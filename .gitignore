@@ -9,3 +9,4 @@ htmlcov/
 *.pyd
 .DS_Store
 outputs/
+build/
