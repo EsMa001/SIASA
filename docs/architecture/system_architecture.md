@@ -1,3 +1,16 @@
+# System Architecture Overview
+
+This document mirrors the canonical architecture in `vmodel/architecture/system_architecture.md` and is intended for reviewer-friendly reading.
+
+Key points:
+- country-centric analytical system
+- explicit separation of domains A-E
+- rule-based D0-D5 and S0-S6 status logic
+- traceability from source to report
+- no naive additive overall instability score in the MVP
+- governance, ethics, and misuse limits as architectural constraints
+
+
 # System Architecture
 
 ## Purpose

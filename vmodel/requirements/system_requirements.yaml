@@ -1,1 +1,529 @@
-system_requirements: []
+metadata:
+  project: SIASA
+  derived_from: Imported stakeholder workbook baseline
+  source_requirements_file: vmodel/requirements/stakeholder_requirements.yaml
+  status: draft_baseline_derived
+  notes:
+  - System requirements were derived from the imported stakeholder baseline, acceptance criteria, domain model, run strategy, governance principles, and system boundaries.
+  - This file establishes the first canonical system layer for SIASA.
+system_requirements:
+- id: SyR-001
+  title: Country-centric multi-domain analytical system
+  category: Mission and scope
+  statement: The system shall provide a country-centric analytical capability for structured assessment of information and activity spaces under uncertainty.
+  status: accepted
+  derives_from:
+  - StR-001
+  - StR-004
+  - StR-024
+  - StR-025
+  acceptance_criteria_refs:
+  - AC-009
+  verification_method: system_review_and_demo
+- id: SyR-002
+  title: Explicit domain separation A-E
+  category: Mission and scope
+  statement: The system shall separate the analytical domains A information space, B event data, C physical activity, D economic/structural data, and E cyber/tech/info-ops as distinct system domains.
+  status: accepted
+  derives_from:
+  - StR-002
+  - StR-008
+  - StR-009
+  - StR-010
+  - StR-011
+  - StR-012
+  acceptance_criteria_refs:
+  - AC-005
+  - AC-006
+  verification_method: system_inspection_and_rule_test
+- id: SyR-003
+  title: No deterministic prediction and no naive overall score
+  category: Mission and scope
+  statement: The system shall not produce deterministic event predictions or a naive additive cross-domain instability score across domains A-E in the MVP baseline.
+  status: accepted
+  derives_from:
+  - StR-007
+  - StR-226
+  - StR-227
+  - StR-228
+  - StR-229
+  - StR-230
+  acceptance_criteria_refs:
+  - AC-007
+  - AC-018
+  verification_method: architecture_review_and_gui_report_review
+- id: SyR-004
+  title: Versioned MVP country set with priorities
+  category: Scope configuration
+  statement: The system shall manage a versioned MVP country set with ISO code, region, selection type, priority class P1/P2/P3, and selection rationale per country.
+  status: accepted
+  derives_from:
+  - StR-162
+  - StR-163
+  - StR-164
+  - StR-165
+  - StR-166
+  - StR-167
+  - StR-168
+  - StR-169
+  - StR-170
+  - StR-171
+  acceptance_criteria_refs:
+  - AC-001
+  verification_method: configuration_review
+- id: SyR-005
+  title: Variable integration depth by country priority
+  category: Scope configuration
+  statement: The system shall support variable integration depth by country priority so that P1 countries can use deeper multi-domain coverage than P2 and P3 countries.
+  status: accepted
+  derives_from:
+  - StR-172
+  - StR-173
+  - StR-174
+  - StR-175
+  - StR-176
+  - StR-177
+  - StR-178
+  acceptance_criteria_refs:
+  - AC-001
+  verification_method: configuration_review_and_system_inspection
+- id: SyR-006
+  title: Structured source catalog
+  category: Source management
+  statement: The system shall maintain a structured source catalog with domain assignment, access mode, history horizon, status, and governance-relevant source metadata.
+  status: accepted
+  derives_from:
+  - StR-013
+  - StR-014
+  - StR-015
+  - StR-016
+  - StR-017
+  acceptance_criteria_refs:
+  - AC-011
+  - AC-017
+  verification_method: catalog_review
+- id: SyR-007
+  title: Support core and selective source families
+  category: Source management
+  statement: The system shall support core source integration for domains A, B, and D and selective or prepared integration for domains C and E according to source status and data sufficiency.
+  status: accepted
+  derives_from:
+  - StR-008
+  - StR-009
+  - StR-010
+  - StR-011
+  - StR-012
+  - StR-179
+  - StR-180
+  - StR-181
+  acceptance_criteria_refs:
+  - AC-002
+  - AC-011
+  verification_method: source_catalog_review_and_system_demo
+- id: SyR-008
+  title: Historical data foundation
+  category: Data lifecycle
+  statement: The system shall build and maintain a historical data foundation of at least three years for core sources where source availability permits and shall document shorter horizons explicitly.
+  status: accepted
+  derives_from:
+  - StR-135
+  - StR-136
+  - StR-137
+  - StR-138
+  - StR-139
+  - StR-140
+  - StR-141
+  - StR-142
+  acceptance_criteria_refs:
+  - AC-002
+  verification_method: data_inventory_review
+- id: SyR-009
+  title: Daily incremental run orchestration
+  category: Operations and runs
+  statement: The system shall execute daily incremental runs that acquire new data, persist raw records, normalize inputs, compute features, derive status values, and store a versioned snapshot.
+  status: accepted
+  derives_from:
+  - StR-143
+  - StR-144
+  - StR-145
+  - StR-146
+  - StR-147
+  - StR-481
+  - StR-482
+  - StR-483
+  acceptance_criteria_refs:
+  - AC-003
+  - AC-013
+  verification_method: end_to_end_run_test
+- id: SyR-010
+  title: Partial-success behavior on source failures
+  category: Operations and runs
+  statement: The system shall tolerate individual source failures without uncontrolled run abortion and shall mark runs, snapshots, logs, and user-facing views with partial-success and failed-source information.
+  status: accepted
+  derives_from:
+  - StR-392
+  - StR-393
+  - StR-394
+  - StR-395
+  - StR-396
+  - StR-497
+  - StR-498
+  - StR-499
+  acceptance_criteria_refs:
+  - AC-004
+  - AC-011
+  - AC-013
+  verification_method: failure_injection_test
+- id: SyR-011
+  title: Raw data persistence and normalized schema
+  category: Data architecture
+  statement: The system shall preserve allowed raw source data or references and transform them into a normalized country- and time-oriented internal schema.
+  status: accepted
+  derives_from:
+  - StR-148
+  - StR-149
+  - StR-150
+  - StR-151
+  - StR-152
+  - StR-153
+  - StR-154
+  acceptance_criteria_refs:
+  - AC-003
+  - AC-015
+  verification_method: data_model_review_and_traceability_review
+- id: SyR-012
+  title: Domain feature computation
+  category: Analytics pipeline
+  statement: The system shall compute domain-specific features for the active domains and preserve feature metadata needed for explainability, baseline comparison, and coverage assessment.
+  status: accepted
+  derives_from:
+  - StR-183
+  - StR-184
+  - StR-185
+  - StR-186
+  - StR-187
+  - StR-188
+  - StR-189
+  acceptance_criteria_refs:
+  - AC-003
+  - AC-010
+  - AC-015
+  verification_method: feature_pipeline_test
+- id: SyR-013
+  title: Relative baselines and anomaly logic
+  category: Analytics pipeline
+  statement: The system shall support relative country baselines with combined 30/90/365-day reference windows and configurable current windows including a 7-day default for anomaly assessment.
+  status: accepted
+  derives_from:
+  - StR-195
+  - StR-196
+  - StR-197
+  - StR-198
+  - StR-199
+  - StR-200
+  - StR-201
+  - StR-202
+  acceptance_criteria_refs:
+  - AC-008
+  - AC-010
+  verification_method: rule_test_and_gui_test
+- id: SyR-014
+  title: Coverage confidence and data sufficiency
+  category: Analytics pipeline
+  statement: The system shall evaluate data sufficiency, coverage, freshness, and confidence before assigning analytical status and shall expose insufficient-data conditions explicitly.
+  status: accepted
+  derives_from:
+  - StR-203
+  - StR-204
+  - StR-205
+  - StR-206
+  - StR-207
+  - StR-208
+  - StR-209
+  - StR-210
+  acceptance_criteria_refs:
+  - AC-005
+  - AC-006
+  - AC-011
+  verification_method: coverage_review_and_rule_test
+- id: SyR-015
+  title: Domain status engine D0-D5
+  category: Status logic
+  statement: The system shall compute domain status values D0 through D5 per country and domain together with drivers, uncertainty indicators, and rule references.
+  status: accepted
+  derives_from:
+  - StR-255
+  - StR-256
+  - StR-257
+  - StR-258
+  - StR-259
+  - StR-260
+  - StR-261
+  - StR-262
+  - StR-263
+  - StR-264
+  - StR-265
+  acceptance_criteria_refs:
+  - AC-005
+  verification_method: system_rule_test
+- id: SyR-016
+  title: Multi-domain status engine S0-S6
+  category: Status logic
+  statement: The system shall derive a rule-based multi-domain status S0 through S6 from active domain states while preserving the contributing domains and ambiguity conditions.
+  status: accepted
+  derives_from:
+  - StR-236
+  - StR-237
+  - StR-238
+  - StR-239
+  - StR-240
+  - StR-241
+  - StR-242
+  - StR-243
+  - StR-244
+  - StR-245
+  acceptance_criteria_refs:
+  - AC-006
+  - AC-007
+  verification_method: system_rule_test
+- id: SyR-017
+  title: Selective contribution of domains C and E
+  category: Status logic
+  statement: The system shall only include domains C and E in status-relevant multi-domain evaluation when source quality and interpretation quality are sufficient for the addressed country and period.
+  status: accepted
+  derives_from:
+  - StR-246
+  - StR-247
+  - StR-248
+  - StR-249
+  - StR-250
+  - StR-251
+  - StR-252
+  - StR-253
+  - StR-254
+  acceptance_criteria_refs:
+  - AC-006
+  verification_method: system_review_and_rule_test
+- id: SyR-018
+  title: Snapshot management and reproducibility
+  category: Traceability and reproducibility
+  statement: The system shall persist versioned snapshots containing run identity, country set identity, algorithm and rule versions, source state, and resulting analytical outputs needed for reproducibility.
+  status: accepted
+  derives_from:
+  - StR-301
+  - StR-302
+  - StR-303
+  - StR-304
+  - StR-305
+  - StR-306
+  - StR-307
+  - StR-308
+  - StR-309
+  - StR-310
+  acceptance_criteria_refs:
+  - AC-013
+  - AC-015
+  verification_method: snapshot_review_and_traceability_review
+- id: SyR-019
+  title: End-to-end evidence path
+  category: Traceability and reproducibility
+  statement: The system shall preserve end-to-end traceability from source catalog entry through raw data, normalized records, features, domain status, multi-domain status, snapshot, and exported report.
+  status: accepted
+  derives_from:
+  - StR-382
+  - StR-383
+  - StR-384
+  - StR-385
+  - StR-386
+  - StR-387
+  - StR-388
+  - StR-389
+  - StR-390
+  - StR-391
+  acceptance_criteria_refs:
+  - AC-015
+  verification_method: traceability_review
+- id: SyR-020
+  title: World anomaly map as default entry view
+  category: User-facing analysis system
+  statement: The system shall provide a world anomaly map as the default entry view, colored by multi-domain status and configurable by domains, time windows, baseline mode, and drill-down navigation.
+  status: accepted
+  derives_from:
+  - StR-089
+  - StR-090
+  - StR-091
+  - StR-092
+  - StR-093
+  - StR-094
+  - StR-095
+  - StR-096
+  acceptance_criteria_refs:
+  - AC-008
+  verification_method: gui_system_test
+- id: SyR-021
+  title: Country profile for deep-dive analysis
+  category: User-facing analysis system
+  statement: The system shall provide a country profile view showing multi-domain status, domain states, drivers, counter-indicators, coverage, confidence, yearly trends, and linked events for one selected country.
+  status: accepted
+  derives_from:
+  - StR-018
+  - StR-019
+  - StR-020
+  - StR-021
+  - StR-022
+  - StR-023
+  acceptance_criteria_refs:
+  - AC-009
+  verification_method: gui_system_test
+- id: SyR-022
+  title: Domain detail views for A B D and selective C E
+  category: User-facing analysis system
+  statement: The system shall provide domain detail views with time series, feature values, baseline comparison, anomaly explanation, and source context for domains A, B, and D in the MVP and selectively for C and E.
+  status: accepted
+  derives_from:
+  - StR-311
+  - StR-312
+  - StR-313
+  - StR-314
+  - StR-315
+  - StR-316
+  - StR-317
+  - StR-318
+  acceptance_criteria_refs:
+  - AC-010
+  verification_method: gui_system_test
+- id: SyR-023
+  title: Source and coverage review view
+  category: User-facing analysis system
+  statement: The system shall provide a source and coverage review view exposing source status, history horizon, data freshness, data gaps, confidence, and failed sources.
+  status: accepted
+  derives_from:
+  - StR-583
+  - StR-584
+  - StR-583
+  - StR-584
+  - StR-013
+  - StR-014
+  - StR-015
+  acceptance_criteria_refs:
+  - AC-011
+  verification_method: gui_system_test
+- id: SyR-024
+  title: Analyst annotation capability
+  category: User-facing analysis system
+  statement: The system shall allow analyst annotations linked to country, domain, signal, event, or snapshot scope without overwriting automatically generated system status.
+  status: accepted
+  derives_from:
+  - StR-270
+  - StR-271
+  - StR-272
+  - StR-273
+  - StR-274
+  - StR-275
+  - StR-276
+  - StR-277
+  acceptance_criteria_refs:
+  - AC-012
+  verification_method: gui_and_data_store_test
+- id: SyR-025
+  title: Report and export subsystem
+  category: Reporting and outputs
+  statement: The system shall generate daily automatic snapshots and manual country, domain, event, and coverage reports in governed export formats with IDs, uncertainty, and source-state context.
+  status: accepted
+  derives_from:
+  - StR-291
+  - StR-292
+  - StR-293
+  - StR-294
+  - StR-295
+  - StR-296
+  - StR-297
+  - StR-298
+  - StR-299
+  - StR-300
+  acceptance_criteria_refs:
+  - AC-013
+  - AC-014
+  verification_method: report_generation_test
+- id: SyR-026
+  title: Validation and backtest capability
+  category: Validation and governance
+  statement: The system shall manage historical validation cases and support review of expected versus observed domain patterns for a curated reference set.
+  status: accepted
+  derives_from:
+  - StR-358
+  - StR-359
+  - StR-360
+  - StR-361
+  - StR-362
+  - StR-363
+  - StR-364
+  - StR-365
+  acceptance_criteria_refs:
+  - AC-016
+  verification_method: backtest_review
+- id: SyR-027
+  title: Data governance controls
+  category: Validation and governance
+  statement: The system shall document and enforce data-governance-relevant source information, purpose limitation, and constraints for public/institutional actor analysis and exports.
+  status: accepted
+  derives_from:
+  - StR-417
+  - StR-418
+  - StR-419
+  - StR-420
+  - StR-421
+  - StR-422
+  - StR-423
+  - StR-424
+  acceptance_criteria_refs:
+  - AC-017
+  verification_method: governance_review
+- id: SyR-028
+  title: Misuse limitation and ethical boundaries
+  category: Validation and governance
+  statement: The system shall exclude capabilities for targeting, operational recommendation, disinformation optimization, or uncontrolled publication that would violate the stated non-goals and principles.
+  status: accepted
+  derives_from:
+  - StR-452
+  - StR-453
+  - StR-454
+  - StR-455
+  - StR-456
+  - StR-457
+  - StR-458
+  - StR-459
+  acceptance_criteria_refs:
+  - AC-018
+  verification_method: function_review
+- id: SyR-029
+  title: Role-based operating model
+  category: Validation and governance
+  statement: The system shall support at least the operating roles Admin/Developer and Analyst in the MVP and shall keep viewer/public access outside the mandatory MVP baseline.
+  status: accepted
+  derives_from:
+  - StR-606
+  - StR-607
+  - StR-608
+  - StR-609
+  - StR-610
+  - StR-611
+  acceptance_criteria_refs: []
+  verification_method: role_model_review
+- id: SyR-030
+  title: Configurable rules and reprocessing readiness
+  category: Operations and lifecycle
+  statement: The system shall maintain versioned rules and configuration tables and shall support reprocessing readiness so that algorithm, rule, and taxonomy changes can be compared against earlier runs.
+  status: accepted
+  derives_from:
+  - StR-612
+  - StR-613
+  - StR-614
+  - StR-615
+  - StR-616
+  - StR-617
+  - StR-618
+  acceptance_criteria_refs:
+  - AC-013
+  - AC-016
+  verification_method: configuration_review_and_reprocessing_demo

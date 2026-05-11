@@ -1,1 +1,381 @@
-test_specifications: []
+metadata:
+  project: SIASA
+  scope: Initial system-level verification baseline derived together with system requirements
+  status: draft_specified
+test_specifications:
+- id: TC-SyR-001-001
+  requirement_ids:
+  - SyR-001
+  title: Verify Country-centric multi-domain analytical system
+  level: system
+  method: system_review_and_demo
+  status: specified
+  acceptance_criteria_refs:
+  - AC-009
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall provide a country-centric analytical capability for structured assessment of information and activity spaces under uncertainty.
+- id: TC-SyR-002-001
+  requirement_ids:
+  - SyR-002
+  title: Verify Explicit domain separation A-E
+  level: system
+  method: system_inspection_and_rule_test
+  status: specified
+  acceptance_criteria_refs:
+  - AC-005
+  - AC-006
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall separate the analytical domains A information space, B event data, C physical activity, D economic/structural data, and E cyber/tech/info-ops as distinct system domains.
+- id: TC-SyR-003-001
+  requirement_ids:
+  - SyR-003
+  title: Verify No deterministic prediction and no naive overall score
+  level: system
+  method: architecture_review_and_gui_report_review
+  status: specified
+  acceptance_criteria_refs:
+  - AC-007
+  - AC-018
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall not produce deterministic event predictions or a naive additive cross-domain instability score across domains A-E in the MVP baseline.
+- id: TC-SyR-004-001
+  requirement_ids:
+  - SyR-004
+  title: Verify Versioned MVP country set with priorities
+  level: system
+  method: configuration_review
+  status: specified
+  acceptance_criteria_refs:
+  - AC-001
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall manage a versioned MVP country set with ISO code, region, selection type, priority class P1/P2/P3, and selection rationale per country.
+- id: TC-SyR-005-001
+  requirement_ids:
+  - SyR-005
+  title: Verify Variable integration depth by country priority
+  level: system
+  method: configuration_review_and_system_inspection
+  status: specified
+  acceptance_criteria_refs:
+  - AC-001
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall support variable integration depth by country priority so that P1 countries can use deeper multi-domain coverage than P2 and P3 countries.
+- id: TC-SyR-006-001
+  requirement_ids:
+  - SyR-006
+  title: Verify Structured source catalog
+  level: system
+  method: catalog_review
+  status: specified
+  acceptance_criteria_refs:
+  - AC-011
+  - AC-017
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall maintain a structured source catalog with domain assignment, access mode, history horizon, status, and governance-relevant source metadata.
+- id: TC-SyR-007-001
+  requirement_ids:
+  - SyR-007
+  title: Verify Support core and selective source families
+  level: system
+  method: source_catalog_review_and_system_demo
+  status: specified
+  acceptance_criteria_refs:
+  - AC-002
+  - AC-011
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall support core source integration for domains A, B, and D and selective or prepared integration for domains C and E according to source status and data sufficiency.
+- id: TC-SyR-008-001
+  requirement_ids:
+  - SyR-008
+  title: Verify Historical data foundation
+  level: system
+  method: data_inventory_review
+  status: specified
+  acceptance_criteria_refs:
+  - AC-002
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall build and maintain a historical data foundation of at least three years for core sources where source availability permits and shall document shorter horizons explicitly.
+- id: TC-SyR-009-001
+  requirement_ids:
+  - SyR-009
+  title: Verify Daily incremental run orchestration
+  level: system
+  method: end_to_end_run_test
+  status: specified
+  acceptance_criteria_refs:
+  - AC-003
+  - AC-013
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall execute daily incremental runs that acquire new data, persist raw records, normalize inputs, compute features, derive status values, and store a versioned snapshot.
+- id: TC-SyR-010-001
+  requirement_ids:
+  - SyR-010
+  title: Verify Partial-success behavior on source failures
+  level: system
+  method: failure_injection_test
+  status: specified
+  acceptance_criteria_refs:
+  - AC-004
+  - AC-011
+  - AC-013
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall tolerate individual source failures without uncontrolled run abortion and shall mark runs, snapshots, logs, and user-facing views with partial-success and failed-source information.
+- id: TC-SyR-011-001
+  requirement_ids:
+  - SyR-011
+  title: Verify Raw data persistence and normalized schema
+  level: system
+  method: data_model_review_and_traceability_review
+  status: specified
+  acceptance_criteria_refs:
+  - AC-003
+  - AC-015
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall preserve allowed raw source data or references and transform them into a normalized country- and time-oriented internal schema.
+- id: TC-SyR-012-001
+  requirement_ids:
+  - SyR-012
+  title: Verify Domain feature computation
+  level: system
+  method: feature_pipeline_test
+  status: specified
+  acceptance_criteria_refs:
+  - AC-003
+  - AC-010
+  - AC-015
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall compute domain-specific features for the active domains and preserve feature metadata needed for explainability, baseline comparison, and coverage assessment.
+- id: TC-SyR-013-001
+  requirement_ids:
+  - SyR-013
+  title: Verify Relative baselines and anomaly logic
+  level: system
+  method: rule_test_and_gui_test
+  status: specified
+  acceptance_criteria_refs:
+  - AC-008
+  - AC-010
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall support relative country baselines with combined 30/90/365-day reference windows and configurable current windows including a 7-day default for anomaly assessment.
+- id: TC-SyR-014-001
+  requirement_ids:
+  - SyR-014
+  title: Verify Coverage confidence and data sufficiency
+  level: system
+  method: coverage_review_and_rule_test
+  status: specified
+  acceptance_criteria_refs:
+  - AC-005
+  - AC-006
+  - AC-011
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall evaluate data sufficiency, coverage, freshness, and confidence before assigning analytical status and shall expose insufficient-data conditions explicitly.
+- id: TC-SyR-015-001
+  requirement_ids:
+  - SyR-015
+  title: Verify Domain status engine D0-D5
+  level: system
+  method: system_rule_test
+  status: specified
+  acceptance_criteria_refs:
+  - AC-005
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall compute domain status values D0 through D5 per country and domain together with drivers, uncertainty indicators, and rule references.
+- id: TC-SyR-016-001
+  requirement_ids:
+  - SyR-016
+  title: Verify Multi-domain status engine S0-S6
+  level: system
+  method: system_rule_test
+  status: specified
+  acceptance_criteria_refs:
+  - AC-006
+  - AC-007
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall derive a rule-based multi-domain status S0 through S6 from active domain states while preserving the contributing domains and ambiguity conditions.
+- id: TC-SyR-017-001
+  requirement_ids:
+  - SyR-017
+  title: Verify Selective contribution of domains C and E
+  level: system
+  method: system_review_and_rule_test
+  status: specified
+  acceptance_criteria_refs:
+  - AC-006
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall only include domains C and E in status-relevant multi-domain evaluation when source quality and interpretation quality are sufficient for the addressed country and period.
+- id: TC-SyR-018-001
+  requirement_ids:
+  - SyR-018
+  title: Verify Snapshot management and reproducibility
+  level: system
+  method: snapshot_review_and_traceability_review
+  status: specified
+  acceptance_criteria_refs:
+  - AC-013
+  - AC-015
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall persist versioned snapshots containing run identity, country set identity, algorithm and rule versions, source state, and resulting analytical outputs needed for reproducibility.
+- id: TC-SyR-019-001
+  requirement_ids:
+  - SyR-019
+  title: Verify End-to-end evidence path
+  level: system
+  method: traceability_review
+  status: specified
+  acceptance_criteria_refs:
+  - AC-015
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall preserve end-to-end traceability from source catalog entry through raw data, normalized records, features, domain status, multi-domain status, snapshot, and exported report.
+- id: TC-SyR-020-001
+  requirement_ids:
+  - SyR-020
+  title: Verify World anomaly map as default entry view
+  level: system
+  method: gui_system_test
+  status: specified
+  acceptance_criteria_refs:
+  - AC-008
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall provide a world anomaly map as the default entry view, colored by multi-domain status and configurable by domains, time windows, baseline mode, and drill-down navigation.
+- id: TC-SyR-021-001
+  requirement_ids:
+  - SyR-021
+  title: Verify Country profile for deep-dive analysis
+  level: system
+  method: gui_system_test
+  status: specified
+  acceptance_criteria_refs:
+  - AC-009
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall provide a country profile view showing multi-domain status, domain states, drivers, counter-indicators, coverage, confidence, yearly trends, and linked events for one selected country.
+- id: TC-SyR-022-001
+  requirement_ids:
+  - SyR-022
+  title: Verify Domain detail views for A B D and selective C E
+  level: system
+  method: gui_system_test
+  status: specified
+  acceptance_criteria_refs:
+  - AC-010
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall provide domain detail views with time series, feature values, baseline comparison, anomaly explanation, and source context for domains A, B, and D in the MVP and selectively for C and E.
+- id: TC-SyR-023-001
+  requirement_ids:
+  - SyR-023
+  title: Verify Source and coverage review view
+  level: system
+  method: gui_system_test
+  status: specified
+  acceptance_criteria_refs:
+  - AC-011
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall provide a source and coverage review view exposing source status, history horizon, data freshness, data gaps, confidence, and failed sources.
+- id: TC-SyR-024-001
+  requirement_ids:
+  - SyR-024
+  title: Verify Analyst annotation capability
+  level: system
+  method: gui_and_data_store_test
+  status: specified
+  acceptance_criteria_refs:
+  - AC-012
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall allow analyst annotations linked to country, domain, signal, event, or snapshot scope without overwriting automatically generated system status.
+- id: TC-SyR-025-001
+  requirement_ids:
+  - SyR-025
+  title: Verify Report and export subsystem
+  level: system
+  method: report_generation_test
+  status: specified
+  acceptance_criteria_refs:
+  - AC-013
+  - AC-014
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall generate daily automatic snapshots and manual country, domain, event, and coverage reports in governed export formats with IDs, uncertainty, and source-state context.
+- id: TC-SyR-026-001
+  requirement_ids:
+  - SyR-026
+  title: Verify Validation and backtest capability
+  level: system
+  method: backtest_review
+  status: specified
+  acceptance_criteria_refs:
+  - AC-016
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall manage historical validation cases and support review of expected versus observed domain patterns for a curated reference set.
+- id: TC-SyR-027-001
+  requirement_ids:
+  - SyR-027
+  title: Verify Data governance controls
+  level: system
+  method: governance_review
+  status: specified
+  acceptance_criteria_refs:
+  - AC-017
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall document and enforce data-governance-relevant source information, purpose limitation, and constraints for public/institutional actor analysis and exports.
+- id: TC-SyR-028-001
+  requirement_ids:
+  - SyR-028
+  title: Verify Misuse limitation and ethical boundaries
+  level: system
+  method: function_review
+  status: specified
+  acceptance_criteria_refs:
+  - AC-018
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall exclude capabilities for targeting, operational recommendation, disinformation optimization, or uncontrolled publication that would violate the stated non-goals and principles.
+- id: TC-SyR-029-001
+  requirement_ids:
+  - SyR-029
+  title: Verify Role-based operating model
+  level: system
+  method: role_model_review
+  status: specified
+  acceptance_criteria_refs: []
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall support at least the operating roles Admin/Developer and Analyst in the MVP and shall keep viewer/public access outside the mandatory MVP baseline.
+- id: TC-SyR-030-001
+  requirement_ids:
+  - SyR-030
+  title: Verify Configurable rules and reprocessing readiness
+  level: system
+  method: configuration_review_and_reprocessing_demo
+  status: specified
+  acceptance_criteria_refs:
+  - AC-013
+  - AC-016
+  preconditions:
+  - Derived system architecture and imported stakeholder baseline are available.
+  expected_result: The system shall maintain versioned rules and configuration tables and shall support reprocessing readiness so that algorithm, rule, and taxonomy changes can be compared against earlier runs.
