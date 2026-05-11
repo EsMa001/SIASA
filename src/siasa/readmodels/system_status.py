@@ -1,0 +1,25 @@
+from __future__ import annotations
+
+
+def build_system_status_read_model(
+    run_id: str,
+    run_status: str,
+    active_domains: list[str],
+    countries_total: int,
+    countries_with_updates: int,
+    failed_sources: list[str],
+    available_reports: list[str],
+    snapshot_id: str | None,
+) -> dict[str, object]:
+    return {
+        "run_id": run_id,
+        "run_status": run_status,
+        "active_domains": active_domains,
+        "coverage": {
+            "countries_total": countries_total,
+            "countries_with_updates": countries_with_updates,
+        },
+        "failed_sources": failed_sources,
+        "available_reports": available_reports,
+        "snapshot_id": snapshot_id,
+    }
