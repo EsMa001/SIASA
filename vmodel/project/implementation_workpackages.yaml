@@ -1,0 +1,234 @@
+metadata:
+  project: SIASA
+  created_at: '2026-05-11'
+  derived_from:
+  - vmodel/requirements/software_requirements.yaml
+  - vmodel/architecture/software_design_elements.yaml
+  - vmodel/verification/test_specifications.yaml
+  purpose: Prioritized implementation work packages for the next execution phase.
+implementation_workpackages:
+- id: WP-001
+  title: Catalog and configuration baseline
+  priority: P1
+  objective: Make source catalog, country-set, and configuration artifacts loadable and versioned in code.
+  design_elements:
+  - DDS-001
+  software_requirements:
+  - SwR-001
+  - SwR-002
+  - SwR-003
+  test_specifications:
+  - TC-SwR-001-001
+  - TC-SwR-002-001
+  - TC-SwR-003-001
+  deliverables:
+  - catalog schema module
+  - country-set schema module
+  - configuration loader
+  - unit tests for loading and validation
+  depends_on: []
+  recommended_branch_scope: single work package commit sequence
+- id: WP-002
+  title: Source adapter framework and failure isolation
+  priority: P1
+  objective: Create the reusable adapter interface, fetch metadata persistence, and per-source failure isolation behavior.
+  design_elements:
+  - DDS-002
+  - DDS-012
+  software_requirements:
+  - SwR-004
+  - SwR-005
+  - SwR-006
+  - SwR-043
+  - SwR-044
+  test_specifications:
+  - TC-SwR-004-001
+  - TC-SwR-005-001
+  - TC-SwR-006-001
+  - TC-SwR-043-001
+  - TC-SwR-044-001
+  deliverables:
+  - adapter base classes
+  - run-state and fetch-metadata models
+  - failure-isolation logic
+  - unit and integration tests for partial_success behavior
+  depends_on:
+  - WP-001
+  recommended_branch_scope: single work package commit sequence
+- id: WP-003
+  title: Raw and normalized data layer
+  priority: P1
+  objective: Establish raw/reference persistence, normalized analytical schema, and normalization mapping versioning.
+  design_elements:
+  - DDS-003
+  software_requirements:
+  - SwR-007
+  - SwR-008
+  - SwR-009
+  - SwR-010
+  test_specifications:
+  - TC-SwR-007-001
+  - TC-SwR-008-001
+  - TC-SwR-009-001
+  - TC-SwR-010-001
+  deliverables:
+  - raw storage schema
+  - normalized record schema
+  - mapping-version model
+  - tests for governance-aware persistence
+  depends_on:
+  - WP-001
+  - WP-002
+  recommended_branch_scope: single work package commit sequence
+- id: WP-004
+  title: Feature computation baseline for A/B/D
+  priority: P1
+  objective: Implement the shared feature framework and MVP feature services for domains A, B, and D.
+  design_elements:
+  - DDS-004
+  software_requirements:
+  - SwR-011
+  - SwR-012
+  - SwR-013
+  - SwR-014
+  - SwR-015
+  - SwR-016
+  test_specifications:
+  - TC-SwR-011-001
+  - TC-SwR-012-001
+  - TC-SwR-013-001
+  - TC-SwR-014-001
+  - TC-SwR-015-001
+  - TC-SwR-016-001
+  deliverables:
+  - feature framework
+  - domain A/B/D feature services
+  - selective C/E hooks
+  - coverage/confidence computation
+  depends_on:
+  - WP-003
+  recommended_branch_scope: single work package commit sequence
+- id: WP-005
+  title: Baseline, anomaly, and status engines
+  priority: P1
+  objective: Implement relative baseline logic, data sufficiency evaluation, D0-D5, and S0-S6 rule engines.
+  design_elements:
+  - DDS-005
+  - DDS-006
+  software_requirements:
+  - SwR-017
+  - SwR-018
+  - SwR-019
+  - SwR-020
+  - SwR-021
+  - SwR-022
+  - SwR-023
+  - SwR-024
+  test_specifications:
+  - TC-SwR-017-001
+  - TC-SwR-018-001
+  - TC-SwR-019-001
+  - TC-SwR-020-001
+  - TC-SwR-021-001
+  - TC-SwR-022-001
+  - TC-SwR-023-001
+  - TC-SwR-024-001
+  deliverables:
+  - baseline services
+  - data sufficiency evaluator
+  - domain status engine
+  - multi-domain status engine
+  - rule tests for D0-D5 and S0-S6
+  depends_on:
+  - WP-004
+  recommended_branch_scope: single work package commit sequence
+- id: WP-006
+  title: Snapshot and traceability core
+  priority: P1
+  objective: Implement versioned snapshots and stable lineage identifiers across the analytical pipeline.
+  design_elements:
+  - DDS-007
+  software_requirements:
+  - SwR-025
+  - SwR-026
+  - SwR-027
+  test_specifications:
+  - TC-SwR-025-001
+  - TC-SwR-026-001
+  - TC-SwR-027-001
+  deliverables:
+  - snapshot schema
+  - snapshot creation service
+  - lineage identifier propagation
+  depends_on:
+  - WP-002
+  - WP-003
+  - WP-005
+  recommended_branch_scope: single work package commit sequence
+- id: WP-007
+  title: Reporting and read-model baseline
+  priority: P2
+  objective: Implement daily/global reporting and the first query-side read models for map, country profile, and source/coverage views.
+  design_elements:
+  - DDS-008
+  - DDS-009
+  software_requirements:
+  - SwR-028
+  - SwR-029
+  - SwR-030
+  - SwR-031
+  - SwR-032
+  - SwR-033
+  - SwR-034
+  - SwR-035
+  test_specifications:
+  - TC-SwR-028-001
+  - TC-SwR-029-001
+  - TC-SwR-030-001
+  - TC-SwR-031-001
+  - TC-SwR-032-001
+  - TC-SwR-033-001
+  - TC-SwR-034-001
+  - TC-SwR-035-001
+  deliverables:
+  - daily global snapshot generator
+  - country/domain/coverage report generators
+  - map and profile read models
+  - report-format tests
+  depends_on:
+  - WP-006
+  recommended_branch_scope: single work package commit sequence
+- id: WP-008
+  title: Annotation, validation, governance, and reprocessing controls
+  priority: P2
+  objective: Implement annotation services, validation-case handling, role/governance hooks, and controlled reprocessing.
+  design_elements:
+  - DDS-010
+  - DDS-011
+  - DDS-012
+  software_requirements:
+  - SwR-036
+  - SwR-037
+  - SwR-038
+  - SwR-039
+  - SwR-040
+  - SwR-041
+  - SwR-042
+  - SwR-045
+  test_specifications:
+  - TC-SwR-036-001
+  - TC-SwR-037-001
+  - TC-SwR-038-001
+  - TC-SwR-039-001
+  - TC-SwR-040-001
+  - TC-SwR-041-001
+  - TC-SwR-042-001
+  - TC-SwR-045-001
+  deliverables:
+  - annotation persistence
+  - validation case schema and comparison service
+  - role/governance enforcement hooks
+  - reprocessing workflow
+  depends_on:
+  - WP-006
+  recommended_branch_scope: single work package commit sequence
