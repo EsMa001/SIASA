@@ -25,6 +25,14 @@ MultiDomainStatusAnalyzer = Callable[[list[DomainStatusResult]], MultiDomainStat
 
 
 @dataclass(frozen=True)
+class FailureArtifact:
+    run_id: str
+    reason: str
+    failed_sources: list[str]
+    diagnostics_by_source: dict[str, str]
+
+
+@dataclass(frozen=True)
 class DailyRunResult:
     run_state: RunState
     fetch_metadata_records: list[FetchMetadataRecord]
@@ -34,7 +42,8 @@ class DailyRunResult:
     domain_statuses: dict[str, DomainStatusResult]
     multi_domain_status: MultiDomainStatusResult
     lineage_records: list[LineageRecord]
-    snapshot: Snapshot
+    failure_artifact: FailureArtifact | None
+    snapshot: Snapshot | None
     daily_report: GeneratedReport
     country_reports: dict[str, GeneratedReport]
 
@@ -102,6 +111,34 @@ class DailyRunOrchestrator:
             if domain_features:
                 domain_statuses[domain] = self.domain_status_analyzer(domain, domain_features)
 
+        failure_reason: str | None = None
+        if run_state.status == "failed":
+            failure_reason = "all_sources_failed"
+        elif not normalized_records:
+            run_state.status = "failed"
+            failure_reason = "no_data_after_fetch"
+        elif not features:
+            run_state.status = "failed"
+            failure_reason = "no_features_computed"
+
+        if failure_reason is not None:
+            failure_artifact = self._build_failure_artifact(run_state, failure_reason)
+            daily_report = self._build_failure_report(failure_artifact)
+            return DailyRunResult(
+                run_state=run_state,
+                fetch_metadata_records=fetch_metadata_records,
+                raw_records=raw_records,
+                normalized_records=normalized_records,
+                features=features,
+                domain_statuses=domain_statuses,
+                multi_domain_status=MultiDomainStatusResult("S6", [], ["SwR-023", "SwR-024"]),
+                lineage_records=[],
+                failure_artifact=failure_artifact,
+                snapshot=None,
+                daily_report=daily_report,
+                country_reports={},
+            )
+
         multi_domain_status = self.multi_domain_status_analyzer(list(domain_statuses.values()))
         country_id = normalized_records[0].country_id if normalized_records else "UNKNOWN"
         analytical_outputs = {
@@ -142,9 +179,46 @@ class DailyRunOrchestrator:
             domain_statuses=domain_statuses,
             multi_domain_status=multi_domain_status,
             lineage_records=lineage_records,
+            failure_artifact=None,
             snapshot=snapshot,
             daily_report=daily_report,
             country_reports=country_reports,
+        )
+
+    def _build_failure_artifact(self, run_state: RunState, reason: str) -> FailureArtifact:
+        diagnostics_by_source = {
+            result.source_id: result.diagnostics
+            for result in run_state.source_results
+            if result.diagnostics
+        }
+        return FailureArtifact(
+            run_id=run_state.run_id,
+            reason=reason,
+            failed_sources=run_state.failed_sources,
+            diagnostics_by_source=diagnostics_by_source,
+        )
+
+    def _build_failure_report(self, failure_artifact: FailureArtifact) -> GeneratedReport:
+        payload = {
+            "run_id": failure_artifact.run_id,
+            "status": "failed",
+            "failure_reason": failure_artifact.reason,
+            "failed_sources": failure_artifact.failed_sources,
+            "diagnostics_by_source": failure_artifact.diagnostics_by_source,
+        }
+        markdown = "\n".join(
+            [
+                "# Failed Daily Run",
+                f"Run ID: {failure_artifact.run_id}",
+                f"Reason: {failure_artifact.reason}",
+                f"Failed sources: {', '.join(failure_artifact.failed_sources) if failure_artifact.failed_sources else '-'}",
+            ]
+        )
+        return GeneratedReport(
+            report_id=f"REP-FAIL-{failure_artifact.run_id}",
+            report_type="failed_run",
+            markdown=markdown,
+            json_payload=payload,
         )
 
     def _build_country_reports(

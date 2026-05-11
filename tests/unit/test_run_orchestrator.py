@@ -235,3 +235,64 @@ def test_daily_run_orchestrator_builds_lineage_records_for_features_and_snapshot
     assert result.lineage_records[0].source_id == "SRC-A"
     assert result.lineage_records[0].snapshot_id == "SNAP-RUN-103-v1"
     assert result.lineage_records[0].report_id == "REP-DAILY-SNAP-RUN-103-v1"
+
+
+
+def test_daily_run_orchestrator_emits_failure_artifact_when_all_sources_fail() -> None:
+    adapters = [
+        FakeAdapter(source_id="SRC-A", domain="A", _result=FetchResult(records=[], diagnostics="timeout", is_success=False)),
+        FakeAdapter(source_id="SRC-B", domain="B", _result=FetchResult(records=[], diagnostics="auth", is_success=False)),
+    ]
+
+    orchestrator = DailyRunOrchestrator(
+        adapters=adapters,
+        normalizer=_normalize,
+        feature_services=[DomainAFeatureService(), DomainBFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A", "B"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+    )
+
+    result = orchestrator.run(run_id="RUN-104")
+
+    assert result.run_state.status == "failed"
+    assert result.failure_artifact is not None
+    assert result.failure_artifact.reason == "all_sources_failed"
+    assert result.failure_artifact.failed_sources == ["SRC-A", "SRC-B"]
+    assert result.snapshot is None
+    assert result.daily_report.report_id == "REP-FAIL-RUN-104"
+    assert result.daily_report.json_payload["status"] == "failed"
+
+
+
+def test_daily_run_orchestrator_emits_failure_artifact_when_fetch_succeeds_but_no_data_is_normalized() -> None:
+    adapters = [
+        FakeAdapter(source_id="SRC-A", domain="A", _result=FetchResult(records=[], diagnostics="empty-source", is_success=True))
+    ]
+
+    orchestrator = DailyRunOrchestrator(
+        adapters=adapters,
+        normalizer=_normalize,
+        feature_services=[DomainAFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+    )
+
+    result = orchestrator.run(run_id="RUN-105")
+
+    assert result.run_state.status == "failed"
+    assert result.failure_artifact is not None
+    assert result.failure_artifact.reason == "no_data_after_fetch"
+    assert result.failure_artifact.failed_sources == []
+    assert result.snapshot is None
+    assert result.country_reports == {}
+    assert result.daily_report.json_payload["failure_reason"] == "no_data_after_fetch"
