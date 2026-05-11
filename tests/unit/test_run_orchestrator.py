@@ -296,3 +296,41 @@ def test_daily_run_orchestrator_emits_failure_artifact_when_fetch_succeeds_but_n
     assert result.snapshot is None
     assert result.country_reports == {}
     assert result.daily_report.json_payload["failure_reason"] == "no_data_after_fetch"
+
+
+
+def test_daily_run_orchestrator_blocks_run_when_active_source_governance_metadata_is_missing() -> None:
+    adapters = [
+        FakeAdapter(
+            source_id="SRC-A",
+            domain="A",
+            _result=FetchResult(
+                records=[{"signal_key": "article_count", "value": 3.0, "expected_source_count": 1, "freshness_hours": 6}],
+                diagnostics="should-not-fetch",
+                is_success=True,
+            ),
+        )
+    ]
+
+    orchestrator = DailyRunOrchestrator(
+        adapters=adapters,
+        normalizer=_normalize,
+        feature_services=[DomainAFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+        source_records={"SRC-A": {"source_id": "SRC-A", "status": "active", "access": "api"}},
+    )
+
+    result = orchestrator.run(run_id="RUN-106")
+
+    assert result.run_state.status == "failed"
+    assert result.failure_artifact is not None
+    assert result.failure_artifact.reason == "source_governance_invalid"
+    assert result.failure_artifact.failed_sources == ["SRC-A"]
+    assert result.fetch_metadata_records == []
+    assert result.daily_report.json_payload["failure_reason"] == "source_governance_invalid"

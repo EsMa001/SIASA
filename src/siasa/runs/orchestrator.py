@@ -10,6 +10,7 @@ from siasa.data.normalized_models import NormalizedRecord
 from siasa.data.raw_models import RawRecord
 from siasa.reporting.country_report import GeneratedReport, generate_country_report
 from siasa.reporting.daily_snapshot import generate_daily_snapshot_report
+from siasa.governance.roles import validate_source_governance_metadata
 from siasa.scoring.domain_status import DomainStatusResult
 from siasa.scoring.multi_domain_status import MultiDomainStatusResult
 from siasa.snapshots.models import Snapshot
@@ -60,9 +61,27 @@ class DailyRunOrchestrator:
     rule_versions: dict[str, str]
     algorithm_version: str
     data_version: str
+    source_records: dict[str, dict[str, str]] | None = None
 
     def run(self, run_id: str) -> DailyRunResult:
         run_state = RunState.start(run_id)
+        governance_failure = self._validate_active_sources(run_id)
+        if governance_failure is not None:
+            return DailyRunResult(
+                run_state=RunState(run_id=run_id, status="failed"),
+                fetch_metadata_records=[],
+                raw_records=[],
+                normalized_records=[],
+                features=[],
+                domain_statuses={},
+                multi_domain_status=MultiDomainStatusResult("S6", [], ["SwR-023", "SwR-024"]),
+                lineage_records=[],
+                failure_artifact=governance_failure,
+                snapshot=None,
+                daily_report=self._build_failure_report(governance_failure),
+                country_reports={},
+            )
+
         fetch_metadata_records: list[FetchMetadataRecord] = []
         raw_records: list[RawRecord] = []
         normalized_records: list[NormalizedRecord] = []
@@ -183,6 +202,30 @@ class DailyRunOrchestrator:
             snapshot=snapshot,
             daily_report=daily_report,
             country_reports=country_reports,
+        )
+
+    def _validate_active_sources(self, run_id: str) -> FailureArtifact | None:
+        if not self.source_records:
+            return None
+
+        invalid_sources: list[str] = []
+        diagnostics_by_source: dict[str, str] = {}
+        for adapter in self.adapters:
+            source_record = self.source_records.get(adapter.source_id)
+            try:
+                validate_source_governance_metadata(source_record or {})
+            except ValueError as exc:
+                invalid_sources.append(adapter.source_id)
+                diagnostics_by_source[adapter.source_id] = str(exc)
+
+        if not invalid_sources:
+            return None
+
+        return FailureArtifact(
+            run_id=run_id,
+            reason="source_governance_invalid",
+            failed_sources=invalid_sources,
+            diagnostics_by_source=diagnostics_by_source,
         )
 
     def _build_failure_artifact(self, run_state: RunState, reason: str) -> FailureArtifact:
