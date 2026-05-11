@@ -87,6 +87,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert (pages.output_dir / "coverage.html").exists()
     assert (pages.output_dir / "reports.html").exists()
     assert (pages.output_dir / "runs.html").exists()
+    assert (pages.output_dir / "trends.html").exists()
+    assert (pages.output_dir / "events.html").exists()
 
     index_html = (pages.output_dir / "index.html").read_text()
     assert "World Anomaly Map" in index_html
@@ -111,6 +113,14 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     runs_html = (pages.output_dir / "runs.html").read_text()
     assert "System Status / Runs" in runs_html
     assert "partial_success" in runs_html
+
+    trends_html = (pages.output_dir / "trends.html").read_text()
+    assert "Yearly Trend Page" in trends_html
+    assert "2026-01" in trends_html
+
+    events_html = (pages.output_dir / "events.html").read_text()
+    assert "Current Events Page" in events_html
+    assert "EVT-001" in events_html
 
 
 def test_local_gui_module_runs_without_runtime_warning(tmp_path: Path) -> None:

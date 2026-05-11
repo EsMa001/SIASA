@@ -28,6 +28,8 @@ def _page(title: str, body: str) -> str:
         "<nav>"
         "<a href='../index.html'>Home</a>"
         "<a href='../coverage.html'>Source / Coverage</a>"
+        "<a href='../trends.html'>Yearly Trend Page</a>"
+        "<a href='../events.html'>Current Events Page</a>"
         "<a href='../reports.html'>Report / Export View</a>"
         "<a href='../runs.html'>System Status / Runs</a>"
         "</nav>"
@@ -159,6 +161,44 @@ def _render_runs(system_status_read_model: dict[str, Any]) -> str:
     return _page("System Status / Runs", body)
 
 
+def _render_trends(country_profile_read_models: dict[str, dict[str, Any]]) -> str:
+    rows = []
+    for country_id, profile in sorted(country_profile_read_models.items()):
+        yearly = profile.get('trends', {}).get('yearly', [])
+        rows.append(
+            "<tr>"
+            f"<td>{html.escape(country_id)}</td>"
+            f"<td>{html.escape(', '.join(str(item) for item in yearly))}</td>"
+            f"<td>{html.escape(str(profile.get('multi_domain_status', 'n/a')))}</td>"
+            "</tr>"
+        )
+    body = (
+        "<h2>Yearly Trend Page</h2>"
+        "<table><thead><tr><th>Country</th><th>Yearly Trend</th><th>Current Multi-Domain Status</th></tr></thead>"
+        f"<tbody>{''.join(rows)}</tbody></table>"
+    )
+    return _page("Yearly Trend Page", body)
+
+
+def _render_events(country_profile_read_models: dict[str, dict[str, Any]]) -> str:
+    rows = []
+    for country_id, profile in sorted(country_profile_read_models.items()):
+        for event_id in profile.get('linked_events', []):
+            rows.append(
+                "<tr>"
+                f"<td>{html.escape(country_id)}</td>"
+                f"<td>{html.escape(str(event_id))}</td>"
+                f"<td>{html.escape(str(profile.get('multi_domain_status', 'n/a')))}</td>"
+                "</tr>"
+            )
+    body = (
+        "<h2>Current Events Page</h2>"
+        "<table><thead><tr><th>Country</th><th>Event</th><th>Context Status</th></tr></thead>"
+        f"<tbody>{''.join(rows)}</tbody></table>"
+    )
+    return _page("Current Events Page", body)
+
+
 def build_local_mvp_site(
     output_dir: Path,
     world_map_read_model: dict[str, Any],
@@ -201,6 +241,14 @@ def build_local_mvp_site(
     runs_file = output_dir / 'runs.html'
     runs_file.write_text(_render_runs(system_status_read_model))
     generated_files.append(runs_file)
+
+    trends_file = output_dir / 'trends.html'
+    trends_file.write_text(_render_trends(country_profile_read_models))
+    generated_files.append(trends_file)
+
+    events_file = output_dir / 'events.html'
+    events_file.write_text(_render_events(country_profile_read_models))
+    generated_files.append(events_file)
 
     return SiteBuildResult(output_dir=output_dir, generated_files=generated_files)
 
