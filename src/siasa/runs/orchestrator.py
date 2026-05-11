@@ -8,7 +8,7 @@ from siasa.adapters.fetch_metadata import FetchMetadataRecord
 from siasa.features.base import FeatureService, FeatureValue
 from siasa.data.normalized_models import NormalizedRecord
 from siasa.data.raw_models import RawRecord
-from siasa.reporting.country_report import GeneratedReport
+from siasa.reporting.country_report import GeneratedReport, generate_country_report
 from siasa.reporting.daily_snapshot import generate_daily_snapshot_report
 from siasa.scoring.domain_status import DomainStatusResult
 from siasa.scoring.multi_domain_status import MultiDomainStatusResult
@@ -36,6 +36,7 @@ class DailyRunResult:
     lineage_records: list[LineageRecord]
     snapshot: Snapshot
     daily_report: GeneratedReport
+    country_reports: dict[str, GeneratedReport]
 
 
 @dataclass
@@ -117,6 +118,13 @@ class DailyRunOrchestrator:
             data_version=self.data_version,
         )
         daily_report = generate_daily_snapshot_report(snapshot)
+        country_reports = self._build_country_reports(
+            run_state=run_state,
+            country_id=country_id,
+            features=features,
+            domain_statuses=domain_statuses,
+            multi_domain_status=multi_domain_status,
+        )
         lineage_records = self._build_lineage_records(
             raw_records=raw_records,
             normalized_records=normalized_records,
@@ -136,7 +144,40 @@ class DailyRunOrchestrator:
             lineage_records=lineage_records,
             snapshot=snapshot,
             daily_report=daily_report,
+            country_reports=country_reports,
         )
+
+    def _build_country_reports(
+        self,
+        run_state: RunState,
+        country_id: str,
+        features: list[FeatureValue],
+        domain_statuses: dict[str, DomainStatusResult],
+        multi_domain_status: MultiDomainStatusResult,
+    ) -> dict[str, GeneratedReport]:
+        if country_id == "UNKNOWN":
+            return {}
+
+        drivers = sorted(feature.feature_id for feature in features)
+        domain_states = {domain: status.status for domain, status in domain_statuses.items()}
+        coverage = sum(feature.coverage for feature in features) / len(features) if features else 0.0
+        uncertainty: list[str] = []
+        if run_state.status == "partial_success":
+            uncertainty.append("partial_success")
+        if run_state.failed_sources:
+            uncertainty.append(f"failed_sources:{','.join(run_state.failed_sources)}")
+
+        report = generate_country_report(
+            country_id=country_id,
+            multi_domain_status=multi_domain_status.status,
+            domain_states=domain_states,
+            drivers=drivers,
+            counter_indicators=[],
+            coverage=coverage,
+            uncertainty=uncertainty,
+            linked_events=[],
+        )
+        return {country_id: report}
 
     def _build_lineage_records(
         self,

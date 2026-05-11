@@ -102,6 +102,9 @@ def test_daily_run_orchestrator_executes_end_to_end_pipeline() -> None:
     assert result.snapshot.snapshot_id == "SNAP-RUN-100-v1"
     assert result.snapshot.analytical_outputs["country_status"] == {"UKR": "S3"}
     assert result.daily_report.json_payload["country_status"] == {"UKR": "S3"}
+    assert result.country_reports["UKR"].report_id == "REP-COUNTRY-UKR"
+    assert result.country_reports["UKR"].json_payload["multi_domain_status"] == "S3"
+    assert result.country_reports["UKR"].json_payload["domain_states"] == {"A": "D3", "B": "D2"}
 
 
 
@@ -145,6 +148,7 @@ def test_daily_run_orchestrator_continues_after_source_failure_and_marks_partial
     assert result.snapshot.status == "partial_success"
     assert result.daily_report.json_payload["status"] == "partial_success"
     assert result.multi_domain_status.status == "S1"
+    assert result.country_reports["UKR"].json_payload["uncertainty"] == ["partial_success", "failed_sources:SRC-B"]
 
 
 
