@@ -7,6 +7,7 @@ from siasa.data.normalized_models import NormalizedRecord
 from siasa.features.domain_a import DomainAFeatureService
 from siasa.features.domain_b import DomainBFeatureService
 from siasa.runs.orchestrator import DailyRunOrchestrator
+from siasa.traceability.lineage import LineageRecord
 from siasa.scoring.data_sufficiency import evaluate_data_sufficiency
 from siasa.scoring.domain_status import derive_domain_status
 from siasa.scoring.multi_domain_status import derive_multi_domain_status
@@ -144,3 +145,89 @@ def test_daily_run_orchestrator_continues_after_source_failure_and_marks_partial
     assert result.snapshot.status == "partial_success"
     assert result.daily_report.json_payload["status"] == "partial_success"
     assert result.multi_domain_status.status == "S1"
+
+
+
+def test_daily_run_orchestrator_persists_fetch_metadata_and_raw_records() -> None:
+    adapters = [
+        FakeAdapter(
+            source_id="SRC-A",
+            domain="A",
+            _result=FetchResult(
+                records=[
+                    {"signal_key": "article_count", "value": 3.0, "expected_source_count": 1, "freshness_hours": 6},
+                    {"signal_key": "tone", "value": -0.2, "expected_source_count": 1, "freshness_hours": 6},
+                ],
+                diagnostics="ok",
+                is_success=True,
+            ),
+        ),
+        FakeAdapter(
+            source_id="SRC-B",
+            domain="B",
+            _result=FetchResult(records=[], diagnostics="timeout", is_success=False),
+        ),
+    ]
+
+    orchestrator = DailyRunOrchestrator(
+        adapters=adapters,
+        normalizer=_normalize,
+        feature_services=[DomainAFeatureService(), DomainBFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A", "B"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+    )
+
+    result = orchestrator.run(run_id="RUN-102")
+
+    assert [record.source_id for record in result.fetch_metadata_records] == ["SRC-A", "SRC-B"]
+    assert result.fetch_metadata_records[0].fetch_status == "success"
+    assert result.fetch_metadata_records[0].record_count == 2
+    assert result.fetch_metadata_records[1].fetch_status == "failed"
+    assert result.fetch_metadata_records[1].diagnostics == "timeout"
+    assert len(result.raw_records) == 2
+    assert result.raw_records[0].raw_record_id == "RAW-SRC-A-1"
+    assert result.raw_records[0].storage_mode == "payload"
+    assert result.raw_records[0].raw_payload == {"signal_key": "article_count", "value": 3.0, "expected_source_count": 1, "freshness_hours": 6}
+
+
+
+def test_daily_run_orchestrator_builds_lineage_records_for_features_and_snapshot() -> None:
+    adapters = [
+        FakeAdapter(
+            source_id="SRC-A",
+            domain="A",
+            _result=FetchResult(
+                records=[
+                    {"signal_key": "article_count", "value": 3.0, "expected_source_count": 1, "freshness_hours": 6},
+                    {"signal_key": "tone", "value": -0.2, "expected_source_count": 1, "freshness_hours": 6},
+                    {"signal_key": "topic:security", "value": 2.0, "expected_source_count": 1, "freshness_hours": 6},
+                ]
+            ),
+        )
+    ]
+
+    orchestrator = DailyRunOrchestrator(
+        adapters=adapters,
+        normalizer=_normalize,
+        feature_services=[DomainAFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+    )
+
+    result = orchestrator.run(run_id="RUN-103")
+
+    assert result.lineage_records
+    assert all(isinstance(record, LineageRecord) for record in result.lineage_records)
+    assert result.lineage_records[0].source_id == "SRC-A"
+    assert result.lineage_records[0].snapshot_id == "SNAP-RUN-103-v1"
+    assert result.lineage_records[0].report_id == "REP-DAILY-SNAP-RUN-103-v1"
