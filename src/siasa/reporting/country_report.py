@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from siasa.governance.export_policy import enforce_export_policy
+
 
 @dataclass(frozen=True)
 class GeneratedReport:
@@ -22,6 +24,9 @@ def generate_country_report(
     coverage: float,
     uncertainty: list[str],
     linked_events: list[str],
+    *,
+    contains_personal_data: bool = False,
+    capability: str = "analysis",
 ) -> GeneratedReport:
     payload = {
         "country_id": country_id,
@@ -32,7 +37,10 @@ def generate_country_report(
         "coverage": coverage,
         "uncertainty": uncertainty,
         "linked_events": linked_events,
+        "contains_personal_data": contains_personal_data,
+        "capability": capability,
     }
+    enforce_export_policy(payload)
     markdown = "\n".join(
         [
             f"# Country Report: {country_id}",

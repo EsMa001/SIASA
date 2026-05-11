@@ -46,3 +46,33 @@ def test_country_report_generator_includes_status_drivers_counter_indicators_cov
     assert report.json_payload["drivers"] == ["A_news_volume", "B_event_count"]
     assert report.json_payload["linked_events"] == ["EVT-001", "EVT-002"]
     assert "Counter indicators" in report.markdown
+
+
+
+def test_country_report_generator_blocks_personal_data_export_payloads() -> None:
+    try:
+        generate_country_report(
+            country_id="UKR",
+            multi_domain_status="S3",
+            domain_states={"A": "D3", "B": "D2", "D": "D1"},
+            drivers=["A_news_volume"],
+            counter_indicators=[],
+            coverage=0.75,
+            uncertainty=[],
+            linked_events=["EVT-001"],
+            contains_personal_data=True,
+        )
+    except PermissionError as exc:
+        assert "personal data" in str(exc)
+    else:
+        raise AssertionError("Expected personal-data export to be blocked")
+
+
+
+def test_daily_snapshot_report_generator_blocks_targeting_capability_payloads() -> None:
+    try:
+        generate_daily_snapshot_report(_snapshot(), capability="targeting")
+    except PermissionError as exc:
+        assert "targeting" in str(exc)
+    else:
+        raise AssertionError("Expected targeting export to be blocked")
