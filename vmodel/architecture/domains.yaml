@@ -1,0 +1,26 @@
+domains:
+- Ebene: A
+  Name: Informationsraum / Narrative / öffentliche Kommunikation
+  Analysegegenstand: Newsvolumen, Tonalität, Themen, Narrative, offizielle Statements, Quellenabhängigkeiten.
+  MVP-Status: Core
+  Primärquellen: GDELT, RSS/News, offizielle Feeds
+- Ebene: B
+  Name: Ereignisdaten
+  Analysegegenstand: Konflikt-, Protest-, Gewalt-, Katastrophen- und humanitäre Ereignisse.
+  MVP-Status: Core
+  Primärquellen: UCDP GED, GDELT Events, ReliefWeb, GDACS
+- Ebene: C
+  Name: Physische Aktivität / Satellit / Infrastruktur
+  Analysegegenstand: Feuer/Thermal, Nachtlicht, Flug-/Schiffsbewegungen, Infrastrukturindikatoren.
+  MVP-Status: Selektiv P1
+  Primärquellen: NASA FIRMS, VIIRS/Black Marble, Copernicus/Sentinel, OpenSky
+- Ebene: D
+  Name: Wirtschafts-/Strukturdaten
+  Analysegegenstand: Inflation, Wechselkurs, Handel, Energie, Nahrung, Makro-/Strukturindikatoren.
+  MVP-Status: Core
+  Primärquellen: World Bank, IMF, UN Comtrade, FAOSTAT, OECD
+- Ebene: E
+  Name: Cyber / Tech / InfoOps / Outages
+  Analysegegenstand: Outages, Traffic-Rückgänge, CVE/KEV, CERT, InfoOps, technische Störungen.
+  MVP-Status: Selektiv P1
+  Primärquellen: CISA KEV, NVD CVE, Cloudflare Radar, Google Transparency Report

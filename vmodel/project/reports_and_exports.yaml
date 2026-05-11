@@ -1,0 +1,41 @@
+reports_and_exports:
+- Reporttyp: Daily Global Snapshot
+  Erzeugung: automatisch nach erfolgreichem täglichen Run
+  Formate: Markdown + JSON
+  Inhalt: Top-Statusänderungen, neue Auffälligkeiten, Datenlücken, Quellenfehler, Annotationen seit letztem Run
+  Status: MVP Pflicht
+- Reporttyp: Country Profile Report
+  Erzeugung: manuell aus GUI
+  Formate: Markdown + JSON; PDF später
+  Inhalt: Land, Zeitraum, Domänenstatus, Treiber, Gegenindikatoren, Events, Unsicherheit, Annotationen
+  Status: MVP Pflicht
+- Reporttyp: Domain Report
+  Erzeugung: manuell aus GUI
+  Formate: Markdown + CSV/JSON
+  Inhalt: Detailreport einer Domäne A–E für ein Land
+  Status: MVP Pflicht für A/B/D
+- Reporttyp: Event Report
+  Erzeugung: manuell aus GUI
+  Formate: CSV/JSON/Markdown
+  Inhalt: Events, Quellen, Typen, Relevanz, Confidence, verlinkte Signale
+  Status: MVP Pflicht
+- Reporttyp: Coverage Report
+  Erzeugung: manuell aus GUI
+  Formate: CSV/JSON/Markdown
+  Inhalt: Datenverfügbarkeit, Quellenfehler, Historie, Lücken, Datenqualität
+  Status: MVP Pflicht
+- Reporttyp: Lineage / Epidemiology Report
+  Erzeugung: manuell aus GUI
+  Formate: JSON/Markdown
+  Inhalt: First Seen, Spread, Source Graph, Amplification, Mutation
+  Status: Extended
+- Reporttyp: Backtest Report
+  Erzeugung: manuell aus GUI
+  Formate: Markdown + JSON
+  Inhalt: historische Rekonstruktion, Signalverlauf, Regeln, False Positive/Negative
+  Status: Extended
+- Reporttyp: Annotation Export
+  Erzeugung: manuell
+  Formate: CSV/JSON
+  Inhalt: Analystenhinweise für Validierung/Review/Regelverbesserung
+  Status: MVP Pflicht

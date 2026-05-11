@@ -1,0 +1,137 @@
+principles:
+- ID: DG-001
+  Kategorie: Daten-Governance
+  Prinzip: Zweckbindung
+  Bedeutung: Daten nur für definierte Analyseziele nutzen.
+- ID: DG-002
+  Kategorie: Daten-Governance
+  Prinzip: Datenminimierung
+  Bedeutung: Nur speichern, was nötig ist.
+- ID: DG-003
+  Kategorie: Daten-Governance
+  Prinzip: Quellenkonformität
+  Bedeutung: Nutzungsbedingungen und Lizenzen beachten.
+- ID: DG-004
+  Kategorie: Daten-Governance
+  Prinzip: Rollen-/Akteurskontext
+  Bedeutung: Personen nur im öffentlichen/institutionellen Kontext.
+- ID: DG-005
+  Kategorie: Daten-Governance
+  Prinzip: Kein Targeting
+  Bedeutung: Keine Zielgruppen- oder Personenansprache.
+- ID: DG-006
+  Kategorie: Daten-Governance
+  Prinzip: Kein Doxing
+  Bedeutung: Keine Deanonymisierung, Lokalisierung oder Kontaktinfos.
+- ID: DG-007
+  Kategorie: Daten-Governance
+  Prinzip: Keine Risikoetikettierung von Personen
+  Bedeutung: Risiko nur auf Länder-/Domänen-/Signalebene.
+- ID: DG-008
+  Kategorie: Daten-Governance
+  Prinzip: Transparenz
+  Bedeutung: Quelle, Kontext und Unsicherheit dokumentieren.
+- ID: DG-009
+  Kategorie: Daten-Governance
+  Prinzip: Löschbarkeit
+  Bedeutung: Personenbezogene Daten entfernbar halten.
+- ID: DG-010
+  Kategorie: Daten-Governance
+  Prinzip: Exportkontrolle
+  Bedeutung: Personenbezogene Inhalte in Reports begrenzen.
+- ID: EP-001
+  Kategorie: Ethik
+  Prinzip: Analyse statt Operation
+  Bedeutung: Beobachtung und Strukturierung, nicht operative Handlung.
+- ID: EP-002
+  Kategorie: Ethik
+  Prinzip: Evidenz vor Interpretation
+  Bedeutung: Schlussfolgerungen müssen auf nachvollziehbarer Evidenz beruhen.
+- ID: EP-003
+  Kategorie: Ethik
+  Prinzip: Unsicherheit sichtbar machen
+  Bedeutung: Unsicherheit ist ein Kernergebnis.
+- ID: EP-004
+  Kategorie: Ethik
+  Prinzip: Keine Zielobjekte
+  Bedeutung: Personen, Gruppen oder Infrastrukturen werden nicht als Ziele bewertet.
+- ID: EP-005
+  Kategorie: Ethik
+  Prinzip: Keine manipulative Nutzung
+  Bedeutung: Keine Unterstützung von Propaganda, Desinformation oder Targeting.
+- ID: EP-006
+  Kategorie: Ethik
+  Prinzip: Quellenkritik
+  Bedeutung: Quellenabhängigkeit, Bias und Replikation werden explizit modelliert.
+- ID: EP-007
+  Kategorie: Ethik
+  Prinzip: Datenminimierung
+  Bedeutung: Nur speichern, was für Analyse erforderlich ist.
+- ID: EP-008
+  Kategorie: Ethik
+  Prinzip: Review vor Öffentlichkeit
+  Bedeutung: Veröffentlichbare Reports sollen geprüft werden.
+- ID: EP-009
+  Kategorie: Ethik
+  Prinzip: Attribution mit Vorsicht
+  Bedeutung: Cyber-, InfoOps- und Konfliktzuschreibungen benötigen Evidenz und Unsicherheitsangabe.
+- ID: EP-010
+  Kategorie: Ethik
+  Prinzip: Keine Scheingenauigkeit
+  Bedeutung: Keine numerische/farbige Darstellung ohne Kontext.
+- ID: OP-001
+  Kategorie: Betrieb
+  Prinzip: Local-first MVP
+  Bedeutung: Der erste MVP soll lokal betreibbar sein.
+- ID: OP-002
+  Kategorie: Betrieb
+  Prinzip: Container-ready
+  Bedeutung: Docker/Container-Betrieb vorbereiten.
+- ID: OP-003
+  Kategorie: Betrieb
+  Prinzip: No silent failures
+  Bedeutung: Fehler müssen sichtbar und protokolliert sein.
+- ID: OP-004
+  Kategorie: Betrieb
+  Prinzip: Partial success allowed
+  Bedeutung: Teilweise erfolgreiche Runs zulässig, aber klar kennzeichnen.
+- ID: OP-005
+  Kategorie: Betrieb
+  Prinzip: Backfill ≠ Daily Run
+  Bedeutung: Historische Backfills und tägliche Updates trennen.
+- ID: OP-006
+  Kategorie: Betrieb
+  Prinzip: Config over hardcoding
+  Bedeutung: Länder, Quellen, Features und Regeln konfigurierbar halten.
+- ID: OP-007
+  Kategorie: Betrieb
+  Prinzip: Secrets outside code
+  Bedeutung: Zugangsdaten dürfen nicht im Code liegen.
+- ID: OP-008
+  Kategorie: Betrieb
+  Prinzip: Reversible operation
+  Bedeutung: Backups und Reprocessing sollen Datenverlust vermeiden.
+- ID: TR-001
+  Kategorie: Traceability
+  Prinzip: Stable IDs
+  Bedeutung: IDs bleiben stabil und werden nicht wiederverwendet.
+- ID: TR-002
+  Kategorie: Traceability
+  Prinzip: Evidence chain
+  Bedeutung: Jede Aussage muss bis zur Quelle rückverfolgbar sein.
+- ID: TR-003
+  Kategorie: Traceability
+  Prinzip: Version everything
+  Bedeutung: Regeln, Features, Quellen, Länder und Reports werden versioniert.
+- ID: TR-004
+  Kategorie: Traceability
+  Prinzip: No silent overwrite
+  Bedeutung: Reprocessing überschreibt keine alten Ergebnisse.
+- ID: TR-005
+  Kategorie: Traceability
+  Prinzip: Explain status changes
+  Bedeutung: Statusänderungen müssen erklärbar sein.
+- ID: TR-006
+  Kategorie: Traceability
+  Prinzip: Reports are snapshots
+  Bedeutung: Reports sind an konkrete Snapshots gebunden.

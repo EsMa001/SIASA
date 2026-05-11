@@ -1,0 +1,181 @@
+mvp_countries:
+- ISO3: UKR
+  Land: Ukraine
+  Priorität: P1
+  Auswahltyp: Core Focus
+  Region: Europe / Black Sea
+  Begründung: Krieg, Eskalation, Infrastruktur, hohe Ereignis- und Informationsdynamik
+- ISO3: RUS
+  Land: Russia
+  Priorität: P1
+  Auswahltyp: Core Focus
+  Region: Eurasia
+  Begründung: Großmacht, Krieg, hybride Konflikte, Energie, Cyber, Informationsraum
+- ISO3: CHN
+  Land: China
+  Priorität: P1
+  Auswahltyp: Core Focus
+  Region: East Asia
+  Begründung: Großmacht, Taiwan, Südchinesisches Meer, Wirtschaft, Informationskontrolle
+- ISO3: TWN
+  Land: Taiwan
+  Priorität: P1
+  Auswahltyp: Core Focus
+  Region: East Asia
+  Begründung: Spannungsraum, physische Aktivität, Informationsraum, Frühwarnfall
+- ISO3: IRN
+  Land: Iran
+  Priorität: P1
+  Auswahltyp: Core Focus
+  Region: Middle East
+  Begründung: Regionalmacht, Sanktionen, Proteste, Proxy-Konflikte, Energie, Cyber
+- ISO3: ISR
+  Land: Israel
+  Priorität: P1
+  Auswahltyp: Core Focus
+  Region: Middle East
+  Begründung: Konfliktstaat, hohe Ereignis- und Informationsdynamik
+- ISO3: TUR
+  Land: Turkey
+  Priorität: P1
+  Auswahltyp: Core Focus
+  Region: Europe / Middle East
+  Begründung: NATO, Regionalmacht, Migration, Kaukasus, Schwarzes Meer
+- ISO3: IND
+  Land: India
+  Priorität: P1
+  Auswahltyp: Core Focus
+  Region: South Asia
+  Begründung: Großmacht, Pakistan/China, Wirtschaft, innenpolitische Mobilisierung
+- ISO3: PAK
+  Land: Pakistan
+  Priorität: P1
+  Auswahltyp: Core Focus
+  Region: South Asia
+  Begründung: Fragilität, Nuklearmacht, Indien/Afghanistan, politische Instabilität
+- ISO3: GEO
+  Land: Georgia
+  Priorität: P1
+  Auswahltyp: Core Focus
+  Region: South Caucasus
+  Begründung: Russland/EU-Einfluss, Proteste, Governance, Informationsraum
+- ISO3: USA
+  Land: United States
+  Priorität: P2
+  Auswahltyp: Extended Focus
+  Region: North America
+  Begründung: systemischer Akteur, globale Narrative, Referenz für westlichen Informationsraum
+- ISO3: DEU
+  Land: Germany
+  Priorität: P2
+  Auswahltyp: Extended Focus
+  Region: Europe
+  Begründung: europäische Referenz, KRITIS, Energie, Cyber, Sicherheitspolitik
+- ISO3: POL
+  Land: Poland
+  Priorität: P2
+  Auswahltyp: Extended Focus
+  Region: Europe / NATO East
+  Begründung: NATO-Ostflanke, Ukraine-/Russlandbezug
+- ISO3: EST
+  Land: Estonia
+  Priorität: P2
+  Auswahltyp: Extended Focus
+  Region: Baltics
+  Begründung: Cyber, NATO-Ostflanke, Resilienzbezug
+- ISO3: FIN
+  Land: Finland
+  Priorität: P2
+  Auswahltyp: Extended Focus
+  Region: Nordics / NATO
+  Begründung: NATO, Russland-Grenze, gute Datenlage
+- ISO3: SAU
+  Land: Saudi Arabia
+  Priorität: P2
+  Auswahltyp: Extended Focus
+  Region: Middle East
+  Begründung: Energie, Iran, regionale Macht, Rohstoffmärkte
+- ISO3: QAT
+  Land: Qatar
+  Priorität: P2
+  Auswahltyp: Extended Focus
+  Region: Middle East
+  Begründung: LNG, Diplomatie, Vermittlungsrollen, Nahost
+- ISO3: NGA
+  Land: Nigeria
+  Priorität: P2
+  Auswahltyp: Extended Focus
+  Region: West Africa
+  Begründung: Energie, Fragilität, Bevölkerung, regionale Relevanz
+- ISO3: EGY
+  Land: Egypt
+  Priorität: P2
+  Auswahltyp: Extended Focus
+  Region: North Africa / Middle East
+  Begründung: Suez, Migration, Nahost, innenpolitische Stabilität
+- ISO3: SDN
+  Land: Sudan
+  Priorität: P2
+  Auswahltyp: Extended Focus
+  Region: Africa
+  Begründung: Konflikt, humanitäre Krise, hohe Ereignisdynamik
+- ISO3: MMR
+  Land: Myanmar
+  Priorität: P2
+  Auswahltyp: Extended Focus
+  Region: Southeast Asia
+  Begründung: Bürgerkrieg, Autoritarismus, Ereignis-/Informationsdiskrepanz
+- ISO3: CHE
+  Land: Switzerland
+  Priorität: P3
+  Auswahltyp: Control / Reference
+  Region: Europe
+  Begründung: stabile Referenz, gute Datenlage, geringe Konfliktdynamik
+- ISO3: NLD
+  Land: Netherlands
+  Priorität: P3
+  Auswahltyp: Control / Reference
+  Region: Europe
+  Begründung: EU-/Wirtschaftsreferenz, Handel/Infrastruktur
+- ISO3: SWE
+  Land: Sweden
+  Priorität: P3
+  Auswahltyp: Control / Reference
+  Region: Nordics
+  Begründung: stabile Demokratie, Sicherheitswandel, gute Referenz
+- ISO3: NOR
+  Land: Norway
+  Priorität: P3
+  Auswahltyp: Control / Reference
+  Region: Nordics
+  Begründung: Energie, Arktisbezug, stabile Referenz
+- ISO3: CAN
+  Land: Canada
+  Priorität: P3
+  Auswahltyp: Control / Reference
+  Region: North America
+  Begründung: westliche Referenz, gute Datenlage, geringe direkte Eskalationsdynamik
+- ISO3: AUS
+  Land: Australia
+  Priorität: P3
+  Auswahltyp: Control / Reference
+  Region: Indo-Pacific
+  Begründung: Indo-Pacific-Referenz, China-/Pacific-Bezug, stabile Datenlage
+- ISO3: NZL
+  Land: New Zealand
+  Priorität: P3
+  Auswahltyp: Control / Reference
+  Region: Oceania
+  Begründung: Low-Noise-Referenz, stabile Kontrollgruppe
+- ISO3: PRT
+  Land: Portugal
+  Priorität: P3
+  Auswahltyp: Control / Reference
+  Region: Europe
+  Begründung: EU-Kontrollland, weniger Großmachtfokus
+- ISO3: IRL
+  Land: Ireland
+  Priorität: P3
+  Auswahltyp: Control / Reference
+  Region: Europe
+  Begründung: EU-/Tech-/Kontrollland, gute Datenlage

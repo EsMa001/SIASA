@@ -1,0 +1,109 @@
+decisions:
+- ID: D-001
+  Bereich: Projektziel
+  Festlegung: Strukturelle Analyse globaler Informations- und Aktivitätsräume unter Unsicherheit.
+  Status: beschlossen
+- ID: D-002
+  Bereich: Analysefokus
+  Festlegung: Länderzentriert, nicht situations-/krisenfokussiert.
+  Status: beschlossen
+- ID: D-003
+  Bereich: Domänen
+  Festlegung: A Informationsraum, B Ereignisdaten, C physische Aktivität, D Wirtschaft/Struktur, E Cyber/Tech/InfoOps.
+  Status: beschlossen
+- ID: D-004
+  Bereich: Narrative
+  Festlegung: Narrative sind Teilkomponente von Ebene A, nicht alleiniger Systemfokus.
+  Status: beschlossen
+- ID: D-005
+  Bereich: Fusion
+  Festlegung: Kein allgemeiner numerischer Gesamt-Score im MVP; keine naive additive Fusion.
+  Status: beschlossen
+- ID: D-006
+  Bereich: Statuslogik
+  Festlegung: D0–D5 je Domäne; S0–S6 regelbasierter Multi-Domain-Status.
+  Status: beschlossen
+- ID: D-007
+  Bereich: Weltkarte Default
+  Festlegung: Startseite = Weltkarte; Default = Multi-Domain-Status, 7 Tage, relative Baseline, kombinierte 30/90/365-Baseline.
+  Status: beschlossen
+- ID: D-008
+  Bereich: Vergleichsmodus
+  Festlegung: Relative Baseline als Default; globaler Vergleich als Umschalter.
+  Status: beschlossen
+- ID: D-009
+  Bereich: Historie
+  Festlegung: Initial mindestens 3 Jahre historische Daten, soweit Quellen verfügbar.
+  Status: beschlossen
+- ID: D-010
+  Bereich: Betrieb
+  Festlegung: Nach Initialaufbau tägliche inkrementelle Runs mit versionierten Snapshots.
+  Status: beschlossen
+- ID: D-011
+  Bereich: Länderset
+  Festlegung: MVP mit 30 Ländern; Hybrid ca. 70 % Fokus, 30 % Kontroll-/Referenzländer.
+  Status: beschlossen
+- ID: D-012
+  Bereich: Prioritäten
+  Festlegung: Länderpriorität P1/P2/P3 mit variabler Integrationstiefe.
+  Status: beschlossen
+- ID: D-013
+  Bereich: MVP-Core-Domänen
+  Festlegung: A/B/D verpflichtender Kern; C/E selektiv, wenn Datenlage reicht.
+  Status: beschlossen
+- ID: D-014
+  Bereich: ACLED
+  Festlegung: Prepared Adapter; wegen fehlendem Zugriff keine MVP-Abhängigkeit.
+  Status: beschlossen
+- ID: D-015
+  Bereich: Annotationen
+  Festlegung: Regelbasierte Statuswerte; Analysten-Annotationen ergänzend, nicht überschreibend.
+  Status: beschlossen
+- ID: D-016
+  Bereich: Review
+  Festlegung: Kein formaler Review-Workflow im MVP; Datenmodell bereitet Review-Status vor.
+  Status: beschlossen
+- ID: D-017
+  Bereich: Reporting
+  Festlegung: Daily Global Snapshot automatisch nach Run; Detailreports manuell aus GUI.
+  Status: beschlossen
+- ID: D-018
+  Bereich: Rollen
+  Festlegung: MVP mit Admin/Developer + Analyst; Viewer optional vorbereitet; kein Public User.
+  Status: beschlossen
+- ID: D-019
+  Bereich: Nutzerrollen
+  Festlegung: MVP mit Admin/Developer und Analyst; Viewer optional vorbereitet; Public User nicht im MVP.
+  Status: beschlossen
+- ID: D-020
+  Bereich: Haupt-Use-Cases
+  Festlegung: UC-001 Daily Global Review, UC-002 Country Deep Dive, UC-003 Source/Coverage Review und UC-004 Report Export sind MVP-Pflicht.
+  Status: beschlossen
+- ID: D-021
+  Bereich: Validierung
+  Festlegung: MVP mit 10–15 manuell kuratierten historischen Referenzfällen; einfacher Backtest, kein vollständiger Point-in-Time-Backtest.
+  Status: beschlossen
+- ID: D-022
+  Bereich: Qualität
+  Festlegung: Traceability, Reproduzierbarkeit, D0 statt Schätzung bei Datenlücken und No Silent Failure als harte Qualitätsprinzipien.
+  Status: beschlossen
+- ID: D-023
+  Bereich: Governance
+  Festlegung: Keine Volltextspeicherung geschützter News; Social Media restriktiv; personenbezogene Analyse nur für öffentliche/institutionelle Akteurskommunikation.
+  Status: beschlossen
+- ID: D-024
+  Bereich: Ethik
+  Festlegung: Keine Zielauswahl, keine operative Empfehlung, keine Desinformation, kein Targeting, keine ungeprüfte Veröffentlichung.
+  Status: beschlossen
+- ID: D-025
+  Bereich: Betrieb
+  Festlegung: Local-first MVP; tägliche Runs; Backfills; strukturierte Logs; Secrets außerhalb Code; Docker vorbereitet.
+  Status: beschlossen
+- ID: D-026
+  Bereich: Traceability
+  Festlegung: Stable IDs und Evidenzpfad Source → Raw → Normalized → Feature → Domain Status → Multi-Domain Status → Snapshot → Report.
+  Status: beschlossen
+- ID: D-027
+  Bereich: MVP-Priorisierung
+  Festlegung: MVP-Must/Should/Could/Post-MVP/Out-of-Scope-Klassen werden verwendet.
+  Status: beschlossen

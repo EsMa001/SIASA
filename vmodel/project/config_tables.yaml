@@ -1,0 +1,69 @@
+config_tables:
+- Konfigurationstyp: Country Priority
+  Wert: P1
+  Bedeutung: Core Focus Countries
+  Festlegung: möglichst A–E, tiefe Analyse
+- Konfigurationstyp: Country Priority
+  Wert: P2
+  Bedeutung: Extended Focus Countries
+  Festlegung: A/B/D mindestens, C/E optional
+- Konfigurationstyp: Country Priority
+  Wert: P3
+  Bedeutung: Control / Reference Countries
+  Festlegung: Kontroll-/Referenzländer, reduzierte Signaltiefe
+- Konfigurationstyp: Source Status
+  Wert: Core
+  Bedeutung: MVP-relevante Pflicht-/Primärquelle
+  Festlegung: soll aktiv integriert werden
+- Konfigurationstyp: Source Status
+  Wert: Extended
+  Bedeutung: nutzbare Zusatzquelle
+  Festlegung: kann im MVP oder danach integriert werden
+- Konfigurationstyp: Source Status
+  Wert: Prepared Adapter
+  Bedeutung: technisch vorbereiten, nicht MVP-abhängig
+  Festlegung: z. B. ACLED, AIS, Telegram, X
+- Konfigurationstyp: Current Window
+  Wert: 7d
+  Bedeutung: Startkarten-Default
+  Festlegung: aktuelle 7-Tage-Auffälligkeit
+- Konfigurationstyp: Current Window
+  Wert: 24h / 30d / 90d / 365d
+  Bedeutung: umschaltbare Alternativen
+  Festlegung: für Detailanalyse
+- Konfigurationstyp: Baseline Mode
+  Wert: Combined 30/90/365
+  Bedeutung: Default
+  Festlegung: kurz-, mittel- und langfristige Referenz
+- Konfigurationstyp: Evaluation Mode
+  Wert: Relative Baseline
+  Bedeutung: Default
+  Festlegung: Land gegen eigene Historie
+- Konfigurationstyp: Evaluation Mode
+  Wert: Global Comparison
+  Bedeutung: optional
+  Festlegung: Länderübergreifender Vergleich, mit Coverage/Confidence
+- Konfigurationstyp: Data Horizon
+  Wert: '>=3 Jahre'
+  Bedeutung: historischer Initialaufbau
+  Festlegung: sofern Quelle verfügbar
+- Konfigurationstyp: Run Mode
+  Wert: Daily Incremental
+  Bedeutung: täglicher Betrieb
+  Festlegung: neue Daten + Snapshot
+- Konfigurationstyp: Fusion Rule
+  Wert: No General Fusion Score
+  Bedeutung: MVP-Regel
+  Festlegung: keine additive A–E-Fusion
+- Konfigurationstyp: Map Default
+  Wert: Multi-Domain Status
+  Bedeutung: Startseite
+  Festlegung: regelbasierter S0–S6-Status
+- Konfigurationstyp: Annotation Review
+  Wert: unreviewed/draft vorbereitet
+  Bedeutung: MVP ohne Freigabeprozess
+  Festlegung: Annotation überschreibt Status nicht
+- Konfigurationstyp: Public Access
+  Wert: none
+  Bedeutung: MVP
+  Festlegung: keine öffentliche Nutzerrolle

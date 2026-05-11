@@ -1,0 +1,511 @@
+feature_catalog:
+- Domäne: A
+  Feature ID: A_news_volume
+  Feature: Newsvolumen
+  Bedeutung: Anzahl relevanter Meldungen zu einem Land
+  Priorität: Core
+- Domäne: A
+  Feature ID: A_news_volume_anomaly
+  Feature: Newsvolumen-Anomalie
+  Bedeutung: Abweichung vom normalen Medienaufkommen
+  Priorität: Core
+- Domäne: A
+  Feature ID: A_source_count
+  Feature: Quellenanzahl
+  Bedeutung: Anzahl unterschiedlicher berichtender Quellen
+  Priorität: Core
+- Domäne: A
+  Feature ID: A_source_diversity_index
+  Feature: Quellenvielfalt
+  Bedeutung: Misst, ob viele unabhängige Quellen berichten
+  Priorität: Core
+- Domäne: A
+  Feature ID: A_source_dependency_score
+  Feature: Quellenabhängigkeit
+  Bedeutung: Hinweis auf Replikation/geringe Unabhängigkeit
+  Priorität: Extended
+- Domäne: A
+  Feature ID: A_duplicate_story_ratio
+  Feature: Duplikat-/Replikationsanteil
+  Bedeutung: Anteil ähnlicher/gleicher Meldungen
+  Priorität: Extended
+- Domäne: A
+  Feature ID: A_first_seen_source
+  Feature: Erste beobachtete Quelle
+  Bedeutung: Ursprung oder früheste bekannte Quelle
+  Priorität: Extended
+- Domäne: A
+  Feature ID: A_amplification_factor
+  Feature: Verstärkungsgrad
+  Bedeutung: Wie stark sich ein Thema ausbreitet
+  Priorität: Extended
+- Domäne: A
+  Feature ID: A_persistence_score
+  Feature: Persistenz
+  Bedeutung: Wie lange ein Thema sichtbar bleibt
+  Priorität: Extended
+- Domäne: A
+  Feature ID: A_tone_mean
+  Feature: Mittlere Tonalität
+  Bedeutung: Durchschnittliche Tonalität der Berichterstattung
+  Priorität: Core
+- Domäne: A
+  Feature ID: A_tone_shift
+  Feature: Tonalitätsverschiebung
+  Bedeutung: Veränderung der Sprache gegenüber Baseline
+  Priorität: Core
+- Domäne: A
+  Feature ID: A_negative_tone_share
+  Feature: Negativer Tonanteil
+  Bedeutung: Anteil stark negativer Berichterstattung
+  Priorität: Extended
+- Domäne: A
+  Feature ID: A_topic_distribution
+  Feature: Themenverteilung
+  Bedeutung: Welche Themen dominieren
+  Priorität: Core
+- Domäne: A
+  Feature ID: A_topic_shift_score
+  Feature: Themenverschiebung
+  Bedeutung: Änderung der Themenstruktur
+  Priorität: Core
+- Domäne: A
+  Feature ID: A_narrative_cluster_count
+  Feature: Narrativcluster
+  Bedeutung: Anzahl erkannter semantischer Cluster
+  Priorität: Advanced
+- Domäne: A
+  Feature ID: A_narrative_shift_score
+  Feature: Narrativverschiebung
+  Bedeutung: Neue oder stark veränderte Narrative
+  Priorität: Advanced
+- Domäne: A
+  Feature ID: A_official_statement_count
+  Feature: Offizielle Statements
+  Bedeutung: Anzahl relevanter offizieller Erklärungen
+  Priorität: Extended
+- Domäne: A
+  Feature ID: A_official_escalation_signal
+  Feature: Eskalative offizielle Sprache
+  Bedeutung: Drohungen, Warnungen, Sanktionen, Vorwürfe
+  Priorität: Extended
+- Domäne: A
+  Feature ID: A_cross_country_spread
+  Feature: Länderübergreifende Ausbreitung
+  Bedeutung: Ob ein Thema in andere Länderkontexte springt
+  Priorität: Advanced
+- Domäne: A
+  Feature ID: A_information_velocity
+  Feature: Informationsgeschwindigkeit
+  Bedeutung: Geschwindigkeit der Verbreitung
+  Priorität: Advanced
+- Domäne: B
+  Feature ID: B_event_count
+  Feature: Ereignisanzahl
+  Bedeutung: Anzahl relevanter Ereignisse
+  Priorität: Core
+- Domäne: B
+  Feature ID: B_event_count_anomaly
+  Feature: Ereignisanomalie
+  Bedeutung: Abweichung von normaler Ereignisfrequenz
+  Priorität: Core
+- Domäne: B
+  Feature ID: B_event_type_distribution
+  Feature: Ereignistypen
+  Bedeutung: Protest, Gewalt, Konflikt, Katastrophe, humanitär
+  Priorität: Core
+- Domäne: B
+  Feature ID: B_event_type_shift
+  Feature: Ereignistypwechsel
+  Bedeutung: Ungewöhnliche Veränderung der Ereignisarten
+  Priorität: Extended
+- Domäne: B
+  Feature ID: B_violent_event_count
+  Feature: Gewaltsame Ereignisse
+  Bedeutung: Anzahl Gewalt-/Konfliktereignisse
+  Priorität: Core
+- Domäne: B
+  Feature ID: B_violent_event_share
+  Feature: Gewaltanteil
+  Bedeutung: Anteil gewaltsamer Ereignisse
+  Priorität: Extended
+- Domäne: B
+  Feature ID: B_fatality_count
+  Feature: Todesfälle
+  Bedeutung: Aggregierte Todeszahlen, soweit verfügbar
+  Priorität: Extended
+- Domäne: B
+  Feature ID: B_fatality_anomaly
+  Feature: Todesfallanomalie
+  Bedeutung: Abweichung zur historischen Schwere
+  Priorität: Extended
+- Domäne: B
+  Feature ID: B_protest_event_count
+  Feature: Protestereignisse
+  Bedeutung: Anzahl Protest-/Mobilisierungsereignisse
+  Priorität: Core
+- Domäne: B
+  Feature ID: B_protest_anomaly
+  Feature: Protestanomalie
+  Bedeutung: Ungewöhnlicher Protestanstieg
+  Priorität: Core
+- Domäne: B
+  Feature ID: B_geo_cluster_score
+  Feature: Geografische Clusterung
+  Bedeutung: Räumliche Häufung von Ereignissen
+  Priorität: Core
+- Domäne: B
+  Feature ID: B_temporal_cluster_score
+  Feature: Zeitliche Clusterung
+  Bedeutung: Ereignisse häufen sich kurzfristig
+  Priorität: Advanced
+- Domäne: B
+  Feature ID: B_event_novelty_score
+  Feature: Ereignisneuheit
+  Bedeutung: Ungewöhnlicher Ereignistyp für dieses Land
+  Priorität: Advanced
+- Domäne: B
+  Feature ID: B_humanitarian_report_count
+  Feature: Humanitäre Berichte
+  Bedeutung: Relevante ReliefWeb-/Krisenberichte
+  Priorität: Extended
+- Domäne: B
+  Feature ID: B_disaster_alert_level
+  Feature: Katastrophenwarnniveau
+  Bedeutung: GDACS-/Disaster-Signal
+  Priorität: Extended
+- Domäne: B
+  Feature ID: B_event_source_agreement
+  Feature: Quellenübereinstimmung
+  Bedeutung: Ob verschiedene Quellen ähnliche Ereignisse melden
+  Priorität: Extended
+- Domäne: B
+  Feature ID: B_reporting_delay_estimate
+  Feature: Meldeverzug
+  Bedeutung: Erwartete Verzögerung der Ereignisquellen
+  Priorität: Advanced
+- Domäne: C
+  Feature ID: C_fire_count
+  Feature: Feuer-/Thermalereignisse
+  Bedeutung: Anzahl FIRMS-Detektionen
+  Priorität: Selective P1 Core
+- Domäne: C
+  Feature ID: C_fire_anomaly
+  Feature: Feueranomalie
+  Bedeutung: Abweichung von saisonaler Feuerbaseline
+  Priorität: Selective P1 Core
+- Domäne: C
+  Feature ID: C_fire_cluster_score
+  Feature: Feuercluster
+  Bedeutung: Räumliche Häufung thermischer Signale
+  Priorität: Selective P1 Core
+- Domäne: C
+  Feature ID: C_nightlight_delta
+  Feature: Nachtlichtänderung
+  Bedeutung: Veränderung von Lichtemissionen
+  Priorität: Selective P1 Core
+- Domäne: C
+  Feature ID: C_nightlight_drop_anomaly
+  Feature: Nachtlichtabfall
+  Bedeutung: Möglicher Hinweis auf Strom-/Aktivitätsausfall
+  Priorität: Selective P1 Core
+- Domäne: C
+  Feature ID: C_air_traffic_volume
+  Feature: Flugverkehrsvolumen
+  Bedeutung: Anzahl sichtbarer Flugbewegungen
+  Priorität: Selective P1 Extended
+- Domäne: C
+  Feature ID: C_air_traffic_change
+  Feature: Flugverkehrsänderung
+  Bedeutung: Abweichung von Normalmuster
+  Priorität: Selective P1 Extended
+- Domäne: C
+  Feature ID: C_airspace_disruption_signal
+  Feature: Luftraumstörung
+  Bedeutung: Ungewöhnliche Reduktion/Umlenkung
+  Priorität: Selective P1 Extended
+- Domäne: C
+  Feature ID: C_port_activity_proxy
+  Feature: Hafenaktivität
+  Bedeutung: Später über AIS/Proxy-Daten
+  Priorität: Prepared/Later
+- Domäne: C
+  Feature ID: C_maritime_route_change
+  Feature: Maritime Routenänderung
+  Bedeutung: Später über AIS
+  Priorität: Prepared/Later
+- Domäne: C
+  Feature ID: C_infrastructure_disruption_signal
+  Feature: Infrastrukturstörung
+  Bedeutung: Physische Hinweise auf Ausfälle/Schäden
+  Priorität: Prepared/Later
+- Domäne: C
+  Feature ID: C_environmental_shock_signal
+  Feature: Umwelt-/Naturereignis
+  Bedeutung: Dürre, Hochwasser, Feuer, Sturm
+  Priorität: Selective P1 Extended
+- Domäne: C
+  Feature ID: C_physical_signal_confidence
+  Feature: Signalbelastbarkeit
+  Bedeutung: Qualität der physischen Beobachtung
+  Priorität: Meta
+- Domäne: C
+  Feature ID: C_interpretation_uncertainty
+  Feature: Interpretationsunsicherheit
+  Bedeutung: Routine vs. Auffälligkeit unklar
+  Priorität: Meta
+- Domäne: D
+  Feature ID: D_inflation_yoy
+  Feature: Inflation
+  Bedeutung: Preisstress
+  Priorität: Core
+- Domäne: D
+  Feature ID: D_inflation_anomaly
+  Feature: Inflationsanomalie
+  Bedeutung: Abweichung von eigener Historie
+  Priorität: Core
+- Domäne: D
+  Feature ID: D_exchange_rate_change
+  Feature: Wechselkursänderung
+  Bedeutung: Währungsstress
+  Priorität: Core
+- Domäne: D
+  Feature ID: D_exchange_rate_volatility
+  Feature: Wechselkursvolatilität
+  Bedeutung: Instabilität der Währung
+  Priorität: Core
+- Domäne: D
+  Feature ID: D_gdp_growth
+  Feature: Wirtschaftswachstum
+  Bedeutung: Makroökonomischer Kontext
+  Priorität: Core
+- Domäne: D
+  Feature ID: D_unemployment_rate
+  Feature: Arbeitslosigkeit
+  Bedeutung: Sozialer/wirtschaftlicher Druck
+  Priorität: Core
+- Domäne: D
+  Feature ID: D_food_price_proxy
+  Feature: Nahrungsmittelstress
+  Bedeutung: Preis-/Versorgungsdruck
+  Priorität: Extended
+- Domäne: D
+  Feature ID: D_food_import_dependency
+  Feature: Nahrungsmittelabhängigkeit
+  Bedeutung: Importabhängigkeit
+  Priorität: Extended
+- Domäne: D
+  Feature ID: D_energy_import_dependency
+  Feature: Energieabhängigkeit
+  Bedeutung: Strukturelle Energieverwundbarkeit
+  Priorität: Extended
+- Domäne: D
+  Feature ID: D_energy_price_stress
+  Feature: Energiepreisstress
+  Bedeutung: Energiepreisdruck, soweit verfügbar
+  Priorität: Extended
+- Domäne: D
+  Feature ID: D_trade_volume_change
+  Feature: Handelsvolumenänderung
+  Bedeutung: Veränderung Import/Export
+  Priorität: Extended
+- Domäne: D
+  Feature ID: D_trade_concentration_index
+  Feature: Handelskonzentration
+  Bedeutung: Abhängigkeit von wenigen Partnern
+  Priorität: Extended
+- Domäne: D
+  Feature ID: D_commodity_exposure_score
+  Feature: Rohstoffexposition
+  Bedeutung: Verwundbarkeit gegenüber Rohstoffpreisen
+  Priorität: Advanced
+- Domäne: D
+  Feature ID: D_current_account_signal
+  Feature: Leistungsbilanzsignal
+  Bedeutung: Externer Finanzdruck
+  Priorität: Advanced
+- Domäne: D
+  Feature ID: D_debt_stress_proxy
+  Feature: Schuldendruck
+  Bedeutung: Struktureller Finanzstress
+  Priorität: Advanced
+- Domäne: D
+  Feature ID: D_structural_vulnerability_index
+  Feature: Strukturelle Vulnerabilität
+  Bedeutung: Zusammenfassender D-interner Kontextindikator
+  Priorität: Advanced
+- Domäne: D
+  Feature ID: D_macro_data_freshness
+  Feature: Aktualität Makrodaten
+  Bedeutung: Viele D-Daten sind verzögert
+  Priorität: Meta
+- Domäne: D
+  Feature ID: D_revision_uncertainty
+  Feature: Revisionsunsicherheit
+  Bedeutung: Spätere Datenkorrekturen möglich
+  Priorität: Meta
+- Domäne: E
+  Feature ID: E_outage_count
+  Feature: Internet-/Service-Outages
+  Bedeutung: Anzahl technischer Störungen
+  Priorität: Selective P1 Core
+- Domäne: E
+  Feature ID: E_outage_anomaly
+  Feature: Outage-Anomalie
+  Bedeutung: Ungewöhnliche Häufung/Stärke
+  Priorität: Selective P1 Core
+- Domäne: E
+  Feature ID: E_traffic_drop_magnitude
+  Feature: Traffic-Rückgang
+  Bedeutung: Ausmaß eines Internet-Traffic-Einbruchs
+  Priorität: Selective P1 Core
+- Domäne: E
+  Feature ID: E_traffic_drop_duration
+  Feature: Dauer des Rückgangs
+  Bedeutung: Persistenz einer Störung
+  Priorität: Selective P1 Extended
+- Domäne: E
+  Feature ID: E_cloudflare_outage_signal
+  Feature: Cloudflare-Signal
+  Bedeutung: Technische Störung laut Cloudflare
+  Priorität: Selective P1 Core
+- Domäne: E
+  Feature ID: E_google_traffic_disruption
+  Feature: Google-Traffic-Signal
+  Bedeutung: Regionale Traffic-Anomalie
+  Priorität: Selective P1 Core
+- Domäne: E
+  Feature ID: E_cve_count
+  Feature: CVE-Anzahl
+  Bedeutung: Schwachstellenaktivität
+  Priorität: Selective P1 Extended
+- Domäne: E
+  Feature ID: E_high_severity_cve_count
+  Feature: Schwere CVEs
+  Bedeutung: CVSS-/Severity-basierte Zählung
+  Priorität: Selective P1 Extended
+- Domäne: E
+  Feature ID: E_kev_count
+  Feature: KEV-Anzahl
+  Bedeutung: Bekannte aktiv ausgenutzte Schwachstellen
+  Priorität: Selective P1 Extended
+- Domäne: E
+  Feature ID: E_kev_trend
+  Feature: KEV-Trend
+  Bedeutung: Veränderung aktiver Exploit-Dynamik
+  Priorität: Selective P1 Extended
+- Domäne: E
+  Feature ID: E_cert_advisory_count
+  Feature: CERT-Warnungen
+  Bedeutung: Nationale/regionale Warnmeldungen
+  Priorität: Selective P1 Extended
+- Domäne: E
+  Feature ID: E_infoops_case_count
+  Feature: InfoOps-Fälle
+  Bedeutung: Desinformations-/Kampagnenfälle
+  Priorität: Advanced
+- Domäne: E
+  Feature ID: E_technical_source_agreement
+  Feature: Technische Quellenübereinstimmung
+  Bedeutung: Mehrere technische Quellen bestätigen Signal
+  Priorität: Advanced
+- Domäne: E
+  Feature ID: E_country_attribution_uncertainty
+  Feature: Länderzuordnungsunsicherheit
+  Bedeutung: Belastbarkeit des Länderbezugs
+  Priorität: Advanced
+- Domäne: E
+  Feature ID: E_attribution_risk_flag
+  Feature: Attribution-Risk-Flag
+  Bedeutung: Warnt vor vorschneller Zuschreibung
+  Priorität: Advanced
+- Domäne: E
+  Feature ID: E_technical_signal_confidence
+  Feature: Technische Confidence
+  Bedeutung: Belastbarkeit der technischen Signale
+  Priorität: Meta
+- Domäne: X
+  Feature ID: X_domain_coverage_score
+  Feature: Datenabdeckung je Domäne
+  Bedeutung: Coverage der Domäne
+  Priorität: Meta Core
+- Domäne: X
+  Feature ID: X_domain_confidence_score
+  Feature: Belastbarkeit je Domäne
+  Bedeutung: Confidence der Domänenbewertung
+  Priorität: Meta Core
+- Domäne: X
+  Feature ID: X_domain_uncertainty_score
+  Feature: Unsicherheit je Domäne
+  Bedeutung: Gesamtunsicherheit
+  Priorität: Meta Core
+- Domäne: X
+  Feature ID: X_data_freshness_score
+  Feature: Datenaktualität
+  Bedeutung: Aktualität der Daten
+  Priorität: Meta Core
+- Domäne: X
+  Feature ID: X_historical_depth_score
+  Feature: Historische Tiefe
+  Bedeutung: Verfügbare Historie
+  Priorität: Meta Core
+- Domäne: X
+  Feature ID: X_missing_data_flag
+  Feature: Datenlücken
+  Bedeutung: Fehlende Daten
+  Priorität: Meta Core
+- Domäne: X
+  Feature ID: X_source_failure_flag
+  Feature: Quellenfehler
+  Bedeutung: Fehlgeschlagene Quelle
+  Priorität: Meta Core
+- Domäne: X
+  Feature ID: X_source_dependency_score
+  Feature: Quellenabhängigkeit
+  Bedeutung: Redundanz/Abhängigkeit
+  Priorität: Meta Extended
+- Domäne: X
+  Feature ID: X_cross_domain_alignment_flag
+  Feature: Cross-Domain-Alignment
+  Bedeutung: Mehrere Domänen auffällig
+  Priorität: Meta Core
+- Domäne: X
+  Feature ID: X_cross_domain_contradiction_flag
+  Feature: Cross-Domain-Widerspruch
+  Bedeutung: Domänen widersprechen sich
+  Priorität: Meta Core
+- Domäne: X
+  Feature ID: X_active_domains
+  Feature: Bewertbare Domänen
+  Bedeutung: Aktive Domänen
+  Priorität: Meta Core
+- Domäne: X
+  Feature ID: X_anomalous_domains
+  Feature: Auffällige Domänen
+  Bedeutung: Domänen mit D2-D4
+  Priorität: Meta Core
+- Domäne: X
+  Feature ID: X_unavailable_domains
+  Feature: Nicht bewertbare Domänen
+  Bedeutung: D0-Domänen
+  Priorität: Meta Core
+- Domäne: X
+  Feature ID: X_status_driver_list
+  Feature: Statustreiber
+  Bedeutung: Wichtigste Treiber
+  Priorität: Meta Core
+- Domäne: X
+  Feature ID: X_counter_signal_list
+  Feature: Gegenindikatoren
+  Bedeutung: Widersprechende Signale
+  Priorität: Meta Core
+- Domäne: X
+  Feature ID: X_annotation_count
+  Feature: Annotationenzahl
+  Bedeutung: Anzahl Analystenhinweise
+  Priorität: Meta Extended
+- Domäne: X
+  Feature ID: X_recent_annotation_flag
+  Feature: Neue Annotation
+  Bedeutung: Neue relevante Annotation vorhanden
+  Priorität: Meta Extended

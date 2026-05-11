@@ -1,0 +1,267 @@
+data_sources:
+- Ebene: A
+  Quelle: GDELT 2.0 Events/GKG/DOC API
+  Status: Core
+  Signale: Newsvolumen, Tonalität, Themen, Akteure, Orte, Quellen, Narrative
+  Zugriff: frei/open data
+  Historie: '>=3 Jahre möglich'
+  Bemerkung: zentral für A; medienabhängig
+- Ebene: A
+  Quelle: RSS / News Feeds
+  Status: Core
+  Signale: aktuelle Nachrichten je Land/Thema
+  Zugriff: frei/websiteabhängig
+  Historie: oft begrenzt
+  Bemerkung: gut für Daily Runs, schwächer für Historie
+- Ebene: A
+  Quelle: Offizielle Regierungs-/Institutionenfeeds
+  Status: Core/Extended
+  Signale: Statements, Warnungen, Diplomatie, Sanktionen
+  Zugriff: frei, kuratiert
+  Historie: quellenabhängig
+  Bemerkung: wertvoll für offizielle Signale
+- Ebene: A
+  Quelle: Media Cloud
+  Status: Extended
+  Signale: Medienökosysteme, Story-Diffusion
+  Zugriff: API/Registrierung möglich
+  Historie: prüfen
+  Bemerkung: gut für Informationsflussanalyse
+- Ebene: A/E
+  Quelle: EUvsDisinfo
+  Status: Extended
+  Signale: Desinformationsfälle, InfoOps-Narrative
+  Zugriff: öffentlich
+  Historie: prüfen
+  Bemerkung: Schnittstelle A/E
+- Ebene: A
+  Quelle: Reddit / Mastodon
+  Status: Extended
+  Signale: öffentliche Diskussionsdynamik
+  Zugriff: API/Regeln
+  Historie: begrenzt
+  Bemerkung: selektiv und vorsichtig
+- Ebene: A
+  Quelle: Telegram
+  Status: Prepared Adapter
+  Signale: Konfliktkommunikation, Propaganda
+  Zugriff: technisch/rechtlich prüfen
+  Historie: unklar
+  Bemerkung: nicht MVP-Core
+- Ebene: A
+  Quelle: X/Twitter
+  Status: Prepared Adapter
+  Signale: schnelle Eliten-/Narrativkommunikation
+  Zugriff: API/Kosten
+  Historie: unklar
+  Bemerkung: nicht MVP-Core
+- Ebene: B
+  Quelle: UCDP GED
+  Status: Core
+  Signale: organisierte Gewalt, Konfliktereignisse, Geodaten, Todeszahlen
+  Zugriff: frei/API/Download
+  Historie: mehrjährig
+  Bemerkung: offene Alternative zu ACLED
+- Ebene: B
+  Quelle: GDELT Events
+  Status: Core
+  Signale: medienextrahierte Ereignisse nach CAMEO
+  Zugriff: frei/open data
+  Historie: '>=3 Jahre möglich'
+  Bemerkung: nicht Ground Truth, medienabhängig
+- Ebene: B
+  Quelle: ReliefWeb API
+  Status: Core/Extended
+  Signale: humanitäre Krisen, Länderberichte, Lageberichte
+  Zugriff: frei/API
+  Historie: mehrjährig
+  Bemerkung: humanitärer Kontext
+- Ebene: B
+  Quelle: GDACS
+  Status: Core/Extended
+  Signale: Naturkatastrophen, Alerts, Krisenereignisse
+  Zugriff: frei/API
+  Historie: mehrjährig prüfen
+  Bemerkung: Disaster-/Shock-Komponente
+- Ebene: B
+  Quelle: INFORM Risk Index
+  Status: Extended
+  Signale: strukturelles humanitäres Risiko
+  Zugriff: öffentlich
+  Historie: jährlich
+  Bemerkung: struktureller Kontext
+- Ebene: B
+  Quelle: Global Terrorism Database
+  Status: Extended
+  Signale: Terrorismusereignisse historisch
+  Zugriff: öffentlich/Download prüfen
+  Historie: langjährig
+  Bemerkung: historische Validierung
+- Ebene: B
+  Quelle: ACLED
+  Status: Prepared Adapter
+  Signale: politische Gewalt, Proteste, Konflikte
+  Zugriff: kein Zugriff im MVP
+  Historie: abhängig von Zugang
+  Bemerkung: Adapter vorbereiten, deaktiviert
+- Ebene: C
+  Quelle: NASA FIRMS
+  Status: Selektiv P1
+  Signale: aktive Feuer, thermische Anomalien
+  Zugriff: frei/API
+  Historie: mehrjährig prüfen
+  Bemerkung: Konflikt-/Katastrophenindikator
+- Ebene: C
+  Quelle: VIIRS / Black Marble Nighttime Lights
+  Status: Selektiv P1
+  Signale: Nachtlicht, Strom-/Aktivitätsänderungen
+  Zugriff: frei/earthdata
+  Historie: mehrjährig
+  Bemerkung: langsamere physische Kontextsignale
+- Ebene: C
+  Quelle: Copernicus / Sentinel
+  Status: Selektiv P1
+  Signale: Satellitenbasierte Infrastruktur-/Umweltindikatoren
+  Zugriff: frei/API
+  Historie: mehrjährig
+  Bemerkung: datenintensiv
+- Ebene: C
+  Quelle: OpenSky Network
+  Status: Extended/Selektiv P1
+  Signale: ADS-B Flugbewegungen
+  Zugriff: API/Registrierung
+  Historie: abhängig vom Zugriff
+  Bemerkung: selektiv einsetzen
+- Ebene: C
+  Quelle: AIS-Schiffsdaten
+  Status: Prepared Adapter
+  Signale: maritime Aktivität, Häfen, Routen
+  Zugriff: oft nicht frei
+  Historie: unklar
+  Bemerkung: später prüfen
+- Ebene: C
+  Quelle: OpenStreetMap / HOT OSM
+  Status: Extended
+  Signale: Infrastruktur-/Kontextdaten
+  Zugriff: frei
+  Historie: statisch/historie begrenzt
+  Bemerkung: Kontext statt tägliches Signal
+- Ebene: D
+  Quelle: World Bank Indicators API
+  Status: Core
+  Signale: Makroindikatoren, Bevölkerung, Entwicklung, Struktur
+  Zugriff: frei/API
+  Historie: langjährig
+  Bemerkung: Basisquelle
+- Ebene: D
+  Quelle: IMF Data API / SDMX
+  Status: Core/Extended
+  Signale: Makroökonomie, Zahlungsbilanz, Wechselkurse, Finanzdaten
+  Zugriff: frei/API
+  Historie: langjährig
+  Bemerkung: für viele Länder
+- Ebene: D
+  Quelle: UN Comtrade
+  Status: Core/Extended
+  Signale: Import/Export, Handelsströme, Abhängigkeiten
+  Zugriff: API-Key/Limits
+  Historie: langjährig
+  Bemerkung: Handelsabhängigkeiten
+- Ebene: D
+  Quelle: FAOSTAT
+  Status: Core/Extended
+  Signale: Nahrung, Landwirtschaft, Versorgung
+  Zugriff: frei/API
+  Historie: langjährig
+  Bemerkung: Food-Stress
+- Ebene: D
+  Quelle: OECD Data Explorer
+  Status: Extended
+  Signale: OECD-Länder, Wirtschaft, Arbeit, Energie
+  Zugriff: API
+  Historie: langjährig
+  Bemerkung: OECD-/Kontrollländer
+- Ebene: D
+  Quelle: Our World in Data
+  Status: Extended
+  Signale: kuratierte globale Zeitreihen
+  Zugriff: frei
+  Historie: variiert
+  Bemerkung: schnelle Prototypen/Kontext
+- Ebene: D
+  Quelle: FRED
+  Status: Extended
+  Signale: Finanz-/Makrozeitreihen
+  Zugriff: API
+  Historie: variiert
+  Bemerkung: Abdeckung je Land unterschiedlich
+- Ebene: D
+  Quelle: ECB Data Portal
+  Status: Extended
+  Signale: Eurozone, Wechselkurse, Finanzmärkte
+  Zugriff: API
+  Historie: mehrjährig
+  Bemerkung: EU-/Euro-Kontext
+- Ebene: D
+  Quelle: EIA / IEA öffentliche Daten
+  Status: Extended
+  Signale: Energieproduktion, Verbrauch, Öl/Gas
+  Zugriff: Lizenz/API prüfen
+  Historie: variiert
+  Bemerkung: Energieindikatoren
+- Ebene: D
+  Quelle: ENTSO-E Transparency Platform
+  Status: Extended
+  Signale: europäische Stromsystemdaten
+  Zugriff: Registrierung/API
+  Historie: mehrjährig
+  Bemerkung: KRITIS/Energie Europa
+- Ebene: E
+  Quelle: CISA KEV Catalog
+  Status: Selektiv P1
+  Signale: bekannte aktiv ausgenutzte Schwachstellen
+  Zugriff: frei CSV/JSON
+  Historie: seit Katalogbeginn
+  Bemerkung: globales Expositionssignal
+- Ebene: E
+  Quelle: NVD CVE API
+  Status: Selektiv P1
+  Signale: CVEs, CVSS, Vulnerability Trends
+  Zugriff: frei/API
+  Historie: langjährig
+  Bemerkung: nicht automatisch länderspezifisch
+- Ebene: E
+  Quelle: Cloudflare Radar / Outage Center
+  Status: Selektiv P1
+  Signale: Internet-Outages, Traffic-Anomalien
+  Zugriff: API/öffentlich
+  Historie: prüfen
+  Bemerkung: technische Störungen
+- Ebene: E
+  Quelle: Google Transparency Report Traffic
+  Status: Selektiv P1
+  Signale: Traffic-Rückgänge, regionale Zugangsprobleme
+  Zugriff: öffentlich
+  Historie: prüfen
+  Bemerkung: unabhängiges Disruption-Signal
+- Ebene: E
+  Quelle: nationale CERT/CSIRT Feeds
+  Status: Extended
+  Signale: nationale Cyberwarnungen
+  Zugriff: frei/kuratiert
+  Historie: quellenabhängig
+  Bemerkung: für P1/P2 kuratieren
+- Ebene: E
+  Quelle: Shadowserver
+  Status: Prepared/Extended
+  Signale: Security-Telemetrie, exposed services, botnet/sinkhole
+  Zugriff: Zugriff prüfen
+  Historie: unklar
+  Bemerkung: später prüfen
+- Ebene: E
+  Quelle: Abuse.ch Feeds
+  Status: Extended
+  Signale: Malware-/Botnet-Indikatoren
+  Zugriff: frei
+  Historie: mehrjährig prüfen
+  Bemerkung: eher globale Threat Intelligence

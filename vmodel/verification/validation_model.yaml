@@ -1,0 +1,23 @@
+validation_model:
+- Feld: case_id
+  Beschreibung: Stabile ID eines historischen Referenzfalls, z. B. VAL-UKR-2022-001.
+- Feld: country_id
+  Beschreibung: Betroffenes Land / ISO-Code.
+- Feld: case_name
+  Beschreibung: Sprechender Titel des Referenzfalls.
+- Feld: case_type
+  Beschreibung: Klassifikation, z. B. military_escalation, protest_wave, cyber_outage, economic_shock.
+- Feld: time_start / time_end
+  Beschreibung: Validierungszeitraum.
+- Feld: expected_domains
+  Beschreibung: Erwartete relevante Domänen A–E.
+- Feld: expected_signal_pattern
+  Beschreibung: Erwartetes Muster als qualitative Beschreibung, nicht als harte Zielwerte.
+- Feld: reference_sources
+  Beschreibung: Externe Referenzen / Dokumentation.
+- Feld: validation_goal
+  Beschreibung: Was geprüft werden soll.
+- Feld: known_limitations
+  Beschreibung: Methodische Einschränkungen.
+- Feld: validation_metrics
+  Beschreibung: Detection Lead/Lag, Domain Coverage, Domain Match, Status Match, FP/FN, Explainability, Data Sufficiency.

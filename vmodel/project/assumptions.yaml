@@ -1,0 +1,76 @@
+assumptions:
+- ID: AS-001
+  Kategorie: Daten
+  Annahme: Für die MVP-Länder sind ausreichend Open-Source-Daten in Core-Domänen A, B und D verfügbar.
+- ID: AS-002
+  Kategorie: Daten
+  Annahme: Für viele Quellen ist ein historischer Datenhorizont von mindestens 3 Jahren verfügbar.
+- ID: AS-003
+  Kategorie: Daten
+  Annahme: Nicht alle Quellen liefern für alle Länder gleich gute Datenqualität.
+- ID: AS-004
+  Kategorie: Daten
+  Annahme: Quellenhistorie, Datenlücken und Aktualität unterscheiden sich je Quelle erheblich.
+- ID: AS-005
+  Kategorie: Daten
+  Annahme: Externe Datenquellen können Schnittstellen, Nutzungsbedingungen oder Datenformate ändern.
+- ID: AS-006
+  Kategorie: Daten
+  Annahme: Einige Quellen sind nur mit API-Key, Registrierung oder Rate Limits nutzbar.
+- ID: AS-007
+  Kategorie: Daten
+  Annahme: ACLED steht im MVP nicht als verfügbare Core-Quelle zur Verfügung und wird nur als Prepared Adapter vorgesehen.
+- ID: AS-008
+  Kategorie: Daten
+  Annahme: GDELT, UCDP, World Bank, IMF und weitere Quellen reichen aus, um einen ersten methodischen MVP aufzubauen.
+- ID: AS-009
+  Kategorie: Methodik
+  Annahme: A–E messen unterschiedliche, nicht direkt gleichartige Phänomene.
+- ID: AS-010
+  Kategorie: Methodik
+  Annahme: Direkte additive Fusion zu einem allgemeinen Gesamt-Score ist im MVP nicht belastbar.
+- ID: AS-011
+  Kategorie: Methodik
+  Annahme: Domänenspezifische Analyse mit regelbasierter Cross-Domain-Kontrastierung ist für den MVP geeigneter als ein komplexes probabilistisches Modell.
+- ID: AS-012
+  Kategorie: Methodik
+  Annahme: Relative Baselines je Land sind im Default aussagekräftiger als direkte globale Vergleiche.
+- ID: AS-013
+  Kategorie: Methodik
+  Annahme: Multi-Window-Baseline mit 30/90/365 Tagen ist robuster als ein einzelnes Baseline-Fenster.
+- ID: AS-014
+  Kategorie: Methodik
+  Annahme: D0–D5 je Domäne und S0–S6 als Multi-Domain-Status reichen für den MVP als erklärbares Statusmodell aus.
+- ID: AS-015
+  Kategorie: Methodik
+  Annahme: Analysten-Annotationen verbessern die Bewertung, überschreiben automatische Statuswerte im MVP aber nicht.
+- ID: AS-016
+  Kategorie: Betrieb
+  Annahme: Der MVP wird zunächst lokal betrieben.
+- ID: AS-017
+  Kategorie: Betrieb
+  Annahme: Tägliche Runs können über einfachen Scheduler/Cron-artigen Mechanismus ausgeführt werden.
+- ID: AS-018
+  Kategorie: Betrieb
+  Annahme: Performance ist im MVP weniger kritisch als Nachvollziehbarkeit, Robustheit und Traceability.
+- ID: AS-019
+  Kategorie: Betrieb
+  Annahme: Docker-/Containerfähigkeit ist sinnvoll, Hochverfügbarkeit aber nicht erforderlich.
+- ID: AS-020
+  Kategorie: Betrieb
+  Annahme: Hermes wird höchstens später als kontrollierter Orchestrator genutzt.
+- ID: AS-021
+  Kategorie: Nutzer/Governance
+  Annahme: Der MVP wird primär durch Admin/Developer und Analyst genutzt.
+- ID: AS-022
+  Kategorie: Nutzer/Governance
+  Annahme: Es gibt im MVP keine öffentliche Nutzerrolle.
+- ID: AS-023
+  Kategorie: Nutzer/Governance
+  Annahme: Personenbezogene Analyse ist nur begrenzt für öffentliche/institutionelle Akteurskommunikation relevant.
+- ID: AS-024
+  Kategorie: Nutzer/Governance
+  Annahme: Reports werden im MVP nicht automatisch öffentlich veröffentlicht.
+- ID: AS-025
+  Kategorie: Nutzer/Governance
+  Annahme: Öffentliche Nutzung oder Veröffentlichung erfordert später eine zusätzliche Review-Stufe.

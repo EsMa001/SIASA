@@ -1,0 +1,97 @@
+glossary:
+- Begriff: System
+  Definition: Analyse- und Beobachtungssystem zur strukturellen Analyse globaler Informations- und Aktivitätsräume unter Unsicherheit.
+- Begriff: MVP
+  Definition: Erste lauffähige Version mit länderzentrierter Analyse, Core-Domänen A/B/D, selektiver C/E-Unterstützung, GUI, Reports, Annotationen, Traceability und Validierung.
+- Begriff: Land / Country
+  Definition: Primäres Analyseobjekt des Systems, identifiziert über ISO-Codes und priorisiert in P1/P2/P3.
+- Begriff: Country Set
+  Definition: Versionierte Liste betrachteter Länder inklusive Priorität, Region, Auswahltyp und Begründung.
+- Begriff: P1-Land
+  Definition: Kernland mit hoher sicherheitspolitischer Relevanz und angestrebter tiefer Multi-Domain-Analyse.
+- Begriff: P2-Land
+  Definition: Erweitertes Fokusland mit relevanter Analyse, aber ggf. reduzierter Integrationstiefe.
+- Begriff: P3-Land
+  Definition: Kontroll-/Referenzland zur Einordnung normaler Dynamiken, Datenrauschen und Vergleichsmustern.
+- Begriff: Domäne / Ebene
+  Definition: 'Analytische Quellen- und Signalgruppe: A Informationsraum, B Ereignisdaten, C physische Aktivität, D Wirtschafts-/Strukturdaten, E Cyber/Tech/InfoOps.'
+- Begriff: Domäne A
+  Definition: 'Informationsraum: News, Narrative, Tonalität, öffentliche Kommunikation, Statements, Social Media und Informationsausbreitung.'
+- Begriff: Domäne B
+  Definition: 'Ereignisdaten: Proteste, Gewalt, Konflikte, Katastrophen, humanitäre Ereignisse und beobachtbare Ereignisse.'
+- Begriff: Domäne C
+  Definition: 'Physische Aktivität: Satelliten-, Feuer-, Nachtlicht-, Verkehrs-, Infrastruktur- und Aktivitätsindikatoren.'
+- Begriff: Domäne D
+  Definition: 'Wirtschafts-/Strukturraum: makroökonomische, handels-, energie-, nahrungsmittel- und strukturbezogene Indikatoren.'
+- Begriff: Domäne E
+  Definition: 'Cyber / Tech / InfoOps: Cyber-, Outage-, CVE/KEV-, CERT-, technische und informationsoperative Signale.'
+- Begriff: Quelle / Source
+  Definition: Externer oder interner Ursprung von Daten, z. B. GDELT, UCDP, World Bank, NASA FIRMS.
+- Begriff: Source Adapter
+  Definition: Softwarekomponente, die eine Quelle abruft und Daten in ein internes Format überführt.
+- Begriff: Signal
+  Definition: Beobachtbare Größe aus einer Quelle oder Domäne, z. B. Newsvolumen, Ereignisanzahl, Inflation, Outage-Signal.
+- Begriff: Feature
+  Definition: Berechnete, versionierte Analysegröße aus einem oder mehreren Signalen, z. B. A_news_volume_anomaly.
+- Begriff: Baseline
+  Definition: Historische Referenz zur Bewertung, was für Land, Domäne, Quelle oder Feature normal ist.
+- Begriff: Combined Baseline
+  Definition: Kombinierte Betrachtung von 30-/90-/365-Tage-Baselines.
+- Begriff: Anomalie
+  Definition: Abweichung eines Signals oder Features von einer geeigneten Baseline; kein Beweis für Instabilität oder Ursache.
+- Begriff: Coverage
+  Definition: Datenabdeckung einer Quelle, Domäne oder eines Landes.
+- Begriff: Confidence
+  Definition: Belastbarkeit einer abgeleiteten Aussage unter Berücksichtigung von Datenqualität, Quellenlage, Historie, Aktualität und Unsicherheit.
+- Begriff: Uncertainty
+  Definition: Unsicherheit durch Datenlücken, Bias, Quellenabhängigkeit, Semantik, Modellannahmen oder Interpretation.
+- Begriff: D0 — nicht bewertbar
+  Definition: Datenlage reicht nicht für belastbare Bewertung.
+- Begriff: D1 — unauffällig
+  Definition: Domänensignale liegen innerhalb der erwartbaren Baseline.
+- Begriff: D2 — leicht auffällig
+  Definition: Geringe, beobachtungswürdige Abweichung.
+- Begriff: D3 — deutlich auffällig
+  Definition: Robuste und relevante Abweichung von der Baseline.
+- Begriff: D4 — stark auffällig
+  Definition: Sehr starke und belastbare Abweichung in der Domäne.
+- Begriff: D5 — widersprüchlich / mehrdeutig
+  Definition: Signale innerhalb der Domäne widersprechen sich oder sind nicht eindeutig interpretierbar.
+- Begriff: S0 — No relevant anomaly
+  Definition: Keine relevante Auffälligkeit in den bewertbaren Domänen.
+- Begriff: S1 — Single-domain anomaly
+  Definition: Eine Domäne ist auffällig.
+- Begriff: S2 — Strong single-domain anomaly
+  Definition: Eine Domäne ist stark auffällig.
+- Begriff: S3 — Multi-domain alignment
+  Definition: Mehrere Domänen zeigen gleichzeitig auffällige Dynamiken.
+- Begriff: S4 — High-confidence multi-domain anomaly
+  Definition: Mehrere Domänen sind deutlich/stark auffällig und Datenlage ist belastbar.
+- Begriff: S5 — Contradictory / ambiguous pattern
+  Definition: Domänen widersprechen sich oder Interpretation ist mehrdeutig.
+- Begriff: S6 — Data insufficient
+  Definition: Datenlage reicht nicht für belastbare Multi-Domain-Bewertung.
+- Begriff: Source Lineage
+  Definition: Versuch, Ursprung und Verbreitungsweg einer Information, Meldung oder eines Narrativs nachzuzeichnen.
+- Begriff: Informations-Epidemiologie
+  Definition: Analyse von Entstehung, Ausbreitung, Verstärkung, Mutation und Abklingen von Informationen, Narrativen oder Ereignismeldungen.
+- Begriff: Run
+  Definition: Ausführung eines Daten- und Analyseprozesses, z. B. Daily Run oder historischer Backfill.
+- Begriff: Backfill
+  Definition: Historischer Datenaufbau über vergangene Zeiträume, z. B. mindestens drei Jahre.
+- Begriff: Snapshot
+  Definition: Gespeicherter Analysezustand eines Runs inklusive Datenstand, Statuswerten, Quellenstatus, Konfigurationen und Versionen.
+- Begriff: Report
+  Definition: Exportierbare Darstellung von Analyseergebnissen, z. B. Daily Snapshot, Country Profile Report, Domain Report, Coverage Report oder Backtest Report.
+- Begriff: Annotation
+  Definition: Manuelle Analystenkommentar- oder Kontextnotiz zu Land, Domäne, Signal, Event, Snapshot oder Report.
+- Begriff: Referenzfall
+  Definition: Manuell kuratierter historischer Fall zur Validierung des Systems.
+- Begriff: False Positive
+  Definition: System zeigt relevante Auffälligkeit, die sich bei Analyse als nicht plausibel oder irreführend herausstellt.
+- Begriff: False Negative
+  Definition: Relevante historische Dynamik wird vom System nicht oder unzureichend sichtbar gemacht.
+- Begriff: Personenbezogene Analyse
+  Definition: Analyse identifizierbarer Personen; im System nur streng begrenzt auf öffentliche/institutionelle Akteurskommunikation.
+- Begriff: Attribution
+  Definition: Zuschreibung eines Ereignisses, Cybervorfalls oder einer Informationsoperation zu einem Akteur; nur mit Unsicherheitskontext zulässig.

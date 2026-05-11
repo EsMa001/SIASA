@@ -1,0 +1,17 @@
+roles:
+- Rolle: Admin/Developer
+  Status: MVP Pflicht
+  Rechte / Aufgaben: Quellen, Adapter, Ländersets, Regeln, Runs, Reprocessing, Datenbank, Systemkonfiguration
+  Grenzen: Daten löschen/ändern, Reprocessing starten, Quellen deaktivieren/aktivieren, Regeln versionieren
+- Rolle: Analyst
+  Status: MVP Pflicht
+  Rechte / Aufgaben: GUI-Analyse, Drill-downs, Annotationen, Reports, Export
+  Grenzen: Darf automatische Statuswerte nicht überschreiben; Annotationen werden daneben dokumentiert
+- Rolle: Viewer/Reader
+  Status: Optional vorbereitet
+  Rechte / Aufgaben: Read-only Zugriff auf Dashboards/Reports
+  Grenzen: Keine Annotationen, keine Konfigurationsänderungen
+- Rolle: Public User
+  Status: Nicht MVP
+  Rechte / Aufgaben: Keine öffentliche Nutzung im MVP
+  Grenzen: Public Dashboard/Website explizit ausgeschlossen

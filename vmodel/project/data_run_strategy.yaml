@@ -1,0 +1,22 @@
+data_run_strategy:
+- Baustein: Initialer Datenaufbau
+  Festlegung: Mindestens 3 Jahre historische Daten, soweit Quelle verfügbar.
+  Zweck: Basis für Baselines, Jahresverläufe, Backtesting.
+- Baustein: Täglicher Run
+  Festlegung: Neue Daten abrufen, Rohdaten speichern, normalisieren, Features berechnen, Status ableiten.
+  Zweck: Erweitert Datenbank inkrementell.
+- Baustein: Snapshot
+  Festlegung: Jeder erfolgreiche Run erzeugt einen versionierten Snapshot.
+  Zweck: Reproduzierbarkeit und GUI-Zustand.
+- Baustein: Partial Failure
+  Festlegung: Bei teilweise fehlgeschlagenem Run wird Quellenfehler explizit dokumentiert.
+  Zweck: Kein irreführender Snapshot.
+- Baustein: Reprocessing
+  Festlegung: Algorithmus-/Regel-/Taxonomieänderungen sollen Reprocessing ermöglichen.
+  Zweck: Vergleichbarkeit alter und neuer Ergebnisse.
+- Baustein: Traceability
+  Festlegung: Source → Raw → Normalized → Feature → D-Status → S-Status → Snapshot → Report.
+  Zweck: Nachvollziehbarkeit bis zur Quelle.
+- Baustein: Data Sufficiency
+  Festlegung: Vor Statusberechnung prüfen, ob Datenhistorie/Coverage reicht.
+  Zweck: D0 oder geringe Confidence statt falsche Unauffälligkeit.

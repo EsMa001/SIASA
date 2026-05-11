@@ -1,0 +1,16 @@
+prioritization:
+- Priorität: MVP-Must
+  Bedeutung: Zwingend erforderlich für MVP v1
+  Beispiele / Scope: Länderzentriert; 30 Länder; A/B/D Core; D0-D5; S0-S6; GUI; Daily Run; Traceability; Governance; Validierung
+- Priorität: MVP-Should
+  Bedeutung: Sehr sinnvoll, aber nicht blockierend
+  Beispiele / Scope: Lineage rudimentär; Informations-Epidemiologie einfach; C/E selektiv; Backtest-GUI; Docker; erste Tests
+- Priorität: MVP-Could
+  Bedeutung: Optional, falls Aufwand vertretbar
+  Beispiele / Scope: PDF Export; Viewer-Rolle; Cross-Country Clustering; OpenSky; Reddit/Mastodon; Hermes-Zusammenfassung
+- Priorität: Post-MVP
+  Bedeutung: Späterer Ausbau
+  Beispiele / Scope: Probabilistische Zustandsmodelle; Point-in-Time-Backtest; globale Abdeckung; Multi-User; Review-Workflow; AIS; X/Telegram
+- Priorität: Out-of-Scope
+  Bedeutung: Bewusst ausgeschlossen
+  Beispiele / Scope: militärische Zielauswahl; operative Einsatzplanung; Desinformation; Targeting; personenbezogene Überwachung; harter Instabilitätsscore

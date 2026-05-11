@@ -1,0 +1,49 @@
+gui_pages:
+- Seite: Startseite / World Anomaly Map
+  Zweck: Globale Orientierung
+  Inhalt: Weltkarte mit Multi-Domain-Status, Filter für Domänen/Zeiträume/Baselines, Drill-down ins Land.
+  MVP-Status: MVP Pflicht
+- Seite: Global Overview
+  Zweck: Gesamtübersicht
+  Inhalt: Länder-Ranking, Domain-Matrix, Coverage/Confidence-Matrix, Statusänderungen.
+  MVP-Status: MVP Pflicht
+- Seite: Country Profile
+  Zweck: Länderanalyse
+  Inhalt: Country Summary, Domänenstatus A–E, Current Events, Jahresverläufe, Treiber, Gegenindikatoren, Unsicherheit.
+  MVP-Status: MVP Pflicht
+- Seite: Domain Detail A–E
+  Zweck: Domänentiefe
+  Inhalt: Detailanalyse der jeweiligen Domäne mit Zeitreihen, Features, Quellen, D0–D5-Begründung.
+  MVP-Status: MVP Pflicht für A/B/D; C/E selektiv
+- Seite: Yearly Trend Page
+  Zweck: Jahresverläufe
+  Inhalt: 12-Monats-Graphen, historische Vergleichsjahre, Baselines, Event Overlays.
+  MVP-Status: MVP Pflicht
+- Seite: Current Events Page
+  Zweck: Ereignisnachvollzug
+  Inhalt: Eventliste, Typ, Quelle, Relevanz, Confidence, Deduplizierung, verlinkte Signale.
+  MVP-Status: MVP Pflicht
+- Seite: Source / Coverage Page
+  Zweck: Datenlage
+  Inhalt: Quellenliste, Coverage, Quality, Update Latency, Bias Notes, Missing Sources.
+  MVP-Status: MVP Pflicht
+- Seite: Source Lineage / Epidemiology
+  Zweck: Informationsausbreitung
+  Inhalt: First Seen, Spread Timeline, Source Graph, Amplification, Mutation, Cross-Country Spread.
+  MVP-Status: MVP vorbereitet / Extended
+- Seite: Cross-Country Comparison
+  Zweck: Ländervergleich
+  Inhalt: Vergleichsmatrix, Similarity Clustering, Domain/Coverage/Trend Comparison.
+  MVP-Status: MVP Extended
+- Seite: Backtest / Validation
+  Zweck: Validierung
+  Inhalt: Historischer Zeitraum, Replay-Modus, damalige Signale, False Positive/Negative, Algorithmusversion.
+  MVP-Status: MVP vorbereitet / Extended
+- Seite: Report / Export View
+  Zweck: Export
+  Inhalt: Daily Snapshot, Country/Domain/Event/Coverage/Backtest Reports als Markdown/JSON/CSV.
+  MVP-Status: MVP Pflicht
+- Seite: System Status / Runs
+  Zweck: Betrieb
+  Inhalt: Last Run, Quellenstatus, Fehler, Datenfrische, Snapshot ID, Reprocessing-Status.
+  MVP-Status: MVP Pflicht

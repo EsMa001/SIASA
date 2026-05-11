@@ -1,0 +1,53 @@
+status_models:
+- Modell: Domänenstatus
+  Status: D0
+  Name: nicht bewertbar
+  Definition: Datenlage reicht nicht aus; keine belastbare Aussage möglich.
+- Modell: Domänenstatus
+  Status: D1
+  Name: unauffällig
+  Definition: Signal liegt innerhalb erwartbarer Baseline.
+- Modell: Domänenstatus
+  Status: D2
+  Name: leicht auffällig
+  Definition: Geringe Abweichung von Baseline; beobachten.
+- Modell: Domänenstatus
+  Status: D3
+  Name: deutlich auffällig
+  Definition: Robuste Abweichung von Baseline; relevante Domänendynamik.
+- Modell: Domänenstatus
+  Status: D4
+  Name: stark auffällig
+  Definition: Sehr starke, belastbare Abweichung; hohe Aufmerksamkeit erforderlich.
+- Modell: Domänenstatus
+  Status: D5
+  Name: widersprüchlich / mehrdeutig
+  Definition: Signale innerhalb der Domäne widersprechen sich oder Interpretation ist unsicher.
+- Modell: Multi-Domain-Status
+  Status: S0
+  Name: No relevant anomaly
+  Definition: Keine relevante Auffälligkeit in aktiven Domänen.
+- Modell: Multi-Domain-Status
+  Status: S1
+  Name: Single-domain anomaly
+  Definition: Eine Domäne auffällig.
+- Modell: Multi-Domain-Status
+  Status: S2
+  Name: Strong single-domain anomaly
+  Definition: Eine Domäne sehr stark auffällig.
+- Modell: Multi-Domain-Status
+  Status: S3
+  Name: Multi-domain alignment
+  Definition: Mehrere Domänen gleichzeitig auffällig.
+- Modell: Multi-Domain-Status
+  Status: S4
+  Name: High-confidence multi-domain anomaly
+  Definition: Mehrere Domänen deutlich/stark auffällig und gute Datenlage/Confidence.
+- Modell: Multi-Domain-Status
+  Status: S5
+  Name: Contradictory / ambiguous pattern
+  Definition: Domänen widersprechen sich oder Muster ist mehrdeutig.
+- Modell: Multi-Domain-Status
+  Status: S6
+  Name: Data insufficient
+  Definition: Datenlage reicht für belastbare Bewertung nicht aus.

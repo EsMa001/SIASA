@@ -1,0 +1,46 @@
+system_boundaries:
+- Bereich: Quellenkatalog
+  Gehört zum System?: ja
+  Beschreibung / Verantwortung: Verwaltet Datenquellen, Status, Lizenzen, Metadaten.
+- Bereich: Source Adapter
+  Gehört zum System?: ja
+  Beschreibung / Verantwortung: Ruft externe Daten ab und kapselt Datenzugang.
+- Bereich: Raw Data Store
+  Gehört zum System?: ja
+  Beschreibung / Verantwortung: Speichert zulässige Roh-/Referenzdaten.
+- Bereich: Normalization Layer
+  Gehört zum System?: ja
+  Beschreibung / Verantwortung: Überführt Daten in internes Schema.
+- Bereich: Feature Layer
+  Gehört zum System?: ja
+  Beschreibung / Verantwortung: Berechnet domänenspezifische Features.
+- Bereich: Baseline / Anomaly Engine
+  Gehört zum System?: ja
+  Beschreibung / Verantwortung: Berechnet Baselines und Abweichungen.
+- Bereich: Status Engine
+  Gehört zum System?: ja
+  Beschreibung / Verantwortung: Berechnet D0–D5 und S0–S6.
+- Bereich: Snapshot Management
+  Gehört zum System?: ja
+  Beschreibung / Verantwortung: Speichert Analysezustände.
+- Bereich: Reporting Layer
+  Gehört zum System?: ja
+  Beschreibung / Verantwortung: Erzeugt Reports / Exporte.
+- Bereich: GUI / Analysis Cockpit
+  Gehört zum System?: ja
+  Beschreibung / Verantwortung: Zeigt Karte, Profile, Domänen, Coverage, Reports.
+- Bereich: Annotation Store
+  Gehört zum System?: ja
+  Beschreibung / Verantwortung: Speichert Analystenkommentare.
+- Bereich: Validation / Backtest Module
+  Gehört zum System?: ja
+  Beschreibung / Verantwortung: Verwaltet Referenzfälle und Backtests.
+- Bereich: Externe Datenquellen
+  Gehört zum System?: nein
+  Beschreibung / Verantwortung: Liefern Daten; Verfügbarkeit und Richtigkeit liegen außerhalb der Systemkontrolle.
+- Bereich: Hermes / Agent
+  Gehört zum System?: nein / vorbereitet
+  Beschreibung / Verantwortung: Späterer externer Orchestrator; keine autonome Veröffentlichung oder Regeländerung im MVP.
+- Bereich: Öffentliche Webplattform
+  Gehört zum System?: nein
+  Beschreibung / Verantwortung: Nicht Teil des MVP.

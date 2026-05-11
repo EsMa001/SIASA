@@ -1,0 +1,28 @@
+traceability_model:
+- Ebene: Source
+  Beschreibung: Datenquelle im Quellenkatalog
+  Mindestmetadaten: source_id, domain, status, access, license, history
+- Ebene: Raw Data
+  Beschreibung: Unveränderte Quellendaten
+  Mindestmetadaten: raw_record_id, source_id, fetched_at, raw_payload/reference
+- Ebene: Normalized Data
+  Beschreibung: Einheitliches länder-/zeitbezogenes Format
+  Mindestmetadaten: normalized_id, country_id, timestamp, event/signal fields
+- Ebene: Feature
+  Beschreibung: Extrahierter Indikator
+  Mindestmetadaten: feature_id, value, window, baseline, confidence, coverage
+- Ebene: Domain Status
+  Beschreibung: D0–D5 je Domäne
+  Mindestmetadaten: domain_status_id, domain, rule_version, drivers, uncertainty
+- Ebene: Multi-Domain Status
+  Beschreibung: S0–S6 je Land/Snapshot
+  Mindestmetadaten: status_id, active_domains, anomalous_domains, rule_trigger
+- Ebene: Snapshot
+  Beschreibung: Versionierter Analysezustand
+  Mindestmetadaten: snapshot_id, run_id, country_set, algorithm_version, data_version
+- Ebene: Report
+  Beschreibung: Exportierter Bericht
+  Mindestmetadaten: report_id, snapshot_id, report_type, format, generated_at
+- Ebene: Annotation
+  Beschreibung: Manuelle Kontextnotiz
+  Mindestmetadaten: annotation_id, author, scope, tags, review_status

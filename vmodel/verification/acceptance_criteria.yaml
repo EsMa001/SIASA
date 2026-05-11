@@ -1,0 +1,109 @@
+acceptance_criteria:
+- AC ID: AC-001
+  Verknüpfte Anforderungen: StR-162..178; StR-562..563
+  Kriterium: Versioniertes MVP-Länderset existiert.
+  Prüfmethode: Konfigurationsreview
+  Akzeptiert, wenn: Jedes Land hat ISO-Code, P1/P2/P3, Auswahltyp, Region und Auswahlbegründung.
+  Priorität: MVP-Must
+- AC ID: AC-002
+  Verknüpfte Anforderungen: StR-135..154; StR-491..496; StR-564..567
+  Kriterium: Historische Datenbasis ist aufgebaut.
+  Prüfmethode: Datenbankprüfung + Coverage Report
+  Akzeptiert, wenn: Für Core-Quellen A/B/D wurden mindestens 3 Jahre geladen, soweit verfügbar; kürzere Historien dokumentiert.
+  Priorität: MVP-Must
+- AC ID: AC-003
+  Verknüpfte Anforderungen: StR-138..147; StR-481..490; StR-592..597
+  Kriterium: Täglicher inkrementeller Run ausführbar.
+  Prüfmethode: Testlauf
+  Akzeptiert, wenn: Neue Daten werden abgerufen, normalisiert, gespeichert, Features berechnet, Statuswerte erzeugt und Snapshot gespeichert.
+  Priorität: MVP-Must
+- AC ID: AC-004
+  Verknüpfte Anforderungen: StR-392..396; StR-497..503
+  Kriterium: Ausfall einzelner Quellen bricht Gesamtrun nicht unkontrolliert ab.
+  Prüfmethode: Fehlersimulation / Mock Source Failure
+  Akzeptiert, wenn: Run wird als partial_success gespeichert; Quelle in GUI, Logs und Snapshot sichtbar.
+  Priorität: MVP-Must
+- AC ID: AC-005
+  Verknüpfte Anforderungen: StR-255..265; StR-568
+  Kriterium: D0–D5 werden regelbasiert berechnet.
+  Prüfmethode: Regeltest + GUI-Prüfung
+  Akzeptiert, wenn: Für bewertbare Domänen A/B/D entsteht D0–D5 mit Treibern, Datenqualität und Regelverweis.
+  Priorität: MVP-Must
+- AC ID: AC-006
+  Verknüpfte Anforderungen: StR-236..254; StR-569..574
+  Kriterium: S0–S6 wird regelbasiert aus Domänenstatus abgeleitet.
+  Prüfmethode: Regeltest
+  Akzeptiert, wenn: S0–S6 ist reproduzierbar ableitbar und beitragende Domänen sind sichtbar.
+  Priorität: MVP-Must
+- AC ID: AC-007
+  Verknüpfte Anforderungen: StR-226..235; StR-570
+  Kriterium: Kein allgemeiner Gesamt-Risiko-Score wird erzeugt.
+  Prüfmethode: Code-/GUI-/Report-Review
+  Akzeptiert, wenn: System zeigt Domänenstatus und Multi-Domain-Status, aber keinen additiven A–E-Instabilitätswert.
+  Priorität: MVP-Must
+- AC ID: AC-008
+  Verknüpfte Anforderungen: StR-089..117; StR-575..578
+  Kriterium: Startseite zeigt Weltkarte.
+  Prüfmethode: GUI-Test
+  Akzeptiert, wenn: Karte färbt Länder nach Multi-Domain-Status, nutzt relative Baseline und erlaubt Drill-down.
+  Priorität: MVP-Must
+- AC ID: AC-009
+  Verknüpfte Anforderungen: StR-018..023; StR-579
+  Kriterium: Country Profile ist verfügbar.
+  Prüfmethode: GUI-Test
+  Akzeptiert, wenn: Landesprofil zeigt Multi-Domain-Status, D0–D5 je Domäne, Treiber, Gegenindikatoren, Coverage, Confidence und Events.
+  Priorität: MVP-Must
+- AC ID: AC-010
+  Verknüpfte Anforderungen: StR-311..327; StR-580
+  Kriterium: Detailansichten für A/B/D existieren.
+  Prüfmethode: GUI-Test
+  Akzeptiert, wenn: A/B/D zeigen Zeitreihen, Feature-Werte, Baselines, Anomalien, Treiber und Unsicherheiten.
+  Priorität: MVP-Must
+- AC ID: AC-011
+  Verknüpfte Anforderungen: StR-013..017; StR-583..584
+  Kriterium: Datenlage ist transparent.
+  Prüfmethode: GUI-Test
+  Akzeptiert, wenn: Quellenstatus, Historie, Datenfrische, Coverage, Confidence und failed sources sichtbar.
+  Priorität: MVP-Must
+- AC ID: AC-012
+  Verknüpfte Anforderungen: StR-270..290; StR-585
+  Kriterium: Analysten-Annotationen sind möglich.
+  Prüfmethode: GUI-Test + Datenbankprüfung
+  Akzeptiert, wenn: Annotationen zu Land/Domäne/Signal/Event/Snapshot werden gespeichert und angezeigt, ohne Status zu überschreiben.
+  Priorität: MVP-Must
+- AC ID: AC-013
+  Verknüpfte Anforderungen: StR-301..310; StR-586..591
+  Kriterium: Automatischer Daily Snapshot wird erzeugt.
+  Prüfmethode: Run-Test + Report-Review
+  Akzeptiert, wenn: Nach erfolgreichem/teilweise erfolgreichem Run entsteht Markdown- und JSON-Snapshot mit IDs, Statusänderungen, Datenlücken und Quellenfehlern.
+  Priorität: MVP-Must
+- AC ID: AC-014
+  Verknüpfte Anforderungen: StR-291..310; StR-588..591
+  Kriterium: Detailreports sind exportierbar.
+  Prüfmethode: GUI-Test
+  Akzeptiert, wenn: Country Profile, Domain Report und Coverage Report sind manuell als Markdown/JSON/CSV exportierbar.
+  Priorität: MVP-Must
+- AC ID: AC-015
+  Verknüpfte Anforderungen: StR-382..391; StR-521..561
+  Kriterium: Evidenzpfad ist nachvollziehbar.
+  Prüfmethode: Traceability-Review
+  Akzeptiert, wenn: Statuswert ist über Snapshot → Regel → Feature → Daten → Quelle rückverfolgbar.
+  Priorität: MVP-Must
+- AC ID: AC-016
+  Verknüpfte Anforderungen: StR-358..381; StR-600..605
+  Kriterium: Historische Referenzfälle sind prüfbar.
+  Prüfmethode: Backtest-Review
+  Akzeptiert, wenn: 10–15 Referenzfälle angelegt und mindestens ein Fall zeigt erwartete vs. beobachtete Domänenmuster.
+  Priorität: MVP-Must
+- AC ID: AC-017
+  Verknüpfte Anforderungen: StR-417..451
+  Kriterium: Daten-Governance ist dokumentiert.
+  Prüfmethode: Quellenkatalog- und Export-Review
+  Akzeptiert, wenn: Jede Quelle besitzt Lizenz-/Nutzungsinfos; personenbezogene Analyse nur für öffentliche/institutionelle Akteure mit Zweckbindung.
+  Priorität: MVP-Must
+- AC ID: AC-018
+  Verknüpfte Anforderungen: StR-452..473
+  Kriterium: Missbrauchsgrenzen sind berücksichtigt.
+  Prüfmethode: Funktionsreview
+  Akzeptiert, wenn: Keine Funktionen für Zielauswahl, operative Empfehlung, Desinformationsoptimierung, personenbezogenes Targeting oder ungeprüfte öffentliche Reports.
+  Priorität: MVP-Must

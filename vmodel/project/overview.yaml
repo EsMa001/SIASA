@@ -1,0 +1,29 @@
+overview:
+- Feld: Projekt
+  Festlegung: Structural Information & Activity Space Analysis under Uncertainty
+- Feld: Version
+  Festlegung: v0.4 — konsolidierte Stakeholder-Anforderungen mit Use Cases, Validierung, Qualität, Governance, Betrieb, Traceability, Risiken und Glossar
+- Feld: Exportdatum
+  Festlegung: 2026-05-11 13:36
+- Feld: Kurzmission
+  Festlegung: Länderzentrierte Analyse globaler Informations- und Aktivitätsräume aus heterogenen Open-Source-Daten; getrennte Domänenanalyse A–E; regelbasierter Multi-Domain-Status; keine naive Score-Fusion.
+- Feld: MVP-Länderset
+  Festlegung: '30 Länder, Hybridansatz: ca. 70 % Fokusländer, ca. 30 % Kontroll-/Referenzländer; Prioritäten P1/P2/P3.'
+- Feld: Datenstrategie
+  Festlegung: Initial mindestens 3 Jahre historische Daten, sofern Quelle verfügbar; danach tägliche inkrementelle Runs mit Snapshots.
+- Feld: GUI-Default
+  Festlegung: Weltkarte mit regelbasiertem Multi-Domain-Status; 7-Tage-Aktualitätsfenster; relative Baseline; kombinierte 30/90/365-Tage-Baseline.
+- Feld: Bewertungslogik
+  Festlegung: Domänenstatus D0–D5 je Ebene; Multi-Domain-Status S0–S6; C/E einbeziehen, wenn Datenqualität ausreichend.
+- Feld: MVP-Core-Domänen
+  Festlegung: A Informationsraum, B Ereignisdaten, D Wirtschafts-/Strukturdaten.
+- Feld: Kein Gesamt-Score
+  Festlegung: Kein allgemeiner additiver Risiko-, Krisen- oder Instabilitätswert über A–E im MVP.
+- Feld: Stakeholder-Anforderungen
+  Festlegung: 668 Anforderungen konsolidiert.
+- Feld: Nicht-Ziele
+  Festlegung: 71 Nicht-Ziele konsolidiert.
+- Feld: Akzeptanzkriterien
+  Festlegung: 18 zentrale Akzeptanzkriterien für MVP-Abnahme.
+- Feld: Nächster Projektschritt
+  Festlegung: Ableitung System Requirements / Software Requirements / Architektur und Traceability-Matrix.

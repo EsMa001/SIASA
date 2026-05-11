@@ -1,19 +1,24 @@
 # SIASA
 
-SIASA ist ein neues Projekt-Repository mit V-Model-light / requirements-as-code Grundgeruest.
+Structural Information & Activity Space Analysis under Uncertainty.
 
-## Ziel der Initialstruktur
+SIASA ist ein V-Model-light / requirements-as-code Repository mit importierter Stakeholder-Baseline aus der Arbeitsmappe `stakeholder_requirements_information_space_mvp_v0_4 (1).xlsx`.
 
-Dieses Repository enthaelt die minimal notwendige Grundstruktur fuer:
-- Stakeholder Requirements
-- System Requirements
-- Software Requirements
-- Change Requests
-- Architekturartefakte
-- Verifikationsartefakte
-- Traceability
-- Python-Implementierung unter `src/`
-- Tests auf mehreren Ebenen
+## Aktueller Stand
+
+- 668 importierte Stakeholder Requirements in `vmodel/requirements/stakeholder_requirements.yaml`
+- importierte Projektkontext-Artefakte unter `vmodel/project/`, `vmodel/architecture/`, `vmodel/method/`, `vmodel/verification/` und `vmodel/traceability/`
+- lesbare Spiegelung unter `docs/`
+
+## Wichtige Einstiege
+
+- `docs/imports/stakeholder_workbook_analysis.md`
+- `docs/project/stakeholder_requirements_overview.md`
+- `vmodel/requirements/stakeholder_requirements.yaml`
+- `vmodel/verification/acceptance_criteria.yaml`
+- `vmodel/project/data_sources.yaml`
+- `vmodel/project/mvp_countries.yaml`
+- `vmodel/method/feature_catalog.yaml`
 
 ## Verzeichnisstruktur
 
@@ -21,12 +26,17 @@ Dieses Repository enthaelt die minimal notwendige Grundstruktur fuer:
 - `tests/` – unit / integration / system / acceptance
 - `tools/` – Validierungs- und Hilfsskripte
 - `prompts/` – Prompts fuer kontrollierte Agent-/Coding-Workflows
-- `vmodel/` – Requirements, Change, Architektur, Verification, Traceability, Baselines
-- `.github/workflows/` – CI
+- `vmodel/requirements/` – kanonische Requirements
+- `vmodel/project/` – Projektkontext, Entscheidungen, Risiken, Quellen, Rollen, Laenderset
+- `vmodel/architecture/` – Domänen, GUI-Seiten, Systemgrenzen
+- `vmodel/method/` – Statusmodelle und Feature-Katalog
+- `vmodel/verification/` – Akzeptanzkriterien und Validierungsmodell
+- `vmodel/traceability/` – Traceability-Artefakte und Traceability-Zielmodell
+- `docs/` – lesbare Spiegelung und Importanalyse
 
-## Naechste sinnvolle Schritte
+## Nächste sinnvolle Schritte
 
-1. Stakeholder Requirements konkretisieren
-2. Validatoren und Matrixgenerator anlegen
-3. CI aktivieren
-4. erstes Beispiel `StR -> SyR -> SwR -> Test -> Code` durchziehen
+1. Stakeholder Requirements in System Requirements schneiden.
+2. Software Requirements für Datenzugang, Normalisierung, Status Engine, GUI und Reporting ableiten.
+3. Validatoren und Trace-Matrix-Generator anlegen.
+4. Erstes lauffähiges End-to-End-Arbeitspaket implementieren.

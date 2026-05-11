@@ -1,0 +1,34 @@
+annotation_model:
+- Feld: annotation_id
+  Bedeutung: eindeutige ID
+  Beispiel / Werte: ANN-2026-000123
+- Feld: created_at
+  Bedeutung: Zeitstempel
+  Beispiel / Werte: '46153.572916666664'
+- Feld: author
+  Bedeutung: Ersteller
+  Beispiel / Werte: analyst
+- Feld: scope
+  Bedeutung: Bezugspunkt
+  Beispiel / Werte: country/domain/signal/event/snapshot
+- Feld: annotation_type
+  Bedeutung: Typ
+  Beispiel / Werte: context_note / false_positive_note / source_quality_note / lineage_note / review_note
+- Feld: severity_assessment
+  Bedeutung: fachliche Einschätzung
+  Beispiel / Werte: not_security_relevant / relevant / uncertain
+- Feld: confidence_assessment
+  Bedeutung: Analysten-Confidence
+  Beispiel / Werte: low / medium / high
+- Feld: text
+  Bedeutung: Freitext
+  Beispiel / Werte: News spike appears driven by replicated agency report.
+- Feld: tags
+  Bedeutung: Schlagworte
+  Beispiel / Werte: source_dependency, possible_false_positive
+- Feld: linked_items
+  Bedeutung: verknüpfte Objekte
+  Beispiel / Werte: SRC-GDELT, EVENT-CLUSTER-456
+- Feld: review_status
+  Bedeutung: vorbereitet, aber nicht verpflichtend
+  Beispiel / Werte: unreviewed / draft / reviewed / accepted / rejected

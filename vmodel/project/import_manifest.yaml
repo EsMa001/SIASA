@@ -1,0 +1,54 @@
+import_manifest:
+  source_workbook: stakeholder_requirements_information_space_mvp_v0_4 (1).xlsx
+  imported_at_utc: '2026-05-11T13:51:17.436352+00:00'
+  sheets:
+  - sheet: Overview
+    rows: 14
+  - sheet: Stakeholder_Reqs
+    rows: 668
+  - sheet: Non_Goals
+    rows: 71
+  - sheet: Decisions
+    rows: 27
+  - sheet: Domains
+    rows: 5
+  - sheet: Data_Sources
+    rows: 38
+  - sheet: MVP_Countries
+    rows: 30
+  - sheet: Status_Models
+    rows: 13
+  - sheet: Feature_Set
+    rows: 102
+  - sheet: GUI_Pages
+    rows: 12
+  - sheet: Roles
+    rows: 4
+  - sheet: Reports_Exports
+    rows: 8
+  - sheet: Data_Run_Strategy
+    rows: 7
+  - sheet: Annotation_Model
+    rows: 11
+  - sheet: Config_Tables
+    rows: 17
+  - sheet: Traceability_Model
+    rows: 9
+  - sheet: Use_Cases
+    rows: 6
+  - sheet: Acceptance_Criteria
+    rows: 18
+  - sheet: Prioritization
+    rows: 5
+  - sheet: Assumptions
+    rows: 25
+  - sheet: Risks
+    rows: 31
+  - sheet: Principles
+    rows: 34
+  - sheet: System_Boundaries
+    rows: 15
+  - sheet: Glossary
+    rows: 48
+  - sheet: Validation_Model
+    rows: 11

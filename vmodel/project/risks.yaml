@@ -1,0 +1,249 @@
+risks:
+- ID: R-001
+  Kategorie: Daten
+  Risiko: Quellen fallen aus
+  Beschreibung: APIs ändern sich, Rate Limits greifen, Quellen sind temporär nicht erreichbar.
+  Gegenmaßnahme: Source Adapter robust bauen; partial_success; Logs; Coverage-Anzeige.
+  Wahrscheinlichkeit: High
+  Schweregrad: Medium
+  Priorität: hoch
+- ID: R-002
+  Kategorie: Daten
+  Risiko: Datenhistorie reicht nicht aus
+  Beschreibung: Manche Quellen liefern keine 3 Jahre Historie.
+  Gegenmaßnahme: Datenhorizont je Quelle dokumentieren; D0/Coverage-Einschränkung.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: Medium
+  Priorität: mittel
+- ID: R-003
+  Kategorie: Daten
+  Risiko: Datenqualität variiert stark
+  Beschreibung: Länder sind unterschiedlich gut beobachtbar.
+  Gegenmaßnahme: Coverage-/Confidence-Score je Land/Domäne/Quelle.
+  Wahrscheinlichkeit: High
+  Schweregrad: High
+  Priorität: hoch
+- ID: R-004
+  Kategorie: Daten
+  Risiko: Medienbias dominiert
+  Beschreibung: Ebene A misst Sichtbarkeit statt Realität.
+  Gegenmaßnahme: A nie isoliert als reale Eskalation interpretieren; Cross-Domain-Kontrastierung.
+  Wahrscheinlichkeit: High
+  Schweregrad: High
+  Priorität: sehr hoch
+- ID: R-005
+  Kategorie: Daten
+  Risiko: Ereignisdaten sind unvollständig
+  Beschreibung: B-Daten können regional verzögert oder lückenhaft sein.
+  Gegenmaßnahme: Meldeverzug, Quellenvergleich, Unsicherheitsflags.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: High
+  Priorität: hoch
+- ID: R-006
+  Kategorie: Daten
+  Risiko: C/E-Daten schwer interpretierbar
+  Beschreibung: Physische/Cyber-Signale sind oft nicht eindeutig länderspezifisch.
+  Gegenmaßnahme: C/E nur bei ausreichender Datenqualität statusrelevant einbeziehen.
+  Wahrscheinlichkeit: High
+  Schweregrad: Medium
+  Priorität: hoch
+- ID: R-007
+  Kategorie: Daten
+  Risiko: Quellenabhängigkeit erzeugt Scheinevidenz
+  Beschreibung: Mehrere Quellen replizieren dieselbe Ursprungsaussage.
+  Gegenmaßnahme: Source Dependency, Duplicate Ratio, First-Seen-/Lineage-Logik.
+  Wahrscheinlichkeit: High
+  Schweregrad: High
+  Priorität: sehr hoch
+- ID: R-008
+  Kategorie: Methodik
+  Risiko: Scheingenauigkeit
+  Beschreibung: Statuswerte wirken präziser, als die Datenlage erlaubt.
+  Gegenmaßnahme: Keine Gesamt-Score-Fusion; Unsicherheit sichtbar machen.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: High
+  Priorität: hoch
+- ID: R-009
+  Kategorie: Methodik
+  Risiko: Fehlinterpretation der Weltkarte
+  Beschreibung: Kartenfarben werden als objektive Krisenbewertung gelesen.
+  Gegenmaßnahme: Legende, Methodentext, Status statt Risiko-Score.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: High
+  Priorität: hoch
+- ID: R-010
+  Kategorie: Methodik
+  Risiko: Schleichende Eskalation wird normalisiert
+  Beschreibung: Kurze Baselines übernehmen langsame Verschlechterung als neuen Normalzustand.
+  Gegenmaßnahme: 30/90/365-Kombination und mehrjährige Historie.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: Medium
+  Priorität: mittel
+- ID: R-011
+  Kategorie: Methodik
+  Risiko: Akute Dynamiken werden geglättet
+  Beschreibung: Lange Baselines übersehen kurzfristige Auffälligkeiten.
+  Gegenmaßnahme: 7-Tage-Aktualitätsfenster plus 30-Tage-Komponente.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: Medium
+  Priorität: mittel
+- ID: R-012
+  Kategorie: Methodik
+  Risiko: Cross-Domain-Kontrastierung wird überinterpretiert
+  Beschreibung: Gleichzeitige Auffälligkeit wird fälschlich als Kausalität gelesen.
+  Gegenmaßnahme: Darstellung als Alignment, nicht als Ursache.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: High
+  Priorität: hoch
+- ID: R-013
+  Kategorie: Methodik
+  Risiko: D5 wird falsch verstanden
+  Beschreibung: Widersprüchliche Daten werden als hoher Risikostatus gelesen.
+  Gegenmaßnahme: D5 als Mehrdeutigkeitsstatus klar kennzeichnen.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: Medium
+  Priorität: mittel
+- ID: R-014
+  Kategorie: Methodik
+  Risiko: Backtests erzeugen rückblickende Scheinsicherheit
+  Beschreibung: Historische Daten werden mit heutiger Kenntnis interpretiert.
+  Gegenmaßnahme: MVP-Backtest klar als nicht Point-in-Time markieren.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: High
+  Priorität: hoch
+- ID: R-015
+  Kategorie: Technik
+  Risiko: Scope Creep
+  Beschreibung: Zu viele Quellen, Länder, Features und GUI-Seiten überladen den MVP.
+  Gegenmaßnahme: MVP-Must/Should/Could/Post-MVP-Priorisierung.
+  Wahrscheinlichkeit: High
+  Schweregrad: High
+  Priorität: sehr hoch
+- ID: R-016
+  Kategorie: Technik
+  Risiko: Datenmodell wird zu komplex
+  Beschreibung: A–E, Features, Status, Snapshots, Reports und Annotationen erzeugen hohe Komplexität.
+  Gegenmaßnahme: Saubere IDs, Versionierung, modulare Datenebenen.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: High
+  Priorität: hoch
+- ID: R-017
+  Kategorie: Technik
+  Risiko: Reprocessing überschreibt Ergebnisse
+  Beschreibung: Alte Analysezustände gehen verloren.
+  Gegenmaßnahme: No silent overwrite, neue Ergebnisversionen.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: High
+  Priorität: hoch
+- ID: R-018
+  Kategorie: Technik
+  Risiko: GUI wird zu früh aufwendig
+  Beschreibung: Visualisierung verschlingt Aufwand vor Daten-/Analysevalidierung.
+  Gegenmaßnahme: Erst funktional-transparente GUI; Design später.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: Medium
+  Priorität: mittel
+- ID: R-019
+  Kategorie: Technik
+  Risiko: Performanceprobleme bei Historie
+  Beschreibung: 3 Jahre Daten × 30 Länder × viele Quellen kann groß werden.
+  Gegenmaßnahme: Inkrementelle Verarbeitung, Feature-Caching, Datenbankindizes.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: Medium
+  Priorität: mittel
+- ID: R-020
+  Kategorie: Technik
+  Risiko: Secrets gelangen in Code/Repo
+  Beschreibung: API-Keys oder Tokens werden versehentlich versioniert.
+  Gegenmaßnahme: .env, Secret-Handling, Gitignore, Konfigurationsprüfung.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: High
+  Priorität: hoch
+- ID: R-021
+  Kategorie: Governance
+  Risiko: Urheberrechtsproblem durch News-Speicherung
+  Beschreibung: Volltexte oder lange Auszüge könnten lizenzproblematisch sein.
+  Gegenmaßnahme: Metadaten/URLs/Features statt Volltext speichern.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: High
+  Priorität: hoch
+- ID: R-022
+  Kategorie: Governance
+  Risiko: Social-Media-Daten missbräuchlich nutzbar
+  Beschreibung: Rohdaten könnten Profiling ermöglichen.
+  Gegenmaßnahme: Aggregation, IDs statt Rohdaten, keine Nutzerprofile.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: High
+  Priorität: hoch
+- ID: R-023
+  Kategorie: Governance
+  Risiko: Personenbezogene Analyse driftet
+  Beschreibung: Öffentliche Akteursanalyse könnte zu Personentracking werden.
+  Gegenmaßnahme: Begrenzung auf öffentliche/institutionelle Akteure; keine Privatpersonen.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: Critical
+  Priorität: sehr hoch
+- ID: R-024
+  Kategorie: Ethik
+  Risiko: System wird operativ missverstanden
+  Beschreibung: Ergebnisse werden als Handlungsempfehlung interpretiert.
+  Gegenmaßnahme: Ethikleitplanken, Reports mit Unsicherheit, keine Handlungsvorschläge.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: High
+  Priorität: hoch
+- ID: R-025
+  Kategorie: Ethik
+  Risiko: Cyber-/InfoOps-Attribution überzogen
+  Beschreibung: Technische Signale werden vorschnell Akteuren zugeschrieben.
+  Gegenmaßnahme: Attribution-Risk-Flag, keine Schuldzuschreibung ohne Evidenz.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: High
+  Priorität: hoch
+- ID: R-026
+  Kategorie: Ethik
+  Risiko: Öffentliche Exporte enthalten sensible Details
+  Beschreibung: Reports könnten personenbezogene oder missbräuchlich nutzbare Details enthalten.
+  Gegenmaßnahme: Export-Governance, Review vor Veröffentlichung.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: High
+  Priorität: hoch
+- ID: R-027
+  Kategorie: Validierung
+  Risiko: Referenzfälle sind biased
+  Beschreibung: Nur bekannte dramatische Ereignisse werden gewählt.
+  Gegenmaßnahme: Mischung aus Positiv-, Negativ- und Kontrollfällen.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: Medium
+  Priorität: mittel
+- ID: R-028
+  Kategorie: Validierung
+  Risiko: False Positives werden unterschätzt
+  Beschreibung: System wirkt gut, obwohl es zu oft Alarm schlägt.
+  Gegenmaßnahme: False-Positive-Dokumentation verpflichtend.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: High
+  Priorität: hoch
+- ID: R-029
+  Kategorie: Validierung
+  Risiko: False Negatives werden übersehen
+  Beschreibung: Relevante Ereignisse werden nicht erkannt.
+  Gegenmaßnahme: False-Negative-Dokumentation und Annotationen.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: High
+  Priorität: hoch
+- ID: R-030
+  Kategorie: Validierung
+  Risiko: Validierung bleibt rein narrativ
+  Beschreibung: Keine strukturierten Kriterien.
+  Gegenmaßnahme: 'Einfache Metriken: Domain Match, Lead/Lag, Explainability, Data Sufficiency.'
+  Wahrscheinlichkeit: Medium
+  Schweregrad: Medium
+  Priorität: mittel
+- ID: R-031
+  Kategorie: Validierung
+  Risiko: Backtests als Prognosebeweis missverstanden
+  Beschreibung: Rückblickende Erkennung wird als Prognosefähigkeit gelesen.
+  Gegenmaßnahme: Methodische Einschränkung in Reports ausweisen.
+  Wahrscheinlichkeit: Medium
+  Schweregrad: High
+  Priorität: hoch

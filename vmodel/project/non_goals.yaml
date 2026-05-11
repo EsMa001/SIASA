@@ -1,0 +1,143 @@
+non_goals:
+- ID: NG-001
+  Nicht-Ziel: Kein Vorhersage-Orakel.
+- ID: NG-002
+  Nicht-Ziel: Kein militärisches Zielsystem.
+- ID: NG-003
+  Nicht-Ziel: Kein Desinformationssystem.
+- ID: NG-004
+  Nicht-Ziel: Kein reines News-Dashboard.
+- ID: NG-005
+  Nicht-Ziel: Kein naiver Weltstabilitäts-Score.
+- ID: NG-006
+  Nicht-Ziel: Keine Black-Box-KI ohne erklärbare Evidenzlogik.
+- ID: NG-007
+  Nicht-Ziel: Keine Gleichsetzung von medialer Aufmerksamkeit und realer Eskalation.
+- ID: NG-008
+  Nicht-Ziel: Keine unkritische Mehrfachzählung replizierter Informationen.
+- ID: NG-009
+  Nicht-Ziel: Keine direkte Rohdatenfusion semantisch inkompatibler Quellen.
+- ID: NG-010
+  Nicht-Ziel: Keine harte Ereignisprognose mit Datum oder binärer Eintrittsaussage.
+- ID: NG-011
+  Nicht-Ziel: Der MVP muss nicht für jedes Land dieselbe Daten- und Analysetiefe bereitstellen.
+- ID: NG-012
+  Nicht-Ziel: P3-Länder sind keine vollständigen sicherheitspolitischen Lageprofile, sondern primär Vergleichs- und Kontrollfälle.
+- ID: NG-013
+  Nicht-Ziel: Der Multi-Domain-Status ist kein allgemeiner politischer Risikoindex.
+- ID: NG-014
+  Nicht-Ziel: Der Multi-Domain-Status ersetzt keine domänenspezifische Analyse.
+- ID: NG-015
+  Nicht-Ziel: Eine hohe Einzelanomalie darf nicht automatisch als Multi-Domain-Krise interpretiert werden.
+- ID: NG-016
+  Nicht-Ziel: Niedrige Datenabdeckung darf nicht als Stabilität interpretiert werden.
+- ID: NG-017
+  Nicht-Ziel: Der MVP muss keine öffentliche Webplattform bereitstellen.
+- ID: NG-018
+  Nicht-Ziel: Der MVP muss keine Mehrnutzer-Rechteverwaltung implementieren.
+- ID: NG-019
+  Nicht-Ziel: Der MVP muss keine automatisierten PDF-Lageberichte mit finalem Layout erzeugen.
+- ID: NG-020
+  Nicht-Ziel: Der MVP muss keine interaktive Regelbearbeitung über die GUI ermöglichen.
+- ID: NG-021
+  Nicht-Ziel: Der MVP muss keinen vollständigen Point-in-Time-Backtest garantieren.
+- ID: NG-022
+  Nicht-Ziel: Validierung soll keine deterministische Vorhersagequalität behaupten.
+- ID: NG-023
+  Nicht-Ziel: Ein erfolgreich erkannter Referenzfall darf nicht als Beweis für allgemeine Prognosefähigkeit dargestellt werden.
+- ID: NG-024
+  Nicht-Ziel: Ein Backtest-Ergebnis darf nicht ohne Datenqualitäts- und Unsicherheitskontext interpretiert werden.
+- ID: NG-025
+  Nicht-Ziel: Der MVP muss keine Echtzeit-Analyseplattform sein.
+- ID: NG-026
+  Nicht-Ziel: Der MVP muss nicht bei jedem Quellenfehler abbrechen.
+- ID: NG-027
+  Nicht-Ziel: Der MVP darf Datenlücken nicht durch implizite Annahmen verstecken.
+- ID: NG-028
+  Nicht-Ziel: Der MVP soll keine Statuswerte ohne erklärbare Daten- und Regelgrundlage anzeigen.
+- ID: NG-029
+  Nicht-Ziel: Performance-Optimierung ist im MVP nicht wichtiger als Nachvollziehbarkeit und Validierbarkeit.
+- ID: NG-030
+  Nicht-Ziel: Das System soll keine personenbezogene Überwachungsplattform sein.
+- ID: NG-031
+  Nicht-Ziel: Das System soll keine Privatpersonen analysieren.
+- ID: NG-032
+  Nicht-Ziel: Das System soll keine Aktivisten, Journalist:innen, Demonstrierende oder Social-Media-Nutzer als individuelle Zielobjekte analysieren.
+- ID: NG-033
+  Nicht-Ziel: Das System soll keine Deanonymisierung, Identifikation oder Lokalisierung einzelner Personen ermöglichen.
+- ID: NG-034
+  Nicht-Ziel: Das System soll keine personenbezogenen Bewegungsprofile erstellen.
+- ID: NG-035
+  Nicht-Ziel: Das System soll keine psychografischen oder politischen Profile einzelner Personen erstellen.
+- ID: NG-036
+  Nicht-Ziel: Das System soll keine personenbezogene Gefährdungs-, Risiko- oder Prioritätsbewertung erzeugen.
+- ID: NG-037
+  Nicht-Ziel: Das System soll keine Funktion zur gezielten Beeinflussung einzelner Personen oder Gruppen bereitstellen.
+- ID: NG-038
+  Nicht-Ziel: Das System soll keine personenbezogenen Rohdaten ohne klare Zweckbindung speichern.
+- ID: NG-039
+  Nicht-Ziel: Kein militärisches Zielauswahl- oder Zielpriorisierungssystem.
+- ID: NG-040
+  Nicht-Ziel: Kein System zur operativen Einsatzplanung.
+- ID: NG-041
+  Nicht-Ziel: Keine automatisierten Handlungsempfehlungen für staatliche, militärische, polizeiliche oder nachrichtendienstliche Maßnahmen.
+- ID: NG-042
+  Nicht-Ziel: Keine Desinformations-, Propaganda- oder Kampagnenoptimierung.
+- ID: NG-043
+  Nicht-Ziel: Keine Funktion zur Verstärkung, Testung oder Optimierung manipulativer Narrative.
+- ID: NG-044
+  Nicht-Ziel: Keine personenbezogene Repressions-, Überwachungs- oder Gefährdungsanalyse.
+- ID: NG-045
+  Nicht-Ziel: Keine Klassifikation von Bevölkerungsgruppen, Minderheiten oder politischen Gruppen als Gefahrenobjekte.
+- ID: NG-046
+  Nicht-Ziel: Keine automatisierte Schuld-, Absichts- oder Verantwortlichkeitszuschreibung ohne belastbare Evidenz.
+- ID: NG-047
+  Nicht-Ziel: Keine Cyber-Attribution ohne explizite Unsicherheitskennzeichnung.
+- ID: NG-048
+  Nicht-Ziel: Keine öffentliche Veröffentlichung ungeprüfter automatischer Reports.
+- ID: NG-049
+  Nicht-Ziel: Keine Darstellung von Statuswerten als objektive politische Wahrheit.
+- ID: NG-050
+  Nicht-Ziel: Keine Exportfunktion, die unnötig sensible Rohdaten oder personenbezogene Detaildaten ausgibt.
+- ID: NG-051
+  Nicht-Ziel: Der MVP muss keine hochverfügbare Produktivplattform sein.
+- ID: NG-052
+  Nicht-Ziel: Der MVP muss keine Echtzeitdatenverarbeitung leisten.
+- ID: NG-053
+  Nicht-Ziel: Der MVP muss keine vollständige Cloud-Infrastruktur enthalten.
+- ID: NG-054
+  Nicht-Ziel: Der MVP muss keine komplexe Mehrnutzerverwaltung implementieren.
+- ID: NG-055
+  Nicht-Ziel: Der MVP muss keine automatischen Benachrichtigungen an externe Kanäle senden.
+- ID: NG-056
+  Nicht-Ziel: Der MVP soll keine Secrets oder API-Keys im Quellcode speichern.
+- ID: NG-057
+  Nicht-Ziel: Hermes oder ein anderer Agent soll im MVP keine autonome Veröffentlichungs- oder Änderungsbefugnis erhalten.
+- ID: NG-058
+  Nicht-Ziel: Das System soll keine nicht rückverfolgbaren Statuswerte anzeigen.
+- ID: NG-059
+  Nicht-Ziel: Reprocessing soll alte Ergebnisse nicht stillschweigend ersetzen.
+- ID: NG-060
+  Nicht-Ziel: Reports sollen nicht ohne Snapshot-, Run- und Ruleset-Referenz erzeugt werden.
+- ID: NG-061
+  Nicht-Ziel: Konfigurationsänderungen sollen nicht unsichtbar erfolgen.
+- ID: NG-062
+  Nicht-Ziel: Externe Datenquellen selbst sind nicht Teil des Systems.
+- ID: NG-063
+  Nicht-Ziel: Das System garantiert nicht die Verfügbarkeit externer APIs.
+- ID: NG-064
+  Nicht-Ziel: Das System garantiert nicht die inhaltliche Richtigkeit externer Quellen.
+- ID: NG-065
+  Nicht-Ziel: Das System ersetzt keine fachliche Analystenbewertung.
+- ID: NG-066
+  Nicht-Ziel: Das System ist kein Nachrichtendienst-, Militär- oder Polizeisystem.
+- ID: NG-067
+  Nicht-Ziel: Das System löst keine externen operativen Maßnahmen aus.
+- ID: NG-068
+  Nicht-Ziel: Das System veröffentlicht keine Inhalte automatisch.
+- ID: NG-069
+  Nicht-Ziel: Das System betreibt keine aktive Informationsbeschaffung außerhalb öffentlich zugänglicher Quellen.
+- ID: NG-070
+  Nicht-Ziel: Das System umgeht keine Zugangsbeschränkungen, Paywalls, API-Limits oder Nutzungsbedingungen.
+- ID: NG-071
+  Nicht-Ziel: Das System ist im MVP keine Multi-User-Produktivplattform.

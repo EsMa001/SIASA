@@ -1,0 +1,37 @@
+use_cases:
+- Use Case ID: UC-001
+  Name: Daily Global Review
+  Ziel: Tägliche Weltkarten-/Statusübersicht prüfen; welche Länder zeigen neue Auffälligkeiten?
+  MVP: ja
+  Primäre GUI-Seite: World Anomaly Map
+  Mindestfunktionen: Karte; aktive/anomale Domänen; Datenlücken; Top-Statusänderungen; Drill-down
+- Use Case ID: UC-002
+  Name: Country Deep Dive
+  Ziel: Land auswählen und erklären, warum es auffällig, unauffällig oder nicht bewertbar ist.
+  MVP: ja
+  Primäre GUI-Seite: Country Profile
+  Mindestfunktionen: D0–D5 je Domäne; Treiber; Gegenindikatoren; Jahresverläufe; Events; Annotation
+- Use Case ID: UC-003
+  Name: Source/Coverage Review
+  Ziel: Datenlage, Quellenstatus, Historientiefe, Ausfälle und Confidence prüfen.
+  MVP: ja
+  Primäre GUI-Seite: Source / Coverage View
+  Mindestfunktionen: Quellenstatus; Datenlücken; Historie; failed sources; ACLED prepared adapter sichtbar
+- Use Case ID: UC-004
+  Name: Report Export
+  Ziel: Ergebnisse reproduzierbar für Dokumentation, Validierung oder Veröffentlichung exportieren.
+  MVP: ja
+  Primäre GUI-Seite: Report / Export View
+  Mindestfunktionen: Daily Snapshot automatisch; Country/Domain/Coverage manuell; IDs und Unsicherheit im Report
+- Use Case ID: UC-005
+  Name: Backtest / Validation
+  Ziel: Historische Referenzfälle prüfen und erwartete vs. beobachtete Muster vergleichen.
+  MVP: MVP-Should
+  Primäre GUI-Seite: Backtest / Validation View
+  Mindestfunktionen: Referenzfälle; Domänenmuster; FP/FN Hinweise; Export
+- Use Case ID: UC-006
+  Name: Rule Tuning
+  Ziel: Regeln und Schwellen anpassen; zunächst Admin-only über Konfigurationsdateien.
+  MVP: Post-MVP/Should
+  Primäre GUI-Seite: Admin / Config
+  Mindestfunktionen: Ruleset-Versionierung; Test gegen Referenzfälle
