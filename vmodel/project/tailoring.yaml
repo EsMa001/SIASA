@@ -1,0 +1,13 @@
+project:
+  name: SIASA
+  process_model: vmodel_light_requirements_as_code
+  language: python
+  code_roots:
+    - src/siasa
+  test_roots:
+    - tests/unit
+    - tests/integration
+    - tests/system
+    - tests/acceptance
+  notes:
+    - Initial tailored scaffold for a new repository.

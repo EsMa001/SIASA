@@ -1,0 +1,14 @@
+quality_plan:
+  branch_policy:
+    protected_default_branch: main
+    working_branch_prefixes:
+      - hermes/
+      - feature/
+      - fix/
+  required_checks:
+    - requirements_validation
+    - traceability_validation
+    - code_link_validation
+    - trace_matrix_generation
+    - verification_report_generation
+    - pytest

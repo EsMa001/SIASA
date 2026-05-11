@@ -1,0 +1,10 @@
+stakeholder_requirements:
+  - id: StR-001
+    title: Establish governed project baseline
+    status: proposed
+    statement: The project shall maintain a governed V-Model-light baseline for requirements, architecture, verification, and traceability artifacts.
+    rationale: Enables controlled development from the first work package.
+    acceptance_criteria:
+      - id: AC-StR-001-01
+        statement: A machine-readable requirements folder structure exists in the repository.
+    open_questions: []
