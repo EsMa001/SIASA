@@ -1,7 +1,8 @@
 metadata:
   project: SIASA
-  scope: Initial system-level verification baseline derived together with system requirements
+  scope: Initial system- and software-level verification baseline
   status: draft_specified
+  extended_with_software_level_at_utc: '2026-05-11T14:25:30.979384+00:00'
 test_specifications:
 - id: TC-SyR-001-001
   requirement_ids:
@@ -379,3 +380,453 @@ test_specifications:
   preconditions:
   - Derived system architecture and imported stakeholder baseline are available.
   expected_result: The system shall maintain versioned rules and configuration tables and shall support reprocessing readiness so that algorithm, rule, and taxonomy changes can be compared against earlier runs.
+- id: TC-SwR-001-001
+  requirement_ids:
+  - SwR-001
+  title: Verify Source catalog record schema
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall persist source catalog records with source_id, domain, status, access mode, license or usage constraint, history horizon, update cadence, and governance notes.
+- id: TC-SwR-002-001
+  requirement_ids:
+  - SwR-002
+  title: Verify Versioned country-set schema
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall persist versioned country-set records with ISO code, region, selection type, priority class, and selection rationale.
+- id: TC-SwR-003-001
+  requirement_ids:
+  - SwR-003
+  title: Verify Configuration table loader
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall load versioned configuration tables for current windows, baseline modes, domain activation, and rule parameters from governed configuration artifacts.
+- id: TC-SwR-004-001
+  requirement_ids:
+  - SwR-004
+  title: Verify Source adapter interface
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall provide a reusable adapter interface for heterogeneous sources including fetch, health, and fetch-metadata reporting operations.
+- id: TC-SwR-005-001
+  requirement_ids:
+  - SwR-005
+  title: Verify Per-source failure isolation
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall isolate source-adapter failures so that failure of one source does not abort unrelated source processing inside the same run.
+- id: TC-SwR-006-001
+  requirement_ids:
+  - SwR-006
+  title: Verify Fetch metadata persistence
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall persist source fetch metadata including fetch timestamp, execution status, and source-specific diagnostics for every adapter execution.
+- id: TC-SwR-007-001
+  requirement_ids:
+  - SwR-007
+  title: Verify Raw record persistence model
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall persist raw source records or stable raw references with source identity and fetch timestamp needed for reproducibility.
+- id: TC-SwR-008-001
+  requirement_ids:
+  - SwR-008
+  title: Verify Permitted raw storage policy hooks
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall support reference-only storage or restricted payload persistence where source governance or license constraints require it.
+- id: TC-SwR-009-001
+  requirement_ids:
+  - SwR-009
+  title: Verify Normalized analytical record schema
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall transform ingested data into a normalized internal schema containing country, timestamp or period, domain, signal fields, provenance, and quality context.
+- id: TC-SwR-010-001
+  requirement_ids:
+  - SwR-010
+  title: Verify Normalization mapping versioning
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall version normalization mappings so that snapshot results can be associated with the mapping rules used at run time.
+- id: TC-SwR-011-001
+  requirement_ids:
+  - SwR-011
+  title: Verify Domain feature computation framework
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall provide a shared feature-computation framework that accepts normalized records and emits feature values with provenance, coverage, and confidence inputs.
+- id: TC-SwR-012-001
+  requirement_ids:
+  - SwR-012
+  title: Verify Domain A feature service
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall compute MVP-relevant Domain A features for information-space dynamics including volume, tone, topic, and source-context metrics.
+- id: TC-SwR-013-001
+  requirement_ids:
+  - SwR-013
+  title: Verify Domain B feature service
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall compute MVP-relevant Domain B features for event dynamics including conflict, protest, violence, and disaster-related indicators.
+- id: TC-SwR-014-001
+  requirement_ids:
+  - SwR-014
+  title: Verify Domain D feature service
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall compute MVP-relevant Domain D features for economic and structural dynamics including trade, energy, macro, and food-related indicators.
+- id: TC-SwR-015-001
+  requirement_ids:
+  - SwR-015
+  title: Verify Selective Domain C and E feature hooks
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall provide feature-computation hooks for selective Domain C and Domain E processing without making them mandatory in the MVP baseline.
+- id: TC-SwR-016-001
+  requirement_ids:
+  - SwR-016
+  title: Verify Coverage and confidence input computation
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall compute feature-level or batch-level coverage, freshness, and confidence inputs needed by downstream status logic.
+- id: TC-SwR-017-001
+  requirement_ids:
+  - SwR-017
+  title: Verify Relative baseline computation
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall compute relative country baselines using configured historical windows for downstream anomaly assessment.
+- id: TC-SwR-018-001
+  requirement_ids:
+  - SwR-018
+  title: Verify Combined 30 90 365 baseline support
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall support combined 30-day, 90-day, and 365-day reference windows as governed baseline inputs.
+- id: TC-SwR-019-001
+  requirement_ids:
+  - SwR-019
+  title: Verify Configurable current-window support
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall support governed current windows including a 7-day default and additional review windows for detailed analysis.
+- id: TC-SwR-020-001
+  requirement_ids:
+  - SwR-020
+  title: Verify Data sufficiency evaluator
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall evaluate data sufficiency before status computation and produce explicit insufficiency outcomes for inadequate inputs.
+- id: TC-SwR-021-001
+  requirement_ids:
+  - SwR-021
+  title: Verify Domain status rule engine
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall derive domain status values D0 through D5 from domain features, baseline comparisons, and data sufficiency results.
+- id: TC-SwR-022-001
+  requirement_ids:
+  - SwR-022
+  title: Verify Domain status explanation payload
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall emit drivers, uncertainty indicators, and rule references together with every domain status result.
+- id: TC-SwR-023-001
+  requirement_ids:
+  - SwR-023
+  title: Verify Multi-domain status rule engine
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall derive multi-domain status values S0 through S6 from active domain states using governed rule logic.
+- id: TC-SwR-024-001
+  requirement_ids:
+  - SwR-024
+  title: Verify Selective C and E inclusion gate
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall gate status-relevant use of domains C and E based on configured quality and interpretation sufficiency criteria.
+- id: TC-SwR-025-001
+  requirement_ids:
+  - SwR-025
+  title: Verify Snapshot schema
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall persist snapshots containing run identity, country-set identity, active domains, rule versions, source state, and resulting analytical outputs.
+- id: TC-SwR-026-001
+  requirement_ids:
+  - SwR-026
+  title: Verify Snapshot creation service
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall create a versioned snapshot after every successful or partial-success daily run.
+- id: TC-SwR-027-001
+  requirement_ids:
+  - SwR-027
+  title: Verify End-to-end lineage identifiers
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall preserve stable lineage identifiers linking source catalog entries, raw records, normalized records, features, status results, snapshots, and reports.
+- id: TC-SwR-028-001
+  requirement_ids:
+  - SwR-028
+  title: Verify Daily global snapshot generator
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall generate a daily global snapshot report in Markdown and JSON after successful or partial-success runs.
+- id: TC-SwR-029-001
+  requirement_ids:
+  - SwR-029
+  title: Verify Country report generator
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall generate manual country profile reports with status, drivers, counter-indicators, coverage, uncertainty, and linked event context.
+- id: TC-SwR-030-001
+  requirement_ids:
+  - SwR-030
+  title: Verify Domain and coverage report generators
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall generate manual domain, event, and coverage reports in governed export formats including IDs and source-state context.
+- id: TC-SwR-031-001
+  requirement_ids:
+  - SwR-031
+  title: Verify Export payload policy enforcement
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall apply export policy checks so that report payloads respect governance and misuse constraints before release.
+- id: TC-SwR-032-001
+  requirement_ids:
+  - SwR-032
+  title: Verify World anomaly map read model
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall provide a query-side read model for the world anomaly map including country status, active domains, baseline mode, and drill-down target data.
+- id: TC-SwR-033-001
+  requirement_ids:
+  - SwR-033
+  title: Verify Country profile read model
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall provide a read model for the country profile view including multi-domain status, domain states, trends, drivers, and linked events.
+- id: TC-SwR-034-001
+  requirement_ids:
+  - SwR-034
+  title: Verify Domain detail read models
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall provide read models for domain detail views including time series, baseline comparison, feature values, and source context.
+- id: TC-SwR-035-001
+  requirement_ids:
+  - SwR-035
+  title: Verify Source and coverage read model
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall provide a read model exposing source status, history horizon, freshness, confidence, and failed-source information.
+- id: TC-SwR-036-001
+  requirement_ids:
+  - SwR-036
+  title: Verify Annotation persistence model
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall persist analyst annotations with scope, type, author, free text, tags, review state, and linked analytical objects.
+- id: TC-SwR-037-001
+  requirement_ids:
+  - SwR-037
+  title: Verify Annotation non-overwrite policy
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall store analyst annotations alongside generated system status without overwriting the generated status values.
+- id: TC-SwR-038-001
+  requirement_ids:
+  - SwR-038
+  title: Verify Validation case schema
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall persist validation cases with case identity, country, time range, expected domains, expected pattern, reference sources, and validation metrics.
+- id: TC-SwR-039-001
+  requirement_ids:
+  - SwR-039
+  title: Verify Backtest comparison service
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall support comparison of expected versus observed domain patterns for curated validation cases.
+- id: TC-SwR-040-001
+  requirement_ids:
+  - SwR-040
+  title: Verify Role model persistence and enforcement hooks
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall represent the MVP role model for Admin/Developer and Analyst and expose authorization hooks for controlled operations.
+- id: TC-SwR-041-001
+  requirement_ids:
+  - SwR-041
+  title: Verify Source governance metadata checks
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall validate required governance metadata for configured sources before those sources are treated as active for governed runs or exports.
+- id: TC-SwR-042-001
+  requirement_ids:
+  - SwR-042
+  title: Verify Misuse-boundary function guards
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall prevent software pathways that would expose targeting, operational recommendation, or disinformation-optimizing functionality within the governed MVP baseline.
+- id: TC-SwR-043-001
+  requirement_ids:
+  - SwR-043
+  title: Verify Daily run orchestrator
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall orchestrate daily runs across source fetch, normalization, feature computation, status derivation, snapshot creation, and report generation.
+- id: TC-SwR-044-001
+  requirement_ids:
+  - SwR-044
+  title: Verify Partial-success run state model
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall persist explicit run states including partial_success together with failed-source diagnostics and downstream visibility flags.
+- id: TC-SwR-045-001
+  requirement_ids:
+  - SwR-045
+  title: Verify Reprocessing workflow
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall support controlled reprocessing using versioned rules, mappings, and configuration tables so that outputs from different versions can be compared.

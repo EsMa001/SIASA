@@ -444,4 +444,706 @@ traceability:
     relation: verifies
     target_ids:
     - SyR-030
+  - source_id: DDS-001
+    relation: supports
+    target_ids:
+    - SyR-004
+  - source_id: DDS-001
+    relation: supports
+    target_ids:
+    - SyR-005
+  - source_id: DDS-001
+    relation: supports
+    target_ids:
+    - SyR-006
+  - source_id: DDS-001
+    relation: supports
+    target_ids:
+    - SyR-030
+  - source_id: DDS-002
+    relation: supports
+    target_ids:
+    - SyR-007
+  - source_id: DDS-002
+    relation: supports
+    target_ids:
+    - SyR-009
+  - source_id: DDS-002
+    relation: supports
+    target_ids:
+    - SyR-010
+  - source_id: DDS-003
+    relation: supports
+    target_ids:
+    - SyR-008
+  - source_id: DDS-003
+    relation: supports
+    target_ids:
+    - SyR-011
+  - source_id: DDS-003
+    relation: supports
+    target_ids:
+    - SyR-018
+  - source_id: DDS-003
+    relation: supports
+    target_ids:
+    - SyR-019
+  - source_id: DDS-004
+    relation: supports
+    target_ids:
+    - SyR-012
+  - source_id: DDS-004
+    relation: supports
+    target_ids:
+    - SyR-014
+  - source_id: DDS-005
+    relation: supports
+    target_ids:
+    - SyR-013
+  - source_id: DDS-005
+    relation: supports
+    target_ids:
+    - SyR-014
+  - source_id: DDS-006
+    relation: supports
+    target_ids:
+    - SyR-015
+  - source_id: DDS-006
+    relation: supports
+    target_ids:
+    - SyR-016
+  - source_id: DDS-006
+    relation: supports
+    target_ids:
+    - SyR-017
+  - source_id: DDS-007
+    relation: supports
+    target_ids:
+    - SyR-018
+  - source_id: DDS-007
+    relation: supports
+    target_ids:
+    - SyR-019
+  - source_id: DDS-008
+    relation: supports
+    target_ids:
+    - SyR-025
+  - source_id: DDS-008
+    relation: supports
+    target_ids:
+    - SyR-027
+  - source_id: DDS-008
+    relation: supports
+    target_ids:
+    - SyR-028
+  - source_id: DDS-009
+    relation: supports
+    target_ids:
+    - SyR-020
+  - source_id: DDS-009
+    relation: supports
+    target_ids:
+    - SyR-021
+  - source_id: DDS-009
+    relation: supports
+    target_ids:
+    - SyR-022
+  - source_id: DDS-009
+    relation: supports
+    target_ids:
+    - SyR-023
+  - source_id: DDS-010
+    relation: supports
+    target_ids:
+    - SyR-024
+  - source_id: DDS-010
+    relation: supports
+    target_ids:
+    - SyR-026
+  - source_id: DDS-011
+    relation: supports
+    target_ids:
+    - SyR-027
+  - source_id: DDS-011
+    relation: supports
+    target_ids:
+    - SyR-028
+  - source_id: DDS-011
+    relation: supports
+    target_ids:
+    - SyR-029
+  - source_id: DDS-012
+    relation: supports
+    target_ids:
+    - SyR-009
+  - source_id: DDS-012
+    relation: supports
+    target_ids:
+    - SyR-010
+  - source_id: DDS-012
+    relation: supports
+    target_ids:
+    - SyR-030
+  - source_id: SwR-001
+    relation: derives_from
+    target_ids:
+    - SyR-006
+  - source_id: SwR-001
+    relation: allocated_to
+    target_ids:
+    - DDS-001
+  - source_id: TC-SwR-001-001
+    relation: verifies
+    target_ids:
+    - SwR-001
+  - source_id: SwR-002
+    relation: derives_from
+    target_ids:
+    - SyR-004
+    - SyR-005
+  - source_id: SwR-002
+    relation: allocated_to
+    target_ids:
+    - DDS-001
+  - source_id: TC-SwR-002-001
+    relation: verifies
+    target_ids:
+    - SwR-002
+  - source_id: SwR-003
+    relation: derives_from
+    target_ids:
+    - SyR-013
+    - SyR-030
+  - source_id: SwR-003
+    relation: allocated_to
+    target_ids:
+    - DDS-001
+  - source_id: TC-SwR-003-001
+    relation: verifies
+    target_ids:
+    - SwR-003
+  - source_id: SwR-004
+    relation: derives_from
+    target_ids:
+    - SyR-007
+    - SyR-009
+  - source_id: SwR-004
+    relation: allocated_to
+    target_ids:
+    - DDS-002
+  - source_id: TC-SwR-004-001
+    relation: verifies
+    target_ids:
+    - SwR-004
+  - source_id: SwR-005
+    relation: derives_from
+    target_ids:
+    - SyR-010
+  - source_id: SwR-005
+    relation: allocated_to
+    target_ids:
+    - DDS-002
+    - DDS-012
+  - source_id: TC-SwR-005-001
+    relation: verifies
+    target_ids:
+    - SwR-005
+  - source_id: SwR-006
+    relation: derives_from
+    target_ids:
+    - SyR-009
+    - SyR-010
+  - source_id: SwR-006
+    relation: allocated_to
+    target_ids:
+    - DDS-002
+    - DDS-007
+  - source_id: TC-SwR-006-001
+    relation: verifies
+    target_ids:
+    - SwR-006
+  - source_id: SwR-007
+    relation: derives_from
+    target_ids:
+    - SyR-011
+    - SyR-018
+  - source_id: SwR-007
+    relation: allocated_to
+    target_ids:
+    - DDS-003
+  - source_id: TC-SwR-007-001
+    relation: verifies
+    target_ids:
+    - SwR-007
+  - source_id: SwR-008
+    relation: derives_from
+    target_ids:
+    - SyR-011
+    - SyR-027
+  - source_id: SwR-008
+    relation: allocated_to
+    target_ids:
+    - DDS-003
+    - DDS-011
+  - source_id: TC-SwR-008-001
+    relation: verifies
+    target_ids:
+    - SwR-008
+  - source_id: SwR-009
+    relation: derives_from
+    target_ids:
+    - SyR-011
+    - SyR-019
+  - source_id: SwR-009
+    relation: allocated_to
+    target_ids:
+    - DDS-003
+  - source_id: TC-SwR-009-001
+    relation: verifies
+    target_ids:
+    - SwR-009
+  - source_id: SwR-010
+    relation: derives_from
+    target_ids:
+    - SyR-018
+    - SyR-030
+  - source_id: SwR-010
+    relation: allocated_to
+    target_ids:
+    - DDS-003
+    - DDS-012
+  - source_id: TC-SwR-010-001
+    relation: verifies
+    target_ids:
+    - SwR-010
+  - source_id: SwR-011
+    relation: derives_from
+    target_ids:
+    - SyR-012
+    - SyR-014
+  - source_id: SwR-011
+    relation: allocated_to
+    target_ids:
+    - DDS-004
+  - source_id: TC-SwR-011-001
+    relation: verifies
+    target_ids:
+    - SwR-011
+  - source_id: SwR-012
+    relation: derives_from
+    target_ids:
+    - SyR-012
+  - source_id: SwR-012
+    relation: allocated_to
+    target_ids:
+    - DDS-004
+  - source_id: TC-SwR-012-001
+    relation: verifies
+    target_ids:
+    - SwR-012
+  - source_id: SwR-013
+    relation: derives_from
+    target_ids:
+    - SyR-012
+  - source_id: SwR-013
+    relation: allocated_to
+    target_ids:
+    - DDS-004
+  - source_id: TC-SwR-013-001
+    relation: verifies
+    target_ids:
+    - SwR-013
+  - source_id: SwR-014
+    relation: derives_from
+    target_ids:
+    - SyR-012
+  - source_id: SwR-014
+    relation: allocated_to
+    target_ids:
+    - DDS-004
+  - source_id: TC-SwR-014-001
+    relation: verifies
+    target_ids:
+    - SwR-014
+  - source_id: SwR-015
+    relation: derives_from
+    target_ids:
+    - SyR-007
+    - SyR-017
+  - source_id: SwR-015
+    relation: allocated_to
+    target_ids:
+    - DDS-004
+  - source_id: TC-SwR-015-001
+    relation: verifies
+    target_ids:
+    - SwR-015
+  - source_id: SwR-016
+    relation: derives_from
+    target_ids:
+    - SyR-014
+  - source_id: SwR-016
+    relation: allocated_to
+    target_ids:
+    - DDS-004
+    - DDS-005
+  - source_id: TC-SwR-016-001
+    relation: verifies
+    target_ids:
+    - SwR-016
+  - source_id: SwR-017
+    relation: derives_from
+    target_ids:
+    - SyR-013
+  - source_id: SwR-017
+    relation: allocated_to
+    target_ids:
+    - DDS-005
+  - source_id: TC-SwR-017-001
+    relation: verifies
+    target_ids:
+    - SwR-017
+  - source_id: SwR-018
+    relation: derives_from
+    target_ids:
+    - SyR-013
+  - source_id: SwR-018
+    relation: allocated_to
+    target_ids:
+    - DDS-005
+  - source_id: TC-SwR-018-001
+    relation: verifies
+    target_ids:
+    - SwR-018
+  - source_id: SwR-019
+    relation: derives_from
+    target_ids:
+    - SyR-013
+  - source_id: SwR-019
+    relation: allocated_to
+    target_ids:
+    - DDS-005
+  - source_id: TC-SwR-019-001
+    relation: verifies
+    target_ids:
+    - SwR-019
+  - source_id: SwR-020
+    relation: derives_from
+    target_ids:
+    - SyR-014
+  - source_id: SwR-020
+    relation: allocated_to
+    target_ids:
+    - DDS-005
+    - DDS-006
+  - source_id: TC-SwR-020-001
+    relation: verifies
+    target_ids:
+    - SwR-020
+  - source_id: SwR-021
+    relation: derives_from
+    target_ids:
+    - SyR-015
+  - source_id: SwR-021
+    relation: allocated_to
+    target_ids:
+    - DDS-006
+  - source_id: TC-SwR-021-001
+    relation: verifies
+    target_ids:
+    - SwR-021
+  - source_id: SwR-022
+    relation: derives_from
+    target_ids:
+    - SyR-015
+  - source_id: SwR-022
+    relation: allocated_to
+    target_ids:
+    - DDS-006
+  - source_id: TC-SwR-022-001
+    relation: verifies
+    target_ids:
+    - SwR-022
+  - source_id: SwR-023
+    relation: derives_from
+    target_ids:
+    - SyR-016
+  - source_id: SwR-023
+    relation: allocated_to
+    target_ids:
+    - DDS-006
+  - source_id: TC-SwR-023-001
+    relation: verifies
+    target_ids:
+    - SwR-023
+  - source_id: SwR-024
+    relation: derives_from
+    target_ids:
+    - SyR-017
+  - source_id: SwR-024
+    relation: allocated_to
+    target_ids:
+    - DDS-006
+  - source_id: TC-SwR-024-001
+    relation: verifies
+    target_ids:
+    - SwR-024
+  - source_id: SwR-025
+    relation: derives_from
+    target_ids:
+    - SyR-018
+  - source_id: SwR-025
+    relation: allocated_to
+    target_ids:
+    - DDS-007
+  - source_id: TC-SwR-025-001
+    relation: verifies
+    target_ids:
+    - SwR-025
+  - source_id: SwR-026
+    relation: derives_from
+    target_ids:
+    - SyR-009
+    - SyR-018
+  - source_id: SwR-026
+    relation: allocated_to
+    target_ids:
+    - DDS-007
+    - DDS-012
+  - source_id: TC-SwR-026-001
+    relation: verifies
+    target_ids:
+    - SwR-026
+  - source_id: SwR-027
+    relation: derives_from
+    target_ids:
+    - SyR-019
+  - source_id: SwR-027
+    relation: allocated_to
+    target_ids:
+    - DDS-007
+  - source_id: TC-SwR-027-001
+    relation: verifies
+    target_ids:
+    - SwR-027
+  - source_id: SwR-028
+    relation: derives_from
+    target_ids:
+    - SyR-025
+  - source_id: SwR-028
+    relation: allocated_to
+    target_ids:
+    - DDS-008
+  - source_id: TC-SwR-028-001
+    relation: verifies
+    target_ids:
+    - SwR-028
+  - source_id: SwR-029
+    relation: derives_from
+    target_ids:
+    - SyR-021
+    - SyR-025
+  - source_id: SwR-029
+    relation: allocated_to
+    target_ids:
+    - DDS-008
+  - source_id: TC-SwR-029-001
+    relation: verifies
+    target_ids:
+    - SwR-029
+  - source_id: SwR-030
+    relation: derives_from
+    target_ids:
+    - SyR-023
+    - SyR-025
+  - source_id: SwR-030
+    relation: allocated_to
+    target_ids:
+    - DDS-008
+  - source_id: TC-SwR-030-001
+    relation: verifies
+    target_ids:
+    - SwR-030
+  - source_id: SwR-031
+    relation: derives_from
+    target_ids:
+    - SyR-027
+    - SyR-028
+  - source_id: SwR-031
+    relation: allocated_to
+    target_ids:
+    - DDS-008
+    - DDS-011
+  - source_id: TC-SwR-031-001
+    relation: verifies
+    target_ids:
+    - SwR-031
+  - source_id: SwR-032
+    relation: derives_from
+    target_ids:
+    - SyR-020
+  - source_id: SwR-032
+    relation: allocated_to
+    target_ids:
+    - DDS-009
+  - source_id: TC-SwR-032-001
+    relation: verifies
+    target_ids:
+    - SwR-032
+  - source_id: SwR-033
+    relation: derives_from
+    target_ids:
+    - SyR-021
+  - source_id: SwR-033
+    relation: allocated_to
+    target_ids:
+    - DDS-009
+  - source_id: TC-SwR-033-001
+    relation: verifies
+    target_ids:
+    - SwR-033
+  - source_id: SwR-034
+    relation: derives_from
+    target_ids:
+    - SyR-022
+  - source_id: SwR-034
+    relation: allocated_to
+    target_ids:
+    - DDS-009
+  - source_id: TC-SwR-034-001
+    relation: verifies
+    target_ids:
+    - SwR-034
+  - source_id: SwR-035
+    relation: derives_from
+    target_ids:
+    - SyR-023
+  - source_id: SwR-035
+    relation: allocated_to
+    target_ids:
+    - DDS-009
+  - source_id: TC-SwR-035-001
+    relation: verifies
+    target_ids:
+    - SwR-035
+  - source_id: SwR-036
+    relation: derives_from
+    target_ids:
+    - SyR-024
+  - source_id: SwR-036
+    relation: allocated_to
+    target_ids:
+    - DDS-010
+  - source_id: TC-SwR-036-001
+    relation: verifies
+    target_ids:
+    - SwR-036
+  - source_id: SwR-037
+    relation: derives_from
+    target_ids:
+    - SyR-024
+  - source_id: SwR-037
+    relation: allocated_to
+    target_ids:
+    - DDS-010
+  - source_id: TC-SwR-037-001
+    relation: verifies
+    target_ids:
+    - SwR-037
+  - source_id: SwR-038
+    relation: derives_from
+    target_ids:
+    - SyR-026
+  - source_id: SwR-038
+    relation: allocated_to
+    target_ids:
+    - DDS-010
+  - source_id: TC-SwR-038-001
+    relation: verifies
+    target_ids:
+    - SwR-038
+  - source_id: SwR-039
+    relation: derives_from
+    target_ids:
+    - SyR-026
+  - source_id: SwR-039
+    relation: allocated_to
+    target_ids:
+    - DDS-010
+  - source_id: TC-SwR-039-001
+    relation: verifies
+    target_ids:
+    - SwR-039
+  - source_id: SwR-040
+    relation: derives_from
+    target_ids:
+    - SyR-029
+  - source_id: SwR-040
+    relation: allocated_to
+    target_ids:
+    - DDS-011
+  - source_id: TC-SwR-040-001
+    relation: verifies
+    target_ids:
+    - SwR-040
+  - source_id: SwR-041
+    relation: derives_from
+    target_ids:
+    - SyR-027
+  - source_id: SwR-041
+    relation: allocated_to
+    target_ids:
+    - DDS-011
+  - source_id: TC-SwR-041-001
+    relation: verifies
+    target_ids:
+    - SwR-041
+  - source_id: SwR-042
+    relation: derives_from
+    target_ids:
+    - SyR-028
+  - source_id: SwR-042
+    relation: allocated_to
+    target_ids:
+    - DDS-011
+  - source_id: TC-SwR-042-001
+    relation: verifies
+    target_ids:
+    - SwR-042
+  - source_id: SwR-043
+    relation: derives_from
+    target_ids:
+    - SyR-009
+  - source_id: SwR-043
+    relation: allocated_to
+    target_ids:
+    - DDS-012
+  - source_id: TC-SwR-043-001
+    relation: verifies
+    target_ids:
+    - SwR-043
+  - source_id: SwR-044
+    relation: derives_from
+    target_ids:
+    - SyR-010
+  - source_id: SwR-044
+    relation: allocated_to
+    target_ids:
+    - DDS-012
+  - source_id: TC-SwR-044-001
+    relation: verifies
+    target_ids:
+    - SwR-044
+  - source_id: SwR-045
+    relation: derives_from
+    target_ids:
+    - SyR-030
+  - source_id: SwR-045
+    relation: allocated_to
+    target_ids:
+    - DDS-012
+  - source_id: TC-SwR-045-001
+    relation: verifies
+    target_ids:
+    - SwR-045
   waivers: []

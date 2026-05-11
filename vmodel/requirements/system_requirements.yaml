@@ -6,6 +6,8 @@ metadata:
   notes:
   - System requirements were derived from the imported stakeholder baseline, acceptance criteria, domain model, run strategy, governance principles, and system boundaries.
   - This file establishes the first canonical system layer for SIASA.
+  reviewed_for_next_vmodel_step_at_utc: '2026-05-11T14:25:30.979384+00:00'
+  review_note: Reviewed as derivation baseline for software requirements. Duplicate source references removed where present.
 system_requirements:
 - id: SyR-001
   title: Country-centric multi-domain analytical system
@@ -398,8 +400,6 @@ system_requirements:
   statement: The system shall provide a source and coverage review view exposing source status, history horizon, data freshness, data gaps, confidence, and failed sources.
   status: accepted
   derives_from:
-  - StR-583
-  - StR-584
   - StR-583
   - StR-584
   - StR-013

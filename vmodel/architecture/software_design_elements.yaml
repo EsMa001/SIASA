@@ -1,0 +1,91 @@
+metadata:
+  project: SIASA
+  derived_from:
+  - vmodel/architecture/system_architecture.md
+  - vmodel/requirements/system_requirements.yaml
+  created_at_utc: '2026-05-11T14:25:30.979384+00:00'
+  status: draft_baseline_derived
+software_design_elements:
+- id: DDS-001
+  title: Catalog and configuration core
+  description: Machine-readable catalog, country-set, and configuration services managing source metadata, country priorities, and baseline parameters.
+  supports_requirements:
+  - SyR-004
+  - SyR-005
+  - SyR-006
+  - SyR-030
+- id: DDS-002
+  title: Source adapter framework
+  description: Reusable adapter abstraction and runtime for heterogeneous external sources with per-source error isolation and fetch metadata.
+  supports_requirements:
+  - SyR-007
+  - SyR-009
+  - SyR-010
+- id: DDS-003
+  title: Raw and normalized data layer
+  description: Persistent raw/reference storage plus normalized internal schemas for country- and time-oriented processing.
+  supports_requirements:
+  - SyR-008
+  - SyR-011
+  - SyR-018
+  - SyR-019
+- id: DDS-004
+  title: Feature computation services
+  description: Domain-specific feature builders and shared coverage/confidence inputs.
+  supports_requirements:
+  - SyR-012
+  - SyR-014
+- id: DDS-005
+  title: Baseline and anomaly services
+  description: Relative baseline, current window, and anomaly computation services.
+  supports_requirements:
+  - SyR-013
+  - SyR-014
+- id: DDS-006
+  title: Domain and multi-domain status engines
+  description: Rule-based engines for D0-D5 and S0-S6 including selective C/E inclusion and explanation payloads.
+  supports_requirements:
+  - SyR-015
+  - SyR-016
+  - SyR-017
+- id: DDS-007
+  title: Snapshot and traceability core
+  description: Versioned snapshot persistence and evidence lineage structures from source to report.
+  supports_requirements:
+  - SyR-018
+  - SyR-019
+- id: DDS-008
+  title: Reporting and export services
+  description: Automated and manual report generation in governed formats with uncertainty and source-state context.
+  supports_requirements:
+  - SyR-025
+  - SyR-027
+  - SyR-028
+- id: DDS-009
+  title: Read models and analysis UI services
+  description: Query-side read models for world map, country profile, domain detail, source/coverage review, and system status views.
+  supports_requirements:
+  - SyR-020
+  - SyR-021
+  - SyR-022
+  - SyR-023
+- id: DDS-010
+  title: Annotation and validation services
+  description: Analyst annotations, validation cases, and backtest comparison services.
+  supports_requirements:
+  - SyR-024
+  - SyR-026
+- id: DDS-011
+  title: Governance and role enforcement
+  description: Role model, export controls, governance constraints, and misuse-boundary enforcement.
+  supports_requirements:
+  - SyR-027
+  - SyR-028
+  - SyR-029
+- id: DDS-012
+  title: Run orchestration and reprocessing services
+  description: Daily run orchestration, partial-success handling, observability, and controlled reprocessing.
+  supports_requirements:
+  - SyR-009
+  - SyR-010
+  - SyR-030
