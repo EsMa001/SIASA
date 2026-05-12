@@ -61,6 +61,22 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
         "country_profile": {"format": "Markdown + JSON", "report_id": "REP-COUNTRY-UKR", "country_id": "UKR"},
         "coverage_report": {"format": "Markdown + JSON + CSV", "report_id": "REP-COVERAGE-001"},
     }
+    validation_view = {
+        "case_id": "VAL-UKR-2022-001",
+        "country_id": "UKR",
+        "case_name": "Escalation reference case",
+        "time_range": {"start": "2022-02-01", "end": "2022-03-01"},
+        "expected_domains": ["A", "B", "D"],
+        "observed_domains": ["A", "B"],
+        "domain_match_ratio": 2 / 3,
+        "status_match": True,
+        "expected_pattern": "Aligned information, event, and economic stress escalation.",
+        "validation_goal": "Check multi-domain alignment detection.",
+        "reference_sources": ["SRC-A", "SRC-B"],
+        "validation_metrics": ["Domain Match", "Status Match"],
+        "known_limitations": ["historical coverage incomplete"],
+        "reprocessing_comparison": {"prior_snapshot_id": "SNAP-RUN-001-v1", "new_snapshot_id": "SNAP-RUN-001-v2", "changed_versions": ["rule_version"]},
+    }
     system_status = {
         "run_id": "RUN-200",
         "run_status": "partial_success",
@@ -81,6 +97,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
         source_coverage_read_model=source_coverage,
         report_catalog=reports,
         system_status_read_model=system_status,
+        validation_view_model=validation_view,
     )
 
     assert (pages.output_dir / "index.html").exists()
@@ -91,6 +108,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert (pages.output_dir / "runs.html").exists()
     assert (pages.output_dir / "trends.html").exists()
     assert (pages.output_dir / "events.html").exists()
+    assert (pages.output_dir / "validation.html").exists()
 
     index_html = (pages.output_dir / "index.html").read_text()
     assert "World Anomaly Map" in index_html
@@ -123,6 +141,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     events_html = (pages.output_dir / "events.html").read_text()
     assert "Current Events Page" in events_html
     assert "EVT-001" in events_html
+
+    validation_html = (pages.output_dir / "validation.html").read_text()
+    assert "Validation / Backtest View" in validation_html
+    assert "VAL-UKR-2022-001" in validation_html
+    assert "Domain Match" in validation_html
 
 
 def test_build_local_mvp_site_copies_report_export_files_and_renders_download_links(tmp_path: Path) -> None:
@@ -245,6 +268,22 @@ def test_load_site_payload_from_artifacts_reads_persisted_json_bundle(tmp_path: 
             "payload": {"country_id": "UKR", "multi_domain_status": "S3"},
         },
     }
+    validation_view = {
+        "case_id": "VAL-UKR-2022-001",
+        "country_id": "UKR",
+        "case_name": "Escalation reference case",
+        "time_range": {"start": "2022-02-01", "end": "2022-03-01"},
+        "expected_domains": ["A", "B", "D"],
+        "observed_domains": ["A", "B"],
+        "domain_match_ratio": 2 / 3,
+        "status_match": True,
+        "expected_pattern": "Aligned information, event, and economic stress escalation.",
+        "validation_goal": "Check multi-domain alignment detection.",
+        "reference_sources": ["SRC-A", "SRC-B"],
+        "validation_metrics": ["Domain Match", "Status Match"],
+        "known_limitations": ["historical coverage incomplete"],
+        "reprocessing_comparison": {"prior_snapshot_id": "SNAP-RUN-001-v1", "new_snapshot_id": "SNAP-RUN-001-v2", "changed_versions": ["rule_version"]},
+    }
 
     (artifacts_dir / "snapshot.json").write_text(json.dumps(snapshot))
     (artifacts_dir / "readmodels" / "world_map.json").write_text(json.dumps(world_map))
@@ -252,6 +291,7 @@ def test_load_site_payload_from_artifacts_reads_persisted_json_bundle(tmp_path: 
     (artifacts_dir / "readmodels" / "system_status.json").write_text(json.dumps(system_status))
     (artifacts_dir / "readmodels" / "country_profiles" / "UKR.json").write_text(json.dumps(country_profile))
     (artifacts_dir / "readmodels" / "domain_details" / "UKR__A.json").write_text(json.dumps(domain_detail))
+    (artifacts_dir / "readmodels" / "validation_backtest.json").write_text(json.dumps(validation_view))
     for report_name, report_payload in reports.items():
         (artifacts_dir / "reports" / f"{report_name}.json").write_text(json.dumps(report_payload))
 
@@ -263,6 +303,7 @@ def test_load_site_payload_from_artifacts_reads_persisted_json_bundle(tmp_path: 
     assert payload["source_coverage_read_model"]["failed_sources"] == ["SRC-B"]
     assert payload["system_status_read_model"]["snapshot_id"] == "SNAP-RUN-300-v1"
     assert payload["report_catalog"]["daily_snapshot"]["report_id"] == "REP-DAILY-SNAP-RUN-300-v1"
+    assert payload["validation_view_model"]["case_id"] == "VAL-UKR-2022-001"
 
 
 def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bundle(tmp_path: Path) -> None:
@@ -348,6 +389,26 @@ def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bund
             }
         )
     )
+    (artifacts_dir / "readmodels" / "validation_backtest.json").write_text(
+        json.dumps(
+            {
+                "case_id": "VAL-UKR-2022-001",
+                "country_id": "UKR",
+                "case_name": "Escalation reference case",
+                "time_range": {"start": "2022-02-01", "end": "2022-03-01"},
+                "expected_domains": ["A", "B", "D"],
+                "observed_domains": ["A", "B"],
+                "domain_match_ratio": 2 / 3,
+                "status_match": True,
+                "expected_pattern": "Aligned information, event, and economic stress escalation.",
+                "validation_goal": "Check multi-domain alignment detection.",
+                "reference_sources": ["SRC-A", "SRC-B"],
+                "validation_metrics": ["Domain Match", "Status Match"],
+                "known_limitations": ["historical coverage incomplete"],
+                "reprocessing_comparison": {"prior_snapshot_id": "SNAP-RUN-001-v1", "new_snapshot_id": "SNAP-RUN-001-v2", "changed_versions": ["rule_version"]},
+            }
+        )
+    )
     (artifacts_dir / "reports" / "daily_snapshot.json").write_text(
         json.dumps(
             {
@@ -381,3 +442,4 @@ def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bund
     assert (tmp_path / "site" / "index.html").exists()
     assert "SNAP-RUN-301-v1" in (tmp_path / "site" / "runs.html").read_text()
     assert "EVT-302" in (tmp_path / "site" / "events.html").read_text()
+    assert "VAL-UKR-2022-001" in (tmp_path / "site" / "validation.html").read_text()

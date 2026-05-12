@@ -1,0 +1,48 @@
+from siasa.readmodels.validation_backtest import build_validation_backtest_read_model
+from siasa.runs.reprocessing import build_reprocessing_comparison
+from siasa.validation.cases import ValidationCase, compare_expected_vs_observed
+
+
+def test_validation_backtest_read_model_exposes_case_context_comparison_and_reprocessing_delta() -> None:
+    case = ValidationCase(
+        case_id="VAL-UKR-2022-001",
+        country_id="UKR",
+        case_name="Escalation reference case",
+        case_type="military_escalation",
+        time_start="2022-02-01",
+        time_end="2022-03-01",
+        expected_domains=["A", "B", "D"],
+        expected_signal_pattern="Aligned information, event, and economic stress escalation.",
+        reference_sources=["SRC-A", "SRC-B"],
+        validation_goal="Check multi-domain alignment detection.",
+        known_limitations=["historical coverage incomplete"],
+        validation_metrics=["Domain Match", "Status Match"],
+    )
+    comparison = compare_expected_vs_observed(
+        validation_case=case,
+        observed_domains=["A", "B"],
+        observed_status="S3",
+        expected_status="S3",
+    )
+    reprocessing = build_reprocessing_comparison(
+        prior_snapshot_id="SNAP-RUN-001-v1",
+        new_snapshot_id="SNAP-RUN-001-v2",
+        prior_versions={"rule_version": "rules-2026-04", "mapping_version": "mapping-v1", "config_version": "config-v2"},
+        new_versions={"rule_version": "rules-2026-05", "mapping_version": "mapping-v2", "config_version": "config-v3"},
+    )
+
+    read_model = build_validation_backtest_read_model(
+        validation_case=case,
+        comparison=comparison,
+        reprocessing_comparison=reprocessing,
+    )
+
+    assert read_model["case_id"] == "VAL-UKR-2022-001"
+    assert read_model["country_id"] == "UKR"
+    assert read_model["time_range"] == {"start": "2022-02-01", "end": "2022-03-01"}
+    assert read_model["expected_domains"] == ["A", "B", "D"]
+    assert read_model["observed_domains"] == ["A", "B"]
+    assert read_model["domain_match_ratio"] == 2 / 3
+    assert read_model["status_match"] is True
+    assert read_model["validation_metrics"] == ["Domain Match", "Status Match"]
+    assert read_model["reprocessing_comparison"]["changed_versions"] == ["config_version", "mapping_version", "rule_version"]

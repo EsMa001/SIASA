@@ -34,6 +34,7 @@ def _page(title: str, body: str) -> str:
         "<a href='../coverage.html'>Source / Coverage</a>"
         "<a href='../trends.html'>Yearly Trend Page</a>"
         "<a href='../events.html'>Current Events Page</a>"
+        "<a href='../validation.html'>Validation / Backtest View</a>"
         "<a href='../reports.html'>Report / Export View</a>"
         "<a href='../runs.html'>System Status / Runs</a>"
         "</nav>"
@@ -78,6 +79,10 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
         report_file.stem: _load_json(report_file)
         for report_file in sorted((artifacts_dir / 'reports').glob('*.json'))
     }
+    validation_view_model = None
+    validation_view_path = readmodels_dir / 'validation_backtest.json'
+    if validation_view_path.exists():
+        validation_view_model = _load_json(validation_view_path)
 
     return {
         'world_map_read_model': world_map_read_model,
@@ -86,6 +91,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
         'source_coverage_read_model': source_coverage_read_model,
         'report_catalog': report_catalog,
         'system_status_read_model': system_status_read_model,
+        'validation_view_model': validation_view_model,
     }
 
 
@@ -268,6 +274,29 @@ def _render_events(country_profile_read_models: dict[str, dict[str, Any]]) -> st
     return _page("Current Events Page", body)
 
 
+def _render_validation(validation_view_model: dict[str, Any]) -> str:
+    time_range = validation_view_model.get('time_range', {})
+    reprocessing = validation_view_model.get('reprocessing_comparison', {})
+    body = (
+        "<h2>Validation / Backtest View</h2>"
+        f"<p>Case ID: <strong>{html.escape(str(validation_view_model.get('case_id', 'n/a')))}</strong></p>"
+        f"<p>Country: <strong>{html.escape(str(validation_view_model.get('country_id', 'n/a')))}</strong></p>"
+        f"<p>Case: {html.escape(str(validation_view_model.get('case_name', 'n/a')))}</p>"
+        f"<p>Time Range: {html.escape(str(time_range.get('start', 'n/a')))} to {html.escape(str(time_range.get('end', 'n/a')))}</p>"
+        f"<p>Expected Domains: {html.escape(', '.join(str(item) for item in validation_view_model.get('expected_domains', [])))}</p>"
+        f"<p>Observed Domains: {html.escape(', '.join(str(item) for item in validation_view_model.get('observed_domains', [])))}</p>"
+        f"<p>Domain Match Ratio: {html.escape(str(validation_view_model.get('domain_match_ratio', 'n/a')))}</p>"
+        f"<p>Status Match: {html.escape(str(validation_view_model.get('status_match', 'n/a')))}</p>"
+        f"<h3>Expected Pattern</h3><p>{html.escape(str(validation_view_model.get('expected_pattern', 'n/a')))}</p>"
+        f"<h3>Validation Goal</h3><p>{html.escape(str(validation_view_model.get('validation_goal', 'n/a')))}</p>"
+        f"<h3>Reference Sources</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in validation_view_model.get('reference_sources', []))}</ul>"
+        f"<h3>Validation Metrics</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in validation_view_model.get('validation_metrics', []))}</ul>"
+        f"<h3>Known Limitations</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in validation_view_model.get('known_limitations', []))}</ul>"
+        f"<h3>Reprocessing Comparison</h3>{_json_block(reprocessing)}"
+    )
+    return _page("Validation / Backtest View", body)
+
+
 def build_local_mvp_site(
     output_dir: Path,
     world_map_read_model: dict[str, Any],
@@ -276,6 +305,7 @@ def build_local_mvp_site(
     source_coverage_read_model: dict[str, Any],
     report_catalog: dict[str, dict[str, Any]],
     system_status_read_model: dict[str, Any],
+    validation_view_model: dict[str, Any] | None = None,
 ) -> SiteBuildResult:
     output_dir.mkdir(parents=True, exist_ok=True)
     countries_dir = output_dir / 'countries'
@@ -320,6 +350,11 @@ def build_local_mvp_site(
     events_file = output_dir / 'events.html'
     events_file.write_text(_render_events(country_profile_read_models))
     generated_files.append(events_file)
+
+    if validation_view_model is not None:
+        validation_file = output_dir / 'validation.html'
+        validation_file.write_text(_render_validation(validation_view_model))
+        generated_files.append(validation_file)
 
     return SiteBuildResult(output_dir=output_dir, generated_files=generated_files)
 
@@ -384,6 +419,22 @@ def _demo_payload() -> dict[str, Any]:
             'snapshot_id': 'SNAP-RUN-200-v1',
             'reprocessing_status': 'idle',
             'last_run': '2026-05-11T18:00:00Z',
+        },
+        'validation_view_model': {
+            'case_id': 'VAL-UKR-2022-001',
+            'country_id': 'UKR',
+            'case_name': 'Escalation reference case',
+            'time_range': {'start': '2022-02-01', 'end': '2022-03-01'},
+            'expected_domains': ['A', 'B', 'D'],
+            'observed_domains': ['A', 'B'],
+            'domain_match_ratio': 2 / 3,
+            'status_match': True,
+            'expected_pattern': 'Aligned information, event, and economic stress escalation.',
+            'validation_goal': 'Check multi-domain alignment detection.',
+            'reference_sources': ['SRC-A', 'SRC-B'],
+            'validation_metrics': ['Domain Match', 'Status Match'],
+            'known_limitations': ['historical coverage incomplete'],
+            'reprocessing_comparison': {'prior_snapshot_id': 'SNAP-RUN-001-v1', 'new_snapshot_id': 'SNAP-RUN-001-v2', 'changed_versions': ['rule_version']},
         },
     }
 
