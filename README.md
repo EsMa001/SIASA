@@ -28,7 +28,7 @@ SIASA ist ein V-Model-light / requirements-as-code Repository mit importierter S
 - `vmodel/method/feature_catalog.yaml`
 - `vmodel/traceability/trace_links.yaml`
 - `vmodel/traceability/implementation_file_links.yaml` – aktuell mit governed Slices `gui-readmodels-and-annotations`, `governance-and-run-controls`, `reporting-and-export` und `validation-and-backtest`
-- `src/siasa/traceability/consistency.py`
+- `src/siasa/traceability/consistency.py` – Slice-Closure und repoweite Closure-Aggregation (`build_requirement_closure_report`, `build_repo_closure_report`)
 - `src/siasa/runs/reprocessing.py`
 - `tests/unit/test_traceability_consistency.py`
 
@@ -87,5 +87,5 @@ Die MVP-GUI-Baseline deckt die Kernseiten aus den Anforderungen ab:
 
 ## Nächste sinnvolle Schritte
 
-1. Repoweite Requirement-Closure-Sicht über alle governed Slices zusammenführen.
+1. Repoweite Closure-Sicht in CLI/Artefakt-Export oder GUI sichtbar machen.
 2. Controlled reprocessing in Artefakt-/GUI-Statuspfade weiter durchziehen, falls daraus ein eigener Sichtbarkeits-Slice werden soll.

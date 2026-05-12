@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from siasa.traceability.consistency import (
+    build_repo_closure_report,
     build_requirement_closure_report,
     load_traceability_slice_definition,
     validate_traceability_slice,
@@ -294,3 +295,27 @@ def test_build_requirement_closure_report_for_validation_and_backtest_slice() ->
     assert report["requirements"][1]["requirement_id"] == "SwR-039"
     assert "src/siasa/readmodels/validation_backtest.py" in report["requirements"][1]["code_paths"]
     assert "tests/unit/test_readmodels_validation_backtest.py" in report["requirements"][1]["test_paths"]
+
+
+
+def test_build_repo_closure_report_aggregates_all_governed_slices() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+
+    report = build_repo_closure_report(repo_root=repo_root)
+
+    assert report["summary"] == {
+        "slice_count": 4,
+        "requirement_count": 18,
+        "closed": 18,
+        "at_risk": 0,
+    }
+    assert report["slice_ids"] == [
+        "governance-and-run-controls",
+        "gui-readmodels-and-annotations",
+        "reporting-and-export",
+        "validation-and-backtest",
+    ]
+    assert report["slices"][0]["slice_id"] == "governance-and-run-controls"
+    assert report["slices"][0]["summary"] == {"closed": 6, "at_risk": 0}
+    assert report["slices"][3]["slice_id"] == "validation-and-backtest"
+    assert report["slices"][3]["summary"] == {"closed": 2, "at_risk": 0}

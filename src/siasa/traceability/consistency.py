@@ -25,27 +25,37 @@ def _load_trace_links(repo_root: Path) -> list[dict[str, Any]]:
     return [link for link in links if isinstance(link, dict)]
 
 
-def load_traceability_slice_definition(*, repo_root: Path, slice_id: str) -> dict[str, Any]:
+def _load_traceability_slices(repo_root: Path) -> dict[str, dict[str, Any]]:
     payload = _load_yaml(repo_root / "vmodel" / "traceability" / "implementation_file_links.yaml")
     slices = payload.get("implementation_slices", {})
     if not isinstance(slices, dict):
         raise ValueError("implementation_slices must be a mapping")
+    normalized: dict[str, dict[str, Any]] = {}
+    for slice_id, slice_definition in slices.items():
+        if not isinstance(slice_definition, dict):
+            continue
+        normalized[str(slice_id)] = {
+            "requirement_ids": [str(item) for item in slice_definition.get("requirement_ids", [])],
+            "implementation_map": {
+                str(requirement_id): {
+                    "code_paths": [str(path) for path in mapping.get("code_paths", [])],
+                    "test_paths": [str(path) for path in mapping.get("test_paths", [])],
+                }
+                for requirement_id, mapping in slice_definition.get("implementation_map", {}).items()
+                if isinstance(mapping, dict)
+            },
+            "known_code_paths": [str(path) for path in slice_definition.get("known_code_paths", [])],
+            "known_test_paths": [str(path) for path in slice_definition.get("known_test_paths", [])],
+        }
+    return normalized
+
+
+def load_traceability_slice_definition(*, repo_root: Path, slice_id: str) -> dict[str, Any]:
+    slices = _load_traceability_slices(repo_root)
     slice_definition = slices.get(slice_id)
     if not isinstance(slice_definition, dict):
         raise ValueError(f"Traceability slice {slice_id} is not defined")
-    return {
-        "requirement_ids": [str(item) for item in slice_definition.get("requirement_ids", [])],
-        "implementation_map": {
-            str(requirement_id): {
-                "code_paths": [str(path) for path in mapping.get("code_paths", [])],
-                "test_paths": [str(path) for path in mapping.get("test_paths", [])],
-            }
-            for requirement_id, mapping in slice_definition.get("implementation_map", {}).items()
-            if isinstance(mapping, dict)
-        },
-        "known_code_paths": [str(path) for path in slice_definition.get("known_code_paths", [])],
-        "known_test_paths": [str(path) for path in slice_definition.get("known_test_paths", [])],
-    }
+    return slice_definition
 
 
 def _build_trace_index(trace_links: list[dict[str, Any]]) -> tuple[dict[str, list[dict[str, Any]]], dict[str, list[str]]]:
@@ -189,4 +199,27 @@ def build_requirement_closure_report(
         "slice_id": slice_id,
         "summary": {"closed": closed_count, "at_risk": at_risk_count},
         "requirements": requirements,
+    }
+
+
+def build_repo_closure_report(*, repo_root: Path) -> dict[str, Any]:
+    slices = _load_traceability_slices(repo_root)
+    slice_ids = sorted(slices)
+    slice_reports = [
+        build_requirement_closure_report(
+            repo_root=repo_root,
+            slice_id=slice_id,
+            slice_definition=slices[slice_id],
+        )
+        for slice_id in slice_ids
+    ]
+    return {
+        "summary": {
+            "slice_count": len(slice_reports),
+            "requirement_count": sum(len(report["requirements"]) for report in slice_reports),
+            "closed": sum(report["summary"]["closed"] for report in slice_reports),
+            "at_risk": sum(report["summary"]["at_risk"] for report in slice_reports),
+        },
+        "slice_ids": slice_ids,
+        "slices": slice_reports,
     }
