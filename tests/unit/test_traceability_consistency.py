@@ -152,3 +152,52 @@ def test_build_requirement_closure_report_marks_requirement_at_risk_when_verific
             "issues": ["missing_test_paths"],
         }
     ]
+
+
+
+def test_governed_governance_and_run_controls_traceability_slice_definition_validates_cleanly() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+
+    slice_definition = load_traceability_slice_definition(
+        repo_root=repo_root,
+        slice_id="governance-and-run-controls",
+    )
+
+    result = validate_traceability_slice(
+        repo_root=repo_root,
+        requirement_ids=slice_definition["requirement_ids"],
+        implementation_map=slice_definition["implementation_map"],
+        known_code_paths=slice_definition["known_code_paths"],
+        known_test_paths=slice_definition["known_test_paths"],
+    )
+
+    assert result["missing_requirements"] == []
+    assert result["missing_trace_links"] == []
+    assert result["missing_code_paths"] == {}
+    assert result["missing_test_paths"] == {}
+    assert result["missing_files"] == []
+    assert result["unmapped_code_paths"] == []
+    assert result["unmapped_test_paths"] == []
+
+
+
+def test_build_requirement_closure_report_for_governance_and_run_controls_slice() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+
+    report = build_requirement_closure_report(
+        repo_root=repo_root,
+        slice_id="governance-and-run-controls",
+    )
+
+    assert report["slice_id"] == "governance-and-run-controls"
+    assert report["summary"] == {"closed": 6, "at_risk": 0}
+    assert report["requirements"][0]["requirement_id"] == "SwR-040"
+    assert report["requirements"][0]["verifying_test_specs"] == ["TC-SwR-040-001"]
+    assert "src/siasa/governance/roles.py" in report["requirements"][0]["code_paths"]
+    assert report["requirements"][4]["requirement_id"] == "SwR-044"
+    assert "tests/unit/test_run_artifacts.py" in report["requirements"][4]["test_paths"]
+    assert report["requirements"][5]["requirement_id"] == "SwR-045"
+    assert report["requirements"][5]["closure_status"] == "closed"
+    assert report["requirements"][5]["verifying_test_specs"] == ["TC-SwR-045-001"]
+    assert "src/siasa/governance/roles.py" in report["requirements"][5]["code_paths"]
+    assert "tests/unit/test_governance_guards.py" in report["requirements"][5]["test_paths"]

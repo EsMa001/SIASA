@@ -65,3 +65,75 @@ implementation_slices:
       - tests/unit/test_annotations.py
       - tests/unit/test_local_gui.py
       - tests/unit/test_run_artifacts.py
+  governance-and-run-controls:
+    requirement_ids:
+      - SwR-040
+      - SwR-041
+      - SwR-042
+      - SwR-043
+      - SwR-044
+      - SwR-045
+    implementation_map:
+      SwR-040:
+        code_paths:
+          - src/siasa/governance/roles.py
+        test_paths:
+          - tests/unit/test_governance_guards.py
+      SwR-041:
+        code_paths:
+          - src/siasa/governance/roles.py
+          - src/siasa/runs/orchestrator.py
+        test_paths:
+          - tests/unit/test_governance_guards.py
+          - tests/unit/test_run_orchestrator.py
+      SwR-042:
+        code_paths:
+          - src/siasa/governance/export_policy.py
+          - src/siasa/reporting/country_report.py
+          - src/siasa/reporting/daily_snapshot.py
+        test_paths:
+          - tests/unit/test_governance_guards.py
+          - tests/unit/test_reporting_daily_snapshot.py
+      SwR-043:
+        code_paths:
+          - src/siasa/runs/orchestrator.py
+          - src/siasa/reporting/country_report.py
+          - src/siasa/reporting/daily_snapshot.py
+        test_paths:
+          - tests/unit/test_run_orchestrator.py
+      SwR-044:
+        code_paths:
+          - src/siasa/runs/run_state.py
+          - src/siasa/snapshots/models.py
+          - src/siasa/snapshots/service.py
+          - src/siasa/runs/orchestrator.py
+          - src/siasa/runs/artifacts.py
+        test_paths:
+          - tests/unit/test_run_state.py
+          - tests/unit/test_run_orchestrator.py
+          - tests/unit/test_run_artifacts.py
+      SwR-045:
+        code_paths:
+          - src/siasa/governance/roles.py
+          - src/siasa/runs/reprocessing.py
+        test_paths:
+          - tests/unit/test_governance_guards.py
+          - tests/unit/test_reprocessing.py
+    known_code_paths:
+      - src/siasa/governance/roles.py
+      - src/siasa/governance/export_policy.py
+      - src/siasa/reporting/country_report.py
+      - src/siasa/reporting/daily_snapshot.py
+      - src/siasa/runs/orchestrator.py
+      - src/siasa/runs/run_state.py
+      - src/siasa/snapshots/models.py
+      - src/siasa/snapshots/service.py
+      - src/siasa/runs/artifacts.py
+      - src/siasa/runs/reprocessing.py
+    known_test_paths:
+      - tests/unit/test_governance_guards.py
+      - tests/unit/test_reporting_daily_snapshot.py
+      - tests/unit/test_run_orchestrator.py
+      - tests/unit/test_run_state.py
+      - tests/unit/test_run_artifacts.py
+      - tests/unit/test_reprocessing.py
