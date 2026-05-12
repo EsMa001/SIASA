@@ -209,6 +209,7 @@ class DailyRunOrchestrator:
                 normalized_records=normalized_records,
                 features=features,
                 domain_statuses=domain_statuses,
+                lineage_records=lineage_records,
                 snapshot=snapshot,
                 daily_report=daily_report,
                 country_reports=country_reports,

@@ -61,6 +61,20 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
         "country_profile": {"format": "Markdown + JSON", "report_id": "REP-COUNTRY-UKR", "country_id": "UKR"},
         "coverage_report": {"format": "Markdown + JSON + CSV", "report_id": "REP-COVERAGE-001"},
     }
+    traceability_view = {
+        "lineage_records": [
+            {
+                "source_id": "SRC-A",
+                "raw_record_id": "RAW-SRC-A-1",
+                "normalized_id": "NORM-SRC-A-1",
+                "feature_id": "A_article_count",
+                "domain_status_id": "DST-UKR-A-RUN-200",
+                "multi_domain_status_id": "MST-UKR-RUN-200",
+                "snapshot_id": "SNAP-RUN-200-v1",
+                "report_id": "REP-DAILY-RUN-200",
+            }
+        ]
+    }
     validation_view = {
         "case_id": "VAL-UKR-2022-001",
         "country_id": "UKR",
@@ -98,6 +112,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
         report_catalog=reports,
         system_status_read_model=system_status,
         validation_view_model=validation_view,
+        traceability_view_model=traceability_view,
     )
 
     assert (pages.output_dir / "index.html").exists()
@@ -109,6 +124,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert (pages.output_dir / "trends.html").exists()
     assert (pages.output_dir / "events.html").exists()
     assert (pages.output_dir / "validation.html").exists()
+    assert (pages.output_dir / "traceability.html").exists()
 
     index_html = (pages.output_dir / "index.html").read_text()
     assert "World Anomaly Map" in index_html
@@ -146,6 +162,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Validation / Backtest View" in validation_html
     assert "VAL-UKR-2022-001" in validation_html
     assert "Domain Match" in validation_html
+
+    traceability_html = (pages.output_dir / "traceability.html").read_text()
+    assert "Traceability / Lineage View" in traceability_html
+    assert "RAW-SRC-A-1" in traceability_html
+    assert "REP-DAILY-RUN-200" in traceability_html
 
 
 def test_build_local_mvp_site_copies_report_export_files_and_renders_download_links(tmp_path: Path) -> None:
@@ -284,6 +305,20 @@ def test_load_site_payload_from_artifacts_reads_persisted_json_bundle(tmp_path: 
         "known_limitations": ["historical coverage incomplete"],
         "reprocessing_comparison": {"prior_snapshot_id": "SNAP-RUN-001-v1", "new_snapshot_id": "SNAP-RUN-001-v2", "changed_versions": ["rule_version"]},
     }
+    traceability_view = {
+        "lineage_records": [
+            {
+                "source_id": "SRC-A",
+                "raw_record_id": "RAW-SRC-A-1",
+                "normalized_id": "NORM-SRC-A-1",
+                "feature_id": "A_article_count",
+                "domain_status_id": "DST-UKR-A-RUN-300",
+                "multi_domain_status_id": "MST-UKR-RUN-300",
+                "snapshot_id": "SNAP-RUN-300-v1",
+                "report_id": "REP-DAILY-SNAP-RUN-300-v1",
+            }
+        ]
+    }
 
     (artifacts_dir / "snapshot.json").write_text(json.dumps(snapshot))
     (artifacts_dir / "readmodels" / "world_map.json").write_text(json.dumps(world_map))
@@ -292,6 +327,7 @@ def test_load_site_payload_from_artifacts_reads_persisted_json_bundle(tmp_path: 
     (artifacts_dir / "readmodels" / "country_profiles" / "UKR.json").write_text(json.dumps(country_profile))
     (artifacts_dir / "readmodels" / "domain_details" / "UKR__A.json").write_text(json.dumps(domain_detail))
     (artifacts_dir / "readmodels" / "validation_backtest.json").write_text(json.dumps(validation_view))
+    (artifacts_dir / "readmodels" / "traceability_lineage.json").write_text(json.dumps(traceability_view))
     for report_name, report_payload in reports.items():
         (artifacts_dir / "reports" / f"{report_name}.json").write_text(json.dumps(report_payload))
 
@@ -304,6 +340,7 @@ def test_load_site_payload_from_artifacts_reads_persisted_json_bundle(tmp_path: 
     assert payload["system_status_read_model"]["snapshot_id"] == "SNAP-RUN-300-v1"
     assert payload["report_catalog"]["daily_snapshot"]["report_id"] == "REP-DAILY-SNAP-RUN-300-v1"
     assert payload["validation_view_model"]["case_id"] == "VAL-UKR-2022-001"
+    assert payload["traceability_view_model"]["lineage_records"][0]["raw_record_id"] == "RAW-SRC-A-1"
 
 
 def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bundle(tmp_path: Path) -> None:
@@ -409,6 +446,24 @@ def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bund
             }
         )
     )
+    (artifacts_dir / "readmodels" / "traceability_lineage.json").write_text(
+        json.dumps(
+            {
+                "lineage_records": [
+                    {
+                        "source_id": "SRC-A",
+                        "raw_record_id": "RAW-SRC-A-1",
+                        "normalized_id": "NORM-SRC-A-1",
+                        "feature_id": "A_article_count",
+                        "domain_status_id": "DST-UKR-A-RUN-301",
+                        "multi_domain_status_id": "MST-UKR-RUN-301",
+                        "snapshot_id": "SNAP-RUN-301-v1",
+                        "report_id": "REP-DAILY-SNAP-RUN-301-v1",
+                    }
+                ]
+            }
+        )
+    )
     (artifacts_dir / "reports" / "daily_snapshot.json").write_text(
         json.dumps(
             {
@@ -443,3 +498,4 @@ def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bund
     assert "SNAP-RUN-301-v1" in (tmp_path / "site" / "runs.html").read_text()
     assert "EVT-302" in (tmp_path / "site" / "events.html").read_text()
     assert "VAL-UKR-2022-001" in (tmp_path / "site" / "validation.html").read_text()
+    assert "RAW-SRC-A-1" in (tmp_path / "site" / "traceability.html").read_text()

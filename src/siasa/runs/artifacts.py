@@ -17,6 +17,7 @@ from siasa.reporting.country_report import GeneratedReport
 from siasa.runs.run_state import RunState
 from siasa.scoring.domain_status import DomainStatusResult
 from siasa.snapshots.models import Snapshot
+from siasa.traceability.lineage import LineageRecord
 
 
 @dataclass(frozen=True)
@@ -35,6 +36,7 @@ def write_run_artifacts(
     normalized_records: list[NormalizedRecord],
     features: list[FeatureValue],
     domain_statuses: dict[str, DomainStatusResult],
+    lineage_records: list[LineageRecord],
     snapshot: Snapshot,
     daily_report: GeneratedReport,
     country_reports: dict[str, GeneratedReport],
@@ -179,6 +181,16 @@ def write_run_artifacts(
         )
     )
     readmodel_paths.append(system_status_path)
+
+    traceability_path = readmodels_dir / "traceability_lineage.json"
+    traceability_path.write_text(
+        json.dumps(
+            {"lineage_records": [asdict(record) for record in lineage_records]},
+            indent=2,
+            sort_keys=True,
+        )
+    )
+    readmodel_paths.append(traceability_path)
 
     report_paths = []
     daily_report_path = reports_dir / "daily_snapshot.json"

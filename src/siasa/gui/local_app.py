@@ -35,6 +35,7 @@ def _page(title: str, body: str) -> str:
         "<a href='../trends.html'>Yearly Trend Page</a>"
         "<a href='../events.html'>Current Events Page</a>"
         "<a href='../validation.html'>Validation / Backtest View</a>"
+        "<a href='../traceability.html'>Traceability / Lineage View</a>"
         "<a href='../reports.html'>Report / Export View</a>"
         "<a href='../runs.html'>System Status / Runs</a>"
         "</nav>"
@@ -83,6 +84,10 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
     validation_view_path = readmodels_dir / 'validation_backtest.json'
     if validation_view_path.exists():
         validation_view_model = _load_json(validation_view_path)
+    traceability_view_model = None
+    traceability_view_path = readmodels_dir / 'traceability_lineage.json'
+    if traceability_view_path.exists():
+        traceability_view_model = _load_json(traceability_view_path)
 
     return {
         'world_map_read_model': world_map_read_model,
@@ -92,6 +97,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
         'report_catalog': report_catalog,
         'system_status_read_model': system_status_read_model,
         'validation_view_model': validation_view_model,
+        'traceability_view_model': traceability_view_model,
     }
 
 
@@ -297,6 +303,28 @@ def _render_validation(validation_view_model: dict[str, Any]) -> str:
     return _page("Validation / Backtest View", body)
 
 
+def _render_traceability(traceability_view_model: dict[str, Any]) -> str:
+    rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(record.get('source_id', '')))}</td>"
+        f"<td>{html.escape(str(record.get('raw_record_id', '')))}</td>"
+        f"<td>{html.escape(str(record.get('normalized_id', '')))}</td>"
+        f"<td>{html.escape(str(record.get('feature_id', '')))}</td>"
+        f"<td>{html.escape(str(record.get('domain_status_id', '')))}</td>"
+        f"<td>{html.escape(str(record.get('multi_domain_status_id', '')))}</td>"
+        f"<td>{html.escape(str(record.get('snapshot_id', '')))}</td>"
+        f"<td>{html.escape(str(record.get('report_id', '')))}</td>"
+        "</tr>"
+        for record in traceability_view_model.get('lineage_records', [])
+    )
+    body = (
+        "<h2>Traceability / Lineage View</h2>"
+        "<table><thead><tr><th>Source</th><th>Raw</th><th>Normalized</th><th>Feature</th><th>Domain Status</th><th>Multi-Domain Status</th><th>Snapshot</th><th>Report</th></tr></thead>"
+        f"<tbody>{rows}</tbody></table>"
+    )
+    return _page("Traceability / Lineage View", body)
+
+
 def build_local_mvp_site(
     output_dir: Path,
     world_map_read_model: dict[str, Any],
@@ -306,6 +334,7 @@ def build_local_mvp_site(
     report_catalog: dict[str, dict[str, Any]],
     system_status_read_model: dict[str, Any],
     validation_view_model: dict[str, Any] | None = None,
+    traceability_view_model: dict[str, Any] | None = None,
 ) -> SiteBuildResult:
     output_dir.mkdir(parents=True, exist_ok=True)
     countries_dir = output_dir / 'countries'
@@ -355,6 +384,11 @@ def build_local_mvp_site(
         validation_file = output_dir / 'validation.html'
         validation_file.write_text(_render_validation(validation_view_model))
         generated_files.append(validation_file)
+
+    if traceability_view_model is not None:
+        traceability_file = output_dir / 'traceability.html'
+        traceability_file.write_text(_render_traceability(traceability_view_model))
+        generated_files.append(traceability_file)
 
     return SiteBuildResult(output_dir=output_dir, generated_files=generated_files)
 

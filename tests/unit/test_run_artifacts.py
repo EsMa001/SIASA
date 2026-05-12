@@ -96,6 +96,7 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert (tmp_path / "bundle" / "readmodels" / "domain_details" / "UKR__B.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "source_coverage.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "system_status.json").exists()
+    assert (tmp_path / "bundle" / "readmodels" / "traceability_lineage.json").exists()
     assert (tmp_path / "bundle" / "reports" / "daily_snapshot.json").exists()
     assert (tmp_path / "bundle" / "reports" / "country_profile_UKR.json").exists()
     assert (tmp_path / "bundle" / "exports" / "daily_snapshot" / "REP-DAILY-SNAP-RUN-200-v1.md").exists()
@@ -107,6 +108,7 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     world_map = json.loads((tmp_path / "bundle" / "readmodels" / "world_map.json").read_text())
     country_profile = json.loads((tmp_path / "bundle" / "readmodels" / "country_profiles" / "UKR.json").read_text())
     system_status = json.loads((tmp_path / "bundle" / "readmodels" / "system_status.json").read_text())
+    traceability = json.loads((tmp_path / "bundle" / "readmodels" / "traceability_lineage.json").read_text())
     daily_report = json.loads((tmp_path / "bundle" / "reports" / "daily_snapshot.json").read_text())
 
     assert snapshot["snapshot_id"] == "SNAP-RUN-200-v1"
@@ -115,6 +117,8 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert country_profile["domain_states"] == {"A": "D3", "B": "D2"}
     assert country_profile["drivers"]
     assert system_status["available_reports"] == ["REP-DAILY-SNAP-RUN-200-v1", "REP-COUNTRY-UKR"]
+    assert traceability["lineage_records"][0]["raw_record_id"] == "RAW-SRC-A-1"
+    assert traceability["lineage_records"][0]["report_id"] == "REP-DAILY-SNAP-RUN-200-v1"
     assert daily_report["report_id"] == "REP-DAILY-SNAP-RUN-200-v1"
     assert daily_report["payload"]["snapshot_id"] == "SNAP-RUN-200-v1"
     assert daily_report["export_files"][0]["relative_path"] == "exports/daily_snapshot/REP-DAILY-SNAP-RUN-200-v1.md"
