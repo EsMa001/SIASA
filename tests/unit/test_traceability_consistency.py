@@ -282,19 +282,48 @@ def test_governed_validation_and_backtest_traceability_slice_definition_validate
 def test_build_requirement_closure_report_for_validation_and_backtest_slice() -> None:
     repo_root = Path(__file__).resolve().parents[2]
 
-    report = build_requirement_closure_report(
-        repo_root=repo_root,
-        slice_id="validation-and-backtest",
-    )
+    report = build_requirement_closure_report(repo_root=repo_root, slice_id="validation-and-backtest")
 
     assert report["slice_id"] == "validation-and-backtest"
     assert report["summary"] == {"closed": 2, "at_risk": 0}
-    assert report["requirements"][0]["requirement_id"] == "SwR-038"
+    assert [item["requirement_id"] for item in report["requirements"]] == ["SwR-038", "SwR-039"]
+    assert report["requirements"][0]["closure_status"] == "closed"
+    assert report["requirements"][0]["trace_links_present"] is True
     assert report["requirements"][0]["verifying_test_specs"] == ["TC-SwR-038-001"]
     assert "src/siasa/validation/cases.py" in report["requirements"][0]["code_paths"]
+    assert "tests/unit/test_validation_cases.py" in report["requirements"][0]["test_paths"]
     assert report["requirements"][1]["requirement_id"] == "SwR-039"
     assert "src/siasa/readmodels/validation_backtest.py" in report["requirements"][1]["code_paths"]
     assert "tests/unit/test_readmodels_validation_backtest.py" in report["requirements"][1]["test_paths"]
+
+
+
+def test_build_requirement_closure_report_for_catalog_and_ingestion_foundation_slice() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+
+    report = build_requirement_closure_report(repo_root=repo_root, slice_id="catalog-and-ingestion-foundation")
+
+    assert report["slice_id"] == "catalog-and-ingestion-foundation"
+    assert report["summary"] == {"closed": 8, "at_risk": 0}
+    assert [item["requirement_id"] for item in report["requirements"]] == [
+        "SwR-001",
+        "SwR-002",
+        "SwR-003",
+        "SwR-004",
+        "SwR-005",
+        "SwR-006",
+        "SwR-007",
+        "SwR-008",
+    ]
+    assert report["requirements"][0]["verifying_test_specs"] == ["TC-SwR-001-001"]
+    assert "src/siasa/catalog/loaders.py" in report["requirements"][0]["code_paths"]
+    assert "tests/unit/test_catalog_models.py" in report["requirements"][0]["test_paths"]
+    assert report["requirements"][4]["closure_status"] == "closed"
+    assert "src/siasa/runs/orchestrator.py" in report["requirements"][4]["code_paths"]
+    assert "tests/unit/test_run_orchestrator.py" in report["requirements"][4]["test_paths"]
+    assert report["requirements"][7]["requirement_id"] == "SwR-008"
+    assert "src/siasa/data/raw_models.py" in report["requirements"][7]["code_paths"]
+    assert "tests/unit/test_data_models.py" in report["requirements"][7]["test_paths"]
 
 
 
@@ -304,18 +333,19 @@ def test_build_repo_closure_report_aggregates_all_governed_slices() -> None:
     report = build_repo_closure_report(repo_root=repo_root)
 
     assert report["summary"] == {
-        "slice_count": 4,
-        "requirement_count": 18,
-        "closed": 18,
+        "slice_count": 5,
+        "requirement_count": 26,
+        "closed": 26,
         "at_risk": 0,
     }
     assert report["slice_ids"] == [
+        "catalog-and-ingestion-foundation",
         "governance-and-run-controls",
         "gui-readmodels-and-annotations",
         "reporting-and-export",
         "validation-and-backtest",
     ]
-    assert report["slices"][0]["slice_id"] == "governance-and-run-controls"
-    assert report["slices"][0]["summary"] == {"closed": 6, "at_risk": 0}
-    assert report["slices"][3]["slice_id"] == "validation-and-backtest"
-    assert report["slices"][3]["summary"] == {"closed": 2, "at_risk": 0}
+    assert report["slices"][0]["slice_id"] == "catalog-and-ingestion-foundation"
+    assert report["slices"][0]["summary"] == {"closed": 8, "at_risk": 0}
+    assert report["slices"][4]["slice_id"] == "validation-and-backtest"
+    assert report["slices"][4]["summary"] == {"closed": 2, "at_risk": 0}

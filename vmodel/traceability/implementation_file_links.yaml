@@ -1,4 +1,78 @@
 implementation_slices:
+  catalog-and-ingestion-foundation:
+    requirement_ids:
+      - SwR-001
+      - SwR-002
+      - SwR-003
+      - SwR-004
+      - SwR-005
+      - SwR-006
+      - SwR-007
+      - SwR-008
+    implementation_map:
+      SwR-001:
+        code_paths:
+          - src/siasa/catalog/models.py
+          - src/siasa/catalog/loaders.py
+        test_paths:
+          - tests/unit/test_catalog_models.py
+      SwR-002:
+        code_paths:
+          - src/siasa/catalog/models.py
+          - src/siasa/catalog/loaders.py
+        test_paths:
+          - tests/unit/test_catalog_models.py
+      SwR-003:
+        code_paths:
+          - src/siasa/catalog/models.py
+          - src/siasa/catalog/loaders.py
+        test_paths:
+          - tests/unit/test_catalog_models.py
+      SwR-004:
+        code_paths:
+          - src/siasa/adapters/base.py
+        test_paths:
+          - tests/unit/test_adapter_base.py
+      SwR-005:
+        code_paths:
+          - src/siasa/runs/run_state.py
+          - src/siasa/runs/orchestrator.py
+        test_paths:
+          - tests/unit/test_run_state.py
+          - tests/unit/test_run_orchestrator.py
+      SwR-006:
+        code_paths:
+          - src/siasa/adapters/fetch_metadata.py
+          - src/siasa/runs/orchestrator.py
+        test_paths:
+          - tests/unit/test_adapter_base.py
+          - tests/unit/test_run_orchestrator.py
+      SwR-007:
+        code_paths:
+          - src/siasa/data/raw_models.py
+          - src/siasa/runs/orchestrator.py
+        test_paths:
+          - tests/unit/test_data_models.py
+          - tests/unit/test_run_orchestrator.py
+      SwR-008:
+        code_paths:
+          - src/siasa/data/raw_models.py
+        test_paths:
+          - tests/unit/test_data_models.py
+    known_code_paths:
+      - src/siasa/catalog/models.py
+      - src/siasa/catalog/loaders.py
+      - src/siasa/adapters/base.py
+      - src/siasa/adapters/fetch_metadata.py
+      - src/siasa/data/raw_models.py
+      - src/siasa/runs/run_state.py
+      - src/siasa/runs/orchestrator.py
+    known_test_paths:
+      - tests/unit/test_catalog_models.py
+      - tests/unit/test_adapter_base.py
+      - tests/unit/test_data_models.py
+      - tests/unit/test_run_state.py
+      - tests/unit/test_run_orchestrator.py
   gui-readmodels-and-annotations:
     requirement_ids:
       - SwR-032
