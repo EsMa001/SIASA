@@ -131,6 +131,10 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
     traceability_view_path = readmodels_dir / 'traceability_lineage.json'
     if traceability_view_path.exists():
         traceability_view_model = _load_json(traceability_view_path)
+    repo_closure_view_model = None
+    repo_closure_view_path = readmodels_dir / 'repo_closure.json'
+    if repo_closure_view_path.exists():
+        repo_closure_view_model = _load_json(repo_closure_view_path)
     annotations_view_model = None
     annotations_view_path = readmodels_dir / 'annotations.json'
     if annotations_view_path.exists():
@@ -145,6 +149,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
         'system_status_read_model': system_status_read_model,
         'validation_view_model': validation_view_model,
         'traceability_view_model': traceability_view_model,
+        'repo_closure_view_model': repo_closure_view_model,
         'annotations_view_model': annotations_view_model,
     }
 
@@ -286,7 +291,26 @@ def _render_reports(report_catalog: dict[str, Any]) -> str:
     return _page("Report / Export View", body)
 
 
-def _render_runs(system_status_read_model: dict[str, Any]) -> str:
+def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_model: dict[str, Any] | None = None) -> str:
+    repo_closure_section = ""
+    if repo_closure_view_model is not None:
+        repo_closure_rows = ''.join(
+            "<tr>"
+            f"<td>{html.escape(str(slice_report.get('slice_id', '')))}</td>"
+            f"<td>{html.escape(str(slice_report.get('summary', {}).get('closed', 'n/a')))}</td>"
+            f"<td>{html.escape(str(slice_report.get('summary', {}).get('at_risk', 'n/a')))}</td>"
+            "</tr>"
+            for slice_report in repo_closure_view_model.get('slices', [])
+        )
+        summary = repo_closure_view_model.get('summary', {})
+        repo_closure_section = (
+            "<h3>Repo Closure Summary</h3>"
+            f"<p>Slices: <strong>{html.escape(str(summary.get('slice_count', 'n/a')))}</strong></p>"
+            f"<p>Requirements: <strong>{html.escape(str(summary.get('requirement_count', 'n/a')))}</strong></p>"
+            f"<p>Closed: <strong>{html.escape(str(summary.get('closed', 'n/a')))}</strong> | At risk: <strong>{html.escape(str(summary.get('at_risk', 'n/a')))}</strong></p>"
+            "<table><thead><tr><th>Slice</th><th>Closed</th><th>At Risk</th></tr></thead>"
+            f"<tbody>{repo_closure_rows}</tbody></table>"
+        )
     body = (
         "<h2>System Status / Runs</h2>"
         f"<p>Run ID: <strong>{html.escape(str(system_status_read_model.get('run_id', 'n/a')))}</strong></p>"
@@ -297,6 +321,7 @@ def _render_runs(system_status_read_model: dict[str, Any]) -> str:
         f"<h3>Coverage</h3>{_json_block(system_status_read_model.get('coverage', {}))}"
         f"<h3>Failed Sources</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in system_status_read_model.get('failed_sources', []))}</ul>"
         f"<h3>Available Reports</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in system_status_read_model.get('available_reports', []))}</ul>"
+        f"{repo_closure_section}"
     )
     return _page("System Status / Runs", body)
 
@@ -423,6 +448,7 @@ def build_local_mvp_site(
     system_status_read_model: dict[str, Any],
     validation_view_model: dict[str, Any] | None = None,
     traceability_view_model: dict[str, Any] | None = None,
+    repo_closure_view_model: dict[str, Any] | None = None,
     annotations_view_model: dict[str, Any] | None = None,
 ) -> SiteBuildResult:
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -458,7 +484,7 @@ def build_local_mvp_site(
     generated_files.append(reports_file)
 
     runs_file = output_dir / 'runs.html'
-    runs_file.write_text(_render_runs(system_status_read_model))
+    runs_file.write_text(_render_runs(system_status_read_model, repo_closure_view_model))
     generated_files.append(runs_file)
 
     trends_file = output_dir / 'trends.html'

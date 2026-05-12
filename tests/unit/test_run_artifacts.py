@@ -139,6 +139,7 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert (tmp_path / "bundle" / "readmodels" / "source_coverage.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "system_status.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "traceability_lineage.json").exists()
+    assert (tmp_path / "bundle" / "readmodels" / "repo_closure.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "annotations.json").exists()
     assert (tmp_path / "bundle" / "reports" / "daily_snapshot.json").exists()
     assert (tmp_path / "bundle" / "reports" / "country_profile_UKR.json").exists()
@@ -163,6 +164,7 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     domain_detail_a = json.loads((tmp_path / "bundle" / "readmodels" / "domain_details" / "UKR__A.json").read_text())
     system_status = json.loads((tmp_path / "bundle" / "readmodels" / "system_status.json").read_text())
     traceability = json.loads((tmp_path / "bundle" / "readmodels" / "traceability_lineage.json").read_text())
+    repo_closure = json.loads((tmp_path / "bundle" / "readmodels" / "repo_closure.json").read_text())
     annotations = json.loads((tmp_path / "bundle" / "readmodels" / "annotations.json").read_text())
     daily_report = json.loads((tmp_path / "bundle" / "reports" / "daily_snapshot.json").read_text())
     coverage_report = json.loads((tmp_path / "bundle" / "reports" / "coverage_report.json").read_text())
@@ -188,6 +190,13 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert event_report["payload"]["source_state"] == {"SRC-B": "success"}
     assert "REP-COVERAGE-RUN-200" in traceability["lineage_records"][0]["report_ids"]
     assert "REP-COUNTRY-UKR" in traceability["lineage_records"][0]["report_ids"]
+    assert repo_closure["summary"] == {"slice_count": 4, "requirement_count": 18, "closed": 18, "at_risk": 0}
+    assert repo_closure["slice_ids"] == [
+        "governance-and-run-controls",
+        "gui-readmodels-and-annotations",
+        "reporting-and-export",
+        "validation-and-backtest",
+    ]
     assert traceability["lineage_records"][0]["raw_record_id"] == "RAW-SRC-A-1"
     assert traceability["lineage_records"][0]["report_id"] == "REP-DAILY-SNAP-RUN-200-v1"
     assert annotations["by_linked_item"]["UKR"] == ["ANN-200-COUNTRY"]

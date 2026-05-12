@@ -20,6 +20,7 @@ from siasa.reporting.manual_reports import generate_coverage_report, generate_do
 from siasa.runs.run_state import RunState
 from siasa.scoring.domain_status import DomainStatusResult
 from siasa.snapshots.models import Snapshot
+from siasa.traceability.consistency import build_repo_closure_report
 from siasa.traceability.lineage import LineageRecord
 
 
@@ -268,6 +269,16 @@ def write_run_artifacts(
         )
     )
     readmodel_paths.append(traceability_path)
+
+    repo_closure_path = readmodels_dir / "repo_closure.json"
+    repo_closure_path.write_text(
+        json.dumps(
+            build_repo_closure_report(repo_root=Path(__file__).resolve().parents[3]),
+            indent=2,
+            sort_keys=True,
+        )
+    )
+    readmodel_paths.append(repo_closure_path)
 
     annotations_path = readmodels_dir / "annotations.json"
     annotations_path.write_text(json.dumps(build_annotations_view_model(annotation_records), indent=2, sort_keys=True))

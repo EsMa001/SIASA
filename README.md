@@ -70,6 +70,7 @@ Erwartete Artefaktstruktur unter `--artifacts-dir`:
 - `readmodels/domain_details/*.json`
 - `readmodels/source_coverage.json`
 - `readmodels/system_status.json`
+- `readmodels/repo_closure.json`
 - `readmodels/annotations.json`
 - `reports/*.json`
 
@@ -87,5 +88,5 @@ Die MVP-GUI-Baseline deckt die Kernseiten aus den Anforderungen ab:
 
 ## Nächste sinnvolle Schritte
 
-1. Repoweite Closure-Sicht in CLI/Artefakt-Export oder GUI sichtbar machen.
+1. Repo-Closure-Details zusätzlich in einer dedizierten Traceability-/Governance-Sicht oder als Exportdatei pro Run aufschlüsseln.
 2. Controlled reprocessing in Artefakt-/GUI-Statuspfade weiter durchziehen, falls daraus ein eigener Sichtbarkeits-Slice werden soll.

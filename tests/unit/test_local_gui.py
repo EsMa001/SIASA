@@ -157,6 +157,14 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
         "last_run": "2026-05-11T18:00:00Z",
     }
 
+    repo_closure_view = {
+        "summary": {"slice_count": 4, "requirement_count": 18, "closed": 18, "at_risk": 0},
+        "slices": [
+            {"slice_id": "governance-and-run-controls", "summary": {"closed": 6, "at_risk": 0}},
+            {"slice_id": "reporting-and-export", "summary": {"closed": 4, "at_risk": 0}},
+        ],
+    }
+
     pages = build_local_mvp_site(
         output_dir=Path("/tmp/siasa-gui-test"),
         world_map_read_model=world_map,
@@ -167,6 +175,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
         system_status_read_model=system_status,
         validation_view_model=validation_view,
         traceability_view_model=traceability_view,
+        repo_closure_view_model=repo_closure_view,
         annotations_view_model=annotations_view,
     )
 
@@ -207,6 +216,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     runs_html = (pages.output_dir / "runs.html").read_text()
     assert "System Status / Runs" in runs_html
     assert "partial_success" in runs_html
+    assert "Repo Closure Summary" in runs_html
+    assert "governance-and-run-controls" in runs_html
+    assert "reporting-and-export" in runs_html
 
     trends_html = (pages.output_dir / "trends.html").read_text()
     assert "Yearly Trend Page" in trends_html
@@ -240,6 +252,14 @@ def test_build_local_mvp_site_copies_report_export_files_and_renders_download_li
     markdown_export.write_text("# Daily Snapshot\n")
     json_export.write_text('{"snapshot_id": "SNAP-RUN-200-v1"}')
 
+    repo_closure_view = {
+        "summary": {"slice_count": 4, "requirement_count": 18, "closed": 18, "at_risk": 0},
+        "slices": [
+            {"slice_id": "governance-and-run-controls", "summary": {"closed": 6, "at_risk": 0}},
+            {"slice_id": "reporting-and-export", "summary": {"closed": 4, "at_risk": 0}},
+        ],
+    }
+
     pages = build_local_mvp_site(
         output_dir=tmp_path / "site",
         world_map_read_model={"baseline_mode": "Combined 30/90/365", "active_domains": ["A"], "countries": []},
@@ -260,13 +280,14 @@ def test_build_local_mvp_site_copies_report_export_files_and_renders_download_li
             "run_id": "RUN-200",
             "run_status": "success",
             "active_domains": ["A"],
-            "coverage": {"countries_total": 1, "countries_with_updates": 1},
+            "coverage": {"countries_total": 2, "countries_with_updates": 1},
             "failed_sources": [],
-            "available_reports": ["REP-DAILY-RUN-200"],
-            "snapshot_id": "SNAP-RUN-200-v1",
+            "available_reports": ["REP-DAILY-RUN-200", "REP-COUNTRY-UKR"],
+            "snapshot_id": "SNAP-RUN-100-v1",
             "reprocessing_status": "idle",
-            "last_run": "2026-05-11T18:00:00Z",
+            "last_run": "2026-05-10T12:00:00Z",
         },
+        repo_closure_view_model=repo_closure_view,
     )
 
     reports_html = (pages.output_dir / "reports.html").read_text()
@@ -274,6 +295,11 @@ def test_build_local_mvp_site_copies_report_export_files_and_renders_download_li
     assert "exports/daily_snapshot.json" in reports_html
     assert (pages.output_dir / "exports" / "daily_snapshot.md").read_text() == "# Daily Snapshot\n"
     assert (pages.output_dir / "exports" / "daily_snapshot.json").read_text() == '{"snapshot_id": "SNAP-RUN-200-v1"}'
+
+    runs_html = (pages.output_dir / "runs.html").read_text()
+    assert "Repo Closure Summary" in runs_html
+    assert "governance-and-run-controls" in runs_html
+    assert "reporting-and-export" in runs_html
 
 
 def test_load_site_payload_from_artifacts_reads_persisted_json_bundle(tmp_path: Path) -> None:
@@ -408,8 +434,22 @@ def test_load_site_payload_from_artifacts_reads_persisted_json_bundle(tmp_path: 
     (artifacts_dir / "readmodels" / "system_status.json").write_text(json.dumps(system_status))
     (artifacts_dir / "readmodels" / "country_profiles" / "UKR.json").write_text(json.dumps(country_profile))
     (artifacts_dir / "readmodels" / "domain_details" / "UKR__A.json").write_text(json.dumps(domain_detail))
+    repo_closure_view = {
+        "summary": {"slice_count": 4, "requirement_count": 18, "closed": 18, "at_risk": 0},
+        "slice_ids": [
+            "governance-and-run-controls",
+            "gui-readmodels-and-annotations",
+            "reporting-and-export",
+            "validation-and-backtest",
+        ],
+        "slices": [
+            {"slice_id": "governance-and-run-controls", "summary": {"closed": 6, "at_risk": 0}},
+            {"slice_id": "gui-readmodels-and-annotations", "summary": {"closed": 6, "at_risk": 0}},
+        ],
+    }
     (artifacts_dir / "readmodels" / "validation_backtest.json").write_text(json.dumps(validation_view))
     (artifacts_dir / "readmodels" / "traceability_lineage.json").write_text(json.dumps(traceability_view))
+    (artifacts_dir / "readmodels" / "repo_closure.json").write_text(json.dumps(repo_closure_view))
     (artifacts_dir / "readmodels" / "annotations.json").write_text(json.dumps(annotations_view))
     for report_name, report_payload in reports.items():
         (artifacts_dir / "reports" / f"{report_name}.json").write_text(json.dumps(report_payload))
@@ -424,6 +464,7 @@ def test_load_site_payload_from_artifacts_reads_persisted_json_bundle(tmp_path: 
     assert payload["report_catalog"]["daily_snapshot"]["report_id"] == "REP-DAILY-SNAP-RUN-300-v1"
     assert payload["validation_view_model"]["case_id"] == "VAL-UKR-2022-001"
     assert payload["traceability_view_model"]["lineage_records"][0]["raw_record_id"] == "RAW-SRC-A-1"
+    assert payload["repo_closure_view_model"]["summary"] == {"slice_count": 4, "requirement_count": 18, "closed": 18, "at_risk": 0}
     assert payload["annotations_view_model"]["by_linked_item"]["UKR"] == ["ANN-301"]
 
 
