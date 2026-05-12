@@ -9,7 +9,7 @@ SIASA ist ein V-Model-light / requirements-as-code Repository mit importierter S
 - 668 importierte Stakeholder Requirements in `vmodel/requirements/stakeholder_requirements.yaml`
 - importierte Projektkontext-Artefakte unter `vmodel/project/`, `vmodel/architecture/`, `vmodel/method/`, `vmodel/verification/` und `vmodel/traceability/`
 - lesbare Spiegelung unter `docs/`
-- funktionaler Python-Kern für Katalog, Adapter, Raw/Normalized Data, Features, Statuslogik, Snapshots, Reporting, Governance, Validation und Reprocessing
+- funktionaler Python-Kern für Katalog, Adapter, Raw/Normalized Data, Features, Statuslogik, Snapshots, Reporting, Governance, Validation, Reprocessing und bidirektionale Traceability-Konsistenzchecks
 - automatisierte Persistierung von Run-/Snapshot-/Report-/Read-Model-Artefakten in die GUI-kompatible Struktur `build/run_artifacts/latest`
 - reale Exportdateien (`.md`, `.json`) pro Report unter `build/run_artifacts/latest/exports/` inklusive Download-Links in der lokalen GUI
 - Validation-/Backtest-View als lokale GUI-Seite mit optionalem Artefakt-Load aus `readmodels/validation_backtest.json`
@@ -26,6 +26,9 @@ SIASA ist ein V-Model-light / requirements-as-code Repository mit importierter S
 - `vmodel/project/data_sources.yaml`
 - `vmodel/project/mvp_countries.yaml`
 - `vmodel/method/feature_catalog.yaml`
+- `vmodel/traceability/trace_links.yaml`
+- `vmodel/traceability/implementation_file_links.yaml`
+- `src/siasa/traceability/consistency.py`
 
 ## Verzeichnisstruktur
 
@@ -39,6 +42,7 @@ SIASA ist ein V-Model-light / requirements-as-code Repository mit importierter S
 - `vmodel/method/` – Statusmodelle und Feature-Katalog
 - `vmodel/verification/` – Akzeptanzkriterien und Validierungsmodell
 - `vmodel/traceability/` – Traceability-Artefakte und Traceability-Zielmodell
+- `src/siasa/traceability/` – Runtime-Lineage und bidirektionale Traceability-Consistency-Checks
 - `docs/` – lesbare Spiegelung und Importanalyse
 
 ## Lokale GUI starten
@@ -81,5 +85,5 @@ Die MVP-GUI-Baseline deckt die Kernseiten aus den Anforderungen ab:
 
 ## Nächste sinnvolle Schritte
 
-1. Annotationen bis in Artefaktbundles und GUI-Views durchziehen.
-2. Weitere Stakeholder-Anforderungen iterativ über System-/Software-/Test-Artefakte schließen.
+1. Governed Traceability-Slices über weitere Requirement-Bereiche ausweiten.
+2. Maschinell berechenbaren Closure-Status pro Requirement aus Requirements, Trace-Links, Datei-/Test-Zuordnung und Testergebnissen ableiten.

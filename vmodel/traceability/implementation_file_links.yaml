@@ -1,0 +1,67 @@
+implementation_slices:
+  gui-readmodels-and-annotations:
+    requirement_ids:
+      - SwR-032
+      - SwR-033
+      - SwR-034
+      - SwR-035
+      - SwR-036
+      - SwR-037
+    implementation_map:
+      SwR-032:
+        code_paths:
+          - src/siasa/readmodels/world_map.py
+          - src/siasa/gui/local_app.py
+        test_paths:
+          - tests/unit/test_local_gui.py
+      SwR-033:
+        code_paths:
+          - src/siasa/readmodels/country_profile.py
+          - src/siasa/gui/local_app.py
+        test_paths:
+          - tests/unit/test_local_gui.py
+      SwR-034:
+        code_paths:
+          - src/siasa/readmodels/domain_detail.py
+          - src/siasa/gui/local_app.py
+        test_paths:
+          - tests/unit/test_local_gui.py
+      SwR-035:
+        code_paths:
+          - src/siasa/readmodels/source_coverage.py
+          - src/siasa/gui/local_app.py
+        test_paths:
+          - tests/unit/test_local_gui.py
+      SwR-036:
+        code_paths:
+          - src/siasa/annotations/models.py
+          - src/siasa/readmodels/annotations.py
+          - src/siasa/runs/artifacts.py
+          - src/siasa/runs/orchestrator.py
+          - src/siasa/gui/local_app.py
+        test_paths:
+          - tests/unit/test_annotations.py
+          - tests/unit/test_local_gui.py
+          - tests/unit/test_run_artifacts.py
+      SwR-037:
+        code_paths:
+          - src/siasa/annotations/models.py
+          - src/siasa/gui/local_app.py
+          - src/siasa/runs/artifacts.py
+        test_paths:
+          - tests/unit/test_annotations.py
+          - tests/unit/test_run_artifacts.py
+    known_code_paths:
+      - src/siasa/readmodels/world_map.py
+      - src/siasa/readmodels/country_profile.py
+      - src/siasa/readmodels/domain_detail.py
+      - src/siasa/readmodels/source_coverage.py
+      - src/siasa/annotations/models.py
+      - src/siasa/readmodels/annotations.py
+      - src/siasa/runs/artifacts.py
+      - src/siasa/runs/orchestrator.py
+      - src/siasa/gui/local_app.py
+    known_test_paths:
+      - tests/unit/test_annotations.py
+      - tests/unit/test_local_gui.py
+      - tests/unit/test_run_artifacts.py
