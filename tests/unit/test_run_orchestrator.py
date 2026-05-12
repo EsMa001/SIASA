@@ -4,8 +4,10 @@ from dataclasses import dataclass
 
 from siasa.adapters.base import FetchResult, SourceAdapter
 from siasa.data.normalized_models import NormalizedRecord
+from siasa.data.raw_models import RawRecord
 from siasa.features.domain_a import DomainAFeatureService
 from siasa.features.domain_b import DomainBFeatureService
+from siasa.features.base import FeatureValue
 from siasa.runs.orchestrator import DailyRunOrchestrator
 from siasa.traceability.lineage import LineageRecord
 from siasa.scoring.data_sufficiency import evaluate_data_sufficiency
@@ -105,6 +107,7 @@ def test_daily_run_orchestrator_executes_end_to_end_pipeline() -> None:
     assert result.country_reports["UKR"].report_id == "REP-COUNTRY-UKR"
     assert result.country_reports["UKR"].json_payload["multi_domain_status"] == "S3"
     assert result.country_reports["UKR"].json_payload["domain_states"] == {"A": "D3", "B": "D2"}
+    assert result.country_reports["UKR"].json_payload["linked_events"] == ["EVT-UKR-RUN-100"]
 
 
 
@@ -235,6 +238,9 @@ def test_daily_run_orchestrator_builds_lineage_records_for_features_and_snapshot
     assert result.lineage_records[0].source_id == "SRC-A"
     assert result.lineage_records[0].snapshot_id == "SNAP-RUN-103-v1"
     assert result.lineage_records[0].report_id == "REP-DAILY-SNAP-RUN-103-v1"
+    assert "REP-COUNTRY-UKR" in result.lineage_records[0].report_ids
+    assert "REP-COVERAGE-RUN-103" in result.lineage_records[0].report_ids
+    assert "REP-DOMAIN-UKR-A" in result.lineage_records[0].report_ids
 
 
 
@@ -334,3 +340,110 @@ def test_daily_run_orchestrator_blocks_run_when_active_source_governance_metadat
     assert result.failure_artifact.failed_sources == ["SRC-A"]
     assert result.fetch_metadata_records == []
     assert result.daily_report.json_payload["failure_reason"] == "source_governance_invalid"
+
+
+
+def test_country_report_and_lineage_only_reference_event_reports_when_event_source_records_exist() -> None:
+    orchestrator = DailyRunOrchestrator(
+        adapters=[],
+        normalizer=_normalize,
+        feature_services=[],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A", "B"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+    )
+
+    features = [
+        FeatureValue(
+            feature_id="B_event_count",
+            country_id="UKR",
+            domain="B",
+            value=5.0,
+            coverage=1.0,
+            provenance_source_ids=["SRC-B"],
+            confidence_inputs={"source_count": 1},
+        )
+    ]
+    normalized_records = [
+        NormalizedRecord(
+            normalized_id="NORM-SRC-B-1",
+            country_id="UKR",
+            timestamp="2026-05-11T18:00:00Z",
+            domain="B",
+            signal_key="incident_index",
+            value=5.0,
+            provenance_source_id="SRC-B",
+            quality_context={"expected_source_count": 1, "freshness_hours": 6},
+        )
+    ]
+
+    run_state = orchestrator.run(run_id="RUN-107").run_state
+    country_reports = orchestrator._build_country_reports(
+        run_state=run_state,
+        country_id="UKR",
+        features=features,
+        normalized_records=normalized_records,
+        domain_statuses={"B": _domain_status_analyzer("B", features)},
+        multi_domain_status=derive_multi_domain_status([_domain_status_analyzer("B", features)]),
+    )
+
+    snapshot = type("S", (), {"run_id": "RUN-107", "snapshot_id": "SNAP-RUN-107-v1"})()
+    lineage_records = orchestrator._build_lineage_records(
+        raw_records=[
+            RawRecord(
+                raw_record_id="RAW-SRC-B-1",
+                source_id="SRC-B",
+                fetched_at="RUN-107",
+                storage_mode="payload",
+                raw_payload={"signal_key": "incident_index", "value": 5.0},
+            )
+        ],
+        normalized_records=normalized_records,
+        features=features,
+        domain_statuses={"B": _domain_status_analyzer("B", features)},
+        snapshot=snapshot,
+        report=type("R", (), {"report_id": "REP-DAILY-SNAP-RUN-107-v1"})(),
+        country_reports=country_reports,
+    )
+
+    assert country_reports["UKR"].json_payload["linked_events"] == []
+    assert all("REP-EVENT-EVT-UKR-RUN-107" not in record.report_ids for record in lineage_records)
+
+
+
+def test_lineage_only_adds_event_report_to_event_derived_domain_b_features() -> None:
+    adapters = [
+        FakeAdapter(
+            source_id="SRC-B",
+            domain="B",
+            _result=FetchResult(
+                records=[
+                    {"signal_key": "conflict_event_count", "value": 4.0, "expected_source_count": 1, "freshness_hours": 12},
+                    {"signal_key": "disaster_alert_level", "value": 2.0, "expected_source_count": 1, "freshness_hours": 12},
+                ]
+            ),
+        )
+    ]
+
+    orchestrator = DailyRunOrchestrator(
+        adapters=adapters,
+        normalizer=_normalize,
+        feature_services=[DomainBFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["B"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+    )
+
+    result = orchestrator.run(run_id="RUN-108")
+
+    lineage_by_feature = {record.feature_id: record for record in result.lineage_records}
+    assert "REP-EVENT-EVT-UKR-RUN-108" in lineage_by_feature["B_event_count"].report_ids
+    assert "REP-EVENT-EVT-UKR-RUN-108" not in lineage_by_feature["B_disaster_alert_level"].report_ids

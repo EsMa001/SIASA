@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from siasa.governance.export_policy import enforce_export_policy
-from .country_report import GeneratedReport
+from .country_report import GeneratedReport, require_safe_identifier
 from siasa.snapshots.models import Snapshot
 
 
@@ -12,6 +12,8 @@ def generate_daily_snapshot_report(
     contains_personal_data: bool = False,
     capability: str = "analysis",
 ) -> GeneratedReport:
+    require_safe_identifier(snapshot.snapshot_id, "snapshot_id")
+    require_safe_identifier(snapshot.run_id, "run_id")
     payload = {
         "snapshot_id": snapshot.snapshot_id,
         "run_id": snapshot.run_id,

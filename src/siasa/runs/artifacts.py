@@ -16,6 +16,7 @@ from siasa.readmodels.source_coverage import build_source_coverage_read_model
 from siasa.readmodels.system_status import build_system_status_read_model
 from siasa.readmodels.world_map import build_world_map_read_model
 from siasa.reporting.country_report import GeneratedReport
+from siasa.reporting.manual_reports import generate_coverage_report, generate_domain_report, generate_event_report
 from siasa.runs.run_state import RunState
 from siasa.scoring.domain_status import DomainStatusResult
 from siasa.snapshots.models import Snapshot
@@ -80,9 +81,38 @@ def write_run_artifacts(
     source_context_by_source = _build_source_context(fetch_metadata_records)
     country_reports_by_id = {country_id: report for country_id, report in country_reports.items()}
     annotation_records = annotation_records or []
+    extra_reports: list[tuple[str, GeneratedReport]] = []
 
     for country_id, multi_domain_status in sorted(country_statuses.items()):
         country_features = [feature for feature in features if feature.country_id == country_id]
+        country_event_records = [
+            record
+            for record in normalized_records
+            if record.country_id == country_id and record.domain == "B" and "event" in record.signal_key
+        ]
+        country_event_ids: list[str] = []
+        if country_event_records:
+            event_id = f"EVT-{country_id}-{run_state.run_id}"
+            country_event_ids.append(event_id)
+            event_signal_keys = sorted({record.signal_key for record in country_event_records})
+            event_source_ids = sorted({record.provenance_source_id for record in country_event_records})
+            extra_reports.append(
+                (
+                    f"event_report_{event_id}.json",
+                    generate_event_report(
+                        country_id=country_id,
+                        event_id=event_id,
+                        title=f"Event context for {country_id}",
+                        summary=f"Signals: {', '.join(event_signal_keys)}",
+                        related_domains=["B"],
+                        source_state={
+                            source_id: str(source_context_by_source[source_id]["status"])
+                            for source_id in event_source_ids
+                            if source_id in source_context_by_source
+                        },
+                    ),
+                )
+            )
         country_domain_states = {
             domain: result.status
             for domain, result in sorted(domain_statuses.items())
@@ -96,7 +126,7 @@ def write_run_artifacts(
             domain_states=country_domain_states,
             trends={"yearly": []},
             drivers=sorted(feature.feature_id for feature in country_features),
-            linked_events=[],
+            linked_events=country_event_ids,
             coverage=_mean([feature.coverage for feature in country_features]),
             confidence=_mean(
                 [
@@ -154,11 +184,34 @@ def write_run_artifacts(
             domain_path.write_text(json.dumps(domain_read_model, indent=2, sort_keys=True))
             readmodel_paths.append(domain_path)
 
+            extra_reports.append(
+                (
+                    f"domain_report_{country_id}_{domain}.json",
+                    generate_domain_report(
+                        country_id=country_id,
+                        domain=domain,
+                        anomaly_state=status,
+                        feature_values=[
+                            {
+                                "feature_id": feature.feature_id,
+                                "value": feature.value,
+                                "coverage": feature.coverage,
+                            }
+                            for feature in domain_features
+                        ],
+                        source_state={entry["source_id"]: str(entry["status"]) for entry in source_context},
+                        uncertainty=list(domain_statuses[domain].uncertainty_indicators),
+                        linked_event_ids=country_event_ids if domain == "B" else [],
+                    ),
+                )
+            )
+
+    source_coverage_rows = [_build_source_coverage_row(record) for record in fetch_metadata_records]
     source_coverage_path = readmodels_dir / "source_coverage.json"
     source_coverage_path.write_text(
         json.dumps(
             build_source_coverage_read_model(
-                [_build_source_coverage_row(record) for record in fetch_metadata_records],
+                source_coverage_rows,
                 missing_sources=[],
             ),
             indent=2,
@@ -167,7 +220,24 @@ def write_run_artifacts(
     )
     readmodel_paths.append(source_coverage_path)
 
-    available_reports = [daily_report.report_id] + [report.report_id for _, report in sorted(country_reports_by_id.items())]
+    extra_reports.append(
+        (
+            "coverage_report.json",
+            generate_coverage_report(
+                run_id=run_state.run_id,
+                source_rows=source_coverage_rows,
+                failed_sources=run_state.failed_sources,
+                missing_sources=[],
+                source_state={record.source_id: record.fetch_status for record in fetch_metadata_records},
+            ),
+        )
+    )
+
+    available_reports = sorted(
+        [daily_report.report_id]
+        + [report.report_id for _, report in sorted(country_reports_by_id.items())]
+        + [report.report_id for _, report in extra_reports]
+    )
     system_status_path = readmodels_dir / "system_status.json"
     system_status_path.write_text(
         json.dumps(
@@ -211,6 +281,12 @@ def write_run_artifacts(
     report_paths.append(daily_report_path)
     for country_id, report in sorted(country_reports_by_id.items()):
         report_path = reports_dir / f"country_profile_{country_id}.json"
+        report_path.write_text(
+            json.dumps(_serialize_report(report, _write_report_exports(report, exports_dir)), indent=2, sort_keys=True)
+        )
+        report_paths.append(report_path)
+    for report_filename, report in extra_reports:
+        report_path = reports_dir / report_filename
         report_path.write_text(
             json.dumps(_serialize_report(report, _write_report_exports(report, exports_dir)), indent=2, sort_keys=True)
         )

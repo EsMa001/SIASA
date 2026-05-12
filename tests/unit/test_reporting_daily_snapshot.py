@@ -76,3 +76,44 @@ def test_daily_snapshot_report_generator_blocks_targeting_capability_payloads() 
         assert "targeting" in str(exc)
     else:
         raise AssertionError("Expected targeting export to be blocked")
+
+
+
+def test_country_report_generator_rejects_unsafe_country_identifier() -> None:
+    try:
+        generate_country_report(
+            country_id="../UKR",
+            multi_domain_status="S3",
+            domain_states={"A": "D3"},
+            drivers=[],
+            counter_indicators=[],
+            coverage=0.75,
+            uncertainty=[],
+            linked_events=[],
+        )
+    except ValueError as exc:
+        assert "country_id" in str(exc)
+    else:
+        raise AssertionError("Expected unsafe country identifier to be rejected")
+
+
+
+def test_daily_snapshot_report_generator_rejects_unsafe_snapshot_identifier() -> None:
+    unsafe_snapshot = Snapshot(
+        snapshot_id="../SNAP-RUN-001-v1",
+        run_id="RUN-001",
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A"],
+        rule_versions={"domain_status": "rules-2026-05"},
+        source_state={"SRC-A": "success"},
+        analytical_outputs={"country_status": {"UKR": "S3"}},
+        status="success",
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+    )
+    try:
+        generate_daily_snapshot_report(unsafe_snapshot)
+    except ValueError as exc:
+        assert "snapshot_id" in str(exc)
+    else:
+        raise AssertionError("Expected unsafe snapshot identifier to be rejected")

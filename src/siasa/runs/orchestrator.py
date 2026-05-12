@@ -189,6 +189,7 @@ class DailyRunOrchestrator:
             run_state=run_state,
             country_id=country_id,
             features=features,
+            normalized_records=normalized_records,
             domain_statuses=domain_statuses,
             multi_domain_status=multi_domain_status,
         )
@@ -199,6 +200,7 @@ class DailyRunOrchestrator:
             domain_statuses=domain_statuses,
             snapshot=snapshot,
             report=daily_report,
+            country_reports=country_reports,
         )
         artifact_bundle = None
         if self.artifacts_output_dir is not None:
@@ -299,6 +301,7 @@ class DailyRunOrchestrator:
         run_state: RunState,
         country_id: str,
         features: list[FeatureValue],
+        normalized_records: list[NormalizedRecord],
         domain_statuses: dict[str, DomainStatusResult],
         multi_domain_status: MultiDomainStatusResult,
     ) -> dict[str, GeneratedReport]:
@@ -308,6 +311,10 @@ class DailyRunOrchestrator:
         drivers = sorted(feature.feature_id for feature in features)
         domain_states = {domain: status.status for domain, status in domain_statuses.items()}
         coverage = sum(feature.coverage for feature in features) / len(features) if features else 0.0
+        linked_events = [f"EVT-{country_id}-{run_state.run_id}"] if any(
+            record.country_id == country_id and record.domain == "B" and "event" in record.signal_key
+            for record in normalized_records
+        ) else []
         uncertainty: list[str] = []
         if run_state.status == "partial_success":
             uncertainty.append("partial_success")
@@ -322,7 +329,7 @@ class DailyRunOrchestrator:
             counter_indicators=[],
             coverage=coverage,
             uncertainty=uncertainty,
-            linked_events=[],
+            linked_events=linked_events,
         )
         return {country_id: report}
 
@@ -334,6 +341,7 @@ class DailyRunOrchestrator:
         domain_statuses: dict[str, DomainStatusResult],
         snapshot: Snapshot,
         report: GeneratedReport,
+        country_reports: dict[str, GeneratedReport],
     ) -> list[LineageRecord]:
         raw_by_source: dict[str, list[RawRecord]] = {}
         for raw_record in raw_records:
@@ -349,6 +357,21 @@ class DailyRunOrchestrator:
             raw_record = raw_by_source[source_id][0]
             normalized_record = normalized_by_source[source_id][0]
             domain_status = domain_statuses.get(feature.domain)
+            country_report = country_reports.get(feature.country_id)
+            source_normalized_records = normalized_by_source.get(source_id, [])
+            report_ids = [
+                report.report_id,
+                f"REP-COVERAGE-{snapshot.run_id}",
+                f"REP-DOMAIN-{feature.country_id}-{feature.domain}",
+            ]
+            if country_report is not None:
+                report_ids.append(country_report.report_id)
+            if (
+                feature.domain == "B"
+                and "event" in feature.feature_id
+                and any(record.domain == "B" and "event" in record.signal_key for record in source_normalized_records)
+            ):
+                report_ids.append(f"REP-EVENT-EVT-{feature.country_id}-{snapshot.run_id}")
             lineage_records.append(
                 build_lineage_record(
                     source_id=source_id,
@@ -359,6 +382,7 @@ class DailyRunOrchestrator:
                     multi_domain_status_id=f"MST-{feature.country_id}-{snapshot.run_id}",
                     snapshot_id=snapshot.snapshot_id,
                     report_id=report.report_id,
+                    report_ids=sorted(set(report_ids)),
                 )
             )
         return lineage_records

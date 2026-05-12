@@ -137,3 +137,63 @@ implementation_slices:
       - tests/unit/test_run_state.py
       - tests/unit/test_run_artifacts.py
       - tests/unit/test_reprocessing.py
+  reporting-and-export:
+    requirement_ids:
+      - SwR-028
+      - SwR-029
+      - SwR-030
+      - SwR-031
+    implementation_map:
+      SwR-028:
+        code_paths:
+          - src/siasa/reporting/daily_snapshot.py
+          - src/siasa/runs/orchestrator.py
+          - src/siasa/runs/artifacts.py
+        test_paths:
+          - tests/unit/test_reporting_daily_snapshot.py
+          - tests/unit/test_run_orchestrator.py
+          - tests/unit/test_run_artifacts.py
+      SwR-029:
+        code_paths:
+          - src/siasa/reporting/country_report.py
+          - src/siasa/runs/orchestrator.py
+          - src/siasa/runs/artifacts.py
+        test_paths:
+          - tests/unit/test_reporting_daily_snapshot.py
+          - tests/unit/test_run_orchestrator.py
+          - tests/unit/test_run_artifacts.py
+      SwR-030:
+        code_paths:
+          - src/siasa/reporting/__init__.py
+          - src/siasa/reporting/manual_reports.py
+          - src/siasa/traceability/lineage.py
+          - src/siasa/runs/artifacts.py
+        test_paths:
+          - tests/unit/test_reporting_manual_reports.py
+          - tests/unit/test_run_orchestrator.py
+          - tests/unit/test_run_artifacts.py
+      SwR-031:
+        code_paths:
+          - src/siasa/governance/export_policy.py
+          - src/siasa/reporting/country_report.py
+          - src/siasa/reporting/daily_snapshot.py
+          - src/siasa/reporting/manual_reports.py
+        test_paths:
+          - tests/unit/test_governance_guards.py
+          - tests/unit/test_reporting_daily_snapshot.py
+          - tests/unit/test_reporting_manual_reports.py
+    known_code_paths:
+      - src/siasa/governance/export_policy.py
+      - src/siasa/reporting/__init__.py
+      - src/siasa/reporting/country_report.py
+      - src/siasa/reporting/daily_snapshot.py
+      - src/siasa/reporting/manual_reports.py
+      - src/siasa/traceability/lineage.py
+      - src/siasa/runs/orchestrator.py
+      - src/siasa/runs/artifacts.py
+    known_test_paths:
+      - tests/unit/test_governance_guards.py
+      - tests/unit/test_reporting_daily_snapshot.py
+      - tests/unit/test_reporting_manual_reports.py
+      - tests/unit/test_run_orchestrator.py
+      - tests/unit/test_run_artifacts.py

@@ -142,10 +142,20 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert (tmp_path / "bundle" / "readmodels" / "annotations.json").exists()
     assert (tmp_path / "bundle" / "reports" / "daily_snapshot.json").exists()
     assert (tmp_path / "bundle" / "reports" / "country_profile_UKR.json").exists()
+    assert (tmp_path / "bundle" / "reports" / "coverage_report.json").exists()
+    assert (tmp_path / "bundle" / "reports" / "domain_report_UKR_A.json").exists()
+    assert (tmp_path / "bundle" / "reports" / "domain_report_UKR_B.json").exists()
+    assert (tmp_path / "bundle" / "reports" / "event_report_EVT-UKR-RUN-200.json").exists()
     assert (tmp_path / "bundle" / "exports" / "daily_snapshot" / "REP-DAILY-SNAP-RUN-200-v1.md").exists()
     assert (tmp_path / "bundle" / "exports" / "daily_snapshot" / "REP-DAILY-SNAP-RUN-200-v1.json").exists()
     assert (tmp_path / "bundle" / "exports" / "country_profile" / "REP-COUNTRY-UKR.md").exists()
     assert (tmp_path / "bundle" / "exports" / "country_profile" / "REP-COUNTRY-UKR.json").exists()
+    assert (tmp_path / "bundle" / "exports" / "coverage_report" / "REP-COVERAGE-RUN-200.md").exists()
+    assert (tmp_path / "bundle" / "exports" / "coverage_report" / "REP-COVERAGE-RUN-200.json").exists()
+    assert (tmp_path / "bundle" / "exports" / "domain_report" / "REP-DOMAIN-UKR-A.md").exists()
+    assert (tmp_path / "bundle" / "exports" / "domain_report" / "REP-DOMAIN-UKR-B.json").exists()
+    assert (tmp_path / "bundle" / "exports" / "event_report" / "REP-EVENT-EVT-UKR-RUN-200.md").exists()
+    assert (tmp_path / "bundle" / "exports" / "event_report" / "REP-EVENT-EVT-UKR-RUN-200.json").exists()
 
     snapshot = json.loads((tmp_path / "bundle" / "snapshot.json").read_text())
     world_map = json.loads((tmp_path / "bundle" / "readmodels" / "world_map.json").read_text())
@@ -155,15 +165,29 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     traceability = json.loads((tmp_path / "bundle" / "readmodels" / "traceability_lineage.json").read_text())
     annotations = json.loads((tmp_path / "bundle" / "readmodels" / "annotations.json").read_text())
     daily_report = json.loads((tmp_path / "bundle" / "reports" / "daily_snapshot.json").read_text())
+    coverage_report = json.loads((tmp_path / "bundle" / "reports" / "coverage_report.json").read_text())
+    domain_report_a = json.loads((tmp_path / "bundle" / "reports" / "domain_report_UKR_A.json").read_text())
+    event_report = json.loads((tmp_path / "bundle" / "reports" / "event_report_EVT-UKR-RUN-200.json").read_text())
 
     assert snapshot["snapshot_id"] == "SNAP-RUN-200-v1"
     assert world_map["countries"] == [{"country_id": "UKR", "status": "S3", "active_domains": ["A", "B"], "drill_down_target": "/countries/UKR"}]
     assert country_profile["multi_domain_status"] == "S3"
     assert country_profile["domain_states"] == {"A": "D3", "B": "D2"}
     assert country_profile["drivers"]
+    assert country_profile["linked_events"] == ["EVT-UKR-RUN-200"]
     assert country_profile["annotations"] == ["ANN-200-COUNTRY"]
     assert domain_detail_a["annotations"] == ["ANN-200-DOMAIN"]
-    assert system_status["available_reports"] == ["REP-DAILY-SNAP-RUN-200-v1", "REP-COUNTRY-UKR"]
+    assert system_status["available_reports"] == ["REP-COUNTRY-UKR", "REP-COVERAGE-RUN-200", "REP-DAILY-SNAP-RUN-200-v1", "REP-DOMAIN-UKR-A", "REP-DOMAIN-UKR-B", "REP-EVENT-EVT-UKR-RUN-200"]
+    assert coverage_report["report_id"] == "REP-COVERAGE-RUN-200"
+    assert coverage_report["payload"]["run_id"] == "RUN-200"
+    assert coverage_report["payload"]["failed_sources"] == []
+    assert domain_report_a["report_id"] == "REP-DOMAIN-UKR-A"
+    assert domain_report_a["payload"]["source_state"] == {"SRC-A": "success"}
+    assert event_report["report_id"] == "REP-EVENT-EVT-UKR-RUN-200"
+    assert event_report["payload"]["related_domains"] == ["B"]
+    assert event_report["payload"]["source_state"] == {"SRC-B": "success"}
+    assert "REP-COVERAGE-RUN-200" in traceability["lineage_records"][0]["report_ids"]
+    assert "REP-COUNTRY-UKR" in traceability["lineage_records"][0]["report_ids"]
     assert traceability["lineage_records"][0]["raw_record_id"] == "RAW-SRC-A-1"
     assert traceability["lineage_records"][0]["report_id"] == "REP-DAILY-SNAP-RUN-200-v1"
     assert annotations["by_linked_item"]["UKR"] == ["ANN-200-COUNTRY"]

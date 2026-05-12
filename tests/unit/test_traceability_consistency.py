@@ -201,3 +201,50 @@ def test_build_requirement_closure_report_for_governance_and_run_controls_slice(
     assert report["requirements"][5]["verifying_test_specs"] == ["TC-SwR-045-001"]
     assert "src/siasa/governance/roles.py" in report["requirements"][5]["code_paths"]
     assert "tests/unit/test_governance_guards.py" in report["requirements"][5]["test_paths"]
+
+
+
+def test_governed_reporting_and_export_traceability_slice_definition_validates_cleanly() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+
+    slice_definition = load_traceability_slice_definition(
+        repo_root=repo_root,
+        slice_id="reporting-and-export",
+    )
+
+    result = validate_traceability_slice(
+        repo_root=repo_root,
+        requirement_ids=slice_definition["requirement_ids"],
+        implementation_map=slice_definition["implementation_map"],
+        known_code_paths=slice_definition["known_code_paths"],
+        known_test_paths=slice_definition["known_test_paths"],
+    )
+
+    assert result["missing_requirements"] == []
+    assert result["missing_trace_links"] == []
+    assert result["missing_code_paths"] == {}
+    assert result["missing_test_paths"] == {}
+    assert result["missing_files"] == []
+    assert result["unmapped_code_paths"] == []
+    assert result["unmapped_test_paths"] == []
+
+
+
+def test_build_requirement_closure_report_for_reporting_and_export_slice() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+
+    report = build_requirement_closure_report(
+        repo_root=repo_root,
+        slice_id="reporting-and-export",
+    )
+
+    assert report["slice_id"] == "reporting-and-export"
+    assert report["summary"] == {"closed": 4, "at_risk": 0}
+    assert report["requirements"][0]["requirement_id"] == "SwR-028"
+    assert report["requirements"][0]["verifying_test_specs"] == ["TC-SwR-028-001"]
+    assert "src/siasa/reporting/daily_snapshot.py" in report["requirements"][0]["code_paths"]
+    assert report["requirements"][2]["requirement_id"] == "SwR-030"
+    assert "src/siasa/reporting/manual_reports.py" in report["requirements"][2]["code_paths"]
+    assert "tests/unit/test_reporting_manual_reports.py" in report["requirements"][2]["test_paths"]
+    assert report["requirements"][3]["requirement_id"] == "SwR-031"
+    assert "src/siasa/governance/export_policy.py" in report["requirements"][3]["code_paths"]

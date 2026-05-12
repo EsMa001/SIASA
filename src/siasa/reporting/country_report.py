@@ -6,6 +6,15 @@ from typing import Any
 from siasa.governance.export_policy import enforce_export_policy
 
 
+
+def require_safe_identifier(value: str, label: str) -> str:
+    if not value:
+        raise ValueError(f"{label} is required")
+    if "/" in value or "\\" in value or ".." in value:
+        raise ValueError(f"{label} contains unsafe identifier content")
+    return value
+
+
 @dataclass(frozen=True)
 class GeneratedReport:
     report_id: str
@@ -28,6 +37,9 @@ def generate_country_report(
     contains_personal_data: bool = False,
     capability: str = "analysis",
 ) -> GeneratedReport:
+    country_id = require_safe_identifier(country_id, "country_id")
+    for event_id in linked_events:
+        require_safe_identifier(event_id, "linked event identifier")
     payload = {
         "country_id": country_id,
         "multi_domain_status": multi_domain_status,
