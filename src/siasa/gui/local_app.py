@@ -8,6 +8,9 @@ from pathlib import Path
 from typing import Any
 
 
+SitePayload = dict[str, Any]
+
+
 @dataclass(frozen=True)
 class SiteBuildResult:
     output_dir: Path
@@ -41,6 +44,48 @@ def _page(title: str, body: str) -> str:
 
 def _json_block(data: Any) -> str:
     return f"<pre>{html.escape(json.dumps(data, indent=2, sort_keys=True))}</pre>"
+
+
+def _load_json(path: Path) -> dict[str, Any]:
+    return json.loads(path.read_text())
+
+
+def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
+    snapshot = _load_json(artifacts_dir / 'snapshot.json')
+
+    readmodels_dir = artifacts_dir / 'readmodels'
+    world_map_read_model = _load_json(readmodels_dir / 'world_map.json')
+    source_coverage_read_model = _load_json(readmodels_dir / 'source_coverage.json')
+    system_status_read_model = _load_json(readmodels_dir / 'system_status.json')
+    system_status_read_model.setdefault('run_id', snapshot.get('run_id'))
+    system_status_read_model.setdefault('run_status', snapshot.get('status'))
+    system_status_read_model.setdefault('snapshot_id', snapshot.get('snapshot_id'))
+    system_status_read_model.setdefault('active_domains', snapshot.get('active_domains', []))
+
+    country_profile_read_models = {
+        country_file.stem: _load_json(country_file)
+        for country_file in sorted((readmodels_dir / 'country_profiles').glob('*.json'))
+    }
+    domain_detail_read_models = {
+        (str(read_model['country_id']), str(read_model['domain'])): read_model
+        for read_model in (
+            _load_json(domain_file)
+            for domain_file in sorted((readmodels_dir / 'domain_details').glob('*.json'))
+        )
+    }
+    report_catalog = {
+        report_file.stem: _load_json(report_file)
+        for report_file in sorted((artifacts_dir / 'reports').glob('*.json'))
+    }
+
+    return {
+        'world_map_read_model': world_map_read_model,
+        'country_profile_read_models': country_profile_read_models,
+        'domain_detail_read_models': domain_detail_read_models,
+        'source_coverage_read_model': source_coverage_read_model,
+        'report_catalog': report_catalog,
+        'system_status_read_model': system_status_read_model,
+    }
 
 
 def _render_index(world_map_read_model: dict[str, Any]) -> str:
@@ -320,9 +365,17 @@ def _demo_payload() -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description='Build a local SIASA MVP GUI site.')
     parser.add_argument('--output-dir', default='build/local_gui', help='Target directory for generated HTML files.')
+    parser.add_argument(
+        '--artifacts-dir',
+        default=None,
+        help='Optional directory containing persisted snapshot, report, and read-model JSON artifacts.',
+    )
     args = parser.parse_args(argv)
 
-    payload = _demo_payload()
+    if args.artifacts_dir:
+        payload = load_site_payload_from_artifacts(Path(args.artifacts_dir))
+    else:
+        payload = _demo_payload()
     result = build_local_mvp_site(output_dir=Path(args.output_dir), **payload)
     print(f'Generated SIASA local GUI at {result.output_dir / "index.html"}')
     return 0

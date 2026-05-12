@@ -42,9 +42,24 @@ Demo-Site generieren:
 
 `PYTHONPATH=src /opt/hermes/.venv/bin/python -m siasa.gui.local_app --output-dir build/local_gui`
 
+Persistierte Artefakte verwenden:
+
+`PYTHONPATH=src /opt/hermes/.venv/bin/python -m siasa.gui.local_app --output-dir build/local_gui --artifacts-dir build/run_artifacts/latest`
+
 oder über den Paket-Entry-Point nach Installation:
 
-`siasa-local-gui --output-dir build/local_gui`
+`siasa-local-gui --output-dir build/local_gui --artifacts-dir build/run_artifacts/latest`
+
+Erwartete Artefaktstruktur unter `--artifacts-dir`:
+- `snapshot.json`
+- `readmodels/world_map.json`
+- `readmodels/country_profiles/*.json`
+- `readmodels/domain_details/*.json`
+- `readmodels/source_coverage.json`
+- `readmodels/system_status.json`
+- `reports/*.json`
+
+Ohne `--artifacts-dir` verwendet die GUI weiterhin die Demo-Daten.
 
 Danach `build/local_gui/index.html` im Browser öffnen.
 
@@ -58,7 +73,8 @@ Die MVP-GUI-Baseline deckt die Kernseiten aus den Anforderungen ab:
 
 ## Nächste sinnvolle Schritte
 
-1. GUI-Baseline an persistierte Run-/Snapshot-Artefakte anbinden statt Demo-Daten.
-2. Current Events, Yearly Trend und Validation/Backtest Views ergänzen.
-3. Traceability- und Exportpfade bis GUI-Interaktionen durchziehen.
-4. Weitere Stakeholder-Anforderungen iterativ über System-/Software-/Test-Artefakte schließen.
+1. Persistierte Run-Artefakte automatisiert in die erwartete GUI-Artefaktstruktur schreiben.
+2. Report-/Export-View mit realen Exportdateien und Download-Pfaden anbinden.
+3. Validation/Backtest-View ergänzen.
+4. Traceability- und Annotation-Pfade bis GUI-Interaktionen durchziehen.
+5. Weitere Stakeholder-Anforderungen iterativ über System-/Software-/Test-Artefakte schließen.
