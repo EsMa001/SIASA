@@ -29,6 +29,7 @@ SIASA ist ein V-Model-light / requirements-as-code Repository mit importierter S
 - `vmodel/traceability/trace_links.yaml`
 - `vmodel/traceability/implementation_file_links.yaml`
 - `src/siasa/traceability/consistency.py`
+- `tests/unit/test_traceability_consistency.py`
 
 ## Verzeichnisstruktur
 

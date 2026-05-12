@@ -1,6 +1,10 @@
 from pathlib import Path
 
-from siasa.traceability.consistency import load_traceability_slice_definition, validate_traceability_slice
+from siasa.traceability.consistency import (
+    build_requirement_closure_report,
+    load_traceability_slice_definition,
+    validate_traceability_slice,
+)
 
 
 def test_validate_traceability_slice_for_gui_and_annotation_requirements() -> None:
@@ -96,3 +100,55 @@ def test_governed_gui_annotation_traceability_slice_definition_validates_cleanly
     assert result["missing_files"] == []
     assert result["unmapped_code_paths"] == []
     assert result["unmapped_test_paths"] == []
+
+
+def test_build_requirement_closure_report_for_governed_slice() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+
+    report = build_requirement_closure_report(
+        repo_root=repo_root,
+        slice_id="gui-readmodels-and-annotations",
+    )
+
+    assert report["slice_id"] == "gui-readmodels-and-annotations"
+    assert report["summary"] == {"closed": 6, "at_risk": 0}
+    assert report["requirements"][0]["requirement_id"] == "SwR-032"
+    assert report["requirements"][0]["closure_status"] == "closed"
+    assert report["requirements"][0]["verifying_test_specs"] == ["TC-SwR-032-001"]
+    assert report["requirements"][4]["requirement_id"] == "SwR-036"
+    assert report["requirements"][4]["closure_status"] == "closed"
+    assert "src/siasa/readmodels/annotations.py" in report["requirements"][4]["code_paths"]
+
+
+def test_build_requirement_closure_report_marks_requirement_at_risk_when_verification_is_missing() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+
+    report = build_requirement_closure_report(
+        repo_root=repo_root,
+        slice_definition={
+            "requirement_ids": ["SwR-032"],
+            "implementation_map": {
+                "SwR-032": {
+                    "code_paths": ["src/siasa/readmodels/world_map.py"],
+                    "test_paths": [],
+                }
+            },
+            "known_code_paths": ["src/siasa/readmodels/world_map.py"],
+            "known_test_paths": [],
+        },
+        slice_id="incomplete-slice",
+    )
+
+    assert report["summary"] == {"closed": 0, "at_risk": 1}
+    assert report["requirements"] == [
+        {
+            "requirement_id": "SwR-032",
+            "closure_status": "at_risk",
+            "trace_links_present": True,
+            "verifying_test_specs": ["TC-SwR-032-001"],
+            "code_paths": ["src/siasa/readmodels/world_map.py"],
+            "test_paths": [],
+            "missing_files": [],
+            "issues": ["missing_test_paths"],
+        }
+    ]

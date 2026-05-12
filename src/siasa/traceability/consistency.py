@@ -126,3 +126,67 @@ def validate_traceability_slice(
         "unmapped_code_paths": unmapped_code_paths,
         "unmapped_test_paths": unmapped_test_paths,
     }
+
+
+def build_requirement_closure_report(
+    *,
+    repo_root: Path,
+    slice_id: str,
+    slice_definition: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    if slice_definition is None:
+        slice_definition = load_traceability_slice_definition(repo_root=repo_root, slice_id=slice_id)
+
+    validation = validate_traceability_slice(
+        repo_root=repo_root,
+        requirement_ids=slice_definition["requirement_ids"],
+        implementation_map=slice_definition["implementation_map"],
+        known_code_paths=slice_definition.get("known_code_paths"),
+        known_test_paths=slice_definition.get("known_test_paths"),
+    )
+
+    requirements: list[dict[str, Any]] = []
+    closed_count = 0
+    at_risk_count = 0
+    for requirement_id in slice_definition["requirement_ids"]:
+        code_paths = list(slice_definition["implementation_map"].get(requirement_id, {}).get("code_paths", []))
+        test_paths = list(slice_definition["implementation_map"].get(requirement_id, {}).get("test_paths", []))
+        requirement_missing_files = [
+            path for path in validation["missing_files"] if path in set(code_paths + test_paths)
+        ]
+        issues: list[str] = []
+        if requirement_id in validation["missing_requirements"]:
+            issues.append("missing_requirement_mapping")
+        if requirement_id in validation["missing_trace_links"]:
+            issues.append("missing_trace_links")
+        if requirement_id in validation["missing_code_paths"]:
+            issues.append("missing_code_paths")
+        if requirement_id in validation["missing_test_paths"]:
+            issues.append("missing_test_paths")
+        if requirement_missing_files:
+            issues.append("missing_files")
+
+        closure_status = "closed" if not issues else "at_risk"
+        if closure_status == "closed":
+            closed_count += 1
+        else:
+            at_risk_count += 1
+
+        requirements.append(
+            {
+                "requirement_id": requirement_id,
+                "closure_status": closure_status,
+                "trace_links_present": requirement_id not in validation["missing_trace_links"],
+                "verifying_test_specs": validation["requirement_to_tests"].get(requirement_id, []),
+                "code_paths": code_paths,
+                "test_paths": test_paths,
+                "missing_files": requirement_missing_files,
+                "issues": issues,
+            }
+        )
+
+    return {
+        "slice_id": slice_id,
+        "summary": {"closed": closed_count, "at_risk": at_risk_count},
+        "requirements": requirements,
+    }
