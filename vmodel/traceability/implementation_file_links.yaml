@@ -139,6 +139,65 @@ implementation_slices:
       - tests/unit/test_annotations.py
       - tests/unit/test_local_gui.py
       - tests/unit/test_run_artifacts.py
+  feature-computation-foundation:
+    requirement_ids:
+      - SwR-011
+      - SwR-012
+      - SwR-013
+      - SwR-014
+      - SwR-015
+      - SwR-016
+    implementation_map:
+      SwR-011:
+        code_paths:
+          - src/siasa/features/base.py
+        test_paths:
+          - tests/unit/test_features_base.py
+      SwR-012:
+        code_paths:
+          - src/siasa/features/domain_a.py
+          - src/siasa/features/base.py
+        test_paths:
+          - tests/unit/test_features_domain_a.py
+          - tests/unit/test_features_base.py
+      SwR-013:
+        code_paths:
+          - src/siasa/features/domain_b.py
+          - src/siasa/features/base.py
+        test_paths:
+          - tests/unit/test_features_domain_b.py
+          - tests/unit/test_features_base.py
+      SwR-014:
+        code_paths:
+          - src/siasa/features/domain_d.py
+          - src/siasa/features/base.py
+        test_paths:
+          - tests/unit/test_features_domain_d.py
+          - tests/unit/test_features_base.py
+      SwR-015:
+        code_paths:
+          - src/siasa/features/base.py
+        test_paths:
+          - tests/unit/test_features_domain_a.py
+          - tests/unit/test_features_base.py
+      SwR-016:
+        code_paths:
+          - src/siasa/features/base.py
+        test_paths:
+          - tests/unit/test_features_base.py
+          - tests/unit/test_features_domain_a.py
+          - tests/unit/test_features_domain_b.py
+          - tests/unit/test_features_domain_d.py
+    known_code_paths:
+      - src/siasa/features/base.py
+      - src/siasa/features/domain_a.py
+      - src/siasa/features/domain_b.py
+      - src/siasa/features/domain_d.py
+    known_test_paths:
+      - tests/unit/test_features_base.py
+      - tests/unit/test_features_domain_a.py
+      - tests/unit/test_features_domain_b.py
+      - tests/unit/test_features_domain_d.py
   governance-and-run-controls:
     requirement_ids:
       - SwR-040

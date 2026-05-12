@@ -345,19 +345,45 @@ def test_build_requirement_closure_report_for_normalization_and_mapping_slice() 
 
 
 
+def test_build_requirement_closure_report_for_feature_computation_foundation_slice() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+
+    report = build_requirement_closure_report(repo_root=repo_root, slice_id="feature-computation-foundation")
+
+    assert report["slice_id"] == "feature-computation-foundation"
+    assert report["summary"] == {"closed": 6, "at_risk": 0}
+    assert [item["requirement_id"] for item in report["requirements"]] == [
+        "SwR-011",
+        "SwR-012",
+        "SwR-013",
+        "SwR-014",
+        "SwR-015",
+        "SwR-016",
+    ]
+    assert report["requirements"][0]["verifying_test_specs"] == ["TC-SwR-011-001"]
+    assert "src/siasa/features/base.py" in report["requirements"][0]["code_paths"]
+    assert "tests/unit/test_features_base.py" in report["requirements"][0]["test_paths"]
+    assert report["requirements"][4]["verifying_test_specs"] == ["TC-SwR-015-001"]
+    assert "tests/unit/test_features_domain_a.py" in report["requirements"][4]["test_paths"]
+    assert report["requirements"][5]["verifying_test_specs"] == ["TC-SwR-016-001"]
+    assert "tests/unit/test_features_base.py" in report["requirements"][5]["test_paths"]
+
+
+
 def test_build_repo_closure_report_aggregates_all_governed_slices() -> None:
     repo_root = Path(__file__).resolve().parents[2]
 
     report = build_repo_closure_report(repo_root=repo_root)
 
     assert report["summary"] == {
-        "slice_count": 6,
-        "requirement_count": 28,
-        "closed": 28,
+        "slice_count": 7,
+        "requirement_count": 34,
+        "closed": 34,
         "at_risk": 0,
     }
     assert report["slice_ids"] == [
         "catalog-and-ingestion-foundation",
+        "feature-computation-foundation",
         "governance-and-run-controls",
         "gui-readmodels-and-annotations",
         "normalization-and-mapping",
@@ -366,5 +392,5 @@ def test_build_repo_closure_report_aggregates_all_governed_slices() -> None:
     ]
     assert report["slices"][0]["slice_id"] == "catalog-and-ingestion-foundation"
     assert report["slices"][0]["summary"] == {"closed": 8, "at_risk": 0}
-    assert report["slices"][5]["slice_id"] == "validation-and-backtest"
-    assert report["slices"][5]["summary"] == {"closed": 2, "at_risk": 0}
+    assert report["slices"][6]["slice_id"] == "validation-and-backtest"
+    assert report["slices"][6]["summary"] == {"closed": 2, "at_risk": 0}

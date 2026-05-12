@@ -45,6 +45,12 @@ class FeatureServiceRegistry:
     def has_optional_hook(self, domain: str) -> bool:
         return domain in self._optional_hooks
 
+    def execute_optional_hook(self, domain: str, records: list[NormalizedRecord]) -> list["FeatureValue"]:
+        hook = self._optional_hooks.get(domain)
+        if hook is None:
+            return []
+        return hook(records)
+
 
 def build_feature_value(
     feature_id: str,
