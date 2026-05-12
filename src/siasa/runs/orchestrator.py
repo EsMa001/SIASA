@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Callable
 
 from siasa.adapters.base import SourceAdapter
 from siasa.adapters.fetch_metadata import FetchMetadataRecord
+from siasa.annotations.models import AnnotationRecord
 from siasa.features.base import FeatureService, FeatureValue
 from siasa.data.normalized_models import NormalizedRecord
 from siasa.data.raw_models import RawRecord
@@ -67,6 +68,7 @@ class DailyRunOrchestrator:
     algorithm_version: str
     data_version: str
     source_records: dict[str, dict[str, str]] | None = None
+    annotation_records: list[AnnotationRecord] | None = None
     artifacts_output_dir: Path | None = None
     baseline_mode: str = "Combined 30/90/365"
 
@@ -213,6 +215,7 @@ class DailyRunOrchestrator:
                 snapshot=snapshot,
                 daily_report=daily_report,
                 country_reports=country_reports,
+                annotation_records=self.annotation_records or [],
                 baseline_mode=self.baseline_mode,
             )
         return DailyRunResult(

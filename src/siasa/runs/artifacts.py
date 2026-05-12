@@ -6,8 +6,10 @@ from pathlib import Path
 from typing import Any
 
 from siasa.adapters.fetch_metadata import FetchMetadataRecord
+from siasa.annotations.models import AnnotationRecord
 from siasa.data.normalized_models import NormalizedRecord
 from siasa.features.base import FeatureValue
+from siasa.readmodels.annotations import build_annotations_view_model
 from siasa.readmodels.country_profile import build_country_profile_read_model
 from siasa.readmodels.domain_detail import build_domain_detail_read_model
 from siasa.readmodels.source_coverage import build_source_coverage_read_model
@@ -40,6 +42,7 @@ def write_run_artifacts(
     snapshot: Snapshot,
     daily_report: GeneratedReport,
     country_reports: dict[str, GeneratedReport],
+    annotation_records: list[AnnotationRecord] | None = None,
     baseline_mode: str = "Combined 30/90/365",
 ) -> RunArtifactBundle:
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -76,6 +79,7 @@ def write_run_artifacts(
     readmodel_paths = [world_map_path]
     source_context_by_source = _build_source_context(fetch_metadata_records)
     country_reports_by_id = {country_id: report for country_id, report in country_reports.items()}
+    annotation_records = annotation_records or []
 
     for country_id, multi_domain_status in sorted(country_statuses.items()):
         country_features = [feature for feature in features if feature.country_id == country_id]
@@ -85,6 +89,7 @@ def write_run_artifacts(
             if any(feature.country_id == country_id and feature.domain == domain for feature in country_features)
         }
         country_uncertainty = _build_country_uncertainty(run_state)
+        country_annotation_ids = _annotation_ids_for_item(annotation_records, country_id)
         country_profile = build_country_profile_read_model(
             country_id=country_id,
             multi_domain_status=multi_domain_status,
@@ -102,7 +107,7 @@ def write_run_artifacts(
             ),
             counter_indicators=[],
             uncertainty=country_uncertainty,
-            annotations=[],
+            annotations=country_annotation_ids,
         )
         country_profile_path = country_profiles_dir / f"{country_id}.json"
         country_profile_path.write_text(json.dumps(country_profile, indent=2, sort_keys=True))
@@ -120,6 +125,7 @@ def write_run_artifacts(
                 for source_id in sorted({record.provenance_source_id for record in domain_records})
                 if source_id in source_context_by_source
             ]
+            domain_annotation_ids = _annotation_ids_for_item(annotation_records, f"{country_id}:{domain}")
             domain_read_model = build_domain_detail_read_model(
                 country_id=country_id,
                 domain=domain,
@@ -142,6 +148,7 @@ def write_run_artifacts(
                 source_context=source_context,
                 anomaly_state=status,
                 uncertainty=list(domain_statuses[domain].uncertainty_indicators),
+                annotations=domain_annotation_ids,
             )
             domain_path = domain_details_dir / f"{country_id}__{domain}.json"
             domain_path.write_text(json.dumps(domain_read_model, indent=2, sort_keys=True))
@@ -191,6 +198,10 @@ def write_run_artifacts(
         )
     )
     readmodel_paths.append(traceability_path)
+
+    annotations_path = readmodels_dir / "annotations.json"
+    annotations_path.write_text(json.dumps(build_annotations_view_model(annotation_records), indent=2, sort_keys=True))
+    readmodel_paths.append(annotations_path)
 
     report_paths = []
     daily_report_path = reports_dir / "daily_snapshot.json"
@@ -273,6 +284,10 @@ def _build_source_coverage_row(record: FetchMetadataRecord) -> dict[str, object]
         "freshness_hours": None,
         "confidence": None,
     }
+
+
+def _annotation_ids_for_item(annotation_records: list[AnnotationRecord], item_id: str) -> list[str]:
+    return [annotation.annotation_id for annotation in annotation_records if item_id in annotation.linked_items]
 
 
 def _build_country_uncertainty(run_state: RunState) -> list[str]:

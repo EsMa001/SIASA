@@ -75,6 +75,60 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             }
         ]
     }
+    annotations_view = {
+        "annotations": [
+            {
+                "annotation_id": "ANN-001",
+                "created_at": "2026-05-11T18:05:00Z",
+                "author": "analyst",
+                "scope": "country",
+                "annotation_type": "context_note",
+                "severity_assessment": "relevant",
+                "confidence_assessment": "medium",
+                "text": "Replicated agency report likely inflated country-level signal volume.",
+                "tags": ["source_dependency"],
+                "linked_items": ["UKR"],
+                "review_status": "draft",
+            },
+            {
+                "annotation_id": "ANN-002",
+                "created_at": "2026-05-11T18:06:00Z",
+                "author": "analyst",
+                "scope": "domain",
+                "annotation_type": "lineage_note",
+                "severity_assessment": "uncertain",
+                "confidence_assessment": "high",
+                "text": "Domain A spike is traceable to two closely coupled source clusters.",
+                "tags": ["lineage"],
+                "linked_items": ["UKR:A", "A_article_count"],
+                "review_status": "reviewed",
+            },
+            {
+                "annotation_id": "ANN-003",
+                "created_at": "2026-05-11T18:07:00Z",
+                "author": "analyst",
+                "scope": "snapshot",
+                "annotation_type": "review_note",
+                "severity_assessment": "uncertain",
+                "confidence_assessment": "low",
+                "text": "Snapshot review pending source outage assessment.",
+                "tags": ["review_pending"],
+                "linked_items": ["SNAP-RUN-200-v1"],
+                "review_status": "unreviewed",
+            },
+        ],
+        "by_scope": {
+            "country": ["ANN-001"],
+            "domain": ["ANN-002"],
+            "snapshot": ["ANN-003"],
+        },
+        "by_linked_item": {
+            "UKR": ["ANN-001"],
+            "UKR:A": ["ANN-002"],
+            "A_article_count": ["ANN-002"],
+            "SNAP-RUN-200-v1": ["ANN-003"],
+        },
+    }
     validation_view = {
         "case_id": "VAL-UKR-2022-001",
         "country_id": "UKR",
@@ -113,6 +167,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
         system_status_read_model=system_status,
         validation_view_model=validation_view,
         traceability_view_model=traceability_view,
+        annotations_view_model=annotations_view,
     )
 
     assert (pages.output_dir / "index.html").exists()
@@ -125,6 +180,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert (pages.output_dir / "events.html").exists()
     assert (pages.output_dir / "validation.html").exists()
     assert (pages.output_dir / "traceability.html").exists()
+    assert (pages.output_dir / "annotations.html").exists()
 
     index_html = (pages.output_dir / "index.html").read_text()
     assert "World Anomaly Map" in index_html
@@ -136,11 +192,13 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Country Profile" in country_html
     assert "A_news_volume" in country_html
     assert "ANN-001" in country_html
+    assert "Replicated agency report likely inflated country-level signal volume." in country_html
 
     domain_html = (pages.output_dir / "domains" / "UKR-A.html").read_text()
     assert "Domain Detail" in domain_html
     assert "delta_to_baseline" in domain_html
     assert "SRC-A" in domain_html
+    assert "Domain A spike is traceable to two closely coupled source clusters." in domain_html
 
     reports_html = (pages.output_dir / "reports.html").read_text()
     assert "Report / Export View" in reports_html
@@ -167,6 +225,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Traceability / Lineage View" in traceability_html
     assert "RAW-SRC-A-1" in traceability_html
     assert "REP-DAILY-RUN-200" in traceability_html
+
+    annotations_html = (pages.output_dir / "annotations.html").read_text()
+    assert "Analyst Annotations View" in annotations_html
+    assert "Snapshot review pending source outage assessment." in annotations_html
+    assert "UKR:A" in annotations_html
 
 
 def test_build_local_mvp_site_copies_report_export_files_and_renders_download_links(tmp_path: Path) -> None:
@@ -319,6 +382,25 @@ def test_load_site_payload_from_artifacts_reads_persisted_json_bundle(tmp_path: 
             }
         ]
     }
+    annotations_view = {
+        "annotations": [
+            {
+                "annotation_id": "ANN-301",
+                "created_at": "2026-05-11T18:05:00Z",
+                "author": "analyst",
+                "scope": "country",
+                "annotation_type": "context_note",
+                "severity_assessment": "relevant",
+                "confidence_assessment": "medium",
+                "text": "Country profile reviewed against replicated reporting.",
+                "tags": ["review"],
+                "linked_items": ["UKR"],
+                "review_status": "draft",
+            }
+        ],
+        "by_scope": {"country": ["ANN-301"]},
+        "by_linked_item": {"UKR": ["ANN-301"]},
+    }
 
     (artifacts_dir / "snapshot.json").write_text(json.dumps(snapshot))
     (artifacts_dir / "readmodels" / "world_map.json").write_text(json.dumps(world_map))
@@ -328,6 +410,7 @@ def test_load_site_payload_from_artifacts_reads_persisted_json_bundle(tmp_path: 
     (artifacts_dir / "readmodels" / "domain_details" / "UKR__A.json").write_text(json.dumps(domain_detail))
     (artifacts_dir / "readmodels" / "validation_backtest.json").write_text(json.dumps(validation_view))
     (artifacts_dir / "readmodels" / "traceability_lineage.json").write_text(json.dumps(traceability_view))
+    (artifacts_dir / "readmodels" / "annotations.json").write_text(json.dumps(annotations_view))
     for report_name, report_payload in reports.items():
         (artifacts_dir / "reports" / f"{report_name}.json").write_text(json.dumps(report_payload))
 
@@ -341,6 +424,7 @@ def test_load_site_payload_from_artifacts_reads_persisted_json_bundle(tmp_path: 
     assert payload["report_catalog"]["daily_snapshot"]["report_id"] == "REP-DAILY-SNAP-RUN-300-v1"
     assert payload["validation_view_model"]["case_id"] == "VAL-UKR-2022-001"
     assert payload["traceability_view_model"]["lineage_records"][0]["raw_record_id"] == "RAW-SRC-A-1"
+    assert payload["annotations_view_model"]["by_linked_item"]["UKR"] == ["ANN-301"]
 
 
 def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bundle(tmp_path: Path) -> None:
@@ -464,6 +548,29 @@ def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bund
             }
         )
     )
+    (artifacts_dir / "readmodels" / "annotations.json").write_text(
+        json.dumps(
+            {
+                "annotations": [
+                    {
+                        "annotation_id": "ANN-401",
+                        "created_at": "2026-05-11T18:05:00Z",
+                        "author": "analyst",
+                        "scope": "country",
+                        "annotation_type": "context_note",
+                        "severity_assessment": "relevant",
+                        "confidence_assessment": "medium",
+                        "text": "CLI verification annotation.",
+                        "tags": ["cli"],
+                        "linked_items": ["UKR"],
+                        "review_status": "draft",
+                    }
+                ],
+                "by_scope": {"country": ["ANN-401"]},
+                "by_linked_item": {"UKR": ["ANN-401"]},
+            }
+        )
+    )
     (artifacts_dir / "reports" / "daily_snapshot.json").write_text(
         json.dumps(
             {
@@ -499,3 +606,4 @@ def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bund
     assert "EVT-302" in (tmp_path / "site" / "events.html").read_text()
     assert "VAL-UKR-2022-001" in (tmp_path / "site" / "validation.html").read_text()
     assert "RAW-SRC-A-1" in (tmp_path / "site" / "traceability.html").read_text()
+    assert "CLI verification annotation." in (tmp_path / "site" / "annotations.html").read_text()

@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from siasa.adapters.base import FetchResult, SourceAdapter
+from siasa.annotations.models import AnnotationRecord
 from siasa.data.normalized_models import NormalizedRecord
 from siasa.features.domain_a import DomainAFeatureService
 from siasa.features.domain_b import DomainBFeatureService
@@ -83,6 +84,47 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
         rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
         algorithm_version="alg-0.1",
         data_version="data-0.1",
+        annotation_records=[
+            AnnotationRecord(
+                annotation_id="ANN-200-COUNTRY",
+                created_at="2026-05-11T18:05:00Z",
+                author="analyst",
+                scope="country",
+                annotation_type="context_note",
+                severity_assessment="relevant",
+                confidence_assessment="medium",
+                text="Country-level review note.",
+                tags=["country"],
+                linked_items=["UKR"],
+                review_status="draft",
+            ),
+            AnnotationRecord(
+                annotation_id="ANN-200-DOMAIN",
+                created_at="2026-05-11T18:06:00Z",
+                author="analyst",
+                scope="domain",
+                annotation_type="lineage_note",
+                severity_assessment="uncertain",
+                confidence_assessment="high",
+                text="Domain-level lineage note.",
+                tags=["domain"],
+                linked_items=["UKR:A"],
+                review_status="reviewed",
+            ),
+            AnnotationRecord(
+                annotation_id="ANN-200-SNAPSHOT",
+                created_at="2026-05-11T18:07:00Z",
+                author="analyst",
+                scope="snapshot",
+                annotation_type="review_note",
+                severity_assessment="uncertain",
+                confidence_assessment="low",
+                text="Snapshot review note.",
+                tags=["snapshot"],
+                linked_items=["SNAP-RUN-200-v1"],
+                review_status="unreviewed",
+            ),
+        ],
         artifacts_output_dir=tmp_path / "bundle",
     )
 
@@ -97,6 +139,7 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert (tmp_path / "bundle" / "readmodels" / "source_coverage.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "system_status.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "traceability_lineage.json").exists()
+    assert (tmp_path / "bundle" / "readmodels" / "annotations.json").exists()
     assert (tmp_path / "bundle" / "reports" / "daily_snapshot.json").exists()
     assert (tmp_path / "bundle" / "reports" / "country_profile_UKR.json").exists()
     assert (tmp_path / "bundle" / "exports" / "daily_snapshot" / "REP-DAILY-SNAP-RUN-200-v1.md").exists()
@@ -107,8 +150,10 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     snapshot = json.loads((tmp_path / "bundle" / "snapshot.json").read_text())
     world_map = json.loads((tmp_path / "bundle" / "readmodels" / "world_map.json").read_text())
     country_profile = json.loads((tmp_path / "bundle" / "readmodels" / "country_profiles" / "UKR.json").read_text())
+    domain_detail_a = json.loads((tmp_path / "bundle" / "readmodels" / "domain_details" / "UKR__A.json").read_text())
     system_status = json.loads((tmp_path / "bundle" / "readmodels" / "system_status.json").read_text())
     traceability = json.loads((tmp_path / "bundle" / "readmodels" / "traceability_lineage.json").read_text())
+    annotations = json.loads((tmp_path / "bundle" / "readmodels" / "annotations.json").read_text())
     daily_report = json.loads((tmp_path / "bundle" / "reports" / "daily_snapshot.json").read_text())
 
     assert snapshot["snapshot_id"] == "SNAP-RUN-200-v1"
@@ -116,9 +161,14 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert country_profile["multi_domain_status"] == "S3"
     assert country_profile["domain_states"] == {"A": "D3", "B": "D2"}
     assert country_profile["drivers"]
+    assert country_profile["annotations"] == ["ANN-200-COUNTRY"]
+    assert domain_detail_a["annotations"] == ["ANN-200-DOMAIN"]
     assert system_status["available_reports"] == ["REP-DAILY-SNAP-RUN-200-v1", "REP-COUNTRY-UKR"]
     assert traceability["lineage_records"][0]["raw_record_id"] == "RAW-SRC-A-1"
     assert traceability["lineage_records"][0]["report_id"] == "REP-DAILY-SNAP-RUN-200-v1"
+    assert annotations["by_linked_item"]["UKR"] == ["ANN-200-COUNTRY"]
+    assert annotations["by_linked_item"]["UKR:A"] == ["ANN-200-DOMAIN"]
+    assert annotations["by_scope"]["snapshot"] == ["ANN-200-SNAPSHOT"]
     assert daily_report["report_id"] == "REP-DAILY-SNAP-RUN-200-v1"
     assert daily_report["payload"]["snapshot_id"] == "SNAP-RUN-200-v1"
     assert daily_report["export_files"][0]["relative_path"] == "exports/daily_snapshot/REP-DAILY-SNAP-RUN-200-v1.md"
@@ -154,6 +204,47 @@ def test_daily_run_orchestrator_writes_partial_success_bundle_with_failed_source
         rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
         algorithm_version="alg-0.1",
         data_version="data-0.1",
+        annotation_records=[
+            AnnotationRecord(
+                annotation_id="ANN-200-COUNTRY",
+                created_at="2026-05-11T18:05:00Z",
+                author="analyst",
+                scope="country",
+                annotation_type="context_note",
+                severity_assessment="relevant",
+                confidence_assessment="medium",
+                text="Country-level review note.",
+                tags=["country"],
+                linked_items=["UKR"],
+                review_status="draft",
+            ),
+            AnnotationRecord(
+                annotation_id="ANN-200-DOMAIN",
+                created_at="2026-05-11T18:06:00Z",
+                author="analyst",
+                scope="domain",
+                annotation_type="lineage_note",
+                severity_assessment="uncertain",
+                confidence_assessment="high",
+                text="Domain-level lineage note.",
+                tags=["domain"],
+                linked_items=["UKR:A"],
+                review_status="reviewed",
+            ),
+            AnnotationRecord(
+                annotation_id="ANN-200-SNAPSHOT",
+                created_at="2026-05-11T18:07:00Z",
+                author="analyst",
+                scope="snapshot",
+                annotation_type="review_note",
+                severity_assessment="uncertain",
+                confidence_assessment="low",
+                text="Snapshot review note.",
+                tags=["snapshot"],
+                linked_items=["SNAP-RUN-200-v1"],
+                review_status="unreviewed",
+            ),
+        ],
         artifacts_output_dir=tmp_path / "bundle",
     )
 

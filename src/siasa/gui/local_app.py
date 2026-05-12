@@ -36,6 +36,7 @@ def _page(title: str, body: str) -> str:
         "<a href='../events.html'>Current Events Page</a>"
         "<a href='../validation.html'>Validation / Backtest View</a>"
         "<a href='../traceability.html'>Traceability / Lineage View</a>"
+        "<a href='../annotations.html'>Analyst Annotations View</a>"
         "<a href='../reports.html'>Report / Export View</a>"
         "<a href='../runs.html'>System Status / Runs</a>"
         "</nav>"
@@ -51,6 +52,48 @@ def _json_block(data: Any) -> str:
 
 def _load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text())
+
+
+def _annotation_index(annotations_view_model: dict[str, Any] | None) -> dict[str, dict[str, Any]]:
+    if annotations_view_model is None:
+        return {}
+    return {
+        str(annotation.get('annotation_id')): annotation
+        for annotation in annotations_view_model.get('annotations', [])
+    }
+
+
+def _annotation_details_html(annotation_ids: list[str], annotations_view_model: dict[str, Any] | None) -> str:
+    annotation_lookup = _annotation_index(annotations_view_model)
+    if not annotation_ids:
+        return "<p>No annotations.</p>"
+
+    rows: list[str] = []
+    for annotation_id in annotation_ids:
+        annotation = annotation_lookup.get(str(annotation_id))
+        if annotation is None:
+            rows.append(
+                "<tr>"
+                f"<td>{html.escape(str(annotation_id))}</td>"
+                "<td colspan='6'>Annotation details unavailable.</td>"
+                "</tr>"
+            )
+            continue
+        rows.append(
+            "<tr>"
+            f"<td>{html.escape(str(annotation.get('annotation_id', '')))}</td>"
+            f"<td>{html.escape(str(annotation.get('scope', '')))}</td>"
+            f"<td>{html.escape(str(annotation.get('annotation_type', '')))}</td>"
+            f"<td>{html.escape(str(annotation.get('author', '')))}</td>"
+            f"<td>{html.escape(str(annotation.get('review_status', '')))}</td>"
+            f"<td>{html.escape(', '.join(str(item) for item in annotation.get('linked_items', [])))}</td>"
+            f"<td>{html.escape(str(annotation.get('text', '')))}</td>"
+            "</tr>"
+        )
+    return (
+        "<table><thead><tr><th>ID</th><th>Scope</th><th>Type</th><th>Author</th><th>Review</th><th>Linked Items</th><th>Text</th></tr></thead>"
+        f"<tbody>{''.join(rows)}</tbody></table>"
+    )
 
 
 def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
@@ -88,6 +131,10 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
     traceability_view_path = readmodels_dir / 'traceability_lineage.json'
     if traceability_view_path.exists():
         traceability_view_model = _load_json(traceability_view_path)
+    annotations_view_model = None
+    annotations_view_path = readmodels_dir / 'annotations.json'
+    if annotations_view_path.exists():
+        annotations_view_model = _load_json(annotations_view_path)
 
     return {
         'world_map_read_model': world_map_read_model,
@@ -98,6 +145,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
         'system_status_read_model': system_status_read_model,
         'validation_view_model': validation_view_model,
         'traceability_view_model': traceability_view_model,
+        'annotations_view_model': annotations_view_model,
     }
 
 
@@ -125,11 +173,12 @@ def _render_index(world_map_read_model: dict[str, Any]) -> str:
     return _page("World Anomaly Map / Global Overview", body)
 
 
-def _render_country(country_profile: dict[str, Any]) -> str:
+def _render_country(country_profile: dict[str, Any], annotations_view_model: dict[str, Any] | None = None) -> str:
     domain_rows = ''.join(
         f"<tr><td>{html.escape(domain)}</td><td>{html.escape(status)}</td></tr>"
         for domain, status in country_profile.get('domain_states', {}).items()
     )
+    annotation_ids = [str(item) for item in country_profile.get('annotations', [])]
     body = (
         "<h2>Country Profile</h2>"
         f"<p>Country: <strong>{html.escape(str(country_profile.get('country_id', 'UNKNOWN')))}</strong></p>"
@@ -141,13 +190,21 @@ def _render_country(country_profile: dict[str, Any]) -> str:
         f"<h3>Counter Indicators</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in country_profile.get('counter_indicators', []))}</ul>"
         f"<h3>Linked Events</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in country_profile.get('linked_events', []))}</ul>"
         f"<h3>Uncertainty</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in country_profile.get('uncertainty', []))}</ul>"
-        f"<h3>Annotations</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in country_profile.get('annotations', []))}</ul>"
+        f"<h3>Annotation IDs</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in annotation_ids)}</ul>"
+        f"<h3>Annotation Details</h3>{_annotation_details_html(annotation_ids, annotations_view_model)}"
         f"<h3>Trends</h3>{_json_block(country_profile.get('trends', {}))}"
     )
     return _page(f"Country Profile - {country_profile.get('country_id', 'UNKNOWN')}", body)
 
 
-def _render_domain_detail(domain_detail: dict[str, Any]) -> str:
+def _render_domain_detail(domain_detail: dict[str, Any], annotations_view_model: dict[str, Any] | None = None) -> str:
+    annotation_ids = [str(item) for item in domain_detail.get('annotations', [])]
+    if not annotation_ids and annotations_view_model is not None:
+        linked_item_key = f"{domain_detail.get('country_id', 'UNKNOWN')}:{domain_detail.get('domain', 'UNKNOWN')}"
+        annotation_ids = [
+            str(item)
+            for item in annotations_view_model.get('by_linked_item', {}).get(linked_item_key, [])
+        ]
     body = (
         "<h2>Domain Detail</h2>"
         f"<p>Country: <strong>{html.escape(str(domain_detail.get('country_id', 'UNKNOWN')))}</strong></p>"
@@ -158,6 +215,8 @@ def _render_domain_detail(domain_detail: dict[str, Any]) -> str:
         f"<h3>Feature Values</h3>{_json_block(domain_detail.get('feature_values', []))}"
         f"<h3>Source Context</h3>{_json_block(domain_detail.get('source_context', []))}"
         f"<h3>Uncertainty</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in domain_detail.get('uncertainty', []))}</ul>"
+        f"<h3>Annotation IDs</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in annotation_ids)}</ul>"
+        f"<h3>Annotation Details</h3>{_annotation_details_html(annotation_ids, annotations_view_model)}"
     )
     return _page(
         f"Domain Detail - {domain_detail.get('country_id', 'UNKNOWN')} / {domain_detail.get('domain', 'UNKNOWN')}",
@@ -325,6 +384,35 @@ def _render_traceability(traceability_view_model: dict[str, Any]) -> str:
     return _page("Traceability / Lineage View", body)
 
 
+def _render_annotations(annotations_view_model: dict[str, Any]) -> str:
+    scope_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(scope))}</td>"
+        f"<td>{html.escape(', '.join(str(item) for item in annotation_ids))}</td>"
+        "</tr>"
+        for scope, annotation_ids in sorted(annotations_view_model.get('by_scope', {}).items())
+    )
+    linked_item_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(linked_item))}</td>"
+        f"<td>{html.escape(', '.join(str(item) for item in annotation_ids))}</td>"
+        "</tr>"
+        for linked_item, annotation_ids in sorted(annotations_view_model.get('by_linked_item', {}).items())
+    )
+    body = (
+        "<h2>Analyst Annotations View</h2>"
+        f"<p>Total annotations: <strong>{html.escape(str(len(annotations_view_model.get('annotations', []))))}</strong></p>"
+        f"<h3>Annotation Details</h3>{_annotation_details_html([str(item.get('annotation_id')) for item in annotations_view_model.get('annotations', [])], annotations_view_model)}"
+        "<h3>By Scope</h3>"
+        "<table><thead><tr><th>Scope</th><th>Annotation IDs</th></tr></thead>"
+        f"<tbody>{scope_rows}</tbody></table>"
+        "<h3>By Linked Item</h3>"
+        "<table><thead><tr><th>Linked Item</th><th>Annotation IDs</th></tr></thead>"
+        f"<tbody>{linked_item_rows}</tbody></table>"
+    )
+    return _page("Analyst Annotations View", body)
+
+
 def build_local_mvp_site(
     output_dir: Path,
     world_map_read_model: dict[str, Any],
@@ -335,6 +423,7 @@ def build_local_mvp_site(
     system_status_read_model: dict[str, Any],
     validation_view_model: dict[str, Any] | None = None,
     traceability_view_model: dict[str, Any] | None = None,
+    annotations_view_model: dict[str, Any] | None = None,
 ) -> SiteBuildResult:
     output_dir.mkdir(parents=True, exist_ok=True)
     countries_dir = output_dir / 'countries'
@@ -350,12 +439,12 @@ def build_local_mvp_site(
 
     for country_id, read_model in country_profile_read_models.items():
         country_file = countries_dir / f'{country_id}.html'
-        country_file.write_text(_render_country(read_model))
+        country_file.write_text(_render_country(read_model, annotations_view_model))
         generated_files.append(country_file)
 
     for (country_id, domain), read_model in domain_detail_read_models.items():
         domain_file = domains_dir / f'{country_id}-{domain}.html'
-        domain_file.write_text(_render_domain_detail(read_model))
+        domain_file.write_text(_render_domain_detail(read_model, annotations_view_model))
         generated_files.append(domain_file)
 
     coverage_file = output_dir / 'coverage.html'
@@ -389,6 +478,11 @@ def build_local_mvp_site(
         traceability_file = output_dir / 'traceability.html'
         traceability_file.write_text(_render_traceability(traceability_view_model))
         generated_files.append(traceability_file)
+
+    if annotations_view_model is not None:
+        annotations_file = output_dir / 'annotations.html'
+        annotations_file.write_text(_render_annotations(annotations_view_model))
+        generated_files.append(annotations_file)
 
     return SiteBuildResult(output_dir=output_dir, generated_files=generated_files)
 
@@ -428,6 +522,7 @@ def _demo_payload() -> dict[str, Any]:
                 'source_context': [{'source_id': 'SRC-A', 'freshness_hours': 6, 'history_horizon': '3y', 'status': 'success'}],
                 'anomaly_state': 'D3',
                 'uncertainty': ['source_bias_possible'],
+                'annotations': ['ANN-002'],
             }
         },
         'source_coverage_read_model': {
@@ -469,6 +564,38 @@ def _demo_payload() -> dict[str, Any]:
             'validation_metrics': ['Domain Match', 'Status Match'],
             'known_limitations': ['historical coverage incomplete'],
             'reprocessing_comparison': {'prior_snapshot_id': 'SNAP-RUN-001-v1', 'new_snapshot_id': 'SNAP-RUN-001-v2', 'changed_versions': ['rule_version']},
+        },
+        'annotations_view_model': {
+            'annotations': [
+                {
+                    'annotation_id': 'ANN-001',
+                    'created_at': '2026-05-11T18:05:00Z',
+                    'author': 'analyst',
+                    'scope': 'country',
+                    'annotation_type': 'context_note',
+                    'severity_assessment': 'relevant',
+                    'confidence_assessment': 'medium',
+                    'text': 'Replicated agency report likely inflated country-level signal volume.',
+                    'tags': ['source_dependency'],
+                    'linked_items': ['UKR'],
+                    'review_status': 'draft',
+                },
+                {
+                    'annotation_id': 'ANN-002',
+                    'created_at': '2026-05-11T18:06:00Z',
+                    'author': 'analyst',
+                    'scope': 'domain',
+                    'annotation_type': 'lineage_note',
+                    'severity_assessment': 'uncertain',
+                    'confidence_assessment': 'high',
+                    'text': 'Domain A spike is traceable to two closely coupled source clusters.',
+                    'tags': ['lineage'],
+                    'linked_items': ['UKR:A', 'A_article_count'],
+                    'review_status': 'reviewed',
+                },
+            ],
+            'by_scope': {'country': ['ANN-001'], 'domain': ['ANN-002']},
+            'by_linked_item': {'UKR': ['ANN-001'], 'UKR:A': ['ANN-002'], 'A_article_count': ['ANN-002']},
         },
     }
 

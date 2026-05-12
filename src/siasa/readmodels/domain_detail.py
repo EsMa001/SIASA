@@ -11,6 +11,7 @@ def build_domain_detail_read_model(
     *,
     anomaly_state: str | None = None,
     uncertainty: list[str] | None = None,
+    annotations: list[str] | None = None,
 ) -> dict[str, object]:
     return {
         "country_id": country_id,
@@ -21,4 +22,5 @@ def build_domain_detail_read_model(
         "source_context": source_context,
         "anomaly_state": anomaly_state,
         "uncertainty": uncertainty or [],
+        "annotations": annotations or [],
     }

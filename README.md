@@ -14,6 +14,7 @@ SIASA ist ein V-Model-light / requirements-as-code Repository mit importierter S
 - reale Exportdateien (`.md`, `.json`) pro Report unter `build/run_artifacts/latest/exports/` inklusive Download-Links in der lokalen GUI
 - Validation-/Backtest-View als lokale GUI-Seite mit optionalem Artefakt-Load aus `readmodels/validation_backtest.json`
 - Traceability-/Lineage-View als lokale GUI-Seite mit optionalem Artefakt-Load aus `readmodels/traceability_lineage.json`
+- Analyst-Annotations-View als lokale GUI-Seite mit optionalem Artefakt-Load aus `readmodels/annotations.json`
 - lokal ausführbare MVP-GUI-Baseline als statische HTML-Site unter `src/siasa/gui/local_app.py`
 
 ## Wichtige Einstiege
@@ -63,6 +64,7 @@ Erwartete Artefaktstruktur unter `--artifacts-dir`:
 - `readmodels/domain_details/*.json`
 - `readmodels/source_coverage.json`
 - `readmodels/system_status.json`
+- `readmodels/annotations.json`
 - `reports/*.json`
 
 Ohne `--artifacts-dir` verwendet die GUI weiterhin die Demo-Daten.
