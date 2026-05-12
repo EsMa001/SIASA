@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import shutil
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -173,19 +174,42 @@ def _render_source_coverage(source_coverage_read_model: dict[str, Any]) -> str:
     return _page("Source / Coverage View", body)
 
 
+def _prepare_report_catalog(report_catalog: dict[str, Any], output_dir: Path) -> tuple[dict[str, dict[str, Any]], list[Path]]:
+    prepared_catalog: dict[str, dict[str, Any]] = {}
+    copied_files: list[Path] = []
+    for report_type, report_info in sorted(report_catalog.items()):
+        prepared_info = dict(report_info)
+        prepared_exports: list[dict[str, Any]] = []
+        for export_file in report_info.get('export_files', []):
+            relative_path = Path(str(export_file.get('relative_path', f"exports/{Path(str(export_file.get('path', 'export'))).name}")))
+            source_path = Path(str(export_file.get('path', '')))
+            destination_path = output_dir / relative_path
+            destination_path.parent.mkdir(parents=True, exist_ok=True)
+            if source_path.exists():
+                shutil.copy2(source_path, destination_path)
+                copied_files.append(destination_path)
+            prepared_export = dict(export_file)
+            prepared_export['href'] = relative_path.as_posix()
+            prepared_exports.append(prepared_export)
+        prepared_info['export_files'] = prepared_exports
+        prepared_catalog[report_type] = prepared_info
+    return prepared_catalog, copied_files
+
+
 def _render_reports(report_catalog: dict[str, Any]) -> str:
     rows = ''.join(
         "<tr>"
         f"<td>{html.escape(report_type)}</td>"
         f"<td>{html.escape(str(report_info.get('report_id', '')))}</td>"
         f"<td>{html.escape(str(report_info.get('format', '')))}</td>"
-        f"<td>{html.escape(json.dumps(report_info, sort_keys=True))}</td>"
+        f"<td>{''.join(f'<div><a href=\"{html.escape(str(export_file.get("href", export_file.get("relative_path", ""))))}\">{html.escape(str(export_file.get("label", export_file.get("format", "download"))))}</a></div>' for export_file in report_info.get('export_files', [])) or '-'}</td>"
+        f"<td>{html.escape(json.dumps({k: v for k, v in report_info.items() if k != 'export_files'}, sort_keys=True))}</td>"
         "</tr>"
         for report_type, report_info in sorted(report_catalog.items())
     )
     body = (
         "<h2>Report / Export View</h2>"
-        "<table><thead><tr><th>Type</th><th>Report ID</th><th>Format</th><th>Metadata</th></tr></thead>"
+        "<table><thead><tr><th>Type</th><th>Report ID</th><th>Format</th><th>Downloads</th><th>Metadata</th></tr></thead>"
         f"<tbody>{rows}</tbody></table>"
     )
     return _page("Report / Export View", body)
@@ -279,8 +303,10 @@ def build_local_mvp_site(
     coverage_file.write_text(_render_source_coverage(source_coverage_read_model))
     generated_files.append(coverage_file)
 
+    prepared_report_catalog, copied_export_files = _prepare_report_catalog(report_catalog, output_dir)
+    generated_files.extend(copied_export_files)
     reports_file = output_dir / 'reports.html'
-    reports_file.write_text(_render_reports(report_catalog))
+    reports_file.write_text(_render_reports(prepared_report_catalog))
     generated_files.append(reports_file)
 
     runs_file = output_dir / 'runs.html'

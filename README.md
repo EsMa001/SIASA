@@ -11,6 +11,7 @@ SIASA ist ein V-Model-light / requirements-as-code Repository mit importierter S
 - lesbare Spiegelung unter `docs/`
 - funktionaler Python-Kern für Katalog, Adapter, Raw/Normalized Data, Features, Statuslogik, Snapshots, Reporting, Governance, Validation und Reprocessing
 - automatisierte Persistierung von Run-/Snapshot-/Report-/Read-Model-Artefakten in die GUI-kompatible Struktur `build/run_artifacts/latest`
+- reale Exportdateien (`.md`, `.json`) pro Report unter `build/run_artifacts/latest/exports/` inklusive Download-Links in der lokalen GUI
 - lokal ausführbare MVP-GUI-Baseline als statische HTML-Site unter `src/siasa/gui/local_app.py`
 
 ## Wichtige Einstiege
@@ -76,7 +77,6 @@ Die MVP-GUI-Baseline deckt die Kernseiten aus den Anforderungen ab:
 
 ## Nächste sinnvolle Schritte
 
-1. Report-/Export-View mit realen Exportdateien und Download-Pfaden anbinden.
-2. Validation/Backtest-View ergänzen.
-3. Traceability- und Annotation-Pfade bis GUI-Interaktionen durchziehen.
-4. Weitere Stakeholder-Anforderungen iterativ über System-/Software-/Test-Artefakte schließen.
+1. Validation/Backtest-View ergänzen.
+2. Traceability- und Annotation-Pfade bis GUI-Interaktionen durchziehen.
+3. Weitere Stakeholder-Anforderungen iterativ über System-/Software-/Test-Artefakte schließen.

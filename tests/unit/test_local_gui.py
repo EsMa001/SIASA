@@ -125,6 +125,50 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "EVT-001" in events_html
 
 
+def test_build_local_mvp_site_copies_report_export_files_and_renders_download_links(tmp_path: Path) -> None:
+    export_source_dir = tmp_path / "artifact_exports"
+    export_source_dir.mkdir()
+    markdown_export = export_source_dir / "daily_snapshot.md"
+    json_export = export_source_dir / "daily_snapshot.json"
+    markdown_export.write_text("# Daily Snapshot\n")
+    json_export.write_text('{"snapshot_id": "SNAP-RUN-200-v1"}')
+
+    pages = build_local_mvp_site(
+        output_dir=tmp_path / "site",
+        world_map_read_model={"baseline_mode": "Combined 30/90/365", "active_domains": ["A"], "countries": []},
+        country_profile_read_models={},
+        domain_detail_read_models={},
+        source_coverage_read_model={"sources": [], "failed_sources": [], "missing_sources": []},
+        report_catalog={
+            "daily_snapshot": {
+                "report_id": "REP-DAILY-RUN-200",
+                "format": "json+markdown",
+                "export_files": [
+                    {"label": "Markdown", "format": "md", "path": str(markdown_export), "relative_path": "exports/daily_snapshot.md"},
+                    {"label": "JSON", "format": "json", "path": str(json_export), "relative_path": "exports/daily_snapshot.json"},
+                ],
+            }
+        },
+        system_status_read_model={
+            "run_id": "RUN-200",
+            "run_status": "success",
+            "active_domains": ["A"],
+            "coverage": {"countries_total": 1, "countries_with_updates": 1},
+            "failed_sources": [],
+            "available_reports": ["REP-DAILY-RUN-200"],
+            "snapshot_id": "SNAP-RUN-200-v1",
+            "reprocessing_status": "idle",
+            "last_run": "2026-05-11T18:00:00Z",
+        },
+    )
+
+    reports_html = (pages.output_dir / "reports.html").read_text()
+    assert "exports/daily_snapshot.md" in reports_html
+    assert "exports/daily_snapshot.json" in reports_html
+    assert (pages.output_dir / "exports" / "daily_snapshot.md").read_text() == "# Daily Snapshot\n"
+    assert (pages.output_dir / "exports" / "daily_snapshot.json").read_text() == '{"snapshot_id": "SNAP-RUN-200-v1"}'
+
+
 def test_load_site_payload_from_artifacts_reads_persisted_json_bundle(tmp_path: Path) -> None:
     artifacts_dir = tmp_path / "artifacts"
     (artifacts_dir / "readmodels" / "country_profiles").mkdir(parents=True)

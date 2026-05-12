@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Any
 
 from siasa.adapters.fetch_metadata import FetchMetadataRecord
 from siasa.data.normalized_models import NormalizedRecord
@@ -44,9 +45,11 @@ def write_run_artifacts(
     country_profiles_dir = readmodels_dir / "country_profiles"
     domain_details_dir = readmodels_dir / "domain_details"
     reports_dir = output_dir / "reports"
+    exports_dir = output_dir / "exports"
     country_profiles_dir.mkdir(parents=True, exist_ok=True)
     domain_details_dir.mkdir(parents=True, exist_ok=True)
     reports_dir.mkdir(parents=True, exist_ok=True)
+    exports_dir.mkdir(parents=True, exist_ok=True)
 
     snapshot_path = output_dir / "snapshot.json"
     snapshot_path.write_text(json.dumps(asdict(snapshot), indent=2, sort_keys=True))
@@ -179,11 +182,15 @@ def write_run_artifacts(
 
     report_paths = []
     daily_report_path = reports_dir / "daily_snapshot.json"
-    daily_report_path.write_text(json.dumps(_serialize_report(daily_report), indent=2, sort_keys=True))
+    daily_report_path.write_text(
+        json.dumps(_serialize_report(daily_report, _write_report_exports(daily_report, exports_dir)), indent=2, sort_keys=True)
+    )
     report_paths.append(daily_report_path)
     for country_id, report in sorted(country_reports_by_id.items()):
         report_path = reports_dir / f"country_profile_{country_id}.json"
-        report_path.write_text(json.dumps(_serialize_report(report), indent=2, sort_keys=True))
+        report_path.write_text(
+            json.dumps(_serialize_report(report, _write_report_exports(report, exports_dir)), indent=2, sort_keys=True)
+        )
         report_paths.append(report_path)
 
     return RunArtifactBundle(
@@ -194,14 +201,40 @@ def write_run_artifacts(
     )
 
 
-def _serialize_report(report: GeneratedReport) -> dict[str, object]:
+def _serialize_report(report: GeneratedReport, export_files: list[dict[str, Any]]) -> dict[str, object]:
     return {
         "report_id": report.report_id,
         "report_type": report.report_type,
         "format": "json+markdown",
         "markdown": report.markdown,
         "payload": report.json_payload,
+        "export_files": export_files,
     }
+
+
+def _write_report_exports(report: GeneratedReport, exports_dir: Path) -> list[dict[str, Any]]:
+    report_export_dir = exports_dir / report.report_type
+    report_export_dir.mkdir(parents=True, exist_ok=True)
+
+    markdown_path = report_export_dir / f"{report.report_id}.md"
+    markdown_path.write_text(report.markdown)
+    json_path = report_export_dir / f"{report.report_id}.json"
+    json_path.write_text(json.dumps(report.json_payload, indent=2, sort_keys=True))
+
+    return [
+        {
+            "label": "Markdown",
+            "format": "md",
+            "path": str(markdown_path),
+            "relative_path": markdown_path.relative_to(exports_dir.parent).as_posix(),
+        },
+        {
+            "label": "JSON",
+            "format": "json",
+            "path": str(json_path),
+            "relative_path": json_path.relative_to(exports_dir.parent).as_posix(),
+        },
+    ]
 
 
 def _build_source_context(fetch_metadata_records: list[FetchMetadataRecord]) -> dict[str, dict[str, object]]:

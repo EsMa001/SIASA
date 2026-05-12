@@ -98,6 +98,10 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert (tmp_path / "bundle" / "readmodels" / "system_status.json").exists()
     assert (tmp_path / "bundle" / "reports" / "daily_snapshot.json").exists()
     assert (tmp_path / "bundle" / "reports" / "country_profile_UKR.json").exists()
+    assert (tmp_path / "bundle" / "exports" / "daily_snapshot" / "REP-DAILY-SNAP-RUN-200-v1.md").exists()
+    assert (tmp_path / "bundle" / "exports" / "daily_snapshot" / "REP-DAILY-SNAP-RUN-200-v1.json").exists()
+    assert (tmp_path / "bundle" / "exports" / "country_profile" / "REP-COUNTRY-UKR.md").exists()
+    assert (tmp_path / "bundle" / "exports" / "country_profile" / "REP-COUNTRY-UKR.json").exists()
 
     snapshot = json.loads((tmp_path / "bundle" / "snapshot.json").read_text())
     world_map = json.loads((tmp_path / "bundle" / "readmodels" / "world_map.json").read_text())
@@ -113,6 +117,8 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert system_status["available_reports"] == ["REP-DAILY-SNAP-RUN-200-v1", "REP-COUNTRY-UKR"]
     assert daily_report["report_id"] == "REP-DAILY-SNAP-RUN-200-v1"
     assert daily_report["payload"]["snapshot_id"] == "SNAP-RUN-200-v1"
+    assert daily_report["export_files"][0]["relative_path"] == "exports/daily_snapshot/REP-DAILY-SNAP-RUN-200-v1.md"
+    assert json.loads((tmp_path / "bundle" / "exports" / "daily_snapshot" / "REP-DAILY-SNAP-RUN-200-v1.json").read_text())["snapshot_id"] == "SNAP-RUN-200-v1"
 
 
 def test_daily_run_orchestrator_writes_partial_success_bundle_with_failed_source_context(tmp_path: Path) -> None:
