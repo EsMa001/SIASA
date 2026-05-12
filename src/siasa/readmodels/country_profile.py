@@ -8,6 +8,12 @@ def build_country_profile_read_model(
     trends: dict[str, list[str]],
     drivers: list[str],
     linked_events: list[str],
+    *,
+    coverage: float | None = None,
+    confidence: float | None = None,
+    counter_indicators: list[str] | None = None,
+    uncertainty: list[str] | None = None,
+    annotations: list[str] | None = None,
 ) -> dict[str, object]:
     return {
         "country_id": country_id,
@@ -16,4 +22,9 @@ def build_country_profile_read_model(
         "trends": trends,
         "drivers": drivers,
         "linked_events": linked_events,
+        "coverage": coverage,
+        "confidence": confidence,
+        "counter_indicators": counter_indicators or [],
+        "uncertainty": uncertainty or [],
+        "annotations": annotations or [],
     }

@@ -10,6 +10,9 @@ def build_system_status_read_model(
     failed_sources: list[str],
     available_reports: list[str],
     snapshot_id: str | None,
+    *,
+    reprocessing_status: str = "idle",
+    last_run: str | None = None,
 ) -> dict[str, object]:
     return {
         "run_id": run_id,
@@ -22,4 +25,6 @@ def build_system_status_read_model(
         "failed_sources": failed_sources,
         "available_reports": available_reports,
         "snapshot_id": snapshot_id,
+        "reprocessing_status": reprocessing_status,
+        "last_run": last_run,
     }

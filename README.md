@@ -10,6 +10,7 @@ SIASA ist ein V-Model-light / requirements-as-code Repository mit importierter S
 - importierte Projektkontext-Artefakte unter `vmodel/project/`, `vmodel/architecture/`, `vmodel/method/`, `vmodel/verification/` und `vmodel/traceability/`
 - lesbare Spiegelung unter `docs/`
 - funktionaler Python-Kern für Katalog, Adapter, Raw/Normalized Data, Features, Statuslogik, Snapshots, Reporting, Governance, Validation und Reprocessing
+- automatisierte Persistierung von Run-/Snapshot-/Report-/Read-Model-Artefakten in die GUI-kompatible Struktur `build/run_artifacts/latest`
 - lokal ausführbare MVP-GUI-Baseline als statische HTML-Site unter `src/siasa/gui/local_app.py`
 
 ## Wichtige Einstiege
@@ -46,6 +47,8 @@ Persistierte Artefakte verwenden:
 
 `PYTHONPATH=src /opt/hermes/.venv/bin/python -m siasa.gui.local_app --output-dir build/local_gui --artifacts-dir build/run_artifacts/latest`
 
+Die Artefaktstruktur wird durch den Python-Orchestrator automatisch geschrieben, wenn `DailyRunOrchestrator(..., artifacts_output_dir=Path("build/run_artifacts/latest"))` gesetzt ist.
+
 oder über den Paket-Entry-Point nach Installation:
 
 `siasa-local-gui --output-dir build/local_gui --artifacts-dir build/run_artifacts/latest`
@@ -73,8 +76,7 @@ Die MVP-GUI-Baseline deckt die Kernseiten aus den Anforderungen ab:
 
 ## Nächste sinnvolle Schritte
 
-1. Persistierte Run-Artefakte automatisiert in die erwartete GUI-Artefaktstruktur schreiben.
-2. Report-/Export-View mit realen Exportdateien und Download-Pfaden anbinden.
-3. Validation/Backtest-View ergänzen.
-4. Traceability- und Annotation-Pfade bis GUI-Interaktionen durchziehen.
-5. Weitere Stakeholder-Anforderungen iterativ über System-/Software-/Test-Artefakte schließen.
+1. Report-/Export-View mit realen Exportdateien und Download-Pfaden anbinden.
+2. Validation/Backtest-View ergänzen.
+3. Traceability- und Annotation-Pfade bis GUI-Interaktionen durchziehen.
+4. Weitere Stakeholder-Anforderungen iterativ über System-/Software-/Test-Artefakte schließen.

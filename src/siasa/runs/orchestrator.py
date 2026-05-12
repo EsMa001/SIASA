@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable
+from pathlib import Path
+from typing import TYPE_CHECKING, Callable
 
 from siasa.adapters.base import SourceAdapter
 from siasa.adapters.fetch_metadata import FetchMetadataRecord
@@ -18,6 +19,9 @@ from siasa.snapshots.service import create_snapshot
 from siasa.traceability.lineage import LineageRecord, build_lineage_record
 
 from .run_state import RunState, SourceExecutionResult
+
+if TYPE_CHECKING:
+    from .artifacts import RunArtifactBundle
 
 
 Normalizer = Callable[[str, str, list[dict[str, float]]], list[NormalizedRecord]]
@@ -47,6 +51,7 @@ class DailyRunResult:
     snapshot: Snapshot | None
     daily_report: GeneratedReport
     country_reports: dict[str, GeneratedReport]
+    artifact_bundle: RunArtifactBundle | None = None
 
 
 @dataclass
@@ -62,6 +67,8 @@ class DailyRunOrchestrator:
     algorithm_version: str
     data_version: str
     source_records: dict[str, dict[str, str]] | None = None
+    artifacts_output_dir: Path | None = None
+    baseline_mode: str = "Combined 30/90/365"
 
     def run(self, run_id: str) -> DailyRunResult:
         run_state = RunState.start(run_id)
@@ -80,6 +87,7 @@ class DailyRunOrchestrator:
                 snapshot=None,
                 daily_report=self._build_failure_report(governance_failure),
                 country_reports={},
+                artifact_bundle=None,
             )
 
         fetch_metadata_records: list[FetchMetadataRecord] = []
@@ -156,6 +164,7 @@ class DailyRunOrchestrator:
                 snapshot=None,
                 daily_report=daily_report,
                 country_reports={},
+                artifact_bundle=None,
             )
 
         multi_domain_status = self.multi_domain_status_analyzer(list(domain_statuses.values()))
@@ -189,6 +198,22 @@ class DailyRunOrchestrator:
             snapshot=snapshot,
             report=daily_report,
         )
+        artifact_bundle = None
+        if self.artifacts_output_dir is not None:
+            from .artifacts import write_run_artifacts
+
+            artifact_bundle = write_run_artifacts(
+                output_dir=self.artifacts_output_dir,
+                run_state=run_state,
+                fetch_metadata_records=fetch_metadata_records,
+                normalized_records=normalized_records,
+                features=features,
+                domain_statuses=domain_statuses,
+                snapshot=snapshot,
+                daily_report=daily_report,
+                country_reports=country_reports,
+                baseline_mode=self.baseline_mode,
+            )
         return DailyRunResult(
             run_state=run_state,
             fetch_metadata_records=fetch_metadata_records,
@@ -202,6 +227,7 @@ class DailyRunOrchestrator:
             snapshot=snapshot,
             daily_report=daily_report,
             country_reports=country_reports,
+            artifact_bundle=artifact_bundle,
         )
 
     def _validate_active_sources(self, run_id: str) -> FailureArtifact | None:

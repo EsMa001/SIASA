@@ -8,6 +8,9 @@ def build_domain_detail_read_model(
     baseline_comparison: dict[str, object],
     feature_values: list[dict[str, object]],
     source_context: list[dict[str, object]],
+    *,
+    anomaly_state: str | None = None,
+    uncertainty: list[str] | None = None,
 ) -> dict[str, object]:
     return {
         "country_id": country_id,
@@ -16,4 +19,6 @@ def build_domain_detail_read_model(
         "baseline_comparison": baseline_comparison,
         "feature_values": feature_values,
         "source_context": source_context,
+        "anomaly_state": anomaly_state,
+        "uncertainty": uncertainty or [],
     }
