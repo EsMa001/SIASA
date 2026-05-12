@@ -27,7 +27,7 @@ SIASA ist ein V-Model-light / requirements-as-code Repository mit importierter S
 - `vmodel/project/mvp_countries.yaml`
 - `vmodel/method/feature_catalog.yaml`
 - `vmodel/traceability/trace_links.yaml`
-- `vmodel/traceability/implementation_file_links.yaml` – aktuell mit governed Slices `catalog-and-ingestion-foundation`, `feature-computation-foundation`, `gui-readmodels-and-annotations`, `governance-and-run-controls`, `normalization-and-mapping`, `reporting-and-export` und `validation-and-backtest`
+- `vmodel/traceability/implementation_file_links.yaml` – aktuell mit governed Slices `baseline-and-status-engines`, `catalog-and-ingestion-foundation`, `feature-computation-foundation`, `gui-readmodels-and-annotations`, `governance-and-run-controls`, `normalization-and-mapping`, `reporting-and-export` und `validation-and-backtest`
 - `src/siasa/traceability/consistency.py` – Slice-Closure und repoweite Closure-Aggregation (`build_requirement_closure_report`, `build_repo_closure_report`)
 - `src/siasa/runs/reprocessing.py`
 - `tests/unit/test_traceability_consistency.py`

@@ -370,18 +370,47 @@ def test_build_requirement_closure_report_for_feature_computation_foundation_sli
 
 
 
+def test_build_requirement_closure_report_for_baseline_and_status_engines_slice() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+
+    report = build_requirement_closure_report(repo_root=repo_root, slice_id="baseline-and-status-engines")
+
+    assert report["slice_id"] == "baseline-and-status-engines"
+    assert report["summary"] == {"closed": 8, "at_risk": 0}
+    assert [item["requirement_id"] for item in report["requirements"]] == [
+        "SwR-017",
+        "SwR-018",
+        "SwR-019",
+        "SwR-020",
+        "SwR-021",
+        "SwR-022",
+        "SwR-023",
+        "SwR-024",
+    ]
+    assert report["requirements"][0]["verifying_test_specs"] == ["TC-SwR-017-001"]
+    assert "src/siasa/scoring/baselines.py" in report["requirements"][0]["code_paths"]
+    assert report["requirements"][3]["verifying_test_specs"] == ["TC-SwR-020-001"]
+    assert "tests/unit/test_data_sufficiency.py" in report["requirements"][3]["test_paths"]
+    assert report["requirements"][6]["verifying_test_specs"] == ["TC-SwR-023-001"]
+    assert "src/siasa/scoring/multi_domain_status.py" in report["requirements"][6]["code_paths"]
+    assert report["requirements"][7]["verifying_test_specs"] == ["TC-SwR-024-001"]
+    assert "tests/unit/test_multi_domain_status.py" in report["requirements"][7]["test_paths"]
+
+
+
 def test_build_repo_closure_report_aggregates_all_governed_slices() -> None:
     repo_root = Path(__file__).resolve().parents[2]
 
     report = build_repo_closure_report(repo_root=repo_root)
 
     assert report["summary"] == {
-        "slice_count": 7,
-        "requirement_count": 34,
-        "closed": 34,
+        "slice_count": 8,
+        "requirement_count": 42,
+        "closed": 42,
         "at_risk": 0,
     }
     assert report["slice_ids"] == [
+        "baseline-and-status-engines",
         "catalog-and-ingestion-foundation",
         "feature-computation-foundation",
         "governance-and-run-controls",
@@ -390,7 +419,7 @@ def test_build_repo_closure_report_aggregates_all_governed_slices() -> None:
         "reporting-and-export",
         "validation-and-backtest",
     ]
-    assert report["slices"][0]["slice_id"] == "catalog-and-ingestion-foundation"
+    assert report["slices"][0]["slice_id"] == "baseline-and-status-engines"
     assert report["slices"][0]["summary"] == {"closed": 8, "at_risk": 0}
-    assert report["slices"][6]["slice_id"] == "validation-and-backtest"
-    assert report["slices"][6]["summary"] == {"closed": 2, "at_risk": 0}
+    assert report["slices"][7]["slice_id"] == "validation-and-backtest"
+    assert report["slices"][7]["summary"] == {"closed": 2, "at_risk": 0}

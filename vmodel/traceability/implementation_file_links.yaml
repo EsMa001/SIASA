@@ -1,4 +1,65 @@
 implementation_slices:
+  baseline-and-status-engines:
+    requirement_ids:
+      - SwR-017
+      - SwR-018
+      - SwR-019
+      - SwR-020
+      - SwR-021
+      - SwR-022
+      - SwR-023
+      - SwR-024
+    implementation_map:
+      SwR-017:
+        code_paths:
+          - src/siasa/scoring/baselines.py
+        test_paths:
+          - tests/unit/test_baselines.py
+      SwR-018:
+        code_paths:
+          - src/siasa/scoring/baselines.py
+        test_paths:
+          - tests/unit/test_baselines.py
+      SwR-019:
+        code_paths:
+          - src/siasa/scoring/baselines.py
+        test_paths:
+          - tests/unit/test_baselines.py
+      SwR-020:
+        code_paths:
+          - src/siasa/scoring/data_sufficiency.py
+        test_paths:
+          - tests/unit/test_data_sufficiency.py
+      SwR-021:
+        code_paths:
+          - src/siasa/scoring/domain_status.py
+        test_paths:
+          - tests/unit/test_domain_status.py
+      SwR-022:
+        code_paths:
+          - src/siasa/scoring/domain_status.py
+        test_paths:
+          - tests/unit/test_domain_status.py
+      SwR-023:
+        code_paths:
+          - src/siasa/scoring/multi_domain_status.py
+        test_paths:
+          - tests/unit/test_multi_domain_status.py
+      SwR-024:
+        code_paths:
+          - src/siasa/scoring/multi_domain_status.py
+        test_paths:
+          - tests/unit/test_multi_domain_status.py
+    known_code_paths:
+      - src/siasa/scoring/baselines.py
+      - src/siasa/scoring/data_sufficiency.py
+      - src/siasa/scoring/domain_status.py
+      - src/siasa/scoring/multi_domain_status.py
+    known_test_paths:
+      - tests/unit/test_baselines.py
+      - tests/unit/test_data_sufficiency.py
+      - tests/unit/test_domain_status.py
+      - tests/unit/test_multi_domain_status.py
   catalog-and-ingestion-foundation:
     requirement_ids:
       - SwR-001
