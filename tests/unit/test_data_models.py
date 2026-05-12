@@ -1,4 +1,5 @@
 from siasa.data.normalization_mappings import NormalizationMappingVersion, resolve_active_mapping
+from siasa.data.normalization_service import normalize_records
 from siasa.data.normalized_models import NormalizedRecord
 from siasa.data.raw_models import RawRecord
 
@@ -81,3 +82,24 @@ def test_normalization_mapping_version_requires_active_mapping() -> None:
         assert "active mapping" in str(exc)
     else:
         raise AssertionError("Expected ValueError when no active mapping exists")
+
+
+def test_normalize_records_keeps_mapping_version_in_quality_context() -> None:
+    mappings = [NormalizationMappingVersion(mapping_id="MAP-001", source_id="SRC-A", version="v3", is_active=True)]
+
+    normalized = normalize_records(
+        source_id="SRC-A",
+        domain="B",
+        raw_records=[
+            {
+                "country_id": "UKR",
+                "timestamp": "2026-05-11T14:00:00Z",
+                "signal_key": "conflict_event_count",
+                "value": 4.0,
+            }
+        ],
+        mappings=mappings,
+    )
+
+    assert normalized[0].quality_context["mapping_version"] == "v3"
+    assert normalized[0].quality_context["mapping_id"] == "MAP-001"

@@ -213,6 +213,36 @@ implementation_slices:
       - tests/unit/test_run_artifacts.py
       - tests/unit/test_reprocessing.py
       - tests/unit/test_reprocessing_workflow.py
+  normalization-and-mapping:
+    requirement_ids:
+      - SwR-009
+      - SwR-010
+    implementation_map:
+      SwR-009:
+        code_paths:
+          - src/siasa/data/normalized_models.py
+          - src/siasa/data/normalization_service.py
+        test_paths:
+          - tests/unit/test_normalization_service.py
+          - tests/unit/test_data_models.py
+      SwR-010:
+        code_paths:
+          - src/siasa/data/normalization_mappings.py
+          - src/siasa/data/normalization_service.py
+          - src/siasa/runs/orchestrator.py
+        test_paths:
+          - tests/unit/test_normalization_service.py
+          - tests/unit/test_data_models.py
+          - tests/unit/test_run_orchestrator.py
+    known_code_paths:
+      - src/siasa/data/normalized_models.py
+      - src/siasa/data/normalization_mappings.py
+      - src/siasa/data/normalization_service.py
+      - src/siasa/runs/orchestrator.py
+    known_test_paths:
+      - tests/unit/test_normalization_service.py
+      - tests/unit/test_data_models.py
+      - tests/unit/test_run_orchestrator.py
   reporting-and-export:
     requirement_ids:
       - SwR-028

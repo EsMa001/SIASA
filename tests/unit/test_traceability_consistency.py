@@ -327,25 +327,44 @@ def test_build_requirement_closure_report_for_catalog_and_ingestion_foundation_s
 
 
 
+def test_build_requirement_closure_report_for_normalization_and_mapping_slice() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+
+    report = build_requirement_closure_report(repo_root=repo_root, slice_id="normalization-and-mapping")
+
+    assert report["slice_id"] == "normalization-and-mapping"
+    assert report["summary"] == {"closed": 2, "at_risk": 0}
+    assert [item["requirement_id"] for item in report["requirements"]] == ["SwR-009", "SwR-010"]
+    assert report["requirements"][0]["verifying_test_specs"] == ["TC-SwR-009-001"]
+    assert "src/siasa/data/normalization_service.py" in report["requirements"][0]["code_paths"]
+    assert "tests/unit/test_normalization_service.py" in report["requirements"][0]["test_paths"]
+    assert report["requirements"][1]["verifying_test_specs"] == ["TC-SwR-010-001"]
+    assert "src/siasa/data/normalization_mappings.py" in report["requirements"][1]["code_paths"]
+    assert "src/siasa/runs/orchestrator.py" in report["requirements"][1]["code_paths"]
+    assert "tests/unit/test_run_orchestrator.py" in report["requirements"][1]["test_paths"]
+
+
+
 def test_build_repo_closure_report_aggregates_all_governed_slices() -> None:
     repo_root = Path(__file__).resolve().parents[2]
 
     report = build_repo_closure_report(repo_root=repo_root)
 
     assert report["summary"] == {
-        "slice_count": 5,
-        "requirement_count": 26,
-        "closed": 26,
+        "slice_count": 6,
+        "requirement_count": 28,
+        "closed": 28,
         "at_risk": 0,
     }
     assert report["slice_ids"] == [
         "catalog-and-ingestion-foundation",
         "governance-and-run-controls",
         "gui-readmodels-and-annotations",
+        "normalization-and-mapping",
         "reporting-and-export",
         "validation-and-backtest",
     ]
     assert report["slices"][0]["slice_id"] == "catalog-and-ingestion-foundation"
     assert report["slices"][0]["summary"] == {"closed": 8, "at_risk": 0}
-    assert report["slices"][4]["slice_id"] == "validation-and-backtest"
-    assert report["slices"][4]["summary"] == {"closed": 2, "at_risk": 0}
+    assert report["slices"][5]["slice_id"] == "validation-and-backtest"
+    assert report["slices"][5]["summary"] == {"closed": 2, "at_risk": 0}

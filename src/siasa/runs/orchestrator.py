@@ -175,11 +175,17 @@ class DailyRunOrchestrator:
             "country_status": {country_id: multi_domain_status.status},
             "domain_statuses": {domain: status.status for domain, status in domain_statuses.items()},
         }
+        snapshot_rule_versions = dict(self.rule_versions)
+        for normalized_record in normalized_records:
+            mapping_version = normalized_record.quality_context.get("mapping_version")
+            if mapping_version is None:
+                continue
+            snapshot_rule_versions[f"normalization:{normalized_record.provenance_source_id}"] = str(mapping_version)
         snapshot = create_snapshot(
             run_state=run_state,
             country_set_id=self.country_set_id,
             active_domains=self.active_domains,
-            rule_versions=self.rule_versions,
+            rule_versions=snapshot_rule_versions,
             analytical_outputs=analytical_outputs,
             algorithm_version=self.algorithm_version,
             data_version=self.data_version,

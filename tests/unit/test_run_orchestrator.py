@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from siasa.adapters.base import FetchResult, SourceAdapter
+from siasa.data.normalization_mappings import NormalizationMappingVersion
+from siasa.data.normalization_service import normalize_records
 from siasa.data.normalized_models import NormalizedRecord
 from siasa.data.raw_models import RawRecord
 from siasa.features.domain_a import DomainAFeatureService
@@ -52,6 +54,69 @@ def _domain_status_analyzer(domain: str, features):
     sufficiency = evaluate_data_sufficiency(features)
     anomaly_score = {"A": 0.7, "B": 0.3, "D": 0.1}.get(domain, 0.1)
     return derive_domain_status(domain, anomaly_score=anomaly_score, sufficiency=sufficiency)
+
+
+
+def test_daily_run_orchestrator_uses_normalization_mapping_versions_in_snapshot_rule_context() -> None:
+    adapters = [
+        FakeAdapter(
+            source_id="SRC-A",
+            domain="A",
+            _result=FetchResult(
+                records=[
+                    {
+                        "country_id": "UKR",
+                        "timestamp": "2026-05-11T18:00:00Z",
+                        "signal_key": "article_count",
+                        "value": 3.0,
+                        "expected_source_count": 1,
+                        "freshness_hours": 6,
+                    },
+                    {
+                        "country_id": "UKR",
+                        "timestamp": "2026-05-11T18:00:00Z",
+                        "signal_key": "tone",
+                        "value": -0.2,
+                        "expected_source_count": 1,
+                        "freshness_hours": 6,
+                    },
+                    {
+                        "country_id": "UKR",
+                        "timestamp": "2026-05-11T18:00:00Z",
+                        "signal_key": "topic:security",
+                        "value": 2.0,
+                        "expected_source_count": 1,
+                        "freshness_hours": 6,
+                    },
+                ]
+            ),
+        )
+    ]
+    mappings = [NormalizationMappingVersion(mapping_id="MAP-SRC-A-v2", source_id="SRC-A", version="v2", is_active=True)]
+
+    orchestrator = DailyRunOrchestrator(
+        adapters=adapters,
+        normalizer=lambda source_id, domain, records: normalize_records(
+            source_id=source_id,
+            domain=domain,
+            raw_records=records,
+            mappings=mappings,
+        ),
+        feature_services=[DomainAFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+    )
+
+    result = orchestrator.run(run_id="RUN-109")
+
+    assert result.normalized_records[0].quality_context["mapping_version"] == "v2"
+    assert result.normalized_records[0].quality_context["mapping_id"] == "MAP-SRC-A-v2"
+    assert result.snapshot.rule_versions["normalization:SRC-A"] == "v2"
 
 
 
