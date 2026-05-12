@@ -197,3 +197,28 @@ implementation_slices:
       - tests/unit/test_reporting_manual_reports.py
       - tests/unit/test_run_orchestrator.py
       - tests/unit/test_run_artifacts.py
+  validation-and-backtest:
+    requirement_ids:
+      - SwR-038
+      - SwR-039
+    implementation_map:
+      SwR-038:
+        code_paths:
+          - src/siasa/validation/cases.py
+          - src/siasa/readmodels/validation_backtest.py
+        test_paths:
+          - tests/unit/test_validation_cases.py
+          - tests/unit/test_readmodels_validation_backtest.py
+      SwR-039:
+        code_paths:
+          - src/siasa/validation/cases.py
+          - src/siasa/readmodels/validation_backtest.py
+        test_paths:
+          - tests/unit/test_validation_cases.py
+          - tests/unit/test_readmodels_validation_backtest.py
+    known_code_paths:
+      - src/siasa/validation/cases.py
+      - src/siasa/readmodels/validation_backtest.py
+    known_test_paths:
+      - tests/unit/test_validation_cases.py
+      - tests/unit/test_readmodels_validation_backtest.py
