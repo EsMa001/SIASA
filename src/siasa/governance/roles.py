@@ -14,6 +14,7 @@ _REQUIRED_SOURCE_METADATA = {"source_id", "status", "access", "license", "histor
 @dataclass(frozen=True)
 class RoleAssignment:
     role: str
+    subject_id: str | None = None
 
     def __post_init__(self) -> None:
         if self.role not in _ROLE_ACTIONS:

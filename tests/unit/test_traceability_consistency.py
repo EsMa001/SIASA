@@ -201,6 +201,7 @@ def test_build_requirement_closure_report_for_governance_and_run_controls_slice(
     assert report["requirements"][5]["verifying_test_specs"] == ["TC-SwR-045-001"]
     assert "src/siasa/governance/roles.py" in report["requirements"][5]["code_paths"]
     assert "tests/unit/test_governance_guards.py" in report["requirements"][5]["test_paths"]
+    assert "tests/unit/test_reprocessing_workflow.py" in report["requirements"][5]["test_paths"]
 
 
 

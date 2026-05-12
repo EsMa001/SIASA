@@ -4,7 +4,8 @@ from siasa.runs.reprocessing import ReprocessingRequest, build_reprocessing_comp
 def test_reprocessing_workflow_captures_versioned_rules_mappings_and_configs() -> None:
     request = ReprocessingRequest(
         run_id="RUN-001",
-        requested_by="Admin/Developer",
+        requested_by="max@example.org",
+        requested_role="Admin/Developer",
         rule_version="rules-2026-05",
         mapping_version="mapping-v2",
         config_version="config-v3",
@@ -12,6 +13,8 @@ def test_reprocessing_workflow_captures_versioned_rules_mappings_and_configs() -
     )
 
     assert request.run_id == "RUN-001"
+    assert request.requested_by == "max@example.org"
+    assert request.requested_role == "Admin/Developer"
     assert request.rule_version == "rules-2026-05"
     assert request.mapping_version == "mapping-v2"
     assert request.config_version == "config-v3"

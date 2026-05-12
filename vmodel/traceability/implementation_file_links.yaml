@@ -119,6 +119,7 @@ implementation_slices:
         test_paths:
           - tests/unit/test_governance_guards.py
           - tests/unit/test_reprocessing.py
+          - tests/unit/test_reprocessing_workflow.py
     known_code_paths:
       - src/siasa/governance/roles.py
       - src/siasa/governance/export_policy.py
@@ -137,6 +138,7 @@ implementation_slices:
       - tests/unit/test_run_state.py
       - tests/unit/test_run_artifacts.py
       - tests/unit/test_reprocessing.py
+      - tests/unit/test_reprocessing_workflow.py
   reporting-and-export:
     requirement_ids:
       - SwR-028
