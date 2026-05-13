@@ -423,6 +423,46 @@ implementation_slices:
       - tests/unit/test_reporting_manual_reports.py
       - tests/unit/test_run_orchestrator.py
       - tests/unit/test_run_artifacts.py
+  snapshot-and-lineage:
+    requirement_ids:
+      - SwR-025
+      - SwR-026
+      - SwR-027
+    implementation_map:
+      SwR-025:
+        code_paths:
+          - src/siasa/snapshots/models.py
+          - src/siasa/snapshots/service.py
+          - src/siasa/runs/artifacts.py
+        test_paths:
+          - tests/unit/test_snapshot_service.py
+          - tests/unit/test_run_artifacts.py
+      SwR-026:
+        code_paths:
+          - src/siasa/snapshots/service.py
+          - src/siasa/runs/orchestrator.py
+        test_paths:
+          - tests/unit/test_snapshot_service.py
+          - tests/unit/test_run_orchestrator.py
+      SwR-027:
+        code_paths:
+          - src/siasa/traceability/lineage.py
+          - src/siasa/runs/orchestrator.py
+          - src/siasa/runs/artifacts.py
+        test_paths:
+          - tests/unit/test_snapshot_service.py
+          - tests/unit/test_run_orchestrator.py
+          - tests/unit/test_run_artifacts.py
+    known_code_paths:
+      - src/siasa/snapshots/models.py
+      - src/siasa/snapshots/service.py
+      - src/siasa/traceability/lineage.py
+      - src/siasa/runs/orchestrator.py
+      - src/siasa/runs/artifacts.py
+    known_test_paths:
+      - tests/unit/test_snapshot_service.py
+      - tests/unit/test_run_orchestrator.py
+      - tests/unit/test_run_artifacts.py
   validation-and-backtest:
     requirement_ids:
       - SwR-038

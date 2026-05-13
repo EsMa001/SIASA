@@ -190,7 +190,7 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert event_report["payload"]["source_state"] == {"SRC-B": "success"}
     assert "REP-COVERAGE-RUN-200" in traceability["lineage_records"][0]["report_ids"]
     assert "REP-COUNTRY-UKR" in traceability["lineage_records"][0]["report_ids"]
-    assert repo_closure["summary"] == {"slice_count": 8, "requirement_count": 42, "closed": 42, "at_risk": 0}
+    assert repo_closure["summary"] == {"slice_count": 9, "requirement_count": 45, "closed": 45, "at_risk": 0}
     assert repo_closure["slice_ids"] == [
         "baseline-and-status-engines",
         "catalog-and-ingestion-foundation",
@@ -199,6 +199,7 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
         "gui-readmodels-and-annotations",
         "normalization-and-mapping",
         "reporting-and-export",
+        "snapshot-and-lineage",
         "validation-and-backtest",
     ]
     assert traceability["lineage_records"][0]["raw_record_id"] == "RAW-SRC-A-1"

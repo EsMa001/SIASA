@@ -253,6 +253,54 @@ def test_build_requirement_closure_report_for_reporting_and_export_slice() -> No
 
 
 
+def test_governed_snapshot_and_lineage_traceability_slice_definition_validates_cleanly() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+
+    slice_definition = load_traceability_slice_definition(
+        repo_root=repo_root,
+        slice_id="snapshot-and-lineage",
+    )
+
+    result = validate_traceability_slice(
+        repo_root=repo_root,
+        requirement_ids=slice_definition["requirement_ids"],
+        implementation_map=slice_definition["implementation_map"],
+        known_code_paths=slice_definition["known_code_paths"],
+        known_test_paths=slice_definition["known_test_paths"],
+    )
+
+    assert result["missing_requirements"] == []
+    assert result["missing_trace_links"] == []
+    assert result["missing_code_paths"] == {}
+    assert result["missing_test_paths"] == {}
+    assert result["missing_files"] == []
+    assert result["unmapped_code_paths"] == []
+    assert result["unmapped_test_paths"] == []
+
+
+
+def test_build_requirement_closure_report_for_snapshot_and_lineage_slice() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+
+    report = build_requirement_closure_report(repo_root=repo_root, slice_id="snapshot-and-lineage")
+
+    assert report["slice_id"] == "snapshot-and-lineage"
+    assert report["summary"] == {"closed": 3, "at_risk": 0}
+    assert [item["requirement_id"] for item in report["requirements"]] == ["SwR-025", "SwR-026", "SwR-027"]
+    assert report["requirements"][0]["verifying_test_specs"] == ["TC-SwR-025-001"]
+    assert "src/siasa/snapshots/models.py" in report["requirements"][0]["code_paths"]
+    assert "src/siasa/runs/artifacts.py" in report["requirements"][0]["code_paths"]
+    assert "tests/unit/test_snapshot_service.py" in report["requirements"][0]["test_paths"]
+    assert report["requirements"][1]["verifying_test_specs"] == ["TC-SwR-026-001"]
+    assert "src/siasa/snapshots/service.py" in report["requirements"][1]["code_paths"]
+    assert "src/siasa/runs/orchestrator.py" in report["requirements"][1]["code_paths"]
+    assert "tests/unit/test_run_orchestrator.py" in report["requirements"][1]["test_paths"]
+    assert report["requirements"][2]["verifying_test_specs"] == ["TC-SwR-027-001"]
+    assert "src/siasa/traceability/lineage.py" in report["requirements"][2]["code_paths"]
+    assert "tests/unit/test_run_artifacts.py" in report["requirements"][2]["test_paths"]
+
+
+
 def test_governed_validation_and_backtest_traceability_slice_definition_validates_cleanly() -> None:
     repo_root = Path(__file__).resolve().parents[2]
 
@@ -404,9 +452,9 @@ def test_build_repo_closure_report_aggregates_all_governed_slices() -> None:
     report = build_repo_closure_report(repo_root=repo_root)
 
     assert report["summary"] == {
-        "slice_count": 8,
-        "requirement_count": 42,
-        "closed": 42,
+        "slice_count": 9,
+        "requirement_count": 45,
+        "closed": 45,
         "at_risk": 0,
     }
     assert report["slice_ids"] == [
@@ -417,9 +465,12 @@ def test_build_repo_closure_report_aggregates_all_governed_slices() -> None:
         "gui-readmodels-and-annotations",
         "normalization-and-mapping",
         "reporting-and-export",
+        "snapshot-and-lineage",
         "validation-and-backtest",
     ]
     assert report["slices"][0]["slice_id"] == "baseline-and-status-engines"
     assert report["slices"][0]["summary"] == {"closed": 8, "at_risk": 0}
-    assert report["slices"][7]["slice_id"] == "validation-and-backtest"
-    assert report["slices"][7]["summary"] == {"closed": 2, "at_risk": 0}
+    assert report["slices"][7]["slice_id"] == "snapshot-and-lineage"
+    assert report["slices"][7]["summary"] == {"closed": 3, "at_risk": 0}
+    assert report["slices"][8]["slice_id"] == "validation-and-backtest"
+    assert report["slices"][8]["summary"] == {"closed": 2, "at_risk": 0}
