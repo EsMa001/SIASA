@@ -90,13 +90,15 @@ Rationale:
 
 ### 1.5 Current technical verification findings
 
-Live technical probes during execution added two important source-access facts:
+Live technical probes during execution added three important source-access facts:
 - ReliefWeb: documentation at `https://apidoc.reliefweb.int/` confirms the current API version is `v2`; from 1 Nov 2025 it requires a pre-approved `appname`; a generic request against `api.reliefweb.int/v2/disasters?appname=siasa...` returned `HTTP 403 Forbidden`
 - GDELT DOC 2.0 API: a public query attempt against `api.gdeltproject.org` returned `HTTP 429 Too Many Requests`, so open access remains plausible but rate-limit/backoff handling is required
+- GDACS RSS: a live request against `https://www.gdacs.org/xml/rss.xml` returned public XML with stable `gdacs:*` fields including `iso3`, `eventtype`, `alertlevel`, `eventid`, `dateadded`, and `iscurrent`; this is sufficient for a first disaster-alert baseline without provider approval
 
 Planning consequence:
-- ReliefWeb is no longer a low-friction immediate second implementation candidate
-- the next near-term source after World Bank should be a source without provider-side approval gating, even if rate-limit handling is still needed
+- ReliefWeb is no longer a low-friction immediate implementation candidate
+- the next near-term source after the initial World Bank/GDELT path should be a source without provider-side approval gating, even if rate-limit handling is still needed
+- GDACS is the next practical Domain-B extension for `disaster_alert_level`
 
 ---
 
@@ -234,8 +236,8 @@ Why third:
 - it avoids the provider approval blocker currently observed on ReliefWeb
 
 Follow-on Domain-B order:
-- `UCDP GED` for stronger conflict-depth triangulation
-- `GDACS` for `B_disaster_alert_level`
+- `GDACS` as the next unblocked disaster-signal source
+- `UCDP GED` after access/auth expectations are clarified
 - `ReliefWeb API` later for humanitarian-context enrichment after approved `appname`
 
 Expected gain:
@@ -246,13 +248,30 @@ Current execution status:
 - implemented baseline adapter in `src/siasa/adapters/gdelt_events.py`
 - covered by `tests/unit/test_gdelt_events_adapter.py`
 
+### 5.4 Fourth source: Domain-B disaster-alert baseline source
+Recommended selection:
+- `GDACS` as the next unblocked Domain-B disaster-alert source
+
+Why fourth:
+- `GDACS` directly maps to the already implemented Domain-B signal `disaster_alert_level`
+- live probe confirmed public RSS access and stable payload fields (`iso3`, `alertlevel`, `dateadded`, `iscurrent`)
+- it extends real Domain-B coverage without waiting for UCDP access clarification or ReliefWeb provider approval
+
+Expected gain:
+- first real source-backed path for explicit disaster-alert evidence in Domain B
+- stronger multi-source grounding for Daily Global Review once event and disaster signals are combined
+
+Current execution status:
+- implemented baseline adapter in `src/siasa/adapters/gdacs.py`
+- covered by `tests/unit/test_gdacs_adapter.py`
+
 ---
 
 ## 6. Recommended second-wave order
 
 After Wave 1 is stable:
-- UCDP GED
 - GDACS
+- UCDP GED (after access/auth expectations are clarified)
 - IMF Data API / SDMX
 - FAOSTAT
 - Offizielle Regierungs-/Institutionenfeeds
@@ -296,7 +315,7 @@ The next serial work packages should be:
 3. P0-WP-002c
 - implement `GDELT Events` as the first Domain-B baseline source
 - selection documented in `docs/plans/siasa-p0-wp-002c-domain-b-source-selection.md`
-- follow with `UCDP GED`, `GDACS`, and only later `ReliefWeb API` after approved `appname`
+- follow with `GDACS`, then `UCDP GED` after access/auth clarification, and only later `ReliefWeb API` after approved `appname`
 
 Only after those three are working should SIASA move to:
 - artifact completeness closure

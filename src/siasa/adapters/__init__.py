@@ -2,6 +2,7 @@
 
 from .base import FetchResult, SourceAdapter
 from .fetch_metadata import FetchMetadataRecord
+from .gdacs import GDACSAdapter
 from .gdelt_doc import GDELTDocAdapter
 from .gdelt_events import GDELTEventsAdapter
 from .world_bank import WorldBankIndicatorsAdapter
@@ -11,6 +12,7 @@ __all__ = [
     "SourceAdapter",
     "FetchMetadataRecord",
     "WorldBankIndicatorsAdapter",
+    "GDACSAdapter",
     "GDELTDocAdapter",
     "GDELTEventsAdapter",
 ]

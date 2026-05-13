@@ -20,8 +20,8 @@ The next Domain-B source to implement should be:
 
 Recommended order after that:
 1. `GDELT Events`
-2. `UCDP GED`
-3. `GDACS`
+2. `GDACS`
+3. `UCDP GED`
 4. `ReliefWeb API` (after approved appname and explicit mapping decision)
 
 ---
@@ -79,23 +79,25 @@ Strengths:
 - historically stronger conflict grounding than media-derived event feeds
 
 Weaknesses:
+- current probe against `https://ucdpapi.pcr.uu.se/api/gedevents/25.1?pagesize=1` returned `401 Unauthorized`
 - stronger fit for conflict/violence than for protest coverage
-- therefore not the best first source for the full current B-core signal set
+- therefore not the best next source for the full current B-core signal set
 
 Assessment:
-- best second Domain-B source, especially for conflict-depth and later triangulation
+- strategically valuable, but no longer the next immediate implementation candidate until access/auth expectations are clarified
 
 #### GDACS
 Strengths:
 - explicitly governed as Domain-B source
 - directly fits `B_disaster_alert_level`
 - open API posture in the governed catalog
+- now the best unblocked next Domain-B candidate after UCDP returned `401 Unauthorized`
 
 Weaknesses:
-- aligns mainly with the disaster extension path, not with the current core event counters
+- aligns mainly with the disaster extension path, not with the current conflict/protest counters
 
 Assessment:
-- valuable third Domain-B source, but should follow one event-count source first
+- best next practical Domain-B source after GDELT Events because it remains unblocked and fits an existing implemented signal
 
 #### ReliefWeb API
 Strengths:
@@ -125,8 +127,8 @@ Why:
 - it progresses the project toward real A+B+D coverage faster than a humanitarian/disaster-only source would
 
 After that:
-- use `UCDP GED` to strengthen conflict credibility and depth
-- use `GDACS` to add explicit disaster-alert coverage
+- use `GDACS` as the next unblocked disaster-alert baseline
+- use `UCDP GED` after access/auth expectations are clarified to strengthen conflict credibility and depth
 - use `ReliefWeb API` later for humanitarian-context enrichment once access is approved
 
 ---
