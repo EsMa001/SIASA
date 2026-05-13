@@ -154,17 +154,25 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
     }
 
 
-def _render_index(world_map_read_model: dict[str, Any]) -> str:
+def _render_index(world_map_read_model: dict[str, Any], available_country_ids: set[str] | None = None) -> str:
     rows = []
+    available_country_ids = available_country_ids or set()
     for country in world_map_read_model.get("countries", []):
         country_id = str(country["country_id"])
         status = str(country["status"])
+        has_country_page = country_id in available_country_ids
+        country_cell = (
+            f"<a href='countries/{html.escape(country_id)}.html'>{html.escape(country_id)}</a>"
+            if has_country_page
+            else html.escape(country_id)
+        )
+        drill_down_cell = f"countries/{html.escape(country_id)}.html" if has_country_page else "not available"
         rows.append(
             "<tr>"
-            f"<td><a href='countries/{html.escape(country_id)}.html'>{html.escape(country_id)}</a></td>"
+            f"<td>{country_cell}</td>"
             f"<td class='status'>{html.escape(status)}</td>"
             f"<td>{html.escape(', '.join(country.get('active_domains', [])))}</td>"
-            f"<td>countries/{html.escape(country_id)}.html</td>"
+            f"<td>{drill_down_cell}</td>"
             "</tr>"
         )
     body = (
@@ -460,7 +468,7 @@ def build_local_mvp_site(
     generated_files: list[Path] = []
 
     index_file = output_dir / 'index.html'
-    index_file.write_text(_render_index(world_map_read_model))
+    index_file.write_text(_render_index(world_map_read_model, available_country_ids=set(country_profile_read_models)))
     generated_files.append(index_file)
 
     for country_id, read_model in country_profile_read_models.items():

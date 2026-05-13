@@ -244,6 +244,56 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "UKR:A" in annotations_html
 
 
+def test_build_local_mvp_site_suppresses_country_drill_down_links_without_generated_country_pages(tmp_path: Path) -> None:
+    pages = build_local_mvp_site(
+        output_dir=tmp_path / "site",
+        world_map_read_model={
+            "baseline_mode": "Combined 30/90/365",
+            "active_domains": ["A", "D"],
+            "countries": [
+                {"country_id": "UKR", "status": "S3", "active_domains": ["A", "D"], "drill_down_target": "/countries/UKR"},
+                {"country_id": "POL", "status": "S1", "active_domains": ["A", "D"], "drill_down_target": "/countries/POL"},
+            ],
+        },
+        country_profile_read_models={
+            "UKR": {
+                "country_id": "UKR",
+                "multi_domain_status": "S3",
+                "domain_states": {"A": "D3"},
+                "trends": {"yearly": []},
+                "drivers": [],
+                "linked_events": [],
+                "coverage": 0.84,
+                "confidence": 0.73,
+                "counter_indicators": [],
+                "uncertainty": [],
+            }
+        },
+        domain_detail_read_models={},
+        source_coverage_read_model={"sources": [], "failed_sources": [], "missing_sources": []},
+        report_catalog={},
+        system_status_read_model={
+            "run_id": "RUN-200",
+            "run_status": "success",
+            "active_domains": ["A", "D"],
+            "coverage": {"countries_total": 2, "countries_with_updates": 1},
+            "failed_sources": [],
+            "available_reports": [],
+            "snapshot_id": "SNAP-RUN-200-v1",
+            "reprocessing_status": "idle",
+            "last_run": "2026-05-11T18:00:00Z",
+        },
+    )
+
+    index_html = (pages.output_dir / "index.html").read_text()
+    assert "<a href='countries/UKR.html'>UKR</a>" in index_html
+    assert "countries/UKR.html" in index_html
+    assert "<a href='countries/POL.html'>POL</a>" not in index_html
+    assert "countries/POL.html" not in index_html
+    assert not (pages.output_dir / "countries" / "POL.html").exists()
+
+
+
 def test_build_local_mvp_site_copies_report_export_files_and_renders_download_links(tmp_path: Path) -> None:
     export_source_dir = tmp_path / "artifact_exports"
     export_source_dir.mkdir()
