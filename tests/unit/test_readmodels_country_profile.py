@@ -41,6 +41,7 @@ def test_source_coverage_read_model_exposes_status_horizon_freshness_confidence_
         sources=[
             {"source_id": "SRC-A", "status": "success", "history_horizon": "3y", "freshness_hours": 6, "confidence": 0.9},
             {"source_id": "SRC-B", "status": "failed", "history_horizon": "1y", "freshness_hours": 48, "confidence": 0.4},
+            {"source_id": "ACLED", "status": "prepared_adapter", "history_horizon": "n/a", "freshness_hours": None, "confidence": None},
         ]
     )
 
@@ -48,3 +49,5 @@ def test_source_coverage_read_model_exposes_status_horizon_freshness_confidence_
     assert read_model["sources"][1]["history_horizon"] == "1y"
     assert read_model["sources"][1]["freshness_hours"] == 48
     assert read_model["sources"][1]["confidence"] == 0.4
+    assert read_model["degraded_sources"] == ["SRC-B", "ACLED"]
+    assert read_model["source_status_summary"] == {"success": 1, "failed": 1, "prepared_adapter": 1}

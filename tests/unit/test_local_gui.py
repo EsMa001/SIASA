@@ -242,6 +242,15 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "SRC-A" in domain_html
     assert "Domain A spike is traceable to two closely coupled source clusters." in domain_html
 
+    coverage_html = (pages.output_dir / "coverage.html").read_text()
+    assert "Source / Coverage View" in coverage_html
+    assert "Trust Summary" in coverage_html
+    assert "partial_success" in coverage_html
+    assert "failed_source:SRC-B" in coverage_html
+    assert "ACLED" in coverage_html
+    assert "prepared_adapter" in coverage_html
+    assert "Degraded Sources" in coverage_html
+
     reports_html = (pages.output_dir / "reports.html").read_text()
     assert "Report / Export View" in reports_html
     assert "REP-COVERAGE-001" in reports_html

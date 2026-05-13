@@ -313,7 +313,13 @@ def _render_domain_detail(domain_detail: dict[str, Any], annotations_view_model:
     )
 
 
-def _render_source_coverage(source_coverage_read_model: dict[str, Any], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
+def _render_source_coverage(
+    source_coverage_read_model: dict[str, Any],
+    system_status_read_model: dict[str, Any] | None = None,
+    *,
+    nav_prefix: str = '',
+    available_pages: set[str] | None = None,
+) -> str:
     rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(source.get('source_id', '')))}</td>"
@@ -324,8 +330,22 @@ def _render_source_coverage(source_coverage_read_model: dict[str, Any], *, nav_p
         "</tr>"
         for source in source_coverage_read_model.get('sources', [])
     )
+    system_status_read_model = system_status_read_model or {}
+    trust_gaps = ''.join(
+        f"<li>{html.escape(str(item))}</li>"
+        for item in system_status_read_model.get('data_gaps', [])
+    ) or "<li>none</li>"
+    degraded_sources = ''.join(
+        f"<li>{html.escape(str(item))}</li>"
+        for item in source_coverage_read_model.get('degraded_sources', [])
+    ) or "<li>none</li>"
     body = (
         "<h2>Source / Coverage View</h2>"
+        "<h3>Trust Summary</h3>"
+        f"<p>Run status: <span class='status'>{html.escape(str(system_status_read_model.get('run_status', 'n/a')))}</span></p>"
+        f"<p>Status summary: {html.escape(str(source_coverage_read_model.get('source_status_summary', {})))}</p>"
+        f"<h4>Data Gaps / Trust Limits</h4><ul>{trust_gaps}</ul>"
+        f"<h4>Degraded Sources</h4><ul>{degraded_sources}</ul>"
         "<table><thead><tr><th>Source</th><th>Status</th><th>History Horizon</th><th>Freshness (h)</th><th>Confidence</th></tr></thead>"
         f"<tbody>{rows}</tbody></table>"
         f"<h3>Failed Sources</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in source_coverage_read_model.get('failed_sources', []))}</ul>"
@@ -599,7 +619,14 @@ def build_local_mvp_site(
         generated_files.append(domain_file)
 
     coverage_file = output_dir / 'coverage.html'
-    coverage_file.write_text(_render_source_coverage(source_coverage_read_model, nav_prefix='', available_pages=available_pages))
+    coverage_file.write_text(
+        _render_source_coverage(
+            source_coverage_read_model,
+            system_status_read_model=system_status_read_model,
+            nav_prefix='',
+            available_pages=available_pages,
+        )
+    )
     generated_files.append(coverage_file)
 
     prepared_report_catalog, copied_export_files = _prepare_report_catalog(report_catalog, output_dir)
