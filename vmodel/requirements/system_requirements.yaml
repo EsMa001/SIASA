@@ -348,7 +348,7 @@ system_requirements:
 - id: SyR-020
   title: World anomaly map as default entry view
   category: User-facing analysis system
-  statement: The system shall provide a world anomaly map as the default entry view, colored by multi-domain status and configurable by domains, time windows, baseline mode, and drill-down navigation.
+  statement: The system shall provide a world anomaly map as the default entry view, colored by multi-domain status and configurable by domains, time windows, baseline mode, and drill-down navigation that only exposes resolvable country-profile targets in the current GUI bundle.
   status: accepted
   derives_from:
   - StR-089
@@ -365,7 +365,7 @@ system_requirements:
 - id: SyR-021
   title: Country profile for deep-dive analysis
   category: User-facing analysis system
-  statement: The system shall provide a country profile view showing multi-domain status, domain states, drivers, counter-indicators, coverage, confidence, yearly trends, and linked events for one selected country.
+  statement: The system shall provide a country profile view for one selected country that is reachable from the supported world-map drill-down flow and preserves working navigation back to the central overview pages while showing multi-domain status, domain states, drivers, counter-indicators, coverage, confidence, yearly trends, and linked events.
   status: accepted
   derives_from:
   - StR-018

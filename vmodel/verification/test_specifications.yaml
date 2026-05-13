@@ -693,13 +693,13 @@ test_specifications:
 - id: TC-SwR-032-001
   requirement_ids:
   - SwR-032
-  title: Verify World anomaly map read model
+  title: Verify World anomaly map read model and resolvable drill-down targets
   level: software
-  method: software_specification_review
+  method: software_test
   status: specified
   preconditions:
   - Derived software requirements and software architecture are available.
-  expected_result: The software shall provide a query-side read model for the world anomaly map including country status, active domains, baseline mode, and drill-down target data.
+  expected_result: The software shall provide a query-side read model for the world anomaly map including country status, active domains, baseline mode, and drill-down target data that resolve only to available country profile views in the generated GUI bundle.
 - id: TC-SwR-033-001
   requirement_ids:
   - SwR-033

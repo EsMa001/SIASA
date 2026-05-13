@@ -4,9 +4,9 @@ Geplante GUI-Seiten und ihr MVP-Status. Quelle: `stakeholder_requirements_inform
 
 | Seite | Zweck | Inhalt | MVP-Status |
 | --- | --- | --- | --- |
-| Startseite / World Anomaly Map | Globale Orientierung | Weltkarte mit Multi-Domain-Status, Filter für Domänen/Zeiträume/Baselines, Drill-down ins Land. | MVP Pflicht |
+| Startseite / World Anomaly Map | Globale Orientierung | Weltkarte mit Multi-Domain-Status, Filter für Domänen/Zeiträume/Baselines, Drill-down nur auf verfügbare Länderansichten ohne dead links. | MVP Pflicht |
 | Global Overview | Gesamtübersicht | Länder-Ranking, Domain-Matrix, Coverage/Confidence-Matrix, Statusänderungen. | MVP Pflicht |
-| Country Profile | Länderanalyse | Country Summary, Domänenstatus A–E, Current Events, Jahresverläufe, Treiber, Gegenindikatoren, Unsicherheit. | MVP Pflicht |
+| Country Profile | Länderanalyse | Country Summary, Domänenstatus A–E, Current Events, Jahresverläufe, Treiber, Gegenindikatoren, Unsicherheit; über unterstützten Drill-down erreichbar und mit funktionierender Rücknavigation. | MVP Pflicht |
 | Domain Detail A–E | Domänentiefe | Detailanalyse der jeweiligen Domäne mit Zeitreihen, Features, Quellen, D0–D5-Begründung. | MVP Pflicht für A/B/D; C/E selektiv |
 | Yearly Trend Page | Jahresverläufe | 12-Monats-Graphen, historische Vergleichsjahre, Baselines, Event Overlays. | MVP Pflicht |
 | Current Events Page | Ereignisnachvollzug | Eventliste, Typ, Quelle, Relevanz, Confidence, Deduplizierung, verlinkte Signale. | MVP Pflicht |

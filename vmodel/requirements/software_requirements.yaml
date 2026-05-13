@@ -310,13 +310,13 @@ software_requirements:
   verification_method: software_specification_review
 - id: SwR-032
   title: World anomaly map read model
-  statement: The software shall provide a query-side read model for the world anomaly map including country status, active domains, baseline mode, and drill-down target data.
+  statement: The software shall provide a query-side read model for the world anomaly map including country status, active domains, baseline mode, and drill-down target data that resolve only to available country profile views in the generated GUI bundle.
   status: accepted
   derives_from:
   - SyR-020
   allocated_to_design:
   - DDS-009
-  verification_method: software_specification_review
+  verification_method: software_test
 - id: SwR-033
   title: Country profile read model
   statement: The software shall provide a read model for the country profile view including multi-domain status, domain states, trends, drivers, and linked events.
