@@ -231,25 +231,54 @@ def _render_index(
     return _page("World Anomaly Map / Global Overview", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
-def _render_country(country_profile: dict[str, Any], annotations_view_model: dict[str, Any] | None = None, *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
+def _render_country(
+    country_profile: dict[str, Any],
+    annotations_view_model: dict[str, Any] | None = None,
+    available_domain_targets: dict[str, str] | None = None,
+    *,
+    nav_prefix: str = '',
+    available_pages: set[str] | None = None,
+) -> str:
     domain_rows = ''.join(
         f"<tr><td>{html.escape(domain)}</td><td>{html.escape(status)}</td></tr>"
         for domain, status in country_profile.get('domain_states', {}).items()
     )
     annotation_ids = [str(item) for item in country_profile.get('annotations', [])]
+    available_domain_targets = available_domain_targets or {}
+    domain_link_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(domain)}</td>"
+        f"<td><a href='{html.escape(target)}'>{html.escape(domain)} detail</a></td>"
+        "</tr>"
+        if target
+        else "<tr>"
+             f"<td>{html.escape(domain)}</td>"
+             f"<td>{html.escape(domain)} — not available</td>"
+             "</tr>"
+        for domain, target in (
+            (domain, available_domain_targets.get(domain))
+            for domain in country_profile.get('domain_states', {}).keys()
+        )
+    )
+    explanation_summary = country_profile.get('explanation_summary') or 'No explanation summary available.'
     body = (
         "<h2>Country Profile</h2>"
         f"<p>Country: <strong>{html.escape(str(country_profile.get('country_id', 'UNKNOWN')))}</strong></p>"
         f"<p>Multi-domain status: <span class='status'>{html.escape(str(country_profile.get('multi_domain_status', 'n/a')))}</span></p>"
         f"<p>Coverage: {html.escape(str(country_profile.get('coverage', 'n/a')))} | Confidence: {html.escape(str(country_profile.get('confidence', 'n/a')))}</p>"
+        "<h3>Why this country is in this state</h3>"
+        f"<p>{html.escape(str(explanation_summary))}</p>"
         "<h3>Domain States</h3>"
         f"<table><thead><tr><th>Domain</th><th>Status</th></tr></thead><tbody>{domain_rows}</tbody></table>"
-        f"<h3>Drivers</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in country_profile.get('drivers', []))}</ul>"
-        f"<h3>Counter Indicators</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in country_profile.get('counter_indicators', []))}</ul>"
-        f"<h3>Linked Events</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in country_profile.get('linked_events', []))}</ul>"
-        f"<h3>Uncertainty</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in country_profile.get('uncertainty', []))}</ul>"
+        "<h3>Domain Deep Dives</h3>"
+        f"<table><thead><tr><th>Domain</th><th>Target</th></tr></thead><tbody>{domain_link_rows}</tbody></table>"
+        "<h3>Explanation Overview</h3>"
+        f"<h4>Drivers</h4><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in country_profile.get('drivers', []))}</ul>"
+        f"<h4>Counter Indicators</h4><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in country_profile.get('counter_indicators', []))}</ul>"
+        f"<h4>Linked Events</h4><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in country_profile.get('linked_events', []))}</ul>"
+        f"<h4>Uncertainty</h4><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in country_profile.get('uncertainty', []))}</ul>"
         f"<h3>Annotation IDs</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in annotation_ids)}</ul>"
-        f"<h3>Annotation Details</h3>{_annotation_details_html(annotation_ids, annotations_view_model)}"
+        f"<h3>Analyst Annotations in Context</h3>{_annotation_details_html(annotation_ids, annotations_view_model)}"
         f"<h3>Trends</h3>{_json_block(country_profile.get('trends', {}))}"
     )
     return _page(f"Country Profile - {country_profile.get('country_id', 'UNKNOWN')}", body, nav_prefix=nav_prefix, available_pages=available_pages)
@@ -540,12 +569,17 @@ def build_local_mvp_site(
     )
     generated_files.append(index_file)
 
+    available_domain_targets_by_country: dict[str, dict[str, str]] = {}
+    for (country_id, domain) in domain_detail_read_models:
+        available_domain_targets_by_country.setdefault(country_id, {})[domain] = f"../domains/{country_id}-{domain}.html"
+
     for country_id, read_model in country_profile_read_models.items():
         country_file = countries_dir / f'{country_id}.html'
         country_file.write_text(
             _render_country(
                 read_model,
                 annotations_view_model,
+                available_domain_targets=available_domain_targets_by_country.get(country_id, {}),
                 nav_prefix='../',
                 available_pages=available_pages,
             )

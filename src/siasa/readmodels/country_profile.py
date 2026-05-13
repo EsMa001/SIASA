@@ -14,6 +14,7 @@ def build_country_profile_read_model(
     counter_indicators: list[str] | None = None,
     uncertainty: list[str] | None = None,
     annotations: list[str] | None = None,
+    explanation_summary: str | None = None,
 ) -> dict[str, object]:
     return {
         "country_id": country_id,
@@ -27,4 +28,5 @@ def build_country_profile_read_model(
         "counter_indicators": counter_indicators or [],
         "uncertainty": uncertainty or [],
         "annotations": annotations or [],
+        "explanation_summary": explanation_summary,
     }

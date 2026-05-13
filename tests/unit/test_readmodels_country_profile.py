@@ -25,6 +25,7 @@ def test_country_profile_read_model_exposes_status_domain_states_trends_drivers_
         trends={"yearly": ["2025-11", "2025-12", "2026-01"]},
         drivers=["A_news_volume"],
         linked_events=["EVT-001"],
+        explanation_summary="Escalation is primarily driven by Domain A with partial corroboration from Domain B.",
     )
 
     assert read_model["country_id"] == "UKR"
@@ -32,6 +33,7 @@ def test_country_profile_read_model_exposes_status_domain_states_trends_drivers_
     assert read_model["domain_states"]["A"] == "D3"
     assert read_model["drivers"] == ["A_news_volume"]
     assert read_model["linked_events"] == ["EVT-001"]
+    assert read_model["explanation_summary"] == "Escalation is primarily driven by Domain A with partial corroboration from Domain B."
 
 
 def test_source_coverage_read_model_exposes_status_horizon_freshness_confidence_and_failed_sources() -> None:

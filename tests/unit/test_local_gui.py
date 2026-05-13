@@ -46,6 +46,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             "counter_indicators": ["D_macro_stability"],
             "uncertainty": ["partial_success"],
             "annotations": ["ANN-001"],
+            "explanation_summary": "Escalation is primarily driven by Domain A with partial corroboration from Domain B.",
         }
     }
     domain_details = {
@@ -224,8 +225,15 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
 
     country_html = (pages.output_dir / "countries" / "UKR.html").read_text()
     assert "Country Profile" in country_html
+    assert "Why this country is in this state" in country_html
+    assert "Escalation is primarily driven by Domain A with partial corroboration from Domain B." in country_html
+    assert "Explanation Overview" in country_html
     assert "A_news_volume" in country_html
+    assert "Domain Deep Dives" in country_html
+    assert "../domains/UKR-A.html" in country_html
+    assert "B — not available" in country_html
     assert "ANN-001" in country_html
+    assert "Analyst Annotations in Context" in country_html
     assert "Replicated agency report likely inflated country-level signal volume." in country_html
 
     domain_html = (pages.output_dir / "domains" / "UKR-A.html").read_text()
