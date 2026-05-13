@@ -95,6 +95,9 @@ Validation:
 - each source classified with access mode and integration readiness
 - explicit list of MVP-core sources that can be connected next
 
+Assessment artifact produced:
+- `docs/plans/siasa-p0-wp-001-source-access-assessment.md`
+
 ### P0-WP-002: Implement first real core source adapters
 Objective: connect the first technically feasible and high-value real sources so the system starts producing governed artifacts from genuine external data rather than only demo/test payloads.
 

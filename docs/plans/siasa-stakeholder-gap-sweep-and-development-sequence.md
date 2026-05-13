@@ -963,6 +963,7 @@ Deliverables:
 - source-access assessment document
 - updated roadmap references
 - recommended first live-source set
+- implemented as `docs/plans/siasa-p0-wp-001-source-access-assessment.md`
 
 Why first:
 - without this, all later GUI/data work risks staying demo-based
