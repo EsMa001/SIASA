@@ -8,6 +8,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from siasa.traceability.consistency import build_repo_closure_report
+
 
 SitePayload = dict[str, Any]
 
@@ -143,10 +145,14 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
     repo_closure_view_path = readmodels_dir / 'repo_closure.json'
     if repo_closure_view_path.exists():
         repo_closure_view_model = _load_json(repo_closure_view_path)
+    else:
+        repo_closure_view_model = build_repo_closure_report(repo_root=Path(__file__).resolve().parents[3])
     annotations_view_model = None
     annotations_view_path = readmodels_dir / 'annotations.json'
     if annotations_view_path.exists():
         annotations_view_model = _load_json(annotations_view_path)
+    else:
+        annotations_view_model = {'annotations': [], 'by_scope': {}, 'by_linked_item': {}}
 
     return {
         'world_map_read_model': world_map_read_model,
@@ -488,6 +494,10 @@ def _build_readiness_view_model(
         [str(item) for item in system_status_read_model.get("data_gaps", [])]
         + [f"failed_source:{item}" for item in system_status_read_model.get("failed_sources", [])]
         + [f"missing_source:{item}" for item in source_coverage_read_model.get("missing_sources", [])]
+        + (["missing_validation_artifact"] if validation_view_model is None else [])
+        + (["missing_traceability_artifact"] if traceability_view_model is None else [])
+        + (["missing_repo_closure_artifact"] if repo_closure_view_model is None else [])
+        + (["missing_annotations_artifact"] if annotations_view_model is None else [])
     )
     release_verdict = "blocked_by_known_gaps" if known_gaps else ("ready" if demo_verdict == "ready" else "blocked")
     return {

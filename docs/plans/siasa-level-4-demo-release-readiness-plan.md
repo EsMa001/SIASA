@@ -33,6 +33,11 @@ Die Readiness-Sicht trennt bewusst zwei Ebenen:
 - Release Verdict
   - berücksichtigt bekannte Gaps vor Auslieferung
   - z. B. `failed_source:*`, `missing_source:*`, explizite `data_gaps`
+  - fehlende Evidenzartefakte werden ebenfalls als benannte Gaps ausgewiesen, z. B. `missing_validation_artifact`
+
+Ergänzende Robustheit für artefaktgestützte Bundles:
+- fehlende `repo_closure.json` wird zur Readiness-Bewertung aus dem Repo-Kontext nachgezogen
+- fehlende `annotations.json` fällt auf eine leere, aber funktionierende Annotations-Sicht zurück
 
 Damit wird sichtbar gemacht:
 - etwas kann demo-fähig sein,
@@ -57,3 +62,4 @@ Damit wird sichtbar gemacht:
 ## Ergebnis
 
 Level 4 liefert damit keinen bloßen Textplan, sondern ein konkret ausführbares Readiness-Artefakt im Produkt selbst.
+Zusätzlich wurde die artefaktgestützte Auswertung gehärtet, damit fehlende Repo-Closure- oder Annotation-Artefakte die Readiness-Sicht nicht unnötig unbrauchbar machen und verbleibende Blocker präzise benannt werden.
