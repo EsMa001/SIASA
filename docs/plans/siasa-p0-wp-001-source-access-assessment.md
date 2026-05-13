@@ -80,14 +80,23 @@ Because current implemented feature logic is strongest in domains A, B, and D, a
 
 That leads to this first-wave recommendation:
 - Wave 1A: World Bank Indicators API
-- Wave 1B: ReliefWeb API
-- Wave 1C: GDELT 2.0 Events/GKG/DOC API
+- Wave 1B: GDELT 2.0 Events/GKG/DOC API
+- Wave 1C: ReliefWeb API (after approved appname) or another domain-B source without approval gating
 
 Rationale:
-- together they cover D, B, and A
-- all three are governed as open or low-friction sources
-- they avoid the access blockers explicitly attached to ACLED, X, Telegram, AIS, etc.
-- they create the minimum credible real-source basis for later multi-country artifact generation
+- the sequence still covers D, then A, then a second crisis/event-oriented source
+- it avoids the now-observed ReliefWeb approval blocker in the immediate next step
+- it keeps the project moving toward real multi-country evidence without waiting for provider approval
+
+### 1.5 Current technical verification findings
+
+Live technical probes during execution added two important source-access facts:
+- ReliefWeb: documentation at `https://apidoc.reliefweb.int/` confirms the current API version is `v2`; from 1 Nov 2025 it requires a pre-approved `appname`; a generic request against `api.reliefweb.int/v2/disasters?appname=siasa...` returned `HTTP 403 Forbidden`
+- GDELT DOC 2.0 API: a public query attempt against `api.gdeltproject.org` returned `HTTP 429 Too Many Requests`, so open access remains plausible but rate-limit/backoff handling is required
+
+Planning consequence:
+- ReliefWeb is no longer a low-friction immediate second implementation candidate
+- the next near-term source after World Bank should be a source without provider-side approval gating, even if rate-limit handling is still needed
 
 ---
 
@@ -144,7 +153,7 @@ Implementation consequence:
 | A | X/Twitter | Prepared Adapter | `API/Kosten` | A2 | intentionally not implemented | R4 | Hold | Do not use in first phases |
 | B | UCDP GED | Core | `frei/API/Download` | A0 | no adapter implementation | R2 | Wave 2 | Good second-wave B-source, especially for historically grounded conflict evidence |
 | B | GDELT Events | Core | `frei/open data` | A0 | no adapter implementation | R2 | Wave 2 | Strong candidate, but sequence after one initial GDELT A path avoids too much provider complexity at once |
-| B | ReliefWeb API | Core/Extended | `frei/API` | A0 | no adapter implementation | R1 | Wave 1 | Excellent first-wave B-source: open, humanitarian, country-oriented, useful for artifact breadth |
+| B | ReliefWeb API | Core/Extended | `frei/API`, but current ReliefWeb V2 requires pre-approved `appname` | A1 | no adapter implementation; generic unauthorised probe returned 403 | R3 | Wave 3 | Useful source, but no longer a low-friction immediate candidate without approved appname and clearer signal mapping |
 | B | GDACS | Core/Extended | `frei/API` | A0 | no adapter implementation | R2 | Wave 2 | Good second-wave disaster/shock source |
 | B | INFORM Risk Index | Extended | `öffentlich` | A0 | no adapter implementation | R3 | Wave 3 | More structural than daily-run oriented; later |
 | B | Global Terrorism Database | Extended | `öffentlich/Download prüfen` | A1 | no adapter implementation | R3 | Wave 3 | Historical validation value, but not ideal first-run source |
@@ -196,29 +205,35 @@ Current execution status:
 - implemented baseline adapter in `src/siasa/adapters/world_bank.py`
 - covered by `tests/unit/test_world_bank_adapter.py`
 
-### 5.2 Second source: ReliefWeb API
+### 5.2 Second source: GDELT 2.0 Events/GKG/DOC API
 Why second:
-- strong country-oriented crisis/event context for domain B
-- open API with practical analytical value
-- complements World Bank well without relying on high-friction providers
+- still governed as open-data source with no provider-side approval gate identified in the catalog
+- directly supports the important information-domain path
+- better near-term candidate than ReliefWeb after the ReliefWeb V2 appname restriction discovery
 
-Expected gain:
-- real B-domain live input
-- humanitarian/event signal context that is easier to explain in GUI and reports
-
-### 5.3 Third source: GDELT 2.0 Events/GKG/DOC API
-Why third:
-- high value for domain A and potentially B-related information context
-- open-data path
-- analytically central for the project vision
-
-Why not necessarily first:
-- broader schema/query complexity than World Bank
-- better implemented once one simpler source path and one event-oriented source path already work
+Important implementation note:
+- current probe returned HTTP 429, so retry/backoff and graceful rate-limit handling are required from the start
 
 Expected gain:
 - first real information-domain path
-- strong basis for Daily Global Review realism
+- stronger basis for Daily Global Review realism
+- keeps progress moving without waiting for provider approval
+
+Current execution status:
+- implemented baseline adapter in `src/siasa/adapters/gdelt_doc.py`
+- covered by `tests/unit/test_gdelt_doc_adapter.py`
+
+### 5.3 Third source: ReliefWeb API (after approved appname)
+Why third:
+- strong country-oriented crisis/event context for domain B
+- still strategically valuable once provider approval is available
+
+Why not second anymore:
+- current ReliefWeb V2 usage requires a pre-approved `appname`
+- the exact ReliefWeb-to-domain-B signal mapping needs a deliberate governed decision before implementation
+
+Expected gain:
+- humanitarian/event signal context that can enrich domain B once access and mapping are clarified
 
 ---
 
@@ -230,7 +245,7 @@ After Wave 1 is stable:
 - IMF Data API / SDMX
 - FAOSTAT
 - Offizielle Regierungs-/Institutionenfeeds
-- GDELT Events
+- ReliefWeb API (after approved appname)
 
 Purpose of Wave 2:
 - deepen B and D
@@ -261,12 +276,15 @@ The next serial work packages should be:
 
 1. P0-WP-002a
 - implement `World Bank Indicators API` adapter end-to-end
+- status: completed (`src/siasa/adapters/world_bank.py`, `tests/unit/test_world_bank_adapter.py`)
 
 2. P0-WP-002b
-- implement `ReliefWeb API` adapter end-to-end
+- implement `GDELT 2.0 Events/GKG/DOC API` adapter end-to-end
+- include rate-limit/backoff handling for public API access
 
 3. P0-WP-002c
-- implement `GDELT 2.0 Events/GKG/DOC API` adapter end-to-end
+- implement a domain-B crisis/event source after provider approval or mapping clarification
+- preferred candidate remains `ReliefWeb API` once approved `appname` access exists
 
 Only after those three are working should SIASA move to:
 - artifact completeness closure
