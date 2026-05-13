@@ -223,17 +223,24 @@ Current execution status:
 - implemented baseline adapter in `src/siasa/adapters/gdelt_doc.py`
 - covered by `tests/unit/test_gdelt_doc_adapter.py`
 
-### 5.3 Third source: ReliefWeb API (after approved appname)
-Why third:
-- strong country-oriented crisis/event context for domain B
-- still strategically valuable once provider approval is available
+### 5.3 Third source: Domain-B event baseline source
+Recommended selection:
+- `GDELT Events` as the next Domain-B baseline source
+- documented in `docs/plans/siasa-p0-wp-002c-domain-b-source-selection.md`
 
-Why not second anymore:
-- current ReliefWeb V2 usage requires a pre-approved `appname`
-- the exact ReliefWeb-to-domain-B signal mapping needs a deliberate governed decision before implementation
+Why third:
+- current Domain-B core implementation is centered on conflict/protest/violent event counters
+- `GDELT Events` fits the current implemented core feature model better than `ReliefWeb API`
+- it avoids the provider approval blocker currently observed on ReliefWeb
+
+Follow-on Domain-B order:
+- `UCDP GED` for stronger conflict-depth triangulation
+- `GDACS` for `B_disaster_alert_level`
+- `ReliefWeb API` later for humanitarian-context enrichment after approved `appname`
 
 Expected gain:
-- humanitarian/event signal context that can enrich domain B once access and mapping are clarified
+- clearer path from current B-core feature service to real source-backed event counts
+- no ambiguity about why ReliefWeb was deprioritized for now
 
 ---
 
@@ -283,8 +290,9 @@ The next serial work packages should be:
 - include rate-limit/backoff handling for public API access
 
 3. P0-WP-002c
-- implement a domain-B crisis/event source after provider approval or mapping clarification
-- preferred candidate remains `ReliefWeb API` once approved `appname` access exists
+- implement `GDELT Events` as the first Domain-B baseline source
+- selection documented in `docs/plans/siasa-p0-wp-002c-domain-b-source-selection.md`
+- follow with `UCDP GED`, `GDACS`, and only later `ReliefWeb API` after approved `appname`
 
 Only after those three are working should SIASA move to:
 - artifact completeness closure
