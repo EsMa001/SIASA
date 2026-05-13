@@ -1,11 +1,23 @@
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
 
 from siasa.gui import local_app
 from siasa.gui.local_app import build_local_mvp_site
+
+
+_HREF_PATTERN = re.compile(r"href='([^']+)'")
+
+
+def _internal_hrefs(html_text: str) -> list[str]:
+    return [
+        href
+        for href in _HREF_PATTERN.findall(html_text)
+        if not href.startswith(("http://", "https://", "#"))
+    ]
 
 
 def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
@@ -291,6 +303,68 @@ def test_build_local_mvp_site_suppresses_country_drill_down_links_without_genera
     assert "<a href='countries/POL.html'>POL</a>" not in index_html
     assert "countries/POL.html" not in index_html
     assert not (pages.output_dir / "countries" / "POL.html").exists()
+
+
+
+def test_build_local_mvp_site_emits_only_resolvable_internal_html_links(tmp_path: Path) -> None:
+    pages = build_local_mvp_site(
+        output_dir=tmp_path / "site",
+        world_map_read_model={
+            "baseline_mode": "Combined 30/90/365",
+            "active_domains": ["A", "B", "D"],
+            "countries": [
+                {"country_id": "UKR", "status": "S3", "active_domains": ["A", "B", "D"], "drill_down_target": "/countries/UKR"},
+            ],
+        },
+        country_profile_read_models={
+            "UKR": {
+                "country_id": "UKR",
+                "multi_domain_status": "S3",
+                "domain_states": {"A": "D3", "B": "D2", "D": "D1"},
+                "trends": {"yearly": ["2025-11", "2025-12", "2026-01"]},
+                "drivers": ["A_news_volume"],
+                "linked_events": ["EVT-001"],
+                "coverage": 0.84,
+                "confidence": 0.73,
+                "counter_indicators": ["D_macro_stability"],
+                "uncertainty": ["partial_success"],
+            }
+        },
+        domain_detail_read_models={
+            ("UKR", "A"): {
+                "country_id": "UKR",
+                "domain": "A",
+                "time_series": [{"timestamp": "2026-05-11", "value": 0.67}],
+                "baseline_comparison": {"current_window": 0.67, "baseline_30d": 0.31, "delta_to_baseline": 0.36},
+                "feature_values": [{"feature_id": "A_article_count", "value": 12.0, "coverage": 0.9}],
+                "source_context": [{"source_id": "SRC-A", "freshness_hours": 6, "history_horizon": "3y", "status": "success"}],
+                "anomaly_state": "D3",
+                "uncertainty": ["source_bias_possible"],
+            }
+        },
+        source_coverage_read_model={"sources": [], "failed_sources": [], "missing_sources": []},
+        report_catalog={},
+        system_status_read_model={
+            "run_id": "RUN-200",
+            "run_status": "success",
+            "active_domains": ["A", "B", "D"],
+            "coverage": {"countries_total": 1, "countries_with_updates": 1},
+            "failed_sources": [],
+            "available_reports": [],
+            "snapshot_id": "SNAP-RUN-200-v1",
+            "reprocessing_status": "idle",
+            "last_run": "2026-05-11T18:00:00Z",
+        },
+    )
+
+    html_files = sorted(pages.output_dir.rglob("*.html"))
+    broken_links: list[tuple[str, str]] = []
+    for html_file in html_files:
+        for href in _internal_hrefs(html_file.read_text()):
+            if Path(href).suffix and not (html_file.parent / href).resolve().exists():
+                broken_links.append((html_file.relative_to(pages.output_dir).as_posix(), href))
+
+    assert broken_links == []
 
 
 

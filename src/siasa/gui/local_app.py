@@ -18,7 +18,24 @@ class SiteBuildResult:
     generated_files: list[Path]
 
 
-def _page(title: str, body: str) -> str:
+def _page(title: str, body: str, *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
+    available_pages = available_pages or set()
+    nav_entries = [
+        ('index.html', 'Home'),
+        ('coverage.html', 'Source / Coverage'),
+        ('trends.html', 'Yearly Trend Page'),
+        ('events.html', 'Current Events Page'),
+        ('validation.html', 'Validation / Backtest View'),
+        ('traceability.html', 'Traceability / Lineage View'),
+        ('annotations.html', 'Analyst Annotations View'),
+        ('reports.html', 'Report / Export View'),
+        ('runs.html', 'System Status / Runs'),
+    ]
+    nav_html = ''.join(
+        f"<a href='{html.escape(nav_prefix + href)}'>{html.escape(label)}</a>"
+        for href, label in nav_entries
+        if href in available_pages
+    )
     return (
         "<!DOCTYPE html>"
         "<html lang='en'><head><meta charset='utf-8'>"
@@ -29,17 +46,7 @@ def _page(title: str, body: str) -> str:
         "code,pre{background:#f5f5f5;padding:0.2rem 0.4rem;}"
         "nav a{margin-right:1rem;} .status{font-weight:bold;} ul{margin-top:0.3rem;}"
         "</style></head><body>"
-        "<nav>"
-        "<a href='../index.html'>Home</a>"
-        "<a href='../coverage.html'>Source / Coverage</a>"
-        "<a href='../trends.html'>Yearly Trend Page</a>"
-        "<a href='../events.html'>Current Events Page</a>"
-        "<a href='../validation.html'>Validation / Backtest View</a>"
-        "<a href='../traceability.html'>Traceability / Lineage View</a>"
-        "<a href='../annotations.html'>Analyst Annotations View</a>"
-        "<a href='../reports.html'>Report / Export View</a>"
-        "<a href='../runs.html'>System Status / Runs</a>"
-        "</nav>"
+        f"<nav>{nav_html}</nav>"
         f"<h1>{html.escape(title)}</h1>"
         f"{body}"
         "</body></html>"
@@ -154,7 +161,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
     }
 
 
-def _render_index(world_map_read_model: dict[str, Any], available_country_ids: set[str] | None = None) -> str:
+def _render_index(world_map_read_model: dict[str, Any], available_country_ids: set[str] | None = None, *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
     rows = []
     available_country_ids = available_country_ids or set()
     for country in world_map_read_model.get("countries", []):
@@ -183,10 +190,10 @@ def _render_index(world_map_read_model: dict[str, Any], available_country_ids: s
         "<table><thead><tr><th>Country</th><th>Multi-Domain Status</th><th>Active Domains</th><th>Drill-down</th></tr></thead>"
         f"<tbody>{''.join(rows)}</tbody></table>"
     )
-    return _page("World Anomaly Map / Global Overview", body)
+    return _page("World Anomaly Map / Global Overview", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
-def _render_country(country_profile: dict[str, Any], annotations_view_model: dict[str, Any] | None = None) -> str:
+def _render_country(country_profile: dict[str, Any], annotations_view_model: dict[str, Any] | None = None, *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
     domain_rows = ''.join(
         f"<tr><td>{html.escape(domain)}</td><td>{html.escape(status)}</td></tr>"
         for domain, status in country_profile.get('domain_states', {}).items()
@@ -207,10 +214,10 @@ def _render_country(country_profile: dict[str, Any], annotations_view_model: dic
         f"<h3>Annotation Details</h3>{_annotation_details_html(annotation_ids, annotations_view_model)}"
         f"<h3>Trends</h3>{_json_block(country_profile.get('trends', {}))}"
     )
-    return _page(f"Country Profile - {country_profile.get('country_id', 'UNKNOWN')}", body)
+    return _page(f"Country Profile - {country_profile.get('country_id', 'UNKNOWN')}", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
-def _render_domain_detail(domain_detail: dict[str, Any], annotations_view_model: dict[str, Any] | None = None) -> str:
+def _render_domain_detail(domain_detail: dict[str, Any], annotations_view_model: dict[str, Any] | None = None, *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
     annotation_ids = [str(item) for item in domain_detail.get('annotations', [])]
     if not annotation_ids and annotations_view_model is not None:
         linked_item_key = f"{domain_detail.get('country_id', 'UNKNOWN')}:{domain_detail.get('domain', 'UNKNOWN')}"
@@ -234,10 +241,12 @@ def _render_domain_detail(domain_detail: dict[str, Any], annotations_view_model:
     return _page(
         f"Domain Detail - {domain_detail.get('country_id', 'UNKNOWN')} / {domain_detail.get('domain', 'UNKNOWN')}",
         body,
+        nav_prefix=nav_prefix,
+        available_pages=available_pages,
     )
 
 
-def _render_source_coverage(source_coverage_read_model: dict[str, Any]) -> str:
+def _render_source_coverage(source_coverage_read_model: dict[str, Any], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
     rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(source.get('source_id', '')))}</td>"
@@ -255,7 +264,7 @@ def _render_source_coverage(source_coverage_read_model: dict[str, Any]) -> str:
         f"<h3>Failed Sources</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in source_coverage_read_model.get('failed_sources', []))}</ul>"
         f"<h3>Missing Sources</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in source_coverage_read_model.get('missing_sources', []))}</ul>"
     )
-    return _page("Source / Coverage View", body)
+    return _page("Source / Coverage View", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
 def _prepare_report_catalog(report_catalog: dict[str, Any], output_dir: Path) -> tuple[dict[str, dict[str, Any]], list[Path]]:
@@ -280,7 +289,7 @@ def _prepare_report_catalog(report_catalog: dict[str, Any], output_dir: Path) ->
     return prepared_catalog, copied_files
 
 
-def _render_reports(report_catalog: dict[str, Any]) -> str:
+def _render_reports(report_catalog: dict[str, Any], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
     rows = ''.join(
         "<tr>"
         f"<td>{html.escape(report_type)}</td>"
@@ -296,10 +305,10 @@ def _render_reports(report_catalog: dict[str, Any]) -> str:
         "<table><thead><tr><th>Type</th><th>Report ID</th><th>Format</th><th>Downloads</th><th>Metadata</th></tr></thead>"
         f"<tbody>{rows}</tbody></table>"
     )
-    return _page("Report / Export View", body)
+    return _page("Report / Export View", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
-def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_model: dict[str, Any] | None = None) -> str:
+def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_model: dict[str, Any] | None = None, *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
     repo_closure_section = ""
     if repo_closure_view_model is not None:
         repo_closure_rows = ''.join(
@@ -331,10 +340,10 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<h3>Available Reports</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in system_status_read_model.get('available_reports', []))}</ul>"
         f"{repo_closure_section}"
     )
-    return _page("System Status / Runs", body)
+    return _page("System Status / Runs", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
-def _render_trends(country_profile_read_models: dict[str, dict[str, Any]]) -> str:
+def _render_trends(country_profile_read_models: dict[str, dict[str, Any]], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
     rows = []
     for country_id, profile in sorted(country_profile_read_models.items()):
         yearly = profile.get('trends', {}).get('yearly', [])
@@ -350,10 +359,10 @@ def _render_trends(country_profile_read_models: dict[str, dict[str, Any]]) -> st
         "<table><thead><tr><th>Country</th><th>Yearly Trend</th><th>Current Multi-Domain Status</th></tr></thead>"
         f"<tbody>{''.join(rows)}</tbody></table>"
     )
-    return _page("Yearly Trend Page", body)
+    return _page("Yearly Trend Page", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
-def _render_events(country_profile_read_models: dict[str, dict[str, Any]]) -> str:
+def _render_events(country_profile_read_models: dict[str, dict[str, Any]], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
     rows = []
     for country_id, profile in sorted(country_profile_read_models.items()):
         for event_id in profile.get('linked_events', []):
@@ -369,10 +378,10 @@ def _render_events(country_profile_read_models: dict[str, dict[str, Any]]) -> st
         "<table><thead><tr><th>Country</th><th>Event</th><th>Context Status</th></tr></thead>"
         f"<tbody>{''.join(rows)}</tbody></table>"
     )
-    return _page("Current Events Page", body)
+    return _page("Current Events Page", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
-def _render_validation(validation_view_model: dict[str, Any]) -> str:
+def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
     time_range = validation_view_model.get('time_range', {})
     reprocessing = validation_view_model.get('reprocessing_comparison', {})
     body = (
@@ -392,10 +401,10 @@ def _render_validation(validation_view_model: dict[str, Any]) -> str:
         f"<h3>Known Limitations</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in validation_view_model.get('known_limitations', []))}</ul>"
         f"<h3>Reprocessing Comparison</h3>{_json_block(reprocessing)}"
     )
-    return _page("Validation / Backtest View", body)
+    return _page("Validation / Backtest View", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
-def _render_traceability(traceability_view_model: dict[str, Any]) -> str:
+def _render_traceability(traceability_view_model: dict[str, Any], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
     rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(record.get('source_id', '')))}</td>"
@@ -414,10 +423,10 @@ def _render_traceability(traceability_view_model: dict[str, Any]) -> str:
         "<table><thead><tr><th>Source</th><th>Raw</th><th>Normalized</th><th>Feature</th><th>Domain Status</th><th>Multi-Domain Status</th><th>Snapshot</th><th>Report</th></tr></thead>"
         f"<tbody>{rows}</tbody></table>"
     )
-    return _page("Traceability / Lineage View", body)
+    return _page("Traceability / Lineage View", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
-def _render_annotations(annotations_view_model: dict[str, Any]) -> str:
+def _render_annotations(annotations_view_model: dict[str, Any], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
     scope_rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(scope))}</td>"
@@ -443,7 +452,7 @@ def _render_annotations(annotations_view_model: dict[str, Any]) -> str:
         "<table><thead><tr><th>Linked Item</th><th>Annotation IDs</th></tr></thead>"
         f"<tbody>{linked_item_rows}</tbody></table>"
     )
-    return _page("Analyst Annotations View", body)
+    return _page("Analyst Annotations View", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
 def build_local_mvp_site(
@@ -466,56 +475,91 @@ def build_local_mvp_site(
     domains_dir.mkdir(exist_ok=True)
 
     generated_files: list[Path] = []
+    available_pages = {
+        'index.html',
+        'coverage.html',
+        'reports.html',
+        'runs.html',
+        'trends.html',
+        'events.html',
+    }
+    if validation_view_model is not None:
+        available_pages.add('validation.html')
+    if traceability_view_model is not None:
+        available_pages.add('traceability.html')
+    if annotations_view_model is not None:
+        available_pages.add('annotations.html')
 
     index_file = output_dir / 'index.html'
-    index_file.write_text(_render_index(world_map_read_model, available_country_ids=set(country_profile_read_models)))
+    index_file.write_text(
+        _render_index(
+            world_map_read_model,
+            available_country_ids=set(country_profile_read_models),
+            nav_prefix='',
+            available_pages=available_pages,
+        )
+    )
     generated_files.append(index_file)
 
     for country_id, read_model in country_profile_read_models.items():
         country_file = countries_dir / f'{country_id}.html'
-        country_file.write_text(_render_country(read_model, annotations_view_model))
+        country_file.write_text(
+            _render_country(
+                read_model,
+                annotations_view_model,
+                nav_prefix='../',
+                available_pages=available_pages,
+            )
+        )
         generated_files.append(country_file)
 
     for (country_id, domain), read_model in domain_detail_read_models.items():
         domain_file = domains_dir / f'{country_id}-{domain}.html'
-        domain_file.write_text(_render_domain_detail(read_model, annotations_view_model))
+        domain_file.write_text(
+            _render_domain_detail(
+                read_model,
+                annotations_view_model,
+                nav_prefix='../',
+                available_pages=available_pages,
+            )
+        )
         generated_files.append(domain_file)
 
     coverage_file = output_dir / 'coverage.html'
-    coverage_file.write_text(_render_source_coverage(source_coverage_read_model))
+    coverage_file.write_text(_render_source_coverage(source_coverage_read_model, nav_prefix='', available_pages=available_pages))
     generated_files.append(coverage_file)
 
     prepared_report_catalog, copied_export_files = _prepare_report_catalog(report_catalog, output_dir)
     generated_files.extend(copied_export_files)
     reports_file = output_dir / 'reports.html'
-    reports_file.write_text(_render_reports(prepared_report_catalog))
+    reports_file.write_text(_render_reports(prepared_report_catalog, nav_prefix='', available_pages=available_pages))
     generated_files.append(reports_file)
 
     runs_file = output_dir / 'runs.html'
-    runs_file.write_text(_render_runs(system_status_read_model, repo_closure_view_model))
+    runs_file.write_text(_render_runs(system_status_read_model, repo_closure_view_model, nav_prefix='', available_pages=available_pages))
     generated_files.append(runs_file)
 
     trends_file = output_dir / 'trends.html'
-    trends_file.write_text(_render_trends(country_profile_read_models))
+    trends_file.write_text(_render_trends(country_profile_read_models, nav_prefix='', available_pages=available_pages))
     generated_files.append(trends_file)
 
     events_file = output_dir / 'events.html'
-    events_file.write_text(_render_events(country_profile_read_models))
+    events_file.write_text(_render_events(country_profile_read_models, nav_prefix='', available_pages=available_pages))
     generated_files.append(events_file)
 
     if validation_view_model is not None:
         validation_file = output_dir / 'validation.html'
-        validation_file.write_text(_render_validation(validation_view_model))
+        validation_file.write_text(_render_validation(validation_view_model, nav_prefix='', available_pages=available_pages))
         generated_files.append(validation_file)
 
     if traceability_view_model is not None:
         traceability_file = output_dir / 'traceability.html'
-        traceability_file.write_text(_render_traceability(traceability_view_model))
+        traceability_file.write_text(_render_traceability(traceability_view_model, nav_prefix='', available_pages=available_pages))
         generated_files.append(traceability_file)
 
     if annotations_view_model is not None:
         annotations_file = output_dir / 'annotations.html'
-        annotations_file.write_text(_render_annotations(annotations_view_model))
+        annotations_file.write_text(_render_annotations(annotations_view_model, nav_prefix='', available_pages=available_pages))
         generated_files.append(annotations_file)
 
     return SiteBuildResult(output_dir=output_dir, generated_files=generated_files)
