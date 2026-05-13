@@ -16,4 +16,5 @@ Geplante GUI-Seiten und ihr MVP-Status. Quelle: `stakeholder_requirements_inform
 | Backtest / Validation | Validierung | Historischer Zeitraum, Replay-Modus, damalige Signale, False Positive/Negative, Algorithmusversion. | MVP vorbereitet / Extended |
 | Report / Export View | Export | Daily Snapshot, Country/Domain/Event/Coverage/Backtest Reports als Markdown/JSON/CSV. | MVP Pflicht |
 | System Status / Runs | Betrieb | Last Run, Quellenstatus, Fehler, Datenfrische, Snapshot ID, Reprocessing-Status. | MVP Pflicht |
+| Demo / Release Readiness | Vorführung und Freigabe | Demo-Flow-Checkliste, Evidenz-Checkliste, bekannte Release-Gaps, Run-/Snapshot-Bezug und Readiness-Verdikte. | MVP für Demo-/Release-Readiness |
 

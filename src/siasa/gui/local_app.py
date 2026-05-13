@@ -30,6 +30,7 @@ def _page(title: str, body: str, *, nav_prefix: str = '', available_pages: set[s
         ('annotations.html', 'Analyst Annotations View'),
         ('reports.html', 'Report / Export View'),
         ('runs.html', 'System Status / Runs'),
+        ('readiness.html', 'Demo / Release Readiness'),
     ]
     nav_html = ''.join(
         f"<a href='{html.escape(nav_prefix + href)}'>{html.escape(label)}</a>"
@@ -444,6 +445,103 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     return _page("System Status / Runs", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
+def _deduplicated_strings(items: list[str]) -> list[str]:
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for item in items:
+        if item in seen:
+            continue
+        seen.add(item)
+        ordered.append(item)
+    return ordered
+
+
+def _build_readiness_view_model(
+    *,
+    country_profile_read_models: dict[str, dict[str, Any]],
+    domain_detail_read_models: dict[tuple[str, str], dict[str, Any]],
+    report_catalog: dict[str, dict[str, Any]],
+    system_status_read_model: dict[str, Any],
+    source_coverage_read_model: dict[str, Any],
+    validation_view_model: dict[str, Any] | None,
+    traceability_view_model: dict[str, Any] | None,
+    annotations_view_model: dict[str, Any] | None,
+    repo_closure_view_model: dict[str, Any] | None,
+    available_pages: set[str],
+) -> dict[str, Any]:
+    demo_checks = [
+        {"label": "Home", "ready": "index.html" in available_pages},
+        {"label": "Country Profile", "ready": bool(country_profile_read_models)},
+        {"label": "Domain Detail", "ready": bool(domain_detail_read_models)},
+        {"label": "Source / Coverage", "ready": "coverage.html" in available_pages},
+        {"label": "Report / Export", "ready": "reports.html" in available_pages},
+        {"label": "Validation / Backtest", "ready": validation_view_model is not None},
+    ]
+    evidence_checks = [
+        {"label": "Traceability / Lineage", "ready": traceability_view_model is not None},
+        {"label": "Analyst Annotations", "ready": annotations_view_model is not None},
+        {"label": "Repo Closure Summary", "ready": repo_closure_view_model is not None},
+        {"label": "Available Reports", "ready": bool(report_catalog)},
+    ]
+    demo_verdict = "ready" if all(check["ready"] for check in demo_checks) else "blocked"
+    known_gaps = _deduplicated_strings(
+        [str(item) for item in system_status_read_model.get("data_gaps", [])]
+        + [f"failed_source:{item}" for item in system_status_read_model.get("failed_sources", [])]
+        + [f"missing_source:{item}" for item in source_coverage_read_model.get("missing_sources", [])]
+    )
+    release_verdict = "blocked_by_known_gaps" if known_gaps else ("ready" if demo_verdict == "ready" else "blocked")
+    return {
+        "run_id": system_status_read_model.get("run_id"),
+        "snapshot_id": system_status_read_model.get("snapshot_id"),
+        "demo_verdict": demo_verdict,
+        "release_verdict": release_verdict,
+        "demo_checks": demo_checks,
+        "evidence_checks": evidence_checks,
+        "known_gaps": known_gaps,
+        "report_count": len(report_catalog),
+        "country_profile_count": len(country_profile_read_models),
+        "domain_detail_count": len(domain_detail_read_models),
+    }
+
+
+def _render_readiness(readiness_view_model: dict[str, Any], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
+    demo_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(check.get('label', '')))}</td>"
+        f"<td>{html.escape('ready' if bool(check.get('ready')) else 'missing')}</td>"
+        "</tr>"
+        for check in readiness_view_model.get('demo_checks', [])
+    )
+    evidence_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(check.get('label', '')))}</td>"
+        f"<td>{html.escape('ready' if bool(check.get('ready')) else 'missing')}</td>"
+        "</tr>"
+        for check in readiness_view_model.get('evidence_checks', [])
+    )
+    known_gap_items = ''.join(
+        f"<li>{html.escape(str(item))}</li>"
+        for item in readiness_view_model.get('known_gaps', [])
+    ) or "<li>none</li>"
+    body = (
+        "<h2>Demo / Release Readiness</h2>"
+        f"<p>Run ID: <strong>{html.escape(str(readiness_view_model.get('run_id', 'n/a')))}</strong></p>"
+        f"<p>Snapshot ID: <strong>{html.escape(str(readiness_view_model.get('snapshot_id', 'n/a')))}</strong></p>"
+        f"<p>Demo Verdict: <strong>{html.escape(str(readiness_view_model.get('demo_verdict', 'n/a')))}</strong></p>"
+        f"<p>Release Verdict: <strong>{html.escape(str(readiness_view_model.get('release_verdict', 'n/a')))}</strong></p>"
+        f"<p>Country Profiles: <strong>{html.escape(str(readiness_view_model.get('country_profile_count', 0)))}</strong> | Domain Details: <strong>{html.escape(str(readiness_view_model.get('domain_detail_count', 0)))}</strong> | Reports: <strong>{html.escape(str(readiness_view_model.get('report_count', 0)))}</strong></p>"
+        "<h3>Demo Flow Checklist</h3>"
+        "<table><thead><tr><th>Flow Step</th><th>Status</th></tr></thead>"
+        f"<tbody>{demo_rows}</tbody></table>"
+        "<h3>Evidence Checklist</h3>"
+        "<table><thead><tr><th>Evidence</th><th>Status</th></tr></thead>"
+        f"<tbody>{evidence_rows}</tbody></table>"
+        "<h3>Known Gaps Before Release</h3>"
+        f"<ul>{known_gap_items}</ul>"
+    )
+    return _page("Demo / Release Readiness", body, nav_prefix=nav_prefix, available_pages=available_pages)
+
+
 def _render_trends(country_profile_read_models: dict[str, dict[str, Any]], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
     rows = []
     for country_id, profile in sorted(country_profile_read_models.items()):
@@ -618,6 +716,7 @@ def build_local_mvp_site(
         'runs.html',
         'trends.html',
         'events.html',
+        'readiness.html',
     }
     if validation_view_model is not None:
         available_pages.add('validation.html')
@@ -710,6 +809,25 @@ def build_local_mvp_site(
         annotations_file = output_dir / 'annotations.html'
         annotations_file.write_text(_render_annotations(annotations_view_model, nav_prefix='', available_pages=available_pages))
         generated_files.append(annotations_file)
+
+    readiness_view_model = _build_readiness_view_model(
+        country_profile_read_models=country_profile_read_models,
+        domain_detail_read_models=domain_detail_read_models,
+        report_catalog=prepared_report_catalog,
+        system_status_read_model=system_status_read_model,
+        source_coverage_read_model=source_coverage_read_model,
+        validation_view_model=validation_view_model,
+        traceability_view_model=traceability_view_model,
+        annotations_view_model=annotations_view_model,
+        repo_closure_view_model=repo_closure_view_model,
+        available_pages=available_pages,
+    )
+    readiness_file = output_dir / 'readiness.html'
+    readiness_file.write_text(_render_readiness(readiness_view_model, nav_prefix='', available_pages=available_pages))
+    generated_files.append(readiness_file)
+    readiness_json_file = output_dir / 'readiness.json'
+    readiness_json_file.write_text(json.dumps(readiness_view_model, indent=2, sort_keys=True))
+    generated_files.append(readiness_json_file)
 
     return SiteBuildResult(output_dir=output_dir, generated_files=generated_files)
 

@@ -214,6 +214,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert (pages.output_dir / "validation.html").exists()
     assert (pages.output_dir / "traceability.html").exists()
     assert (pages.output_dir / "annotations.html").exists()
+    assert (pages.output_dir / "readiness.html").exists()
 
     index_html = (pages.output_dir / "index.html").read_text()
     assert "World Anomaly Map" in index_html
@@ -289,6 +290,17 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Missing Expected Domains" in validation_html
     assert "D" in validation_html
     assert "Changed Versions" in validation_html
+
+    readiness_html = (pages.output_dir / "readiness.html").read_text()
+    assert "Demo / Release Readiness" in readiness_html
+    assert "Demo Verdict" in readiness_html
+    assert "Release Verdict" in readiness_html
+    assert "ready" in readiness_html
+    assert "blocked_by_known_gaps" in readiness_html
+    assert "failed_source:SRC-B" in readiness_html
+    assert "country_without_update:POL" in readiness_html
+    assert "Source / Coverage" in readiness_html
+    assert "Validation / Backtest" in readiness_html
 
     traceability_html = (pages.output_dir / "traceability.html").read_text()
     assert "Traceability / Lineage View" in traceability_html
@@ -403,6 +415,7 @@ def test_build_local_mvp_site_emits_only_resolvable_internal_html_links(tmp_path
     )
 
     html_files = sorted(pages.output_dir.rglob("*.html"))
+    assert (pages.output_dir / "readiness.html") in html_files
     broken_links: list[tuple[str, str]] = []
     for html_file in html_files:
         for href in _internal_hrefs(html_file.read_text()):
@@ -824,3 +837,4 @@ def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bund
     assert "VAL-UKR-2022-001" in (tmp_path / "site" / "validation.html").read_text()
     assert "RAW-SRC-A-1" in (tmp_path / "site" / "traceability.html").read_text()
     assert "CLI verification annotation." in (tmp_path / "site" / "annotations.html").read_text()
+    assert "Demo / Release Readiness" in (tmp_path / "site" / "readiness.html").read_text()

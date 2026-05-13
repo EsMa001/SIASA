@@ -15,6 +15,7 @@ SIASA ist ein V-Model-light / requirements-as-code Repository mit importierter S
 - Validation-/Backtest-View als lokale GUI-Seite mit optionalem Artefakt-Load aus `readmodels/validation_backtest.json`
 - Traceability-/Lineage-View als lokale GUI-Seite mit optionalem Artefakt-Load aus `readmodels/traceability_lineage.json`
 - Analyst-Annotations-View als lokale GUI-Seite mit optionalem Artefakt-Load aus `readmodels/annotations.json`
+- Demo-/Release-Readiness-View als lokale GUI-Seite inklusive Checklisten und `readiness.json`-Artefakt
 - lokal ausführbare MVP-GUI-Baseline als statische HTML-Site unter `src/siasa/gui/local_app.py`
 
 ## Wichtige Einstiege
@@ -85,6 +86,7 @@ Die MVP-GUI-Baseline deckt die Kernseiten aus den Anforderungen ab:
 - Source / Coverage View
 - Report / Export View
 - System Status / Runs
+- Demo / Release Readiness
 
 ## Nächste sinnvolle Schritte
 
