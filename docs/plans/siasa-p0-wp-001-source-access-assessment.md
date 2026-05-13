@@ -242,6 +242,10 @@ Expected gain:
 - clearer path from current B-core feature service to real source-backed event counts
 - no ambiguity about why ReliefWeb was deprioritized for now
 
+Current execution status:
+- implemented baseline adapter in `src/siasa/adapters/gdelt_events.py`
+- covered by `tests/unit/test_gdelt_events_adapter.py`
+
 ---
 
 ## 6. Recommended second-wave order
