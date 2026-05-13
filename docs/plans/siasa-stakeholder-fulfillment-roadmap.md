@@ -16,6 +16,7 @@ Tech stack: Python 3.11+, pytest, static HTML GUI generator, governed YAML V-mod
 | --- | --- | --- | --- | --- |
 | World overview / world map | World map, anomaly overview, drill-down | Partially present | Static HTML overview table exists; no real map rendering | Missing visual layer |
 | Country coverage breadth | Many governed countries visible and explorable | Weak | Current demo payload shows UKR + POL; current latest artifact bundle shows only UKR in `world_map.json` | Missing artifact population |
+| Real source access | Productive access to genuine external data sources | Weak | Source catalog and adapter framework exist, but no concrete live source adapter implementations are present in `src/siasa/adapters/`; several sources are explicitly only `Prepared Adapter` or require API access/registration | Foundational access gap |
 | Country drill-down | Country profile reachable from overview | Present | Working drill-down for generated country pages; dead links suppressed | Mostly done |
 | Country explanation | Why-country explanation, drivers, counter-indicators, uncertainty | Present | Explanation summary + grouped explanation sections implemented | Mostly done |
 | Domain deep dive | Domain A/B/D detail pages | Present but selective | Domain detail pages exist only where read models are generated | Partial coverage |
@@ -59,18 +60,67 @@ Therefore the next work must not be random GUI polishing. It should follow a sta
 
 ## 3. Recommended target operating model
 
-To get from the current state to stakeholder fulfillment, work in 4 serial program increments:
+To get from the current state to stakeholder fulfillment, work in 5 serial program increments:
 
+0. Real-source-access readiness
 1. Artifact-complete MVP
 2. Data-complete country coverage MVP
 3. Visual analyst GUI MVP
 4. Advanced stakeholder features / extended analytics
 
-Only after (1) and (2) does it make sense to invest heavily in (3).
+Only after (0), (1), and (2) does it make sense to invest heavily in (3).
 
 ---
 
 ## 4. Serial implementation roadmap
+
+## Phase P0: Establish real-source-access readiness
+
+Objective: determine which stakeholder-relevant external sources are actually accessible now, which require credentials/registration/legal clarification, and which can be integrated first as real governed MVP inputs.
+
+### P0-WP-001: Source-by-source access and integration assessment
+Objective: classify each candidate source as (a) directly accessible now, (b) accessible after API key / registration setup, (c) legally or operationally constrained, or (d) intentionally deferred.
+
+Expected outcome:
+- no ambiguity about whether SIASA currently runs on demo data or real live inputs
+- a governed source-access matrix exists for implementation planning
+- first real-source integration candidates are selected on evidence, not assumption
+
+Likely files:
+- `vmodel/project/data_sources.yaml`
+- `docs/plans/siasa-stakeholder-fulfillment-roadmap.md`
+- optional follow-up decision / assumption artifacts under `vmodel/project/`
+
+Validation:
+- each source classified with access mode and integration readiness
+- explicit list of MVP-core sources that can be connected next
+
+### P0-WP-002: Implement first real core source adapters
+Objective: connect the first technically feasible and high-value real sources so the system starts producing governed artifacts from genuine external data rather than only demo/test payloads.
+
+Recommended first candidates:
+- GDELT
+- ReliefWeb or UCDP GED
+- World Bank Indicators API
+
+Expected outcome:
+- at least one end-to-end run uses real fetched source data
+- real source identifiers replace purely synthetic `SRC-A` / `SRC-B` placeholders in the first governed slice
+- creates the basis for meaningful multi-country artifact generation in P2
+
+Likely files:
+- `src/siasa/adapters/`
+- `src/siasa/runs/orchestrator.py`
+- `src/siasa/runs/artifacts.py`
+- source catalog / governance artifacts under `vmodel/`
+- unit tests for adapter and orchestrator integration
+
+Validation:
+- adapter-level fetch tests
+- governed run with real-source metadata
+- resulting artifact bundle shows real source provenance
+
+---
 
 ## Phase P1: Close remaining artifact and runtime completeness gaps
 
@@ -212,18 +262,20 @@ These should come after P1–P3, not before.
 
 If the goal is a believable path to “stakeholder requirements fulfilled”, the next serial order should be:
 
-1. P1-WP-001 — close validation artifact generation gap
-2. P1-WP-002 — explicit artifact absence reasons
-3. P2-WP-001 — diagnose single-country latest bundle
-4. P2-WP-002 — generate representative multi-country artifact bundle
-5. P3-WP-001 — chart rendering for trends/domain details
-6. P3-WP-002 — map visualization layer
-7. P3-WP-003 — filters and mode controls
-8. P3-WP-004 — cross-country comparison
-9. P3-WP-005 — annotation create/edit workflows
-10. P4 extended features
+1. P0-WP-001 — assess real-source access and integration readiness
+2. P0-WP-002 — implement first real core source adapters
+3. P1-WP-001 — close validation artifact generation gap
+4. P1-WP-002 — explicit artifact absence reasons
+5. P2-WP-001 — diagnose single-country latest bundle
+6. P2-WP-002 — generate representative multi-country artifact bundle
+7. P3-WP-001 — chart rendering for trends/domain details
+8. P3-WP-002 — map visualization layer
+9. P3-WP-003 — filters and mode controls
+10. P3-WP-004 — cross-country comparison
+11. P3-WP-005 — annotation create/edit workflows
+12. P4 extended features
 
-This order is recommended because it first makes the system honest and complete, then broad, then visually strong.
+This order is recommended because it first makes data access explicit, then the runtime honest and complete, then broad, then visually strong.
 
 ---
 
