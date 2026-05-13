@@ -70,7 +70,13 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
         "missing_sources": ["SRC-C"],
     }
     reports = {
-        "daily_snapshot": {"format": "Markdown + JSON", "report_id": "REP-DAILY-RUN-200", "uncertainty": ["partial_success"]},
+        "daily_snapshot": {
+            "format": "Markdown + JSON",
+            "report_id": "REP-DAILY-RUN-200",
+            "uncertainty": ["partial_success"],
+            "failed_sources": ["SRC-B"],
+            "snapshot_id": "SNAP-RUN-200-v1",
+        },
         "country_profile": {"format": "Markdown + JSON", "report_id": "REP-COUNTRY-UKR", "country_id": "UKR"},
         "coverage_report": {"format": "Markdown + JSON + CSV", "report_id": "REP-COVERAGE-001"},
     }
@@ -254,6 +260,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     reports_html = (pages.output_dir / "reports.html").read_text()
     assert "Report / Export View" in reports_html
     assert "REP-COVERAGE-001" in reports_html
+    assert "Evidence Summary" in reports_html
+    assert "partial_success" in reports_html
+    assert "SRC-B" in reports_html
+    assert "SNAP-RUN-200-v1" in reports_html
 
     runs_html = (pages.output_dir / "runs.html").read_text()
     assert "System Status / Runs" in runs_html
@@ -424,6 +434,9 @@ def test_build_local_mvp_site_copies_report_export_files_and_renders_download_li
             "daily_snapshot": {
                 "report_id": "REP-DAILY-RUN-200",
                 "format": "json+markdown",
+                "snapshot_id": "SNAP-RUN-200-v1",
+                "uncertainty": ["partial_success"],
+                "failed_sources": ["SRC-B"],
                 "export_files": [
                     {"label": "Markdown", "format": "md", "path": str(markdown_export), "relative_path": "exports/daily_snapshot.md"},
                     {"label": "JSON", "format": "json", "path": str(json_export), "relative_path": "exports/daily_snapshot.json"},
@@ -447,6 +460,10 @@ def test_build_local_mvp_site_copies_report_export_files_and_renders_download_li
     reports_html = (pages.output_dir / "reports.html").read_text()
     assert "exports/daily_snapshot.md" in reports_html
     assert "exports/daily_snapshot.json" in reports_html
+    assert "Evidence Summary" in reports_html
+    assert "partial_success" in reports_html
+    assert "SRC-B" in reports_html
+    assert "SNAP-RUN-200-v1" in reports_html
     assert (pages.output_dir / "exports" / "daily_snapshot.md").read_text() == "# Daily Snapshot\n"
     assert (pages.output_dir / "exports" / "daily_snapshot.json").read_text() == '{"snapshot_id": "SNAP-RUN-200-v1"}'
 

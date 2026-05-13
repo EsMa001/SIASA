@@ -387,8 +387,22 @@ def _render_reports(report_catalog: dict[str, Any], *, nav_prefix: str = '', ava
         "</tr>"
         for report_type, report_info in sorted(report_catalog.items())
     )
+    export_count = sum(len(report_info.get('export_files', [])) for report_info in report_catalog.values())
+    evidence_items = ''.join(
+        "<li>"
+        f"{html.escape(str(report_info.get('report_id', report_type)))}"
+        f" | snapshot={html.escape(str(report_info.get('snapshot_id', 'n/a')))}"
+        f" | uncertainty={html.escape(', '.join(str(item) for item in report_info.get('uncertainty', [])) or 'none')}"
+        f" | failed_sources={html.escape(', '.join(str(item) for item in report_info.get('failed_sources', [])) or 'none')}"
+        "</li>"
+        for report_type, report_info in sorted(report_catalog.items())
+    ) or "<li>none</li>"
     body = (
         "<h2>Report / Export View</h2>"
+        "<h3>Evidence Summary</h3>"
+        f"<p>Reports available: <strong>{html.escape(str(len(report_catalog)))}</strong></p>"
+        f"<p>Download-ready artifacts: <strong>{html.escape(str(export_count))}</strong></p>"
+        f"<ul>{evidence_items}</ul>"
         "<table><thead><tr><th>Type</th><th>Report ID</th><th>Format</th><th>Downloads</th><th>Metadata</th></tr></thead>"
         f"<tbody>{rows}</tbody></table>"
     )
