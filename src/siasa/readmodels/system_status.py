@@ -13,6 +13,8 @@ def build_system_status_read_model(
     *,
     reprocessing_status: str = "idle",
     last_run: str | None = None,
+    top_status_changes: list[dict[str, object]] | None = None,
+    data_gaps: list[str] | None = None,
 ) -> dict[str, object]:
     return {
         "run_id": run_id,
@@ -27,4 +29,6 @@ def build_system_status_read_model(
         "snapshot_id": snapshot_id,
         "reprocessing_status": reprocessing_status,
         "last_run": last_run,
+        "top_status_changes": list(top_status_changes or []),
+        "data_gaps": list(data_gaps or []),
     }

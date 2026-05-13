@@ -161,7 +161,14 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
     }
 
 
-def _render_index(world_map_read_model: dict[str, Any], available_country_ids: set[str] | None = None, *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
+def _render_index(
+    world_map_read_model: dict[str, Any],
+    available_country_ids: set[str] | None = None,
+    system_status_read_model: dict[str, Any] | None = None,
+    *,
+    nav_prefix: str = '',
+    available_pages: set[str] | None = None,
+) -> str:
     rows = []
     available_country_ids = available_country_ids or set()
     for country in world_map_read_model.get("countries", []):
@@ -174,20 +181,51 @@ def _render_index(world_map_read_model: dict[str, Any], available_country_ids: s
             else html.escape(country_id)
         )
         drill_down_cell = f"countries/{html.escape(country_id)}.html" if has_country_page else "not available"
+        support_status = "supported" if has_country_page else "not available"
         rows.append(
             "<tr>"
             f"<td>{country_cell}</td>"
+            f"<td>{html.escape(support_status)}</td>"
             f"<td class='status'>{html.escape(status)}</td>"
             f"<td>{html.escape(', '.join(country.get('active_domains', [])))}</td>"
             f"<td>{drill_down_cell}</td>"
             "</tr>"
         )
+
+    system_status_read_model = system_status_read_model or {}
+    top_status_changes_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(change.get('country_id', '')))}</td>"
+        f"<td>{html.escape(str(change.get('from_status', 'n/a')))} → {html.escape(str(change.get('to_status', 'n/a')))}</td>"
+        f"<td>{html.escape(str(change.get('direction', 'n/a')))}</td>"
+        "</tr>"
+        for change in system_status_read_model.get('top_status_changes', [])
+    ) or "<tr><td colspan='3'>No status changes recorded.</td></tr>"
+    data_gap_items = ''.join(
+        f"<li>{html.escape(str(item))}</li>"
+        for item in system_status_read_model.get('data_gaps', [])
+    ) or "<li>none</li>"
+    failed_sources = ''.join(
+        f"<li>{html.escape(str(item))}</li>"
+        for item in system_status_read_model.get('failed_sources', [])
+    ) or "<li>none</li>"
+
     body = (
+        "<h2>Daily Global Review</h2>"
+        f"<p>Run status: <span class='status'>{html.escape(str(system_status_read_model.get('run_status', 'n/a')))}</span></p>"
+        f"<p>Snapshot ID: {html.escape(str(system_status_read_model.get('snapshot_id', 'n/a')))}</p>"
+        f"<p>Coverage summary: {html.escape(str(system_status_read_model.get('coverage', {})))}</p>"
+        f"<h3>Failed Sources</h3><ul>{failed_sources}</ul>"
+        "<h3>Data Gaps / Trust Limits</h3>"
+        f"<ul>{data_gap_items}</ul>"
+        "<h3>Top Status Changes</h3>"
+        "<table><thead><tr><th>Country</th><th>Status Change</th><th>Direction</th></tr></thead>"
+        f"<tbody>{top_status_changes_rows}</tbody></table>"
         "<h2>World Anomaly Map</h2>"
         f"<p>Baseline mode: <strong>{html.escape(str(world_map_read_model.get('baseline_mode', 'unknown')))}</strong></p>"
         f"<p>Active domains: {html.escape(', '.join(world_map_read_model.get('active_domains', [])))}</p>"
         "<h2>Global Overview</h2>"
-        "<table><thead><tr><th>Country</th><th>Multi-Domain Status</th><th>Active Domains</th><th>Drill-down</th></tr></thead>"
+        "<table><thead><tr><th>Country</th><th>Support Status</th><th>Multi-Domain Status</th><th>Active Domains</th><th>Drill-down</th></tr></thead>"
         f"<tbody>{''.join(rows)}</tbody></table>"
     )
     return _page("World Anomaly Map / Global Overview", body, nav_prefix=nav_prefix, available_pages=available_pages)
@@ -495,6 +533,7 @@ def build_local_mvp_site(
         _render_index(
             world_map_read_model,
             available_country_ids=set(country_profile_read_models),
+            system_status_read_model=system_status_read_model,
             nav_prefix='',
             available_pages=available_pages,
         )

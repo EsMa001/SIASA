@@ -167,6 +167,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
         "snapshot_id": "SNAP-RUN-200-v1",
         "reprocessing_status": "idle",
         "last_run": "2026-05-11T18:00:00Z",
+        "top_status_changes": [
+            {"country_id": "UKR", "from_status": "S2", "to_status": "S3", "direction": "up"},
+            {"country_id": "POL", "from_status": "S2", "to_status": "S1", "direction": "down"},
+        ],
+        "data_gaps": ["failed_source:SRC-B", "country_without_update:POL"],
     }
 
     repo_closure_view = {
@@ -208,6 +213,14 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Global Overview" in index_html
     assert "UKR" in index_html
     assert "countries/UKR.html" in index_html
+    assert "Daily Global Review" in index_html
+    assert "Top Status Changes" in index_html
+    assert "S2 → S3" in index_html
+    assert "Data Gaps / Trust Limits" in index_html
+    assert "failed_source:SRC-B" in index_html
+    assert "country_without_update:POL" in index_html
+    assert "Support Status" in index_html
+    assert "supported" in index_html
 
     country_html = (pages.output_dir / "countries" / "UKR.html").read_text()
     assert "Country Profile" in country_html

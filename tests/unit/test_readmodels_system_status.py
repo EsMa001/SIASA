@@ -11,6 +11,11 @@ def test_system_status_read_model_exposes_run_status_operational_scope_and_avail
         failed_sources=["SRC-B", "SRC-D"],
         available_reports=["REP-DAILY-RUN-200", "REP-COUNTRY-UKR"],
         snapshot_id="SNAP-RUN-200-v1",
+        top_status_changes=[
+            {"country_id": "UKR", "from_status": "S2", "to_status": "S3", "direction": "up"},
+            {"country_id": "POL", "from_status": "S2", "to_status": "S1", "direction": "down"},
+        ],
+        data_gaps=["failed_source:SRC-B", "failed_source:SRC-D"],
     )
 
     assert read_model["run_id"] == "RUN-200"
@@ -21,3 +26,5 @@ def test_system_status_read_model_exposes_run_status_operational_scope_and_avail
     assert read_model["failed_sources"] == ["SRC-B", "SRC-D"]
     assert read_model["available_reports"] == ["REP-DAILY-RUN-200", "REP-COUNTRY-UKR"]
     assert read_model["snapshot_id"] == "SNAP-RUN-200-v1"
+    assert read_model["top_status_changes"][0] == {"country_id": "UKR", "from_status": "S2", "to_status": "S3", "direction": "up"}
+    assert read_model["data_gaps"] == ["failed_source:SRC-B", "failed_source:SRC-D"]
