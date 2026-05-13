@@ -44,5 +44,8 @@ def test_validation_backtest_read_model_exposes_case_context_comparison_and_repr
     assert read_model["observed_domains"] == ["A", "B"]
     assert read_model["domain_match_ratio"] == 2 / 3
     assert read_model["status_match"] is True
+    assert read_model["review_verdict"] == "match_with_gaps"
+    assert read_model["missing_expected_domains"] == ["D"]
+    assert read_model["unexpected_observed_domains"] == []
     assert read_model["validation_metrics"] == ["Domain Match", "Status Match"]
     assert read_model["reprocessing_comparison"]["changed_versions"] == ["config_version", "mapping_version", "rule_version"]

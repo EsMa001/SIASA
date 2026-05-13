@@ -284,6 +284,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Validation / Backtest View" in validation_html
     assert "VAL-UKR-2022-001" in validation_html
     assert "Domain Match" in validation_html
+    assert "Review Summary" in validation_html
+    assert "match_with_gaps" in validation_html
+    assert "Missing Expected Domains" in validation_html
+    assert "D" in validation_html
+    assert "Changed Versions" in validation_html
 
     traceability_html = (pages.output_dir / "traceability.html").read_text()
     assert "Traceability / Lineage View" in traceability_html

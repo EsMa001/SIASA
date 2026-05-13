@@ -485,21 +485,56 @@ def _render_events(country_profile_read_models: dict[str, dict[str, Any]], *, na
 def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
     time_range = validation_view_model.get('time_range', {})
     reprocessing = validation_view_model.get('reprocessing_comparison', {})
+    expected_domains = [str(item) for item in validation_view_model.get('expected_domains', [])]
+    observed_domains = [str(item) for item in validation_view_model.get('observed_domains', [])]
+    missing_expected_domain_values = validation_view_model.get('missing_expected_domains')
+    if missing_expected_domain_values is None:
+        missing_expected_domain_values = [domain for domain in expected_domains if domain not in observed_domains]
+    unexpected_observed_domain_values = validation_view_model.get('unexpected_observed_domains')
+    if unexpected_observed_domain_values is None:
+        unexpected_observed_domain_values = [domain for domain in observed_domains if domain not in expected_domains]
+    review_verdict = validation_view_model.get('review_verdict')
+    if review_verdict is None:
+        status_match = validation_view_model.get('status_match')
+        if status_match and not missing_expected_domain_values and not unexpected_observed_domain_values:
+            review_verdict = 'match'
+        elif status_match:
+            review_verdict = 'match_with_gaps'
+        else:
+            review_verdict = 'mismatch'
+    changed_versions = ''.join(
+        f"<li>{html.escape(str(item))}</li>"
+        for item in reprocessing.get('changed_versions', [])
+    ) or "<li>none</li>"
+    missing_expected_domains = ''.join(
+        f"<li>{html.escape(str(item))}</li>"
+        for item in missing_expected_domain_values
+    ) or "<li>none</li>"
+    unexpected_observed_domains = ''.join(
+        f"<li>{html.escape(str(item))}</li>"
+        for item in unexpected_observed_domain_values
+    ) or "<li>none</li>"
     body = (
         "<h2>Validation / Backtest View</h2>"
         f"<p>Case ID: <strong>{html.escape(str(validation_view_model.get('case_id', 'n/a')))}</strong></p>"
         f"<p>Country: <strong>{html.escape(str(validation_view_model.get('country_id', 'n/a')))}</strong></p>"
         f"<p>Case: {html.escape(str(validation_view_model.get('case_name', 'n/a')))}</p>"
         f"<p>Time Range: {html.escape(str(time_range.get('start', 'n/a')))} to {html.escape(str(time_range.get('end', 'n/a')))}</p>"
-        f"<p>Expected Domains: {html.escape(', '.join(str(item) for item in validation_view_model.get('expected_domains', [])))}</p>"
-        f"<p>Observed Domains: {html.escape(', '.join(str(item) for item in validation_view_model.get('observed_domains', [])))}</p>"
+        "<h3>Review Summary</h3>"
+        f"<p>Review verdict: <strong>{html.escape(str(review_verdict))}</strong></p>"
+        f"<p>Expected Domains: {html.escape(', '.join(expected_domains))}</p>"
+        f"<p>Observed Domains: {html.escape(', '.join(observed_domains))}</p>"
         f"<p>Domain Match Ratio: {html.escape(str(validation_view_model.get('domain_match_ratio', 'n/a')))}</p>"
         f"<p>Status Match: {html.escape(str(validation_view_model.get('status_match', 'n/a')))}</p>"
+        f"<h4>Missing Expected Domains</h4><ul>{missing_expected_domains}</ul>"
+        f"<h4>Unexpected Observed Domains</h4><ul>{unexpected_observed_domains}</ul>"
         f"<h3>Expected Pattern</h3><p>{html.escape(str(validation_view_model.get('expected_pattern', 'n/a')))}</p>"
         f"<h3>Validation Goal</h3><p>{html.escape(str(validation_view_model.get('validation_goal', 'n/a')))}</p>"
         f"<h3>Reference Sources</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in validation_view_model.get('reference_sources', []))}</ul>"
         f"<h3>Validation Metrics</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in validation_view_model.get('validation_metrics', []))}</ul>"
         f"<h3>Known Limitations</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in validation_view_model.get('known_limitations', []))}</ul>"
+        "<h3>Changed Versions</h3>"
+        f"<ul>{changed_versions}</ul>"
         f"<h3>Reprocessing Comparison</h3>{_json_block(reprocessing)}"
     )
     return _page("Validation / Backtest View", body, nav_prefix=nav_prefix, available_pages=available_pages)
