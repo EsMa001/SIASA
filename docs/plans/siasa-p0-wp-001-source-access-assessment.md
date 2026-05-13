@@ -192,6 +192,10 @@ Expected gain:
 - low implementation friction
 - strong base for country coverage expansion
 
+Current execution status:
+- implemented baseline adapter in `src/siasa/adapters/world_bank.py`
+- covered by `tests/unit/test_world_bank_adapter.py`
+
 ### 5.2 Second source: ReliefWeb API
 Why second:
 - strong country-oriented crisis/event context for domain B
