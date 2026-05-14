@@ -70,6 +70,51 @@ To get from the current state to stakeholder fulfillment, work in 5 serial progr
 
 Only after (0), (1), and (2) does it make sense to invest heavily in (3).
 
+## 3a. Current execution status snapshot
+
+Current repo-evidenced status on branch `hermes/repo-scaffold`:
+
+- P0 is materially advanced:
+  - source-access assessment exists
+  - real adapter baselines exist for World Bank, GDELT DOC, GDELT Events, and GDACS
+  - governed live runtime pilot exists
+- P1 is still not fully closed:
+  - latest bundle still lacks `readmodels/validation_backtest.json`
+  - readiness still reports `missing_validation_artifact`
+- P2 is partly closed, but not yet stakeholder-complete:
+  - multi-country runtime/artifact path works
+  - latest bundle currently proves `POL` and `UKR`
+  - this is operationally meaningful, but still not representative breadth
+- P3 is strongly advanced:
+  - artifact-backed trend charts exist
+  - world-map visualization exists
+  - controls exist and are interactive
+  - cross-country comparison exists
+  - coverage/confidence/uncertainty visualization exists
+  - semantic view projections and trend event overlays exist
+- P4 remains largely open
+
+Interpretation:
+- the old roadmap order was correct as a program scaffold
+- however, execution has now overtaken parts of the document
+- the critical remaining gap is no longer “basic GUI existence”, but the mismatch between a relatively rich GUI and still-incomplete runtime breadth / validation completeness
+
+## 3b. Updated planning horizon
+
+For time planning, the remaining work should be treated in three bands rather than as one flat backlog:
+
+- Near-term closure band:
+  - close the remaining runtime honesty gaps that still block a clean readiness claim
+- Mid-term breadth band:
+  - expand from the current 2-country proof to a representative MVP country subset
+- Later analyst-depth band:
+  - add operational annotation workflows and the first advanced source-intelligence features
+
+Practical recommendation for serial pacing:
+- 1 small cleanup package
+- 2 to 4 medium runtime/breadth packages
+- then 2 larger analyst-workflow/content packages
+
 ---
 
 ## 4. Serial implementation roadmap
@@ -263,22 +308,42 @@ These should come after P1–P3, not before.
 
 ## 5. Concrete recommended next execution order
 
-If the goal is a believable path to “stakeholder requirements fulfilled”, the next serial order should be:
+The old order should now be updated to the current repo state.
 
-1. P0-WP-001 — assess real-source access and integration readiness
-2. P0-WP-002 — implement first real core source adapters
-3. P1-WP-001 — close validation artifact generation gap
-4. P1-WP-002 — explicit artifact absence reasons
-5. P2-WP-001 — diagnose single-country latest bundle
-6. P2-WP-002 — generate representative multi-country artifact bundle
-7. P3-WP-001 — chart rendering for trends/domain details
-8. P3-WP-002 — map visualization layer
-9. P3-WP-003 — filters and mode controls
-10. P3-WP-004 — cross-country comparison
-11. P3-WP-005 — annotation create/edit workflows
-12. P4 extended features
+Recommended serial order from here:
 
-This order is recommended because it first makes data access explicit, then the runtime honest and complete, then broad, then visually strong.
+1. P1-WP-001 — close validation artifact generation gap
+   - size: small
+   - reason: still the cleanest blocker in readiness and release honesty
+2. P1-WP-002 — explicit artifact absence reasons
+   - size: small to medium
+   - reason: prevents ambiguous demos once validation is fixed
+3. P2-WP-003 — expand governed live runtime from 2 countries to a representative MVP subset
+   - size: medium
+   - reason: current `POL`/`UKR` proof is good, but still too narrow to claim breadth
+4. P2-WP-004 — make country-priority / source-depth differences visible in runtime outputs and GUI
+   - size: medium
+   - reason: stakeholder country-prioritization intent is configured, but still weakly visible
+5. P3-WP-005 — annotation create/edit workflows
+   - size: medium to large
+   - reason: this is the main remaining analyst-workflow gap inside the GUI layer
+6. P4-WP-001 — source-gap / freshness overlays in overview and map-facing entry views
+   - size: medium
+   - reason: highest-value next transparency upgrade after current projections
+7. P4-WP-002 — baseline / historical comparison overlays on trends and domain views
+   - size: medium
+   - reason: strengthens anomaly interpretation instead of only showing state
+8. P4-WP-003 — source-dependency / source-origin groundwork
+   - size: large
+   - reason: this opens the door to stakeholder categories F/G/H without overclaiming today
+
+Suggested planning cadence:
+- next 1 work package: runtime honesty cleanup
+- next 2 to 3 work packages: breadth expansion
+- following 2 work packages: analyst workflow closure
+- after that: advanced stakeholder analytics
+
+This updated order is recommended because the repo now already has a stronger GUI than the old roadmap assumed, while breadth and validation honesty are still behind.
 
 ---
 
@@ -310,10 +375,12 @@ Only then is the program close to the stakeholder intent, not merely the current
 
 ## 7. Immediate recommendation
 
-Start with P1-WP-001 next.
+Next serial work package should be: P1-WP-001.
 
-Reason:
-- it is the last clearly isolated artifact blocker already visible in readiness
-- it is small enough for a serial governed work package
-- it improves honesty of the demo/release state
-- it prevents us from building more GUI on top of incomplete runtime evidence
+Current rationale:
+- latest artifact-backed readiness still shows `missing_validation_artifact`
+- this is the cleanest remaining mismatch between visible GUI maturity and actual runtime completeness
+- it is smaller and lower-risk than immediately pushing breadth or advanced analytics
+- once closed, the roadmap can move into breadth expansion with a cleaner release baseline
+
+After that, proceed directly with P1-WP-002 and then the first breadth package (P2-WP-003).
