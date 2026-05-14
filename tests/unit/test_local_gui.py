@@ -230,6 +230,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "World Anomaly Map" in index_html
     assert "Map Visualization" in index_html
     assert "Europe / Black Sea" in index_html
+    assert "Baseline / View Controls" in index_html
+    assert "Domain Filter" in index_html
+    assert "Time Window" in index_html
+    assert "Baseline Mode" in index_html
     assert "<svg" in index_html
     assert "Global Overview" in index_html
     assert "UKR" in index_html

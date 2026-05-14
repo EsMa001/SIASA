@@ -381,6 +381,30 @@ def _render_index(
         for item in system_status_read_model.get('failed_sources', [])
     ) or "<li>none</li>"
 
+    controls_html = (
+        "<h3>Baseline / View Controls</h3>"
+        f"<p>Baseline Mode: <strong>{html.escape(str(world_map_read_model.get('baseline_mode', 'unknown')))}</strong></p>"
+        "<label for='domain-filter'>Domain Filter</label> "
+        "<select id='domain-filter' name='domain-filter'>"
+        "<option value='all'>All active domains</option>"
+        + ''.join(
+            f"<option value='{html.escape(domain)}'>{html.escape(domain)}</option>"
+            for domain in world_map_read_model.get('active_domains', [])
+        )
+        + "</select> "
+        "<label for='time-window'>Time Window</label> "
+        "<select id='time-window' name='time-window'>"
+        "<option value='7d'>7 days</option>"
+        "<option value='30d'>30 days</option>"
+        "<option value='90d'>90 days</option>"
+        "</select> "
+        "<label for='view-mode'>View Mode</label> "
+        "<select id='view-mode' name='view-mode'>"
+        "<option value='multi-domain'>Multi-domain status</option>"
+        "<option value='coverage'>Coverage emphasis</option>"
+        "</select>"
+    )
+
     body = (
         "<h2>Daily Global Review</h2>"
         f"<p>Run status: <span class='status'>{html.escape(str(system_status_read_model.get('run_status', 'n/a')))}</span></p>"
@@ -395,6 +419,7 @@ def _render_index(
         "<h2>World Anomaly Map</h2>"
         f"<p>Baseline mode: <strong>{html.escape(str(world_map_read_model.get('baseline_mode', 'unknown')))}</strong></p>"
         f"<p>Active domains: {html.escape(', '.join(world_map_read_model.get('active_domains', [])))}</p>"
+        f"{controls_html}"
         f"{_render_world_map_visualization(world_map_read_model, available_country_ids)}"
         "<h2>Global Overview</h2>"
         "<table><thead><tr><th>Country</th><th>Support Status</th><th>Multi-Domain Status</th><th>Active Domains</th><th>Drill-down</th></tr></thead>"
