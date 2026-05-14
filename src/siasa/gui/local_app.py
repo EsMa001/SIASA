@@ -28,6 +28,7 @@ def _page(title: str, body: str, *, nav_prefix: str = '', available_pages: set[s
         ('coverage.html', 'Source / Coverage'),
         ('trends.html', 'Yearly Trend Page'),
         ('events.html', 'Current Events Page'),
+        ('comparison.html', 'Cross-Country Comparison'),
         ('validation.html', 'Validation / Backtest View'),
         ('traceability.html', 'Traceability / Lineage View'),
         ('annotations.html', 'Analyst Annotations View'),
@@ -74,6 +75,23 @@ def _coerce_chart_points(series: list[Any], *, label_key: str) -> list[tuple[str
         if isinstance(item, (int, float)):
             points.append((str(index), float(item)))
     return points
+
+
+
+def _trend_labels(series: list[Any], *, label_key: str) -> list[str]:
+    labels: list[str] = []
+    for index, item in enumerate(series, start=1):
+        if isinstance(item, dict):
+            label = item.get(label_key) or item.get('label')
+            if label is not None:
+                labels.append(str(label))
+            continue
+        if isinstance(item, str):
+            labels.append(item)
+            continue
+        if isinstance(item, (int, float)):
+            labels.append(str(index))
+    return labels
 
 
 
@@ -237,6 +255,15 @@ def _annotation_index(annotations_view_model: dict[str, Any] | None) -> dict[str
     }
 
 
+
+def _trend_filter_options(country_profile_read_models: dict[str, dict[str, Any]]) -> list[str]:
+    labels: set[str] = set()
+    for profile in country_profile_read_models.values():
+        labels.update(_trend_labels(profile.get('trends', {}).get('yearly', []), label_key='label'))
+    return sorted(labels)
+
+
+
 def _annotation_details_html(annotation_ids: list[str], annotations_view_model: dict[str, Any] | None) -> str:
     annotation_lookup = _annotation_index(annotations_view_model)
     if not annotation_ids:
@@ -268,6 +295,7 @@ def _annotation_details_html(annotation_ids: list[str], annotations_view_model: 
         "<table><thead><tr><th>ID</th><th>Scope</th><th>Type</th><th>Author</th><th>Review</th><th>Linked Items</th><th>Text</th></tr></thead>"
         f"<tbody>{''.join(rows)}</tbody></table>"
     )
+
 
 
 def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
@@ -335,6 +363,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
 def _render_index(
     world_map_read_model: dict[str, Any],
     available_country_ids: set[str] | None = None,
+    country_profile_read_models: dict[str, dict[str, Any]] | None = None,
     system_status_read_model: dict[str, Any] | None = None,
     *,
     nav_prefix: str = '',
@@ -342,9 +371,18 @@ def _render_index(
 ) -> str:
     rows = []
     available_country_ids = available_country_ids or set()
+    country_profile_read_models = country_profile_read_models or {}
+    trend_options = _trend_filter_options(country_profile_read_models)
     for country in world_map_read_model.get("countries", []):
         country_id = str(country["country_id"])
         status = str(country["status"])
+        active_domains = [str(domain) for domain in country.get('active_domains', [])]
+        trend_labels = ','.join(
+            _trend_labels(
+                country_profile_read_models.get(country_id, {}).get('trends', {}).get('yearly', []),
+                label_key='label',
+            )
+        )
         has_country_page = country_id in available_country_ids
         country_cell = (
             f"<a href='countries/{html.escape(country_id)}.html'>{html.escape(country_id)}</a>"
@@ -354,11 +392,11 @@ def _render_index(
         drill_down_cell = f"countries/{html.escape(country_id)}.html" if has_country_page else "not available"
         support_status = "supported" if has_country_page else "not available"
         rows.append(
-            "<tr>"
+            f"<tr class='overview-row' data-country-id='{html.escape(country_id)}' data-active-domains='{html.escape(','.join(active_domains))}' data-status='{html.escape(status)}' data-trend-labels='{html.escape(trend_labels)}'>"
             f"<td>{country_cell}</td>"
             f"<td>{html.escape(support_status)}</td>"
             f"<td class='status'>{html.escape(status)}</td>"
-            f"<td>{html.escape(', '.join(country.get('active_domains', [])))}</td>"
+            f"<td>{html.escape(', '.join(active_domains))}</td>"
             f"<td>{drill_down_cell}</td>"
             "</tr>"
         )
@@ -393,11 +431,12 @@ def _render_index(
         )
         + "</select> "
         "<label for='time-window'>Time Window</label> "
-        "<select id='time-window' name='time-window'>"
-        "<option value='7d'>7 days</option>"
-        "<option value='30d'>30 days</option>"
-        "<option value='90d'>90 days</option>"
-        "</select> "
+        "<select id='time-window' name='time-window'><option value='all'>All trend labels</option>"
+        + ''.join(
+            f"<option value='{html.escape(label)}'>{html.escape(label)}</option>"
+            for label in trend_options
+        )
+        + "</select> "
         "<label for='view-mode'>View Mode</label> "
         "<select id='view-mode' name='view-mode'>"
         "<option value='multi-domain'>Multi-domain status</option>"
@@ -420,10 +459,31 @@ def _render_index(
         f"<p>Baseline mode: <strong>{html.escape(str(world_map_read_model.get('baseline_mode', 'unknown')))}</strong></p>"
         f"<p>Active domains: {html.escape(', '.join(world_map_read_model.get('active_domains', [])))}</p>"
         f"{controls_html}"
-        f"{_render_world_map_visualization(world_map_read_model, available_country_ids)}"
+        "<p id='overview-filter-result'>Selected Time Window: all trend labels | View Mode: multi-domain status</p>"
+        f"<div id='map-visualization-block'>{_render_world_map_visualization(world_map_read_model, available_country_ids)}</div>"
         "<h2>Global Overview</h2>"
-        "<table><thead><tr><th>Country</th><th>Support Status</th><th>Multi-Domain Status</th><th>Active Domains</th><th>Drill-down</th></tr></thead>"
-        f"<tbody>{''.join(rows)}</tbody></table>"
+        "<div id='overview-table-block'><table id='overview-table'><thead><tr><th>Country</th><th>Support Status</th><th>Multi-Domain Status</th><th>Active Domains</th><th>Drill-down</th></tr></thead>"
+        f"<tbody>{''.join(rows)}</tbody></table></div>"
+        "<script>"
+        "function applyOverviewFilters(){"
+        "const domain=document.getElementById('domain-filter').value;"
+        "const timeWindow=document.getElementById('time-window').value;"
+        "const viewMode=document.getElementById('view-mode').value;"
+        "document.querySelectorAll('.overview-row').forEach((row)=>{"
+        "const domains=(row.dataset.activeDomains||'').split(',').filter(Boolean);"
+        "const trendLabels=(row.dataset.trendLabels||'').split(',').filter(Boolean);"
+        "const domainMatch=(domain==='all'||domains.includes(domain));"
+        "const timeMatch=(timeWindow==='all'||trendLabels.includes(timeWindow));"
+        "row.style.display=(domainMatch&&timeMatch)?'':'none';"
+        "});"
+        "document.getElementById('map-visualization-block').style.display=viewMode==='coverage'?'none':'';"
+        "document.getElementById('overview-filter-result').textContent='Selected Time Window: '+timeWindow+' | View Mode: '+viewMode;"
+        "}"
+        "document.getElementById('domain-filter').addEventListener('change', applyOverviewFilters);"
+        "document.getElementById('time-window').addEventListener('change', applyOverviewFilters);"
+        "document.getElementById('view-mode').addEventListener('change', applyOverviewFilters);"
+        "applyOverviewFilters();"
+        "</script>"
     )
     return _page("World Anomaly Map / Global Overview", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
@@ -746,29 +806,60 @@ def _render_readiness(readiness_view_model: dict[str, Any], *, nav_prefix: str =
 
 def _render_trends(country_profile_read_models: dict[str, dict[str, Any]], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
     rows = []
+    country_options = []
+    trend_options = _trend_filter_options(country_profile_read_models)
     for country_id, profile in sorted(country_profile_read_models.items()):
         yearly = profile.get('trends', {}).get('yearly', [])
+        chart_points = _coerce_chart_points(yearly, label_key='label')
+        labels = ','.join(_trend_labels(yearly, label_key='label'))
         rows.append(
-            "<tr>"
+            f"<tr class='trend-row' data-country-id='{html.escape(country_id)}' data-trend-labels='{html.escape(labels)}'>"
             f"<td>{html.escape(country_id)}</td>"
             f"<td><h4>Trend Chart</h4>{_render_line_chart(yearly, label_key='label', chart_label=f'{country_id} yearly trend')}</td>"
             f"<td>{html.escape(str(profile.get('multi_domain_status', 'n/a')))}</td>"
             "</tr>"
         )
+        country_options.append(f"<option value='{html.escape(country_id)}'>{html.escape(country_id)}</option>")
     body = (
         "<h2>Yearly Trend Page</h2>"
-        "<table><thead><tr><th>Country</th><th>Yearly Trend</th><th>Current Multi-Domain Status</th></tr></thead>"
+        "<h3>Trend Controls</h3>"
+        "<label for='trend-country-filter'>Country Filter</label> "
+        "<select id='trend-country-filter' name='trend-country-filter'><option value='all'>All countries</option>"
+        f"{''.join(country_options)}</select> "
+        "<label for='trend-time-window'>Time Window</label> "
+        "<select id='trend-time-window' name='trend-time-window'><option value='all'>All labels</option>"
+        f"{''.join(f"<option value='{html.escape(label)}'>{html.escape(label)}</option>" for label in trend_options)}</select>"
+        "<p id='trend-filter-result'>Selected Trend Window: all labels</p>"
+        "<table id='trend-table'><thead><tr><th>Country</th><th>Yearly Trend</th><th>Current Multi-Domain Status</th></tr></thead>"
         f"<tbody>{''.join(rows)}</tbody></table>"
+        "<script>"
+        "function applyTrendFilters(){"
+        "const country=document.getElementById('trend-country-filter').value;"
+        "const windowValue=document.getElementById('trend-time-window').value;"
+        "document.querySelectorAll('.trend-row').forEach((row)=>{"
+        "const labels=(row.dataset.trendLabels||'').split(',').filter(Boolean);"
+        "const matchesCountry=(country==='all'||row.dataset.countryId===country);"
+        "const matchesWindow=(windowValue==='all'||labels.includes(windowValue));"
+        "row.style.display=(matchesCountry&&matchesWindow)?'':'none';"
+        "});"
+        "document.getElementById('trend-filter-result').textContent='Selected Trend Window: '+windowValue;"
+        "}"
+        "document.getElementById('trend-country-filter').addEventListener('change', applyTrendFilters);"
+        "document.getElementById('trend-time-window').addEventListener('change', applyTrendFilters);"
+        "applyTrendFilters();"
+        "</script>"
     )
     return _page("Yearly Trend Page", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
 def _render_events(country_profile_read_models: dict[str, dict[str, Any]], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
     rows = []
+    country_options = []
     for country_id, profile in sorted(country_profile_read_models.items()):
+        country_options.append(f"<option value='{html.escape(country_id)}'>{html.escape(country_id)}</option>")
         for event_id in profile.get('linked_events', []):
             rows.append(
-                "<tr>"
+                f"<tr class='event-row' data-country-id='{html.escape(country_id)}' data-event-id='{html.escape(str(event_id))}'>"
                 f"<td>{html.escape(country_id)}</td>"
                 f"<td>{html.escape(str(event_id))}</td>"
                 f"<td>{html.escape(str(profile.get('multi_domain_status', 'n/a')))}</td>"
@@ -776,10 +867,50 @@ def _render_events(country_profile_read_models: dict[str, dict[str, Any]], *, na
             )
     body = (
         "<h2>Current Events Page</h2>"
-        "<table><thead><tr><th>Country</th><th>Event</th><th>Context Status</th></tr></thead>"
+        "<h3>Event Controls</h3>"
+        "<label for='event-country-filter'>Country Filter</label> "
+        "<select id='event-country-filter' name='event-country-filter'><option value='all'>All countries</option>"
+        f"{''.join(country_options)}</select>"
+        "<p id='event-filter-result'>Selected Event Country: all countries</p>"
+        "<table id='event-table'><thead><tr><th>Country</th><th>Event</th><th>Context Status</th></tr></thead>"
         f"<tbody>{''.join(rows)}</tbody></table>"
+        "<script>"
+        "function applyEventFilters(){"
+        "const country=document.getElementById('event-country-filter').value;"
+        "document.querySelectorAll('.event-row').forEach((row)=>{"
+        "const show=(country==='all'||row.dataset.countryId===country);"
+        "row.style.display=show?'':'none';"
+        "});"
+        "document.getElementById('event-filter-result').textContent='Selected Event Country: '+country;"
+        "}"
+        "document.getElementById('event-country-filter').addEventListener('change', applyEventFilters);"
+        "applyEventFilters();"
+        "</script>"
     )
     return _page("Current Events Page", body, nav_prefix=nav_prefix, available_pages=available_pages)
+
+
+
+def _render_comparison(country_profile_read_models: dict[str, dict[str, Any]], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
+    rows = []
+    for country_id, profile in sorted(country_profile_read_models.items()):
+        domain_states = profile.get('domain_states', {})
+        rows.append(
+            "<tr>"
+            f"<td>{html.escape(country_id)}</td>"
+            f"<td>{html.escape(str(profile.get('multi_domain_status', 'n/a')))}</td>"
+            f"<td>{html.escape(', '.join(f'{domain}:{status}' for domain, status in sorted(domain_states.items())))}</td>"
+            f"<td>{html.escape(str(profile.get('coverage', 'n/a')))}</td>"
+            f"<td>{html.escape(str(profile.get('confidence', 'n/a')))}</td>"
+            f"<td>{html.escape(', '.join(str(item) for item in profile.get('drivers', [])))}</td>"
+            "</tr>"
+        )
+    body = (
+        "<h2>Cross-Country Comparison</h2>"
+        "<table><thead><tr><th>Country</th><th>Multi-Domain Status</th><th>Domain States</th><th>Coverage</th><th>Confidence</th><th>Drivers</th></tr></thead>"
+        f"<tbody>{''.join(rows)}</tbody></table>"
+    )
+    return _page("Cross-Country Comparison", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
 def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
@@ -918,6 +1049,7 @@ def build_local_mvp_site(
         'runs.html',
         'trends.html',
         'events.html',
+        'comparison.html',
         'readiness.html',
     }
     if validation_view_model is not None:
@@ -932,6 +1064,7 @@ def build_local_mvp_site(
         _render_index(
             world_map_read_model,
             available_country_ids=set(country_profile_read_models),
+            country_profile_read_models=country_profile_read_models,
             system_status_read_model=system_status_read_model,
             nav_prefix='',
             available_pages=available_pages,
@@ -996,6 +1129,10 @@ def build_local_mvp_site(
     events_file = output_dir / 'events.html'
     events_file.write_text(_render_events(country_profile_read_models, nav_prefix='', available_pages=available_pages))
     generated_files.append(events_file)
+
+    comparison_file = output_dir / 'comparison.html'
+    comparison_file.write_text(_render_comparison(country_profile_read_models, nav_prefix='', available_pages=available_pages))
+    generated_files.append(comparison_file)
 
     if validation_view_model is not None:
         validation_file = output_dir / 'validation.html'

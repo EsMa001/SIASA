@@ -221,6 +221,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert (pages.output_dir / "runs.html").exists()
     assert (pages.output_dir / "trends.html").exists()
     assert (pages.output_dir / "events.html").exists()
+    assert (pages.output_dir / "comparison.html").exists()
     assert (pages.output_dir / "validation.html").exists()
     assert (pages.output_dir / "traceability.html").exists()
     assert (pages.output_dir / "annotations.html").exists()
@@ -302,6 +303,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     events_html = (pages.output_dir / "events.html").read_text()
     assert "Current Events Page" in events_html
     assert "EVT-001" in events_html
+
+    comparison_html = (pages.output_dir / "comparison.html").read_text()
+    assert "Cross-Country Comparison" in comparison_html
+    assert "UKR" in comparison_html
+    assert "S3" in comparison_html
 
     validation_html = (pages.output_dir / "validation.html").read_text()
     assert "Validation / Backtest View" in validation_html
@@ -801,10 +807,23 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert (pages.output_dir / "countries" / "UKR.html").exists()
     assert (pages.output_dir / "domains" / "POL-A.html").exists()
     assert (pages.output_dir / "domains" / "UKR-A.html").exists()
+    assert (pages.output_dir / "comparison.html").exists()
     assert "countries/POL.html" in index_html
     assert "countries/UKR.html" in index_html
+    assert "data-country-id='POL'" in index_html
+    assert "data-active-domains='A,B'" in index_html
+    assert "option value='2026-02'" in index_html
+    assert "function applyOverviewFilters()" in index_html
     assert "POL" in trends_html and "UKR" in trends_html
+    assert "data-country-id='POL'" in trends_html
+    assert "option value='2026-02'" in trends_html
+    assert "function applyTrendFilters()" in trends_html
     assert "EVT-POL-350" in events_html and "EVT-UKR-350" in events_html
+    assert "data-country-id='POL'" in events_html
+    assert "function applyEventFilters()" in events_html
+    comparison_html = (pages.output_dir / "comparison.html").read_text()
+    assert "Cross-Country Comparison" in comparison_html
+    assert "POL" in comparison_html and "UKR" in comparison_html
 
 
 
