@@ -560,3 +560,48 @@ def test_daily_run_orchestrator_builds_country_reports_for_multiple_countries() 
     assert sorted(result.country_reports) == ["POL", "UKR"]
     assert result.country_reports["POL"].json_payload["multi_domain_status"] == "S3"
     assert result.country_reports["UKR"].json_payload["multi_domain_status"] == "S3"
+
+
+
+def test_daily_run_orchestrator_builds_country_specific_lineage_for_multiple_countries() -> None:
+    adapters = [
+        FakeAdapter(
+            source_id="SRC-A",
+            domain="A",
+            _result=FetchResult(
+                records=[
+                    {"country_id": "UKR", "signal_key": "article_count", "value": 3.0, "expected_source_count": 1, "freshness_hours": 6},
+                    {"country_id": "UKR", "signal_key": "tone", "value": -0.2, "expected_source_count": 1, "freshness_hours": 6},
+                    {"country_id": "POL", "signal_key": "article_count", "value": 5.0, "expected_source_count": 1, "freshness_hours": 8},
+                    {"country_id": "POL", "signal_key": "tone", "value": 0.1, "expected_source_count": 1, "freshness_hours": 8},
+                ]
+            ),
+        )
+    ]
+
+    orchestrator = DailyRunOrchestrator(
+        adapters=adapters,
+        normalizer=_normalize,
+        feature_services=[DomainAFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+    )
+
+    result = orchestrator.run(run_id="RUN-111")
+
+    lineage_by_country = {
+        feature.country_id: record
+        for feature in result.features
+        for record in result.lineage_records
+        if record.feature_id == feature.feature_id and record.domain_status_id == f"DST-{feature.country_id}-{feature.domain}-RUN-111"
+    }
+
+    assert lineage_by_country["UKR"].raw_record_id == "RAW-SRC-A-1"
+    assert lineage_by_country["POL"].raw_record_id == "RAW-SRC-A-3"
+    assert lineage_by_country["UKR"].normalized_id == "NORM-SRC-A-1"
+    assert lineage_by_country["POL"].normalized_id == "NORM-SRC-A-3"

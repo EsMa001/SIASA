@@ -370,22 +370,29 @@ class DailyRunOrchestrator:
         report: GeneratedReport,
         country_reports: dict[str, GeneratedReport],
     ) -> list[LineageRecord]:
+        raw_by_source_and_country: dict[tuple[str, str], list[RawRecord]] = {}
         raw_by_source: dict[str, list[RawRecord]] = {}
         for raw_record in raw_records:
             raw_by_source.setdefault(raw_record.source_id, []).append(raw_record)
+            country_id = str(raw_record.raw_payload.get("country_id") or "UNKNOWN")
+            raw_by_source_and_country.setdefault((raw_record.source_id, country_id), []).append(raw_record)
 
-        normalized_by_source: dict[str, list[NormalizedRecord]] = {}
+        normalized_by_source_and_country: dict[tuple[str, str], list[NormalizedRecord]] = {}
         for normalized_record in normalized_records:
-            normalized_by_source.setdefault(normalized_record.provenance_source_id, []).append(normalized_record)
+            normalized_by_source_and_country.setdefault(
+                (normalized_record.provenance_source_id, normalized_record.country_id), []
+            ).append(normalized_record)
 
         lineage_records: list[LineageRecord] = []
         for feature in features:
             source_id = feature.provenance_source_ids[0]
-            raw_record = raw_by_source[source_id][0]
-            normalized_record = normalized_by_source[source_id][0]
+            raw_record = (
+                raw_by_source_and_country.get((source_id, feature.country_id)) or raw_by_source[source_id]
+            )[0]
+            normalized_record = normalized_by_source_and_country[(source_id, feature.country_id)][0]
             domain_status = domain_statuses.get(feature.domain)
             country_report = country_reports.get(feature.country_id)
-            source_normalized_records = normalized_by_source.get(source_id, [])
+            source_normalized_records = normalized_by_source_and_country.get((source_id, feature.country_id), [])
             report_ids = [
                 report.report_id,
                 f"REP-COVERAGE-{snapshot.run_id}",
