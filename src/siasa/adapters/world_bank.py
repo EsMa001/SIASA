@@ -68,10 +68,10 @@ class WorldBankIndicatorsAdapter(SourceAdapter):
             if value is None:
                 continue
             country = row.get("country") or {}
-            country_id = str(country.get("id") or "").strip()
+            country_id = str(row.get("countryiso3code") or country.get("id") or "").strip().upper()
             period = str(row.get("date") or "").strip()
             if not country_id or not period:
-                raise ValueError("World Bank rows require country.id and date")
+                raise ValueError("World Bank rows require country.id/countryiso3code and date")
             records.append(
                 {
                     "country_id": country_id,

@@ -182,3 +182,7 @@ def main(argv: list[str] | None = None) -> int:
         f"output_dir={args.output_dir}"
     )
     return 0 if result.run_state.status in {"success", "partial_success"} else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -62,6 +62,40 @@ def test_world_bank_adapter_fetch_transforms_indicator_payloads_into_domain_d_re
     assert fetcher.urls == list(responses)
 
 
+def test_world_bank_adapter_prefers_countryiso3code_from_live_like_payload() -> None:
+    responses = {
+        "https://api.worldbank.org/v2/country/UKR/indicator/NY.GDP.MKTP.KD.ZG?format=json&per_page=1000&mrv=1": [
+            {"page": 1, "pages": 1},
+            [
+                {
+                    "country": {"id": "UA"},
+                    "countryiso3code": "UKR",
+                    "date": "2024",
+                    "value": 3.2,
+                },
+            ],
+        ],
+        "https://api.worldbank.org/v2/country/UKR/indicator/NE.EXP.GNFS.KD.ZG?format=json&per_page=1000&mrv=1": [
+            {"page": 1, "pages": 1},
+            [
+                {
+                    "country": {"id": "UA"},
+                    "countryiso3code": "UKR",
+                    "date": "2024",
+                    "value": 1.1,
+                },
+            ],
+        ],
+    }
+    adapter = WorldBankIndicatorsAdapter(country_ids=("UKR",), fetch_json=StubFetcher(responses))
+
+    result = adapter.fetch()
+
+    assert result.is_success is True
+    assert {record["country_id"] for record in result.records} == {"UKR"}
+
+
+
 def test_world_bank_adapter_skips_empty_values_and_supports_domain_d_feature_computation() -> None:
     responses = {
         "https://api.worldbank.org/v2/country/UKR/indicator/NY.GDP.MKTP.KD.ZG?format=json&per_page=1000&mrv=1": [

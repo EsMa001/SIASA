@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -44,6 +45,26 @@ def test_build_governed_live_orchestrator_rejects_unsupported_country_for_gdelt_
         assert "CHE" in str(exc)
     else:
         raise AssertionError("Expected unsupported live pilot country to raise ValueError")
+
+
+
+def test_governed_live_runtime_module_executes_main_for_help() -> None:
+    result = subprocess.run(
+        [
+            "/opt/hermes/.venv/bin/python",
+            "-m",
+            "siasa.runs.live_runtime",
+            "--help",
+        ],
+        cwd=REPO_ROOT,
+        env={"PYTHONPATH": "src"},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "Run the governed SIASA live-source single-country pilot" in result.stdout
 
 
 
