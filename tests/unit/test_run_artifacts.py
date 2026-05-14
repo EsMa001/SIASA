@@ -265,6 +265,10 @@ def test_daily_run_orchestrator_writes_multi_country_artifact_bundle(tmp_path: P
     assert sorted(result.country_reports) == ["POL", "UKR"]
     assert pol_profile["multi_domain_status"] == "S3"
     assert ukr_profile["multi_domain_status"] == "S3"
+    assert pol_profile["trends"]["yearly"]
+    assert ukr_profile["trends"]["yearly"]
+    assert pol_profile["trends"]["yearly"][0]["label"]
+    assert isinstance(pol_profile["trends"]["yearly"][0]["value"], float)
 
 
 

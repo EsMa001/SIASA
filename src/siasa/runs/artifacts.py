@@ -123,11 +123,12 @@ def write_run_artifacts(
         }
         country_uncertainty = _build_country_uncertainty(run_state)
         country_annotation_ids = _annotation_ids_for_item(annotation_records, country_id)
+        country_trends = {"yearly": _build_country_yearly_trend(country_id, normalized_records)}
         country_profile = build_country_profile_read_model(
             country_id=country_id,
             multi_domain_status=multi_domain_status,
             domain_states=country_domain_states,
-            trends={"yearly": []},
+            trends=country_trends,
             drivers=sorted(feature.feature_id for feature in country_features),
             linked_events=country_event_ids,
             coverage=_mean([feature.coverage for feature in country_features]),
@@ -387,6 +388,24 @@ def _build_country_uncertainty(run_state: RunState) -> list[str]:
     if run_state.failed_sources:
         uncertainty.append(f"failed_sources:{','.join(run_state.failed_sources)}")
     return uncertainty
+
+
+
+def _build_country_yearly_trend(country_id: str, normalized_records: list[NormalizedRecord]) -> list[dict[str, float | str]]:
+    series_by_label: dict[str, list[float]] = {}
+    for record in normalized_records:
+        if record.country_id != country_id:
+            continue
+        timestamp = str(record.timestamp)
+        label = timestamp[:7] if "-" in timestamp else timestamp[:4]
+        if not label:
+            continue
+        series_by_label.setdefault(label, []).append(float(record.value))
+    return [
+        {"label": label, "value": sum(values) / len(values)}
+        for label, values in sorted(series_by_label.items())
+    ]
+
 
 
 def _mean(values: list[float]) -> float | None:
