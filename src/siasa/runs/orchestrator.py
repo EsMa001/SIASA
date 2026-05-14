@@ -134,11 +134,20 @@ class DailyRunOrchestrator:
         for service in self.feature_services:
             features.extend(service.compute(normalized_records))
 
-        domain_statuses: dict[str, DomainStatusResult] = {}
-        for domain in self.active_domains:
-            domain_features = [feature for feature in features if feature.domain == domain]
-            if domain_features:
-                domain_statuses[domain] = self.domain_status_analyzer(domain, domain_features)
+        country_domain_statuses: dict[str, dict[str, DomainStatusResult]] = {}
+        for country_id in sorted({feature.country_id for feature in features}):
+            per_country_statuses: dict[str, DomainStatusResult] = {}
+            for domain in self.active_domains:
+                domain_features = [
+                    feature for feature in features if feature.country_id == country_id and feature.domain == domain
+                ]
+                if domain_features:
+                    per_country_statuses[domain] = self.domain_status_analyzer(domain, domain_features)
+            if per_country_statuses:
+                country_domain_statuses[country_id] = per_country_statuses
+
+        primary_country_id = normalized_records[0].country_id if normalized_records else "UNKNOWN"
+        domain_statuses = country_domain_statuses.get(primary_country_id, {})
 
         failure_reason: str | None = None
         if run_state.status == "failed":
@@ -169,10 +178,18 @@ class DailyRunOrchestrator:
                 artifact_bundle=None,
             )
 
-        multi_domain_status = self.multi_domain_status_analyzer(list(domain_statuses.values()))
-        country_id = normalized_records[0].country_id if normalized_records else "UNKNOWN"
+        country_multi_domain_statuses = {
+            country_id: self.multi_domain_status_analyzer(list(per_country_statuses.values()))
+            for country_id, per_country_statuses in sorted(country_domain_statuses.items())
+        }
+        multi_domain_status = country_multi_domain_statuses.get(
+            primary_country_id,
+            self.multi_domain_status_analyzer(list(domain_statuses.values())),
+        )
         analytical_outputs = {
-            "country_status": {country_id: multi_domain_status.status},
+            "country_status": {
+                country_id: result.status for country_id, result in sorted(country_multi_domain_statuses.items())
+            },
             "domain_statuses": {domain: status.status for domain, status in domain_statuses.items()},
         }
         snapshot_rule_versions = dict(self.rule_versions)
@@ -191,14 +208,18 @@ class DailyRunOrchestrator:
             data_version=self.data_version,
         )
         daily_report = generate_daily_snapshot_report(snapshot)
-        country_reports = self._build_country_reports(
-            run_state=run_state,
-            country_id=country_id,
-            features=features,
-            normalized_records=normalized_records,
-            domain_statuses=domain_statuses,
-            multi_domain_status=multi_domain_status,
-        )
+        country_reports: dict[str, GeneratedReport] = {}
+        for country_id, per_country_multi_domain_status in sorted(country_multi_domain_statuses.items()):
+            country_reports.update(
+                self._build_country_reports(
+                    run_state=run_state,
+                    country_id=country_id,
+                    features=[feature for feature in features if feature.country_id == country_id],
+                    normalized_records=[record for record in normalized_records if record.country_id == country_id],
+                    domain_statuses=country_domain_statuses.get(country_id, {}),
+                    multi_domain_status=per_country_multi_domain_status,
+                )
+            )
         lineage_records = self._build_lineage_records(
             raw_records=raw_records,
             normalized_records=normalized_records,

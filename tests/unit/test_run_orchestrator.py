@@ -512,3 +512,51 @@ def test_lineage_only_adds_event_report_to_event_derived_domain_b_features() -> 
     lineage_by_feature = {record.feature_id: record for record in result.lineage_records}
     assert "REP-EVENT-EVT-UKR-RUN-108" in lineage_by_feature["B_event_count"].report_ids
     assert "REP-EVENT-EVT-UKR-RUN-108" not in lineage_by_feature["B_disaster_alert_level"].report_ids
+
+
+
+def test_daily_run_orchestrator_builds_country_reports_for_multiple_countries() -> None:
+    adapters = [
+        FakeAdapter(
+            source_id="SRC-A",
+            domain="A",
+            _result=FetchResult(
+                records=[
+                    {"country_id": "UKR", "signal_key": "article_count", "value": 3.0, "expected_source_count": 1, "freshness_hours": 6},
+                    {"country_id": "UKR", "signal_key": "tone", "value": -0.2, "expected_source_count": 1, "freshness_hours": 6},
+                    {"country_id": "POL", "signal_key": "article_count", "value": 5.0, "expected_source_count": 1, "freshness_hours": 8},
+                    {"country_id": "POL", "signal_key": "tone", "value": 0.1, "expected_source_count": 1, "freshness_hours": 8},
+                ]
+            ),
+        ),
+        FakeAdapter(
+            source_id="SRC-B",
+            domain="B",
+            _result=FetchResult(
+                records=[
+                    {"country_id": "UKR", "signal_key": "conflict_event_count", "value": 4.0, "expected_source_count": 1, "freshness_hours": 12},
+                    {"country_id": "POL", "signal_key": "conflict_event_count", "value": 1.0, "expected_source_count": 1, "freshness_hours": 10},
+                ]
+            ),
+        ),
+    ]
+
+    orchestrator = DailyRunOrchestrator(
+        adapters=adapters,
+        normalizer=_normalize,
+        feature_services=[DomainAFeatureService(), DomainBFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A", "B"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+    )
+
+    result = orchestrator.run(run_id="RUN-110")
+
+    assert result.snapshot.analytical_outputs["country_status"] == {"POL": "S3", "UKR": "S3"}
+    assert sorted(result.country_reports) == ["POL", "UKR"]
+    assert result.country_reports["POL"].json_payload["multi_domain_status"] == "S3"
+    assert result.country_reports["UKR"].json_payload["multi_domain_status"] == "S3"
