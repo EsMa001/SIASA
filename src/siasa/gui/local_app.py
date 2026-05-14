@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from siasa.catalog import load_country_set
 from siasa.traceability.consistency import build_repo_closure_report
 
 
@@ -122,6 +123,109 @@ def _render_line_chart(series: list[Any], *, label_key: str, chart_label: str) -
 
 def _load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text())
+
+
+
+def _country_metadata_lookup() -> dict[str, dict[str, str]]:
+    repo_root = Path(__file__).resolve().parents[3]
+    country_set_path = repo_root / 'vmodel' / 'project' / 'mvp_countries.yaml'
+    lookup: dict[str, dict[str, str]] = {}
+    for record in load_country_set(country_set_path):
+        lookup[record.iso3] = {
+            'country_name': record.country_name,
+            'priority': record.priority,
+            'selection_type': record.selection_type,
+            'region': record.region,
+            'rationale': record.rationale,
+        }
+    return lookup
+
+
+
+def _region_anchor(region: str) -> tuple[float, float]:
+    normalized = region.lower()
+    if 'europe' in normalized:
+        return (180.0, 70.0)
+    if 'middle east' in normalized:
+        return (205.0, 120.0)
+    if 'asia' in normalized:
+        return (255.0, 90.0)
+    if 'africa' in normalized:
+        return (185.0, 155.0)
+    if 'north america' in normalized:
+        return (75.0, 85.0)
+    if 'oceania' in normalized or 'indo-pacific' in normalized:
+        return (290.0, 170.0)
+    return (155.0, 115.0)
+
+
+
+def _status_color(status: str) -> str:
+    return {
+        'S0': '#6b7280',
+        'S1': '#2563eb',
+        'S2': '#0ea5e9',
+        'S3': '#f59e0b',
+        'S4': '#f97316',
+        'S5': '#dc2626',
+        'S6': '#7f1d1d',
+    }.get(status, '#6b7280')
+
+
+
+def _render_world_map_visualization(world_map_read_model: dict[str, Any], available_country_ids: set[str]) -> str:
+    metadata_lookup = _country_metadata_lookup()
+    region_offsets: dict[str, int] = {}
+    markers: list[str] = []
+    labels: list[str] = []
+    legend_rows: list[str] = []
+
+    for country in world_map_read_model.get('countries', []):
+        country_id = str(country.get('country_id', 'UNKNOWN'))
+        status = str(country.get('status', 'n/a'))
+        metadata = metadata_lookup.get(country_id, {})
+        region = str(metadata.get('region', 'Other / Unknown'))
+        anchor_x, anchor_y = _region_anchor(region)
+        offset_index = region_offsets.get(region, 0)
+        region_offsets[region] = offset_index + 1
+        x = anchor_x + (offset_index % 4) * 18
+        y = anchor_y + (offset_index // 4) * 18
+        color = _status_color(status)
+        href = f"countries/{country_id}.html" if country_id in available_country_ids else None
+        marker = (
+            f"<a href='{html.escape(href)}'><circle cx='{x:.1f}' cy='{y:.1f}' r='7' fill='{color}' stroke='#1f2937' stroke-width='1'>"
+            f"<title>{html.escape(country_id)} — {html.escape(status)} — {html.escape(region)}</title></circle></a>"
+            if href
+            else f"<circle cx='{x:.1f}' cy='{y:.1f}' r='7' fill='{color}' stroke='#1f2937' stroke-width='1'>"
+                 f"<title>{html.escape(country_id)} — {html.escape(status)} — {html.escape(region)}</title></circle>"
+        )
+        markers.append(marker)
+        labels.append(f"<text x='{x + 10:.1f}' y='{y + 4:.1f}' font-size='10'>{html.escape(country_id)}</text>")
+        legend_rows.append(
+            "<tr>"
+            f"<td>{html.escape(country_id)}</td>"
+            f"<td>{html.escape(metadata.get('country_name', country_id))}</td>"
+            f"<td>{html.escape(region)}</td>"
+            f"<td>{html.escape(str(metadata.get('priority', 'n/a')))}</td>"
+            f"<td><span class='status'>{html.escape(status)}</span></td>"
+            "</tr>"
+        )
+
+    return (
+        "<h3>Map Visualization</h3>"
+        "<p>Region-anchored anomaly markers based on governed MVP country metadata.</p>"
+        "<svg viewBox='0 0 340 210' width='340' height='210' role='img' aria-label='World anomaly map'>"
+        "<rect x='5' y='5' width='330' height='200' rx='8' fill='#eef6ff' stroke='#cbd5e1' />"
+        "<text x='25' y='35' font-size='12'>North America</text>"
+        "<text x='165' y='35' font-size='12'>Europe</text>"
+        "<text x='245' y='35' font-size='12'>Asia</text>"
+        "<text x='165' y='150' font-size='12'>Africa / Middle East</text>"
+        f"{''.join(markers)}{''.join(labels)}"
+        "</svg>"
+        "<table><thead><tr><th>Country</th><th>Name</th><th>Region</th><th>Priority</th><th>Status</th></tr></thead>"
+        f"<tbody>{''.join(legend_rows)}</tbody></table>"
+    )
+
 
 
 def _annotation_index(annotations_view_model: dict[str, Any] | None) -> dict[str, dict[str, Any]]:
@@ -291,6 +395,7 @@ def _render_index(
         "<h2>World Anomaly Map</h2>"
         f"<p>Baseline mode: <strong>{html.escape(str(world_map_read_model.get('baseline_mode', 'unknown')))}</strong></p>"
         f"<p>Active domains: {html.escape(', '.join(world_map_read_model.get('active_domains', [])))}</p>"
+        f"{_render_world_map_visualization(world_map_read_model, available_country_ids)}"
         "<h2>Global Overview</h2>"
         "<table><thead><tr><th>Country</th><th>Support Status</th><th>Multi-Domain Status</th><th>Active Domains</th><th>Drill-down</th></tr></thead>"
         f"<tbody>{''.join(rows)}</tbody></table>"

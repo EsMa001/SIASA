@@ -228,6 +228,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
 
     index_html = (pages.output_dir / "index.html").read_text()
     assert "World Anomaly Map" in index_html
+    assert "Map Visualization" in index_html
+    assert "Europe / Black Sea" in index_html
+    assert "<svg" in index_html
     assert "Global Overview" in index_html
     assert "UKR" in index_html
     assert "countries/UKR.html" in index_html
