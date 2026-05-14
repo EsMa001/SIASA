@@ -4,10 +4,10 @@ from siasa.data.normalized_models import NormalizedRecord
 from siasa.features.domain_b import DomainBFeatureService
 
 
-def _record(signal_key: str, value: float, source_id: str, **quality_context: float) -> NormalizedRecord:
+def _record(signal_key: str, value: float, source_id: str, country_id: str = "UKR", **quality_context: float) -> NormalizedRecord:
     return NormalizedRecord(
-        normalized_id=f"N-{signal_key}-{source_id}",
-        country_id="UKR",
+        normalized_id=f"N-{country_id}-{signal_key}-{source_id}",
+        country_id=country_id,
         timestamp="2026-05-11T14:00:00Z",
         domain="B",
         signal_key=signal_key,
@@ -40,3 +40,21 @@ def test_domain_b_feature_service_emits_event_conflict_protest_violence_and_disa
     }
     assert features["B_event_count"].coverage == 0.75
     assert features["B_event_count"].confidence_inputs["freshness_hours"] == 24
+
+
+
+def test_domain_b_feature_service_groups_outputs_per_country() -> None:
+    service = DomainBFeatureService()
+    records = [
+        _record("conflict_event_count", 4.0, "SRC-1", country_id="UKR", expected_source_count=2, freshness_hours=8),
+        _record("protest_event_count", 2.0, "SRC-1", country_id="UKR", expected_source_count=2, freshness_hours=8),
+        _record("conflict_event_count", 1.0, "SRC-2", country_id="POL", expected_source_count=2, freshness_hours=10),
+        _record("violent_event_count", 3.0, "SRC-2", country_id="POL", expected_source_count=2, freshness_hours=10),
+    ]
+
+    features = service.compute(records)
+    event_count_by_country = {
+        feature.country_id: feature.value for feature in features if feature.feature_id == "B_event_count"
+    }
+
+    assert event_count_by_country == {"UKR": 6.0, "POL": 4.0}

@@ -2,10 +2,10 @@ from siasa.data.normalized_models import NormalizedRecord
 from siasa.features.domain_d import DomainDFeatureService
 
 
-def _record(signal_key: str, value: float, source_id: str, **quality_context: float) -> NormalizedRecord:
+def _record(signal_key: str, value: float, source_id: str, country_id: str = "UKR", **quality_context: float) -> NormalizedRecord:
     return NormalizedRecord(
-        normalized_id=f"N-{signal_key}-{source_id}",
-        country_id="UKR",
+        normalized_id=f"N-{country_id}-{signal_key}-{source_id}",
+        country_id=country_id,
         timestamp="2026-05-11T14:00:00Z",
         domain="D",
         signal_key=signal_key,
@@ -33,3 +33,21 @@ def test_domain_d_feature_service_emits_trade_energy_macro_and_food_indicators()
     assert features["D_macro_data_freshness"].value == 720
     assert features["D_trade_volume_change"].coverage == 0.8
     assert features["D_trade_volume_change"].confidence_inputs["source_count"] == 4
+
+
+
+def test_domain_d_feature_service_groups_outputs_per_country() -> None:
+    service = DomainDFeatureService()
+    records = [
+        _record("gdp_growth", 2.1, "SRC-MACRO", country_id="UKR", expected_source_count=2, freshness_hours=720),
+        _record("trade_volume_change", -5.0, "SRC-TRADE", country_id="UKR", expected_source_count=2, freshness_hours=72),
+        _record("gdp_growth", 1.5, "SRC-MACRO", country_id="POL", expected_source_count=2, freshness_hours=360),
+        _record("trade_volume_change", 0.7, "SRC-TRADE", country_id="POL", expected_source_count=2, freshness_hours=48),
+    ]
+
+    features = service.compute(records)
+    gdp_growth_by_country = {
+        feature.country_id: feature.value for feature in features if feature.feature_id == "D_gdp_growth"
+    }
+
+    assert gdp_growth_by_country == {"UKR": 2.1, "POL": 1.5}

@@ -13,32 +13,37 @@ class DomainBFeatureService(FeatureService):
         if not domain_records:
             return []
 
-        conflict_count = sum_signal(domain_records, "conflict_event_count")
-        protest_count = sum_signal(domain_records, "protest_event_count")
-        violent_count = sum_signal(domain_records, "violent_event_count")
-        disaster_alert_level = max(
-            (record.value for record in domain_records if record.signal_key == "disaster_alert_level"),
-            default=0.0,
-        )
-        event_count = conflict_count + protest_count + violent_count
-        violent_share = violent_count / event_count if event_count else 0.0
-        distribution = {
-            key: value / event_count
-            for key, value in {
-                "conflict": conflict_count,
-                "protest": protest_count,
-                "violent": violent_count,
-            }.items()
-            if value > 0 and event_count
-        }
+        features: list[FeatureValue] = []
+        for country_id in sorted({record.country_id for record in domain_records}):
+            country_records = [record for record in domain_records if record.country_id == country_id]
+            conflict_count = sum_signal(country_records, "conflict_event_count")
+            protest_count = sum_signal(country_records, "protest_event_count")
+            violent_count = sum_signal(country_records, "violent_event_count")
+            disaster_alert_level = max(
+                (record.value for record in country_records if record.signal_key == "disaster_alert_level"),
+                default=0.0,
+            )
+            event_count = conflict_count + protest_count + violent_count
+            violent_share = violent_count / event_count if event_count else 0.0
+            distribution = {
+                key: value / event_count
+                for key, value in {
+                    "conflict": conflict_count,
+                    "protest": protest_count,
+                    "violent": violent_count,
+                }.items()
+                if value > 0 and event_count
+            }
 
-        features = [
-            build_feature_value("B_event_count", self.domain, event_count, domain_records),
-            build_feature_value("B_violent_event_count", self.domain, violent_count, domain_records),
-            build_feature_value("B_protest_event_count", self.domain, protest_count, domain_records),
-            build_feature_value("B_violent_event_share", self.domain, violent_share, domain_records),
-            build_feature_value("B_disaster_alert_level", self.domain, disaster_alert_level, domain_records),
-        ]
-        if distribution:
-            features.append(build_feature_value("B_event_type_distribution", self.domain, distribution, domain_records))
+            features.extend(
+                [
+                    build_feature_value("B_event_count", self.domain, event_count, country_records),
+                    build_feature_value("B_violent_event_count", self.domain, violent_count, country_records),
+                    build_feature_value("B_protest_event_count", self.domain, protest_count, country_records),
+                    build_feature_value("B_violent_event_share", self.domain, violent_share, country_records),
+                    build_feature_value("B_disaster_alert_level", self.domain, disaster_alert_level, country_records),
+                ]
+            )
+            if distribution:
+                features.append(build_feature_value("B_event_type_distribution", self.domain, distribution, country_records))
         return features

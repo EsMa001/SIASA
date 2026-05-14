@@ -13,6 +13,7 @@ class DomainDFeatureService(FeatureService):
         if not domain_records:
             return []
 
+        features: list[FeatureValue] = []
         feature_specs = {
             "D_trade_volume_change": "trade_volume_change",
             "D_energy_price_stress": "energy_price_stress",
@@ -20,14 +21,17 @@ class DomainDFeatureService(FeatureService):
             "D_food_price_proxy": "food_price_proxy",
         }
 
-        features: list[FeatureValue] = []
-        for feature_id, signal_key in feature_specs.items():
-            value = mean_signal(domain_records, signal_key)
-            if value is not None:
-                features.append(build_feature_value(feature_id, self.domain, value, domain_records))
+        for country_id in sorted({record.country_id for record in domain_records}):
+            country_records = [record for record in domain_records if record.country_id == country_id]
+            for feature_id, signal_key in feature_specs.items():
+                value = mean_signal(country_records, signal_key)
+                if value is not None:
+                    features.append(build_feature_value(feature_id, self.domain, value, country_records))
 
-        freshness_hours = max(
-            float(record.quality_context.get("freshness_hours", 0) or 0) for record in domain_records
-        )
-        features.append(build_feature_value("D_macro_data_freshness", self.domain, int(freshness_hours), domain_records))
+            freshness_hours = max(
+                float(record.quality_context.get("freshness_hours", 0) or 0) for record in country_records
+            )
+            features.append(
+                build_feature_value("D_macro_data_freshness", self.domain, int(freshness_hours), country_records)
+            )
         return features
