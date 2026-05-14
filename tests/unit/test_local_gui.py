@@ -730,20 +730,23 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
             }
         )
     )
-    for country_id, event_id, trend in (("POL", "EVT-POL-350", ["2026-02"]), ("UKR", "EVT-UKR-350", ["2026-01"])):
+    for country_id, event_id, trend, domain_states, uncertainty, coverage, confidence in (
+        ("POL", "EVT-POL-350", [{"label": "2026-02", "value": 0.61}], {"A": "D3", "B": "D2"}, ["partial_signal_loss"], 0.42, 0.88),
+        ("UKR", "EVT-UKR-350", [{"label": "2026-01", "value": 0.77}], {"A": "D4", "B": "D3"}, [], 0.91, 0.46),
+    ):
         (artifacts_dir / "readmodels" / "country_profiles" / f"{country_id}.json").write_text(
             json.dumps(
                 {
                     "country_id": country_id,
                     "multi_domain_status": "S3",
-                    "domain_states": {"A": "D3", "B": "D2"},
+                    "domain_states": domain_states,
                     "trends": {"yearly": trend},
                     "drivers": ["A_news_volume"],
                     "linked_events": [event_id],
-                    "coverage": 0.8,
-                    "confidence": 0.7,
+                    "coverage": coverage,
+                    "confidence": confidence,
                     "counter_indicators": [],
-                    "uncertainty": [],
+                    "uncertainty": uncertainty,
                     "annotations": [],
                 }
             )
@@ -822,18 +825,30 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "countries/UKR.html" in index_html
     assert "data-country-id='POL'" in index_html
     assert "data-active-domains='A,B'" in index_html
-    assert "option value='2026-02'" in index_html
+    assert "option value='coverage'" in index_html
+    assert "option value='domain-A'" in index_html
+    assert "option value='domain-B'" in index_html
+    assert "domain-projection-block" in index_html
     assert "function applyOverviewFilters()" in index_html
-    assert "POL" in trends_html and "UKR" in trends_html
-    assert "data-country-id='POL'" in trends_html
-    assert "option value='2026-02'" in trends_html
-    assert "function applyTrendFilters()" in trends_html
+    assert "dataset.domainAStatus" in index_html
+    assert "dataset.domainBStatus" in index_html
+    assert "function applyOverviewViewMode()" in index_html
+    assert "Event Overlay Summary" in trends_html
+    assert "trend-event-overlay" in trends_html
+    assert "data-event-ids='EVT-POL-350'" in trends_html
+    assert "option value='events'" in trends_html
+    assert "function applyTrendViewMode()" in trends_html
     assert "EVT-POL-350" in events_html and "EVT-UKR-350" in events_html
     assert "data-country-id='POL'" in events_html
     assert "function applyEventFilters()" in events_html
     comparison_html = (pages.output_dir / "comparison.html").read_text()
     assert "Cross-Country Comparison" in comparison_html
     assert "POL" in comparison_html and "UKR" in comparison_html
+    assert "option value='low_coverage'" in comparison_html
+    assert "option value='low_confidence'" in comparison_html
+    assert "data-coverage-band='low'" in comparison_html
+    assert "data-confidence-band='low'" in comparison_html
+    assert "function applyComparisonFilters()" in comparison_html
 
 
 

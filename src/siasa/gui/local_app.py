@@ -301,6 +301,33 @@ def _render_country_trust_visualization(country_profile_read_models: dict[str, d
 
 
 
+def _render_domain_projection(country_profile_read_models: dict[str, dict[str, Any]], active_domains: list[str]) -> str:
+    if not country_profile_read_models or not active_domains:
+        return "<p>No domain projection data available.</p>"
+
+    rows: list[str] = []
+    for country_id, profile in sorted(country_profile_read_models.items()):
+        domain_cells = ''.join(
+            f"<td class='domain-projection-value'>{html.escape(str(profile.get('domain_states', {}).get(domain, 'n/a')))}</td>"
+            for domain in active_domains
+        )
+        rows.append(
+            f"<tr class='domain-projection-row' data-country-id='{html.escape(country_id)}'>"
+            f"<td>{html.escape(country_id)}</td>"
+            f"{domain_cells}"
+            f"<td>{_render_uncertainty_badges(profile.get('uncertainty', []))}</td>"
+            "</tr>"
+        )
+    header_cells = ''.join(f"<th>{html.escape(domain)} Status</th>" for domain in active_domains)
+    return (
+        "<h3>Domain Projection View</h3>"
+        "<p>Domain-specific projection makes the active domain status slice explicit per visible country.</p>"
+        f"<table id='domain-projection-table'><thead><tr><th>Country</th>{header_cells}<th>Uncertainty</th></tr></thead>"
+        f"<tbody>{''.join(rows)}</tbody></table>"
+    )
+
+
+
 def _render_world_map_visualization(world_map_read_model: dict[str, Any], available_country_ids: set[str]) -> str:
     metadata_lookup = _country_metadata_lookup()
     region_offsets: dict[str, int] = {}
@@ -487,11 +514,16 @@ def _render_index(
         country_id = str(country["country_id"])
         status = str(country["status"])
         active_domains = [str(domain) for domain in country.get('active_domains', [])]
+        country_profile = country_profile_read_models.get(country_id, {})
         trend_labels = ','.join(
             _trend_labels(
-                country_profile_read_models.get(country_id, {}).get('trends', {}).get('yearly', []),
+                country_profile.get('trends', {}).get('yearly', []),
                 label_key='label',
             )
+        )
+        domain_state_attributes = ''.join(
+            f" data-domain-{html.escape(domain.lower())}-status='{html.escape(str(country_profile.get('domain_states', {}).get(domain, 'n/a')))}'"
+            for domain in world_map_read_model.get('active_domains', [])
         )
         has_country_page = country_id in available_country_ids
         country_cell = (
@@ -502,7 +534,7 @@ def _render_index(
         drill_down_cell = f"countries/{html.escape(country_id)}.html" if has_country_page else "not available"
         support_status = "supported" if has_country_page else "not available"
         rows.append(
-            f"<tr class='overview-row' data-country-id='{html.escape(country_id)}' data-active-domains='{html.escape(','.join(active_domains))}' data-status='{html.escape(status)}' data-trend-labels='{html.escape(trend_labels)}'>"
+            f"<tr class='overview-row' data-country-id='{html.escape(country_id)}' data-active-domains='{html.escape(','.join(active_domains))}' data-status='{html.escape(status)}' data-trend-labels='{html.escape(trend_labels)}'{domain_state_attributes}>"
             f"<td>{country_cell}</td>"
             f"<td>{html.escape(support_status)}</td>"
             f"<td class='status'>{html.escape(status)}</td>"
@@ -551,7 +583,11 @@ def _render_index(
         "<select id='view-mode' name='view-mode'>"
         "<option value='multi-domain'>Multi-domain status</option>"
         "<option value='coverage'>Coverage emphasis</option>"
-        "</select>"
+        + ''.join(
+            f"<option value='domain-{html.escape(domain)}'>Domain {html.escape(domain)} projection</option>"
+            for domain in world_map_read_model.get('active_domains', [])
+        )
+        + "</select>"
     )
 
     body = (
@@ -572,10 +608,26 @@ def _render_index(
         "<p id='overview-filter-result'>Selected Time Window: all trend labels | View Mode: multi-domain status</p>"
         f"<div id='map-visualization-block'>{_render_world_map_visualization(world_map_read_model, available_country_ids)}</div>"
         f"<div id='coverage-visualization-block' style='display:none'>{_render_country_trust_visualization(country_profile_read_models)}</div>"
+        f"<div id='domain-projection-block' style='display:none'>{_render_domain_projection(country_profile_read_models, [str(domain) for domain in world_map_read_model.get('active_domains', [])])}</div>"
         "<h2>Global Overview</h2>"
         "<div id='overview-table-block'><table id='overview-table'><thead><tr><th>Country</th><th>Support Status</th><th>Multi-Domain Status</th><th>Active Domains</th><th>Drill-down</th></tr></thead>"
         f"<tbody>{''.join(rows)}</tbody></table></div>"
         "<script>"
+        "function applyOverviewViewMode(){"
+        "const viewMode=document.getElementById('view-mode').value;"
+        "const showCoverage=viewMode==='coverage';"
+        "const showDomain=viewMode.startsWith('domain-');"
+        "const selectedDomain=showDomain?viewMode.replace('domain-','').toUpperCase():'';"
+        "document.getElementById('map-visualization-block').style.display=(!showCoverage&&!showDomain)?'':'none';"
+        "document.getElementById('coverage-visualization-block').style.display=showCoverage?'':'none';"
+        "document.getElementById('domain-projection-block').style.display=showDomain?'':'none';"
+        "document.querySelectorAll('.domain-projection-value').forEach((cell)=>{cell.style.display='';});"
+        "if(showDomain){"
+        "const headers=Array.from(document.querySelectorAll('#domain-projection-table thead th'));"
+        "headers.forEach((header,index)=>{if(index===0||index===headers.length-1){header.style.display='';return;} const domainLabel=(header.textContent||'').split(' ')[0]; header.style.display=(domainLabel===selectedDomain)?'':'none';});"
+        "document.querySelectorAll('#domain-projection-table tbody tr').forEach((row)=>{const domainAStatus=row.dataset.domainAStatus||''; const domainBStatus=row.dataset.domainBStatus||''; const domainDStatus=row.dataset.domainDStatus||''; row.querySelectorAll('.domain-projection-value').forEach((cell,index)=>{const mapped=['A','B','D','C','E'][index]||''; cell.style.display=(mapped===selectedDomain)?'':'none';}); row.style.display=row.style.display==='none'?'none':'';});"
+        "}"
+        "}"
         "function applyOverviewFilters(){"
         "const domain=document.getElementById('domain-filter').value;"
         "const timeWindow=document.getElementById('time-window').value;"
@@ -587,8 +639,14 @@ def _render_index(
         "const timeMatch=(timeWindow==='all'||trendLabels.includes(timeWindow));"
         "row.style.display=(domainMatch&&timeMatch)?'':'none';"
         "});"
-        "document.getElementById('map-visualization-block').style.display=viewMode==='coverage'?'none':'';"
-        "document.getElementById('coverage-visualization-block').style.display=viewMode==='coverage'?'':'none';"
+        "document.querySelectorAll('.domain-projection-row').forEach((row)=>{"
+        "const sourceRow=document.querySelector(`.overview-row[data-country-id='${row.dataset.countryId}']`);"
+        "row.dataset.domainAStatus=sourceRow?.dataset.domainAStatus||'';"
+        "row.dataset.domainBStatus=sourceRow?.dataset.domainBStatus||'';"
+        "row.dataset.domainDStatus=sourceRow?.dataset.domainDStatus||'';"
+        "row.style.display=(sourceRow&&sourceRow.style.display!=='none')?'':'none';"
+        "});"
+        "applyOverviewViewMode();"
         "document.getElementById('overview-filter-result').textContent='Selected Time Window: '+timeWindow+' | View Mode: '+viewMode;"
         "}"
         "document.getElementById('domain-filter').addEventListener('change', applyOverviewFilters);"
@@ -944,12 +1002,13 @@ def _render_trends(country_profile_read_models: dict[str, dict[str, Any]], *, na
     trend_options = _trend_filter_options(country_profile_read_models)
     for country_id, profile in sorted(country_profile_read_models.items()):
         yearly = profile.get('trends', {}).get('yearly', [])
-        chart_points = _coerce_chart_points(yearly, label_key='label')
         labels = ','.join(_trend_labels(yearly, label_key='label'))
+        event_ids = [str(item) for item in profile.get('linked_events', [])]
+        event_overlay = ''.join(f"<li>{html.escape(event_id)}</li>" for event_id in event_ids) or "<li>none</li>"
         rows.append(
-            f"<tr class='trend-row' data-country-id='{html.escape(country_id)}' data-trend-labels='{html.escape(labels)}'>"
+            f"<tr class='trend-row' data-country-id='{html.escape(country_id)}' data-trend-labels='{html.escape(labels)}' data-event-ids='{html.escape(','.join(event_ids))}'>"
             f"<td>{html.escape(country_id)}</td>"
-            f"<td><h4>Trend Chart</h4>{_render_line_chart(yearly, label_key='label', chart_label=f'{country_id} yearly trend')}</td>"
+            f"<td><div class='trend-chart-block'><h4>Trend Chart</h4>{_render_line_chart(yearly, label_key='label', chart_label=f'{country_id} yearly trend')}</div><div class='trend-event-overlay' style='display:none'><h4>Event Overlay Summary</h4><ul>{event_overlay}</ul></div></td>"
             f"<td>{html.escape(str(profile.get('multi_domain_status', 'n/a')))}</td>"
             "</tr>"
         )
@@ -962,11 +1021,22 @@ def _render_trends(country_profile_read_models: dict[str, dict[str, Any]], *, na
         f"{''.join(country_options)}</select> "
         "<label for='trend-time-window'>Time Window</label> "
         "<select id='trend-time-window' name='trend-time-window'><option value='all'>All labels</option>"
-        f"{''.join(f"<option value='{html.escape(label)}'>{html.escape(label)}</option>" for label in trend_options)}</select>"
+        f"{''.join(f"<option value='{html.escape(label)}'>{html.escape(label)}</option>" for label in trend_options)}</select> "
+        "<label for='trend-view-mode'>Trend View Mode</label> "
+        "<select id='trend-view-mode' name='trend-view-mode'><option value='chart'>Chart view</option><option value='events'>Event overlay view</option></select>"
         "<p id='trend-filter-result'>Selected Trend Window: all labels</p>"
         "<table id='trend-table'><thead><tr><th>Country</th><th>Yearly Trend</th><th>Current Multi-Domain Status</th></tr></thead>"
         f"<tbody>{''.join(rows)}</tbody></table>"
         "<script>"
+        "function applyTrendViewMode(){"
+        "const mode=document.getElementById('trend-view-mode').value;"
+        "document.querySelectorAll('.trend-row').forEach((row)=>{"
+        "const chart=row.querySelector('.trend-chart-block');"
+        "const overlay=row.querySelector('.trend-event-overlay');"
+        "if(chart){chart.style.display=mode==='events'?'none':'';}"
+        "if(overlay){overlay.style.display=mode==='events'?'':'none';}"
+        "});"
+        "}"
         "function applyTrendFilters(){"
         "const country=document.getElementById('trend-country-filter').value;"
         "const windowValue=document.getElementById('trend-time-window').value;"
@@ -976,10 +1046,12 @@ def _render_trends(country_profile_read_models: dict[str, dict[str, Any]], *, na
         "const matchesWindow=(windowValue==='all'||labels.includes(windowValue));"
         "row.style.display=(matchesCountry&&matchesWindow)?'':'none';"
         "});"
+        "applyTrendViewMode();"
         "document.getElementById('trend-filter-result').textContent='Selected Trend Window: '+windowValue;"
         "}"
         "document.getElementById('trend-country-filter').addEventListener('change', applyTrendFilters);"
         "document.getElementById('trend-time-window').addEventListener('change', applyTrendFilters);"
+        "document.getElementById('trend-view-mode').addEventListener('change', applyTrendViewMode);"
         "applyTrendFilters();"
         "</script>"
     )
