@@ -50,6 +50,9 @@ def _page(title: str, body: str, *, nav_prefix: str = '', available_pages: set[s
         "th,td{border:1px solid #ccc;padding:0.5rem;text-align:left;vertical-align:top;}"
         "code,pre{background:#f5f5f5;padding:0.2rem 0.4rem;}"
         "nav a{margin-right:1rem;} .status{font-weight:bold;} ul{margin-top:0.3rem;}"
+        ".uncertainty-badge{display:inline-block;margin:0.1rem 0.25rem 0.1rem 0;padding:0.15rem 0.45rem;border-radius:999px;background:#fee2e2;color:#991b1b;font-size:0.85rem;}"
+        ".uncertainty-none{background:#e5e7eb;color:#374151;}"
+        ".metric-meter p{margin:0.2rem 0;}"
         "</style></head><body>"
         f"<nav>{nav_html}</nav>"
         f"<h1>{html.escape(title)}</h1>"
@@ -188,6 +191,113 @@ def _status_color(status: str) -> str:
         'S5': '#dc2626',
         'S6': '#7f1d1d',
     }.get(status, '#6b7280')
+
+
+
+def _coerce_ratio(value: Any) -> float | None:
+    if isinstance(value, bool):
+        return float(value)
+    if isinstance(value, (int, float)):
+        return max(0.0, min(float(value), 1.0))
+    return None
+
+
+
+def _ratio_band(value: Any) -> str:
+    ratio = _coerce_ratio(value)
+    if ratio is None:
+        return 'unknown'
+    if ratio >= 0.8:
+        return 'high'
+    if ratio >= 0.5:
+        return 'medium'
+    return 'low'
+
+
+
+def _band_color(band: str) -> str:
+    return {
+        'high': '#15803d',
+        'medium': '#d97706',
+        'low': '#dc2626',
+        'unknown': '#6b7280',
+    }.get(band, '#6b7280')
+
+
+
+def _render_metric_meter(label: str, value: Any, *, fill_color: str) -> str:
+    ratio = _coerce_ratio(value)
+    band = _ratio_band(value)
+    percent = int(round((ratio or 0.0) * 100))
+    value_label = 'n/a' if ratio is None else f'{ratio:.2f}'
+    width = 220
+    height = 16
+    fill_width = int(round((ratio or 0.0) * width))
+    return (
+        f"<div class='metric-meter metric-meter-{html.escape(label.lower().replace(' ', '-'))}'>"
+        f"<p><strong>{html.escape(label)}</strong>: {html.escape(value_label)} ({html.escape(band)})</p>"
+        f"<svg viewBox='0 0 {width} {height}' width='{width}' height='{height}' role='img' aria-label='{html.escape(label)} meter'>"
+        f"<rect x='0' y='0' width='{width}' height='{height}' rx='6' fill='#e5e7eb'></rect>"
+        f"<rect x='0' y='0' width='{fill_width}' height='{height}' rx='6' fill='{html.escape(fill_color)}'></rect>"
+        f"<text x='{min(fill_width + 6, width - 36)}' y='12' font-size='10'>{percent}%</text>"
+        "</svg>"
+        "</div>"
+    )
+
+
+
+def _render_uncertainty_badges(items: list[Any]) -> str:
+    labels = [str(item) for item in items if str(item)]
+    if not labels:
+        return "<span class='uncertainty-badge uncertainty-none'>none</span>"
+    return ''.join(
+        f"<span class='uncertainty-badge'>{html.escape(label)}</span>"
+        for label in labels
+    )
+
+
+
+def _render_country_trust_visualization(country_profile_read_models: dict[str, dict[str, Any]]) -> str:
+    if not country_profile_read_models:
+        return "<p>No country trust metrics available.</p>"
+
+    rows: list[str] = []
+    svg_rows: list[str] = []
+    for index, (country_id, profile) in enumerate(sorted(country_profile_read_models.items())):
+        coverage = profile.get('coverage')
+        confidence = profile.get('confidence')
+        coverage_ratio = _coerce_ratio(coverage) or 0.0
+        confidence_ratio = _coerce_ratio(confidence) or 0.0
+        y = 28 + (index * 26)
+        svg_rows.append(
+            f"<text x='8' y='{y + 11}' font-size='10'>{html.escape(country_id)}</text>"
+            f"<rect x='64' y='{y}' width='100' height='8' rx='4' fill='#e5e7eb'></rect>"
+            f"<rect x='64' y='{y}' width='{int(round(coverage_ratio * 100))}' height='8' rx='4' fill='#0ea5e9'></rect>"
+            f"<rect x='182' y='{y}' width='100' height='8' rx='4' fill='#e5e7eb'></rect>"
+            f"<rect x='182' y='{y}' width='{int(round(confidence_ratio * 100))}' height='8' rx='4' fill='#8b5cf6'></rect>"
+        )
+        rows.append(
+            "<tr>"
+            f"<td>{html.escape(country_id)}</td>"
+            f"<td>{html.escape(str(coverage))}</td>"
+            f"<td>{html.escape(_ratio_band(coverage))}</td>"
+            f"<td>{html.escape(str(confidence))}</td>"
+            f"<td>{html.escape(_ratio_band(confidence))}</td>"
+            f"<td>{_render_uncertainty_badges(profile.get('uncertainty', []))}</td>"
+            "</tr>"
+        )
+    chart_height = max(72, 40 + (len(country_profile_read_models) * 26))
+    return (
+        "<h3>Coverage / Confidence Visualization</h3>"
+        "<p>Coverage and confidence are rendered as country-level trust bars so gaps remain visually explicit.</p>"
+        "<svg viewBox='0 0 300 {height}' width='300' height='{height}' role='img' aria-label='Coverage and confidence by country'>"
+        "<text x='64' y='18' font-size='10'>Coverage</text>"
+        "<text x='182' y='18' font-size='10'>Confidence</text>"
+        "{rows}"
+        "</svg>"
+        "<table><thead><tr><th>Country</th><th>Coverage</th><th>Coverage Band</th><th>Confidence</th><th>Confidence Band</th><th>Uncertainty</th></tr></thead>"
+        "<tbody>{table_rows}</tbody></table>"
+    ).format(height=chart_height, rows=''.join(svg_rows), table_rows=''.join(rows))
 
 
 
@@ -461,6 +571,7 @@ def _render_index(
         f"{controls_html}"
         "<p id='overview-filter-result'>Selected Time Window: all trend labels | View Mode: multi-domain status</p>"
         f"<div id='map-visualization-block'>{_render_world_map_visualization(world_map_read_model, available_country_ids)}</div>"
+        f"<div id='coverage-visualization-block' style='display:none'>{_render_country_trust_visualization(country_profile_read_models)}</div>"
         "<h2>Global Overview</h2>"
         "<div id='overview-table-block'><table id='overview-table'><thead><tr><th>Country</th><th>Support Status</th><th>Multi-Domain Status</th><th>Active Domains</th><th>Drill-down</th></tr></thead>"
         f"<tbody>{''.join(rows)}</tbody></table></div>"
@@ -477,6 +588,7 @@ def _render_index(
         "row.style.display=(domainMatch&&timeMatch)?'':'none';"
         "});"
         "document.getElementById('map-visualization-block').style.display=viewMode==='coverage'?'none':'';"
+        "document.getElementById('coverage-visualization-block').style.display=viewMode==='coverage'?'':'none';"
         "document.getElementById('overview-filter-result').textContent='Selected Time Window: '+timeWindow+' | View Mode: '+viewMode;"
         "}"
         "document.getElementById('domain-filter').addEventListener('change', applyOverviewFilters);"
@@ -518,11 +630,19 @@ def _render_country(
         )
     )
     explanation_summary = country_profile.get('explanation_summary') or 'No explanation summary available.'
+    trust_summary_html = (
+        "<h3>Trust / Uncertainty Summary</h3>"
+        f"<p>Coverage band: <strong>{html.escape(_ratio_band(country_profile.get('coverage')))}</strong> | Confidence band: <strong>{html.escape(_ratio_band(country_profile.get('confidence')))}</strong></p>"
+        f"<h4>Coverage Meter</h4>{_render_metric_meter('Coverage', country_profile.get('coverage'), fill_color='#0ea5e9')}"
+        f"<h4>Confidence Meter</h4>{_render_metric_meter('Confidence', country_profile.get('confidence'), fill_color='#8b5cf6')}"
+        f"<h4>Uncertainty Flags</h4><div>{_render_uncertainty_badges(country_profile.get('uncertainty', []))}</div>"
+    )
     body = (
         "<h2>Country Profile</h2>"
         f"<p>Country: <strong>{html.escape(str(country_profile.get('country_id', 'UNKNOWN')))}</strong></p>"
         f"<p>Multi-domain status: <span class='status'>{html.escape(str(country_profile.get('multi_domain_status', 'n/a')))}</span></p>"
         f"<p>Coverage: {html.escape(str(country_profile.get('coverage', 'n/a')))} | Confidence: {html.escape(str(country_profile.get('confidence', 'n/a')))}</p>"
+        f"{trust_summary_html}"
         "<h3>Why this country is in this state</h3>"
         f"<p>{html.escape(str(explanation_summary))}</p>"
         "<h3>Domain States</h3>"
@@ -589,6 +709,16 @@ def _render_source_coverage(
         "</tr>"
         for source in source_coverage_read_model.get('sources', [])
     )
+    matrix_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(source.get('source_id', '')))}</td>"
+        f"<td>{html.escape(_ratio_band(source.get('confidence')))}</td>"
+        f"<td>{_render_metric_meter('Confidence', source.get('confidence'), fill_color=_band_color(_ratio_band(source.get('confidence'))))}</td>"
+        f"<td>{html.escape(str(source.get('freshness_hours', 'n/a')))}</td>"
+        f"<td>{html.escape(str(source.get('status', '')))}</td>"
+        "</tr>"
+        for source in source_coverage_read_model.get('sources', [])
+    ) or "<tr><td colspan='5'>No source metrics available.</td></tr>"
     system_status_read_model = system_status_read_model or {}
     trust_gaps = ''.join(
         f"<li>{html.escape(str(item))}</li>"
@@ -605,6 +735,10 @@ def _render_source_coverage(
         f"<p>Status summary: {html.escape(str(source_coverage_read_model.get('source_status_summary', {})))}</p>"
         f"<h4>Data Gaps / Trust Limits</h4><ul>{trust_gaps}</ul>"
         f"<h4>Degraded Sources</h4><ul>{degraded_sources}</ul>"
+        "<h3>Coverage / Confidence Matrix</h3>"
+        "<p>Confidence Band highlights source trust at a glance while keeping freshness visible.</p>"
+        "<table><thead><tr><th>Source</th><th>Confidence Band</th><th>Confidence Meter</th><th>Freshness (h)</th><th>Status</th></tr></thead>"
+        f"<tbody>{matrix_rows}</tbody></table>"
         "<table><thead><tr><th>Source</th><th>Status</th><th>History Horizon</th><th>Freshness (h)</th><th>Confidence</th></tr></thead>"
         f"<tbody>{rows}</tbody></table>"
         f"<h3>Failed Sources</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in source_coverage_read_model.get('failed_sources', []))}</ul>"
@@ -895,20 +1029,49 @@ def _render_comparison(country_profile_read_models: dict[str, dict[str, Any]], *
     rows = []
     for country_id, profile in sorted(country_profile_read_models.items()):
         domain_states = profile.get('domain_states', {})
+        coverage_band = _ratio_band(profile.get('coverage'))
+        confidence_band = _ratio_band(profile.get('confidence'))
+        uncertainty_count = len(profile.get('uncertainty', []))
         rows.append(
-            "<tr>"
+            f"<tr class='comparison-row' data-country-id='{html.escape(country_id)}' data-coverage-band='{html.escape(coverage_band)}' data-confidence-band='{html.escape(confidence_band)}' data-uncertainty-count='{uncertainty_count}'>"
             f"<td>{html.escape(country_id)}</td>"
             f"<td>{html.escape(str(profile.get('multi_domain_status', 'n/a')))}</td>"
             f"<td>{html.escape(', '.join(f'{domain}:{status}' for domain, status in sorted(domain_states.items())))}</td>"
-            f"<td>{html.escape(str(profile.get('coverage', 'n/a')))}</td>"
-            f"<td>{html.escape(str(profile.get('confidence', 'n/a')))}</td>"
+            f"<td>{_render_metric_meter('Coverage', profile.get('coverage'), fill_color=_band_color(coverage_band))}</td>"
+            f"<td>{_render_metric_meter('Confidence', profile.get('confidence'), fill_color=_band_color(confidence_band))}</td>"
             f"<td>{html.escape(', '.join(str(item) for item in profile.get('drivers', [])))}</td>"
+            f"<td>{_render_uncertainty_badges(profile.get('uncertainty', []))}</td>"
             "</tr>"
         )
     body = (
         "<h2>Cross-Country Comparison</h2>"
-        "<table><thead><tr><th>Country</th><th>Multi-Domain Status</th><th>Domain States</th><th>Coverage</th><th>Confidence</th><th>Drivers</th></tr></thead>"
+        "<h3>Comparison controls</h3>"
+        "<label for='comparison-filter'>Coverage / Uncertainty Focus</label> "
+        "<select id='comparison-filter' name='comparison-filter'>"
+        "<option value='all'>All countries</option>"
+        "<option value='low_coverage'>Low coverage only</option>"
+        "<option value='low_confidence'>Low confidence only</option>"
+        "<option value='has_uncertainty'>With uncertainty flags</option>"
+        "</select>"
+        "<p id='comparison-filter-result'>Selected Comparison Filter: all countries</p>"
+        "<h3>Coverage / Confidence Comparison</h3>"
+        "<table><thead><tr><th>Country</th><th>Multi-Domain Status</th><th>Domain States</th><th>Coverage</th><th>Confidence</th><th>Drivers</th><th>Uncertainty</th></tr></thead>"
         f"<tbody>{''.join(rows)}</tbody></table>"
+        "<script>"
+        "function applyComparisonFilters(){"
+        "const mode=document.getElementById('comparison-filter').value;"
+        "document.querySelectorAll('.comparison-row').forEach((row)=>{"
+        "const lowCoverage=row.dataset.coverageBand==='low';"
+        "const lowConfidence=row.dataset.confidenceBand==='low';"
+        "const hasUncertainty=Number(row.dataset.uncertaintyCount||'0')>0;"
+        "const show=(mode==='all'||(mode==='low_coverage'&&lowCoverage)||(mode==='low_confidence'&&lowConfidence)||(mode==='has_uncertainty'&&hasUncertainty));"
+        "row.style.display=show?'':'none';"
+        "});"
+        "document.getElementById('comparison-filter-result').textContent='Selected Comparison Filter: '+mode;"
+        "}"
+        "document.getElementById('comparison-filter').addEventListener('change', applyComparisonFilters);"
+        "applyComparisonFilters();"
+        "</script>"
     )
     return _page("Cross-Country Comparison", body, nav_prefix=nav_prefix, available_pages=available_pages)
 

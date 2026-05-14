@@ -230,6 +230,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     index_html = (pages.output_dir / "index.html").read_text()
     assert "World Anomaly Map" in index_html
     assert "Map Visualization" in index_html
+    assert "Coverage / Confidence Visualization" in index_html
+    assert "coverage-visualization-block" in index_html
     assert "Europe / Black Sea" in index_html
     assert "Baseline / View Controls" in index_html
     assert "Domain Filter" in index_html
@@ -250,6 +252,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
 
     country_html = (pages.output_dir / "countries" / "UKR.html").read_text()
     assert "Country Profile" in country_html
+    assert "Trust / Uncertainty Summary" in country_html
+    assert "Coverage Meter" in country_html
+    assert "Confidence Meter" in country_html
+    assert "uncertainty-badge" in country_html
     assert "Why this country is in this state" in country_html
     assert "Escalation is primarily driven by Domain A with partial corroboration from Domain B." in country_html
     assert "Explanation Overview" in country_html
@@ -273,6 +279,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     coverage_html = (pages.output_dir / "coverage.html").read_text()
     assert "Source / Coverage View" in coverage_html
     assert "Trust Summary" in coverage_html
+    assert "Coverage / Confidence Matrix" in coverage_html
+    assert "Confidence Band" in coverage_html
     assert "partial_success" in coverage_html
     assert "failed_source:SRC-B" in coverage_html
     assert "ACLED" in coverage_html
@@ -306,6 +314,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
 
     comparison_html = (pages.output_dir / "comparison.html").read_text()
     assert "Cross-Country Comparison" in comparison_html
+    assert "Coverage / Confidence Comparison" in comparison_html
+    assert "Comparison controls" in comparison_html
     assert "UKR" in comparison_html
     assert "S3" in comparison_html
 
