@@ -657,6 +657,135 @@ def test_load_site_payload_from_artifacts_reads_persisted_json_bundle(tmp_path: 
     assert payload["annotations_view_model"]["by_linked_item"]["UKR"] == ["ANN-301"]
 
 
+
+def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path) -> None:
+    artifacts_dir = tmp_path / "artifacts"
+    (artifacts_dir / "readmodels" / "country_profiles").mkdir(parents=True)
+    (artifacts_dir / "readmodels" / "domain_details").mkdir(parents=True)
+    (artifacts_dir / "reports").mkdir(parents=True)
+
+    (artifacts_dir / "snapshot.json").write_text(
+        json.dumps(
+            {
+                "snapshot_id": "SNAP-RUN-350-v1",
+                "run_id": "RUN-350",
+                "country_set_id": "MVP-COUNTRIES-v1",
+                "active_domains": ["A", "B"],
+                "rule_versions": {"domain_status": "rules-2026-05"},
+                "source_state": {"SRC-A": "success", "SRC-B": "success"},
+                "analytical_outputs": {"country_status": {"POL": "S3", "UKR": "S3"}},
+                "status": "success",
+                "algorithm_version": "alg-0.1",
+                "data_version": "data-0.1",
+            }
+        )
+    )
+    (artifacts_dir / "readmodels" / "world_map.json").write_text(
+        json.dumps(
+            {
+                "baseline_mode": "Combined 30/90/365",
+                "active_domains": ["A", "B"],
+                "countries": [
+                    {"country_id": "POL", "status": "S3", "active_domains": ["A", "B"]},
+                    {"country_id": "UKR", "status": "S3", "active_domains": ["A", "B"]},
+                ],
+            }
+        )
+    )
+    for country_id, event_id, trend in (("POL", "EVT-POL-350", ["2026-02"]), ("UKR", "EVT-UKR-350", ["2026-01"])):
+        (artifacts_dir / "readmodels" / "country_profiles" / f"{country_id}.json").write_text(
+            json.dumps(
+                {
+                    "country_id": country_id,
+                    "multi_domain_status": "S3",
+                    "domain_states": {"A": "D3", "B": "D2"},
+                    "trends": {"yearly": trend},
+                    "drivers": ["A_news_volume"],
+                    "linked_events": [event_id],
+                    "coverage": 0.8,
+                    "confidence": 0.7,
+                    "counter_indicators": [],
+                    "uncertainty": [],
+                    "annotations": [],
+                }
+            )
+        )
+        (artifacts_dir / "readmodels" / "domain_details" / f"{country_id}__A.json").write_text(
+            json.dumps(
+                {
+                    "country_id": country_id,
+                    "domain": "A",
+                    "anomaly_state": "D3",
+                    "time_series": [{"timestamp": "2026-05-11", "value": 0.67}],
+                    "baseline_comparison": {"delta_to_baseline": 0.36},
+                    "feature_values": [{"feature_id": "A_article_count", "value": 12.0, "coverage": 0.9}],
+                    "source_context": [{"source_id": "SRC-A", "freshness_hours": 6, "history_horizon": "3y", "status": "success"}],
+                    "uncertainty": [],
+                }
+            )
+        )
+    (artifacts_dir / "readmodels" / "source_coverage.json").write_text(
+        json.dumps(
+            {
+                "sources": [
+                    {"source_id": "SRC-A", "status": "success", "history_horizon": "3y", "freshness_hours": 6, "confidence": 0.9},
+                    {"source_id": "SRC-B", "status": "success", "history_horizon": "3y", "freshness_hours": 12, "confidence": 0.8},
+                ],
+                "failed_sources": [],
+                "missing_sources": [],
+            }
+        )
+    )
+    (artifacts_dir / "readmodels" / "system_status.json").write_text(
+        json.dumps(
+            {
+                "run_id": "RUN-350",
+                "run_status": "success",
+                "active_domains": ["A", "B"],
+                "coverage": {"countries_total": 2, "countries_with_updates": 2},
+                "failed_sources": [],
+                "available_reports": ["REP-DAILY-SNAP-RUN-350-v1", "REP-COUNTRY-POL", "REP-COUNTRY-UKR"],
+                "snapshot_id": "SNAP-RUN-350-v1",
+                "reprocessing_status": "idle",
+                "last_run": "2026-05-11T18:00:00Z",
+            }
+        )
+    )
+    (artifacts_dir / "reports" / "daily_snapshot.json").write_text(
+        json.dumps(
+            {
+                "report_id": "REP-DAILY-SNAP-RUN-350-v1",
+                "report_type": "daily_snapshot",
+                "format": "json",
+                "payload": {"snapshot_id": "SNAP-RUN-350-v1", "status": "success"},
+            }
+        )
+    )
+    (artifacts_dir / "reports" / "country_profile_POL.json").write_text(
+        json.dumps({"report_id": "REP-COUNTRY-POL", "report_type": "country_profile", "format": "json", "payload": {"country_id": "POL", "multi_domain_status": "S3"}})
+    )
+    (artifacts_dir / "reports" / "country_profile_UKR.json").write_text(
+        json.dumps({"report_id": "REP-COUNTRY-UKR", "report_type": "country_profile", "format": "json", "payload": {"country_id": "UKR", "multi_domain_status": "S3"}})
+    )
+
+    payload = local_app.load_site_payload_from_artifacts(artifacts_dir)
+    pages = build_local_mvp_site(output_dir=tmp_path / "site", **payload)
+
+    index_html = (pages.output_dir / "index.html").read_text()
+    trends_html = (pages.output_dir / "trends.html").read_text()
+    events_html = (pages.output_dir / "events.html").read_text()
+
+    assert (pages.output_dir / "countries" / "POL.html").exists()
+    assert (pages.output_dir / "countries" / "UKR.html").exists()
+    assert (pages.output_dir / "domains" / "POL-A.html").exists()
+    assert (pages.output_dir / "domains" / "UKR-A.html").exists()
+    assert "countries/POL.html" in index_html
+    assert "countries/UKR.html" in index_html
+    assert "POL" in trends_html and "UKR" in trends_html
+    assert "EVT-POL-350" in events_html and "EVT-UKR-350" in events_html
+
+
+
 def test_load_site_payload_from_artifacts_falls_back_for_missing_readiness_support_files(tmp_path: Path) -> None:
     artifacts_dir = tmp_path / "artifacts"
     (artifacts_dir / "readmodels" / "country_profiles").mkdir(parents=True)
