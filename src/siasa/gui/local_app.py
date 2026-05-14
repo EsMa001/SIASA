@@ -60,6 +60,66 @@ def _json_block(data: Any) -> str:
     return f"<pre>{html.escape(json.dumps(data, indent=2, sort_keys=True))}</pre>"
 
 
+
+def _coerce_chart_points(series: list[Any], *, label_key: str) -> list[tuple[str, float]]:
+    points: list[tuple[str, float]] = []
+    for index, item in enumerate(series, start=1):
+        if isinstance(item, dict):
+            value = item.get('value')
+            label = item.get(label_key) or item.get('label') or index
+            if isinstance(value, (int, float)):
+                points.append((str(label), float(value)))
+            continue
+        if isinstance(item, (int, float)):
+            points.append((str(index), float(item)))
+    return points
+
+
+
+def _render_line_chart(series: list[Any], *, label_key: str, chart_label: str) -> str:
+    points = _coerce_chart_points(series, label_key=label_key)
+    if not points:
+        return "<p>No chartable data available.</p>"
+
+    width = 320
+    height = 120
+    margin = 16
+    values = [value for _, value in points]
+    min_value = min(values)
+    max_value = max(values)
+    value_range = max_value - min_value
+
+    coordinates: list[str] = []
+    circle_markup: list[str] = []
+    usable_width = max(width - (2 * margin), 1)
+    usable_height = max(height - (2 * margin), 1)
+    for index, (label, value) in enumerate(points):
+        x = margin if len(points) == 1 else margin + (usable_width * index / (len(points) - 1))
+        if value_range == 0:
+            y = margin + (usable_height / 2)
+        else:
+            y = margin + ((max_value - value) / value_range) * usable_height
+        coordinates.append(f"{x:.1f},{y:.1f}")
+        circle_markup.append(
+            f"<circle cx='{x:.1f}' cy='{y:.1f}' r='3' fill='#0b6cff'><title>{html.escape(label)}: {value:.2f}</title></circle>"
+        )
+
+    labels_html = ''.join(
+        f"<li>{html.escape(label)}: {value:.2f}</li>"
+        for label, value in points
+    )
+    return (
+        f"<figure><figcaption>{html.escape(chart_label)}</figcaption>"
+        f"<svg viewBox='0 0 {width} {height}' width='{width}' height='{height}' role='img' aria-label='{html.escape(chart_label)}'>"
+        f"<line x1='{margin}' y1='{height - margin}' x2='{width - margin}' y2='{height - margin}' stroke='#999' stroke-width='1' />"
+        f"<line x1='{margin}' y1='{margin}' x2='{margin}' y2='{height - margin}' stroke='#999' stroke-width='1' />"
+        f"<polyline fill='none' stroke='#0b6cff' stroke-width='2' points='{' '.join(coordinates)}' />"
+        f"{''.join(circle_markup)}</svg>"
+        f"<ul>{labels_html}</ul></figure>"
+    )
+
+
+
 def _load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text())
 
@@ -299,12 +359,14 @@ def _render_domain_detail(domain_detail: dict[str, Any], annotations_view_model:
             str(item)
             for item in annotations_view_model.get('by_linked_item', {}).get(linked_item_key, [])
         ]
+    time_series = domain_detail.get('time_series', [])
     body = (
         "<h2>Domain Detail</h2>"
         f"<p>Country: <strong>{html.escape(str(domain_detail.get('country_id', 'UNKNOWN')))}</strong></p>"
         f"<p>Domain: <strong>{html.escape(str(domain_detail.get('domain', 'UNKNOWN')))}</strong></p>"
         f"<p>Anomaly state: <span class='status'>{html.escape(str(domain_detail.get('anomaly_state', 'n/a')))}</span></p>"
-        f"<h3>Time Series</h3>{_json_block(domain_detail.get('time_series', []))}"
+        f"<h3>Time Series Chart</h3>{_render_line_chart(time_series, label_key='timestamp', chart_label='Domain time series') }"
+        f"<h3>Time Series</h3>{_json_block(time_series)}"
         f"<h3>Baseline Comparison</h3>{_json_block(domain_detail.get('baseline_comparison', {}))}"
         f"<h3>Feature Values</h3>{_json_block(domain_detail.get('feature_values', []))}"
         f"<h3>Source Context</h3>{_json_block(domain_detail.get('source_context', []))}"
@@ -559,7 +621,7 @@ def _render_trends(country_profile_read_models: dict[str, dict[str, Any]], *, na
         rows.append(
             "<tr>"
             f"<td>{html.escape(country_id)}</td>"
-            f"<td>{html.escape(', '.join(str(item) for item in yearly))}</td>"
+            f"<td><h4>Trend Chart</h4>{_render_line_chart(yearly, label_key='label', chart_label=f'{country_id} yearly trend')}</td>"
             f"<td>{html.escape(str(profile.get('multi_domain_status', 'n/a')))}</td>"
             "</tr>"
         )

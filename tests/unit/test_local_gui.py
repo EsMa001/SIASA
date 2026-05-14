@@ -38,7 +38,13 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             "country_id": "UKR",
             "multi_domain_status": "S3",
             "domain_states": {"A": "D3", "B": "D2", "D": "D1"},
-            "trends": {"yearly": ["2025-11", "2025-12", "2026-01"]},
+            "trends": {
+                "yearly": [
+                    {"label": "2025-11", "value": 0.22},
+                    {"label": "2025-12", "value": 0.48},
+                    {"label": "2026-01", "value": 0.73},
+                ]
+            },
             "drivers": ["A_news_volume"],
             "linked_events": ["EVT-001"],
             "coverage": 0.84,
@@ -53,7 +59,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
         ("UKR", "A"): {
             "country_id": "UKR",
             "domain": "A",
-            "time_series": [{"timestamp": "2026-05-11", "value": 0.67}],
+            "time_series": [
+                {"timestamp": "2026-05-09", "value": 0.31},
+                {"timestamp": "2026-05-10", "value": 0.44},
+                {"timestamp": "2026-05-11", "value": 0.67},
+            ],
             "baseline_comparison": {"current_window": 0.67, "baseline_30d": 0.31, "delta_to_baseline": 0.36},
             "feature_values": [{"feature_id": "A_article_count", "value": 12.0, "coverage": 0.9}],
             "source_context": [{"source_id": "SRC-A", "freshness_hours": 6, "history_horizon": "3y", "status": "success"}],
@@ -246,6 +256,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     domain_html = (pages.output_dir / "domains" / "UKR-A.html").read_text()
     assert "Domain Detail" in domain_html
     assert "delta_to_baseline" in domain_html
+    assert "Time Series Chart" in domain_html
+    assert "2026-05-09" in domain_html
+    assert "<svg" in domain_html
     assert "SRC-A" in domain_html
     assert "Domain A spike is traceable to two closely coupled source clusters." in domain_html
 
@@ -275,7 +288,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
 
     trends_html = (pages.output_dir / "trends.html").read_text()
     assert "Yearly Trend Page" in trends_html
+    assert "Trend Chart" in trends_html
     assert "2026-01" in trends_html
+    assert "<svg" in trends_html
 
     events_html = (pages.output_dir / "events.html").read_text()
     assert "Current Events Page" in events_html
