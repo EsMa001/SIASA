@@ -37,6 +37,28 @@ def test_build_governed_live_orchestrator_uses_real_source_adapters_for_supporte
 
 
 
+def test_build_governed_live_orchestrator_supports_multi_country_live_pilot() -> None:
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        country_ids=("UKR", "POL"),
+    )
+
+    assert orchestrator.country_set_id == "MVP-COUNTRIES-LIVE-MULTI-v1"
+    assert orchestrator.rule_versions["runtime_profile"] == "live-multi-country-v1"
+    assert orchestrator.algorithm_version == "live-multi-country-v1"
+
+    world_bank = orchestrator.adapters[0]
+    gdelt_doc = orchestrator.adapters[1]
+    gdelt_events = orchestrator.adapters[2]
+    gdacs = orchestrator.adapters[3]
+
+    assert world_bank.country_ids == ("UKR", "POL")
+    assert gdelt_doc.country_queries == {"UKR": "Ukraine", "POL": "Poland"}
+    assert gdelt_events.country_codes == {"UKR": "UP", "POL": "PL"}
+    assert gdacs.country_ids == {"UKR", "POL"}
+
+
+
 def test_build_governed_live_orchestrator_rejects_unsupported_country_for_gdelt_events() -> None:
     try:
         build_governed_live_orchestrator(repo_root=REPO_ROOT, country_id="CHE")
@@ -64,7 +86,32 @@ def test_governed_live_runtime_module_executes_main_for_help() -> None:
     )
 
     assert result.returncode == 0
-    assert "Run the governed SIASA live-source single-country pilot" in result.stdout
+    assert "Run the governed SIASA live-source runtime" in result.stdout
+    assert "--country-id" in result.stdout
+
+
+
+def test_governed_live_runtime_module_accepts_repeated_country_ids_for_multi_country_run() -> None:
+    result = subprocess.run(
+        [
+            "/opt/hermes/.venv/bin/python",
+            "-m",
+            "siasa.runs.live_runtime",
+            "--country-id",
+            "UKR",
+            "--country-id",
+            "POL",
+            "--help",
+        ],
+        cwd=REPO_ROOT,
+        env={"PYTHONPATH": "src"},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "Governed live pilot country ISO3" in result.stdout
 
 
 
@@ -72,7 +119,7 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
     output_dir = tmp_path / "live-runtime"
     orchestrator = build_governed_live_orchestrator(
         repo_root=REPO_ROOT,
-        country_id="UKR",
+        country_ids=("UKR", "POL"),
         output_dir=output_dir,
     )
     orchestrator.adapters = [
@@ -94,6 +141,22 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
                         "timestamp": "2026-05-14",
                         "signal_key": "energy_price_stress",
                         "value": 0.4,
+                        "freshness_hours": 24,
+                        "quality_flag": "world_bank_api",
+                    },
+                    {
+                        "country_id": "POL",
+                        "timestamp": "2026-05-14",
+                        "signal_key": "gdp_growth",
+                        "value": 1.8,
+                        "freshness_hours": 24,
+                        "quality_flag": "world_bank_api",
+                    },
+                    {
+                        "country_id": "POL",
+                        "timestamp": "2026-05-14",
+                        "signal_key": "energy_price_stress",
+                        "value": 0.2,
                         "freshness_hours": 24,
                         "quality_flag": "world_bank_api",
                     },
@@ -123,6 +186,22 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
                         "freshness_hours": 2,
                         "quality_flag": "gdelt_doc_api",
                     },
+                    {
+                        "country_id": "POL",
+                        "timestamp": "2026-05-14T11:00:00Z",
+                        "signal_key": "article_count",
+                        "value": 8.0,
+                        "freshness_hours": 1,
+                        "quality_flag": "gdelt_doc_api",
+                    },
+                    {
+                        "country_id": "POL",
+                        "timestamp": "2026-05-14T11:00:00Z",
+                        "signal_key": "tone",
+                        "value": -0.4,
+                        "freshness_hours": 1,
+                        "quality_flag": "gdelt_doc_api",
+                    },
                 ],
                 diagnostics="gdelt_doc_fetch_ok",
                 is_success=True,
@@ -149,6 +228,14 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
                         "freshness_hours": 1,
                         "quality_flag": "gdelt_events_export",
                     },
+                    {
+                        "country_id": "POL",
+                        "timestamp": "2026-05-14T11:00:00Z",
+                        "signal_key": "protest_event_count",
+                        "value": 2.0,
+                        "freshness_hours": 1,
+                        "quality_flag": "gdelt_events_export",
+                    },
                 ],
                 diagnostics="gdelt_events_fetch_ok",
                 is_success=True,
@@ -166,7 +253,15 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
                         "value": 2.0,
                         "freshness_hours": 4,
                         "quality_flag": "gdacs_rss",
-                    }
+                    },
+                    {
+                        "country_id": "POL",
+                        "timestamp": "2026-05-14T09:30:00Z",
+                        "signal_key": "disaster_alert_level",
+                        "value": 1.0,
+                        "freshness_hours": 3,
+                        "quality_flag": "gdacs_rss",
+                    },
                 ],
                 diagnostics="gdacs_fetch_ok",
                 is_success=True,
@@ -174,12 +269,13 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
         ),
     ]
 
-    result = orchestrator.run("RUN-LIVE-UKR-001")
+    result = orchestrator.run("RUN-LIVE-MULTI-001")
 
     assert result.run_state.status == "success"
 
     source_coverage = json.loads((output_dir / "readmodels" / "source_coverage.json").read_text())
     world_map = json.loads((output_dir / "readmodels" / "world_map.json").read_text())
+    system_status = json.loads((output_dir / "readmodels" / "system_status.json").read_text())
 
     assert [entry["source_id"] for entry in source_coverage["sources"]] == [
         "WB-INDICATORS",
@@ -188,4 +284,5 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
         "SRC-GDACS",
     ]
     assert all(entry["source_id"] not in {"SRC-A", "SRC-B"} for entry in source_coverage["sources"])
-    assert [country["country_id"] for country in world_map["countries"]] == ["UKR"]
+    assert [country["country_id"] for country in world_map["countries"]] == ["POL", "UKR"]
+    assert system_status["coverage"]["countries_total"] == 2

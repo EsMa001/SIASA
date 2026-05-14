@@ -558,6 +558,12 @@ def test_daily_run_orchestrator_builds_country_reports_for_multiple_countries() 
 
     assert result.snapshot.analytical_outputs["country_status"] == {"POL": "S3", "UKR": "S3"}
     assert sorted(result.country_reports) == ["POL", "UKR"]
+    assert result.country_domain_statuses["POL"]["A"].status == "D3"
+    assert result.country_domain_statuses["POL"]["B"].status == "D2"
+    assert result.country_domain_statuses["UKR"]["A"].status == "D3"
+    assert result.country_domain_statuses["UKR"]["B"].status == "D2"
+    assert result.country_multi_domain_statuses["POL"].status == "S3"
+    assert result.country_multi_domain_statuses["UKR"].status == "S3"
     assert result.country_reports["POL"].json_payload["multi_domain_status"] == "S3"
     assert result.country_reports["UKR"].json_payload["multi_domain_status"] == "S3"
 

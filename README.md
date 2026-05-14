@@ -58,18 +58,19 @@ Persistierte Artefakte verwenden:
 
 `PYTHONPATH=src /opt/hermes/.venv/bin/python -m siasa.gui.local_app --output-dir build/local_gui --artifacts-dir build/run_artifacts/latest`
 
-Governed live-source single-country pilot erzeugen:
+Governed live-source runtime erzeugen:
 
-`PYTHONPATH=src /opt/hermes/.venv/bin/python -m siasa.runs.live_runtime --country-id UKR --run-id RUN-LIVE-UKR-001 --output-dir build/run_artifacts/latest`
+`PYTHONPATH=src /opt/hermes/.venv/bin/python -m siasa.runs.live_runtime --country-id UKR --country-id POL --run-id RUN-LIVE-MULTI-001 --output-dir build/run_artifacts/latest`
 
 oder nach Installation:
 
-`siasa-live-runtime --country-id UKR --run-id RUN-LIVE-UKR-001 --output-dir build/run_artifacts/latest`
+`siasa-live-runtime --country-id UKR --country-id POL --run-id RUN-LIVE-MULTI-001 --output-dir build/run_artifacts/latest`
 
-Wichtige aktuelle Einschränkung:
-- dieser Runtime-Pilot ist bewusst single-country, weil der aktuelle Orchestrator Snapshot-/Country-Report-Aufbau noch auf ein Land pro Run zugeschnitten ist
-- unterstützte Live-Pilot-Länder sind aktuell `UKR`, `POL`, `ISR`, `TWN`
-- der Pilot ersetzt die bisherigen rein synthetischen `SRC-A` / `SRC-B` Latest-Artefakte durch reale Source-IDs (`WB-INDICATORS`, `SRC-GDELT-DOC`, `SRC-GDELT-EVENTS`, `SRC-GDACS`), ohne bereits eine echte Multi-Country-Laufzeit zu behaupten
+Aktueller Runtime-Stand:
+- der Runtime-Pfad unterstützt jetzt Single- und Multi-Country-Runs für die aktuell freigegebenen Live-Pilot-Länder `UKR`, `POL`, `ISR`, `TWN`
+- wiederhole `--country-id`, um mehrere Länder in einem Run zu verarbeiten
+- der Pilot ersetzt die bisherigen rein synthetischen `SRC-A` / `SRC-B` Latest-Artefakte durch reale Source-IDs (`WB-INDICATORS`, `SRC-GDELT-DOC`, `SRC-GDELT-EVENTS`, `SRC-GDACS`)
+- reale Multi-Country-Runs bleiben quellenabhängig: einzelne Sources können weiterhin partiell fehlschlagen und als `partial_success` im Bundle erscheinen
 
 Die Artefaktstruktur wird durch den Python-Orchestrator automatisch geschrieben, wenn `DailyRunOrchestrator(..., artifacts_output_dir=Path("build/run_artifacts/latest"))` gesetzt ist.
 

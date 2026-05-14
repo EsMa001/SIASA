@@ -268,6 +268,68 @@ def test_daily_run_orchestrator_writes_multi_country_artifact_bundle(tmp_path: P
 
 
 
+def test_daily_run_orchestrator_writes_country_specific_multi_country_artifact_statuses(tmp_path: Path) -> None:
+    def _country_specific_domain_status(domain: str, features):
+        country_id = features[0].country_id
+        if country_id == "UKR":
+            return derive_domain_status(domain, anomaly_score=1.1 if domain == "A" else 0.4, sufficiency=evaluate_data_sufficiency(features))
+        return derive_domain_status(domain, anomaly_score=0.1 if domain == "A" else 0.7, sufficiency=evaluate_data_sufficiency(features))
+
+    orchestrator = DailyRunOrchestrator(
+        adapters=[
+            FakeAdapter(
+                source_id="SRC-A",
+                domain="A",
+                _result=FetchResult(
+                    records=[
+                        {"country_id": "UKR", "signal_key": "article_count", "value": 3.0, "expected_source_count": 1, "freshness_hours": 6},
+                        {"country_id": "UKR", "signal_key": "tone", "value": -0.2, "expected_source_count": 1, "freshness_hours": 6},
+                        {"country_id": "POL", "signal_key": "article_count", "value": 5.0, "expected_source_count": 1, "freshness_hours": 8},
+                        {"country_id": "POL", "signal_key": "tone", "value": 0.1, "expected_source_count": 1, "freshness_hours": 8},
+                    ]
+                ),
+            ),
+            FakeAdapter(
+                source_id="SRC-B",
+                domain="B",
+                _result=FetchResult(
+                    records=[
+                        {"country_id": "UKR", "signal_key": "conflict_event_count", "value": 4.0, "expected_source_count": 1, "freshness_hours": 12},
+                        {"country_id": "UKR", "signal_key": "protest_event_count", "value": 1.0, "expected_source_count": 1, "freshness_hours": 12},
+                        {"country_id": "POL", "signal_key": "conflict_event_count", "value": 1.0, "expected_source_count": 1, "freshness_hours": 10},
+                        {"country_id": "POL", "signal_key": "protest_event_count", "value": 3.0, "expected_source_count": 1, "freshness_hours": 10},
+                    ]
+                ),
+            ),
+        ],
+        normalizer=_normalize,
+        feature_services=[DomainAFeatureService(), DomainBFeatureService()],
+        domain_status_analyzer=_country_specific_domain_status,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A", "B"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+        artifacts_output_dir=tmp_path / "bundle-multi-distinct",
+    )
+
+    result = orchestrator.run(run_id="RUN-202")
+
+    pol_profile = json.loads((tmp_path / "bundle-multi-distinct" / "readmodels" / "country_profiles" / "POL.json").read_text())
+    ukr_profile = json.loads((tmp_path / "bundle-multi-distinct" / "readmodels" / "country_profiles" / "UKR.json").read_text())
+    pol_domain_a = json.loads((tmp_path / "bundle-multi-distinct" / "readmodels" / "domain_details" / "POL__A.json").read_text())
+    ukr_domain_a = json.loads((tmp_path / "bundle-multi-distinct" / "readmodels" / "domain_details" / "UKR__A.json").read_text())
+
+    assert result.country_domain_statuses["POL"]["A"].status == "D1"
+    assert result.country_domain_statuses["UKR"]["A"].status == "D4"
+    assert pol_profile["domain_states"]["A"] == "D1"
+    assert ukr_profile["domain_states"]["A"] == "D4"
+    assert pol_domain_a["baseline_comparison"]["delta_to_baseline"] == 0.1
+    assert ukr_domain_a["baseline_comparison"]["delta_to_baseline"] == 1.1
+
+
+
 def test_daily_run_orchestrator_writes_partial_success_bundle_with_failed_source_context(tmp_path: Path) -> None:
     orchestrator = DailyRunOrchestrator(
         adapters=[

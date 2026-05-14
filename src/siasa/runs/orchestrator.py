@@ -46,7 +46,9 @@ class DailyRunResult:
     normalized_records: list[NormalizedRecord]
     features: list[FeatureValue]
     domain_statuses: dict[str, DomainStatusResult]
+    country_domain_statuses: dict[str, dict[str, DomainStatusResult]]
     multi_domain_status: MultiDomainStatusResult
+    country_multi_domain_statuses: dict[str, MultiDomainStatusResult]
     lineage_records: list[LineageRecord]
     failure_artifact: FailureArtifact | None
     snapshot: Snapshot | None
@@ -83,7 +85,9 @@ class DailyRunOrchestrator:
                 normalized_records=[],
                 features=[],
                 domain_statuses={},
+                country_domain_statuses={},
                 multi_domain_status=MultiDomainStatusResult("S6", [], ["SwR-023", "SwR-024"]),
+                country_multi_domain_statuses={},
                 lineage_records=[],
                 failure_artifact=governance_failure,
                 snapshot=None,
@@ -169,7 +173,9 @@ class DailyRunOrchestrator:
                 normalized_records=normalized_records,
                 features=features,
                 domain_statuses=domain_statuses,
+                country_domain_statuses=country_domain_statuses,
                 multi_domain_status=MultiDomainStatusResult("S6", [], ["SwR-023", "SwR-024"]),
+                country_multi_domain_statuses={},
                 lineage_records=[],
                 failure_artifact=failure_artifact,
                 snapshot=None,
@@ -240,6 +246,7 @@ class DailyRunOrchestrator:
                 normalized_records=normalized_records,
                 features=features,
                 domain_statuses=domain_statuses,
+                country_domain_statuses=country_domain_statuses,
                 lineage_records=lineage_records,
                 snapshot=snapshot,
                 daily_report=daily_report,
@@ -254,7 +261,9 @@ class DailyRunOrchestrator:
             normalized_records=normalized_records,
             features=features,
             domain_statuses=domain_statuses,
+            country_domain_statuses=country_domain_statuses,
             multi_domain_status=multi_domain_status,
+            country_multi_domain_statuses=country_multi_domain_statuses,
             lineage_records=lineage_records,
             failure_artifact=None,
             snapshot=snapshot,

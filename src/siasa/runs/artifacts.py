@@ -40,6 +40,7 @@ def write_run_artifacts(
     normalized_records: list[NormalizedRecord],
     features: list[FeatureValue],
     domain_statuses: dict[str, DomainStatusResult],
+    country_domain_statuses: dict[str, dict[str, DomainStatusResult]],
     lineage_records: list[LineageRecord],
     snapshot: Snapshot,
     daily_report: GeneratedReport,
@@ -114,9 +115,10 @@ def write_run_artifacts(
                     ),
                 )
             )
+        per_country_domain_statuses = country_domain_statuses.get(country_id, {})
         country_domain_states = {
             domain: result.status
-            for domain, result in sorted(domain_statuses.items())
+            for domain, result in sorted(per_country_domain_statuses.items())
             if any(feature.country_id == country_id and feature.domain == domain for feature in country_features)
         }
         country_uncertainty = _build_country_uncertainty(run_state)
@@ -157,6 +159,7 @@ def write_run_artifacts(
                 if source_id in source_context_by_source
             ]
             domain_annotation_ids = _annotation_ids_for_item(annotation_records, f"{country_id}:{domain}")
+            domain_status = per_country_domain_statuses[domain]
             domain_read_model = build_domain_detail_read_model(
                 country_id=country_id,
                 domain=domain,
@@ -166,7 +169,7 @@ def write_run_artifacts(
                 ],
                 baseline_comparison={
                     "current_window": _mean([record.value for record in domain_records]),
-                    "delta_to_baseline": domain_statuses[domain].anomaly_score,
+                    "delta_to_baseline": domain_status.anomaly_score,
                 },
                 feature_values=[
                     {
@@ -178,7 +181,7 @@ def write_run_artifacts(
                 ],
                 source_context=source_context,
                 anomaly_state=status,
-                uncertainty=list(domain_statuses[domain].uncertainty_indicators),
+                uncertainty=list(domain_status.uncertainty_indicators),
                 annotations=domain_annotation_ids,
             )
             domain_path = domain_details_dir / f"{country_id}__{domain}.json"
@@ -201,7 +204,7 @@ def write_run_artifacts(
                             for feature in domain_features
                         ],
                         source_state={entry["source_id"]: str(entry["status"]) for entry in source_context},
-                        uncertainty=list(domain_statuses[domain].uncertainty_indicators),
+                        uncertainty=list(domain_status.uncertainty_indicators),
                         linked_event_ids=country_event_ids if domain == "B" else [],
                     ),
                 )
