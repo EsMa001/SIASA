@@ -58,6 +58,19 @@ Persistierte Artefakte verwenden:
 
 `PYTHONPATH=src /opt/hermes/.venv/bin/python -m siasa.gui.local_app --output-dir build/local_gui --artifacts-dir build/run_artifacts/latest`
 
+Governed live-source single-country pilot erzeugen:
+
+`PYTHONPATH=src /opt/hermes/.venv/bin/python -m siasa.runs.live_runtime --country-id UKR --run-id RUN-LIVE-UKR-001 --output-dir build/run_artifacts/latest`
+
+oder nach Installation:
+
+`siasa-live-runtime --country-id UKR --run-id RUN-LIVE-UKR-001 --output-dir build/run_artifacts/latest`
+
+Wichtige aktuelle Einschränkung:
+- dieser Runtime-Pilot ist bewusst single-country, weil der aktuelle Orchestrator Snapshot-/Country-Report-Aufbau noch auf ein Land pro Run zugeschnitten ist
+- unterstützte Live-Pilot-Länder sind aktuell `UKR`, `POL`, `ISR`, `TWN`
+- der Pilot ersetzt die bisherigen rein synthetischen `SRC-A` / `SRC-B` Latest-Artefakte durch reale Source-IDs (`WB-INDICATORS`, `SRC-GDELT-DOC`, `SRC-GDELT-EVENTS`, `SRC-GDACS`), ohne bereits eine echte Multi-Country-Laufzeit zu behaupten
+
 Die Artefaktstruktur wird durch den Python-Orchestrator automatisch geschrieben, wenn `DailyRunOrchestrator(..., artifacts_output_dir=Path("build/run_artifacts/latest"))` gesetzt ist.
 
 oder über den Paket-Entry-Point nach Installation:

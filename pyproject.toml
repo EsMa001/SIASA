@@ -19,6 +19,7 @@ dev = [
 
 [project.scripts]
 siasa-local-gui = "siasa.gui.local_app:main"
+siasa-live-runtime = "siasa.runs.live_runtime:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
