@@ -20,6 +20,15 @@ def _internal_hrefs(html_text: str) -> list[str]:
     ]
 
 
+
+def test_render_watchlist_evidence_link_allows_internal_coverage_targets_only() -> None:
+    assert local_app._render_watchlist_evidence_link("coverage.html#source-SRC-A") == "<a href='coverage.html#source-SRC-A'>coverage.html#source-SRC-A</a>"
+    assert local_app._render_watchlist_evidence_link("coverage.html") == "<a href='coverage.html'>coverage.html</a>"
+    assert local_app._render_watchlist_evidence_link("javascript:alert(1)") == "invalid evidence link"
+    assert local_app._render_watchlist_evidence_link("https://example.com") == "invalid evidence link"
+
+
+
 def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     world_map = {
         "baseline_mode": "Combined 30/90/365",
@@ -213,7 +222,17 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             ],
             "missing_domain_totals": {"D": 1},
             "remediation_watchlist": [
-                {"action_category": "fetch_problem", "severity": "high", "country_count": 1, "source_count": 1, "countries": ["UKR"], "source_ids": ["SRC-D"]}
+                {
+                    "action_category": "fetch_problem",
+                    "severity": "high",
+                    "country_count": 1,
+                    "source_count": 1,
+                    "countries": ["UKR"],
+                    "source_ids": ["SRC-D"],
+                    "suggested_next_action": "Retry adapter execution and inspect source-side rate limiting or transport failures.",
+                    "owner_hint": "adapter/source integration",
+                    "evidence_link": "coverage.html#source-SRC-D",
+                }
             ],
         },
     }
@@ -283,6 +302,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Remediation Watchlist" in index_html
     assert "fetch_problem" in index_html
     assert "severity=high" in index_html
+    assert "Retry adapter execution and inspect source-side rate limiting or transport failures." in index_html
+    assert "adapter/source integration" in index_html
+    assert "coverage.html#source-SRC-D" in index_html
     assert "SRC-D" in index_html
     assert "Gap Cause" in index_html
     assert "moderate" in index_html
@@ -896,7 +918,17 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
                     ],
                     "missing_domain_totals": {"B": 1},
                     "remediation_watchlist": [
-                        {"action_category": "scope_config_problem", "severity": "medium", "country_count": 1, "source_count": 1, "countries": ["POL"], "source_ids": ["SRC-B"]}
+                        {
+                            "action_category": "scope_config_problem",
+                            "severity": "medium",
+                            "country_count": 1,
+                            "source_count": 1,
+                            "countries": ["POL"],
+                            "source_ids": ["SRC-B"],
+                            "suggested_next_action": "Review country scope and source applicability configuration for the affected source.",
+                            "owner_hint": "runtime/source configuration",
+                            "evidence_link": "coverage.html#source-SRC-B",
+                        }
                     ],
                 },
             }
@@ -944,6 +976,9 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "Country Coverage / Gap Watchlist" in index_html
     assert "Remediation Watchlist" in index_html
     assert "scope_config_problem" in index_html
+    assert "Review country scope and source applicability configuration for the affected source." in index_html
+    assert "runtime/source configuration" in index_html
+    assert "coverage.html#source-SRC-B" in index_html
     assert "Gap Cause" in index_html
     assert "missing:B" in index_html
     assert "no_usable_input_data" in index_html
@@ -983,6 +1018,8 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "function applyComparisonFilters()" in comparison_html
     assert "Country Coverage / Gap Matrix" in coverage_html
     assert "Remediation Watchlist" in coverage_html
+    assert "Review country scope and source applicability configuration for the affected source." in coverage_html
+    assert "coverage.html#source-SRC-B" in coverage_html
     assert "minimal" in coverage_html
     assert "missing:B" in coverage_html
     assert "no_usable_input_data" in coverage_html

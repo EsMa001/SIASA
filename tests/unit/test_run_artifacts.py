@@ -381,7 +381,17 @@ def test_daily_run_orchestrator_records_country_gap_visibility_in_system_status(
         }
     ]
     assert system_status["country_coverage_visibility"]["remediation_watchlist"] == [
-        {"action_category": "scope_config_problem", "severity": "medium", "country_count": 1, "source_count": 1, "countries": ["POL"], "source_ids": ["SRC-B"]}
+        {
+            "action_category": "scope_config_problem",
+            "severity": "medium",
+            "country_count": 1,
+            "source_count": 1,
+            "countries": ["POL"],
+            "source_ids": ["SRC-B"],
+            "suggested_next_action": "Review country scope and source applicability configuration for the affected source.",
+            "owner_hint": "runtime/source configuration",
+            "evidence_link": "coverage.html#source-SRC-B",
+        }
     ]
     assert system_status["country_coverage_visibility"]["missing_domain_totals"] == {"B": 1}
 

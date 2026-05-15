@@ -740,6 +740,9 @@ def _build_country_coverage_visibility(country_rows: list[dict[str, object]]) ->
             "source_count": len(sorted(group["source_ids"])),
             "countries": sorted(group["countries"]),
             "source_ids": sorted(group["source_ids"]),
+            "suggested_next_action": _suggested_next_action(action_category),
+            "owner_hint": _owner_hint(action_category),
+            "evidence_link": _watchlist_evidence_link(sorted(group["source_ids"])),
         }
         for (action_category, severity), group in sorted(
             remediation_groups.items(),
@@ -759,6 +762,43 @@ def _build_country_coverage_visibility(country_rows: list[dict[str, object]]) ->
 
 def _severity_rank(severity: str) -> int:
     return {"high": 0, "medium": 1, "low": 2}.get(severity, 3)
+
+
+
+def _suggested_next_action(action_category: str) -> str:
+    if action_category == "fetch_problem":
+        return "Retry adapter execution and inspect source-side rate limiting or transport failures."
+    if action_category == "scope_config_problem":
+        return "Review country scope and source applicability configuration for the affected source."
+    if action_category == "mapping_problem":
+        return "Review normalization and required-signal mapping for the affected source."
+    if action_category == "freshness_problem":
+        return "Review source freshness window and staleness thresholds for the affected feed."
+    if action_category == "downstream_gating_problem":
+        return "Review feature sufficiency and downstream gating thresholds for the affected source."
+    return "Review gap diagnostics manually and classify the next remediation step."
+
+
+
+def _owner_hint(action_category: str) -> str:
+    if action_category == "fetch_problem":
+        return "adapter/source integration"
+    if action_category == "scope_config_problem":
+        return "runtime/source configuration"
+    if action_category == "mapping_problem":
+        return "normalization/mapping maintenance"
+    if action_category == "freshness_problem":
+        return "source operations / freshness governance"
+    if action_category == "downstream_gating_problem":
+        return "feature/scoring logic"
+    return "triage required"
+
+
+
+def _watchlist_evidence_link(source_ids: list[str]) -> str:
+    if len(source_ids) == 1:
+        return f"coverage.html#source-{source_ids[0]}"
+    return "coverage.html"
 
 
 

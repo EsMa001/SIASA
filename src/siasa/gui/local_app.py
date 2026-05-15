@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import re
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
@@ -365,15 +366,33 @@ def _render_remediation_watchlist(visibility: dict[str, Any]) -> str:
         f"<td>{html.escape(str(row.get('source_count', 0)))}</td>"
         f"<td>{html.escape(', '.join(str(item) for item in row.get('countries', [])) or 'none')}</td>"
         f"<td>{html.escape(', '.join(str(item) for item in row.get('source_ids', [])) or 'none')}</td>"
+        f"<td>{html.escape(str(row.get('suggested_next_action', 'n/a')))}</td>"
+        f"<td>{html.escape(str(row.get('owner_hint', 'n/a')))}</td>"
+        f"<td>{_render_watchlist_evidence_link(str(row.get('evidence_link', '')))}</td>"
         "</tr>"
         for row in visibility.get('remediation_watchlist', [])
-    ) or "<tr><td colspan='6'>No remediation priorities recorded.</td></tr>"
+    ) or "<tr><td colspan='9'>No remediation priorities recorded.</td></tr>"
     return (
         "<h3>Remediation Watchlist</h3>"
         "<p>Aggregated action categories highlight which operational problem classes should be addressed first.</p>"
-        "<table><thead><tr><th>Action Category</th><th>Severity</th><th>Countries</th><th>Sources</th><th>Country IDs</th><th>Source IDs</th></tr></thead>"
+        "<table><thead><tr><th>Action Category</th><th>Severity</th><th>Countries</th><th>Sources</th><th>Country IDs</th><th>Source IDs</th><th>Suggested Next Action</th><th>Owner Hint</th><th>Evidence</th></tr></thead>"
         f"<tbody>{rows}</tbody></table>"
     )
+
+
+
+def _render_watchlist_evidence_link(evidence_link: str) -> str:
+    if not evidence_link:
+        return 'n/a'
+    if not _is_safe_internal_evidence_link(evidence_link):
+        return 'invalid evidence link'
+    escaped = html.escape(evidence_link)
+    return f"<a href='{escaped}'>{escaped}</a>"
+
+
+
+def _is_safe_internal_evidence_link(evidence_link: str) -> bool:
+    return bool(re.fullmatch(r"coverage\.html(?:#source-[A-Za-z0-9_.-]+)?", evidence_link))
 
 
 
