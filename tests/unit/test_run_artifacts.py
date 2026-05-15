@@ -296,6 +296,7 @@ def test_daily_run_orchestrator_writes_multi_country_artifact_bundle(tmp_path: P
         ],
         "country_gap_rows": [],
         "missing_domain_totals": {},
+        "remediation_watchlist": [],
     }
     assert sorted(result.country_reports) == ["POL", "UKR"]
     assert pol_profile["multi_domain_status"] == "S3"
@@ -378,6 +379,9 @@ def test_daily_run_orchestrator_records_country_gap_visibility_in_system_status(
                 }
             ],
         }
+    ]
+    assert system_status["country_coverage_visibility"]["remediation_watchlist"] == [
+        {"action_category": "scope_config_problem", "severity": "medium", "country_count": 1, "source_count": 1, "countries": ["POL"], "source_ids": ["SRC-B"]}
     ]
     assert system_status["country_coverage_visibility"]["missing_domain_totals"] == {"B": 1}
 

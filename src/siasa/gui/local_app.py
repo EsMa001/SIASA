@@ -344,13 +344,36 @@ def _country_coverage_visibility_rows(system_status_read_model: dict[str, Any]) 
             'source_depth_band_summary': [],
             'country_gap_rows': [],
             'missing_domain_totals': {},
+            'remediation_watchlist': [],
         }
     return {
         'priority_summary': list(visibility.get('priority_summary', [])),
         'source_depth_band_summary': list(visibility.get('source_depth_band_summary', [])),
         'country_gap_rows': list(visibility.get('country_gap_rows', [])),
         'missing_domain_totals': dict(visibility.get('missing_domain_totals', {})),
+        'remediation_watchlist': list(visibility.get('remediation_watchlist', [])),
     }
+
+
+
+def _render_remediation_watchlist(visibility: dict[str, Any]) -> str:
+    rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(row.get('action_category', 'unknown')))}</td>"
+        f"<td>severity={html.escape(str(row.get('severity', 'low')))}</td>"
+        f"<td>{html.escape(str(row.get('country_count', 0)))}</td>"
+        f"<td>{html.escape(str(row.get('source_count', 0)))}</td>"
+        f"<td>{html.escape(', '.join(str(item) for item in row.get('countries', [])) or 'none')}</td>"
+        f"<td>{html.escape(', '.join(str(item) for item in row.get('source_ids', [])) or 'none')}</td>"
+        "</tr>"
+        for row in visibility.get('remediation_watchlist', [])
+    ) or "<tr><td colspan='6'>No remediation priorities recorded.</td></tr>"
+    return (
+        "<h3>Remediation Watchlist</h3>"
+        "<p>Aggregated action categories highlight which operational problem classes should be addressed first.</p>"
+        "<table><thead><tr><th>Action Category</th><th>Severity</th><th>Countries</th><th>Sources</th><th>Country IDs</th><th>Source IDs</th></tr></thead>"
+        f"<tbody>{rows}</tbody></table>"
+    )
 
 
 
@@ -393,6 +416,7 @@ def _render_country_coverage_visibility(visibility: dict[str, Any]) -> str:
         "<h3>Source Depth Band Summary</h3>"
         "<table><thead><tr><th>Depth Band</th><th>Countries</th><th>Country IDs</th></tr></thead>"
         f"<tbody>{depth_rows}</tbody></table>"
+        f"{_render_remediation_watchlist(visibility)}"
         "<h3>Country Coverage / Gap Watchlist</h3>"
         f"<div><strong>Missing domain totals</strong><ul>{missing_domain_totals}</ul></div>"
         "<table><thead><tr><th>Country</th><th>Priority</th><th>Depth Band</th><th>Source Count</th><th>Missing Domains</th><th>Gap Cause</th></tr></thead>"
@@ -415,6 +439,7 @@ def _render_country_coverage_matrix(visibility: dict[str, Any]) -> str:
         for row in visibility.get('country_gap_rows', [])
     ) or "<tr><td colspan='7'>No per-country coverage gaps recorded.</td></tr>"
     return (
+        f"{_render_remediation_watchlist(visibility)}"
         "<h3>Country Coverage / Gap Matrix</h3>"
         "<p>Priority, source depth, and explicit missing-domain badges stay visible alongside source-level coverage.</p>"
         "<table><thead><tr><th>Country</th><th>Priority</th><th>Depth Band</th><th>Source Count</th><th>Gap Count</th><th>Missing Domains</th><th>Gap Cause</th></tr></thead>"

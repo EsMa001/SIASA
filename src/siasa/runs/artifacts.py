@@ -713,12 +713,52 @@ def _build_country_coverage_visibility(country_rows: list[dict[str, object]]) ->
         for domain in row.get("missing_domains", []):
             missing_domain_totals[domain] = missing_domain_totals.get(domain, 0) + 1
 
+    remediation_groups: dict[tuple[str, str], dict[str, object]] = {}
+    for row in country_gap_rows:
+        country_id = str(row.get("country_id", "UNKNOWN"))
+        for detail in row.get("gap_details", []):
+            for source_detail in detail.get("source_reason_details", []):
+                action_category = str(source_detail.get("action_category", "unknown"))
+                severity = str(source_detail.get("severity", "low"))
+                group = remediation_groups.setdefault(
+                    (action_category, severity),
+                    {
+                        "action_category": action_category,
+                        "severity": severity,
+                        "countries": set(),
+                        "source_ids": set(),
+                    },
+                )
+                group["countries"].add(country_id)
+                group["source_ids"].add(str(source_detail.get("source_id", "UNKNOWN")))
+
+    remediation_watchlist = [
+        {
+            "action_category": action_category,
+            "severity": severity,
+            "country_count": len(sorted(group["countries"])),
+            "source_count": len(sorted(group["source_ids"])),
+            "countries": sorted(group["countries"]),
+            "source_ids": sorted(group["source_ids"]),
+        }
+        for (action_category, severity), group in sorted(
+            remediation_groups.items(),
+            key=lambda item: (_severity_rank(str(item[0][1])), str(item[0][0])),
+        )
+    ]
+
     return {
         "priority_summary": priority_summary,
         "source_depth_band_summary": source_depth_band_summary,
         "country_gap_rows": country_gap_rows,
         "missing_domain_totals": dict(sorted(missing_domain_totals.items())),
+        "remediation_watchlist": remediation_watchlist,
     }
+
+
+
+def _severity_rank(severity: str) -> int:
+    return {"high": 0, "medium": 1, "low": 2}.get(severity, 3)
 
 
 

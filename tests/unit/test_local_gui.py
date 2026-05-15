@@ -212,6 +212,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 }
             ],
             "missing_domain_totals": {"D": 1},
+            "remediation_watchlist": [
+                {"action_category": "fetch_problem", "severity": "high", "country_count": 1, "source_count": 1, "countries": ["UKR"], "source_ids": ["SRC-D"]}
+            ],
         },
     }
 
@@ -277,6 +280,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Priority Coverage Summary" in index_html
     assert "Source Depth Band Summary" in index_html
     assert "Country Coverage / Gap Watchlist" in index_html
+    assert "Remediation Watchlist" in index_html
+    assert "fetch_problem" in index_html
+    assert "severity=high" in index_html
+    assert "SRC-D" in index_html
     assert "Gap Cause" in index_html
     assert "moderate" in index_html
     assert "source_failed_this_run" in index_html
@@ -888,6 +895,9 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
                         },
                     ],
                     "missing_domain_totals": {"B": 1},
+                    "remediation_watchlist": [
+                        {"action_category": "scope_config_problem", "severity": "medium", "country_count": 1, "source_count": 1, "countries": ["POL"], "source_ids": ["SRC-B"]}
+                    ],
                 },
             }
         )
@@ -932,6 +942,8 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "option value='P2'" in index_html
     assert "Source Depth Band Summary" in index_html
     assert "Country Coverage / Gap Watchlist" in index_html
+    assert "Remediation Watchlist" in index_html
+    assert "scope_config_problem" in index_html
     assert "Gap Cause" in index_html
     assert "missing:B" in index_html
     assert "no_usable_input_data" in index_html
@@ -970,6 +982,7 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "data-confidence-band='low'" in comparison_html
     assert "function applyComparisonFilters()" in comparison_html
     assert "Country Coverage / Gap Matrix" in coverage_html
+    assert "Remediation Watchlist" in coverage_html
     assert "minimal" in coverage_html
     assert "missing:B" in coverage_html
     assert "no_usable_input_data" in coverage_html
