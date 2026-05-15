@@ -16,6 +16,7 @@ def build_system_status_read_model(
     top_status_changes: list[dict[str, object]] | None = None,
     data_gaps: list[str] | None = None,
     artifact_status: dict[str, dict[str, object | None]] | None = None,
+    country_coverage_visibility: dict[str, object] | None = None,
 ) -> dict[str, object]:
     return {
         "run_id": run_id,
@@ -33,4 +34,5 @@ def build_system_status_read_model(
         "top_status_changes": list(top_status_changes or []),
         "data_gaps": list(data_gaps or []),
         "artifact_status": dict(artifact_status or {}),
+        "country_coverage_visibility": dict(country_coverage_visibility or {}),
     }

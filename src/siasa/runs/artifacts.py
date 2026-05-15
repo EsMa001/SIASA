@@ -88,6 +88,7 @@ def write_run_artifacts(
     country_reports_by_id = {country_id: report for country_id, report in country_reports.items()}
     annotation_records = annotation_records or []
     extra_reports: list[tuple[str, GeneratedReport]] = []
+    country_coverage_rows: list[dict[str, object]] = []
 
     for country_id, multi_domain_status in sorted(country_statuses.items()):
         country_features = [feature for feature in features if feature.country_id == country_id]
@@ -130,6 +131,7 @@ def write_run_artifacts(
         country_trends = {"yearly": _build_country_yearly_trend(country_id, normalized_records)}
         country_context = dict(country_metadata.get(country_id, {}))
         country_source_ids = sorted({record.provenance_source_id for record in normalized_records if record.country_id == country_id})
+        source_depth_band = _source_depth_band(len(country_source_ids))
         country_domain_gap_summary = {
             "expected_domains": list(snapshot.active_domains),
             "observed_domains": sorted(country_domain_states.keys()),
@@ -137,6 +139,16 @@ def write_run_artifacts(
                 domain for domain in snapshot.active_domains if domain not in country_domain_states
             ],
         }
+        country_coverage_rows.append(
+            {
+                "country_id": country_id,
+                "priority": str(country_context.get("priority", "unassigned")),
+                "source_count": len(country_source_ids),
+                "source_depth_band": source_depth_band,
+                "missing_domains": list(country_domain_gap_summary["missing_domains"]),
+                "missing_domain_count": len(country_domain_gap_summary["missing_domains"]),
+            }
+        )
         country_profile = build_country_profile_read_model(
             country_id=country_id,
             multi_domain_status=multi_domain_status,
@@ -274,6 +286,7 @@ def write_run_artifacts(
                 reprocessing_status="idle",
                 last_run=run_state.run_id,
                 artifact_status=artifact_status,
+                country_coverage_visibility=_build_country_coverage_visibility(country_coverage_rows),
             ),
             indent=2,
             sort_keys=True,
@@ -447,6 +460,71 @@ def _load_country_metadata(repo_root: Path) -> dict[str, dict[str, str]]:
             "rationale": record.rationale,
         }
         for record in records
+    }
+
+
+
+def _source_depth_band(source_count: int) -> str:
+    if source_count <= 1:
+        return "minimal"
+    if source_count == 2:
+        return "moderate"
+    return "deep"
+
+
+
+def _build_country_coverage_visibility(country_rows: list[dict[str, object]]) -> dict[str, object]:
+    priority_map: dict[str, list[str]] = {}
+    for row in country_rows:
+        priority = str(row.get("priority", "unassigned"))
+        priority_map.setdefault(priority, []).append(str(row.get("country_id", "UNKNOWN")))
+    priority_summary = [
+        {
+            "priority": priority,
+            "country_count": len(sorted(country_ids)),
+            "countries": sorted(country_ids),
+        }
+        for priority, country_ids in sorted(priority_map.items())
+    ]
+
+    source_depth_band_summary = []
+    for band in ("minimal", "moderate", "deep"):
+        band_countries = sorted(
+            str(row.get("country_id", "UNKNOWN"))
+            for row in country_rows
+            if str(row.get("source_depth_band", "")) == band
+        )
+        source_depth_band_summary.append(
+            {
+                "band": band,
+                "country_count": len(band_countries),
+                "countries": band_countries,
+            }
+        )
+
+    country_gap_rows = [
+        {
+            "country_id": str(row.get("country_id", "UNKNOWN")),
+            "priority": str(row.get("priority", "unassigned")),
+            "source_count": int(row.get("source_count", 0)),
+            "source_depth_band": str(row.get("source_depth_band", "minimal")),
+            "missing_domains": [str(item) for item in row.get("missing_domains", [])],
+            "missing_domain_count": int(row.get("missing_domain_count", 0)),
+        }
+        for row in country_rows
+        if row.get("missing_domain_count", 0)
+    ]
+
+    missing_domain_totals: dict[str, int] = {}
+    for row in country_gap_rows:
+        for domain in row.get("missing_domains", []):
+            missing_domain_totals[domain] = missing_domain_totals.get(domain, 0) + 1
+
+    return {
+        "priority_summary": priority_summary,
+        "source_depth_band_summary": source_depth_band_summary,
+        "country_gap_rows": country_gap_rows,
+        "missing_domain_totals": dict(sorted(missing_domain_totals.items())),
     }
 
 

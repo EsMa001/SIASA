@@ -192,6 +192,12 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             {"country_id": "POL", "from_status": "S2", "to_status": "S1", "direction": "down"},
         ],
         "data_gaps": ["failed_source:SRC-B", "country_without_update:POL"],
+        "country_coverage_visibility": {
+            "priority_summary": [{"priority": "P1", "country_count": 1, "countries": ["UKR"]}],
+            "source_depth_band_summary": [{"band": "moderate", "country_count": 1, "countries": ["UKR"]}],
+            "country_gap_rows": [],
+            "missing_domain_totals": {},
+        },
     }
 
     repo_closure_view = {
@@ -253,6 +259,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Data Gaps / Trust Limits" in index_html
     assert "failed_source:SRC-B" in index_html
     assert "country_without_update:POL" in index_html
+    assert "Priority Coverage Summary" in index_html
+    assert "Source Depth Band Summary" in index_html
+    assert "Country Coverage / Gap Watchlist" in index_html
+    assert "moderate" in index_html
     assert "Support Status" in index_html
     assert "supported" in index_html
 
@@ -291,6 +301,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Source / Coverage View" in coverage_html
     assert "Trust Summary" in coverage_html
     assert "Coverage / Confidence Matrix" in coverage_html
+    assert "Country Coverage / Gap Matrix" in coverage_html
     assert "Confidence Band" in coverage_html
     assert "partial_success" in coverage_html
     assert "failed_source:SRC-B" in coverage_html
@@ -742,7 +753,7 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
         )
     )
     for country_id, event_id, trend, domain_states, uncertainty, coverage, confidence in (
-        ("POL", "EVT-POL-350", [{"label": "2026-02", "value": 0.61}], {"A": "D3", "B": "D2"}, ["partial_signal_loss"], 0.42, 0.88),
+        ("POL", "EVT-POL-350", [{"label": "2026-02", "value": 0.61}], {"A": "D3"}, ["partial_signal_loss"], 0.42, 0.88),
         ("UKR", "EVT-UKR-350", [{"label": "2026-01", "value": 0.77}], {"A": "D4", "B": "D3"}, [], 0.91, 0.46),
     ):
         (artifacts_dir / "readmodels" / "country_profiles" / f"{country_id}.json").write_text(
@@ -764,8 +775,8 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
                         "selection_type": "Extended Focus" if country_id == "POL" else "Core Focus",
                         "region": "Europe / NATO East" if country_id == "POL" else "Europe / Black Sea",
                     },
-                    "source_depth": {"source_ids": ["SRC-A", "SRC-B"], "source_count": 2},
-                    "domain_gap_summary": {"expected_domains": ["A", "B"], "observed_domains": sorted(domain_states.keys()), "missing_domains": []},
+                    "source_depth": {"source_ids": ["SRC-A"] if country_id == "POL" else ["SRC-A", "SRC-B"], "source_count": 1 if country_id == "POL" else 2},
+                    "domain_gap_summary": {"expected_domains": ["A", "B"], "observed_domains": sorted(domain_states.keys()), "missing_domains": ["B"] if country_id == "POL" else []},
                 }
             )
         )
@@ -807,6 +818,20 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
                 "snapshot_id": "SNAP-RUN-350-v1",
                 "reprocessing_status": "idle",
                 "last_run": "2026-05-11T18:00:00Z",
+                "country_coverage_visibility": {
+                    "priority_summary": [
+                        {"priority": "P1", "country_count": 1, "countries": ["UKR"]},
+                        {"priority": "P2", "country_count": 1, "countries": ["POL"]},
+                    ],
+                    "source_depth_band_summary": [
+                        {"band": "minimal", "country_count": 1, "countries": ["POL"]},
+                        {"band": "moderate", "country_count": 1, "countries": ["UKR"]},
+                    ],
+                    "country_gap_rows": [
+                        {"country_id": "POL", "priority": "P2", "source_count": 1, "source_depth_band": "minimal", "missing_domains": ["B"], "missing_domain_count": 1},
+                    ],
+                    "missing_domain_totals": {"B": 1},
+                },
             }
         )
     )
@@ -846,7 +871,14 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "Priority Class" in index_html
     assert "Source Depth" in index_html
     assert "Domain Gaps" in index_html
+    assert "Priority Filter" in index_html
+    assert "option value='P2'" in index_html
+    assert "Source Depth Band Summary" in index_html
+    assert "Country Coverage / Gap Watchlist" in index_html
+    assert "missing:B" in index_html
+    assert "data-priority='P2'" in index_html
     assert "P2" in index_html and "P1" in index_html
+    assert "1 (SRC-A)" in index_html
     assert "2 (SRC-A, SRC-B)" in index_html
     assert "option value='coverage'" in index_html
     assert "option value='domain-A'" in index_html
@@ -865,6 +897,7 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "data-country-id='POL'" in events_html
     assert "function applyEventFilters()" in events_html
     comparison_html = (pages.output_dir / "comparison.html").read_text()
+    coverage_html = (pages.output_dir / "coverage.html").read_text()
     assert "Cross-Country Comparison" in comparison_html
     assert "POL" in comparison_html and "UKR" in comparison_html
     assert "option value='low_coverage'" in comparison_html
@@ -872,6 +905,9 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "data-coverage-band='low'" in comparison_html
     assert "data-confidence-band='low'" in comparison_html
     assert "function applyComparisonFilters()" in comparison_html
+    assert "Country Coverage / Gap Matrix" in coverage_html
+    assert "minimal" in coverage_html
+    assert "missing:B" in coverage_html
 
 
 

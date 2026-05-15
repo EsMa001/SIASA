@@ -273,6 +273,19 @@ def test_daily_run_orchestrator_writes_multi_country_artifact_bundle(tmp_path: P
     assert result.artifact_bundle is not None
     assert [country["country_id"] for country in world_map["countries"]] == ["POL", "UKR"]
     assert system_status["coverage"] == {"countries_total": 2, "countries_with_updates": 2}
+    assert system_status["country_coverage_visibility"] == {
+        "priority_summary": [
+            {"priority": "P1", "country_count": 1, "countries": ["UKR"]},
+            {"priority": "P2", "country_count": 1, "countries": ["POL"]},
+        ],
+        "source_depth_band_summary": [
+            {"band": "minimal", "country_count": 0, "countries": []},
+            {"band": "moderate", "country_count": 2, "countries": ["POL", "UKR"]},
+            {"band": "deep", "country_count": 0, "countries": []},
+        ],
+        "country_gap_rows": [],
+        "missing_domain_totals": {},
+    }
     assert sorted(result.country_reports) == ["POL", "UKR"]
     assert pol_profile["multi_domain_status"] == "S3"
     assert ukr_profile["multi_domain_status"] == "S3"
@@ -280,6 +293,64 @@ def test_daily_run_orchestrator_writes_multi_country_artifact_bundle(tmp_path: P
     assert ukr_profile["trends"]["yearly"]
     assert pol_profile["trends"]["yearly"][0]["label"]
     assert isinstance(pol_profile["trends"]["yearly"][0]["value"], float)
+
+
+
+def test_daily_run_orchestrator_records_country_gap_visibility_in_system_status(tmp_path: Path) -> None:
+    orchestrator = DailyRunOrchestrator(
+        adapters=[
+            FakeAdapter(
+                source_id="SRC-A",
+                domain="A",
+                _result=FetchResult(
+                    records=[
+                        {"country_id": "UKR", "signal_key": "article_count", "value": 3.0, "expected_source_count": 1, "freshness_hours": 6},
+                        {"country_id": "UKR", "signal_key": "tone", "value": -0.2, "expected_source_count": 1, "freshness_hours": 6},
+                        {"country_id": "POL", "signal_key": "article_count", "value": 5.0, "expected_source_count": 1, "freshness_hours": 8},
+                        {"country_id": "POL", "signal_key": "tone", "value": 0.1, "expected_source_count": 1, "freshness_hours": 8},
+                    ]
+                ),
+            ),
+            FakeAdapter(
+                source_id="SRC-B",
+                domain="B",
+                _result=FetchResult(
+                    records=[
+                        {"country_id": "UKR", "signal_key": "conflict_event_count", "value": 4.0, "expected_source_count": 1, "freshness_hours": 12},
+                    ]
+                ),
+            ),
+        ],
+        normalizer=_normalize,
+        feature_services=[DomainAFeatureService(), DomainBFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A", "B"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+        artifacts_output_dir=tmp_path / "bundle-gap-visibility",
+    )
+
+    result = orchestrator.run(run_id="RUN-204")
+
+    system_status = json.loads((tmp_path / "bundle-gap-visibility" / "readmodels" / "system_status.json").read_text())
+    pol_profile = json.loads((tmp_path / "bundle-gap-visibility" / "readmodels" / "country_profiles" / "POL.json").read_text())
+
+    assert result.artifact_bundle is not None
+    assert pol_profile["domain_gap_summary"]["missing_domains"] == ["B"]
+    assert system_status["country_coverage_visibility"]["country_gap_rows"] == [
+        {
+            "country_id": "POL",
+            "priority": "P2",
+            "source_count": 1,
+            "source_depth_band": "minimal",
+            "missing_domains": ["B"],
+            "missing_domain_count": 1,
+        }
+    ]
+    assert system_status["country_coverage_visibility"]["missing_domain_totals"] == {"B": 1}
 
 
 

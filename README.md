@@ -78,6 +78,8 @@ Aktueller Runtime-Stand:
 - reale Multi-Country-Runs bleiben quellenabhängig: einzelne Sources können weiterhin partiell fehlschlagen und als `partial_success` im Bundle erscheinen
 - der governed Live-Runtime-Pfad erzeugt jetzt zusätzlich `readmodels/validation_backtest.json` als transparenten `runtime_support_check`; diese Sicht ist explizit keine historische Referenzfall-Backtest-Wertung
 - Country-Profile- und GUI-Sichten machen jetzt Priority Class, Selection Type, Source Depth und Domain Gaps pro Land explizit sichtbar
+- `readmodels/system_status.json` enthält jetzt zusätzlich `country_coverage_visibility` mit Priority-Summary, Source-Depth-Bands und expliziten Country/Domain-Gap-Listen für Overview- und Coverage-Aggregationen
+- die Startseite bietet jetzt einen `Priority Filter` sowie aggregierte Coverage-/Gap-Summaries; die Coverage-Ansicht zeigt zusätzlich eine `Country Coverage / Gap Matrix` mit Missing-Domain-Badges
 - optionale Artefaktlücken werden im Runtime-Bundle jetzt mit expliziten Gründen im `system_status.json` unter `artifact_status` codiert, z. B. `not_configured` oder `no_usable_input_data`
 
 Die Artefaktstruktur wird durch den Python-Orchestrator automatisch geschrieben, wenn `DailyRunOrchestrator(..., artifacts_output_dir=Path("build/run_artifacts/latest"))` gesetzt ist.
