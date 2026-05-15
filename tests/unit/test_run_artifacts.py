@@ -183,6 +183,10 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert coverage_report["report_id"] == "REP-COVERAGE-RUN-200"
     assert coverage_report["payload"]["run_id"] == "RUN-200"
     assert coverage_report["payload"]["failed_sources"] == []
+    assert system_status["artifact_status"]["validation_backtest"] == {
+        "status": "absent",
+        "reason": "not_configured",
+    }
     assert domain_report_a["report_id"] == "REP-DOMAIN-UKR-A"
     assert domain_report_a["payload"]["source_state"] == {"SRC-A": "success"}
     assert event_report["report_id"] == "REP-EVENT-EVT-UKR-RUN-200"
@@ -419,3 +423,62 @@ def test_daily_run_orchestrator_writes_partial_success_bundle_with_failed_source
     assert country_profile["uncertainty"] == ["partial_success", "failed_sources:SRC-B"]
     assert system_status["run_status"] == "partial_success"
     assert system_status["failed_sources"] == ["SRC-B"]
+
+
+
+def test_daily_run_orchestrator_records_optional_artifact_absence_reasons(tmp_path: Path) -> None:
+    orchestrator = DailyRunOrchestrator(
+        adapters=[
+            FakeAdapter(
+                source_id="SRC-A",
+                domain="A",
+                _result=FetchResult(
+                    records=[
+                        {"country_id": "POL", "signal_key": "article_count", "value": 3.0, "expected_source_count": 1, "freshness_hours": 6},
+                        {"country_id": "POL", "signal_key": "tone", "value": -0.2, "expected_source_count": 1, "freshness_hours": 6},
+                    ]
+                ),
+            ),
+            FakeAdapter(
+                source_id="SRC-B",
+                domain="B",
+                _result=FetchResult(
+                    records=[
+                        {"country_id": "POL", "signal_key": "conflict_event_count", "value": 4.0, "expected_source_count": 1, "freshness_hours": 12},
+                    ]
+                ),
+            ),
+        ],
+        normalizer=_normalize,
+        feature_services=[DomainAFeatureService(), DomainBFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A", "B"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+        artifacts_output_dir=tmp_path / "bundle-absence-reasons",
+        validation_view_model_builder=lambda *_args, **_kwargs: None,
+    )
+
+    result = orchestrator.run(run_id="RUN-203")
+
+    system_status = json.loads((tmp_path / "bundle-absence-reasons" / "readmodels" / "system_status.json").read_text())
+    assert result.artifact_bundle is not None
+    assert system_status["artifact_status"]["validation_backtest"] == {
+        "status": "absent",
+        "reason": "no_usable_input_data",
+    }
+    assert system_status["artifact_status"]["traceability_lineage"] == {
+        "status": "present",
+        "reason": None,
+    }
+    assert system_status["artifact_status"]["repo_closure"] == {
+        "status": "present",
+        "reason": None,
+    }
+    assert system_status["artifact_status"]["annotations"] == {
+        "status": "present",
+        "reason": None,
+    }

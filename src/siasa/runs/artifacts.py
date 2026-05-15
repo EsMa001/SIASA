@@ -48,6 +48,7 @@ def write_run_artifacts(
     annotation_records: list[AnnotationRecord] | None = None,
     baseline_mode: str = "Combined 30/90/365",
     validation_view_model: dict[str, object] | None = None,
+    artifact_status: dict[str, dict[str, object | None]] | None = None,
 ) -> RunArtifactBundle:
     output_dir.mkdir(parents=True, exist_ok=True)
     readmodels_dir = output_dir / "readmodels"
@@ -258,6 +259,7 @@ def write_run_artifacts(
                 snapshot_id=snapshot.snapshot_id,
                 reprocessing_status="idle",
                 last_run=run_state.run_id,
+                artifact_status=artifact_status,
             ),
             indent=2,
             sort_keys=True,

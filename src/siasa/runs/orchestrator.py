@@ -250,6 +250,7 @@ class DailyRunOrchestrator:
         )
         artifact_bundle = None
         validation_view_model = None
+        validation_artifact_reason = "not_configured"
         if self.validation_view_model_builder is not None:
             validation_view_model = self.validation_view_model_builder(
                 primary_country_id,
@@ -260,6 +261,16 @@ class DailyRunOrchestrator:
                 country_multi_domain_statuses,
                 snapshot,
             )
+            validation_artifact_reason = None if validation_view_model is not None else "no_usable_input_data"
+        artifact_status = {
+            "validation_backtest": {
+                "status": "present" if validation_view_model is not None else "absent",
+                "reason": validation_artifact_reason,
+            },
+            "traceability_lineage": {"status": "present", "reason": None},
+            "repo_closure": {"status": "present", "reason": None},
+            "annotations": {"status": "present", "reason": None},
+        }
         if self.artifacts_output_dir is not None:
             from .artifacts import write_run_artifacts
 
@@ -278,7 +289,9 @@ class DailyRunOrchestrator:
                 annotation_records=self.annotation_records or [],
                 baseline_mode=self.baseline_mode,
                 validation_view_model=validation_view_model,
+                artifact_status=artifact_status,
             )
+
         return DailyRunResult(
             run_state=run_state,
             fetch_metadata_records=fetch_metadata_records,

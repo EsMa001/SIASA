@@ -906,6 +906,25 @@ def _deduplicated_strings(items: list[str]) -> list[str]:
     return ordered
 
 
+
+def _optional_artifact_gap(
+    system_status_read_model: dict[str, Any],
+    artifact_key: str,
+    *,
+    missing_fallback: str,
+) -> list[str]:
+    artifact_status = system_status_read_model.get("artifact_status", {})
+    artifact_entry = artifact_status.get(artifact_key, {}) if isinstance(artifact_status, dict) else {}
+    status = artifact_entry.get("status") if isinstance(artifact_entry, dict) else None
+    reason = artifact_entry.get("reason") if isinstance(artifact_entry, dict) else None
+    if status == "absent" and reason:
+        return [f"{artifact_key}_absent:{reason}"]
+    if status == "present":
+        return []
+    return [missing_fallback]
+
+
+
 def _build_readiness_view_model(
     *,
     country_profile_read_models: dict[str, dict[str, Any]],
@@ -938,10 +957,10 @@ def _build_readiness_view_model(
         [str(item) for item in system_status_read_model.get("data_gaps", [])]
         + [f"failed_source:{item}" for item in system_status_read_model.get("failed_sources", [])]
         + [f"missing_source:{item}" for item in source_coverage_read_model.get("missing_sources", [])]
-        + (["missing_validation_artifact"] if validation_view_model is None else [])
-        + (["missing_traceability_artifact"] if traceability_view_model is None else [])
-        + (["missing_repo_closure_artifact"] if repo_closure_view_model is None else [])
-        + (["missing_annotations_artifact"] if annotations_view_model is None else [])
+        + ([] if validation_view_model is not None else _optional_artifact_gap(system_status_read_model, "validation_backtest", missing_fallback="missing_validation_artifact"))
+        + ([] if traceability_view_model is not None else _optional_artifact_gap(system_status_read_model, "traceability_lineage", missing_fallback="missing_traceability_artifact"))
+        + ([] if repo_closure_view_model is not None else _optional_artifact_gap(system_status_read_model, "repo_closure", missing_fallback="missing_repo_closure_artifact"))
+        + ([] if annotations_view_model is not None else _optional_artifact_gap(system_status_read_model, "annotations", missing_fallback="missing_annotations_artifact"))
     )
     release_verdict = "blocked_by_known_gaps" if known_gaps else ("ready" if demo_verdict == "ready" else "blocked")
     return {

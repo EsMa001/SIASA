@@ -881,7 +881,15 @@ def test_load_site_payload_from_artifacts_falls_back_for_missing_readiness_suppo
         json.dumps({"sources": [{"source_id": "SRC-A", "status": "success", "history_horizon": "3y", "freshness_hours": 6, "confidence": 0.9}], "failed_sources": [], "missing_sources": []})
     )
     (artifacts_dir / "readmodels" / "system_status.json").write_text(
-        json.dumps({"run_id": "RUN-320", "run_status": "success", "active_domains": ["A", "B", "D"], "coverage": {"countries_total": 1, "countries_with_updates": 1}, "failed_sources": [], "available_reports": ["REP-DAILY-SNAP-RUN-320-v1"], "snapshot_id": "SNAP-RUN-320-v1", "reprocessing_status": "idle", "last_run": "2026-05-11T18:00:00Z"})
+        json.dumps({
+            "run_id": "RUN-320", "run_status": "success", "active_domains": ["A", "B", "D"], "coverage": {"countries_total": 1, "countries_with_updates": 1}, "failed_sources": [], "available_reports": ["REP-DAILY-SNAP-RUN-320-v1"], "snapshot_id": "SNAP-RUN-320-v1", "reprocessing_status": "idle", "last_run": "2026-05-11T18:00:00Z",
+            "artifact_status": {
+                "validation_backtest": {"status": "absent", "reason": "not_configured"},
+                "traceability_lineage": {"status": "present", "reason": None},
+                "repo_closure": {"status": "absent", "reason": "not_yet_implemented"},
+                "annotations": {"status": "absent", "reason": "not_yet_implemented"}
+            }
+        })
     )
     (artifacts_dir / "readmodels" / "country_profiles" / "UKR.json").write_text(
         json.dumps({"country_id": "UKR", "multi_domain_status": "S3", "domain_states": {"A": "D3"}, "trends": {"yearly": ["2026-01"]}, "drivers": ["A_news_volume"], "linked_events": [], "coverage": 0.84, "confidence": 0.73, "counter_indicators": [], "uncertainty": []})
@@ -904,7 +912,8 @@ def test_load_site_payload_from_artifacts_falls_back_for_missing_readiness_suppo
 
     pages = build_local_mvp_site(output_dir=tmp_path / "site", **payload)
     readiness_html = (pages.output_dir / "readiness.html").read_text()
-    assert "missing_validation_artifact" in readiness_html
+    assert "validation_backtest_absent:not_configured" in readiness_html
+    assert "missing_validation_artifact" not in readiness_html
     assert "missing_annotations_artifact" not in readiness_html
     assert "missing_repo_closure_artifact" not in readiness_html
 
