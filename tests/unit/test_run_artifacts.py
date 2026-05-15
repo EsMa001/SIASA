@@ -357,7 +357,7 @@ def test_daily_run_orchestrator_records_country_gap_visibility_in_system_status(
             "reason": "no_usable_input_data",
             "source_ids": ["SRC-B"],
             "diagnostics_by_source": {},
-            "source_reason_details": [{"source_id": "SRC-B", "reason": "records_only_for_other_countries_in_scope", "diagnostics": ""}],
+            "source_reason_details": [{"source_id": "SRC-B", "reason": "records_only_for_other_countries_in_scope", "diagnostics": "", "action_category": "scope_config_problem", "severity": "medium"}],
         }
     ]
     assert system_status["country_coverage_visibility"]["country_gap_rows"] == [
@@ -374,7 +374,7 @@ def test_daily_run_orchestrator_records_country_gap_visibility_in_system_status(
                     "reason": "no_usable_input_data",
                     "source_ids": ["SRC-B"],
                     "diagnostics_by_source": {},
-                    "source_reason_details": [{"source_id": "SRC-B", "reason": "records_only_for_other_countries_in_scope", "diagnostics": ""}],
+                    "source_reason_details": [{"source_id": "SRC-B", "reason": "records_only_for_other_countries_in_scope", "diagnostics": "", "action_category": "scope_config_problem", "severity": "medium"}],
                 }
             ],
         }
@@ -476,7 +476,7 @@ def test_daily_run_orchestrator_marks_failed_source_gap_causes(tmp_path: Path) -
             "reason": "source_failed_this_run",
             "source_ids": ["SRC-B"],
             "diagnostics_by_source": {"SRC-B": "timeout"},
-            "source_reason_details": [{"source_id": "SRC-B", "reason": "source_failed_this_run", "diagnostics": "timeout"}],
+            "source_reason_details": [{"source_id": "SRC-B", "reason": "source_failed_this_run", "diagnostics": "timeout", "action_category": "fetch_problem", "severity": "high"}],
         }
     ]
 
@@ -519,7 +519,7 @@ def test_daily_run_orchestrator_marks_zero_record_gap_causes(tmp_path: Path) -> 
             "reason": "zero_records_returned",
             "source_ids": ["SRC-B"],
             "diagnostics_by_source": {"SRC-B": "empty_window"},
-            "source_reason_details": [{"source_id": "SRC-B", "reason": "zero_records_returned", "diagnostics": "empty_window"}],
+            "source_reason_details": [{"source_id": "SRC-B", "reason": "zero_records_returned", "diagnostics": "empty_window", "action_category": "fetch_problem", "severity": "medium"}],
         }
     ]
 
@@ -572,7 +572,7 @@ def test_daily_run_orchestrator_marks_filtered_record_gap_causes(tmp_path: Path)
             "reason": "records_filtered_out_or_not_mapped",
             "source_ids": ["SRC-B"],
             "diagnostics_by_source": {"SRC-B": "fetched_but_filtered"},
-            "source_reason_details": [{"source_id": "SRC-B", "reason": "records_for_country_not_mapped_to_required_signal_set", "diagnostics": "fetched_but_filtered"}],
+            "source_reason_details": [{"source_id": "SRC-B", "reason": "records_for_country_not_mapped_to_required_signal_set", "diagnostics": "fetched_but_filtered", "action_category": "mapping_problem", "severity": "medium"}],
         }
     ]
 
@@ -620,7 +620,7 @@ def test_daily_run_orchestrator_marks_stale_gap_causes(tmp_path: Path) -> None:
             "reason": "stale_source_window",
             "source_ids": ["SRC-B"],
             "diagnostics_by_source": {"SRC-B": "stale_b_window"},
-            "source_reason_details": [{"source_id": "SRC-B", "reason": "stale_source_window", "diagnostics": "stale_b_window"}],
+            "source_reason_details": [{"source_id": "SRC-B", "reason": "stale_source_window", "diagnostics": "stale_b_window", "action_category": "freshness_problem", "severity": "medium"}],
         }
     ]
 
@@ -668,7 +668,7 @@ def test_daily_run_orchestrator_marks_filtered_by_gate_gap_causes(tmp_path: Path
             "reason": "filtered_by_feature_or_sufficiency_gate",
             "source_ids": ["SRC-B"],
             "diagnostics_by_source": {"SRC-B": "fresh_but_unscored"},
-            "source_reason_details": [{"source_id": "SRC-B", "reason": "filtered_by_feature_or_sufficiency_gate", "diagnostics": "fresh_but_unscored"}],
+            "source_reason_details": [{"source_id": "SRC-B", "reason": "filtered_by_feature_or_sufficiency_gate", "diagnostics": "fresh_but_unscored", "action_category": "downstream_gating_problem", "severity": "medium"}],
         }
     ]
 
@@ -724,8 +724,8 @@ def test_daily_run_orchestrator_decomposes_mixed_no_usable_input_data_by_source(
             "source_ids": ["SRC-B1", "SRC-B2"],
             "diagnostics_by_source": {"SRC-B1": "empty_pol_window", "SRC-B2": "ukr_only_window"},
             "source_reason_details": [
-                {"source_id": "SRC-B1", "reason": "zero_records_returned", "diagnostics": "empty_pol_window"},
-                {"source_id": "SRC-B2", "reason": "records_only_for_other_countries_in_scope", "diagnostics": "ukr_only_window"},
+                {"source_id": "SRC-B1", "reason": "zero_records_returned", "diagnostics": "empty_pol_window", "action_category": "fetch_problem", "severity": "medium"},
+                {"source_id": "SRC-B2", "reason": "records_only_for_other_countries_in_scope", "diagnostics": "ukr_only_window", "action_category": "scope_config_problem", "severity": "medium"},
             ],
         }
     ]
@@ -736,8 +736,8 @@ def test_daily_run_orchestrator_decomposes_mixed_no_usable_input_data_by_source(
             "source_ids": ["SRC-B1", "SRC-B2"],
             "diagnostics_by_source": {"SRC-B1": "empty_pol_window", "SRC-B2": "ukr_only_window"},
             "source_reason_details": [
-                {"source_id": "SRC-B1", "reason": "zero_records_returned", "diagnostics": "empty_pol_window"},
-                {"source_id": "SRC-B2", "reason": "records_only_for_other_countries_in_scope", "diagnostics": "ukr_only_window"},
+                {"source_id": "SRC-B1", "reason": "zero_records_returned", "diagnostics": "empty_pol_window", "action_category": "fetch_problem", "severity": "medium"},
+                {"source_id": "SRC-B2", "reason": "records_only_for_other_countries_in_scope", "diagnostics": "ukr_only_window", "action_category": "scope_config_problem", "severity": "medium"},
             ],
         }
     ]

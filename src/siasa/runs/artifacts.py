@@ -602,11 +602,31 @@ def _build_source_gap_reason_detail(
             reason = "stale_source_window"
         else:
             reason = "filtered_by_feature_or_sufficiency_gate"
+    action_category, severity = _classify_source_gap_action(reason)
     return {
         "source_id": source_id,
         "reason": reason,
         "diagnostics": metadata.diagnostics if metadata is not None else "",
+        "action_category": action_category,
+        "severity": severity,
     }
+
+
+
+def _classify_source_gap_action(reason: str) -> tuple[str, str]:
+    if reason == "source_failed_this_run":
+        return ("fetch_problem", "high")
+    if reason == "zero_records_returned":
+        return ("fetch_problem", "medium")
+    if reason == "records_only_for_other_countries_in_scope":
+        return ("scope_config_problem", "medium")
+    if reason == "records_for_country_not_mapped_to_required_signal_set":
+        return ("mapping_problem", "medium")
+    if reason == "stale_source_window":
+        return ("freshness_problem", "medium")
+    if reason == "filtered_by_feature_or_sufficiency_gate":
+        return ("downstream_gating_problem", "medium")
+    return ("unknown", "low")
 
 
 
@@ -674,6 +694,8 @@ def _build_country_coverage_visibility(country_rows: list[dict[str, object]]) ->
                             "source_id": str(source_detail.get("source_id", "UNKNOWN")),
                             "reason": str(source_detail.get("reason", "unknown")),
                             "diagnostics": str(source_detail.get("diagnostics", "")),
+                            "action_category": str(source_detail.get("action_category", "unknown")),
+                            "severity": str(source_detail.get("severity", "low")),
                         }
                         for source_detail in detail.get("source_reason_details", [])
                         if isinstance(source_detail, dict)

@@ -812,7 +812,7 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
                                 "reason": "no_usable_input_data",
                                 "source_ids": ["SRC-B"],
                                 "source_reason_details": [
-                                    {"source_id": "SRC-B", "reason": "records_only_for_other_countries_in_scope", "diagnostics": "ukr_only_window"}
+                                    {"source_id": "SRC-B", "reason": "records_only_for_other_countries_in_scope", "diagnostics": "ukr_only_window", "action_category": "scope_config_problem", "severity": "medium"}
                                 ],
                             }
                         ] if country_id == "POL" else [],
@@ -881,7 +881,7 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
                                     "reason": "no_usable_input_data",
                                     "source_ids": ["SRC-B"],
                                     "source_reason_details": [
-                                        {"source_id": "SRC-B", "reason": "records_only_for_other_countries_in_scope", "diagnostics": "ukr_only_window"}
+                                        {"source_id": "SRC-B", "reason": "records_only_for_other_countries_in_scope", "diagnostics": "ukr_only_window", "action_category": "scope_config_problem", "severity": "medium"}
                                     ],
                                 }
                             ],
@@ -937,6 +937,8 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "no_usable_input_data" in index_html
     assert "SRC-B" in index_html
     assert "records_only_for_other_countries_in_scope" in index_html
+    assert "scope_config_problem" in index_html
+    assert "severity=medium" in index_html
     assert "ukr_only_window" in index_html
     assert "data-priority='P2'" in index_html
     assert "P2" in index_html and "P1" in index_html
@@ -972,6 +974,7 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "missing:B" in coverage_html
     assert "no_usable_input_data" in coverage_html
     assert "records_only_for_other_countries_in_scope" in coverage_html
+    assert "scope_config_problem" in coverage_html
 
 
 

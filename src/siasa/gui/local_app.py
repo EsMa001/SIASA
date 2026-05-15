@@ -328,8 +328,10 @@ def _render_source_reason_details(source_reason_details: list[dict[str, Any]]) -
         source_id = html.escape(str(detail.get('source_id', 'UNKNOWN')))
         reason = html.escape(str(detail.get('reason', 'unknown')))
         diagnostics = html.escape(str(detail.get('diagnostics', '')))
+        action_category = html.escape(str(detail.get('action_category', 'unknown')))
+        severity = html.escape(str(detail.get('severity', 'low')))
         suffix = f" ({diagnostics})" if diagnostics else ''
-        parts.append(f"{source_id}: {reason}{suffix}")
+        parts.append(f"{source_id}: {reason} | action={action_category} | severity={severity}{suffix}")
     return f" | source_causes={'; '.join(parts)}"
 
 
