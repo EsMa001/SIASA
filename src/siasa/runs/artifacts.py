@@ -514,6 +514,18 @@ def _build_gap_details(
         country_domain_records = [
             record for record in normalized_records if record.country_id == country_id and record.domain == domain
         ]
+        source_reason_details = [
+            _build_source_gap_reason_detail(
+                source_id=source_id,
+                country_id=country_id,
+                domain=domain,
+                raw_records=raw_records,
+                normalized_records=normalized_records,
+                metadata=metadata_by_source.get(source_id),
+                fetch_status=fetch_status_by_source.get(source_id),
+            )
+            for source_id in domain_source_ids
+        ]
         if not domain_source_ids:
             reason = "not_configured_for_runtime"
         elif any(fetch_status_by_source.get(source_id) == "failed" for source_id in domain_source_ids):
@@ -544,9 +556,57 @@ def _build_gap_details(
                     for source_id in domain_source_ids
                     if source_id in metadata_by_source and metadata_by_source[source_id].diagnostics
                 },
+                "source_reason_details": source_reason_details,
             }
         )
     return gap_details
+
+
+
+def _build_source_gap_reason_detail(
+    *,
+    source_id: str,
+    country_id: str,
+    domain: str,
+    raw_records: list[object],
+    normalized_records: list[NormalizedRecord],
+    metadata: FetchMetadataRecord | None,
+    fetch_status: str | None,
+) -> dict[str, object]:
+    source_raw_records = [raw_record for raw_record in raw_records if getattr(raw_record, "source_id", None) == source_id]
+    source_country_raw_records = [
+        raw_record
+        for raw_record in source_raw_records
+        if str(getattr(raw_record, "raw_payload", {}).get("country_id", "")).upper() == country_id
+    ]
+    source_country_domain_records = [
+        record
+        for record in normalized_records
+        if record.country_id == country_id and record.domain == domain and record.provenance_source_id == source_id
+    ]
+    if fetch_status == "failed":
+        reason = "source_failed_this_run"
+    elif metadata is not None and metadata.record_count == 0:
+        reason = "zero_records_returned"
+    elif not source_country_raw_records:
+        reason = "records_only_for_other_countries_in_scope"
+    elif not source_country_domain_records:
+        reason = "records_for_country_not_mapped_to_required_signal_set"
+    else:
+        freshness_values = [
+            float(record.quality_context.get("freshness_hours"))
+            for record in source_country_domain_records
+            if isinstance(record.quality_context.get("freshness_hours"), (int, float))
+        ]
+        if freshness_values and min(freshness_values) > 168.0:
+            reason = "stale_source_window"
+        else:
+            reason = "filtered_by_feature_or_sufficiency_gate"
+    return {
+        "source_id": source_id,
+        "reason": reason,
+        "diagnostics": metadata.diagnostics if metadata is not None else "",
+    }
 
 
 
@@ -609,6 +669,15 @@ def _build_country_coverage_visibility(country_rows: list[dict[str, object]]) ->
                     "reason": str(detail.get("reason", "unknown")),
                     "source_ids": [str(item) for item in detail.get("source_ids", [])],
                     "diagnostics_by_source": {str(source_id): str(diagnostic) for source_id, diagnostic in dict(detail.get("diagnostics_by_source", {})).items()},
+                    "source_reason_details": [
+                        {
+                            "source_id": str(source_detail.get("source_id", "UNKNOWN")),
+                            "reason": str(source_detail.get("reason", "unknown")),
+                            "diagnostics": str(source_detail.get("diagnostics", "")),
+                        }
+                        for source_detail in detail.get("source_reason_details", [])
+                        if isinstance(source_detail, dict)
+                    ],
                 }
                 for detail in row.get("gap_details", [])
             ],

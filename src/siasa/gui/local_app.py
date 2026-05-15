@@ -295,6 +295,7 @@ def _render_gap_details(gap_details: list[dict[str, Any]], *, coverage_href_pref
         f"{html.escape(str(detail.get('reason', 'unknown')))}"
         f" | sources={''.join(_render_gap_source_link(source_id, coverage_href_prefix) for source_id in detail.get('source_ids', [])) or 'none'}"
         f"{_render_gap_diagnostics(detail.get('diagnostics_by_source', {}))}"
+        f"{_render_source_reason_details(list(detail.get('source_reason_details', [])))}"
         "</div>"
         for detail in gap_details
     )
@@ -316,6 +317,20 @@ def _render_gap_diagnostics(diagnostics_by_source: dict[str, Any]) -> str:
         for source_id, diagnostic in diagnostics_by_source.items()
     )
     return f" | diagnostics={html.escape(diagnostics)}"
+
+
+
+def _render_source_reason_details(source_reason_details: list[dict[str, Any]]) -> str:
+    if not source_reason_details:
+        return ''
+    parts = []
+    for detail in source_reason_details:
+        source_id = html.escape(str(detail.get('source_id', 'UNKNOWN')))
+        reason = html.escape(str(detail.get('reason', 'unknown')))
+        diagnostics = html.escape(str(detail.get('diagnostics', '')))
+        suffix = f" ({diagnostics})" if diagnostics else ''
+        parts.append(f"{source_id}: {reason}{suffix}")
+    return f" | source_causes={'; '.join(parts)}"
 
 
 

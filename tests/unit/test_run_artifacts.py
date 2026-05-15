@@ -352,7 +352,13 @@ def test_daily_run_orchestrator_records_country_gap_visibility_in_system_status(
     assert result.artifact_bundle is not None
     assert pol_profile["domain_gap_summary"]["missing_domains"] == ["B"]
     assert pol_profile["domain_gap_summary"]["gap_details"] == [
-        {"domain": "B", "reason": "no_usable_input_data", "source_ids": ["SRC-B"], "diagnostics_by_source": {}}
+        {
+            "domain": "B",
+            "reason": "no_usable_input_data",
+            "source_ids": ["SRC-B"],
+            "diagnostics_by_source": {},
+            "source_reason_details": [{"source_id": "SRC-B", "reason": "records_only_for_other_countries_in_scope", "diagnostics": ""}],
+        }
     ]
     assert system_status["country_coverage_visibility"]["country_gap_rows"] == [
         {
@@ -362,7 +368,15 @@ def test_daily_run_orchestrator_records_country_gap_visibility_in_system_status(
             "source_depth_band": "minimal",
             "missing_domains": ["B"],
             "missing_domain_count": 1,
-            "gap_details": [{"domain": "B", "reason": "no_usable_input_data", "source_ids": ["SRC-B"], "diagnostics_by_source": {}}],
+            "gap_details": [
+                {
+                    "domain": "B",
+                    "reason": "no_usable_input_data",
+                    "source_ids": ["SRC-B"],
+                    "diagnostics_by_source": {},
+                    "source_reason_details": [{"source_id": "SRC-B", "reason": "records_only_for_other_countries_in_scope", "diagnostics": ""}],
+                }
+            ],
         }
     ]
     assert system_status["country_coverage_visibility"]["missing_domain_totals"] == {"B": 1}
@@ -412,10 +426,58 @@ def test_daily_run_orchestrator_uses_country_specific_source_scope_for_gap_reaso
 
     assert result.artifact_bundle is not None
     assert pol_profile["domain_gap_summary"]["gap_details"] == [
-        {"domain": "B", "reason": "not_configured_for_runtime", "source_ids": [], "diagnostics_by_source": {}}
+        {"domain": "B", "reason": "not_configured_for_runtime", "source_ids": [], "diagnostics_by_source": {}, "source_reason_details": []}
     ]
     assert system_status["country_coverage_visibility"]["country_gap_rows"][0]["gap_details"] == [
-        {"domain": "B", "reason": "not_configured_for_runtime", "source_ids": [], "diagnostics_by_source": {}}
+        {"domain": "B", "reason": "not_configured_for_runtime", "source_ids": [], "diagnostics_by_source": {}, "source_reason_details": []}
+    ]
+
+
+
+def test_daily_run_orchestrator_marks_failed_source_gap_causes(tmp_path: Path) -> None:
+    orchestrator = DailyRunOrchestrator(
+        adapters=[
+            FakeAdapter(
+                source_id="SRC-A",
+                domain="A",
+                _result=FetchResult(
+                    records=[
+                        {"country_id": "POL", "signal_key": "article_count", "value": 5.0, "expected_source_count": 1, "freshness_hours": 8},
+                        {"country_id": "POL", "signal_key": "tone", "value": 0.1, "expected_source_count": 1, "freshness_hours": 8},
+                    ]
+                ),
+            ),
+            ScopedFakeAdapter(
+                source_id="SRC-B",
+                domain="B",
+                country_ids=("POL",),
+                _result=FetchResult(records=[], diagnostics="timeout", is_success=False),
+            ),
+        ],
+        normalizer=_normalize,
+        feature_services=[DomainAFeatureService(), DomainBFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A", "B"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+        artifacts_output_dir=tmp_path / "bundle-failed-source-gap",
+    )
+
+    result = orchestrator.run(run_id="RUN-205A")
+    pol_profile = json.loads((tmp_path / "bundle-failed-source-gap" / "readmodels" / "country_profiles" / "POL.json").read_text())
+
+    assert result.artifact_bundle is not None
+    assert pol_profile["domain_gap_summary"]["gap_details"] == [
+        {
+            "domain": "B",
+            "reason": "source_failed_this_run",
+            "source_ids": ["SRC-B"],
+            "diagnostics_by_source": {"SRC-B": "timeout"},
+            "source_reason_details": [{"source_id": "SRC-B", "reason": "source_failed_this_run", "diagnostics": "timeout"}],
+        }
     ]
 
 
@@ -452,7 +514,13 @@ def test_daily_run_orchestrator_marks_zero_record_gap_causes(tmp_path: Path) -> 
 
     assert result.artifact_bundle is not None
     assert pol_profile["domain_gap_summary"]["gap_details"] == [
-        {"domain": "B", "reason": "zero_records_returned", "source_ids": ["SRC-B"], "diagnostics_by_source": {"SRC-B": "empty_window"}}
+        {
+            "domain": "B",
+            "reason": "zero_records_returned",
+            "source_ids": ["SRC-B"],
+            "diagnostics_by_source": {"SRC-B": "empty_window"},
+            "source_reason_details": [{"source_id": "SRC-B", "reason": "zero_records_returned", "diagnostics": "empty_window"}],
+        }
     ]
 
 
@@ -499,7 +567,13 @@ def test_daily_run_orchestrator_marks_filtered_record_gap_causes(tmp_path: Path)
 
     assert result.artifact_bundle is not None
     assert pol_profile["domain_gap_summary"]["gap_details"] == [
-        {"domain": "B", "reason": "records_filtered_out_or_not_mapped", "source_ids": ["SRC-B"], "diagnostics_by_source": {"SRC-B": "fetched_but_filtered"}}
+        {
+            "domain": "B",
+            "reason": "records_filtered_out_or_not_mapped",
+            "source_ids": ["SRC-B"],
+            "diagnostics_by_source": {"SRC-B": "fetched_but_filtered"},
+            "source_reason_details": [{"source_id": "SRC-B", "reason": "records_for_country_not_mapped_to_required_signal_set", "diagnostics": "fetched_but_filtered"}],
+        }
     ]
 
 
@@ -541,7 +615,131 @@ def test_daily_run_orchestrator_marks_stale_gap_causes(tmp_path: Path) -> None:
 
     assert result.artifact_bundle is not None
     assert pol_profile["domain_gap_summary"]["gap_details"] == [
-        {"domain": "B", "reason": "stale_source_window", "source_ids": ["SRC-B"], "diagnostics_by_source": {"SRC-B": "stale_b_window"}}
+        {
+            "domain": "B",
+            "reason": "stale_source_window",
+            "source_ids": ["SRC-B"],
+            "diagnostics_by_source": {"SRC-B": "stale_b_window"},
+            "source_reason_details": [{"source_id": "SRC-B", "reason": "stale_source_window", "diagnostics": "stale_b_window"}],
+        }
+    ]
+
+
+
+def test_daily_run_orchestrator_marks_filtered_by_gate_gap_causes(tmp_path: Path) -> None:
+    orchestrator = DailyRunOrchestrator(
+        adapters=[
+            FakeAdapter(
+                source_id="SRC-A",
+                domain="A",
+                _result=FetchResult(
+                    records=[
+                        {"country_id": "POL", "signal_key": "article_count", "value": 5.0, "expected_source_count": 1, "freshness_hours": 8},
+                        {"country_id": "POL", "signal_key": "tone", "value": 0.1, "expected_source_count": 1, "freshness_hours": 8},
+                    ]
+                ),
+            ),
+            ScopedFakeAdapter(
+                source_id="SRC-B",
+                domain="B",
+                country_ids=("POL",),
+                _result=FetchResult(records=[{"country_id": "POL", "signal_key": "conflict_event_count", "value": 2.0, "expected_source_count": 1, "freshness_hours": 24}], diagnostics="fresh_but_unscored", is_success=True),
+            ),
+        ],
+        normalizer=_normalize,
+        feature_services=[DomainAFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A", "B"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+        artifacts_output_dir=tmp_path / "bundle-filtered-gate-records",
+    )
+
+    result = orchestrator.run(run_id="RUN-208A")
+    pol_profile = json.loads((tmp_path / "bundle-filtered-gate-records" / "readmodels" / "country_profiles" / "POL.json").read_text())
+
+    assert result.artifact_bundle is not None
+    assert pol_profile["domain_gap_summary"]["gap_details"] == [
+        {
+            "domain": "B",
+            "reason": "filtered_by_feature_or_sufficiency_gate",
+            "source_ids": ["SRC-B"],
+            "diagnostics_by_source": {"SRC-B": "fresh_but_unscored"},
+            "source_reason_details": [{"source_id": "SRC-B", "reason": "filtered_by_feature_or_sufficiency_gate", "diagnostics": "fresh_but_unscored"}],
+        }
+    ]
+
+
+
+def test_daily_run_orchestrator_decomposes_mixed_no_usable_input_data_by_source(tmp_path: Path) -> None:
+    orchestrator = DailyRunOrchestrator(
+        adapters=[
+            FakeAdapter(
+                source_id="SRC-A",
+                domain="A",
+                _result=FetchResult(
+                    records=[
+                        {"country_id": "POL", "signal_key": "article_count", "value": 5.0, "expected_source_count": 1, "freshness_hours": 8},
+                        {"country_id": "POL", "signal_key": "tone", "value": 0.1, "expected_source_count": 1, "freshness_hours": 8},
+                    ]
+                ),
+            ),
+            ScopedFakeAdapter(
+                source_id="SRC-B1",
+                domain="B",
+                country_ids=("POL",),
+                _result=FetchResult(records=[], diagnostics="empty_pol_window", is_success=True),
+            ),
+            ScopedFakeAdapter(
+                source_id="SRC-B2",
+                domain="B",
+                country_ids=("POL",),
+                _result=FetchResult(records=[{"country_id": "UKR", "signal_key": "conflict_event_count", "value": 4.0, "expected_source_count": 1, "freshness_hours": 12}], diagnostics="ukr_only_window", is_success=True),
+            ),
+        ],
+        normalizer=_normalize,
+        feature_services=[DomainAFeatureService(), DomainBFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A", "B"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+        artifacts_output_dir=tmp_path / "bundle-mixed-no-usable-input",
+    )
+
+    result = orchestrator.run(run_id="RUN-209")
+    pol_profile = json.loads((tmp_path / "bundle-mixed-no-usable-input" / "readmodels" / "country_profiles" / "POL.json").read_text())
+    system_status = json.loads((tmp_path / "bundle-mixed-no-usable-input" / "readmodels" / "system_status.json").read_text())
+
+    assert result.artifact_bundle is not None
+    assert pol_profile["domain_gap_summary"]["gap_details"] == [
+        {
+            "domain": "B",
+            "reason": "no_usable_input_data",
+            "source_ids": ["SRC-B1", "SRC-B2"],
+            "diagnostics_by_source": {"SRC-B1": "empty_pol_window", "SRC-B2": "ukr_only_window"},
+            "source_reason_details": [
+                {"source_id": "SRC-B1", "reason": "zero_records_returned", "diagnostics": "empty_pol_window"},
+                {"source_id": "SRC-B2", "reason": "records_only_for_other_countries_in_scope", "diagnostics": "ukr_only_window"},
+            ],
+        }
+    ]
+    assert system_status["country_coverage_visibility"]["country_gap_rows"][0]["gap_details"] == [
+        {
+            "domain": "B",
+            "reason": "no_usable_input_data",
+            "source_ids": ["SRC-B1", "SRC-B2"],
+            "diagnostics_by_source": {"SRC-B1": "empty_pol_window", "SRC-B2": "ukr_only_window"},
+            "source_reason_details": [
+                {"source_id": "SRC-B1", "reason": "zero_records_returned", "diagnostics": "empty_pol_window"},
+                {"source_id": "SRC-B2", "reason": "records_only_for_other_countries_in_scope", "diagnostics": "ukr_only_window"},
+            ],
+        }
     ]
 
 

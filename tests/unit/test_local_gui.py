@@ -806,7 +806,16 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
                         "expected_domains": ["A", "B"],
                         "observed_domains": sorted(domain_states.keys()),
                         "missing_domains": ["B"] if country_id == "POL" else [],
-                        "gap_details": [{"domain": "B", "reason": "no_usable_input_data", "source_ids": ["SRC-B"]}] if country_id == "POL" else [],
+                        "gap_details": [
+                            {
+                                "domain": "B",
+                                "reason": "no_usable_input_data",
+                                "source_ids": ["SRC-B"],
+                                "source_reason_details": [
+                                    {"source_id": "SRC-B", "reason": "records_only_for_other_countries_in_scope", "diagnostics": "ukr_only_window"}
+                                ],
+                            }
+                        ] if country_id == "POL" else [],
                     },
                 }
             )
@@ -866,7 +875,16 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
                             "source_depth_band": "minimal",
                             "missing_domains": ["B"],
                             "missing_domain_count": 1,
-                            "gap_details": [{"domain": "B", "reason": "no_usable_input_data", "source_ids": ["SRC-B"]}],
+                            "gap_details": [
+                                {
+                                    "domain": "B",
+                                    "reason": "no_usable_input_data",
+                                    "source_ids": ["SRC-B"],
+                                    "source_reason_details": [
+                                        {"source_id": "SRC-B", "reason": "records_only_for_other_countries_in_scope", "diagnostics": "ukr_only_window"}
+                                    ],
+                                }
+                            ],
                         },
                     ],
                     "missing_domain_totals": {"B": 1},
@@ -918,6 +936,8 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "missing:B" in index_html
     assert "no_usable_input_data" in index_html
     assert "SRC-B" in index_html
+    assert "records_only_for_other_countries_in_scope" in index_html
+    assert "ukr_only_window" in index_html
     assert "data-priority='P2'" in index_html
     assert "P2" in index_html and "P1" in index_html
     assert "1 (SRC-A)" in index_html
@@ -951,6 +971,7 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "minimal" in coverage_html
     assert "missing:B" in coverage_html
     assert "no_usable_input_data" in coverage_html
+    assert "records_only_for_other_countries_in_scope" in coverage_html
 
 
 
