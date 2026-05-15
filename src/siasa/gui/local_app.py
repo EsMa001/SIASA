@@ -360,6 +360,8 @@ def _country_coverage_visibility_rows(system_status_read_model: dict[str, Any]) 
 def _render_remediation_watchlist(visibility: dict[str, Any]) -> str:
     rows = ''.join(
         "<tr>"
+        f"<td>{html.escape(str(row.get('priority_rank', 'n/a')))}</td>"
+        f"<td>{html.escape(str(row.get('priority_score', 'n/a')))}</td>"
         f"<td>{html.escape(str(row.get('action_category', 'unknown')))}</td>"
         f"<td>severity={html.escape(str(row.get('severity', 'low')))}</td>"
         f"<td>{html.escape(str(row.get('country_count', 0)))}</td>"
@@ -371,11 +373,11 @@ def _render_remediation_watchlist(visibility: dict[str, Any]) -> str:
         f"<td>{_render_watchlist_evidence_link(str(row.get('evidence_link', '')))}</td>"
         "</tr>"
         for row in visibility.get('remediation_watchlist', [])
-    ) or "<tr><td colspan='9'>No remediation priorities recorded.</td></tr>"
+    ) or "<tr><td colspan='11'>No remediation priorities recorded.</td></tr>"
     return (
         "<h3>Remediation Watchlist</h3>"
         "<p>Aggregated action categories highlight which operational problem classes should be addressed first.</p>"
-        "<table><thead><tr><th>Action Category</th><th>Severity</th><th>Countries</th><th>Sources</th><th>Country IDs</th><th>Source IDs</th><th>Suggested Next Action</th><th>Owner Hint</th><th>Evidence</th></tr></thead>"
+        "<table><thead><tr><th>Priority Rank</th><th>Priority Score</th><th>Action Category</th><th>Severity</th><th>Countries</th><th>Sources</th><th>Country IDs</th><th>Source IDs</th><th>Suggested Next Action</th><th>Owner Hint</th><th>Evidence</th></tr></thead>"
         f"<tbody>{rows}</tbody></table>"
     )
 

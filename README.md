@@ -78,8 +78,8 @@ Aktueller Runtime-Stand:
 - reale Multi-Country-Runs bleiben quellenabhängig: einzelne Sources können weiterhin partiell fehlschlagen und als `partial_success` im Bundle erscheinen
 - der governed Live-Runtime-Pfad erzeugt jetzt zusätzlich `readmodels/validation_backtest.json` als transparenten `runtime_support_check`; diese Sicht ist explizit keine historische Referenzfall-Backtest-Wertung
 - Country-Profile- und GUI-Sichten machen jetzt Priority Class, Selection Type, Source Depth und Domain Gaps pro Land explizit sichtbar
-- `readmodels/system_status.json` enthält jetzt zusätzlich `country_coverage_visibility` mit Priority-Summary, Source-Depth-Bands und expliziten Country/Domain-Gap-Listen für Overview- und Coverage-Aggregationen
-- die Startseite bietet jetzt einen `Priority Filter` sowie aggregierte Coverage-/Gap-Summaries; die Coverage-Ansicht zeigt zusätzlich eine `Country Coverage / Gap Matrix` mit Missing-Domain-Badges
+- `readmodels/system_status.json` enthält jetzt zusätzlich `country_coverage_visibility` mit Priority-Summary, Source-Depth-Bands, expliziten Country/Domain-Gap-Listen und einer aggregierten `remediation_watchlist` inklusive `priority_rank`/`priority_score` für Overview- und Coverage-Aggregationen
+- die Startseite bietet jetzt einen `Priority Filter` sowie aggregierte Coverage-/Gap-Summaries; die Coverage-Ansicht zeigt zusätzlich eine `Country Coverage / Gap Matrix` mit Missing-Domain-Badges und eine priorisierte `Remediation Watchlist` mit Guidance-/Evidence-Links
 - Missing Domains werden jetzt zusätzlich mit expliziten Ursacheinträgen ausgewiesen, z. B. `source_failed_this_run`, `no_usable_input_data` oder `not_configured_for_runtime`, inklusive zugehöriger Source-IDs
 - optionale Artefaktlücken werden im Runtime-Bundle jetzt mit expliziten Gründen im `system_status.json` unter `artifact_status` codiert, z. B. `not_configured` oder `no_usable_input_data`
 

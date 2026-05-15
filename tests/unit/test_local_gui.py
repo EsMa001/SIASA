@@ -29,6 +29,16 @@ def test_render_watchlist_evidence_link_allows_internal_coverage_targets_only() 
 
 
 
+def test_render_remediation_watchlist_shows_empty_state_when_no_priorities_exist() -> None:
+    html = local_app._render_remediation_watchlist({"remediation_watchlist": []})
+
+    assert "Remediation Watchlist" in html
+    assert "Priority Rank" in html
+    assert "Priority Score" in html
+    assert "No remediation priorities recorded." in html
+
+
+
 def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     world_map = {
         "baseline_mode": "Combined 30/90/365",
@@ -919,6 +929,8 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
                     "missing_domain_totals": {"B": 1},
                     "remediation_watchlist": [
                         {
+                            "priority_rank": 1,
+                            "priority_score": 111,
                             "action_category": "scope_config_problem",
                             "severity": "medium",
                             "country_count": 1,
@@ -975,7 +987,10 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "Source Depth Band Summary" in index_html
     assert "Country Coverage / Gap Watchlist" in index_html
     assert "Remediation Watchlist" in index_html
+    assert "Priority Rank" in index_html
+    assert "Priority Score" in index_html
     assert "scope_config_problem" in index_html
+    assert "111" in index_html
     assert "Review country scope and source applicability configuration for the affected source." in index_html
     assert "runtime/source configuration" in index_html
     assert "coverage.html#source-SRC-B" in index_html

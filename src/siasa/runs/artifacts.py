@@ -732,23 +732,43 @@ def _build_country_coverage_visibility(country_rows: list[dict[str, object]]) ->
                 group["countries"].add(country_id)
                 group["source_ids"].add(str(source_detail.get("source_id", "UNKNOWN")))
 
-    remediation_watchlist = [
-        {
-            "action_category": action_category,
-            "severity": severity,
-            "country_count": len(sorted(group["countries"])),
-            "source_count": len(sorted(group["source_ids"])),
-            "countries": sorted(group["countries"]),
-            "source_ids": sorted(group["source_ids"]),
-            "suggested_next_action": _suggested_next_action(action_category),
-            "owner_hint": _owner_hint(action_category),
-            "evidence_link": _watchlist_evidence_link(sorted(group["source_ids"])),
-        }
-        for (action_category, severity), group in sorted(
+    remediation_watchlist = []
+    for priority_rank, ((action_category, severity), group) in enumerate(
+        sorted(
             remediation_groups.items(),
-            key=lambda item: (_severity_rank(str(item[0][1])), str(item[0][0])),
+            key=lambda item: (
+                -_remediation_priority_score(
+                    str(item[0][1]),
+                    len(set(item[1]["countries"])),
+                    len(set(item[1]["source_ids"])),
+                ),
+                _severity_rank(str(item[0][1])),
+                str(item[0][0]),
+                tuple(sorted(str(source_id) for source_id in item[1]["source_ids"])),
+                tuple(sorted(str(country_id) for country_id in item[1]["countries"])),
+            ),
+        ),
+        start=1,
+    ):
+        countries = sorted(group["countries"])
+        source_ids = sorted(group["source_ids"])
+        country_count = len(countries)
+        source_count = len(source_ids)
+        remediation_watchlist.append(
+            {
+                "priority_rank": priority_rank,
+                "priority_score": _remediation_priority_score(severity, country_count, source_count),
+                "action_category": action_category,
+                "severity": severity,
+                "country_count": country_count,
+                "source_count": source_count,
+                "countries": countries,
+                "source_ids": source_ids,
+                "suggested_next_action": _suggested_next_action(action_category),
+                "owner_hint": _owner_hint(action_category),
+                "evidence_link": _watchlist_evidence_link(source_ids),
+            }
         )
-    ]
 
     return {
         "priority_summary": priority_summary,
@@ -762,6 +782,12 @@ def _build_country_coverage_visibility(country_rows: list[dict[str, object]]) ->
 
 def _severity_rank(severity: str) -> int:
     return {"high": 0, "medium": 1, "low": 2}.get(severity, 3)
+
+
+
+def _remediation_priority_score(severity: str, country_count: int, source_count: int) -> int:
+    severity_base = {"high": 200, "medium": 100, "low": 0}.get(severity, 0)
+    return severity_base + (10 * max(country_count, 0)) + max(source_count, 0)
 
 
 

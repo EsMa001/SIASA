@@ -7,7 +7,7 @@ from siasa.annotations.models import AnnotationRecord
 from siasa.data.normalized_models import NormalizedRecord
 from siasa.features.domain_a import DomainAFeatureService
 from siasa.features.domain_b import DomainBFeatureService
-from siasa.runs.artifacts import _load_country_metadata
+from siasa.runs.artifacts import _build_country_coverage_visibility, _load_country_metadata
 from siasa.runs.orchestrator import DailyRunOrchestrator
 from siasa.scoring.data_sufficiency import evaluate_data_sufficiency
 from siasa.scoring.domain_status import derive_domain_status
@@ -382,6 +382,8 @@ def test_daily_run_orchestrator_records_country_gap_visibility_in_system_status(
     ]
     assert system_status["country_coverage_visibility"]["remediation_watchlist"] == [
         {
+            "priority_rank": 1,
+            "priority_score": 111,
             "action_category": "scope_config_problem",
             "severity": "medium",
             "country_count": 1,
@@ -394,6 +396,160 @@ def test_daily_run_orchestrator_records_country_gap_visibility_in_system_status(
         }
     ]
     assert system_status["country_coverage_visibility"]["missing_domain_totals"] == {"B": 1}
+
+
+
+def test_build_country_coverage_visibility_assigns_priority_scores_and_stable_ranking() -> None:
+    visibility = _build_country_coverage_visibility(
+        [
+            {
+                "country_id": "UKR",
+                "priority": "P1",
+                "source_count": 2,
+                "source_depth_band": "moderate",
+                "missing_domains": ["A"],
+                "missing_domain_count": 1,
+                "gap_details": [
+                    {
+                        "domain": "A",
+                        "reason": "source_failed_this_run",
+                        "source_ids": ["SRC-X", "SRC-Y"],
+                        "diagnostics_by_source": {},
+                        "source_reason_details": [
+                            {"source_id": "SRC-X", "reason": "source_failed_this_run", "diagnostics": "timeout", "action_category": "fetch_problem", "severity": "high"},
+                            {"source_id": "SRC-Y", "reason": "source_failed_this_run", "diagnostics": "timeout", "action_category": "fetch_problem", "severity": "high"},
+                        ],
+                    }
+                ],
+            },
+            {
+                "country_id": "POL",
+                "priority": "P2",
+                "source_count": 1,
+                "source_depth_band": "minimal",
+                "missing_domains": ["B"],
+                "missing_domain_count": 1,
+                "gap_details": [
+                    {
+                        "domain": "B",
+                        "reason": "no_usable_input_data",
+                        "source_ids": ["SRC-B"],
+                        "diagnostics_by_source": {},
+                        "source_reason_details": [
+                            {"source_id": "SRC-B", "reason": "records_only_for_other_countries_in_scope", "diagnostics": "ukr_only_window", "action_category": "scope_config_problem", "severity": "medium"},
+                        ],
+                    }
+                ],
+            },
+            {
+                "country_id": "TWN",
+                "priority": "P2",
+                "source_count": 1,
+                "source_depth_band": "minimal",
+                "missing_domains": ["B"],
+                "missing_domain_count": 1,
+                "gap_details": [
+                    {
+                        "domain": "B",
+                        "reason": "no_usable_input_data",
+                        "source_ids": ["SRC-B"],
+                        "diagnostics_by_source": {},
+                        "source_reason_details": [
+                            {"source_id": "SRC-B", "reason": "records_only_for_other_countries_in_scope", "diagnostics": "ukr_only_window", "action_category": "scope_config_problem", "severity": "medium"},
+                        ],
+                    }
+                ],
+            },
+        ]
+    )
+
+    assert visibility["remediation_watchlist"] == [
+        {
+            "priority_rank": 1,
+            "priority_score": 212,
+            "action_category": "fetch_problem",
+            "severity": "high",
+            "country_count": 1,
+            "source_count": 2,
+            "countries": ["UKR"],
+            "source_ids": ["SRC-X", "SRC-Y"],
+            "suggested_next_action": "Retry adapter execution and inspect source-side rate limiting or transport failures.",
+            "owner_hint": "adapter/source integration",
+            "evidence_link": "coverage.html",
+        },
+        {
+            "priority_rank": 2,
+            "priority_score": 121,
+            "action_category": "scope_config_problem",
+            "severity": "medium",
+            "country_count": 2,
+            "source_count": 1,
+            "countries": ["POL", "TWN"],
+            "source_ids": ["SRC-B"],
+            "suggested_next_action": "Review country scope and source applicability configuration for the affected source.",
+            "owner_hint": "runtime/source configuration",
+            "evidence_link": "coverage.html#source-SRC-B",
+        },
+    ]
+
+
+
+def test_build_country_coverage_visibility_breaks_equal_priority_scores_deterministically() -> None:
+    visibility = _build_country_coverage_visibility(
+        [
+            {
+                "country_id": country_id,
+                "priority": "P2",
+                "source_count": 1,
+                "source_depth_band": "minimal",
+                "missing_domains": ["A"],
+                "missing_domain_count": 1,
+                "gap_details": [
+                    {
+                        "domain": "A",
+                        "reason": "zero_records_returned",
+                        "source_ids": ["SRC-M"],
+                        "diagnostics_by_source": {},
+                        "source_reason_details": [
+                            {"source_id": "SRC-M", "reason": "zero_records_returned", "diagnostics": "", "action_category": "fetch_problem", "severity": "medium"},
+                        ],
+                    }
+                ],
+            }
+            for country_id in [
+                "ARG", "BRA", "CAN", "DEU", "ESP", "FRA", "GRC", "HUN", "ITA", "JPN", "KEN",
+            ]
+        ]
+        + [
+            {
+                "country_id": "UKR",
+                "priority": "P1",
+                "source_count": 1,
+                "source_depth_band": "minimal",
+                "missing_domains": ["A"],
+                "missing_domain_count": 1,
+                "gap_details": [
+                    {
+                        "domain": "A",
+                        "reason": "source_failed_this_run",
+                        "source_ids": ["SRC-H"],
+                        "diagnostics_by_source": {},
+                        "source_reason_details": [
+                            {"source_id": "SRC-H", "reason": "source_failed_this_run", "diagnostics": "timeout", "action_category": "fetch_problem", "severity": "high"},
+                        ],
+                    }
+                ],
+            }
+        ]
+    )
+
+    assert [
+        (row["priority_rank"], row["priority_score"], row["action_category"], row["severity"], row["countries"])
+        for row in visibility["remediation_watchlist"]
+    ] == [
+        (1, 211, "fetch_problem", "high", ["UKR"]),
+        (2, 211, "fetch_problem", "medium", ["ARG", "BRA", "CAN", "DEU", "ESP", "FRA", "GRC", "HUN", "ITA", "JPN", "KEN"]),
+    ]
 
 
 
