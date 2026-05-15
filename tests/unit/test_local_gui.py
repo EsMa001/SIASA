@@ -53,6 +53,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             "uncertainty": ["partial_success"],
             "annotations": ["ANN-001"],
             "explanation_summary": "Escalation is primarily driven by Domain A with partial corroboration from Domain B.",
+            "country_context": {"priority": "P1", "selection_type": "Core Focus", "region": "Europe / Black Sea"},
+            "source_depth": {"source_ids": ["SRC-A", "SRC-B"], "source_count": 2},
+            "domain_gap_summary": {"expected_domains": ["A", "B", "D"], "observed_domains": ["A", "B", "D"], "missing_domains": []},
         }
     }
     domain_details = {
@@ -242,6 +245,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "UKR" in index_html
     assert "countries/UKR.html" in index_html
     assert "Daily Global Review" in index_html
+    assert "Priority Class" in index_html
+    assert "Source Depth" in index_html
+    assert "Domain Gaps" in index_html
     assert "Top Status Changes" in index_html
     assert "S2 → S3" in index_html
     assert "Data Gaps / Trust Limits" in index_html
@@ -255,6 +261,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Trust / Uncertainty Summary" in country_html
     assert "Coverage Meter" in country_html
     assert "Confidence Meter" in country_html
+    assert "Priority: <strong>P1</strong>" in country_html
+    assert "Selection Type: <strong>Core Focus</strong>" in country_html
+    assert "Source Depth" in country_html
+    assert "SRC-A" in country_html and "SRC-B" in country_html
+    assert "Domain Gap Summary" in country_html
     assert "uncertainty-badge" in country_html
     assert "Why this country is in this state" in country_html
     assert "Escalation is primarily driven by Domain A with partial corroboration from Domain B." in country_html
@@ -748,6 +759,13 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
                     "counter_indicators": [],
                     "uncertainty": uncertainty,
                     "annotations": [],
+                    "country_context": {
+                        "priority": "P2" if country_id == "POL" else "P1",
+                        "selection_type": "Extended Focus" if country_id == "POL" else "Core Focus",
+                        "region": "Europe / NATO East" if country_id == "POL" else "Europe / Black Sea",
+                    },
+                    "source_depth": {"source_ids": ["SRC-A", "SRC-B"], "source_count": 2},
+                    "domain_gap_summary": {"expected_domains": ["A", "B"], "observed_domains": sorted(domain_states.keys()), "missing_domains": []},
                 }
             )
         )
@@ -825,6 +843,11 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "countries/UKR.html" in index_html
     assert "data-country-id='POL'" in index_html
     assert "data-active-domains='A,B'" in index_html
+    assert "Priority Class" in index_html
+    assert "Source Depth" in index_html
+    assert "Domain Gaps" in index_html
+    assert "P2" in index_html and "P1" in index_html
+    assert "2 (SRC-A, SRC-B)" in index_html
     assert "option value='coverage'" in index_html
     assert "option value='domain-A'" in index_html
     assert "option value='domain-B'" in index_html

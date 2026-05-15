@@ -17,7 +17,7 @@ def test_world_map_read_model_exposes_country_status_active_domains_baseline_and
     assert read_model["countries"][1]["drill_down_target"] == "/countries/UKR"
 
 
-def test_country_profile_read_model_exposes_status_domain_states_trends_drivers_and_events() -> None:
+def test_country_profile_read_model_exposes_status_domain_states_trends_drivers_events_and_context() -> None:
     read_model = build_country_profile_read_model(
         country_id="UKR",
         multi_domain_status="S3",
@@ -26,6 +26,9 @@ def test_country_profile_read_model_exposes_status_domain_states_trends_drivers_
         drivers=["A_news_volume"],
         linked_events=["EVT-001"],
         explanation_summary="Escalation is primarily driven by Domain A with partial corroboration from Domain B.",
+        country_context={"priority": "P1", "selection_type": "Core Focus", "region": "Europe / Black Sea"},
+        source_depth={"source_ids": ["SRC-A", "SRC-B"], "source_count": 2},
+        domain_gap_summary={"expected_domains": ["A", "B", "D"], "observed_domains": ["A", "B"], "missing_domains": ["D"]},
     )
 
     assert read_model["country_id"] == "UKR"
@@ -34,6 +37,9 @@ def test_country_profile_read_model_exposes_status_domain_states_trends_drivers_
     assert read_model["drivers"] == ["A_news_volume"]
     assert read_model["linked_events"] == ["EVT-001"]
     assert read_model["explanation_summary"] == "Escalation is primarily driven by Domain A with partial corroboration from Domain B."
+    assert read_model["country_context"] == {"priority": "P1", "selection_type": "Core Focus", "region": "Europe / Black Sea"}
+    assert read_model["source_depth"] == {"source_ids": ["SRC-A", "SRC-B"], "source_count": 2}
+    assert read_model["domain_gap_summary"] == {"expected_domains": ["A", "B", "D"], "observed_domains": ["A", "B"], "missing_domains": ["D"]}
 
 
 def test_source_coverage_read_model_exposes_status_horizon_freshness_confidence_and_failed_sources() -> None:

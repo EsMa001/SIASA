@@ -515,6 +515,9 @@ def _render_index(
         status = str(country["status"])
         active_domains = [str(domain) for domain in country.get('active_domains', [])]
         country_profile = country_profile_read_models.get(country_id, {})
+        country_context = country_profile.get('country_context', {})
+        source_depth = country_profile.get('source_depth', {})
+        domain_gap_summary = country_profile.get('domain_gap_summary', {})
         trend_labels = ','.join(
             _trend_labels(
                 country_profile.get('trends', {}).get('yearly', []),
@@ -533,12 +536,17 @@ def _render_index(
         )
         drill_down_cell = f"countries/{html.escape(country_id)}.html" if has_country_page else "not available"
         support_status = "supported" if has_country_page else "not available"
+        source_ids = [str(item) for item in source_depth.get('source_ids', [])]
+        missing_domains = [str(item) for item in domain_gap_summary.get('missing_domains', [])]
         rows.append(
             f"<tr class='overview-row' data-country-id='{html.escape(country_id)}' data-active-domains='{html.escape(','.join(active_domains))}' data-status='{html.escape(status)}' data-trend-labels='{html.escape(trend_labels)}'{domain_state_attributes}>"
             f"<td>{country_cell}</td>"
             f"<td>{html.escape(support_status)}</td>"
+            f"<td>{html.escape(str(country_context.get('priority', 'n/a')))}</td>"
             f"<td class='status'>{html.escape(status)}</td>"
             f"<td>{html.escape(', '.join(active_domains))}</td>"
+            f"<td>{html.escape(str(source_depth.get('source_count', 0)))} ({html.escape(', '.join(source_ids) or 'none')})</td>"
+            f"<td>{html.escape(', '.join(missing_domains) or 'none')}</td>"
             f"<td>{drill_down_cell}</td>"
             "</tr>"
         )
@@ -610,7 +618,7 @@ def _render_index(
         f"<div id='coverage-visualization-block' style='display:none'>{_render_country_trust_visualization(country_profile_read_models)}</div>"
         f"<div id='domain-projection-block' style='display:none'>{_render_domain_projection(country_profile_read_models, [str(domain) for domain in world_map_read_model.get('active_domains', [])])}</div>"
         "<h2>Global Overview</h2>"
-        "<div id='overview-table-block'><table id='overview-table'><thead><tr><th>Country</th><th>Support Status</th><th>Multi-Domain Status</th><th>Active Domains</th><th>Drill-down</th></tr></thead>"
+        "<div id='overview-table-block'><table id='overview-table'><thead><tr><th>Country</th><th>Support Status</th><th>Priority Class</th><th>Multi-Domain Status</th><th>Active Domains</th><th>Source Depth</th><th>Domain Gaps</th><th>Drill-down</th></tr></thead>"
         f"<tbody>{''.join(rows)}</tbody></table></div>"
         "<script>"
         "function applyOverviewViewMode(){"
@@ -688,6 +696,11 @@ def _render_country(
         )
     )
     explanation_summary = country_profile.get('explanation_summary') or 'No explanation summary available.'
+    country_context = country_profile.get('country_context', {})
+    source_depth = country_profile.get('source_depth', {})
+    domain_gap_summary = country_profile.get('domain_gap_summary', {})
+    source_ids = [str(item) for item in source_depth.get('source_ids', [])]
+    missing_domains = [str(item) for item in domain_gap_summary.get('missing_domains', [])]
     trust_summary_html = (
         "<h3>Trust / Uncertainty Summary</h3>"
         f"<p>Coverage band: <strong>{html.escape(_ratio_band(country_profile.get('coverage')))}</strong> | Confidence band: <strong>{html.escape(_ratio_band(country_profile.get('confidence')))}</strong></p>"
@@ -698,9 +711,17 @@ def _render_country(
     body = (
         "<h2>Country Profile</h2>"
         f"<p>Country: <strong>{html.escape(str(country_profile.get('country_id', 'UNKNOWN')))}</strong></p>"
+        f"<p>Priority: <strong>{html.escape(str(country_context.get('priority', 'n/a')))}</strong> | Selection Type: <strong>{html.escape(str(country_context.get('selection_type', 'n/a')))}</strong> | Region: <strong>{html.escape(str(country_context.get('region', 'n/a')))}</strong></p>"
         f"<p>Multi-domain status: <span class='status'>{html.escape(str(country_profile.get('multi_domain_status', 'n/a')))}</span></p>"
         f"<p>Coverage: {html.escape(str(country_profile.get('coverage', 'n/a')))} | Confidence: {html.escape(str(country_profile.get('confidence', 'n/a')))}</p>"
         f"{trust_summary_html}"
+        "<h3>Source Depth</h3>"
+        f"<p>Source count: <strong>{html.escape(str(source_depth.get('source_count', 0)))}</strong></p>"
+        f"<ul>{''.join(f'<li>{html.escape(item)}</li>' for item in source_ids) or '<li>none</li>'}</ul>"
+        "<h3>Domain Gap Summary</h3>"
+        f"<p>Expected domains: {html.escape(', '.join(str(item) for item in domain_gap_summary.get('expected_domains', [])) or 'none')}</p>"
+        f"<p>Observed domains: {html.escape(', '.join(str(item) for item in domain_gap_summary.get('observed_domains', [])) or 'none')}</p>"
+        f"<p>Missing domains: {html.escape(', '.join(missing_domains) or 'none')}</p>"
         "<h3>Why this country is in this state</h3>"
         f"<p>{html.escape(str(explanation_summary))}</p>"
         "<h3>Domain States</h3>"

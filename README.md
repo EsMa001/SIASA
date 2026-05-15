@@ -77,6 +77,7 @@ Aktueller Runtime-Stand:
 - der Pilot ersetzt die bisherigen rein synthetischen `SRC-A` / `SRC-B` Latest-Artefakte durch reale Source-IDs (`WB-INDICATORS`, `SRC-GDELT-DOC`, `SRC-GDELT-EVENTS`, `SRC-GDACS`)
 - reale Multi-Country-Runs bleiben quellenabhängig: einzelne Sources können weiterhin partiell fehlschlagen und als `partial_success` im Bundle erscheinen
 - der governed Live-Runtime-Pfad erzeugt jetzt zusätzlich `readmodels/validation_backtest.json` als transparenten `runtime_support_check`; diese Sicht ist explizit keine historische Referenzfall-Backtest-Wertung
+- Country-Profile- und GUI-Sichten machen jetzt Priority Class, Selection Type, Source Depth und Domain Gaps pro Land explizit sichtbar
 - optionale Artefaktlücken werden im Runtime-Bundle jetzt mit expliziten Gründen im `system_status.json` unter `artifact_status` codiert, z. B. `not_configured` oder `no_usable_input_data`
 
 Die Artefaktstruktur wird durch den Python-Orchestrator automatisch geschrieben, wenn `DailyRunOrchestrator(..., artifacts_output_dir=Path("build/run_artifacts/latest"))` gesetzt ist.

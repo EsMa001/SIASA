@@ -7,6 +7,7 @@ from typing import Any
 
 from siasa.adapters.fetch_metadata import FetchMetadataRecord
 from siasa.annotations.models import AnnotationRecord
+from siasa.catalog import load_country_set
 from siasa.data.normalized_models import NormalizedRecord
 from siasa.features.base import FeatureValue
 from siasa.readmodels.annotations import build_annotations_view_model
@@ -83,6 +84,7 @@ def write_run_artifacts(
 
     readmodel_paths = [world_map_path]
     source_context_by_source = _build_source_context(fetch_metadata_records)
+    country_metadata = _load_country_metadata(Path(__file__).resolve().parents[3])
     country_reports_by_id = {country_id: report for country_id, report in country_reports.items()}
     annotation_records = annotation_records or []
     extra_reports: list[tuple[str, GeneratedReport]] = []
@@ -126,6 +128,15 @@ def write_run_artifacts(
         country_uncertainty = _build_country_uncertainty(run_state)
         country_annotation_ids = _annotation_ids_for_item(annotation_records, country_id)
         country_trends = {"yearly": _build_country_yearly_trend(country_id, normalized_records)}
+        country_context = dict(country_metadata.get(country_id, {}))
+        country_source_ids = sorted({record.provenance_source_id for record in normalized_records if record.country_id == country_id})
+        country_domain_gap_summary = {
+            "expected_domains": list(snapshot.active_domains),
+            "observed_domains": sorted(country_domain_states.keys()),
+            "missing_domains": [
+                domain for domain in snapshot.active_domains if domain not in country_domain_states
+            ],
+        }
         country_profile = build_country_profile_read_model(
             country_id=country_id,
             multi_domain_status=multi_domain_status,
@@ -144,6 +155,9 @@ def write_run_artifacts(
             counter_indicators=[],
             uncertainty=country_uncertainty,
             annotations=country_annotation_ids,
+            country_context=country_context,
+            source_depth={"source_ids": country_source_ids, "source_count": len(country_source_ids)},
+            domain_gap_summary=country_domain_gap_summary,
         )
         country_profile_path = country_profiles_dir / f"{country_id}.json"
         country_profile_path.write_text(json.dumps(country_profile, indent=2, sort_keys=True))
@@ -413,6 +427,27 @@ def _build_country_yearly_trend(country_id: str, normalized_records: list[Normal
         {"label": label, "value": sum(values) / len(values)}
         for label, values in sorted(series_by_label.items())
     ]
+
+
+
+def _load_country_metadata(repo_root: Path) -> dict[str, dict[str, str]]:
+    country_set_path = repo_root / "vmodel" / "project" / "mvp_countries.yaml"
+    if not country_set_path.exists():
+        return {}
+    try:
+        records = load_country_set(country_set_path)
+    except (OSError, ValueError):
+        return {}
+    return {
+        record.iso3: {
+            "country_name": record.country_name,
+            "priority": record.priority,
+            "selection_type": record.selection_type,
+            "region": record.region,
+            "rationale": record.rationale,
+        }
+        for record in records
+    }
 
 
 

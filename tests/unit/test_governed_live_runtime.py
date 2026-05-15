@@ -360,6 +360,15 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
     assert validation_backtest["status_match"] is None
     assert validation_backtest["review_verdict"] == "support_check"
     assert "pilot_runtime_support_case_not_historical_backtest" in validation_backtest["known_limitations"]
+    assert pol_profile["country_context"] == {
+        "country_name": "Poland",
+        "priority": "P2",
+        "selection_type": "Extended Focus",
+        "region": "Europe / NATO East",
+        "rationale": "NATO-Ostflanke, Ukraine-/Russlandbezug",
+    }
+    assert pol_profile["source_depth"] == {"source_ids": ["SRC-GDACS", "SRC-GDELT-DOC", "SRC-GDELT-EVENTS", "WB-INDICATORS"], "source_count": 4}
+    assert pol_profile["domain_gap_summary"] == {"expected_domains": ["A", "B", "D"], "observed_domains": ["A", "B", "D"], "missing_domains": []}
     assert pol_profile["trends"]["yearly"]
 
 
@@ -496,3 +505,4 @@ def test_governed_live_runtime_validation_artifact_falls_back_to_next_configured
     assert result.run_state.status == "success"
     validation_backtest = json.loads((output_dir / "readmodels" / "validation_backtest.json").read_text())
     assert validation_backtest["country_id"] == "POL"
+    assert validation_backtest["review_verdict"] == "support_check"

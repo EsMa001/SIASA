@@ -7,6 +7,7 @@ from siasa.annotations.models import AnnotationRecord
 from siasa.data.normalized_models import NormalizedRecord
 from siasa.features.domain_a import DomainAFeatureService
 from siasa.features.domain_b import DomainBFeatureService
+from siasa.runs.artifacts import _load_country_metadata
 from siasa.runs.orchestrator import DailyRunOrchestrator
 from siasa.scoring.data_sufficiency import evaluate_data_sufficiency
 from siasa.scoring.domain_status import derive_domain_status
@@ -48,6 +49,12 @@ def _domain_status_analyzer(domain: str, features):
     sufficiency = evaluate_data_sufficiency(features)
     anomaly_score = {"A": 0.7, "B": 0.3, "D": 0.1}.get(domain, 0.1)
     return derive_domain_status(domain, anomaly_score=anomaly_score, sufficiency=sufficiency)
+
+
+
+def test_load_country_metadata_returns_empty_mapping_when_governed_file_is_unavailable(tmp_path: Path) -> None:
+    assert _load_country_metadata(tmp_path) == {}
+
 
 
 def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(tmp_path: Path) -> None:
