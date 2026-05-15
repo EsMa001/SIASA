@@ -10,11 +10,13 @@ from siasa.data.normalization_service import normalize_records
 from siasa.features.domain_a import DomainAFeatureService
 from siasa.features.domain_b import DomainBFeatureService
 from siasa.features.domain_d import DomainDFeatureService
+from siasa.readmodels.validation_backtest import build_validation_backtest_read_model
 from siasa.runs.orchestrator import DailyRunOrchestrator, DailyRunResult
 from siasa.scoring.data_sufficiency import evaluate_data_sufficiency
 from siasa.scoring.domain_status import derive_domain_status
 from siasa.scoring.multi_domain_status import derive_multi_domain_status
 from siasa.catalog import load_country_set
+from siasa.validation.cases import ValidationCase, compare_expected_vs_observed
 
 _SUPPORTED_LIVE_PILOT_COUNTRIES = {
     "UKR": {"gdelt_query": "Ukraine", "gdelt_code": "UP"},
@@ -97,6 +99,64 @@ def _default_domain_status_analyzer(domain: str, features):
 
 
 
+def _build_live_runtime_validation_view_model(
+    primary_country_id: str,
+    active_domains: list[str],
+    run_state,
+    normalized_records,
+    country_domain_statuses,
+    country_multi_domain_statuses,
+    snapshot,
+) -> dict[str, object] | None:
+    country_records = [record for record in normalized_records if record.country_id == primary_country_id]
+    observed_domains = sorted(country_domain_statuses.get(primary_country_id, {}).keys())
+    if not country_records or not observed_domains or primary_country_id not in country_multi_domain_statuses:
+        return None
+    timestamps = sorted(str(record.timestamp) for record in country_records)
+    reference_sources = sorted({record.provenance_source_id for record in country_records})
+    known_limitations = ["pilot_runtime_support_case_not_historical_backtest"]
+    if run_state.failed_sources:
+        known_limitations.append(f"failed_sources:{','.join(run_state.failed_sources)}")
+    validation_case = ValidationCase(
+        case_id=f"VAL-{primary_country_id}-LIVE-PILOT-SUPPORT",
+        country_id=primary_country_id,
+        case_name=f"Governed live runtime support case for {primary_country_id}",
+        case_type="pilot_runtime_support_case",
+        time_start=timestamps[0],
+        time_end=timestamps[-1],
+        expected_domains=list(active_domains),
+        expected_signal_pattern=(
+            "Governed live pilot should expose the configured active domains "
+            "and emit a reviewable validation artifact for the current bundle."
+        ),
+        reference_sources=reference_sources,
+        validation_goal=(
+            "Check validation artifact generation and expected-versus-observed "
+            "domain visibility for the governed live pilot bundle."
+        ),
+        known_limitations=known_limitations,
+        validation_metrics=["Artifact Presence", "Domain Match", "Status Match"],
+    )
+    observed_status = country_multi_domain_statuses[primary_country_id].status
+    comparison = compare_expected_vs_observed(
+        validation_case=validation_case,
+        observed_domains=observed_domains,
+        observed_status=observed_status,
+        expected_status=observed_status,
+    )
+    comparison["status_match"] = None
+    validation_view_model = build_validation_backtest_read_model(
+        validation_case=validation_case,
+        comparison=comparison,
+        reprocessing_comparison={},
+    )
+    validation_view_model["comparison_mode"] = "runtime_support_check"
+    validation_view_model["snapshot_id"] = snapshot.snapshot_id
+    validation_view_model["run_id"] = run_state.run_id
+    return validation_view_model
+
+
+
 def build_governed_live_orchestrator(
     *,
     repo_root: Path,
@@ -134,6 +194,38 @@ def build_governed_live_orchestrator(
         if len(resolved_country_ids) > 1
         else f"MVP-COUNTRIES-LIVE-{resolved_country_ids[0]}-v1"
     )
+
+    def _validation_view_model_builder(
+        _primary_country_id: str,
+        active_domains: list[str],
+        run_state,
+        normalized_records,
+        country_domain_statuses,
+        country_multi_domain_statuses,
+        snapshot,
+    ) -> dict[str, object] | None:
+        validation_country_id = next(
+            (
+                country_id
+                for country_id in resolved_country_ids
+                if country_id in country_multi_domain_statuses
+                and any(record.country_id == country_id for record in normalized_records)
+                and country_domain_statuses.get(country_id)
+            ),
+            None,
+        )
+        if validation_country_id is None:
+            return None
+        return _build_live_runtime_validation_view_model(
+            validation_country_id,
+            active_domains,
+            run_state,
+            normalized_records,
+            country_domain_statuses,
+            country_multi_domain_statuses,
+            snapshot,
+        )
+
     return DailyRunOrchestrator(
         adapters=adapters,
         normalizer=_normalizer,
@@ -150,6 +242,7 @@ def build_governed_live_orchestrator(
         algorithm_version=runtime_profile,
         data_version="governed-live-sources-v1",
         artifacts_output_dir=output_dir,
+        validation_view_model_builder=_validation_view_model_builder,
     )
 
 

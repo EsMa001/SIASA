@@ -47,6 +47,7 @@ def write_run_artifacts(
     country_reports: dict[str, GeneratedReport],
     annotation_records: list[AnnotationRecord] | None = None,
     baseline_mode: str = "Combined 30/90/365",
+    validation_view_model: dict[str, object] | None = None,
 ) -> RunArtifactBundle:
     output_dir.mkdir(parents=True, exist_ok=True)
     readmodels_dir = output_dir / "readmodels"
@@ -287,6 +288,11 @@ def write_run_artifacts(
     annotations_path = readmodels_dir / "annotations.json"
     annotations_path.write_text(json.dumps(build_annotations_view_model(annotation_records), indent=2, sort_keys=True))
     readmodel_paths.append(annotations_path)
+
+    if validation_view_model is not None:
+        validation_path = readmodels_dir / "validation_backtest.json"
+        validation_path.write_text(json.dumps(validation_view_model, indent=2, sort_keys=True))
+        readmodel_paths.append(validation_path)
 
     report_paths = []
     daily_report_path = reports_dir / "daily_snapshot.json"

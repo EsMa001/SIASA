@@ -276,6 +276,7 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
     source_coverage = json.loads((output_dir / "readmodels" / "source_coverage.json").read_text())
     world_map = json.loads((output_dir / "readmodels" / "world_map.json").read_text())
     system_status = json.loads((output_dir / "readmodels" / "system_status.json").read_text())
+    validation_backtest = json.loads((output_dir / "readmodels" / "validation_backtest.json").read_text())
     pol_profile = json.loads((output_dir / "readmodels" / "country_profiles" / "POL.json").read_text())
 
     assert [entry["source_id"] for entry in source_coverage["sources"]] == [
@@ -287,4 +288,146 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
     assert all(entry["source_id"] not in {"SRC-A", "SRC-B"} for entry in source_coverage["sources"])
     assert [country["country_id"] for country in world_map["countries"]] == ["POL", "UKR"]
     assert system_status["coverage"]["countries_total"] == 2
+    assert validation_backtest["country_id"] == "UKR"
+    assert validation_backtest["comparison_mode"] == "runtime_support_check"
+    assert validation_backtest["expected_domains"] == ["A", "B", "D"]
+    assert validation_backtest["observed_domains"] == ["A", "B", "D"]
+    assert validation_backtest["status_match"] is None
+    assert validation_backtest["review_verdict"] == "support_check"
+    assert "pilot_runtime_support_case_not_historical_backtest" in validation_backtest["known_limitations"]
     assert pol_profile["trends"]["yearly"]
+
+
+
+def test_governed_live_runtime_validation_artifact_uses_first_configured_country(tmp_path: Path) -> None:
+    output_dir = tmp_path / "live-runtime-ordered"
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        country_ids=("UKR", "POL"),
+        output_dir=output_dir,
+    )
+    orchestrator.adapters = [
+        FakeAdapter(
+            source_id="WB-INDICATORS",
+            domain="D",
+            _result=FetchResult(
+                records=[
+                    {"country_id": "POL", "timestamp": "2026-05-14", "signal_key": "gdp_growth", "value": 1.8, "freshness_hours": 24, "quality_flag": "world_bank_api"},
+                    {"country_id": "POL", "timestamp": "2026-05-14", "signal_key": "energy_price_stress", "value": 0.2, "freshness_hours": 24, "quality_flag": "world_bank_api"},
+                    {"country_id": "UKR", "timestamp": "2026-05-14", "signal_key": "gdp_growth", "value": 2.1, "freshness_hours": 24, "quality_flag": "world_bank_api"},
+                    {"country_id": "UKR", "timestamp": "2026-05-14", "signal_key": "energy_price_stress", "value": 0.4, "freshness_hours": 24, "quality_flag": "world_bank_api"},
+                ],
+                diagnostics="world_bank_fetch_ok",
+                is_success=True,
+            ),
+        ),
+        FakeAdapter(
+            source_id="SRC-GDELT-DOC",
+            domain="A",
+            _result=FetchResult(
+                records=[
+                    {"country_id": "POL", "timestamp": "2026-05-14T11:00:00Z", "signal_key": "article_count", "value": 8.0, "freshness_hours": 1, "quality_flag": "gdelt_doc_api"},
+                    {"country_id": "POL", "timestamp": "2026-05-14T11:00:00Z", "signal_key": "tone", "value": -0.4, "freshness_hours": 1, "quality_flag": "gdelt_doc_api"},
+                    {"country_id": "UKR", "timestamp": "2026-05-14T10:00:00Z", "signal_key": "article_count", "value": 10.0, "freshness_hours": 2, "quality_flag": "gdelt_doc_api"},
+                    {"country_id": "UKR", "timestamp": "2026-05-14T10:00:00Z", "signal_key": "tone", "value": -1.2, "freshness_hours": 2, "quality_flag": "gdelt_doc_api"},
+                ],
+                diagnostics="gdelt_doc_fetch_ok",
+                is_success=True,
+            ),
+        ),
+        FakeAdapter(
+            source_id="SRC-GDELT-EVENTS",
+            domain="B",
+            _result=FetchResult(
+                records=[
+                    {"country_id": "POL", "timestamp": "2026-05-14T11:00:00Z", "signal_key": "protest_event_count", "value": 2.0, "freshness_hours": 1, "quality_flag": "gdelt_events_export"},
+                    {"country_id": "UKR", "timestamp": "2026-05-14T10:00:00Z", "signal_key": "conflict_event_count", "value": 3.0, "freshness_hours": 1, "quality_flag": "gdelt_events_export"},
+                    {"country_id": "UKR", "timestamp": "2026-05-14T10:00:00Z", "signal_key": "violent_event_count", "value": 1.0, "freshness_hours": 1, "quality_flag": "gdelt_events_export"},
+                ],
+                diagnostics="gdelt_events_fetch_ok",
+                is_success=True,
+            ),
+        ),
+        FakeAdapter(
+            source_id="SRC-GDACS",
+            domain="B",
+            _result=FetchResult(
+                records=[
+                    {"country_id": "POL", "timestamp": "2026-05-14T09:30:00Z", "signal_key": "disaster_alert_level", "value": 1.0, "freshness_hours": 3, "quality_flag": "gdacs_rss"},
+                    {"country_id": "UKR", "timestamp": "2026-05-14T09:00:00Z", "signal_key": "disaster_alert_level", "value": 2.0, "freshness_hours": 4, "quality_flag": "gdacs_rss"},
+                ],
+                diagnostics="gdacs_fetch_ok",
+                is_success=True,
+            ),
+        ),
+    ]
+
+    result = orchestrator.run("RUN-LIVE-MULTI-ORDER-001")
+
+    assert result.run_state.status == "success"
+    validation_backtest = json.loads((output_dir / "readmodels" / "validation_backtest.json").read_text())
+    assert validation_backtest["country_id"] == "UKR"
+
+
+
+def test_governed_live_runtime_validation_artifact_falls_back_to_next_configured_country_with_data(tmp_path: Path) -> None:
+    output_dir = tmp_path / "live-runtime-fallback"
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        country_ids=("UKR", "POL"),
+        output_dir=output_dir,
+    )
+    orchestrator.adapters = [
+        FakeAdapter(
+            source_id="WB-INDICATORS",
+            domain="D",
+            _result=FetchResult(
+                records=[
+                    {"country_id": "POL", "timestamp": "2026-05-14", "signal_key": "gdp_growth", "value": 1.8, "freshness_hours": 24, "quality_flag": "world_bank_api"},
+                    {"country_id": "POL", "timestamp": "2026-05-14", "signal_key": "energy_price_stress", "value": 0.2, "freshness_hours": 24, "quality_flag": "world_bank_api"},
+                ],
+                diagnostics="world_bank_fetch_ok",
+                is_success=True,
+            ),
+        ),
+        FakeAdapter(
+            source_id="SRC-GDELT-DOC",
+            domain="A",
+            _result=FetchResult(
+                records=[
+                    {"country_id": "POL", "timestamp": "2026-05-14T11:00:00Z", "signal_key": "article_count", "value": 8.0, "freshness_hours": 1, "quality_flag": "gdelt_doc_api"},
+                    {"country_id": "POL", "timestamp": "2026-05-14T11:00:00Z", "signal_key": "tone", "value": -0.4, "freshness_hours": 1, "quality_flag": "gdelt_doc_api"},
+                ],
+                diagnostics="gdelt_doc_fetch_ok",
+                is_success=True,
+            ),
+        ),
+        FakeAdapter(
+            source_id="SRC-GDELT-EVENTS",
+            domain="B",
+            _result=FetchResult(
+                records=[
+                    {"country_id": "POL", "timestamp": "2026-05-14T11:00:00Z", "signal_key": "protest_event_count", "value": 2.0, "freshness_hours": 1, "quality_flag": "gdelt_events_export"},
+                ],
+                diagnostics="gdelt_events_fetch_ok",
+                is_success=True,
+            ),
+        ),
+        FakeAdapter(
+            source_id="SRC-GDACS",
+            domain="B",
+            _result=FetchResult(
+                records=[
+                    {"country_id": "POL", "timestamp": "2026-05-14T09:30:00Z", "signal_key": "disaster_alert_level", "value": 1.0, "freshness_hours": 3, "quality_flag": "gdacs_rss"},
+                ],
+                diagnostics="gdacs_fetch_ok",
+                is_success=True,
+            ),
+        ),
+    ]
+
+    result = orchestrator.run("RUN-LIVE-MULTI-FALLBACK-001")
+
+    assert result.run_state.status == "success"
+    validation_backtest = json.loads((output_dir / "readmodels" / "validation_backtest.json").read_text())
+    assert validation_backtest["country_id"] == "POL"

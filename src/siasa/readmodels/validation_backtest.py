@@ -13,7 +13,9 @@ def build_validation_backtest_read_model(
     missing_expected_domains = [domain for domain in expected_domains if domain not in observed_domains]
     unexpected_observed_domains = [domain for domain in observed_domains if domain not in expected_domains]
     status_match = comparison.get("status_match")
-    if status_match and not missing_expected_domains and not unexpected_observed_domains:
+    if status_match is None:
+        review_verdict = "support_check" if not missing_expected_domains and not unexpected_observed_domains else "support_check_with_gaps"
+    elif status_match and not missing_expected_domains and not unexpected_observed_domains:
         review_verdict = "match"
     elif status_match:
         review_verdict = "match_with_gaps"

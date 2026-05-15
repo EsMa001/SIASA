@@ -28,6 +28,18 @@ if TYPE_CHECKING:
 Normalizer = Callable[[str, str, list[dict[str, float]]], list[NormalizedRecord]]
 DomainStatusAnalyzer = Callable[[str, list[FeatureValue]], DomainStatusResult]
 MultiDomainStatusAnalyzer = Callable[[list[DomainStatusResult]], MultiDomainStatusResult]
+ValidationViewModelBuilder = Callable[
+    [
+        str,
+        list[str],
+        RunState,
+        list[NormalizedRecord],
+        dict[str, dict[str, DomainStatusResult]],
+        dict[str, MultiDomainStatusResult],
+        Snapshot,
+    ],
+    dict[str, object] | None,
+]
 
 
 @dataclass(frozen=True)
@@ -73,6 +85,7 @@ class DailyRunOrchestrator:
     annotation_records: list[AnnotationRecord] | None = None
     artifacts_output_dir: Path | None = None
     baseline_mode: str = "Combined 30/90/365"
+    validation_view_model_builder: ValidationViewModelBuilder | None = None
 
     def run(self, run_id: str) -> DailyRunResult:
         run_state = RunState.start(run_id)
@@ -236,6 +249,17 @@ class DailyRunOrchestrator:
             country_reports=country_reports,
         )
         artifact_bundle = None
+        validation_view_model = None
+        if self.validation_view_model_builder is not None:
+            validation_view_model = self.validation_view_model_builder(
+                primary_country_id,
+                list(self.active_domains),
+                run_state,
+                normalized_records,
+                country_domain_statuses,
+                country_multi_domain_statuses,
+                snapshot,
+            )
         if self.artifacts_output_dir is not None:
             from .artifacts import write_run_artifacts
 
@@ -253,6 +277,7 @@ class DailyRunOrchestrator:
                 country_reports=country_reports,
                 annotation_records=self.annotation_records or [],
                 baseline_mode=self.baseline_mode,
+                validation_view_model=validation_view_model,
             )
         return DailyRunResult(
             run_state=run_state,

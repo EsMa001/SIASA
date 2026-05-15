@@ -49,3 +49,33 @@ def test_validation_backtest_read_model_exposes_case_context_comparison_and_repr
     assert read_model["unexpected_observed_domains"] == []
     assert read_model["validation_metrics"] == ["Domain Match", "Status Match"]
     assert read_model["reprocessing_comparison"]["changed_versions"] == ["config_version", "mapping_version", "rule_version"]
+
+
+
+def test_validation_backtest_read_model_marks_runtime_support_checks_without_status_baseline() -> None:
+    case = ValidationCase(
+        case_id="VAL-UKR-LIVE-PILOT-SUPPORT",
+        country_id="UKR",
+        case_name="Governed live runtime support case for UKR",
+        case_type="pilot_runtime_support_case",
+        time_start="2024",
+        time_end="2026-05-15T05:30:00Z",
+        expected_domains=["A", "B", "D"],
+        expected_signal_pattern="Governed live pilot should expose the configured active domains and emit a reviewable validation artifact for the current bundle.",
+        reference_sources=["SRC-GDELT-DOC", "SRC-GDELT-EVENTS", "WB-INDICATORS"],
+        validation_goal="Check validation artifact generation and expected-versus-observed domain visibility for the governed live pilot bundle.",
+        known_limitations=["pilot_runtime_support_case_not_historical_backtest"],
+        validation_metrics=["Artifact Presence", "Domain Match", "Status Match"],
+    )
+    read_model = build_validation_backtest_read_model(
+        validation_case=case,
+        comparison={
+            "observed_domains": ["A", "B", "D"],
+            "domain_match_ratio": 1.0,
+            "status_match": None,
+        },
+        reprocessing_comparison={},
+    )
+
+    assert read_model["status_match"] is None
+    assert read_model["review_verdict"] == "support_check"
