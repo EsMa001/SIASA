@@ -38,6 +38,7 @@ def write_run_artifacts(
     output_dir: Path,
     run_state: RunState,
     fetch_metadata_records: list[FetchMetadataRecord],
+    raw_records: list[object],
     normalized_records: list[NormalizedRecord],
     features: list[FeatureValue],
     domain_statuses: dict[str, DomainStatusResult],
@@ -143,7 +144,9 @@ def write_run_artifacts(
         gap_details = _build_gap_details(
             country_id=country_id,
             missing_domains=missing_domains,
+            raw_records=raw_records,
             normalized_records=normalized_records,
+            fetch_metadata_records=fetch_metadata_records,
             fetch_status_by_source=fetch_status_by_source,
             source_domain_by_source=source_domain_by_source,
             source_countries_by_source=source_countries_by_source,
@@ -426,6 +429,8 @@ def _build_source_coverage_row(record: FetchMetadataRecord) -> dict[str, object]
         "history_horizon": "n/a",
         "freshness_hours": None,
         "confidence": None,
+        "record_count": record.record_count,
+        "diagnostics": record.diagnostics,
     }
 
 
@@ -485,30 +490,62 @@ def _build_gap_details(
     *,
     country_id: str,
     missing_domains: list[str],
+    raw_records: list[object],
     normalized_records: list[NormalizedRecord],
+    fetch_metadata_records: list[FetchMetadataRecord],
     fetch_status_by_source: dict[str, str],
     source_domain_by_source: dict[str, str],
     source_countries_by_source: dict[str, list[str] | None],
 ) -> list[dict[str, object]]:
     gap_details: list[dict[str, object]] = []
+    metadata_by_source = {record.source_id: record for record in fetch_metadata_records}
     for domain in missing_domains:
         domain_source_ids = sorted(
             source_id
             for source_id, source_domain in source_domain_by_source.items()
             if source_domain == domain and _source_applies_to_country(source_countries_by_source.get(source_id), country_id)
         )
+        country_domain_raw_records = [
+            raw_record
+            for raw_record in raw_records
+            if getattr(raw_record, "source_id", None) in domain_source_ids
+            and str(getattr(raw_record, "raw_payload", {}).get("country_id", "")).upper() == country_id
+        ]
         country_domain_records = [
             record for record in normalized_records if record.country_id == country_id and record.domain == domain
         ]
         if not domain_source_ids:
             reason = "not_configured_for_runtime"
-        elif country_domain_records:
-            reason = "filtered_by_feature_or_sufficiency_gate"
         elif any(fetch_status_by_source.get(source_id) == "failed" for source_id in domain_source_ids):
             reason = "source_failed_this_run"
-        else:
+        elif all((metadata_by_source.get(source_id).record_count if metadata_by_source.get(source_id) is not None else 0) == 0 for source_id in domain_source_ids):
+            reason = "zero_records_returned"
+        elif not country_domain_raw_records:
             reason = "no_usable_input_data"
-        gap_details.append({"domain": domain, "reason": reason, "source_ids": domain_source_ids})
+        elif not country_domain_records:
+            reason = "records_filtered_out_or_not_mapped"
+        else:
+            freshness_values = [
+                float(record.quality_context.get("freshness_hours"))
+                for record in country_domain_records
+                if isinstance(record.quality_context.get("freshness_hours"), (int, float))
+            ]
+            if freshness_values and min(freshness_values) > 168.0:
+                reason = "stale_source_window"
+            else:
+                reason = "filtered_by_feature_or_sufficiency_gate"
+        gap_details.append(
+            {
+                "domain": domain,
+                "reason": reason,
+                "source_ids": domain_source_ids,
+                "diagnostics_by_source": {
+                    source_id: metadata_by_source[source_id].diagnostics
+                    for source_id in domain_source_ids
+                    if source_id in metadata_by_source and metadata_by_source[source_id].diagnostics
+                },
+            }
+        )
     return gap_details
 
 
@@ -571,6 +608,7 @@ def _build_country_coverage_visibility(country_rows: list[dict[str, object]]) ->
                     "domain": str(detail.get("domain", "UNKNOWN")),
                     "reason": str(detail.get("reason", "unknown")),
                     "source_ids": [str(item) for item in detail.get("source_ids", [])],
+                    "diagnostics_by_source": {str(source_id): str(diagnostic) for source_id, diagnostic in dict(detail.get("diagnostics_by_source", {})).items()},
                 }
                 for detail in row.get("gap_details", [])
             ],

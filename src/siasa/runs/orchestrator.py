@@ -299,6 +299,7 @@ class DailyRunOrchestrator:
                 output_dir=self.artifacts_output_dir,
                 run_state=run_state,
                 fetch_metadata_records=fetch_metadata_records,
+                raw_records=raw_records,
                 normalized_records=normalized_records,
                 features=features,
                 domain_statuses=domain_statuses,

@@ -281,17 +281,41 @@ def _render_missing_domain_badges(items: list[Any]) -> str:
 
 
 
-def _render_gap_details(gap_details: list[dict[str, Any]]) -> str:
+def _source_anchor_id(source_id: str) -> str:
+    return f"source-{source_id}"
+
+
+
+def _render_gap_details(gap_details: list[dict[str, Any]], *, coverage_href_prefix: str = 'coverage.html') -> str:
     if not gap_details:
         return "<span class='uncertainty-badge uncertainty-none'>none</span>"
     return ''.join(
         "<div class='gap-detail'>"
         f"<strong>{html.escape(str(detail.get('domain', 'UNKNOWN')))}</strong>: "
         f"{html.escape(str(detail.get('reason', 'unknown')))}"
-        f" | sources={html.escape(', '.join(str(item) for item in detail.get('source_ids', [])) or 'none')}"
+        f" | sources={''.join(_render_gap_source_link(source_id, coverage_href_prefix) for source_id in detail.get('source_ids', [])) or 'none'}"
+        f"{_render_gap_diagnostics(detail.get('diagnostics_by_source', {}))}"
         "</div>"
         for detail in gap_details
     )
+
+
+
+def _render_gap_source_link(source_id: Any, coverage_href_prefix: str) -> str:
+    source_label = str(source_id)
+    href = f"{coverage_href_prefix}#{_source_anchor_id(source_label)}"
+    return f"<a href='{html.escape(href)}'>{html.escape(source_label)}</a> "
+
+
+
+def _render_gap_diagnostics(diagnostics_by_source: dict[str, Any]) -> str:
+    if not diagnostics_by_source:
+        return ''
+    diagnostics = '; '.join(
+        f"{source_id}: {diagnostic}"
+        for source_id, diagnostic in diagnostics_by_source.items()
+    )
+    return f" | diagnostics={html.escape(diagnostics)}"
 
 
 
@@ -864,7 +888,7 @@ def _render_country(
         f"<p>Expected domains: {html.escape(', '.join(str(item) for item in domain_gap_summary.get('expected_domains', [])) or 'none')}</p>"
         f"<p>Observed domains: {html.escape(', '.join(str(item) for item in domain_gap_summary.get('observed_domains', [])) or 'none')}</p>"
         f"<p>Missing domains: {html.escape(', '.join(missing_domains) or 'none')}</p>"
-        f"<h4>Gap Cause Details</h4>{_render_gap_details(gap_details)}"
+        f"<h4>Gap Cause Details</h4>{_render_gap_details(gap_details, coverage_href_prefix='../coverage.html')}"
         "<h3>Why this country is in this state</h3>"
         f"<p>{html.escape(str(explanation_summary))}</p>"
         "<h3>Domain States</h3>"
@@ -923,11 +947,13 @@ def _render_source_coverage(
 ) -> str:
     rows = ''.join(
         "<tr>"
-        f"<td>{html.escape(str(source.get('source_id', '')))}</td>"
+        f"<td id='{html.escape(_source_anchor_id(str(source.get('source_id', ''))))}'>{html.escape(str(source.get('source_id', '')))}</td>"
         f"<td>{html.escape(str(source.get('status', '')))}</td>"
         f"<td>{html.escape(str(source.get('history_horizon', '')))}</td>"
         f"<td>{html.escape(str(source.get('freshness_hours', '')))}</td>"
         f"<td>{html.escape(str(source.get('confidence', '')))}</td>"
+        f"<td>{html.escape(str(source.get('record_count', '')))}</td>"
+        f"<td>{html.escape(str(source.get('diagnostics', '')))}</td>"
         "</tr>"
         for source in source_coverage_read_model.get('sources', [])
     )
@@ -963,7 +989,7 @@ def _render_source_coverage(
         "<p>Confidence Band highlights source trust at a glance while keeping freshness visible.</p>"
         "<table><thead><tr><th>Source</th><th>Confidence Band</th><th>Confidence Meter</th><th>Freshness (h)</th><th>Status</th></tr></thead>"
         f"<tbody>{matrix_rows}</tbody></table>"
-        "<table><thead><tr><th>Source</th><th>Status</th><th>History Horizon</th><th>Freshness (h)</th><th>Confidence</th></tr></thead>"
+        "<table><thead><tr><th>Source</th><th>Status</th><th>History Horizon</th><th>Freshness (h)</th><th>Confidence</th><th>Record Count</th><th>Diagnostics</th></tr></thead>"
         f"<tbody>{rows}</tbody></table>"
         f"<h3>Failed Sources</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in source_coverage_read_model.get('failed_sources', []))}</ul>"
         f"<h3>Missing Sources</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in source_coverage_read_model.get('missing_sources', []))}</ul>"

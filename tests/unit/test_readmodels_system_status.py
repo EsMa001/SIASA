@@ -34,7 +34,7 @@ def test_system_status_read_model_exposes_run_status_operational_scope_and_avail
                     "source_depth_band": "minimal",
                     "missing_domains": ["D"],
                     "missing_domain_count": 1,
-                    "gap_details": [{"domain": "D", "reason": "source_failed_this_run", "source_ids": ["SRC-D"]}],
+                    "gap_details": [{"domain": "D", "reason": "source_failed_this_run", "source_ids": ["SRC-D"], "diagnostics_by_source": {"SRC-D": "timeout"}}],
                 },
             ],
             "missing_domain_totals": {"D": 1},
@@ -63,6 +63,7 @@ def test_system_status_read_model_exposes_run_status_operational_scope_and_avail
             "domain": "D",
             "reason": "source_failed_this_run",
             "source_ids": ["SRC-D"],
+            "diagnostics_by_source": {"SRC-D": "timeout"},
         }
     ]
     assert read_model["country_coverage_visibility"]["missing_domain_totals"] == {"D": 1}

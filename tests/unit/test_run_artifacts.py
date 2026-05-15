@@ -352,7 +352,7 @@ def test_daily_run_orchestrator_records_country_gap_visibility_in_system_status(
     assert result.artifact_bundle is not None
     assert pol_profile["domain_gap_summary"]["missing_domains"] == ["B"]
     assert pol_profile["domain_gap_summary"]["gap_details"] == [
-        {"domain": "B", "reason": "no_usable_input_data", "source_ids": ["SRC-B"]}
+        {"domain": "B", "reason": "no_usable_input_data", "source_ids": ["SRC-B"], "diagnostics_by_source": {}}
     ]
     assert system_status["country_coverage_visibility"]["country_gap_rows"] == [
         {
@@ -362,7 +362,7 @@ def test_daily_run_orchestrator_records_country_gap_visibility_in_system_status(
             "source_depth_band": "minimal",
             "missing_domains": ["B"],
             "missing_domain_count": 1,
-            "gap_details": [{"domain": "B", "reason": "no_usable_input_data", "source_ids": ["SRC-B"]}],
+            "gap_details": [{"domain": "B", "reason": "no_usable_input_data", "source_ids": ["SRC-B"], "diagnostics_by_source": {}}],
         }
     ]
     assert system_status["country_coverage_visibility"]["missing_domain_totals"] == {"B": 1}
@@ -412,10 +412,136 @@ def test_daily_run_orchestrator_uses_country_specific_source_scope_for_gap_reaso
 
     assert result.artifact_bundle is not None
     assert pol_profile["domain_gap_summary"]["gap_details"] == [
-        {"domain": "B", "reason": "not_configured_for_runtime", "source_ids": []}
+        {"domain": "B", "reason": "not_configured_for_runtime", "source_ids": [], "diagnostics_by_source": {}}
     ]
     assert system_status["country_coverage_visibility"]["country_gap_rows"][0]["gap_details"] == [
-        {"domain": "B", "reason": "not_configured_for_runtime", "source_ids": []}
+        {"domain": "B", "reason": "not_configured_for_runtime", "source_ids": [], "diagnostics_by_source": {}}
+    ]
+
+
+
+def test_daily_run_orchestrator_marks_zero_record_gap_causes(tmp_path: Path) -> None:
+    orchestrator = DailyRunOrchestrator(
+        adapters=[
+            FakeAdapter(
+                source_id="SRC-A",
+                domain="A",
+                _result=FetchResult(
+                    records=[
+                        {"country_id": "POL", "signal_key": "article_count", "value": 5.0, "expected_source_count": 1, "freshness_hours": 8},
+                        {"country_id": "POL", "signal_key": "tone", "value": 0.1, "expected_source_count": 1, "freshness_hours": 8},
+                    ]
+                ),
+            ),
+            ScopedFakeAdapter(source_id="SRC-B", domain="B", country_ids=("POL",), _result=FetchResult(records=[], diagnostics="empty_window", is_success=True)),
+        ],
+        normalizer=_normalize,
+        feature_services=[DomainAFeatureService(), DomainBFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A", "B"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+        artifacts_output_dir=tmp_path / "bundle-zero-records",
+    )
+
+    result = orchestrator.run(run_id="RUN-206")
+    pol_profile = json.loads((tmp_path / "bundle-zero-records" / "readmodels" / "country_profiles" / "POL.json").read_text())
+
+    assert result.artifact_bundle is not None
+    assert pol_profile["domain_gap_summary"]["gap_details"] == [
+        {"domain": "B", "reason": "zero_records_returned", "source_ids": ["SRC-B"], "diagnostics_by_source": {"SRC-B": "empty_window"}}
+    ]
+
+
+
+def test_daily_run_orchestrator_marks_filtered_record_gap_causes(tmp_path: Path) -> None:
+    def _dropping_normalizer(source_id: str, domain: str, records: list[dict[str, float]]) -> list[NormalizedRecord]:
+        if source_id == "SRC-B":
+            return []
+        return _normalize(source_id, domain, records)
+
+    orchestrator = DailyRunOrchestrator(
+        adapters=[
+            FakeAdapter(
+                source_id="SRC-A",
+                domain="A",
+                _result=FetchResult(
+                    records=[
+                        {"country_id": "POL", "signal_key": "article_count", "value": 5.0, "expected_source_count": 1, "freshness_hours": 8},
+                        {"country_id": "POL", "signal_key": "tone", "value": 0.1, "expected_source_count": 1, "freshness_hours": 8},
+                    ]
+                ),
+            ),
+            ScopedFakeAdapter(
+                source_id="SRC-B",
+                domain="B",
+                country_ids=("POL",),
+                _result=FetchResult(records=[{"country_id": "POL", "signal_key": "conflict_event_count", "value": 2.0, "expected_source_count": 1, "freshness_hours": 12}], diagnostics="fetched_but_filtered", is_success=True),
+            ),
+        ],
+        normalizer=_dropping_normalizer,
+        feature_services=[DomainAFeatureService(), DomainBFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A", "B"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+        artifacts_output_dir=tmp_path / "bundle-filtered-records",
+    )
+
+    result = orchestrator.run(run_id="RUN-207")
+    pol_profile = json.loads((tmp_path / "bundle-filtered-records" / "readmodels" / "country_profiles" / "POL.json").read_text())
+
+    assert result.artifact_bundle is not None
+    assert pol_profile["domain_gap_summary"]["gap_details"] == [
+        {"domain": "B", "reason": "records_filtered_out_or_not_mapped", "source_ids": ["SRC-B"], "diagnostics_by_source": {"SRC-B": "fetched_but_filtered"}}
+    ]
+
+
+
+def test_daily_run_orchestrator_marks_stale_gap_causes(tmp_path: Path) -> None:
+    orchestrator = DailyRunOrchestrator(
+        adapters=[
+            FakeAdapter(
+                source_id="SRC-A",
+                domain="A",
+                _result=FetchResult(
+                    records=[
+                        {"country_id": "POL", "signal_key": "article_count", "value": 5.0, "expected_source_count": 1, "freshness_hours": 8},
+                        {"country_id": "POL", "signal_key": "tone", "value": 0.1, "expected_source_count": 1, "freshness_hours": 8},
+                    ]
+                ),
+            ),
+            ScopedFakeAdapter(
+                source_id="SRC-B",
+                domain="B",
+                country_ids=("POL",),
+                _result=FetchResult(records=[{"country_id": "POL", "signal_key": "conflict_event_count", "value": 2.0, "expected_source_count": 1, "freshness_hours": 400}], diagnostics="stale_b_window", is_success=True),
+            ),
+        ],
+        normalizer=_normalize,
+        feature_services=[DomainAFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A", "B"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+        artifacts_output_dir=tmp_path / "bundle-stale-records",
+    )
+
+    result = orchestrator.run(run_id="RUN-208")
+    pol_profile = json.loads((tmp_path / "bundle-stale-records" / "readmodels" / "country_profiles" / "POL.json").read_text())
+
+    assert result.artifact_bundle is not None
+    assert pol_profile["domain_gap_summary"]["gap_details"] == [
+        {"domain": "B", "reason": "stale_source_window", "source_ids": ["SRC-B"], "diagnostics_by_source": {"SRC-B": "stale_b_window"}}
     ]
 
 

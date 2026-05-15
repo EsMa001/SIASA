@@ -55,7 +55,12 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             "explanation_summary": "Escalation is primarily driven by Domain A with partial corroboration from Domain B.",
             "country_context": {"priority": "P1", "selection_type": "Core Focus", "region": "Europe / Black Sea"},
             "source_depth": {"source_ids": ["SRC-A", "SRC-B"], "source_count": 2},
-            "domain_gap_summary": {"expected_domains": ["A", "B", "D"], "observed_domains": ["A", "B", "D"], "missing_domains": []},
+            "domain_gap_summary": {
+                "expected_domains": ["A", "B", "D"],
+                "observed_domains": ["A", "B", "D"],
+                "missing_domains": [],
+                "gap_details": [{"domain": "D", "reason": "source_failed_this_run", "source_ids": ["SRC-D"], "diagnostics_by_source": {"SRC-D": "timeout"}}],
+            },
         }
     }
     domain_details = {
@@ -76,8 +81,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     }
     source_coverage = {
         "sources": [
-            {"source_id": "SRC-A", "status": "success", "history_horizon": "3y", "freshness_hours": 6, "confidence": 0.9},
-            {"source_id": "ACLED", "status": "prepared_adapter", "history_horizon": "n/a", "freshness_hours": None, "confidence": None},
+            {"source_id": "SRC-A", "status": "success", "history_horizon": "3y", "freshness_hours": 6, "confidence": 0.9, "record_count": 12, "diagnostics": "fetch_ok"},
+            {"source_id": "ACLED", "status": "prepared_adapter", "history_horizon": "n/a", "freshness_hours": None, "confidence": None, "record_count": 0, "diagnostics": "not_enabled"},
         ],
         "failed_sources": ["SRC-B"],
         "missing_sources": ["SRC-C"],
@@ -203,7 +208,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                     "source_depth_band": "moderate",
                     "missing_domains": ["D"],
                     "missing_domain_count": 1,
-                    "gap_details": [{"domain": "D", "reason": "source_failed_this_run", "source_ids": ["SRC-D"]}],
+                    "gap_details": [{"domain": "D", "reason": "source_failed_this_run", "source_ids": ["SRC-D"], "source_links": ["coverage.html#source-SRC-D"]}],
                 }
             ],
             "missing_domain_totals": {"D": 1},
@@ -275,6 +280,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Gap Cause" in index_html
     assert "moderate" in index_html
     assert "source_failed_this_run" in index_html
+    assert "coverage.html#source-SRC-D" in index_html
     assert "SRC-D" in index_html
     assert "Support Status" in index_html
     assert "supported" in index_html
@@ -290,6 +296,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "SRC-A" in country_html and "SRC-B" in country_html
     assert "Domain Gap Summary" in country_html
     assert "Gap Cause Details" in country_html
+    assert "../coverage.html#source-SRC-D" in country_html
     assert "uncertainty-badge" in country_html
     assert "Why this country is in this state" in country_html
     assert "Escalation is primarily driven by Domain A with partial corroboration from Domain B." in country_html
@@ -318,6 +325,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Country Coverage / Gap Matrix" in coverage_html
     assert "Gap Cause" in coverage_html
     assert "source_failed_this_run" in coverage_html
+    assert "source-SRC-A" in coverage_html
+    assert "Diagnostics" in coverage_html
+    assert "fetch_ok" in coverage_html
     assert "Confidence Band" in coverage_html
     assert "partial_success" in coverage_html
     assert "failed_source:SRC-B" in coverage_html
@@ -819,8 +829,8 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
         json.dumps(
             {
                 "sources": [
-                    {"source_id": "SRC-A", "status": "success", "history_horizon": "3y", "freshness_hours": 6, "confidence": 0.9},
-                    {"source_id": "SRC-B", "status": "success", "history_horizon": "3y", "freshness_hours": 12, "confidence": 0.8},
+                    {"source_id": "SRC-A", "status": "success", "history_horizon": "3y", "freshness_hours": 6, "confidence": 0.9, "record_count": 5, "diagnostics": "fetch_ok"},
+                    {"source_id": "SRC-B", "status": "success", "history_horizon": "3y", "freshness_hours": 12, "confidence": 0.8, "record_count": 3, "diagnostics": "fetch_ok"},
                 ],
                 "failed_sources": [],
                 "missing_sources": [],
