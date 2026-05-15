@@ -59,6 +59,48 @@ def test_build_governed_live_orchestrator_supports_multi_country_live_pilot() ->
 
 
 
+def test_build_governed_live_orchestrator_supports_representative_pilot_set() -> None:
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        pilot_set="representative",
+    )
+
+    world_bank = orchestrator.adapters[0]
+    gdelt_doc = orchestrator.adapters[1]
+    gdelt_events = orchestrator.adapters[2]
+    gdacs = orchestrator.adapters[3]
+
+    assert world_bank.country_ids == ("UKR", "POL", "ISR", "TWN")
+    assert gdelt_doc.country_queries == {
+        "UKR": "Ukraine",
+        "POL": "Poland",
+        "ISR": "Israel",
+        "TWN": "Taiwan",
+    }
+    assert gdelt_events.country_codes == {
+        "UKR": "UP",
+        "POL": "PL",
+        "ISR": "IS",
+        "TWN": "TW",
+    }
+    assert gdacs.country_ids == {"UKR", "POL", "ISR", "TWN"}
+
+
+
+def test_build_governed_live_orchestrator_rejects_combined_pilot_set_and_explicit_countries() -> None:
+    try:
+        build_governed_live_orchestrator(
+            repo_root=REPO_ROOT,
+            country_ids=("UKR", "POL"),
+            pilot_set="representative",
+        )
+    except ValueError as exc:
+        assert "cannot be combined" in str(exc)
+    else:
+        raise AssertionError("Expected representative pilot set with explicit countries to raise ValueError")
+
+
+
 def test_build_governed_live_orchestrator_rejects_unsupported_country_for_gdelt_events() -> None:
     try:
         build_governed_live_orchestrator(repo_root=REPO_ROOT, country_id="CHE")
@@ -112,6 +154,29 @@ def test_governed_live_runtime_module_accepts_repeated_country_ids_for_multi_cou
 
     assert result.returncode == 0
     assert "Governed live pilot country ISO3" in result.stdout
+
+
+
+def test_governed_live_runtime_module_accepts_representative_pilot_set_flag() -> None:
+    result = subprocess.run(
+        [
+            "/opt/hermes/.venv/bin/python",
+            "-m",
+            "siasa.runs.live_runtime",
+            "--pilot-set",
+            "representative",
+            "--help",
+        ],
+        cwd=REPO_ROOT,
+        env={"PYTHONPATH": "src"},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "--pilot-set" in result.stdout
+    assert "representative" in result.stdout
 
 
 

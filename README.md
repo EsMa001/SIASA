@@ -62,6 +62,10 @@ Governed live-source runtime erzeugen:
 
 `PYTHONPATH=src /opt/hermes/.venv/bin/python -m siasa.runs.live_runtime --country-id UKR --country-id POL --run-id RUN-LIVE-MULTI-001 --output-dir build/run_artifacts/latest`
 
+oder als repräsentatives Pilot-Subset:
+
+`PYTHONPATH=src /opt/hermes/.venv/bin/python -m siasa.runs.live_runtime --pilot-set representative --run-id RUN-LIVE-REP-001 --output-dir build/run_artifacts/latest`
+
 oder nach Installation:
 
 `siasa-live-runtime --country-id UKR --country-id POL --run-id RUN-LIVE-MULTI-001 --output-dir build/run_artifacts/latest`
@@ -69,6 +73,7 @@ oder nach Installation:
 Aktueller Runtime-Stand:
 - der Runtime-Pfad unterstützt jetzt Single- und Multi-Country-Runs für die aktuell freigegebenen Live-Pilot-Länder `UKR`, `POL`, `ISR`, `TWN`
 - wiederhole `--country-id`, um mehrere Länder in einem Run zu verarbeiten
+- alternativ wähle `--pilot-set representative`, um das aktuell freigegebene repräsentative Teilset `UKR`, `POL`, `ISR`, `TWN` in einem Schritt zu fahren
 - der Pilot ersetzt die bisherigen rein synthetischen `SRC-A` / `SRC-B` Latest-Artefakte durch reale Source-IDs (`WB-INDICATORS`, `SRC-GDELT-DOC`, `SRC-GDELT-EVENTS`, `SRC-GDACS`)
 - reale Multi-Country-Runs bleiben quellenabhängig: einzelne Sources können weiterhin partiell fehlschlagen und als `partial_success` im Bundle erscheinen
 - der governed Live-Runtime-Pfad erzeugt jetzt zusätzlich `readmodels/validation_backtest.json` als transparenten `runtime_support_check`; diese Sicht ist explizit keine historische Referenzfall-Backtest-Wertung

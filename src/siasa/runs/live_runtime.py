@@ -25,6 +25,21 @@ _SUPPORTED_LIVE_PILOT_COUNTRIES = {
     "TWN": {"gdelt_query": "Taiwan", "gdelt_code": "TW"},
 }
 
+_REPRESENTATIVE_LIVE_PILOT_SET = ("UKR", "POL", "ISR", "TWN")
+
+
+
+def _resolve_requested_country_ids(
+    country_id: str,
+    country_ids: tuple[str, ...] | None = None,
+    pilot_set: str | None = None,
+) -> tuple[str, ...]:
+    if pilot_set == "representative":
+        if country_ids:
+            raise ValueError("pilot_set=representative cannot be combined with explicit country_ids")
+        return _REPRESENTATIVE_LIVE_PILOT_SET
+    return _normalize_country_ids(country_id, country_ids)
+
 
 
 def _normalize_country_ids(country_id: str, country_ids: tuple[str, ...] | None = None) -> tuple[str, ...]:
@@ -162,9 +177,10 @@ def build_governed_live_orchestrator(
     repo_root: Path,
     country_id: str = "UKR",
     country_ids: tuple[str, ...] | None = None,
+    pilot_set: str | None = None,
     output_dir: Path | None = None,
 ) -> DailyRunOrchestrator:
-    resolved_country_ids = _normalize_country_ids(country_id, country_ids)
+    resolved_country_ids = _resolve_requested_country_ids(country_id, country_ids, pilot_set)
     mappings = _build_normalization_mappings()
     country_queries: dict[str, str] = {}
     country_codes: dict[str, str] = {}
@@ -253,12 +269,14 @@ def run_governed_live_pipeline(
     run_id: str,
     country_id: str = "UKR",
     country_ids: tuple[str, ...] | None = None,
+    pilot_set: str | None = None,
     output_dir: Path | None = None,
 ) -> DailyRunResult:
     orchestrator = build_governed_live_orchestrator(
         repo_root=repo_root,
         country_id=country_id,
         country_ids=country_ids,
+        pilot_set=pilot_set,
         output_dir=output_dir,
     )
     return orchestrator.run(run_id)
@@ -284,6 +302,11 @@ def main(argv: list[str] | None = None) -> int:
         ),
     )
     parser.add_argument(
+        "--pilot-set",
+        choices=["representative"],
+        help="Named governed live pilot subset. 'representative' expands to UKR,POL,ISR,TWN.",
+    )
+    parser.add_argument(
         "--run-id",
         default="RUN-LIVE-001",
         help="Run identifier to stamp into artifacts.",
@@ -294,7 +317,11 @@ def main(argv: list[str] | None = None) -> int:
         help="Artifact output directory.",
     )
     args = parser.parse_args(argv)
-    resolved_country_ids = _normalize_country_ids("UKR", tuple(args.country_ids) if args.country_ids else None)
+    resolved_country_ids = _resolve_requested_country_ids(
+        "UKR",
+        tuple(args.country_ids) if args.country_ids else None,
+        args.pilot_set,
+    )
 
     result = run_governed_live_pipeline(
         repo_root=Path(args.repo_root),
