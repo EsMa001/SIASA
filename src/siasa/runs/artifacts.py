@@ -50,6 +50,8 @@ def write_run_artifacts(
     baseline_mode: str = "Combined 30/90/365",
     validation_view_model: dict[str, object] | None = None,
     artifact_status: dict[str, dict[str, object | None]] | None = None,
+    source_domain_by_source: dict[str, str] | None = None,
+    source_countries_by_source: dict[str, list[str] | None] | None = None,
 ) -> RunArtifactBundle:
     output_dir.mkdir(parents=True, exist_ok=True)
     readmodels_dir = output_dir / "readmodels"
@@ -84,6 +86,9 @@ def write_run_artifacts(
 
     readmodel_paths = [world_map_path]
     source_context_by_source = _build_source_context(fetch_metadata_records)
+    fetch_status_by_source = {record.source_id: record.fetch_status for record in fetch_metadata_records}
+    source_domain_by_source = dict(source_domain_by_source or {})
+    source_countries_by_source = dict(source_countries_by_source or {})
     country_metadata = _load_country_metadata(Path(__file__).resolve().parents[3])
     country_reports_by_id = {country_id: report for country_id, report in country_reports.items()}
     annotation_records = annotation_records or []
@@ -132,13 +137,24 @@ def write_run_artifacts(
         country_context = dict(country_metadata.get(country_id, {}))
         country_source_ids = sorted({record.provenance_source_id for record in normalized_records if record.country_id == country_id})
         source_depth_band = _source_depth_band(len(country_source_ids))
+        missing_domains = [
+            domain for domain in snapshot.active_domains if domain not in country_domain_states
+        ]
+        gap_details = _build_gap_details(
+            country_id=country_id,
+            missing_domains=missing_domains,
+            normalized_records=normalized_records,
+            fetch_status_by_source=fetch_status_by_source,
+            source_domain_by_source=source_domain_by_source,
+            source_countries_by_source=source_countries_by_source,
+        )
         country_domain_gap_summary = {
             "expected_domains": list(snapshot.active_domains),
             "observed_domains": sorted(country_domain_states.keys()),
-            "missing_domains": [
-                domain for domain in snapshot.active_domains if domain not in country_domain_states
-            ],
+            "missing_domains": missing_domains,
         }
+        if gap_details:
+            country_domain_gap_summary["gap_details"] = gap_details
         country_coverage_rows.append(
             {
                 "country_id": country_id,
@@ -147,6 +163,7 @@ def write_run_artifacts(
                 "source_depth_band": source_depth_band,
                 "missing_domains": list(country_domain_gap_summary["missing_domains"]),
                 "missing_domain_count": len(country_domain_gap_summary["missing_domains"]),
+                "gap_details": gap_details,
             }
         )
         country_profile = build_country_profile_read_model(
@@ -464,6 +481,45 @@ def _load_country_metadata(repo_root: Path) -> dict[str, dict[str, str]]:
 
 
 
+def _build_gap_details(
+    *,
+    country_id: str,
+    missing_domains: list[str],
+    normalized_records: list[NormalizedRecord],
+    fetch_status_by_source: dict[str, str],
+    source_domain_by_source: dict[str, str],
+    source_countries_by_source: dict[str, list[str] | None],
+) -> list[dict[str, object]]:
+    gap_details: list[dict[str, object]] = []
+    for domain in missing_domains:
+        domain_source_ids = sorted(
+            source_id
+            for source_id, source_domain in source_domain_by_source.items()
+            if source_domain == domain and _source_applies_to_country(source_countries_by_source.get(source_id), country_id)
+        )
+        country_domain_records = [
+            record for record in normalized_records if record.country_id == country_id and record.domain == domain
+        ]
+        if not domain_source_ids:
+            reason = "not_configured_for_runtime"
+        elif country_domain_records:
+            reason = "filtered_by_feature_or_sufficiency_gate"
+        elif any(fetch_status_by_source.get(source_id) == "failed" for source_id in domain_source_ids):
+            reason = "source_failed_this_run"
+        else:
+            reason = "no_usable_input_data"
+        gap_details.append({"domain": domain, "reason": reason, "source_ids": domain_source_ids})
+    return gap_details
+
+
+
+def _source_applies_to_country(configured_countries: list[str] | None, country_id: str) -> bool:
+    if configured_countries is None:
+        return True
+    return country_id in configured_countries
+
+
+
 def _source_depth_band(source_count: int) -> str:
     if source_count <= 1:
         return "minimal"
@@ -510,6 +566,14 @@ def _build_country_coverage_visibility(country_rows: list[dict[str, object]]) ->
             "source_depth_band": str(row.get("source_depth_band", "minimal")),
             "missing_domains": [str(item) for item in row.get("missing_domains", [])],
             "missing_domain_count": int(row.get("missing_domain_count", 0)),
+            "gap_details": [
+                {
+                    "domain": str(detail.get("domain", "UNKNOWN")),
+                    "reason": str(detail.get("reason", "unknown")),
+                    "source_ids": [str(item) for item in detail.get("source_ids", [])],
+                }
+                for detail in row.get("gap_details", [])
+            ],
         }
         for row in country_rows
         if row.get("missing_domain_count", 0)

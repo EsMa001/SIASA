@@ -24,6 +24,17 @@ class FakeAdapter(SourceAdapter):
         return self._result
 
 
+@dataclass
+class ScopedFakeAdapter(SourceAdapter):
+    source_id: str
+    domain: str
+    country_ids: tuple[str, ...]
+    _result: FetchResult
+
+    def fetch(self) -> FetchResult:
+        return self._result
+
+
 def _normalize(source_id: str, domain: str, records: list[dict[str, float]]) -> list[NormalizedRecord]:
     normalized: list[NormalizedRecord] = []
     for index, record in enumerate(records, start=1):
@@ -340,6 +351,9 @@ def test_daily_run_orchestrator_records_country_gap_visibility_in_system_status(
 
     assert result.artifact_bundle is not None
     assert pol_profile["domain_gap_summary"]["missing_domains"] == ["B"]
+    assert pol_profile["domain_gap_summary"]["gap_details"] == [
+        {"domain": "B", "reason": "no_usable_input_data", "source_ids": ["SRC-B"]}
+    ]
     assert system_status["country_coverage_visibility"]["country_gap_rows"] == [
         {
             "country_id": "POL",
@@ -348,9 +362,61 @@ def test_daily_run_orchestrator_records_country_gap_visibility_in_system_status(
             "source_depth_band": "minimal",
             "missing_domains": ["B"],
             "missing_domain_count": 1,
+            "gap_details": [{"domain": "B", "reason": "no_usable_input_data", "source_ids": ["SRC-B"]}],
         }
     ]
     assert system_status["country_coverage_visibility"]["missing_domain_totals"] == {"B": 1}
+
+
+
+def test_daily_run_orchestrator_uses_country_specific_source_scope_for_gap_reasons(tmp_path: Path) -> None:
+    orchestrator = DailyRunOrchestrator(
+        adapters=[
+            FakeAdapter(
+                source_id="SRC-A",
+                domain="A",
+                _result=FetchResult(
+                    records=[
+                        {"country_id": "POL", "signal_key": "article_count", "value": 5.0, "expected_source_count": 1, "freshness_hours": 8},
+                        {"country_id": "POL", "signal_key": "tone", "value": 0.1, "expected_source_count": 1, "freshness_hours": 8},
+                    ]
+                ),
+            ),
+            ScopedFakeAdapter(
+                source_id="SRC-B",
+                domain="B",
+                country_ids=("UKR",),
+                _result=FetchResult(
+                    records=[
+                        {"country_id": "UKR", "signal_key": "conflict_event_count", "value": 4.0, "expected_source_count": 1, "freshness_hours": 12},
+                    ]
+                ),
+            ),
+        ],
+        normalizer=_normalize,
+        feature_services=[DomainAFeatureService(), DomainBFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A", "B"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+        artifacts_output_dir=tmp_path / "bundle-country-scope",
+    )
+
+    result = orchestrator.run(run_id="RUN-205")
+
+    system_status = json.loads((tmp_path / "bundle-country-scope" / "readmodels" / "system_status.json").read_text())
+    pol_profile = json.loads((tmp_path / "bundle-country-scope" / "readmodels" / "country_profiles" / "POL.json").read_text())
+
+    assert result.artifact_bundle is not None
+    assert pol_profile["domain_gap_summary"]["gap_details"] == [
+        {"domain": "B", "reason": "not_configured_for_runtime", "source_ids": []}
+    ]
+    assert system_status["country_coverage_visibility"]["country_gap_rows"][0]["gap_details"] == [
+        {"domain": "B", "reason": "not_configured_for_runtime", "source_ids": []}
+    ]
 
 
 

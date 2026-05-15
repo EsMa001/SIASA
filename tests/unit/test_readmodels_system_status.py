@@ -27,7 +27,15 @@ def test_system_status_read_model_exposes_run_status_operational_scope_and_avail
                 {"band": "deep", "country_count": 1, "countries": ["POL"]},
             ],
             "country_gap_rows": [
-                {"country_id": "ISR", "priority": "P2", "source_count": 1, "source_depth_band": "minimal", "missing_domains": ["D"], "missing_domain_count": 1},
+                {
+                    "country_id": "ISR",
+                    "priority": "P2",
+                    "source_count": 1,
+                    "source_depth_band": "minimal",
+                    "missing_domains": ["D"],
+                    "missing_domain_count": 1,
+                    "gap_details": [{"domain": "D", "reason": "source_failed_this_run", "source_ids": ["SRC-D"]}],
+                },
             ],
             "missing_domain_totals": {"D": 1},
         },
@@ -50,4 +58,11 @@ def test_system_status_read_model_exposes_run_status_operational_scope_and_avail
     }
     assert read_model["country_coverage_visibility"]["source_depth_band_summary"][2]["band"] == "deep"
     assert read_model["country_coverage_visibility"]["country_gap_rows"][0]["missing_domains"] == ["D"]
+    assert read_model["country_coverage_visibility"]["country_gap_rows"][0]["gap_details"] == [
+        {
+            "domain": "D",
+            "reason": "source_failed_this_run",
+            "source_ids": ["SRC-D"],
+        }
+    ]
     assert read_model["country_coverage_visibility"]["missing_domain_totals"] == {"D": 1}

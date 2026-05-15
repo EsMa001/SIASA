@@ -195,8 +195,18 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
         "country_coverage_visibility": {
             "priority_summary": [{"priority": "P1", "country_count": 1, "countries": ["UKR"]}],
             "source_depth_band_summary": [{"band": "moderate", "country_count": 1, "countries": ["UKR"]}],
-            "country_gap_rows": [],
-            "missing_domain_totals": {},
+            "country_gap_rows": [
+                {
+                    "country_id": "UKR",
+                    "priority": "P1",
+                    "source_count": 2,
+                    "source_depth_band": "moderate",
+                    "missing_domains": ["D"],
+                    "missing_domain_count": 1,
+                    "gap_details": [{"domain": "D", "reason": "source_failed_this_run", "source_ids": ["SRC-D"]}],
+                }
+            ],
+            "missing_domain_totals": {"D": 1},
         },
     }
 
@@ -262,7 +272,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Priority Coverage Summary" in index_html
     assert "Source Depth Band Summary" in index_html
     assert "Country Coverage / Gap Watchlist" in index_html
+    assert "Gap Cause" in index_html
     assert "moderate" in index_html
+    assert "source_failed_this_run" in index_html
+    assert "SRC-D" in index_html
     assert "Support Status" in index_html
     assert "supported" in index_html
 
@@ -276,6 +289,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Source Depth" in country_html
     assert "SRC-A" in country_html and "SRC-B" in country_html
     assert "Domain Gap Summary" in country_html
+    assert "Gap Cause Details" in country_html
     assert "uncertainty-badge" in country_html
     assert "Why this country is in this state" in country_html
     assert "Escalation is primarily driven by Domain A with partial corroboration from Domain B." in country_html
@@ -302,6 +316,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Trust Summary" in coverage_html
     assert "Coverage / Confidence Matrix" in coverage_html
     assert "Country Coverage / Gap Matrix" in coverage_html
+    assert "Gap Cause" in coverage_html
+    assert "source_failed_this_run" in coverage_html
     assert "Confidence Band" in coverage_html
     assert "partial_success" in coverage_html
     assert "failed_source:SRC-B" in coverage_html
@@ -776,7 +792,12 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
                         "region": "Europe / NATO East" if country_id == "POL" else "Europe / Black Sea",
                     },
                     "source_depth": {"source_ids": ["SRC-A"] if country_id == "POL" else ["SRC-A", "SRC-B"], "source_count": 1 if country_id == "POL" else 2},
-                    "domain_gap_summary": {"expected_domains": ["A", "B"], "observed_domains": sorted(domain_states.keys()), "missing_domains": ["B"] if country_id == "POL" else []},
+                    "domain_gap_summary": {
+                        "expected_domains": ["A", "B"],
+                        "observed_domains": sorted(domain_states.keys()),
+                        "missing_domains": ["B"] if country_id == "POL" else [],
+                        "gap_details": [{"domain": "B", "reason": "no_usable_input_data", "source_ids": ["SRC-B"]}] if country_id == "POL" else [],
+                    },
                 }
             )
         )
@@ -828,7 +849,15 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
                         {"band": "moderate", "country_count": 1, "countries": ["UKR"]},
                     ],
                     "country_gap_rows": [
-                        {"country_id": "POL", "priority": "P2", "source_count": 1, "source_depth_band": "minimal", "missing_domains": ["B"], "missing_domain_count": 1},
+                        {
+                            "country_id": "POL",
+                            "priority": "P2",
+                            "source_count": 1,
+                            "source_depth_band": "minimal",
+                            "missing_domains": ["B"],
+                            "missing_domain_count": 1,
+                            "gap_details": [{"domain": "B", "reason": "no_usable_input_data", "source_ids": ["SRC-B"]}],
+                        },
                     ],
                     "missing_domain_totals": {"B": 1},
                 },
@@ -875,7 +904,10 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "option value='P2'" in index_html
     assert "Source Depth Band Summary" in index_html
     assert "Country Coverage / Gap Watchlist" in index_html
+    assert "Gap Cause" in index_html
     assert "missing:B" in index_html
+    assert "no_usable_input_data" in index_html
+    assert "SRC-B" in index_html
     assert "data-priority='P2'" in index_html
     assert "P2" in index_html and "P1" in index_html
     assert "1 (SRC-A)" in index_html
@@ -908,6 +940,7 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "Country Coverage / Gap Matrix" in coverage_html
     assert "minimal" in coverage_html
     assert "missing:B" in coverage_html
+    assert "no_usable_input_data" in coverage_html
 
 
 

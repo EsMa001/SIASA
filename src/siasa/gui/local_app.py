@@ -281,6 +281,20 @@ def _render_missing_domain_badges(items: list[Any]) -> str:
 
 
 
+def _render_gap_details(gap_details: list[dict[str, Any]]) -> str:
+    if not gap_details:
+        return "<span class='uncertainty-badge uncertainty-none'>none</span>"
+    return ''.join(
+        "<div class='gap-detail'>"
+        f"<strong>{html.escape(str(detail.get('domain', 'UNKNOWN')))}</strong>: "
+        f"{html.escape(str(detail.get('reason', 'unknown')))}"
+        f" | sources={html.escape(', '.join(str(item) for item in detail.get('source_ids', [])) or 'none')}"
+        "</div>"
+        for detail in gap_details
+    )
+
+
+
 def _country_coverage_visibility_rows(system_status_read_model: dict[str, Any]) -> dict[str, Any]:
     visibility = system_status_read_model.get('country_coverage_visibility', {})
     if not isinstance(visibility, dict):
@@ -323,9 +337,10 @@ def _render_country_coverage_visibility(visibility: dict[str, Any]) -> str:
         f"<td>{html.escape(str(row.get('source_depth_band', 'n/a')))}</td>"
         f"<td>{html.escape(str(row.get('source_count', 0)))}</td>"
         f"<td>{_render_missing_domain_badges(list(row.get('missing_domains', [])))}</td>"
+        f"<td>{_render_gap_details(list(row.get('gap_details', [])))}</td>"
         "</tr>"
         for row in visibility.get('country_gap_rows', [])
-    ) or "<tr><td colspan='5'>No explicit country domain gaps recorded.</td></tr>"
+    ) or "<tr><td colspan='6'>No explicit country domain gaps recorded.</td></tr>"
     missing_domain_totals = ''.join(
         f"<li>{html.escape(str(domain))}: {html.escape(str(count))}</li>"
         for domain, count in sorted(visibility.get('missing_domain_totals', {}).items())
@@ -339,7 +354,7 @@ def _render_country_coverage_visibility(visibility: dict[str, Any]) -> str:
         f"<tbody>{depth_rows}</tbody></table>"
         "<h3>Country Coverage / Gap Watchlist</h3>"
         f"<div><strong>Missing domain totals</strong><ul>{missing_domain_totals}</ul></div>"
-        "<table><thead><tr><th>Country</th><th>Priority</th><th>Depth Band</th><th>Source Count</th><th>Missing Domains</th></tr></thead>"
+        "<table><thead><tr><th>Country</th><th>Priority</th><th>Depth Band</th><th>Source Count</th><th>Missing Domains</th><th>Gap Cause</th></tr></thead>"
         f"<tbody>{gap_rows}</tbody></table>"
     )
 
@@ -354,13 +369,14 @@ def _render_country_coverage_matrix(visibility: dict[str, Any]) -> str:
         f"<td>{html.escape(str(row.get('source_count', 0)))}</td>"
         f"<td>{html.escape(str(row.get('missing_domain_count', 0)))}</td>"
         f"<td>{_render_missing_domain_badges(list(row.get('missing_domains', [])))}</td>"
+        f"<td>{_render_gap_details(list(row.get('gap_details', [])))}</td>"
         "</tr>"
         for row in visibility.get('country_gap_rows', [])
-    ) or "<tr><td colspan='6'>No per-country coverage gaps recorded.</td></tr>"
+    ) or "<tr><td colspan='7'>No per-country coverage gaps recorded.</td></tr>"
     return (
         "<h3>Country Coverage / Gap Matrix</h3>"
         "<p>Priority, source depth, and explicit missing-domain badges stay visible alongside source-level coverage.</p>"
-        "<table><thead><tr><th>Country</th><th>Priority</th><th>Depth Band</th><th>Source Count</th><th>Gap Count</th><th>Missing Domains</th></tr></thead>"
+        "<table><thead><tr><th>Country</th><th>Priority</th><th>Depth Band</th><th>Source Count</th><th>Gap Count</th><th>Missing Domains</th><th>Gap Cause</th></tr></thead>"
         f"<tbody>{rows}</tbody></table>"
     )
 
@@ -826,6 +842,7 @@ def _render_country(
     domain_gap_summary = country_profile.get('domain_gap_summary', {})
     source_ids = [str(item) for item in source_depth.get('source_ids', [])]
     missing_domains = [str(item) for item in domain_gap_summary.get('missing_domains', [])]
+    gap_details = [dict(item) for item in domain_gap_summary.get('gap_details', []) if isinstance(item, dict)]
     trust_summary_html = (
         "<h3>Trust / Uncertainty Summary</h3>"
         f"<p>Coverage band: <strong>{html.escape(_ratio_band(country_profile.get('coverage')))}</strong> | Confidence band: <strong>{html.escape(_ratio_band(country_profile.get('confidence')))}</strong></p>"
@@ -847,6 +864,7 @@ def _render_country(
         f"<p>Expected domains: {html.escape(', '.join(str(item) for item in domain_gap_summary.get('expected_domains', [])) or 'none')}</p>"
         f"<p>Observed domains: {html.escape(', '.join(str(item) for item in domain_gap_summary.get('observed_domains', [])) or 'none')}</p>"
         f"<p>Missing domains: {html.escape(', '.join(missing_domains) or 'none')}</p>"
+        f"<h4>Gap Cause Details</h4>{_render_gap_details(gap_details)}"
         "<h3>Why this country is in this state</h3>"
         f"<p>{html.escape(str(explanation_summary))}</p>"
         "<h3>Domain States</h3>"

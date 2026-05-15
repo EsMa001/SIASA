@@ -69,6 +69,27 @@ class DailyRunResult:
     artifact_bundle: RunArtifactBundle | None = None
 
 
+
+def _adapter_country_scope(adapter: SourceAdapter) -> list[str] | None:
+    if hasattr(adapter, "country_ids"):
+        country_ids = getattr(adapter, "country_ids")
+        if country_ids is None:
+            return None
+        if isinstance(country_ids, dict):
+            return sorted(str(country_id).upper() for country_id in country_ids.keys())
+        return sorted(str(country_id).upper() for country_id in country_ids)
+    if hasattr(adapter, "country_queries"):
+        country_queries = getattr(adapter, "country_queries")
+        if isinstance(country_queries, dict):
+            return sorted(str(country_id).upper() for country_id in country_queries.keys())
+    if hasattr(adapter, "country_codes"):
+        country_codes = getattr(adapter, "country_codes")
+        if isinstance(country_codes, dict):
+            return sorted(str(country_id).upper() for country_id in country_codes.keys())
+    return None
+
+
+
 @dataclass
 class DailyRunOrchestrator:
     adapters: list[SourceAdapter]
@@ -290,6 +311,8 @@ class DailyRunOrchestrator:
                 baseline_mode=self.baseline_mode,
                 validation_view_model=validation_view_model,
                 artifact_status=artifact_status,
+                source_domain_by_source={adapter.source_id: adapter.domain for adapter in self.adapters},
+                source_countries_by_source={adapter.source_id: _adapter_country_scope(adapter) for adapter in self.adapters},
             )
 
         return DailyRunResult(
