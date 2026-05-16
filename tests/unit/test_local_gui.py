@@ -365,6 +365,12 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "<svg" in domain_html
     assert "SRC-A" in domain_html
     assert "Domain A spike is traceable to two closely coupled source clusters." in domain_html
+    assert "Comparison vs Baseline" in domain_html
+    assert "Current Window" in domain_html
+    assert "30d Baseline" in domain_html
+    assert "Baseline Delta Band" in domain_html
+    assert "Historical Window Context" in domain_html
+    assert "2026-05-11" in domain_html
     assert "../annotations.html?scope=domain&amp;linked_item=UKR%3AA&amp;annotation_type=lineage_note" in domain_html
     assert "Open Annotation Workflow for this Domain" in domain_html
 
@@ -403,6 +409,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     trends_html = (pages.output_dir / "trends.html").read_text()
     assert "Yearly Trend Page" in trends_html
     assert "Trend Chart" in trends_html
+    assert "Historical Comparison Summary" in trends_html
+    assert "Net Change" in trends_html
+    assert "Peak Label" in trends_html
+    assert "Current vs First Label" in trends_html
     assert "2026-01" in trends_html
     assert "<svg" in trends_html
 

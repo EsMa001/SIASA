@@ -144,6 +144,65 @@ def _render_line_chart(series: list[Any], *, label_key: str, chart_label: str) -
 
 
 
+def _delta_band(value: Any) -> str:
+    if not isinstance(value, (int, float)):
+        return 'unknown'
+    numeric = float(value)
+    if numeric >= 0.25:
+        return 'strong increase'
+    if numeric >= 0.05:
+        return 'increase'
+    if numeric > -0.05:
+        return 'stable'
+    if numeric > -0.25:
+        return 'decrease'
+    return 'strong decrease'
+
+
+
+def _render_historical_comparison_summary(series: list[Any], *, label_key: str) -> str:
+    points = _coerce_chart_points(series, label_key=label_key)
+    if not points:
+        return "<p>No historical comparison summary available.</p>"
+
+    first_label, first_value = points[0]
+    last_label, last_value = points[-1]
+    peak_label, peak_value = max(points, key=lambda item: item[1])
+    trough_label, trough_value = min(points, key=lambda item: item[1])
+    net_change = last_value - first_value
+    return (
+        "<h4>Historical Comparison Summary</h4>"
+        "<table><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>"
+        f"<tr><td>Current vs First Label</td><td>{html.escape(last_label)} vs {html.escape(first_label)}</td></tr>"
+        f"<tr><td>Net Change</td><td>{net_change:.2f}</td></tr>"
+        f"<tr><td>Peak Label</td><td>{html.escape(peak_label)}</td></tr>"
+        f"<tr><td>Peak Value</td><td>{peak_value:.2f}</td></tr>"
+        f"<tr><td>Lowest Label</td><td>{html.escape(trough_label)}</td></tr>"
+        f"<tr><td>Lowest Value</td><td>{trough_value:.2f}</td></tr>"
+        f"<tr><td>Observation Count</td><td>{len(points)}</td></tr>"
+        "</tbody></table>"
+    )
+
+
+
+def _render_baseline_comparison_summary(baseline_comparison: dict[str, Any], time_series: list[Any]) -> str:
+    current_window = baseline_comparison.get('current_window')
+    baseline_30d = baseline_comparison.get('baseline_30d')
+    delta_to_baseline = baseline_comparison.get('delta_to_baseline')
+    return (
+        "<h3>Comparison vs Baseline</h3>"
+        "<table><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>"
+        f"<tr><td>Current Window</td><td>{html.escape(str(current_window))}</td></tr>"
+        f"<tr><td>30d Baseline</td><td>{html.escape(str(baseline_30d))}</td></tr>"
+        f"<tr><td>Delta to Baseline</td><td>{html.escape(str(delta_to_baseline))}</td></tr>"
+        f"<tr><td>Baseline Delta Band</td><td>{html.escape(_delta_band(delta_to_baseline))}</td></tr>"
+        "</tbody></table>"
+        "<h3>Historical Window Context</h3>"
+        f"{_render_historical_comparison_summary(time_series, label_key='timestamp')}"
+    )
+
+
+
 def _load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text())
 
@@ -1118,7 +1177,8 @@ def _render_domain_detail(domain_detail: dict[str, Any], annotations_view_model:
         f"<p>Anomaly state: <span class='status'>{html.escape(str(domain_detail.get('anomaly_state', 'n/a')))}</span></p>"
         f"<h3>Time Series Chart</h3>{_render_line_chart(time_series, label_key='timestamp', chart_label='Domain time series') }"
         f"<h3>Time Series</h3>{_json_block(time_series)}"
-        f"<h3>Baseline Comparison</h3>{_json_block(domain_detail.get('baseline_comparison', {}))}"
+        f"{_render_baseline_comparison_summary(domain_detail.get('baseline_comparison', {}), time_series)}"
+        f"<h3>Raw Baseline Comparison Payload</h3>{_json_block(domain_detail.get('baseline_comparison', {}))}"
         f"<h3>Feature Values</h3>{_json_block(domain_detail.get('feature_values', []))}"
         f"<h3>Source Context</h3>{_json_block(domain_detail.get('source_context', []))}"
         f"<h3>Uncertainty</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in domain_detail.get('uncertainty', []))}</ul>"
@@ -1415,7 +1475,7 @@ def _render_trends(country_profile_read_models: dict[str, dict[str, Any]], *, na
         rows.append(
             f"<tr class='trend-row' data-country-id='{html.escape(country_id)}' data-trend-labels='{html.escape(labels)}' data-event-ids='{html.escape(','.join(event_ids))}'>"
             f"<td>{html.escape(country_id)}</td>"
-            f"<td><div class='trend-chart-block'><h4>Trend Chart</h4>{_render_line_chart(yearly, label_key='label', chart_label=f'{country_id} yearly trend')}</div><div class='trend-event-overlay' style='display:none'><h4>Event Overlay Summary</h4><ul>{event_overlay}</ul></div></td>"
+            f"<td><div class='trend-chart-block'><h4>Trend Chart</h4>{_render_line_chart(yearly, label_key='label', chart_label=f'{country_id} yearly trend')}{_render_historical_comparison_summary(yearly, label_key='label')}</div><div class='trend-event-overlay' style='display:none'><h4>Event Overlay Summary</h4><ul>{event_overlay}</ul></div></td>"
             f"<td>{html.escape(str(profile.get('multi_domain_status', 'n/a')))}</td>"
             "</tr>"
         )

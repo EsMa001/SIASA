@@ -97,7 +97,7 @@ Current repo-evidenced status on branch `hermes/repo-scaffold`:
 - P4 is now partly advanced:
   - source-gap transparency is visible through country gap watchlists, remediation watchlists, priority/depth summaries, and freshness overlays in overview/map-facing views
   - analyst annotation create/edit workflow now exists as a governed static-site workflow baseline
-  - baseline/historical comparison overlays beyond the current trend view are still open
+  - baseline/historical comparison overlays on trends and domain views now exist as analyst-friendly comparison summaries
 
 Interpretation:
 - the old roadmap order was correct as a program scaffold
@@ -317,23 +317,23 @@ The old order should now be updated to the current repo state.
 
 Recommended serial order from here:
 
-1. P4-WP-002 — baseline / historical comparison overlays on trends and domain views
-   - size: medium
-   - reason: this is now the clearest next analyst-value gap after annotation workflow closure
-2. P4-WP-003 — source-dependency / source-origin groundwork
+1. P4-WP-003 — source-dependency / source-origin groundwork
    - size: large
-   - reason: this opens the door to stakeholder categories F/G/H without overclaiming today
-3. broader live-source/runtime hardening beyond the current governed pilot subset
+   - reason: this is now the clearest next analyst-value gap after closing annotation workflow and trend/domain comparison overlays
+2. broader live-source/runtime hardening beyond the current governed pilot subset
    - size: medium to large
    - reason: remaining operational issues are now mostly source/runtime robustness rather than missing GUI transparency structure
-4. P1 closure package(s) for latest-bundle validation completeness, if readiness honesty remains blocked
+3. P1 closure package(s) for latest-bundle validation completeness, if readiness honesty remains blocked
    - size: small to medium
    - reason: readiness claims should not remain artificially weaker than the now richer GUI baseline
+4. P2 representative-breadth continuation packages
+   - size: medium to large
+   - reason: stakeholder breadth remains materially below the governed country set even though the path now exists
 
 Suggested planning cadence:
-- next work package: richer baseline/historical comparison overlays
-- following 1 to 2 work packages: source-origin groundwork and selected runtime hardening
-- after that: close the biggest remaining honesty/breadth gap shown by the capability matrix
+- next work package: source-origin groundwork
+- following 1 to 2 work packages: selected runtime hardening and/or validation completeness closure, depending on the capability matrix
+- after that: continue with the biggest remaining honesty/breadth delta shown by the matrix
 
 This updated order is recommended because breadth, transparency, and core GUI usability are now materially stronger than this document originally assumed.
 
@@ -367,12 +367,12 @@ Only then is the program close to the stakeholder intent, not merely the current
 
 ## 7. Immediate recommendation
 
-Next serial work package should be: P4-WP-002.
+Next serial work package should be: P4-WP-003.
 
 Current rationale:
-- the main remaining analyst-workflow gap in the GUI layer was the missing annotation create/edit workflow; this has now been closed with a governed static-site workflow baseline
-- the next highest-value step is therefore richer baseline / historical comparison overlays on trends and domain views
-- this builds directly on the now stronger artifact-backed GUI without reopening already-closed runtime honesty work
-- it improves analyst interpretation quality rather than only adding more transparency structure
+- the annotation create/edit workflow gap has been closed with a governed static-site workflow baseline
+- the trend/domain baseline-historical interpretation gap has now also been closed for the current static GUI baseline
+- the next highest-value analyst-depth step is therefore source-dependency / source-origin groundwork
+- after that, the capability matrix should determine whether runtime honesty closure (P1) or representative breadth expansion (P2) has become the larger remaining project-lead gap
 
-After that, proceed with P4-WP-003 and then broader live-source/runtime hardening.
+After that, proceed with the highest remaining honesty/breadth package and then broader live-source/runtime hardening.
