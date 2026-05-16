@@ -368,12 +368,13 @@ Only then is the program close to the stakeholder intent, not merely the current
 
 ## 7. Immediate recommendation
 
-Next serial work package should be: P1 closure package for latest-bundle validation completeness / readiness honesty.
+Next serial work package should be: broader live-source/runtime hardening.
 
 Current rationale:
 - the annotation create/edit workflow gap has been closed with a governed static-site workflow baseline
 - the trend/domain baseline-historical interpretation gap has been closed for the current static GUI baseline
 - the first source-dependency / source-origin groundwork slice is now also present in the traceability view without overclaiming full origin inference
-- the most important remaining project-level gap is therefore runtime honesty: the latest governed bundle should not remain weaker than the visible analyst-facing product baseline
+- the readiness-honesty closure slice is now also in place: artifact presence/absence is explicit and `validation_backtest` is visibly present in the current latest bundle
+- the most important remaining project-level gap is therefore operational robustness of the governed live runtime, not another GUI-only slice
 
-After that, proceed with the strongest remaining runtime-hardening or breadth package indicated by the capability matrix.
+After that, proceed with the strongest remaining breadth package indicated by the capability matrix.

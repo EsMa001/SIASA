@@ -461,6 +461,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Demo / Release Readiness" in readiness_html
     assert "Demo Verdict" in readiness_html
     assert "Release Verdict" in readiness_html
+    assert "Artifact Readiness Summary" in readiness_html
+    assert "validation_backtest" in readiness_html
+    assert "present" in readiness_html
     assert "ready" in readiness_html
     assert "blocked_by_known_gaps" in readiness_html
     assert "failed_source:SRC-B" in readiness_html
@@ -1186,6 +1189,9 @@ def test_load_site_payload_from_artifacts_falls_back_for_missing_readiness_suppo
     pages = build_local_mvp_site(output_dir=tmp_path / "site", **payload)
     readiness_html = (pages.output_dir / "readiness.html").read_text()
     assert "validation_backtest_absent:not_configured" in readiness_html
+    assert "Artifact Readiness Summary" in readiness_html
+    assert "validation_backtest" in readiness_html
+    assert "absent (not_configured)" in readiness_html
     assert "missing_validation_artifact" not in readiness_html
     assert "missing_annotations_artifact" not in readiness_html
     assert "missing_repo_closure_artifact" not in readiness_html

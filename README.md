@@ -18,6 +18,7 @@ SIASA ist ein V-Model-light / requirements-as-code Repository mit importierter S
 - browser-lokaler Annotation-Workflow in der GUI mit Create/Edit/Filter/History-Flow, Quick-Links aus Country-/Domain-Seiten und JSON-Export für governed Persistierung
 - analystenfreundliche Baseline-/Historical-Comparison-Summaries auf Trend- und Domain-Seiten für schnellere Interpretation von Delta, Peak und Verlaufskontext
 - Traceability-/Lineage-Sicht jetzt zusätzlich mit Source-Dependency-Cluster-Kandidaten und expliziter Source-Origin-Groundwork-Tabelle als artefaktbasiertem Ausgangspunkt für spätere Herkunfts-/Ausbreitungsanalyse
+- Readiness-Sicht jetzt zusätzlich mit einer expliziten Artifact Readiness Summary, damit Präsenz/Abwesenheit von `validation_backtest`, `traceability_lineage`, `repo_closure` und `annotations` sichtbar bleibt und nicht nur indirekt über Known Gaps erschlossen werden muss
 - Demo-/Release-Readiness-View als lokale GUI-Seite inklusive Checklisten und `readiness.json`-Artefakt
 - lokal ausführbare MVP-GUI-Baseline als statische HTML-Site unter `src/siasa/gui/local_app.py`
 

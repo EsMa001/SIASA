@@ -1400,6 +1400,26 @@ def _build_readiness_view_model(
         {"label": "Repo Closure Summary", "ready": repo_closure_view_model is not None},
         {"label": "Available Reports", "ready": bool(report_catalog)},
     ]
+    artifact_status = system_status_read_model.get("artifact_status", {}) if isinstance(system_status_read_model.get("artifact_status", {}), dict) else {}
+    artifact_presence_fallbacks = {
+        "validation_backtest": validation_view_model is not None,
+        "traceability_lineage": traceability_view_model is not None,
+        "repo_closure": repo_closure_view_model is not None,
+        "annotations": annotations_view_model is not None,
+    }
+    artifact_checks = [
+        {
+            "artifact": artifact_key,
+            "status": str(
+                (artifact_status.get(artifact_key, {}) or {}).get(
+                    "status",
+                    "present" if artifact_presence_fallbacks.get(artifact_key, False) else "unknown",
+                )
+            ),
+            "reason": (artifact_status.get(artifact_key, {}) or {}).get("reason"),
+        }
+        for artifact_key in ["validation_backtest", "traceability_lineage", "repo_closure", "annotations"]
+    ]
     demo_verdict = "ready" if all(check["ready"] for check in demo_checks) else "blocked"
     known_gaps = _deduplicated_strings(
         [str(item) for item in system_status_read_model.get("data_gaps", [])]
@@ -1418,6 +1438,7 @@ def _build_readiness_view_model(
         "release_verdict": release_verdict,
         "demo_checks": demo_checks,
         "evidence_checks": evidence_checks,
+        "artifact_checks": artifact_checks,
         "known_gaps": known_gaps,
         "report_count": len(report_catalog),
         "country_profile_count": len(country_profile_read_models),
@@ -1440,6 +1461,13 @@ def _render_readiness(readiness_view_model: dict[str, Any], *, nav_prefix: str =
         "</tr>"
         for check in readiness_view_model.get('evidence_checks', [])
     )
+    artifact_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(check.get('artifact', '')))}</td>"
+        f"<td>{html.escape(str(check.get('status', 'unknown')) if not check.get('reason') else f"{check.get('status', 'unknown')} ({check.get('reason')})")}</td>"
+        "</tr>"
+        for check in readiness_view_model.get('artifact_checks', [])
+    )
     known_gap_items = ''.join(
         f"<li>{html.escape(str(item))}</li>"
         for item in readiness_view_model.get('known_gaps', [])
@@ -1457,6 +1485,9 @@ def _render_readiness(readiness_view_model: dict[str, Any], *, nav_prefix: str =
         "<h3>Evidence Checklist</h3>"
         "<table><thead><tr><th>Evidence</th><th>Status</th></tr></thead>"
         f"<tbody>{evidence_rows}</tbody></table>"
+        "<h3>Artifact Readiness Summary</h3>"
+        "<table><thead><tr><th>Artifact</th><th>Status</th></tr></thead>"
+        f"<tbody>{artifact_rows}</tbody></table>"
         "<h3>Known Gaps Before Release</h3>"
         f"<ul>{known_gap_items}</ul>"
     )
