@@ -1,3 +1,4 @@
+import html
 import json
 import os
 import re
@@ -353,6 +354,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "ANN-001" in country_html
     assert "Analyst Annotations in Context" in country_html
     assert "Replicated agency report likely inflated country-level signal volume." in country_html
+    assert "../annotations.html?scope=country&amp;linked_item=UKR&amp;annotation_type=context_note" in country_html
+    assert "Open Annotation Workflow for this Country" in country_html
 
     domain_html = (pages.output_dir / "domains" / "UKR-A.html").read_text()
     assert "Domain Detail" in domain_html
@@ -362,6 +365,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "<svg" in domain_html
     assert "SRC-A" in domain_html
     assert "Domain A spike is traceable to two closely coupled source clusters." in domain_html
+    assert "../annotations.html?scope=domain&amp;linked_item=UKR%3AA&amp;annotation_type=lineage_note" in domain_html
+    assert "Open Annotation Workflow for this Domain" in domain_html
 
     coverage_html = (pages.output_dir / "coverage.html").read_text()
     assert "Source / Coverage View" in coverage_html
@@ -442,6 +447,21 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Analyst Annotations View" in annotations_html
     assert "Snapshot review pending source outage assessment." in annotations_html
     assert "UKR:A" in annotations_html
+    assert "Create / Edit Annotation Workflow" in annotations_html
+    assert "annotation-editor-form" in annotations_html
+    assert "annotation-scope-filter" in annotations_html
+    assert "annotation-review-filter" in annotations_html
+    assert "annotation-linked-item-filter" in annotations_html
+    assert "Save Draft Annotation" in annotations_html
+    assert "Export Draft Annotations" in annotations_html
+    assert "Draft History" in annotations_html
+    assert "siasa_annotation_workflow_v1" in annotations_html
+    assert "prefillAnnotationFromQuery" in annotations_html
+    assert "loadAnnotationIntoEditor" in annotations_html
+    assert "function mergedAnnotationsById()" in annotations_html
+    assert "const all = Array.from(mergedAnnotationsById().values());" in annotations_html
+    assert "function escapeAnnotationHtml(value)" in annotations_html
+    assert "${escapeAnnotationHtml(annotation.author || '')}" in annotations_html
 
 
 def test_build_local_mvp_site_suppresses_country_drill_down_links_without_generated_country_pages(tmp_path: Path) -> None:
@@ -550,7 +570,8 @@ def test_build_local_mvp_site_emits_only_resolvable_internal_html_links(tmp_path
     broken_links: list[tuple[str, str]] = []
     for html_file in html_files:
         for href in _internal_hrefs(html_file.read_text()):
-            if Path(href).suffix and not (html_file.parent / href).resolve().exists():
+            resolved_target = html.unescape(href).split('?', 1)[0].split('#', 1)[0]
+            if Path(resolved_target).suffix and not (html_file.parent / resolved_target).resolve().exists():
                 broken_links.append((html_file.relative_to(pages.output_dir).as_posix(), href))
 
     assert broken_links == []

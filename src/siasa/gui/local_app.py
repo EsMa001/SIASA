@@ -8,6 +8,7 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 from siasa.catalog import load_country_set
 from siasa.traceability.consistency import build_repo_closure_report
@@ -722,6 +723,29 @@ def _annotation_details_html(annotation_ids: list[str], annotations_view_model: 
 
 
 
+def _annotation_workflow_href(*, nav_prefix: str, scope: str, linked_item: str, annotation_type: str) -> str:
+    query = (
+        f"scope={quote(scope, safe='')}"
+        f"&linked_item={quote(linked_item, safe='')}"
+        f"&annotation_type={quote(annotation_type, safe='')}"
+    )
+    return f"{nav_prefix}annotations.html?{query}"
+
+
+
+def _annotation_workflow_seed(annotations_view_model: dict[str, Any]) -> str:
+    payload = {
+        'annotations': list(annotations_view_model.get('annotations', [])),
+        'allowed_scopes': ['country', 'domain', 'signal', 'event', 'snapshot'],
+        'allowed_annotation_types': ['context_note', 'false_positive_note', 'source_quality_note', 'lineage_note', 'review_note'],
+        'allowed_severity_assessments': ['not_security_relevant', 'relevant', 'uncertain'],
+        'allowed_confidence_assessments': ['low', 'medium', 'high'],
+        'allowed_review_statuses': ['unreviewed', 'draft', 'reviewed', 'accepted', 'rejected'],
+    }
+    return json.dumps(payload, sort_keys=True).replace('</', '<\\/')
+
+
+
 def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
     snapshot = _load_json(artifacts_dir / 'snapshot.json')
 
@@ -1013,6 +1037,18 @@ def _render_country(
     source_ids = [str(item) for item in source_depth.get('source_ids', [])]
     missing_domains = [str(item) for item in domain_gap_summary.get('missing_domains', [])]
     gap_details = [dict(item) for item in domain_gap_summary.get('gap_details', []) if isinstance(item, dict)]
+    country_id = str(country_profile.get('country_id', 'UNKNOWN'))
+    annotation_workflow_href = _annotation_workflow_href(
+        nav_prefix=nav_prefix,
+        scope='country',
+        linked_item=country_id,
+        annotation_type='context_note',
+    )
+    annotation_workflow_link_html = (
+        f"<p><a href='{html.escape(annotation_workflow_href)}'>Open Annotation Workflow for this Country</a></p>"
+        if annotations_view_model is not None and available_pages is not None and 'annotations.html' in available_pages
+        else ''
+    )
     trust_summary_html = (
         "<h3>Trust / Uncertainty Summary</h3>"
         f"<p>Coverage band: <strong>{html.escape(_ratio_band(country_profile.get('coverage')))}</strong> | Confidence band: <strong>{html.escape(_ratio_band(country_profile.get('confidence')))}</strong></p>"
@@ -1047,6 +1083,7 @@ def _render_country(
         f"<h4>Linked Events</h4><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in country_profile.get('linked_events', []))}</ul>"
         f"<h4>Uncertainty</h4><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in country_profile.get('uncertainty', []))}</ul>"
         f"<h3>Annotation IDs</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in annotation_ids)}</ul>"
+        f"{annotation_workflow_link_html}"
         f"<h3>Analyst Annotations in Context</h3>{_annotation_details_html(annotation_ids, annotations_view_model)}"
         f"<h3>Trends</h3>{_json_block(country_profile.get('trends', {}))}"
     )
@@ -1062,6 +1099,18 @@ def _render_domain_detail(domain_detail: dict[str, Any], annotations_view_model:
             for item in annotations_view_model.get('by_linked_item', {}).get(linked_item_key, [])
         ]
     time_series = domain_detail.get('time_series', [])
+    domain_linked_item = f"{domain_detail.get('country_id', 'UNKNOWN')}:{domain_detail.get('domain', 'UNKNOWN')}"
+    annotation_workflow_href = _annotation_workflow_href(
+        nav_prefix=nav_prefix,
+        scope='domain',
+        linked_item=domain_linked_item,
+        annotation_type='lineage_note',
+    )
+    annotation_workflow_link_html = (
+        f"<p><a href='{html.escape(annotation_workflow_href)}'>Open Annotation Workflow for this Domain</a></p>"
+        if annotations_view_model is not None and available_pages is not None and 'annotations.html' in available_pages
+        else ''
+    )
     body = (
         "<h2>Domain Detail</h2>"
         f"<p>Country: <strong>{html.escape(str(domain_detail.get('country_id', 'UNKNOWN')))}</strong></p>"
@@ -1074,6 +1123,7 @@ def _render_domain_detail(domain_detail: dict[str, Any], annotations_view_model:
         f"<h3>Source Context</h3>{_json_block(domain_detail.get('source_context', []))}"
         f"<h3>Uncertainty</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in domain_detail.get('uncertainty', []))}</ul>"
         f"<h3>Annotation IDs</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in annotation_ids)}</ul>"
+        f"{annotation_workflow_link_html}"
         f"<h3>Annotation Details</h3>{_annotation_details_html(annotation_ids, annotations_view_model)}"
     )
     return _page(
@@ -1600,16 +1650,197 @@ def _render_annotations(annotations_view_model: dict[str, Any], *, nav_prefix: s
         "</tr>"
         for linked_item, annotation_ids in sorted(annotations_view_model.get('by_linked_item', {}).items())
     )
-    body = (
-        "<h2>Analyst Annotations View</h2>"
-        f"<p>Total annotations: <strong>{html.escape(str(len(annotations_view_model.get('annotations', []))))}</strong></p>"
-        f"<h3>Annotation Details</h3>{_annotation_details_html([str(item.get('annotation_id')) for item in annotations_view_model.get('annotations', [])], annotations_view_model)}"
-        "<h3>By Scope</h3>"
-        "<table><thead><tr><th>Scope</th><th>Annotation IDs</th></tr></thead>"
-        f"<tbody>{scope_rows}</tbody></table>"
-        "<h3>By Linked Item</h3>"
-        "<table><thead><tr><th>Linked Item</th><th>Annotation IDs</th></tr></thead>"
-        f"<tbody>{linked_item_rows}</tbody></table>"
+    workflow_seed = _annotation_workflow_seed(annotations_view_model)
+    workflow_script = """
+<script>
+const annotationSeed = JSON.parse((document.getElementById('annotation-seed-data')?.textContent || '{}'));
+const annotationStoreKey = 'siasa_annotation_workflow_v1';
+const annotationHistoryStoreKey = 'siasa_annotation_workflow_history_v1';
+function readStoredAnnotations(){ try { return JSON.parse(window.localStorage.getItem(annotationStoreKey) || '[]'); } catch (error) { return []; } }
+function writeStoredAnnotations(items){ window.localStorage.setItem(annotationStoreKey, JSON.stringify(items)); }
+function readStoredHistory(){ try { return JSON.parse(window.localStorage.getItem(annotationHistoryStoreKey) || '[]'); } catch (error) { return []; } }
+function writeStoredHistory(items){ window.localStorage.setItem(annotationHistoryStoreKey, JSON.stringify(items)); }
+function annotationLinkedItems(annotation){ return Array.isArray(annotation.linked_items) ? annotation.linked_items : []; }
+function annotationDraftSource(annotation){ return String(annotation._draft_source || 'artifact'); }
+function escapeAnnotationHtml(value){
+  return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function mergedAnnotationsById(){
+  const artifactItems = Array.isArray(annotationSeed.annotations) ? annotationSeed.annotations : [];
+  const draftItems = readStoredAnnotations();
+  const merged = new Map(artifactItems.map((item) => [String(item.annotation_id), item]));
+  draftItems.forEach((item) => merged.set(String(item.annotation_id), item));
+  return merged;
+}
+function currentEditorAnnotation(){
+  return {
+    annotation_id: (document.getElementById('annotation-id-input').value || '').trim(),
+    created_at: (document.getElementById('annotation-created-at-input').value || '').trim(),
+    author: (document.getElementById('annotation-author-input').value || '').trim(),
+    scope: document.getElementById('annotation-scope-input').value,
+    annotation_type: document.getElementById('annotation-type-input').value,
+    severity_assessment: document.getElementById('annotation-severity-input').value,
+    confidence_assessment: document.getElementById('annotation-confidence-input').value,
+    text: (document.getElementById('annotation-text-input').value || '').trim(),
+    tags: (document.getElementById('annotation-tags-input').value || '').split(',').map((item) => item.trim()).filter(Boolean),
+    linked_items: (document.getElementById('annotation-linked-items-input').value || '').split(',').map((item) => item.trim()).filter(Boolean),
+    review_status: document.getElementById('annotation-review-status-input').value,
+    _draft_source: 'local_draft',
+  };
+}
+function generatedDraftId(){ return `ANN-DRAFT-${Date.now()}`; }
+function setWorkflowStatus(message){ document.getElementById('annotation-workflow-status').textContent = message; }
+function loadAnnotationIntoEditor(annotationId){
+  const all = Array.from(mergedAnnotationsById().values());
+  const selected = all.find((item) => String(item.annotation_id) === String(annotationId));
+  if (!selected) { return; }
+  document.getElementById('annotation-id-input').value = selected.annotation_id || '';
+  document.getElementById('annotation-created-at-input').value = selected.created_at || '';
+  document.getElementById('annotation-author-input').value = selected.author || '';
+  document.getElementById('annotation-scope-input').value = selected.scope || 'country';
+  document.getElementById('annotation-type-input').value = selected.annotation_type || 'context_note';
+  document.getElementById('annotation-severity-input').value = selected.severity_assessment || 'uncertain';
+  document.getElementById('annotation-confidence-input').value = selected.confidence_assessment || 'medium';
+  document.getElementById('annotation-review-status-input').value = selected.review_status || 'draft';
+  document.getElementById('annotation-linked-items-input').value = annotationLinkedItems(selected).join(', ');
+  document.getElementById('annotation-tags-input').value = (Array.isArray(selected.tags) ? selected.tags : []).join(', ');
+  document.getElementById('annotation-text-input').value = selected.text || '';
+  setWorkflowStatus(`Loaded annotation ${selected.annotation_id} into editor.`);
+}
+function prefillAnnotationFromQuery(){
+  const params = new URLSearchParams(window.location.search);
+  const linkedItem = params.get('linked_item') || '';
+  const scope = params.get('scope') || '';
+  const annotationType = params.get('annotation_type') || '';
+  if (scope) { document.getElementById('annotation-scope-input').value = scope; }
+  if (annotationType) { document.getElementById('annotation-type-input').value = annotationType; }
+  if (linkedItem) {
+    document.getElementById('annotation-linked-items-input').value = linkedItem;
+    setWorkflowStatus(`Prefilled workflow for ${linkedItem}.`);
+  }
+}
+function renderAnnotationWorkflow(){
+  const merged = Array.from(mergedAnnotationsById().values());
+  const scopeFilter = document.getElementById('annotation-scope-filter').value;
+  const reviewFilter = document.getElementById('annotation-review-filter').value;
+  const linkedItemNeedle = (document.getElementById('annotation-linked-item-filter').value || '').trim().toLowerCase();
+  const filtered = merged.filter((annotation) => {
+    const scopeOk = scopeFilter === 'all' || String(annotation.scope || '') === scopeFilter;
+    const reviewOk = reviewFilter === 'all' || String(annotation.review_status || '') === reviewFilter;
+    const linkedItems = annotationLinkedItems(annotation).join(', ').toLowerCase();
+    const linkedOk = !linkedItemNeedle || linkedItems.includes(linkedItemNeedle) || String(annotation.annotation_id || '').toLowerCase().includes(linkedItemNeedle);
+    return scopeOk && reviewOk && linkedOk;
+  });
+  document.getElementById('annotation-workflow-table-body').innerHTML = filtered.map((annotation) => `
+    <tr>
+      <td>${escapeAnnotationHtml(annotation.annotation_id || '')}</td>
+      <td>${escapeAnnotationHtml(annotation.scope || '')}</td>
+      <td>${escapeAnnotationHtml(annotation.annotation_type || '')}</td>
+      <td>${escapeAnnotationHtml(annotation.review_status || '')}</td>
+      <td>${escapeAnnotationHtml(annotation.author || '')}</td>
+      <td>${escapeAnnotationHtml(annotationLinkedItems(annotation).join(', '))}</td>
+      <td>${escapeAnnotationHtml(annotationDraftSource(annotation))}</td>
+      <td><button type="button" class="annotation-edit-button" data-annotation-id="${escapeAnnotationHtml(annotation.annotation_id || '')}">Edit</button></td>
+    </tr>`).join('') || '<tr><td colspan="8">No annotations match the current filters.</td></tr>';
+  document.querySelectorAll('.annotation-edit-button').forEach((button) => button.addEventListener('click', () => loadAnnotationIntoEditor(button.getAttribute('data-annotation-id') || '')));
+  const history = readStoredHistory();
+  document.getElementById('annotation-history-table-body').innerHTML = history.map((entry) => `
+    <tr>
+      <td>${escapeAnnotationHtml(entry.saved_at || '')}</td>
+      <td>${escapeAnnotationHtml(entry.annotation_id || '')}</td>
+      <td>${escapeAnnotationHtml(entry.action || '')}</td>
+      <td>${escapeAnnotationHtml((entry.linked_items || []).join(', '))}</td>
+    </tr>`).join('') || '<tr><td colspan="4">No draft history recorded.</td></tr>';
+  document.getElementById('annotation-draft-export').textContent = JSON.stringify(readStoredAnnotations(), null, 2);
+}
+document.getElementById('annotation-editor-form').addEventListener('submit', (event) => {
+  event.preventDefault();
+  const annotation = currentEditorAnnotation();
+  if (!annotation.annotation_id) { annotation.annotation_id = generatedDraftId(); }
+  if (!annotation.created_at) { annotation.created_at = new Date().toISOString(); }
+  if (!annotation.author) { annotation.author = 'analyst'; }
+  const drafts = readStoredAnnotations();
+  const existingIndex = drafts.findIndex((item) => String(item.annotation_id) === String(annotation.annotation_id));
+  const action = existingIndex >= 0 ? 'updated' : 'created';
+  if (existingIndex >= 0) { drafts[existingIndex] = annotation; } else { drafts.push(annotation); }
+  writeStoredAnnotations(drafts);
+  const history = readStoredHistory();
+  history.unshift({ saved_at: new Date().toISOString(), annotation_id: annotation.annotation_id, action: action, linked_items: annotation.linked_items });
+  writeStoredHistory(history.slice(0, 25));
+  document.getElementById('annotation-id-input').value = annotation.annotation_id;
+  document.getElementById('annotation-created-at-input').value = annotation.created_at;
+  setWorkflowStatus(`Draft annotation ${annotation.annotation_id} ${action}.`);
+  renderAnnotationWorkflow();
+});
+document.getElementById('annotation-reset-editor').addEventListener('click', () => {
+  document.getElementById('annotation-editor-form').reset();
+  document.getElementById('annotation-id-input').value = '';
+  document.getElementById('annotation-created-at-input').value = '';
+  prefillAnnotationFromQuery();
+  setWorkflowStatus('Annotation editor reset.');
+});
+document.getElementById('annotation-export-drafts').addEventListener('click', () => {
+  const exportText = JSON.stringify(readStoredAnnotations(), null, 2);
+  document.getElementById('annotation-draft-export').textContent = exportText;
+  const blob = new Blob([exportText], { type: 'application/json' });
+  const exportLink = document.createElement('a');
+  exportLink.href = URL.createObjectURL(blob);
+  exportLink.download = 'annotation_drafts.json';
+  exportLink.click();
+  URL.revokeObjectURL(exportLink.href);
+  setWorkflowStatus('Draft annotations exported as JSON.');
+});
+document.getElementById('annotation-scope-filter').addEventListener('change', renderAnnotationWorkflow);
+document.getElementById('annotation-review-filter').addEventListener('change', renderAnnotationWorkflow);
+document.getElementById('annotation-linked-item-filter').addEventListener('input', renderAnnotationWorkflow);
+prefillAnnotationFromQuery();
+renderAnnotationWorkflow();
+</script>
+"""
+    body = ''.join(
+        [
+            "<h2>Analyst Annotations View</h2>",
+            f"<p>Total annotations: <strong>{html.escape(str(len(annotations_view_model.get('annotations', []))))}</strong></p>",
+            "<h3>Create / Edit Annotation Workflow</h3>",
+            "<p>This static GUI keeps analyst draft annotations in the browser for create/edit/filter/history workflow support. Export the draft JSON for governed persistence into repo-backed artifacts.</p>",
+            "<div id='annotation-workflow-status'></div>",
+            "<h4>Workflow Filters</h4>",
+            "<label for='annotation-scope-filter'>Scope Filter</label> ",
+            "<select id='annotation-scope-filter'><option value='all'>All scopes</option><option value='country'>country</option><option value='domain'>domain</option><option value='signal'>signal</option><option value='event'>event</option><option value='snapshot'>snapshot</option></select> ",
+            "<label for='annotation-review-filter'>Review Filter</label> ",
+            "<select id='annotation-review-filter'><option value='all'>All review states</option><option value='unreviewed'>unreviewed</option><option value='draft'>draft</option><option value='reviewed'>reviewed</option><option value='accepted'>accepted</option><option value='rejected'>rejected</option></select> ",
+            "<label for='annotation-linked-item-filter'>Linked Item Filter</label> ",
+            "<input id='annotation-linked-item-filter' type='text' placeholder='UKR / UKR:A / SNAP-...' />",
+            "<h4>Annotation Registry</h4>",
+            "<table id='annotation-workflow-table'><thead><tr><th>ID</th><th>Scope</th><th>Type</th><th>Review</th><th>Author</th><th>Linked Items</th><th>Draft Source</th><th>Action</th></tr></thead><tbody id='annotation-workflow-table-body'></tbody></table>",
+            "<h4>Draft Editor</h4>",
+            "<form id='annotation-editor-form'>",
+            "<p><label for='annotation-id-input'>Annotation ID</label><br><input id='annotation-id-input' type='text' placeholder='ANN-DRAFT-...' /></p>",
+            "<p><label for='annotation-created-at-input'>Created At</label><br><input id='annotation-created-at-input' type='text' placeholder='2026-05-16T06:45:00Z' /></p>",
+            "<p><label for='annotation-author-input'>Author</label><br><input id='annotation-author-input' type='text' placeholder='analyst' /></p>",
+            "<p><label for='annotation-scope-input'>Scope</label><br><select id='annotation-scope-input'><option value='country'>country</option><option value='domain'>domain</option><option value='signal'>signal</option><option value='event'>event</option><option value='snapshot'>snapshot</option></select></p>",
+            "<p><label for='annotation-type-input'>Annotation Type</label><br><select id='annotation-type-input'><option value='context_note'>context_note</option><option value='false_positive_note'>false_positive_note</option><option value='source_quality_note'>source_quality_note</option><option value='lineage_note'>lineage_note</option><option value='review_note'>review_note</option></select></p>",
+            "<p><label for='annotation-severity-input'>Severity Assessment</label><br><select id='annotation-severity-input'><option value='not_security_relevant'>not_security_relevant</option><option value='relevant'>relevant</option><option value='uncertain'>uncertain</option></select></p>",
+            "<p><label for='annotation-confidence-input'>Confidence Assessment</label><br><select id='annotation-confidence-input'><option value='low'>low</option><option value='medium'>medium</option><option value='high'>high</option></select></p>",
+            "<p><label for='annotation-review-status-input'>Review Status</label><br><select id='annotation-review-status-input'><option value='unreviewed'>unreviewed</option><option value='draft'>draft</option><option value='reviewed'>reviewed</option><option value='accepted'>accepted</option><option value='rejected'>rejected</option></select></p>",
+            "<p><label for='annotation-linked-items-input'>Linked Items (comma separated)</label><br><input id='annotation-linked-items-input' type='text' placeholder='UKR, UKR:A, SNAP-RUN-...' /></p>",
+            "<p><label for='annotation-tags-input'>Tags (comma separated)</label><br><input id='annotation-tags-input' type='text' placeholder='source_dependency, review' /></p>",
+            "<p><label for='annotation-text-input'>Annotation Text</label><br><textarea id='annotation-text-input' rows='6' cols='80' placeholder='Analyst note...'></textarea></p>",
+            "<p><button id='annotation-save-draft' type='submit'>Save Draft Annotation</button> <button id='annotation-reset-editor' type='button'>Reset Editor</button> <button id='annotation-export-drafts' type='button'>Export Draft Annotations</button></p>",
+            "</form>",
+            "<h4>Draft Export</h4><pre id='annotation-draft-export'>[]</pre>",
+            "<h4>Draft History</h4>",
+            "<table id='annotation-history-table'><thead><tr><th>Saved At</th><th>Annotation ID</th><th>Action</th><th>Linked Items</th></tr></thead><tbody id='annotation-history-table-body'></tbody></table>",
+            f"<h3>Annotation Details</h3>{_annotation_details_html([str(item.get('annotation_id')) for item in annotations_view_model.get('annotations', [])], annotations_view_model)}",
+            "<h3>By Scope</h3>",
+            "<table><thead><tr><th>Scope</th><th>Annotation IDs</th></tr></thead>",
+            f"<tbody>{scope_rows}</tbody></table>",
+            "<h3>By Linked Item</h3>",
+            "<table><thead><tr><th>Linked Item</th><th>Annotation IDs</th></tr></thead>",
+            f"<tbody>{linked_item_rows}</tbody></table>",
+            f"<script id='annotation-seed-data' type='application/json'>{workflow_seed}</script>",
+            workflow_script,
+        ]
     )
     return _page("Analyst Annotations View", body, nav_prefix=nav_prefix, available_pages=available_pages)
 

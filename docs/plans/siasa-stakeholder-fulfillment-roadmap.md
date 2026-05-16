@@ -365,12 +365,12 @@ Only then is the program close to the stakeholder intent, not merely the current
 
 ## 7. Immediate recommendation
 
-Next serial work package should be: P1-WP-001.
+Next serial work package should be: P4-WP-002.
 
 Current rationale:
-- latest artifact-backed readiness still shows `missing_validation_artifact`
-- this is the cleanest remaining mismatch between visible GUI maturity and actual runtime completeness
-- it is smaller and lower-risk than immediately pushing breadth or advanced analytics
-- once closed, the roadmap can move into breadth expansion with a cleaner release baseline
+- the main remaining analyst-workflow gap in the GUI layer was the missing annotation create/edit workflow; this has now been closed with a governed static-site workflow baseline
+- the next highest-value step is therefore richer baseline / historical comparison overlays on trends and domain views
+- this builds directly on the now stronger artifact-backed GUI without reopening already-closed runtime honesty work
+- it improves analyst interpretation quality rather than only adding more transparency structure
 
-After that, proceed directly with P1-WP-002 and then the first breadth package (P2-WP-003).
+After that, proceed with P4-WP-003 and then broader live-source/runtime hardening.

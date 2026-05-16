@@ -15,6 +15,7 @@ SIASA ist ein V-Model-light / requirements-as-code Repository mit importierter S
 - Validation-/Backtest-View als lokale GUI-Seite mit optionalem Artefakt-Load aus `readmodels/validation_backtest.json`
 - Traceability-/Lineage-View als lokale GUI-Seite mit optionalem Artefakt-Load aus `readmodels/traceability_lineage.json`
 - Analyst-Annotations-View als lokale GUI-Seite mit optionalem Artefakt-Load aus `readmodels/annotations.json`
+- browser-lokaler Annotation-Workflow in der GUI mit Create/Edit/Filter/History-Flow, Quick-Links aus Country-/Domain-Seiten und JSON-Export für governed Persistierung
 - Demo-/Release-Readiness-View als lokale GUI-Seite inklusive Checklisten und `readiness.json`-Artefakt
 - lokal ausführbare MVP-GUI-Baseline als statische HTML-Site unter `src/siasa/gui/local_app.py`
 
@@ -80,6 +81,7 @@ Aktueller Runtime-Stand:
 - Country-Profile- und GUI-Sichten machen jetzt Priority Class, Selection Type, Source Depth und Domain Gaps pro Land explizit sichtbar
 - `readmodels/system_status.json` enthält jetzt zusätzlich `country_coverage_visibility` mit Priority-Summary, Source-Depth-Bands, expliziten Country/Domain-Gap-Listen und einer aggregierten `remediation_watchlist` inklusive `priority_rank`/`priority_score` für Overview- und Coverage-Aggregationen
 - die Startseite bietet jetzt einen `Priority Filter` sowie aggregierte Coverage-/Gap-Summaries; die Coverage-Ansicht zeigt zusätzlich eine `Country Coverage / Gap Matrix` mit Missing-Domain-Badges und eine priorisierte `Remediation Watchlist` mit Guidance-/Evidence-Links
+- die Annotations-Sicht bietet jetzt zusätzlich einen browser-lokalen Create/Edit/Filter/History-Workflow mit Quick-Links aus Country-/Domain-Seiten und JSON-Export der Draft-Annotationen
 - Missing Domains werden jetzt zusätzlich mit expliziten Ursacheinträgen ausgewiesen, z. B. `source_failed_this_run`, `no_usable_input_data` oder `not_configured_for_runtime`, inklusive zugehöriger Source-IDs
 - optionale Artefaktlücken werden im Runtime-Bundle jetzt mit expliziten Gründen im `system_status.json` unter `artifact_status` codiert, z. B. `not_configured` oder `no_usable_input_data`
 
