@@ -37,6 +37,27 @@ class StubBytesFetcher:
         return self.payload
 
 
+class SequenceBytesFetcher:
+    def __init__(self, responses: list[object]) -> None:
+        self.responses = list(responses)
+        self.urls: list[str] = []
+
+    def __call__(self, url: str) -> bytes:
+        self.urls.append(url)
+        response = self.responses.pop(0)
+        if isinstance(response, Exception):
+            raise response
+        assert isinstance(response, bytes)
+        return response
+
+
+class FakeRateLimitError(RuntimeError):
+    def __init__(self, message: str, *, retry_after: str | None = None) -> None:
+        super().__init__(message)
+        self.code = 429
+        self.headers = {} if retry_after is None else {"Retry-After": retry_after}
+
+
 def _build_export_zip(rows: list[list[str]]) -> bytes:
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as archive:
@@ -161,3 +182,55 @@ def test_gdelt_events_adapter_returns_failed_fetch_result_when_export_discovery_
     assert result.records == []
     assert result.is_success is False
     assert "lastupdate unavailable" in result.diagnostics
+
+
+
+def test_gdelt_events_adapter_honors_numeric_retry_after_for_rate_limit_backoff() -> None:
+    export_url = "http://data.gdeltproject.org/gdeltv2/20260513130000.export.CSV.zip"
+    sleep_calls: list[float] = []
+    adapter = GDELTEventsAdapter(
+        country_codes={"UKR": "UP"},
+        fetch_text=StubTextFetcher(f"100 abc {export_url}\n"),
+        fetch_bytes=SequenceBytesFetcher(
+            [
+                FakeRateLimitError("HTTP 429: Too Many Requests", retry_after="7"),
+                _build_export_zip([]),
+            ]
+        ),
+        retry_sleep=sleep_calls.append,
+        max_retries=2,
+        retry_backoff_seconds=1.0,
+    )
+
+    result = adapter.fetch()
+
+    assert result.is_success is True
+    assert sleep_calls == [7.0]
+
+
+
+def test_gdelt_events_adapter_honors_http_date_retry_after_for_rate_limit_backoff() -> None:
+    export_url = "http://data.gdeltproject.org/gdeltv2/20260513130000.export.CSV.zip"
+    sleep_calls: list[float] = []
+    adapter = GDELTEventsAdapter(
+        country_codes={"UKR": "UP"},
+        fetch_text=StubTextFetcher(f"100 abc {export_url}\n"),
+        fetch_bytes=SequenceBytesFetcher(
+            [
+                FakeRateLimitError(
+                    "HTTP 429: Too Many Requests",
+                    retry_after="Wed, 13 May 2026 08:00:07 GMT",
+                ),
+                _build_export_zip([]),
+            ]
+        ),
+        retry_sleep=sleep_calls.append,
+        now_provider=lambda: datetime(2026, 5, 13, 8, 0, 0, tzinfo=UTC),
+        max_retries=2,
+        retry_backoff_seconds=1.0,
+    )
+
+    result = adapter.fetch()
+
+    assert result.is_success is True
+    assert sleep_calls == [7.0]
