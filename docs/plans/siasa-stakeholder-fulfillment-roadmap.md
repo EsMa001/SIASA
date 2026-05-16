@@ -92,7 +92,10 @@ Current repo-evidenced status on branch `hermes/repo-scaffold`:
   - cross-country comparison exists
   - coverage/confidence/uncertainty visualization exists
   - semantic view projections and trend event overlays exist
-- P4 remains largely open
+- P4 is now partly advanced:
+  - source-gap transparency is visible through country gap watchlists, remediation watchlists, priority/depth summaries, and freshness overlays in overview/map-facing views
+  - analyst annotation create/edit workflow is still absent
+  - baseline/historical comparison overlays beyond the current trend view are still open
 
 Interpretation:
 - the old roadmap order was correct as a program scaffold
@@ -312,38 +315,25 @@ The old order should now be updated to the current repo state.
 
 Recommended serial order from here:
 
-1. P1-WP-001 — close validation artifact generation gap
-   - size: small
-   - reason: still the cleanest blocker in readiness and release honesty
-2. P1-WP-002 — explicit artifact absence reasons
-   - size: small to medium
-   - reason: prevents ambiguous demos once validation is fixed
-3. P2-WP-003 — expand governed live runtime from 2 countries to a representative MVP subset
-   - size: medium
-   - reason: current `POL`/`UKR` proof is good, but still too narrow to claim breadth
-4. P2-WP-004 — make country-priority / source-depth differences visible in runtime outputs and GUI
-   - size: medium
-   - reason: stakeholder country-prioritization intent is configured, but still weakly visible
-5. P3-WP-005 — annotation create/edit workflows
+1. P3-WP-005 — annotation create/edit workflows
    - size: medium to large
-   - reason: this is the main remaining analyst-workflow gap inside the GUI layer
-6. P4-WP-001 — source-gap / freshness overlays in overview and map-facing entry views
+   - reason: this is now the main remaining analyst-workflow gap inside the GUI layer
+2. P4-WP-002 — baseline / historical comparison overlays on trends and domain views
    - size: medium
-   - reason: highest-value next transparency upgrade after current projections
-7. P4-WP-002 — baseline / historical comparison overlays on trends and domain views
-   - size: medium
-   - reason: strengthens anomaly interpretation instead of only showing state
-8. P4-WP-003 — source-dependency / source-origin groundwork
+   - reason: strengthens anomaly interpretation instead of only showing current state and freshness
+3. P4-WP-003 — source-dependency / source-origin groundwork
    - size: large
    - reason: this opens the door to stakeholder categories F/G/H without overclaiming today
+4. broader live-source/runtime hardening beyond the current governed pilot subset
+   - size: medium to large
+   - reason: remaining operational issues are now mostly source/runtime robustness rather than missing GUI transparency structure
 
 Suggested planning cadence:
-- next 1 work package: runtime honesty cleanup
-- next 2 to 3 work packages: breadth expansion
-- following 2 work packages: analyst workflow closure
-- after that: advanced stakeholder analytics
+- next work package: annotation workflow closure
+- following 1 to 2 work packages: richer interpretation overlays
+- after that: source-origin / dependency groundwork and runtime hardening
 
-This updated order is recommended because the repo now already has a stronger GUI than the old roadmap assumed, while breadth and validation honesty are still behind.
+This updated order is recommended because breadth, transparency, and core GUI usability are now materially stronger than this document originally assumed.
 
 ---
 

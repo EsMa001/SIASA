@@ -158,12 +158,15 @@ def write_run_artifacts(
         }
         if gap_details:
             country_domain_gap_summary["gap_details"] = gap_details
+        country_freshness_hours = _country_freshness_hours(country_id, normalized_records)
         country_coverage_rows.append(
             {
                 "country_id": country_id,
                 "priority": str(country_context.get("priority", "unassigned")),
                 "source_count": len(country_source_ids),
                 "source_depth_band": source_depth_band,
+                "freshness_hours": country_freshness_hours,
+                "freshness_band": _freshness_band(country_freshness_hours),
                 "missing_domains": list(country_domain_gap_summary["missing_domains"]),
                 "missing_domain_count": len(country_domain_gap_summary["missing_domains"]),
                 "gap_details": gap_details,
@@ -640,9 +643,32 @@ def _source_applies_to_country(configured_countries: list[str] | None, country_i
 def _source_depth_band(source_count: int) -> str:
     if source_count <= 1:
         return "minimal"
-    if source_count == 2:
+    if source_count <= 3:
         return "moderate"
     return "deep"
+
+
+
+def _country_freshness_hours(country_id: str, normalized_records: list[NormalizedRecord]) -> float | None:
+    freshness_values = [
+        float(record.quality_context.get("freshness_hours"))
+        for record in normalized_records
+        if record.country_id == country_id and isinstance(record.quality_context.get("freshness_hours"), (int, float))
+    ]
+    if not freshness_values:
+        return None
+    return max(freshness_values)
+
+
+
+def _freshness_band(freshness_hours: float | None) -> str:
+    if freshness_hours is None:
+        return "unknown"
+    if freshness_hours <= 24.0:
+        return "fresh"
+    if freshness_hours <= 168.0:
+        return "aging"
+    return "stale"
 
 
 
@@ -675,12 +701,40 @@ def _build_country_coverage_visibility(country_rows: list[dict[str, object]]) ->
             }
         )
 
+    freshness_band_summary = []
+    for band in ("fresh", "aging", "stale", "unknown"):
+        band_countries = sorted(
+            str(row.get("country_id", "UNKNOWN"))
+            for row in country_rows
+            if str(row.get("freshness_band", "unknown")) == band
+        )
+        freshness_band_summary.append(
+            {
+                "band": band,
+                "country_count": len(band_countries),
+                "countries": band_countries,
+            }
+        )
+
+    country_freshness_rows = [
+        {
+            "country_id": str(row.get("country_id", "UNKNOWN")),
+            "freshness_hours": row.get("freshness_hours"),
+            "freshness_band": str(row.get("freshness_band", "unknown")),
+            "priority": str(row.get("priority", "unassigned")),
+            "source_depth_band": str(row.get("source_depth_band", "minimal")),
+        }
+        for row in sorted(country_rows, key=lambda row: str(row.get("country_id", "UNKNOWN")))
+    ]
+
     country_gap_rows = [
         {
             "country_id": str(row.get("country_id", "UNKNOWN")),
             "priority": str(row.get("priority", "unassigned")),
             "source_count": int(row.get("source_count", 0)),
             "source_depth_band": str(row.get("source_depth_band", "minimal")),
+            "freshness_hours": row.get("freshness_hours"),
+            "freshness_band": str(row.get("freshness_band", "unknown")),
             "missing_domains": [str(item) for item in row.get("missing_domains", [])],
             "missing_domain_count": int(row.get("missing_domain_count", 0)),
             "gap_details": [
@@ -694,11 +748,10 @@ def _build_country_coverage_visibility(country_rows: list[dict[str, object]]) ->
                             "source_id": str(source_detail.get("source_id", "UNKNOWN")),
                             "reason": str(source_detail.get("reason", "unknown")),
                             "diagnostics": str(source_detail.get("diagnostics", "")),
-                            "action_category": str(source_detail.get("action_category", "unknown")),
+                            "action_category": str(source_detail.get("action_category", "triage_required")),
                             "severity": str(source_detail.get("severity", "low")),
                         }
                         for source_detail in detail.get("source_reason_details", [])
-                        if isinstance(source_detail, dict)
                     ],
                 }
                 for detail in row.get("gap_details", [])
@@ -707,6 +760,7 @@ def _build_country_coverage_visibility(country_rows: list[dict[str, object]]) ->
         for row in country_rows
         if row.get("missing_domain_count", 0)
     ]
+
 
     missing_domain_totals: dict[str, int] = {}
     for row in country_gap_rows:
@@ -773,6 +827,8 @@ def _build_country_coverage_visibility(country_rows: list[dict[str, object]]) ->
     return {
         "priority_summary": priority_summary,
         "source_depth_band_summary": source_depth_band_summary,
+        "freshness_band_summary": freshness_band_summary,
+        "country_freshness_rows": country_freshness_rows,
         "country_gap_rows": country_gap_rows,
         "missing_domain_totals": dict(sorted(missing_domain_totals.items())),
         "remediation_watchlist": remediation_watchlist,

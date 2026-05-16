@@ -294,6 +294,16 @@ def test_daily_run_orchestrator_writes_multi_country_artifact_bundle(tmp_path: P
             {"band": "moderate", "country_count": 2, "countries": ["POL", "UKR"]},
             {"band": "deep", "country_count": 0, "countries": []},
         ],
+        "freshness_band_summary": [
+            {"band": "fresh", "country_count": 2, "countries": ["POL", "UKR"]},
+            {"band": "aging", "country_count": 0, "countries": []},
+            {"band": "stale", "country_count": 0, "countries": []},
+            {"band": "unknown", "country_count": 0, "countries": []},
+        ],
+        "country_freshness_rows": [
+            {"country_id": "POL", "freshness_hours": 10.0, "freshness_band": "fresh", "priority": "P2", "source_depth_band": "moderate"},
+            {"country_id": "UKR", "freshness_hours": 12.0, "freshness_band": "fresh", "priority": "P1", "source_depth_band": "moderate"},
+        ],
         "country_gap_rows": [],
         "missing_domain_totals": {},
         "remediation_watchlist": [],
@@ -367,6 +377,8 @@ def test_daily_run_orchestrator_records_country_gap_visibility_in_system_status(
             "priority": "P2",
             "source_count": 1,
             "source_depth_band": "minimal",
+            "freshness_hours": 8.0,
+            "freshness_band": "fresh",
             "missing_domains": ["B"],
             "missing_domain_count": 1,
             "gap_details": [
@@ -396,6 +408,16 @@ def test_daily_run_orchestrator_records_country_gap_visibility_in_system_status(
         }
     ]
     assert system_status["country_coverage_visibility"]["missing_domain_totals"] == {"B": 1}
+    assert system_status["country_coverage_visibility"]["freshness_band_summary"] == [
+        {"band": "fresh", "country_count": 2, "countries": ["POL", "UKR"]},
+        {"band": "aging", "country_count": 0, "countries": []},
+        {"band": "stale", "country_count": 0, "countries": []},
+        {"band": "unknown", "country_count": 0, "countries": []},
+    ]
+    assert system_status["country_coverage_visibility"]["country_freshness_rows"] == [
+        {"country_id": "POL", "freshness_hours": 8.0, "freshness_band": "fresh", "priority": "P2", "source_depth_band": "minimal"},
+        {"country_id": "UKR", "freshness_hours": 12.0, "freshness_band": "fresh", "priority": "P1", "source_depth_band": "moderate"},
+    ]
 
 
 

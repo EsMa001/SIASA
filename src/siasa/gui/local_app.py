@@ -226,6 +226,40 @@ def _band_color(band: str) -> str:
 
 
 
+def _freshness_band(value: Any) -> str:
+    if value is None:
+        return 'unknown'
+    if isinstance(value, bool):
+        return 'unknown'
+    if isinstance(value, (int, float)):
+        if float(value) <= 24.0:
+            return 'fresh'
+        if float(value) <= 168.0:
+            return 'aging'
+        return 'stale'
+    return 'unknown'
+
+
+
+def _freshness_band_color(band: str) -> str:
+    return {
+        'fresh': '#15803d',
+        'aging': '#d97706',
+        'stale': '#dc2626',
+        'unknown': '#6b7280',
+    }.get(band, '#6b7280')
+
+
+
+def _format_freshness(value: Any) -> str:
+    band = _freshness_band(value)
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        return band
+    hours = int(value) if float(value).is_integer() else round(float(value), 1)
+    return f'{band} ({hours}h)'
+
+
+
 def _render_metric_meter(label: str, value: Any, *, fill_color: str) -> str:
     ratio = _coerce_ratio(value)
     band = _ratio_band(value)
@@ -265,7 +299,7 @@ def _source_depth_band(source_count: Any) -> str:
         count = 0
     if count <= 1:
         return 'minimal'
-    if count == 2:
+    if count <= 3:
         return 'moderate'
     return 'deep'
 
@@ -341,15 +375,19 @@ def _country_coverage_visibility_rows(system_status_read_model: dict[str, Any]) 
     visibility = system_status_read_model.get('country_coverage_visibility', {})
     if not isinstance(visibility, dict):
         return {
-            'priority_summary': [],
-            'source_depth_band_summary': [],
-            'country_gap_rows': [],
-            'missing_domain_totals': {},
-            'remediation_watchlist': [],
-        }
+        'priority_summary': [],
+        'source_depth_band_summary': [],
+        'freshness_band_summary': [],
+        'country_freshness_rows': [],
+        'country_gap_rows': [],
+        'missing_domain_totals': {},
+        'remediation_watchlist': [],
+    }
     return {
         'priority_summary': list(visibility.get('priority_summary', [])),
         'source_depth_band_summary': list(visibility.get('source_depth_band_summary', [])),
+        'freshness_band_summary': list(visibility.get('freshness_band_summary', [])),
+        'country_freshness_rows': list(visibility.get('country_freshness_rows', [])),
         'country_gap_rows': list(visibility.get('country_gap_rows', [])),
         'missing_domain_totals': dict(visibility.get('missing_domain_totals', {})),
         'remediation_watchlist': list(visibility.get('remediation_watchlist', [])),
@@ -415,17 +453,26 @@ def _render_country_coverage_visibility(visibility: dict[str, Any]) -> str:
         "</tr>"
         for row in visibility.get('source_depth_band_summary', [])
     ) or "<tr><td colspan='3'>No source depth summary available.</td></tr>"
+    freshness_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(row.get('band', 'n/a')))}</td>"
+        f"<td>{html.escape(str(row.get('country_count', 0)))}</td>"
+        f"<td>{html.escape(', '.join(str(item) for item in row.get('countries', [])) or 'none')}</td>"
+        "</tr>"
+        for row in visibility.get('freshness_band_summary', [])
+    ) or "<tr><td colspan='3'>No freshness summary available.</td></tr>"
     gap_rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(row.get('country_id', 'n/a')))}</td>"
         f"<td>{html.escape(str(row.get('priority', 'n/a')))}</td>"
         f"<td>{html.escape(str(row.get('source_depth_band', 'n/a')))}</td>"
+        f"<td>{html.escape(_format_freshness(row.get('freshness_hours')))}</td>"
         f"<td>{html.escape(str(row.get('source_count', 0)))}</td>"
         f"<td>{_render_missing_domain_badges(list(row.get('missing_domains', [])))}</td>"
         f"<td>{_render_gap_details(list(row.get('gap_details', [])))}</td>"
         "</tr>"
         for row in visibility.get('country_gap_rows', [])
-    ) or "<tr><td colspan='6'>No explicit country domain gaps recorded.</td></tr>"
+    ) or "<tr><td colspan='7'>No explicit country domain gaps recorded.</td></tr>"
     missing_domain_totals = ''.join(
         f"<li>{html.escape(str(domain))}: {html.escape(str(count))}</li>"
         for domain, count in sorted(visibility.get('missing_domain_totals', {}).items())
@@ -437,33 +484,48 @@ def _render_country_coverage_visibility(visibility: dict[str, Any]) -> str:
         "<h3>Source Depth Band Summary</h3>"
         "<table><thead><tr><th>Depth Band</th><th>Countries</th><th>Country IDs</th></tr></thead>"
         f"<tbody>{depth_rows}</tbody></table>"
+        "<h3>Freshness Band Summary</h3>"
+        "<table><thead><tr><th>Freshness Band</th><th>Countries</th><th>Country IDs</th></tr></thead>"
+        f"<tbody>{freshness_rows}</tbody></table>"
         f"{_render_remediation_watchlist(visibility)}"
         "<h3>Country Coverage / Gap Watchlist</h3>"
         f"<div><strong>Missing domain totals</strong><ul>{missing_domain_totals}</ul></div>"
-        "<table><thead><tr><th>Country</th><th>Priority</th><th>Depth Band</th><th>Source Count</th><th>Missing Domains</th><th>Gap Cause</th></tr></thead>"
+        "<table><thead><tr><th>Country</th><th>Priority</th><th>Depth Band</th><th>Freshness</th><th>Source Count</th><th>Missing Domains</th><th>Gap Cause</th></tr></thead>"
         f"<tbody>{gap_rows}</tbody></table>"
     )
 
 
 
 def _render_country_coverage_matrix(visibility: dict[str, Any]) -> str:
+    freshness_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(row.get('band', 'n/a')))}</td>"
+        f"<td>{html.escape(str(row.get('country_count', 0)))}</td>"
+        f"<td>{html.escape(', '.join(str(item) for item in row.get('countries', [])) or 'none')}</td>"
+        "</tr>"
+        for row in visibility.get('freshness_band_summary', [])
+    ) or "<tr><td colspan='3'>No freshness summary available.</td></tr>"
     rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(row.get('country_id', 'n/a')))}</td>"
         f"<td>{html.escape(str(row.get('priority', 'n/a')))}</td>"
         f"<td>{html.escape(str(row.get('source_depth_band', 'n/a')))}</td>"
+        f"<td>{html.escape(_format_freshness(row.get('freshness_hours')))}</td>"
         f"<td>{html.escape(str(row.get('source_count', 0)))}</td>"
         f"<td>{html.escape(str(row.get('missing_domain_count', 0)))}</td>"
         f"<td>{_render_missing_domain_badges(list(row.get('missing_domains', [])))}</td>"
         f"<td>{_render_gap_details(list(row.get('gap_details', [])))}</td>"
         "</tr>"
         for row in visibility.get('country_gap_rows', [])
-    ) or "<tr><td colspan='7'>No per-country coverage gaps recorded.</td></tr>"
+    ) or "<tr><td colspan='8'>No per-country coverage gaps recorded.</td></tr>"
     return (
         f"{_render_remediation_watchlist(visibility)}"
+        "<h3>Freshness Band Summary</h3>"
+        "<table><thead><tr><th>Freshness Band</th><th>Countries</th><th>Country IDs</th></tr></thead>"
+        f"<tbody>{freshness_rows}</tbody></table>"
         "<h3>Country Coverage / Gap Matrix</h3>"
-        "<p>Priority, source depth, and explicit missing-domain badges stay visible alongside source-level coverage.</p>"
-        "<table><thead><tr><th>Country</th><th>Priority</th><th>Depth Band</th><th>Source Count</th><th>Gap Count</th><th>Missing Domains</th><th>Gap Cause</th></tr></thead>"
+        "<p>Priority, source depth, explicit missing-domain badges, and freshness bands stay visible alongside source-level coverage.</p>"
+        "<table><thead><tr><th>Country</th><th>Priority</th><th>Depth Band</th><th>Freshness</th><th>Source Count</th><th>Gap Count</th><th>Missing Domains</th><th>Gap Cause</th></tr></thead>"
         f"<tbody>{rows}</tbody></table>"
     )
 
@@ -540,8 +602,16 @@ def _render_domain_projection(country_profile_read_models: dict[str, dict[str, A
 
 
 
-def _render_world_map_visualization(world_map_read_model: dict[str, Any], available_country_ids: set[str]) -> str:
+def _render_world_map_visualization(
+    world_map_read_model: dict[str, Any],
+    available_country_ids: set[str],
+    coverage_visibility: dict[str, Any] | None = None,
+) -> str:
     metadata_lookup = _country_metadata_lookup()
+    coverage_by_country = {
+        str(row.get('country_id', 'UNKNOWN')): row
+        for row in (coverage_visibility or {}).get('country_freshness_rows', [])
+    }
     region_offsets: dict[str, int] = {}
     markers: list[str] = []
     labels: list[str] = []
@@ -550,6 +620,9 @@ def _render_world_map_visualization(world_map_read_model: dict[str, Any], availa
     for country in world_map_read_model.get('countries', []):
         country_id = str(country.get('country_id', 'UNKNOWN'))
         status = str(country.get('status', 'n/a'))
+        country_visibility = coverage_by_country.get(country_id, {})
+        freshness_label = _format_freshness(country_visibility.get('freshness_hours'))
+        freshness_band = _freshness_band(country_visibility.get('freshness_hours'))
         metadata = metadata_lookup.get(country_id, {})
         region = str(metadata.get('region', 'Other / Unknown'))
         anchor_x, anchor_y = _region_anchor(region)
@@ -558,13 +631,14 @@ def _render_world_map_visualization(world_map_read_model: dict[str, Any], availa
         x = anchor_x + (offset_index % 4) * 18
         y = anchor_y + (offset_index // 4) * 18
         color = _status_color(status)
+        freshness_stroke = _freshness_band_color(freshness_band)
         href = f"countries/{country_id}.html" if country_id in available_country_ids else None
         marker = (
-            f"<a href='{html.escape(href)}'><circle cx='{x:.1f}' cy='{y:.1f}' r='7' fill='{color}' stroke='#1f2937' stroke-width='1'>"
-            f"<title>{html.escape(country_id)} — {html.escape(status)} — {html.escape(region)}</title></circle></a>"
+            f"<a href='{html.escape(href)}'><circle cx='{x:.1f}' cy='{y:.1f}' r='7' fill='{color}' stroke='{freshness_stroke}' stroke-width='2'>"
+            f"<title>{html.escape(country_id)} — {html.escape(status)} — {html.escape(region)} — freshness={html.escape(freshness_label)}</title></circle></a>"
             if href
-            else f"<circle cx='{x:.1f}' cy='{y:.1f}' r='7' fill='{color}' stroke='#1f2937' stroke-width='1'>"
-                 f"<title>{html.escape(country_id)} — {html.escape(status)} — {html.escape(region)}</title></circle>"
+            else f"<circle cx='{x:.1f}' cy='{y:.1f}' r='7' fill='{color}' stroke='{freshness_stroke}' stroke-width='2'>"
+                 f"<title>{html.escape(country_id)} — {html.escape(status)} — {html.escape(region)} — freshness={html.escape(freshness_label)}</title></circle>"
         )
         markers.append(marker)
         labels.append(f"<text x='{x + 10:.1f}' y='{y + 4:.1f}' font-size='10'>{html.escape(country_id)}</text>")
@@ -574,13 +648,14 @@ def _render_world_map_visualization(world_map_read_model: dict[str, Any], availa
             f"<td>{html.escape(metadata.get('country_name', country_id))}</td>"
             f"<td>{html.escape(region)}</td>"
             f"<td>{html.escape(str(metadata.get('priority', 'n/a')))}</td>"
+            f"<td>{html.escape(freshness_label)}</td>"
             f"<td><span class='status'>{html.escape(status)}</span></td>"
             "</tr>"
         )
 
     return (
         "<h3>Map Visualization</h3>"
-        "<p>Region-anchored anomaly markers based on governed MVP country metadata.</p>"
+        "<p>Region-anchored anomaly markers based on governed MVP country metadata, with freshness-colored marker outlines.</p>"
         "<svg viewBox='0 0 340 210' width='340' height='210' role='img' aria-label='World anomaly map'>"
         "<rect x='5' y='5' width='330' height='200' rx='8' fill='#eef6ff' stroke='#cbd5e1' />"
         "<text x='25' y='35' font-size='12'>North America</text>"
@@ -589,7 +664,7 @@ def _render_world_map_visualization(world_map_read_model: dict[str, Any], availa
         "<text x='165' y='150' font-size='12'>Africa / Middle East</text>"
         f"{''.join(markers)}{''.join(labels)}"
         "</svg>"
-        "<table><thead><tr><th>Country</th><th>Name</th><th>Region</th><th>Priority</th><th>Status</th></tr></thead>"
+        "<table><thead><tr><th>Country</th><th>Name</th><th>Region</th><th>Priority</th><th>Freshness</th><th>Status</th></tr></thead>"
         f"<tbody>{''.join(legend_rows)}</tbody></table>"
     )
 
@@ -721,6 +796,12 @@ def _render_index(
     rows = []
     available_country_ids = available_country_ids or set()
     country_profile_read_models = country_profile_read_models or {}
+    system_status_read_model = system_status_read_model or {}
+    coverage_visibility = _country_coverage_visibility_rows(system_status_read_model)
+    coverage_by_country = {
+        str(row.get('country_id', 'UNKNOWN')): row
+        for row in coverage_visibility.get('country_freshness_rows', [])
+    }
     trend_options = _trend_filter_options(country_profile_read_models)
     for country in world_map_read_model.get("countries", []):
         country_id = str(country["country_id"])
@@ -750,9 +831,12 @@ def _render_index(
         support_status = "supported" if has_country_page else "not available"
         source_ids = [str(item) for item in source_depth.get('source_ids', [])]
         source_depth_band = _source_depth_band(source_depth.get('source_count', 0))
+        freshness_entry = coverage_by_country.get(country_id, {})
+        freshness_hours = freshness_entry.get('freshness_hours')
+        freshness_band = _freshness_band(freshness_hours)
         missing_domains = [str(item) for item in domain_gap_summary.get('missing_domains', [])]
         rows.append(
-            f"<tr class='overview-row' data-country-id='{html.escape(country_id)}' data-active-domains='{html.escape(','.join(active_domains))}' data-status='{html.escape(status)}' data-trend-labels='{html.escape(trend_labels)}' data-priority='{html.escape(str(country_context.get('priority', 'n/a')))}' data-source-depth-band='{html.escape(source_depth_band)}' data-missing-domain-count='{html.escape(str(len(missing_domains)))}'{domain_state_attributes}>"
+            f"<tr class='overview-row' data-country-id='{html.escape(country_id)}' data-active-domains='{html.escape(','.join(active_domains))}' data-status='{html.escape(status)}' data-trend-labels='{html.escape(trend_labels)}' data-priority='{html.escape(str(country_context.get('priority', 'n/a')))}' data-source-depth-band='{html.escape(source_depth_band)}' data-freshness-band='{html.escape(freshness_band)}' data-missing-domain-count='{html.escape(str(len(missing_domains)))}'{domain_state_attributes}>"
             f"<td>{country_cell}</td>"
             f"<td>{html.escape(support_status)}</td>"
             f"<td>{html.escape(str(country_context.get('priority', 'n/a')))}</td>"
@@ -760,13 +844,12 @@ def _render_index(
             f"<td>{html.escape(', '.join(active_domains))}</td>"
             f"<td>{html.escape(str(source_depth.get('source_count', 0)))} ({html.escape(', '.join(source_ids) or 'none')})</td>"
             f"<td>{html.escape(source_depth_band)}</td>"
+            f"<td>{html.escape(_format_freshness(freshness_hours))}</td>"
             f"<td>{_render_missing_domain_badges(missing_domains)}</td>"
             f"<td>{drill_down_cell}</td>"
             "</tr>"
         )
 
-    system_status_read_model = system_status_read_model or {}
-    coverage_visibility = _country_coverage_visibility_rows(system_status_read_model)
     top_status_changes_rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(change.get('country_id', '')))}</td>"
@@ -837,12 +920,12 @@ def _render_index(
         f"<p>Active domains: {html.escape(', '.join(world_map_read_model.get('active_domains', [])))}</p>"
         f"{controls_html}"
         "<p id='overview-filter-result'>Selected Time Window: all trend labels | View Mode: multi-domain status</p>"
-        f"<div id='map-visualization-block'>{_render_world_map_visualization(world_map_read_model, available_country_ids)}</div>"
+        f"<div id='map-visualization-block'>{_render_world_map_visualization(world_map_read_model, available_country_ids, coverage_visibility)}</div>"
         f"<div id='coverage-visualization-block' style='display:none'>{_render_country_trust_visualization(country_profile_read_models)}</div>"
         f"<div id='domain-projection-block' style='display:none'>{_render_domain_projection(country_profile_read_models, [str(domain) for domain in world_map_read_model.get('active_domains', [])])}</div>"
         f"{_render_country_coverage_visibility(coverage_visibility)}"
         "<h2>Global Overview</h2>"
-        "<div id='overview-table-block'><table id='overview-table'><thead><tr><th>Country</th><th>Support Status</th><th>Priority Class</th><th>Multi-Domain Status</th><th>Active Domains</th><th>Source Depth</th><th>Depth Band</th><th>Domain Gaps</th><th>Drill-down</th></tr></thead>"
+        "<div id='overview-table-block'><table id='overview-table'><thead><tr><th>Country</th><th>Support Status</th><th>Priority Class</th><th>Multi-Domain Status</th><th>Active Domains</th><th>Source Depth</th><th>Depth Band</th><th>Freshness</th><th>Domain Gaps</th><th>Drill-down</th></tr></thead>"
         f"<tbody>{''.join(rows)}</tbody></table></div>"
         "<script>"
         "function applyOverviewViewMode(){"

@@ -33,9 +33,15 @@ def test_render_remediation_watchlist_shows_empty_state_when_no_priorities_exist
     html = local_app._render_remediation_watchlist({"remediation_watchlist": []})
 
     assert "Remediation Watchlist" in html
-    assert "Priority Rank" in html
-    assert "Priority Score" in html
     assert "No remediation priorities recorded." in html
+
+
+
+def test_source_depth_band_matches_artifact_thresholds() -> None:
+    assert local_app._source_depth_band(1) == "minimal"
+    assert local_app._source_depth_band(2) == "moderate"
+    assert local_app._source_depth_band(3) == "moderate"
+    assert local_app._source_depth_band(4) == "deep"
 
 
 
@@ -906,12 +912,24 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
                         {"band": "minimal", "country_count": 1, "countries": ["POL"]},
                         {"band": "moderate", "country_count": 1, "countries": ["UKR"]},
                     ],
+                    "freshness_band_summary": [
+                        {"band": "fresh", "country_count": 2, "countries": ["POL", "UKR"]},
+                        {"band": "aging", "country_count": 0, "countries": []},
+                        {"band": "stale", "country_count": 0, "countries": []},
+                        {"band": "unknown", "country_count": 0, "countries": []},
+                    ],
+                    "country_freshness_rows": [
+                        {"country_id": "POL", "freshness_hours": 12.0, "freshness_band": "fresh", "priority": "P2", "source_depth_band": "minimal"},
+                        {"country_id": "UKR", "freshness_hours": 6.0, "freshness_band": "fresh", "priority": "P1", "source_depth_band": "moderate"},
+                    ],
                     "country_gap_rows": [
                         {
                             "country_id": "POL",
                             "priority": "P2",
                             "source_count": 1,
                             "source_depth_band": "minimal",
+                            "freshness_hours": 12.0,
+                            "freshness_band": "fresh",
                             "missing_domains": ["B"],
                             "missing_domain_count": 1,
                             "gap_details": [
@@ -981,6 +999,7 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "data-active-domains='A,B'" in index_html
     assert "Priority Class" in index_html
     assert "Source Depth" in index_html
+    assert "Freshness" in index_html
     assert "Domain Gaps" in index_html
     assert "Priority Filter" in index_html
     assert "option value='P2'" in index_html
@@ -1003,6 +1022,10 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "severity=medium" in index_html
     assert "ukr_only_window" in index_html
     assert "data-priority='P2'" in index_html
+    assert "data-freshness-band='fresh'" in index_html
+    assert "fresh (12h)" in index_html
+    assert "fresh (6h)" in index_html
+    assert "Freshness Band Summary" in index_html
     assert "P2" in index_html and "P1" in index_html
     assert "1 (SRC-A)" in index_html
     assert "2 (SRC-A, SRC-B)" in index_html
@@ -1032,6 +1055,8 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "data-confidence-band='low'" in comparison_html
     assert "function applyComparisonFilters()" in comparison_html
     assert "Country Coverage / Gap Matrix" in coverage_html
+    assert "Freshness Band Summary" in coverage_html
+    assert "fresh" in coverage_html
     assert "Remediation Watchlist" in coverage_html
     assert "Review country scope and source applicability configuration for the affected source." in coverage_html
     assert "coverage.html#source-SRC-B" in coverage_html
