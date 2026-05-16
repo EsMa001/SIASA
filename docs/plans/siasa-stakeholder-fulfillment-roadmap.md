@@ -12,6 +12,8 @@ Tech stack: Python 3.11+, pytest, static HTML GUI generator, governed YAML V-mod
 
 ## 1. Current state matrix: what exists vs what is still missing
 
+For project-lead steering, use `docs/plans/siasa-project-lead-capability-matrix.md` as the operational companion to this roadmap. The roadmap stays strategic; the capability matrix tracks what is Done / Partial / Weak / Missing with evidence and work-package linkage.
+
 | Area | Stakeholder expectation | Current implementation state | Evidence / notes | Gap classification |
 | --- | --- | --- | --- | --- |
 | World overview / world map | World map, anomaly overview, drill-down | Partially present | Static HTML overview table exists; no real map rendering | Missing visual layer |
@@ -94,7 +96,7 @@ Current repo-evidenced status on branch `hermes/repo-scaffold`:
   - semantic view projections and trend event overlays exist
 - P4 is now partly advanced:
   - source-gap transparency is visible through country gap watchlists, remediation watchlists, priority/depth summaries, and freshness overlays in overview/map-facing views
-  - analyst annotation create/edit workflow is still absent
+  - analyst annotation create/edit workflow now exists as a governed static-site workflow baseline
   - baseline/historical comparison overlays beyond the current trend view are still open
 
 Interpretation:
@@ -315,23 +317,23 @@ The old order should now be updated to the current repo state.
 
 Recommended serial order from here:
 
-1. P3-WP-005 — annotation create/edit workflows
-   - size: medium to large
-   - reason: this is now the main remaining analyst-workflow gap inside the GUI layer
-2. P4-WP-002 — baseline / historical comparison overlays on trends and domain views
+1. P4-WP-002 — baseline / historical comparison overlays on trends and domain views
    - size: medium
-   - reason: strengthens anomaly interpretation instead of only showing current state and freshness
-3. P4-WP-003 — source-dependency / source-origin groundwork
+   - reason: this is now the clearest next analyst-value gap after annotation workflow closure
+2. P4-WP-003 — source-dependency / source-origin groundwork
    - size: large
    - reason: this opens the door to stakeholder categories F/G/H without overclaiming today
-4. broader live-source/runtime hardening beyond the current governed pilot subset
+3. broader live-source/runtime hardening beyond the current governed pilot subset
    - size: medium to large
    - reason: remaining operational issues are now mostly source/runtime robustness rather than missing GUI transparency structure
+4. P1 closure package(s) for latest-bundle validation completeness, if readiness honesty remains blocked
+   - size: small to medium
+   - reason: readiness claims should not remain artificially weaker than the now richer GUI baseline
 
 Suggested planning cadence:
-- next work package: annotation workflow closure
-- following 1 to 2 work packages: richer interpretation overlays
-- after that: source-origin / dependency groundwork and runtime hardening
+- next work package: richer baseline/historical comparison overlays
+- following 1 to 2 work packages: source-origin groundwork and selected runtime hardening
+- after that: close the biggest remaining honesty/breadth gap shown by the capability matrix
 
 This updated order is recommended because breadth, transparency, and core GUI usability are now materially stronger than this document originally assumed.
 

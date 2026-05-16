@@ -4,6 +4,8 @@
 
 Goal: sweep the stakeholder requirement baseline end-to-end, identify what is substantively present, what is only structurally represented, what is still missing, and derive the step-by-step development sequence that should be executed next.
 
+Historical note: this document remains the broad sweep baseline, but current serial execution priority has since been refined in `docs/plans/siasa-stakeholder-fulfillment-roadmap.md` and the operational project-lead steering view in `docs/plans/siasa-project-lead-capability-matrix.md`.
+
 Architecture: this assessment distinguishes between (1) requirement/governance structure, (2) analytical core and governed artifacts, (3) actual runtime/data completeness, and (4) product-level GUI fulfillment. SIASA is already relatively strong in layers (1) and parts of (2), but still weak in real source access, multi-country artifact population, and rich analyst-facing GUI behavior.
 
 Tech stack / evidence base: `vmodel/requirements/stakeholder_requirements.yaml`, `src/siasa/**`, `tests/**`, `docs/ui/gui_pages.md`, `docs/project/use_cases.md`, `docs/verification/level-1-to-4-acceptance-review.md`, current artifact bundle under `build/run_artifacts/latest`.
@@ -1044,6 +1046,8 @@ Objective:
 - visually communicate confidence, data gaps, and coverage, not just textually
 
 ## Phase P4 — Analyst workflow completion
+
+Historical naming note: the package labels in this section predate later roadmap refinement. For current execution order and currently active package names, use `siasa-stakeholder-fulfillment-roadmap.md` and `siasa-project-lead-capability-matrix.md`.
 
 ### P4-WP-001: Annotation create/edit/filter/history workflow
 Objective:

@@ -1,0 +1,110 @@
+# SIASA Project-Lead Capability Matrix
+
+> For Hermes: maintain this document after every completed serial work package. Update capability status only when there is repo evidence, verification evidence, and a committed package that materially changes stakeholder-visible functionality.
+
+Goal: give the project lead a fast, evidence-backed view of (1) what is implemented, (2) what is only partly implemented or merely prepared, and (3) what is still materially open.
+
+Architecture: this matrix sits above code-level details. It maps stakeholder-facing capabilities to concrete repo evidence, test evidence, and work packages so progress can be tracked as capability maturity instead of raw file churn.
+
+Tech stack / evidence base: `docs/plans/siasa-stakeholder-fulfillment-roadmap.md`, `docs/plans/siasa-stakeholder-gap-sweep-and-development-sequence.md`, `src/siasa/**`, `tests/**`, and current governed artifacts under `build/run_artifacts/latest`.
+
+---
+
+## 1. How to use this matrix
+
+### Status semantics
+- `Done` = materially usable in the current product/repo baseline; verified and committed
+- `Partial` = meaningful capability exists, but stakeholder intent is only partly fulfilled
+- `Weak` = structural preparation exists, but practical product capability is still thin
+- `Missing` = materially not implemented yet
+- `Deferred by intent` = intentionally later/post-MVP unless reprioritized
+
+### Evidence rule
+A capability must not be marked `Done` based only on code structure.
+It should only be marked `Done` when all three exist:
+1. product/runtime evidence
+2. verification evidence
+3. committed package evidence
+
+### Work-package status rule
+For project steering, use these work-package states:
+- `Open` = not started
+- `In Progress` = active serial package right now
+- `Verified` = implemented and verified locally, but not yet committed/pushed
+- `Done` = verified, committed, and pushed
+
+---
+
+## 2. Current project-lead capability matrix
+
+| Capability | Stakeholder focus | Current status | What exists now | What is still missing | Product / runtime evidence | Verification evidence | Last completed work package | Next planned work package |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| World overview and anomaly navigation | Fast global anomaly orientation with drill-down | Partial | Interactive overview page, country drill-down links, map-facing visualization layer, overview controls | Still limited by current runtime breadth and latest-bundle population | `build/local_gui/index.html`, `build/run_artifacts/latest/readmodels/world_map.json`, `src/siasa/gui/local_app.py` | GUI generation tests in `tests/unit/test_local_gui.py` | Earlier P3 GUI hardening packages | P2 breadth/runtime continuation as needed |
+| Country drill-down and explanation | Understand why a country is in its current state | Done | Country profile page, explanation summary, drivers, uncertainty, gap context, links to domain pages and annotations | Richer historical comparison on country reasoning can still improve later | `countries/*.html` generation in `src/siasa/gui/local_app.py` | `tests/unit/test_local_gui.py` | Earlier country-profile GUI package | P4-WP-002 for richer comparison overlays |
+| Domain deep dive and trend interpretation | Inspect domain-specific time series and drivers | Partial | Domain detail pages, trend views, feature values, source context, anomaly state | Stronger baseline/historical comparison overlays beyond current baseline view are still open | `domains/*.html`, `trends.html`, `src/siasa/gui/local_app.py` | `tests/unit/test_local_gui.py` | Earlier P3 visual GUI packages | `P4-WP-002` |
+| Cross-country comparison | Compare multiple countries in one analyst flow | Done | Dedicated comparison page with coverage/confidence comparison and controls | Runtime breadth still limits practical representativeness | `comparison.html`, `src/siasa/gui/local_app.py` | `tests/unit/test_local_gui.py` | Earlier P3 comparison package | Later breadth/runtime packages |
+| Source trust / coverage / gap transparency | Review source status, failures, confidence, freshness, and remediation guidance | Done | Coverage view, degraded sources, remediation watchlist, freshness overlays, source-depth summaries | Broader live-source evidence can still deepen practical value | `coverage.html`, `readmodels/system_status.json`, `src/siasa/runs/artifacts.py` | `tests/unit/test_run_artifacts.py`, `tests/unit/test_local_gui.py` | `8c3537d feat: add freshness overlays to coverage views` | Later live-source/runtime hardening |
+| Validation / backtest review | Compare expected vs observed outcomes with governed evidence | Partial | Validation page exists in GUI baseline and validation readmodel path exists | Latest runtime bundle still lacks complete validation artifact in regular readiness path | `validation.html`, readiness state in `build/local_gui/readiness.json` / `readmodels/system_status.json` | Validation-related tests in repo; full suite passing | Earlier validation GUI baseline package | Runtime completeness package after current analyst-depth work |
+| Traceability / lineage visibility | Follow evidence path from source to status/report | Done | Dedicated traceability page and lineage records in artifacts | Richer graph-style visualization is still future enhancement | `traceability.html`, lineage readmodels, `src/siasa/readmodels/traceability*.py` | `tests/unit/test_local_gui.py` and related unit tests | Earlier traceability package | Optional later visualization package |
+| Reports / exports | Generate and inspect governed output artifacts | Partial | Export/report view exists, exported files are linked and copied, evidence summary visible | More interactive report generation and richer scoping UX still open | `reports.html`, export files under generated GUI output | `tests/unit/test_local_gui.py` | Earlier report/export baseline package | Later analyst workflow package |
+| Analyst annotation visibility | See annotation context in country/domain/global views | Done | Annotation page, contextual rendering on country/domain pages, linked annotation details | Future review/admin workflows may still extend this | `annotations.html`, country/domain annotation sections | `tests/unit/test_local_gui.py` | Earlier annotation visibility package | None immediately required |
+| Analyst annotation create/edit workflow | Operationally create/edit/filter/history/export annotations in GUI | Done | Browser-local create/edit/filter/history workflow, contextual quick links from country/domain pages, JSON export, prefilled workflow entry | Future governed server-side persistence/review flow may still come later | `annotations.html`, quick links from `countries/*.html` and `domains/*.html`, `src/siasa/gui/local_app.py` | `tests/unit/test_local_gui.py`, browser verification, full suite pass | `884659b [verified] feat: add local annotation workflow` | Optional later review/admin workflow |
+| Historical / baseline comparison overlays | Explain status/trend deltas against baseline and history in an analyst-friendly way | Partial | Current trends/domain pages contain baseline-related foundations | Richer comparison overlays on trends and domain views are still the next targeted gap | Trend/domain GUI pages in `src/siasa/gui/local_app.py` | Existing GUI tests cover current baseline | Existing P3 baseline work | `P4-WP-002` |
+| Real source access | Productive use of real external sources | Partial | Source-access assessment and governed live runtime pilot exist; real adapter baselines exist for selected sources | Full production-grade breadth and stable access across intended source classes remains incomplete | Current roadmap status in `docs/plans/siasa-stakeholder-fulfillment-roadmap.md`, live runtime code under `src/siasa/runs/live_runtime.py` | Repo tests plus earlier runtime validation work | P0 readiness and pilot packages already advanced | Broader live-source/runtime hardening |
+| Representative multi-country runtime breadth | More than one governed country materially supported in latest outputs | Partial | Multi-country runtime/artifact path works; current repo evidence proves at least UKR/POL path | Still not representative stakeholder breadth across the intended governed set | Roadmap status snapshot, latest artifacts/readmodels, `build/run_artifacts/latest/readmodels/world_map.json` | Full suite pass, runtime-related tests | Earlier P2 breadth progression packages | Further P2 breadth/runtime packages |
+| Role-based UI behavior | Functions change by user role / permission model | Weak | Requirement/governance hooks exist conceptually | No materially exposed role-based behavior in current GUI | Requirements/roadmap evidence, limited/no GUI behavior | No strong product-level role-behavior verification | None materially closed yet | Later role-behavior package |
+| Rich analyst cockpit beyond static-view baseline | Dashboard-like exploratory product experience | Partial | Current GUI is materially richer than before: controls, comparisons, overlays, annotation workflow, readiness, traceability | Still generated as a static HTML artifact viewer rather than a fully stateful application | `src/siasa/gui/local_app.py`, generated `build/local_gui/*.html` | GUI tests and browser verifications | Multiple P3/P4 packages | Depends on later strategic direction |
+
+---
+
+## 3. Current work-package steering view
+
+| Work package | Purpose | Current state | Evidence of closure / current truth | Capability impact |
+| --- | --- | --- | --- | --- |
+| P0 real-source-access readiness | Determine which real sources can be integrated honestly and under what constraints | Done (materially advanced) | Source-access assessment exists; live runtime pilot exists in repo/roadmap | Raised `Real source access` from Weak toward Partial |
+| P1 artifact-complete MVP | Ensure latest bundle contains the governed evidence artifacts needed for honest readiness claims | Partial | Roadmap still records missing validation artifact in latest readiness path | Keeps `Validation / backtest review` and readiness honesty from being fully closed |
+| P2 data-complete country coverage MVP | Move from narrow proof to representative multi-country runtime coverage | Partial | Current repo evidence proves limited multi-country path but not representative breadth | `Representative multi-country runtime breadth` remains Partial |
+| P3 visual analyst GUI MVP | Build practical GUI usability, controls, comparisons, and visual navigation | Strongly advanced | Roadmap status snapshot records trends, map visualization, controls, comparison, uncertainty/coverage views | Raised multiple analyst-facing capabilities to Done/Partial |
+| P4-WP-001 source-gap transparency overlays | Make coverage/freshness/gap remediation visible in overview/map/coverage flows | Done | Commit `8c3537d` and passing tests | Closed major transparency gap |
+| P3-WP-005 annotation create/edit workflow | Make annotations operationally editable in the static local GUI | Done | Commit `884659b`, passing tests, browser verification | Closed major analyst workflow gap |
+| P4-WP-002 richer baseline/historical overlays | Improve interpretation quality in trend/domain views | Open | Explicit next recommendation in roadmap | Next targeted capability uplift |
+
+---
+
+## 4. Project-lead reading guide
+
+If you want to know:
+
+### What is implemented?
+Look for capability status `Done` and confirm that the evidence columns point to:
+- generated GUI/runtime outputs
+- tests
+- a completed work package / commit
+
+### What is only partly begun?
+Look for `Partial` or `Weak`:
+- `Partial` = meaningful capability exists, but a stakeholder would still hit a practical limit
+- `Weak` = mostly structure/preparation, not robust practical use
+
+### What is still completely open?
+Look for `Missing`.
+In the current matrix, very few top-level areas are truly blank; most remaining gaps are now `Partial` rather than `Missing`.
+That is a useful sign of progress, but it also means prioritization must focus on the highest-value remaining deltas, not on creating more thin surface area.
+
+---
+
+## 5. Immediate steering recommendation
+
+Current serial recommendation remains:
+- next work package: `P4-WP-002`
+
+Why this is next:
+- the annotation create/edit workflow gap was just closed
+- the next highest-value stakeholder delta is better baseline/historical interpretation in trend and domain views
+- this improves analyst decision support directly without pretending that runtime breadth/completeness is already fully solved
+
+After that, reassess whether the largest remaining project-lead gap is:
+- runtime/artifact completeness (`P1` closure), or
+- representative country breadth (`P2` continuation)
+
+That reassessment should be based on the matrix above, not on raw code churn.
