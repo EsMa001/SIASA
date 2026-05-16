@@ -283,7 +283,11 @@ def test_daily_run_orchestrator_writes_multi_country_artifact_bundle(tmp_path: P
 
     assert result.artifact_bundle is not None
     assert [country["country_id"] for country in world_map["countries"]] == ["POL", "UKR"]
-    assert system_status["coverage"] == {"countries_total": 2, "countries_with_updates": 2}
+    assert system_status["coverage"] == {
+        "countries_total": 2,
+        "countries_with_updates": 2,
+        "countries_without_updates": [],
+    }
     assert system_status["country_coverage_visibility"] == {
         "priority_summary": [
             {"priority": "P1", "country_count": 1, "countries": ["UKR"]},

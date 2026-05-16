@@ -53,6 +53,7 @@ def write_run_artifacts(
     artifact_status: dict[str, dict[str, object | None]] | None = None,
     source_domain_by_source: dict[str, str] | None = None,
     source_countries_by_source: dict[str, list[str] | None] | None = None,
+    requested_country_ids: list[str] | None = None,
 ) -> RunArtifactBundle:
     output_dir.mkdir(parents=True, exist_ok=True)
     readmodels_dir = output_dir / "readmodels"
@@ -90,6 +91,24 @@ def write_run_artifacts(
     fetch_status_by_source = {record.source_id: record.fetch_status for record in fetch_metadata_records}
     source_domain_by_source = dict(source_domain_by_source or {})
     source_countries_by_source = dict(source_countries_by_source or {})
+    explicit_requested_country_ids = [str(country_id).upper() for country_id in (requested_country_ids or []) if str(country_id).strip()]
+    requested_country_ids = sorted(dict.fromkeys(explicit_requested_country_ids))
+    if not requested_country_ids:
+        requested_country_ids = sorted(
+            {
+                str(country_id)
+                for country_ids in source_countries_by_source.values()
+                if country_ids is not None
+                for country_id in country_ids
+            }
+        )
+    if not requested_country_ids:
+        requested_country_ids = sorted(country_statuses)
+    else:
+        requested_country_ids = sorted({*requested_country_ids, *country_statuses})
+    countries_without_updates = [
+        country_id for country_id in requested_country_ids if country_id not in country_statuses
+    ]
     country_metadata = _load_country_metadata(Path(__file__).resolve().parents[3])
     country_reports_by_id = {country_id: report for country_id, report in country_reports.items()}
     annotation_records = annotation_records or []
@@ -301,8 +320,9 @@ def write_run_artifacts(
                 run_id=run_state.run_id,
                 run_status=run_state.status,
                 active_domains=snapshot.active_domains,
-                countries_total=len(country_statuses),
+                countries_total=len(requested_country_ids),
                 countries_with_updates=len(country_statuses),
+                countries_without_updates=countries_without_updates,
                 failed_sources=run_state.failed_sources,
                 available_reports=available_reports,
                 snapshot_id=snapshot.snapshot_id,

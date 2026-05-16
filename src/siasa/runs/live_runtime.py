@@ -259,6 +259,7 @@ def build_governed_live_orchestrator(
         data_version="governed-live-sources-v1",
         artifacts_output_dir=output_dir,
         validation_view_model_builder=_validation_view_model_builder,
+        requested_country_ids=resolved_country_ids,
     )
 
 

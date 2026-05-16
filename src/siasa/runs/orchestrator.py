@@ -107,6 +107,7 @@ class DailyRunOrchestrator:
     artifacts_output_dir: Path | None = None
     baseline_mode: str = "Combined 30/90/365"
     validation_view_model_builder: ValidationViewModelBuilder | None = None
+    requested_country_ids: tuple[str, ...] | None = None
 
     def run(self, run_id: str) -> DailyRunResult:
         run_state = RunState.start(run_id)
@@ -314,6 +315,7 @@ class DailyRunOrchestrator:
                 artifact_status=artifact_status,
                 source_domain_by_source={adapter.source_id: adapter.domain for adapter in self.adapters},
                 source_countries_by_source={adapter.source_id: _adapter_country_scope(adapter) for adapter in self.adapters},
+                requested_country_ids=list(self.requested_country_ids or []),
             )
 
         return DailyRunResult(

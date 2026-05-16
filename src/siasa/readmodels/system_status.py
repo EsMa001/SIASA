@@ -17,6 +17,7 @@ def build_system_status_read_model(
     data_gaps: list[str] | None = None,
     artifact_status: dict[str, dict[str, object | None]] | None = None,
     country_coverage_visibility: dict[str, object] | None = None,
+    countries_without_updates: list[str] | None = None,
 ) -> dict[str, object]:
     return {
         "run_id": run_id,
@@ -25,6 +26,7 @@ def build_system_status_read_model(
         "coverage": {
             "countries_total": countries_total,
             "countries_with_updates": countries_with_updates,
+            "countries_without_updates": list(countries_without_updates or []),
         },
         "failed_sources": failed_sources,
         "available_reports": available_reports,
