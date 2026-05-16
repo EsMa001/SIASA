@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 from siasa.adapters.base import FetchResult
 from siasa.data.normalization_mappings import NormalizationMappingVersion
 from siasa.data.normalization_service import normalize_records
@@ -18,6 +20,26 @@ class StubFetcher:
         if self.error is not None:
             raise self.error
         return self.responses[url]
+
+
+class SequenceFetcher:
+    def __init__(self, responses: list[object]) -> None:
+        self.responses = list(responses)
+        self.urls: list[str] = []
+
+    def __call__(self, url: str) -> object:
+        self.urls.append(url)
+        response = self.responses.pop(0)
+        if isinstance(response, Exception):
+            raise response
+        return response
+
+
+class FakeRateLimitError(RuntimeError):
+    def __init__(self, message: str, *, retry_after: str | None = None) -> None:
+        super().__init__(message)
+        self.code = 429
+        self.headers = {} if retry_after is None else {"Retry-After": retry_after}
 
 
 def test_world_bank_adapter_fetch_transforms_indicator_payloads_into_domain_d_records() -> None:
@@ -143,3 +165,80 @@ def test_world_bank_adapter_returns_failed_fetch_result_when_provider_call_fails
     assert result.records == []
     assert result.is_success is False
     assert "provider down" in result.diagnostics
+
+
+
+def test_world_bank_adapter_honors_numeric_retry_after_for_rate_limit_backoff() -> None:
+    sleep_calls: list[float] = []
+    payload = [
+        {"page": 1, "pages": 1},
+        [
+            {"country": {"id": "UKR"}, "date": "2024", "value": 3.2},
+        ],
+    ]
+    adapter = WorldBankIndicatorsAdapter(
+        country_ids=("UKR",),
+        fetch_json=SequenceFetcher(
+            [
+                FakeRateLimitError("HTTP 429: Too Many Requests", retry_after="7"),
+                payload,
+                payload,
+            ]
+        ),
+        retry_sleep=sleep_calls.append,
+        max_retries=2,
+        retry_backoff_seconds=1.0,
+    )
+
+    result = adapter.fetch()
+
+    assert result.is_success is True
+    assert sleep_calls == [7.0]
+
+
+
+def test_world_bank_adapter_honors_http_date_retry_after_for_rate_limit_backoff() -> None:
+    sleep_calls: list[float] = []
+    payload = [
+        {"page": 1, "pages": 1},
+        [
+            {"country": {"id": "UKR"}, "date": "2024", "value": 3.2},
+        ],
+    ]
+    adapter = WorldBankIndicatorsAdapter(
+        country_ids=("UKR",),
+        fetch_json=SequenceFetcher(
+            [
+                FakeRateLimitError(
+                    "HTTP 429: Too Many Requests",
+                    retry_after="Wed, 13 May 2026 08:00:07 GMT",
+                ),
+                payload,
+                payload,
+            ]
+        ),
+        retry_sleep=sleep_calls.append,
+        now_provider=lambda: datetime(2026, 5, 13, 8, 0, 0, tzinfo=UTC),
+        max_retries=2,
+        retry_backoff_seconds=1.0,
+    )
+
+    result = adapter.fetch()
+
+    assert result.is_success is True
+    assert sleep_calls == [7.0]
+
+
+
+def test_world_bank_adapter_returns_failed_fetch_result_for_invalid_retry_configuration() -> None:
+    adapter = WorldBankIndicatorsAdapter(
+        country_ids=("UKR",),
+        fetch_json=SequenceFetcher([]),
+        max_retries=0,
+    )
+
+    result = adapter.fetch()
+
+    assert result.records == []
+    assert result.is_success is False
+    assert "max_retries" in result.diagnostics
