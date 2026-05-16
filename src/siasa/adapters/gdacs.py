@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
 import xml.etree.ElementTree as ET
+from time import sleep
 from typing import Callable
 from urllib.request import urlopen
 
@@ -12,6 +13,7 @@ from .base import FetchResult, SourceAdapter
 
 FetchText = Callable[[str], str]
 NowProvider = Callable[[], datetime]
+SleepFn = Callable[[float], None]
 
 _GDACS_NS = {"gdacs": "http://www.gdacs.org"}
 _ALERT_LEVELS = {
@@ -30,6 +32,28 @@ def _utc_now() -> datetime:
     return datetime.now(UTC)
 
 
+
+def _retry_delay_seconds(exc: Exception, default_delay: float, now: datetime) -> float:
+    code = getattr(exc, 'code', None)
+    if code == 429:
+        headers = getattr(exc, 'headers', None)
+        if headers is not None:
+            retry_after = headers.get('Retry-After') if hasattr(headers, 'get') else None
+            if retry_after is not None:
+                try:
+                    return max(default_delay, float(retry_after))
+                except (TypeError, ValueError):
+                    try:
+                        retry_at = parsedate_to_datetime(str(retry_after))
+                    except (TypeError, ValueError, IndexError, OverflowError):
+                        return default_delay
+                    if retry_at.tzinfo is None:
+                        retry_at = retry_at.replace(tzinfo=UTC)
+                    seconds_until_retry = max(0.0, (retry_at - now).total_seconds())
+                    return max(default_delay, seconds_until_retry)
+    return default_delay
+
+
 @dataclass
 class GDACSAdapter(SourceAdapter):
     country_ids: set[str] | None = None
@@ -38,15 +62,41 @@ class GDACSAdapter(SourceAdapter):
     rss_url: str = "https://www.gdacs.org/xml/rss.xml"
     fetch_text: FetchText = _default_fetch_text
     now_provider: NowProvider = _utc_now
+    max_retries: int = 3
+    retry_backoff_seconds: float = 1.0
+    retry_sleep: SleepFn = sleep
 
     def fetch(self) -> FetchResult:
         try:
-            payload = self.fetch_text(self.rss_url)
+            payload = self._fetch_with_retry(self.rss_url)
             records = self._parse_payload(payload)
             diagnostics = f"gdacs_fetch_ok countries={len(records)} records={len(records)}"
             return FetchResult(records=records, diagnostics=diagnostics, is_success=True)
         except Exception as exc:
             return FetchResult(records=[], diagnostics=f"gdacs_fetch_failed: {exc}", is_success=False)
+
+    def _fetch_with_retry(self, url: str) -> str:
+        if self.max_retries < 0:
+            raise ValueError("GDACS adapter max_retries must be >= 0")
+        if self.retry_backoff_seconds < 0:
+            raise ValueError("GDACS adapter retry_backoff_seconds must be >= 0")
+
+        last_error: Exception | None = None
+        for attempt in range(self.max_retries + 1):
+            try:
+                return self.fetch_text(url)
+            except Exception as exc:  # noqa: BLE001 - adapter should return failed FetchResult, not crash caller
+                last_error = exc
+                if attempt == self.max_retries:
+                    break
+                retry_delay = _retry_delay_seconds(
+                    exc,
+                    self.retry_backoff_seconds * (2**attempt),
+                    self.now_provider(),
+                )
+                self.retry_sleep(retry_delay)
+        assert last_error is not None
+        raise last_error
 
     def _parse_payload(self, payload: str) -> list[dict[str, object]]:
         root = ET.fromstring(payload)

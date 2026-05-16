@@ -85,18 +85,18 @@ class WorldBankIndicatorsAdapter(SourceAdapter):
             return FetchResult(records=[], diagnostics=f"world_bank_fetch_failed: {exc}", is_success=False)
 
     def _fetch_with_retry(self, url: str) -> object:
-        if self.max_retries < 1:
-            raise ValueError("World Bank adapter max_retries must be >= 1")
+        if self.max_retries < 0:
+            raise ValueError("World Bank adapter max_retries must be >= 0")
         if self.retry_backoff_seconds < 0:
             raise ValueError("World Bank adapter retry_backoff_seconds must be >= 0")
 
         last_error: Exception | None = None
-        for attempt in range(self.max_retries):
+        for attempt in range(self.max_retries + 1):
             try:
                 return self.fetch_json(url)
             except Exception as exc:  # noqa: BLE001 - adapter should return failed FetchResult, not crash caller
                 last_error = exc
-                if attempt == self.max_retries - 1:
+                if attempt == self.max_retries:
                     break
                 retry_delay = _retry_delay_seconds(
                     exc,

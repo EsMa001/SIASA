@@ -87,12 +87,12 @@ class GDELTDocAdapter(SourceAdapter):
 
     def _fetch_with_retry(self, url: str) -> object:
         last_error: Exception | None = None
-        for attempt in range(self.max_retries):
+        for attempt in range(self.max_retries + 1):
             try:
                 return self.fetch_json(url)
             except Exception as exc:  # noqa: BLE001 - adapter should return failed FetchResult, not crash caller
                 last_error = exc
-                if attempt == self.max_retries - 1:
+                if attempt == self.max_retries:
                     break
                 retry_delay = _retry_delay_seconds(
                     exc,

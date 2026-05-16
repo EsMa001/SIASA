@@ -22,6 +22,27 @@ class StubTextFetcher:
         return self.text
 
 
+class SequenceTextFetcher:
+    def __init__(self, responses: list[object]) -> None:
+        self.responses = list(responses)
+        self.urls: list[str] = []
+
+    def __call__(self, url: str) -> str:
+        self.urls.append(url)
+        response = self.responses.pop(0)
+        if isinstance(response, Exception):
+            raise response
+        assert isinstance(response, str)
+        return response
+
+
+class FakeRateLimitError(RuntimeError):
+    def __init__(self, message: str, *, retry_after: str | None = None) -> None:
+        super().__init__(message)
+        self.code = 429
+        self.headers = {} if retry_after is None else {"Retry-After": retry_after}
+
+
 def _rss_item(*, iso3: str, alertlevel: str, dateadded: str, eventtype: str, eventid: str, iscurrent: str = "true") -> str:
     return f"""
     <item>
@@ -174,3 +195,67 @@ def test_gdacs_adapter_returns_failed_fetch_result_when_rss_fetch_fails() -> Non
     assert result.records == []
     assert result.is_success is False
     assert "gdacs unavailable" in result.diagnostics
+
+
+
+def test_gdacs_adapter_honors_numeric_retry_after_for_rate_limit_backoff() -> None:
+    sleep_calls: list[float] = []
+    adapter = GDACSAdapter(
+        country_ids={"UKR"},
+        fetch_text=SequenceTextFetcher(
+            [
+                FakeRateLimitError("HTTP 429: Too Many Requests", retry_after="7"),
+                _rss_feed([]),
+            ]
+        ),
+        retry_sleep=sleep_calls.append,
+        max_retries=2,
+        retry_backoff_seconds=1.0,
+    )
+
+    result = adapter.fetch()
+
+    assert result.is_success is True
+    assert sleep_calls == [7.0]
+
+
+
+def test_gdacs_adapter_honors_http_date_retry_after_for_rate_limit_backoff() -> None:
+    sleep_calls: list[float] = []
+    adapter = GDACSAdapter(
+        country_ids={"UKR"},
+        fetch_text=SequenceTextFetcher(
+            [
+                FakeRateLimitError(
+                    "HTTP 429: Too Many Requests",
+                    retry_after="Wed, 13 May 2026 08:00:07 GMT",
+                ),
+                _rss_feed([]),
+            ]
+        ),
+        retry_sleep=sleep_calls.append,
+        now_provider=lambda: datetime(2026, 5, 13, 8, 0, 0, tzinfo=UTC),
+        max_retries=2,
+        retry_backoff_seconds=1.0,
+    )
+
+    result = adapter.fetch()
+
+    assert result.is_success is True
+    assert sleep_calls == [7.0]
+
+
+
+def test_gdacs_adapter_max_retries_counts_retries_after_initial_attempt() -> None:
+    fetcher = SequenceTextFetcher([RuntimeError("gdacs unavailable"), _rss_feed([])])
+    adapter = GDACSAdapter(
+        country_ids={"UKR"},
+        fetch_text=fetcher,
+        retry_sleep=lambda _seconds: None,
+        max_retries=1,
+    )
+
+    result = adapter.fetch()
+
+    assert result.is_success is True
+    assert len(fetcher.urls) == 2

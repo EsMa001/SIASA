@@ -88,12 +88,12 @@ class GDELTEventsAdapter(SourceAdapter):
 
     def _fetch_bytes_with_retry(self, url: str) -> bytes:
         last_error: Exception | None = None
-        for attempt in range(self.max_retries):
+        for attempt in range(self.max_retries + 1):
             try:
                 return self.fetch_bytes(url)
             except Exception as exc:  # noqa: BLE001
                 last_error = exc
-                if attempt == self.max_retries - 1:
+                if attempt == self.max_retries:
                     break
                 retry_delay = _retry_delay_seconds(
                     exc,

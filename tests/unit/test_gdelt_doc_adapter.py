@@ -135,7 +135,7 @@ def test_gdelt_doc_adapter_retries_transient_failure_and_supports_domain_a_featu
 def test_gdelt_doc_adapter_returns_failed_fetch_result_after_retry_budget_is_exhausted() -> None:
     adapter = GDELTDocAdapter(
         country_queries={"UKR": "ukraine"},
-        fetch_json=SequenceFetcher([RuntimeError("HTTP 429"), RuntimeError("HTTP 429")]),
+        fetch_json=SequenceFetcher([RuntimeError("HTTP 429"), RuntimeError("HTTP 429"), RuntimeError("HTTP 429")]),
         retry_sleep=lambda _seconds: None,
         max_retries=2,
     )

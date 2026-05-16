@@ -234,7 +234,7 @@ def test_world_bank_adapter_returns_failed_fetch_result_for_invalid_retry_config
     adapter = WorldBankIndicatorsAdapter(
         country_ids=("UKR",),
         fetch_json=SequenceFetcher([]),
-        max_retries=0,
+        max_retries=-1,
     )
 
     result = adapter.fetch()
