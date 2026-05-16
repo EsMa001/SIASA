@@ -1673,7 +1673,79 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
     return _page("Validation / Backtest View", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
+def _traceability_dependency_rows(lineage_records: list[dict[str, Any]]) -> str:
+    clusters: dict[tuple[str, str, str], dict[str, Any]] = {}
+    for record in lineage_records:
+        feature_id = str(record.get('feature_id', ''))
+        domain_status_id = str(record.get('domain_status_id', ''))
+        snapshot_id = str(record.get('snapshot_id', ''))
+        cluster_key = (feature_id, domain_status_id, snapshot_id)
+        entry = clusters.setdefault(
+            cluster_key,
+            {
+                'feature_id': feature_id,
+                'domain_status_id': domain_status_id,
+                'snapshot_id': snapshot_id,
+                'source_ids': set(),
+                'report_ids': set(),
+            },
+        )
+        entry['source_ids'].add(str(record.get('source_id', '')))
+        if record.get('report_id'):
+            entry['report_ids'].add(str(record.get('report_id')))
+    rows = []
+    for cluster in clusters.values():
+        source_ids = sorted(source_id for source_id in cluster['source_ids'] if source_id)
+        if len(source_ids) < 2:
+            continue
+        rows.append(
+            "<tr>"
+            f"<td>{html.escape(cluster['feature_id'])}</td>"
+            f"<td>{html.escape(cluster['domain_status_id'])}</td>"
+            f"<td>{html.escape(cluster['snapshot_id'])}</td>"
+            f"<td>{html.escape(', '.join(source_ids))}</td>"
+            f"<td>{html.escape(', '.join(sorted(cluster['report_ids'])) or 'n/a')}</td>"
+            f"<td>{html.escape('replication_or_shared_dependency_candidate')}</td>"
+            "</tr>"
+        )
+    return ''.join(rows) or "<tr><td colspan='6'>No dependency cluster candidates in current lineage artifact.</td></tr>"
+
+
+
+def _traceability_origin_rows(lineage_records: list[dict[str, Any]]) -> str:
+    by_source: dict[str, dict[str, Any]] = {}
+    for record in lineage_records:
+        source_id = str(record.get('source_id', ''))
+        entry = by_source.setdefault(
+            source_id,
+            {
+                'raw_record_ids': set(),
+                'feature_ids': set(),
+                'report_ids': set(),
+            },
+        )
+        entry['raw_record_ids'].add(str(record.get('raw_record_id', '')))
+        entry['feature_ids'].add(str(record.get('feature_id', '')))
+        if record.get('report_id'):
+            entry['report_ids'].add(str(record.get('report_id')))
+    rows = []
+    for source_id, entry in sorted(by_source.items()):
+        rows.append(
+            "<tr>"
+            f"<td>{html.escape(source_id)}</td>"
+            f"<td>{len([item for item in entry['raw_record_ids'] if item])}</td>"
+            f"<td>{len([item for item in entry['feature_ids'] if item])}</td>"
+            f"<td>{html.escape(', '.join(sorted(item for item in entry['report_ids'] if item)) or 'n/a')}</td>"
+            f"<td>{html.escape('not yet inferable from current lineage artifact')}</td>"
+            f"<td>{html.escape('current artifact lacks earliest-seen / propagation timestamps needed for origin inference')}</td>"
+            "</tr>"
+        )
+    return ''.join(rows) or "<tr><td colspan='6'>No source-origin groundwork available.</td></tr>"
+
+
+
 def _render_traceability(traceability_view_model: dict[str, Any], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
+    lineage_records = [record for record in traceability_view_model.get('lineage_records', []) if isinstance(record, dict)]
     rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(record.get('source_id', '')))}</td>"
@@ -1685,12 +1757,22 @@ def _render_traceability(traceability_view_model: dict[str, Any], *, nav_prefix:
         f"<td>{html.escape(str(record.get('snapshot_id', '')))}</td>"
         f"<td>{html.escape(str(record.get('report_id', '')))}</td>"
         "</tr>"
-        for record in traceability_view_model.get('lineage_records', [])
+        for record in lineage_records
     )
+    dependency_rows = _traceability_dependency_rows(lineage_records)
+    origin_rows = _traceability_origin_rows(lineage_records)
     body = (
         "<h2>Traceability / Lineage View</h2>"
         "<table><thead><tr><th>Source</th><th>Raw</th><th>Normalized</th><th>Feature</th><th>Domain Status</th><th>Multi-Domain Status</th><th>Snapshot</th><th>Report</th></tr></thead>"
         f"<tbody>{rows}</tbody></table>"
+        "<h3>Source Dependency Groundwork</h3>"
+        "<h4>Dependency Cluster Candidates</h4>"
+        "<table><thead><tr><th>Feature</th><th>Domain Status</th><th>Snapshot</th><th>Sources</th><th>Reports</th><th>Coupling Signal</th></tr></thead>"
+        f"<tbody>{dependency_rows}</tbody></table>"
+        "<h3>Source-Origin Groundwork</h3>"
+        "<p>This slice surfaces what the current lineage artifact can already support while explicitly marking origin inference as unresolved where no first-seen / propagation timestamps exist.</p>"
+        "<table><thead><tr><th>Source</th><th>Raw Records</th><th>Features</th><th>Reports</th><th>Origin Inference Status</th><th>Origin Uncertainty</th></tr></thead>"
+        f"<tbody>{origin_rows}</tbody></table>"
     )
     return _page("Traceability / Lineage View", body, nav_prefix=nav_prefix, available_pages=available_pages)
 

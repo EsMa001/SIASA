@@ -94,10 +94,11 @@ Current repo-evidenced status on branch `hermes/repo-scaffold`:
   - cross-country comparison exists
   - coverage/confidence/uncertainty visualization exists
   - semantic view projections and trend event overlays exist
-- P4 is now partly advanced:
+- P4 is now materially advanced:
   - source-gap transparency is visible through country gap watchlists, remediation watchlists, priority/depth summaries, and freshness overlays in overview/map-facing views
   - analyst annotation create/edit workflow now exists as a governed static-site workflow baseline
   - baseline/historical comparison overlays on trends and domain views now exist as analyst-friendly comparison summaries
+  - source-dependency cluster candidates and explicit source-origin groundwork are now visible in the traceability view
 
 Interpretation:
 - the old roadmap order was correct as a program scaffold
@@ -317,23 +318,23 @@ The old order should now be updated to the current repo state.
 
 Recommended serial order from here:
 
-1. P4-WP-003 — source-dependency / source-origin groundwork
-   - size: large
-   - reason: this is now the clearest next analyst-value gap after closing annotation workflow and trend/domain comparison overlays
+1. P1 closure package(s) for latest-bundle validation completeness, if readiness honesty remains blocked
+   - size: small to medium
+   - reason: readiness claims should not remain artificially weaker than the now richer GUI baseline
 2. broader live-source/runtime hardening beyond the current governed pilot subset
    - size: medium to large
    - reason: remaining operational issues are now mostly source/runtime robustness rather than missing GUI transparency structure
-3. P1 closure package(s) for latest-bundle validation completeness, if readiness honesty remains blocked
-   - size: small to medium
-   - reason: readiness claims should not remain artificially weaker than the now richer GUI baseline
-4. P2 representative-breadth continuation packages
+3. P2 representative-breadth continuation packages
    - size: medium to large
    - reason: stakeholder breadth remains materially below the governed country set even though the path now exists
+4. later source-origin / epidemiology extension package(s)
+   - size: large
+   - reason: the groundwork now exists, but full origin inference and information-spread analysis are still intentionally deferred beyond the current baseline
 
 Suggested planning cadence:
-- next work package: source-origin groundwork
-- following 1 to 2 work packages: selected runtime hardening and/or validation completeness closure, depending on the capability matrix
-- after that: continue with the biggest remaining honesty/breadth delta shown by the matrix
+- next work package: validation completeness / readiness honesty closure
+- following 1 to 2 work packages: selected runtime hardening and representative breadth expansion
+- after that: resume extended source-origin / epidemiology features only when the capability matrix shows the runtime baseline is strong enough
 
 This updated order is recommended because breadth, transparency, and core GUI usability are now materially stronger than this document originally assumed.
 
@@ -367,12 +368,12 @@ Only then is the program close to the stakeholder intent, not merely the current
 
 ## 7. Immediate recommendation
 
-Next serial work package should be: P4-WP-003.
+Next serial work package should be: P1 closure package for latest-bundle validation completeness / readiness honesty.
 
 Current rationale:
 - the annotation create/edit workflow gap has been closed with a governed static-site workflow baseline
-- the trend/domain baseline-historical interpretation gap has now also been closed for the current static GUI baseline
-- the next highest-value analyst-depth step is therefore source-dependency / source-origin groundwork
-- after that, the capability matrix should determine whether runtime honesty closure (P1) or representative breadth expansion (P2) has become the larger remaining project-lead gap
+- the trend/domain baseline-historical interpretation gap has been closed for the current static GUI baseline
+- the first source-dependency / source-origin groundwork slice is now also present in the traceability view without overclaiming full origin inference
+- the most important remaining project-level gap is therefore runtime honesty: the latest governed bundle should not remain weaker than the visible analyst-facing product baseline
 
-After that, proceed with the highest remaining honesty/breadth package and then broader live-source/runtime hardening.
+After that, proceed with the strongest remaining runtime-hardening or breadth package indicated by the capability matrix.

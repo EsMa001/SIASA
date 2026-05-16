@@ -135,7 +135,27 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 "multi_domain_status_id": "MST-UKR-RUN-200",
                 "snapshot_id": "SNAP-RUN-200-v1",
                 "report_id": "REP-DAILY-RUN-200",
-            }
+            },
+            {
+                "source_id": "SRC-B",
+                "raw_record_id": "RAW-SRC-B-7",
+                "normalized_id": "NORM-SRC-B-7",
+                "feature_id": "A_article_count",
+                "domain_status_id": "DST-UKR-A-RUN-200",
+                "multi_domain_status_id": "MST-UKR-RUN-200",
+                "snapshot_id": "SNAP-RUN-200-v1",
+                "report_id": "REP-DAILY-RUN-200",
+            },
+            {
+                "source_id": "SRC-C",
+                "raw_record_id": "RAW-SRC-C-3",
+                "normalized_id": "NORM-SRC-C-3",
+                "feature_id": "D_macro_index",
+                "domain_status_id": "DST-UKR-D-RUN-200",
+                "multi_domain_status_id": "MST-UKR-RUN-200",
+                "snapshot_id": "SNAP-RUN-200-v1",
+                "report_id": "REP-DAILY-RUN-200",
+            },
         ]
     }
     annotations_view = {
@@ -452,6 +472,12 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Traceability / Lineage View" in traceability_html
     assert "RAW-SRC-A-1" in traceability_html
     assert "REP-DAILY-RUN-200" in traceability_html
+    assert "Source Dependency Groundwork" in traceability_html
+    assert "Dependency Cluster Candidates" in traceability_html
+    assert "A_article_count" in traceability_html
+    assert "SRC-A, SRC-B" in traceability_html
+    assert "Source-Origin Groundwork" in traceability_html
+    assert "not yet inferable from current lineage artifact" in traceability_html
 
     annotations_html = (pages.output_dir / "annotations.html").read_text()
     assert "Analyst Annotations View" in annotations_html
