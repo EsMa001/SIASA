@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from email.utils import parsedate_to_datetime
 import json
 from time import sleep
 from typing import Any, Callable
@@ -23,6 +24,29 @@ def _default_fetch_json(url: str) -> object:
 
 def _utc_now() -> datetime:
     return datetime.now(UTC)
+
+
+
+def _retry_delay_seconds(exc: Exception, default_delay: float, now: datetime) -> float:
+    code = getattr(exc, 'code', None)
+    if code == 429:
+        headers = getattr(exc, 'headers', None)
+        if headers is not None:
+            retry_after = headers.get('Retry-After') if hasattr(headers, 'get') else None
+            if retry_after is not None:
+                try:
+                    return max(default_delay, float(retry_after))
+                except (TypeError, ValueError):
+                    try:
+                        retry_at = parsedate_to_datetime(str(retry_after))
+                    except (TypeError, ValueError, IndexError, OverflowError):
+                        return default_delay
+                    if retry_at.tzinfo is None:
+                        retry_at = retry_at.replace(tzinfo=UTC)
+                    seconds_until_retry = max(0.0, (retry_at - now).total_seconds())
+                    return max(default_delay, seconds_until_retry)
+    return default_delay
+
 
 
 @dataclass
@@ -70,7 +94,12 @@ class GDELTDocAdapter(SourceAdapter):
                 last_error = exc
                 if attempt == self.max_retries - 1:
                     break
-                self.retry_sleep(self.retry_backoff_seconds * (2**attempt))
+                retry_delay = _retry_delay_seconds(
+                    exc,
+                    self.retry_backoff_seconds * (2**attempt),
+                    self.now_provider(),
+                )
+                self.retry_sleep(retry_delay)
         assert last_error is not None
         raise last_error
 

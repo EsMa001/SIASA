@@ -22,6 +22,13 @@ class SequenceFetcher:
         return response
 
 
+class FakeRateLimitError(RuntimeError):
+    def __init__(self, message: str, *, retry_after: str | None = None) -> None:
+        super().__init__(message)
+        self.code = 429
+        self.headers = {} if retry_after is None else {"Retry-After": retry_after}
+
+
 def test_gdelt_doc_adapter_fetch_transforms_artlist_payload_into_article_records() -> None:
     fetcher = SequenceFetcher(
         [
@@ -138,3 +145,52 @@ def test_gdelt_doc_adapter_returns_failed_fetch_result_after_retry_budget_is_exh
     assert result.records == []
     assert result.is_success is False
     assert "HTTP 429" in result.diagnostics
+
+
+
+def test_gdelt_doc_adapter_honors_retry_after_for_rate_limit_backoff() -> None:
+    sleep_calls: list[float] = []
+    fetcher = SequenceFetcher(
+        [
+            FakeRateLimitError("HTTP 429: Too Many Requests", retry_after="7"),
+            {"articles": []},
+        ]
+    )
+    adapter = GDELTDocAdapter(
+        country_queries={"UKR": "ukraine"},
+        fetch_json=fetcher,
+        retry_sleep=sleep_calls.append,
+        max_retries=2,
+        retry_backoff_seconds=1.0,
+    )
+
+    result = adapter.fetch()
+
+    assert result.is_success is True
+    assert sleep_calls == [7.0]
+
+
+def test_gdelt_doc_adapter_honors_retry_after_http_date_for_rate_limit_backoff() -> None:
+    sleep_calls: list[float] = []
+    fetcher = SequenceFetcher(
+        [
+            FakeRateLimitError(
+                "HTTP 429: Too Many Requests",
+                retry_after="Wed, 13 May 2026 08:00:07 GMT",
+            ),
+            {"articles": []},
+        ]
+    )
+    adapter = GDELTDocAdapter(
+        country_queries={"UKR": "ukraine"},
+        fetch_json=fetcher,
+        retry_sleep=sleep_calls.append,
+        now_provider=lambda: datetime(2026, 5, 13, 8, 0, 0, tzinfo=UTC),
+        max_retries=2,
+        retry_backoff_seconds=1.0,
+    )
+
+    result = adapter.fetch()
+
+    assert result.is_success is True
+    assert sleep_calls == [7.0]
