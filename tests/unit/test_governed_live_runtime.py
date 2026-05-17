@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -10,6 +12,7 @@ from siasa.runs.live_runtime import build_governed_live_orchestrator, run_govern
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+_SUBPROCESS_ENV = {**os.environ, "PYTHONPATH": "src"}
 
 
 @dataclass
@@ -170,13 +173,13 @@ def test_build_governed_live_orchestrator_rejects_unsupported_country_for_gdelt_
 def test_governed_live_runtime_module_executes_main_for_help() -> None:
     result = subprocess.run(
         [
-            "/opt/hermes/.venv/bin/python",
+            sys.executable,
             "-m",
             "siasa.runs.live_runtime",
             "--help",
         ],
         cwd=REPO_ROOT,
-        env={"PYTHONPATH": "src"},
+        env=_SUBPROCESS_ENV,
         capture_output=True,
         text=True,
         check=False,
@@ -191,7 +194,7 @@ def test_governed_live_runtime_module_executes_main_for_help() -> None:
 def test_governed_live_runtime_module_accepts_repeated_country_ids_for_multi_country_run() -> None:
     result = subprocess.run(
         [
-            "/opt/hermes/.venv/bin/python",
+            sys.executable,
             "-m",
             "siasa.runs.live_runtime",
             "--country-id",
@@ -201,7 +204,7 @@ def test_governed_live_runtime_module_accepts_repeated_country_ids_for_multi_cou
             "--help",
         ],
         cwd=REPO_ROOT,
-        env={"PYTHONPATH": "src"},
+        env=_SUBPROCESS_ENV,
         capture_output=True,
         text=True,
         check=False,
@@ -215,7 +218,7 @@ def test_governed_live_runtime_module_accepts_repeated_country_ids_for_multi_cou
 def test_governed_live_runtime_module_accepts_representative_pilot_set_flag() -> None:
     result = subprocess.run(
         [
-            "/opt/hermes/.venv/bin/python",
+            sys.executable,
             "-m",
             "siasa.runs.live_runtime",
             "--pilot-set",
@@ -223,7 +226,7 @@ def test_governed_live_runtime_module_accepts_representative_pilot_set_flag() ->
             "--help",
         ],
         cwd=REPO_ROOT,
-        env={"PYTHONPATH": "src"},
+        env=_SUBPROCESS_ENV,
         capture_output=True,
         text=True,
         check=False,
