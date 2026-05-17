@@ -148,6 +148,29 @@ def test_gdelt_doc_adapter_returns_failed_fetch_result_after_retry_budget_is_exh
 
 
 
+def test_gdelt_doc_adapter_sleeps_between_successful_multi_country_requests() -> None:
+    sleep_calls: list[float] = []
+    fetcher = SequenceFetcher(
+        [
+            {"articles": []},
+            {"articles": []},
+            {"articles": []},
+        ]
+    )
+    adapter = GDELTDocAdapter(
+        country_queries={"UKR": "ukraine", "POL": "poland", "ISR": "israel"},
+        fetch_json=fetcher,
+        retry_sleep=sleep_calls.append,
+        inter_request_delay_seconds=1.0,
+    )
+
+    result = adapter.fetch()
+
+    assert result.is_success is True
+    assert sleep_calls == [1.0, 1.0]
+
+
+
 def test_gdelt_doc_adapter_honors_retry_after_for_rate_limit_backoff() -> None:
     sleep_calls: list[float] = []
     fetcher = SequenceFetcher(

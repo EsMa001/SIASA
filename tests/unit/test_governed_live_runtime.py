@@ -54,6 +54,8 @@ def test_build_governed_live_orchestrator_supports_multi_country_live_pilot() ->
 
     assert world_bank.country_ids == ("UKR", "POL")
     assert gdelt_doc.country_queries == {"UKR": "Ukraine", "POL": "Poland"}
+    assert gdelt_doc.max_records == 10
+    assert gdelt_doc.inter_request_delay_seconds == 1.0
     assert gdelt_events.country_codes == {"UKR": "UP", "POL": "PL"}
     assert gdacs.country_ids == {"UKR", "POL"}
 
@@ -77,6 +79,8 @@ def test_build_governed_live_orchestrator_supports_representative_pilot_set() ->
         "ISR": "Israel",
         "TWN": "Taiwan",
     }
+    assert gdelt_doc.max_records == 5
+    assert gdelt_doc.inter_request_delay_seconds == 1.0
     assert gdelt_events.country_codes == {
         "UKR": "UP",
         "POL": "PL",

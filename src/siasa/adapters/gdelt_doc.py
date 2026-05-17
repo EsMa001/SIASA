@@ -60,6 +60,7 @@ class GDELTDocAdapter(SourceAdapter):
     output_format: str = "json"
     max_retries: int = 3
     retry_backoff_seconds: float = 1.0
+    inter_request_delay_seconds: float = 0.0
     fetch_json: FetchJson = _default_fetch_json
     now_provider: NowProvider = _utc_now
     retry_sleep: SleepFn = sleep
@@ -67,10 +68,13 @@ class GDELTDocAdapter(SourceAdapter):
     def fetch(self) -> FetchResult:
         try:
             records: list[dict[str, Any]] = []
-            for country_id, query in self.country_queries.items():
+            country_items = list(self.country_queries.items())
+            for index, (country_id, query) in enumerate(country_items):
                 url = self._build_url(query)
                 payload = self._fetch_with_retry(url)
                 records.extend(self._parse_payload(country_id, payload))
+                if index < len(country_items) - 1 and self.inter_request_delay_seconds > 0:
+                    self.retry_sleep(self.inter_request_delay_seconds)
             diagnostics = (
                 f"gdelt_doc_fetch_ok countries={len(self.country_queries)} records={len(records)}"
             )

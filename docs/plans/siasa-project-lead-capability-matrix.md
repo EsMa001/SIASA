@@ -62,6 +62,7 @@ For project steering, use these work-package states:
 
 | Work package | Purpose | Current state | Evidence of closure / current truth | Capability impact |
 | --- | --- | --- | --- | --- |
+| P2 live-runtime hardening: GDELT DOC query budget and pacing | Reduce representative multi-country runtime fragility from GDELT DOC rate limiting | Done | Live runtime now configures conservative per-country GDELT DOC record budgets and inter-request pacing, with targeted adapter/runtime tests and full-suite pass | Narrows one concrete live-source instability cause without overclaiming full runtime closure |
 | P0 real-source-access readiness | Determine which real sources can be integrated honestly and under what constraints | Done (materially advanced) | Source-access assessment exists; live runtime pilot exists in repo/roadmap | Raised `Real source access` from Weak toward Partial |
 | P1 artifact-complete MVP | Ensure latest bundle contains the governed evidence artifacts needed for honest readiness claims | Partial | Roadmap still records missing validation artifact in latest readiness path | Keeps `Validation / backtest review` and readiness honesty from being fully closed |
 | P2 data-complete country coverage MVP | Move from narrow proof to representative multi-country runtime coverage | Partial | Current repo evidence proves limited multi-country path but not representative breadth | `Representative multi-country runtime breadth` remains Partial |

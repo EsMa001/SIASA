@@ -29,6 +29,13 @@ _REPRESENTATIVE_LIVE_PILOT_SET = ("UKR", "POL", "ISR", "TWN")
 
 
 
+def _gdelt_doc_max_records_for_country_count(country_count: int) -> int:
+    if country_count <= 1:
+        return 50
+    return max(5, 20 // country_count)
+
+
+
 def _resolve_requested_country_ids(
     country_id: str,
     country_ids: tuple[str, ...] | None = None,
@@ -200,7 +207,11 @@ def build_governed_live_orchestrator(
 
     adapters = [
         WorldBankIndicatorsAdapter(country_ids=resolved_country_ids),
-        GDELTDocAdapter(country_queries=country_queries),
+        GDELTDocAdapter(
+            country_queries=country_queries,
+            max_records=_gdelt_doc_max_records_for_country_count(len(resolved_country_ids)),
+            inter_request_delay_seconds=1.0 if len(resolved_country_ids) > 1 else 0.0,
+        ),
         GDELTEventsAdapter(country_codes=country_codes),
         GDACSAdapter(country_ids=set(resolved_country_ids)),
     ]
