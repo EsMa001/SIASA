@@ -18,6 +18,7 @@ def build_country_profile_read_model(
     country_context: dict[str, object] | None = None,
     source_depth: dict[str, object] | None = None,
     domain_gap_summary: dict[str, object] | None = None,
+    configured_domains: list[str] | None = None,
 ) -> dict[str, object]:
     return {
         "country_id": country_id,
@@ -35,4 +36,5 @@ def build_country_profile_read_model(
         "country_context": dict(country_context or {}),
         "source_depth": dict(source_depth or {}),
         "domain_gap_summary": dict(domain_gap_summary or {}),
+        "configured_domains": list(configured_domains or []),
     }

@@ -17,6 +17,20 @@ def test_world_map_read_model_exposes_country_status_active_domains_baseline_and
     assert read_model["countries"][1]["drill_down_target"] == "/countries/UKR"
 
 
+def test_world_map_read_model_supports_country_specific_active_domains() -> None:
+    read_model = build_world_map_read_model(
+        country_statuses={"UKR": "S3", "TWN": "S1"},
+        active_domains=["A", "B", "D"],
+        baseline_mode="Combined 30/90/365",
+        active_domains_by_country={"TWN": ["A", "B"]},
+    )
+
+    assert read_model["countries"] == [
+        {"country_id": "TWN", "status": "S1", "active_domains": ["A", "B"], "drill_down_target": "/countries/TWN"},
+        {"country_id": "UKR", "status": "S3", "active_domains": ["A", "B", "D"], "drill_down_target": "/countries/UKR"},
+    ]
+
+
 def test_country_profile_read_model_exposes_status_domain_states_trends_drivers_events_and_context() -> None:
     read_model = build_country_profile_read_model(
         country_id="UKR",
@@ -29,6 +43,7 @@ def test_country_profile_read_model_exposes_status_domain_states_trends_drivers_
         country_context={"priority": "P1", "selection_type": "Core Focus", "region": "Europe / Black Sea"},
         source_depth={"source_ids": ["SRC-A", "SRC-B"], "source_count": 2},
         domain_gap_summary={"expected_domains": ["A", "B", "D"], "observed_domains": ["A", "B"], "missing_domains": ["D"]},
+        configured_domains=["A", "B", "D"],
     )
 
     assert read_model["country_id"] == "UKR"
@@ -40,6 +55,7 @@ def test_country_profile_read_model_exposes_status_domain_states_trends_drivers_
     assert read_model["country_context"] == {"priority": "P1", "selection_type": "Core Focus", "region": "Europe / Black Sea"}
     assert read_model["source_depth"] == {"source_ids": ["SRC-A", "SRC-B"], "source_count": 2}
     assert read_model["domain_gap_summary"] == {"expected_domains": ["A", "B", "D"], "observed_domains": ["A", "B"], "missing_domains": ["D"]}
+    assert read_model["configured_domains"] == ["A", "B", "D"]
 
 
 def test_source_coverage_read_model_exposes_status_horizon_freshness_confidence_and_failed_sources() -> None:

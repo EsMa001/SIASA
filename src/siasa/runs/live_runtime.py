@@ -29,6 +29,12 @@ _SUPPORTED_LIVE_PILOT_COUNTRIES = {
 _REPRESENTATIVE_LIVE_PILOT_SET = ("UKR", "POL", "ISR", "TWN")
 _WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = ("UKR", "POL", "ISR")
 _MULTI_COUNTRY_GDELT_EVENTS_RECENT_EXPORT_COUNT = 8
+_GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
+    "UKR": ["A", "B", "D"],
+    "POL": ["A", "B", "D"],
+    "ISR": ["A", "B", "D"],
+    "TWN": ["A", "B"],
+}
 
 
 
@@ -132,6 +138,7 @@ def _build_live_runtime_validation_view_model(
     country_domain_statuses,
     country_multi_domain_statuses,
     snapshot,
+    country_expected_domains: dict[str, list[str]] | None = None,
 ) -> dict[str, object] | None:
     country_records = [record for record in normalized_records if record.country_id == primary_country_id]
     observed_domains = sorted(country_domain_statuses.get(primary_country_id, {}).keys())
@@ -142,6 +149,7 @@ def _build_live_runtime_validation_view_model(
     known_limitations = ["pilot_runtime_support_case_not_historical_backtest"]
     if run_state.failed_sources:
         known_limitations.append(f"failed_sources:{','.join(run_state.failed_sources)}")
+    expected_domains = list((country_expected_domains or {}).get(primary_country_id, active_domains))
     validation_case = ValidationCase(
         case_id=f"VAL-{primary_country_id}-LIVE-PILOT-SUPPORT",
         country_id=primary_country_id,
@@ -149,7 +157,7 @@ def _build_live_runtime_validation_view_model(
         case_type="pilot_runtime_support_case",
         time_start=timestamps[0],
         time_end=timestamps[-1],
-        expected_domains=list(active_domains),
+        expected_domains=expected_domains,
         expected_signal_pattern=(
             "Governed live pilot should expose the configured active domains "
             "and emit a reviewable validation artifact for the current bundle."
@@ -223,6 +231,10 @@ def build_governed_live_orchestrator(
     supported_world_bank_country_ids = tuple(
         country_id for country_id in resolved_country_ids if country_id in _WORLD_BANK_SUPPORTED_LIVE_COUNTRIES
     )
+    country_expected_domains = {
+        country_id: list(_GOVERNED_LIVE_DOMAINS_BY_COUNTRY.get(country_id, ["A", "B", "D"]))
+        for country_id in resolved_country_ids
+    }
 
     adapters = []
     if supported_world_bank_country_ids:
@@ -279,6 +291,7 @@ def build_governed_live_orchestrator(
             country_domain_statuses,
             country_multi_domain_statuses,
             snapshot,
+            country_expected_domains,
         )
 
     return DailyRunOrchestrator(
@@ -299,6 +312,7 @@ def build_governed_live_orchestrator(
         artifacts_output_dir=output_dir,
         validation_view_model_builder=_validation_view_model_builder,
         requested_country_ids=resolved_country_ids,
+        country_expected_domains=country_expected_domains,
     )
 
 

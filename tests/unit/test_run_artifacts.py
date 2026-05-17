@@ -283,6 +283,7 @@ def test_daily_run_orchestrator_writes_multi_country_artifact_bundle(tmp_path: P
 
     assert result.artifact_bundle is not None
     assert [country["country_id"] for country in world_map["countries"]] == ["POL", "UKR"]
+    assert [country["active_domains"] for country in world_map["countries"]] == [["A", "B"], ["A", "B"]]
     assert system_status["coverage"] == {
         "countries_total": 2,
         "countries_with_updates": 2,
@@ -576,6 +577,56 @@ def test_build_country_coverage_visibility_breaks_equal_priority_scores_determin
         (1, 211, "fetch_problem", "high", ["UKR"]),
         (2, 211, "fetch_problem", "medium", ["ARG", "BRA", "CAN", "DEU", "ESP", "FRA", "GRC", "HUN", "ITA", "JPN", "KEN"]),
     ]
+
+
+
+def test_daily_run_orchestrator_respects_country_specific_expected_domains(tmp_path: Path) -> None:
+    orchestrator = DailyRunOrchestrator(
+        adapters=[
+            FakeAdapter(
+                source_id="SRC-A",
+                domain="A",
+                _result=FetchResult(
+                    records=[
+                        {"country_id": "TWN", "signal_key": "article_count", "value": 7.0, "expected_source_count": 1, "freshness_hours": 6},
+                        {"country_id": "TWN", "signal_key": "tone", "value": -0.3, "expected_source_count": 1, "freshness_hours": 6},
+                    ]
+                ),
+            ),
+            FakeAdapter(
+                source_id="SRC-B",
+                domain="B",
+                _result=FetchResult(
+                    records=[
+                        {"country_id": "TWN", "signal_key": "conflict_event_count", "value": 2.0, "expected_source_count": 1, "freshness_hours": 4},
+                    ]
+                ),
+            ),
+        ],
+        normalizer=_normalize,
+        feature_services=[DomainAFeatureService(), DomainBFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A", "B", "D"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+        artifacts_output_dir=tmp_path / "bundle-country-expected-domains",
+        country_expected_domains={"TWN": ["A", "B"]},
+    )
+
+    result = orchestrator.run(run_id="RUN-204A")
+
+    world_map = json.loads((tmp_path / "bundle-country-expected-domains" / "readmodels" / "world_map.json").read_text())
+    twn_profile = json.loads((tmp_path / "bundle-country-expected-domains" / "readmodels" / "country_profiles" / "TWN.json").read_text())
+    system_status = json.loads((tmp_path / "bundle-country-expected-domains" / "readmodels" / "system_status.json").read_text())
+
+    assert result.artifact_bundle is not None
+    assert world_map["countries"] == [{"country_id": "TWN", "status": "S3", "active_domains": ["A", "B"], "drill_down_target": "/countries/TWN"}]
+    assert twn_profile["configured_domains"] == ["A", "B"]
+    assert twn_profile["domain_gap_summary"] == {"expected_domains": ["A", "B"], "observed_domains": ["A", "B"], "missing_domains": []}
+    assert system_status["country_coverage_visibility"]["country_gap_rows"] == []
 
 
 

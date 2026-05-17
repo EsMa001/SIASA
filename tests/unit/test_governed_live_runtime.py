@@ -82,6 +82,7 @@ def test_build_governed_live_orchestrator_skips_world_bank_for_twn_only_runtime_
         "SRC-GDELT-EVENTS",
         "SRC-GDACS",
     ]
+    assert orchestrator.country_expected_domains == {"TWN": ["A", "B"]}
 
 
 
@@ -124,6 +125,12 @@ def test_build_governed_live_orchestrator_supports_representative_pilot_set() ->
     gdacs = orchestrator.adapters[3]
 
     assert world_bank.country_ids == ("UKR", "POL", "ISR")
+    assert orchestrator.country_expected_domains == {
+        "UKR": ["A", "B", "D"],
+        "POL": ["A", "B", "D"],
+        "ISR": ["A", "B", "D"],
+        "TWN": ["A", "B"],
+    }
     assert gdelt_doc.country_queries == {
         "UKR": "Ukraine",
         "POL": "Poland",
@@ -469,6 +476,91 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
     assert pol_profile["source_depth"] == {"source_ids": ["SRC-GDACS", "SRC-GDELT-DOC", "SRC-GDELT-EVENTS", "WB-INDICATORS"], "source_count": 4}
     assert pol_profile["domain_gap_summary"] == {"expected_domains": ["A", "B", "D"], "observed_domains": ["A", "B", "D"], "missing_domains": []}
     assert pol_profile["trends"]["yearly"]
+
+
+
+def test_governed_live_runtime_representative_scope_excludes_twn_domain_d_from_expected_domains(tmp_path: Path) -> None:
+    output_dir = tmp_path / "live-runtime-representative-scope"
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        pilot_set="representative",
+        output_dir=output_dir,
+    )
+    orchestrator.adapters = [
+        FakeAdapter(
+            source_id="WB-INDICATORS",
+            domain="D",
+            _result=FetchResult(
+                records=[
+                    {"country_id": "UKR", "timestamp": "2026-05-14", "signal_key": "gdp_growth", "value": 2.1, "freshness_hours": 24, "quality_flag": "world_bank_api"},
+                    {"country_id": "UKR", "timestamp": "2026-05-14", "signal_key": "energy_price_stress", "value": 0.4, "freshness_hours": 24, "quality_flag": "world_bank_api"},
+                    {"country_id": "POL", "timestamp": "2026-05-14", "signal_key": "gdp_growth", "value": 1.8, "freshness_hours": 24, "quality_flag": "world_bank_api"},
+                    {"country_id": "POL", "timestamp": "2026-05-14", "signal_key": "energy_price_stress", "value": 0.2, "freshness_hours": 24, "quality_flag": "world_bank_api"},
+                    {"country_id": "ISR", "timestamp": "2026-05-14", "signal_key": "gdp_growth", "value": 0.9, "freshness_hours": 24, "quality_flag": "world_bank_api"},
+                    {"country_id": "ISR", "timestamp": "2026-05-14", "signal_key": "energy_price_stress", "value": 0.5, "freshness_hours": 24, "quality_flag": "world_bank_api"},
+                ],
+                diagnostics="world_bank_fetch_ok",
+                is_success=True,
+            ),
+        ),
+        FakeAdapter(
+            source_id="SRC-GDELT-DOC",
+            domain="A",
+            _result=FetchResult(
+                records=[
+                    {"country_id": "UKR", "timestamp": "2026-05-14T10:00:00Z", "signal_key": "article_count", "value": 10.0, "freshness_hours": 2, "quality_flag": "gdelt_doc_api"},
+                    {"country_id": "UKR", "timestamp": "2026-05-14T10:00:00Z", "signal_key": "tone", "value": -1.2, "freshness_hours": 2, "quality_flag": "gdelt_doc_api"},
+                    {"country_id": "POL", "timestamp": "2026-05-14T11:00:00Z", "signal_key": "article_count", "value": 8.0, "freshness_hours": 1, "quality_flag": "gdelt_doc_api"},
+                    {"country_id": "POL", "timestamp": "2026-05-14T11:00:00Z", "signal_key": "tone", "value": -0.4, "freshness_hours": 1, "quality_flag": "gdelt_doc_api"},
+                    {"country_id": "ISR", "timestamp": "2026-05-14T12:00:00Z", "signal_key": "article_count", "value": 9.0, "freshness_hours": 1, "quality_flag": "gdelt_doc_api"},
+                    {"country_id": "ISR", "timestamp": "2026-05-14T12:00:00Z", "signal_key": "tone", "value": -0.6, "freshness_hours": 1, "quality_flag": "gdelt_doc_api"},
+                    {"country_id": "TWN", "timestamp": "2026-05-14T13:00:00Z", "signal_key": "article_count", "value": 7.0, "freshness_hours": 1, "quality_flag": "gdelt_doc_api"},
+                    {"country_id": "TWN", "timestamp": "2026-05-14T13:00:00Z", "signal_key": "tone", "value": -0.5, "freshness_hours": 1, "quality_flag": "gdelt_doc_api"},
+                ],
+                diagnostics="gdelt_doc_fetch_ok",
+                is_success=True,
+            ),
+        ),
+        FakeAdapter(
+            source_id="SRC-GDELT-EVENTS",
+            domain="B",
+            _result=FetchResult(
+                records=[
+                    {"country_id": "UKR", "timestamp": "2026-05-14T10:00:00Z", "signal_key": "conflict_event_count", "value": 3.0, "freshness_hours": 1, "quality_flag": "gdelt_events_export"},
+                    {"country_id": "UKR", "timestamp": "2026-05-14T10:00:00Z", "signal_key": "violent_event_count", "value": 1.0, "freshness_hours": 1, "quality_flag": "gdelt_events_export"},
+                    {"country_id": "POL", "timestamp": "2026-05-14T11:00:00Z", "signal_key": "protest_event_count", "value": 2.0, "freshness_hours": 1, "quality_flag": "gdelt_events_export"},
+                    {"country_id": "ISR", "timestamp": "2026-05-14T12:00:00Z", "signal_key": "conflict_event_count", "value": 1.0, "freshness_hours": 1, "quality_flag": "gdelt_events_export"},
+                    {"country_id": "TWN", "timestamp": "2026-05-14T13:00:00Z", "signal_key": "protest_event_count", "value": 1.0, "freshness_hours": 1, "quality_flag": "gdelt_events_export"},
+                ],
+                diagnostics="gdelt_events_fetch_ok",
+                is_success=True,
+            ),
+        ),
+        FakeAdapter(
+            source_id="SRC-GDACS",
+            domain="B",
+            _result=FetchResult(
+                records=[
+                    {"country_id": "UKR", "timestamp": "2026-05-14T09:00:00Z", "signal_key": "disaster_alert_level", "value": 2.0, "freshness_hours": 4, "quality_flag": "gdacs_rss"},
+                    {"country_id": "POL", "timestamp": "2026-05-14T09:30:00Z", "signal_key": "disaster_alert_level", "value": 1.0, "freshness_hours": 3, "quality_flag": "gdacs_rss"},
+                    {"country_id": "ISR", "timestamp": "2026-05-14T10:30:00Z", "signal_key": "disaster_alert_level", "value": 1.0, "freshness_hours": 2, "quality_flag": "gdacs_rss"},
+                    {"country_id": "TWN", "timestamp": "2026-05-14T11:30:00Z", "signal_key": "disaster_alert_level", "value": 1.0, "freshness_hours": 2, "quality_flag": "gdacs_rss"},
+                ],
+                diagnostics="gdacs_fetch_ok",
+                is_success=True,
+            ),
+        ),
+    ]
+
+    result = orchestrator.run("RUN-LIVE-REP-SCOPE-001")
+
+    world_map = json.loads((output_dir / "readmodels" / "world_map.json").read_text())
+    twn_profile = json.loads((output_dir / "readmodels" / "country_profiles" / "TWN.json").read_text())
+
+    assert result.run_state.status == "success"
+    assert twn_profile["configured_domains"] == ["A", "B"]
+    assert twn_profile["domain_gap_summary"] == {"expected_domains": ["A", "B"], "observed_domains": ["A", "B"], "missing_domains": []}
+    assert next(country for country in world_map["countries"] if country["country_id"] == "TWN")["active_domains"] == ["A", "B"]
 
 
 

@@ -54,6 +54,7 @@ def write_run_artifacts(
     source_domain_by_source: dict[str, str] | None = None,
     source_countries_by_source: dict[str, list[str] | None] | None = None,
     requested_country_ids: list[str] | None = None,
+    country_expected_domains: dict[str, list[str]] | None = None,
 ) -> RunArtifactBundle:
     output_dir.mkdir(parents=True, exist_ok=True)
     readmodels_dir = output_dir / "readmodels"
@@ -74,12 +75,17 @@ def write_run_artifacts(
         for country_id, status in snapshot.analytical_outputs.get("country_status", {}).items()
     }
     world_map_path = readmodels_dir / "world_map.json"
+    country_expected_domains = {
+        str(country_id): [str(domain) for domain in domains]
+        for country_id, domains in dict(country_expected_domains or {}).items()
+    }
     world_map_path.write_text(
         json.dumps(
             build_world_map_read_model(
                 country_statuses=country_statuses,
                 active_domains=snapshot.active_domains,
                 baseline_mode=baseline_mode,
+                active_domains_by_country=country_expected_domains,
             ),
             indent=2,
             sort_keys=True,
@@ -157,8 +163,9 @@ def write_run_artifacts(
         country_context = dict(country_metadata.get(country_id, {}))
         country_source_ids = sorted({record.provenance_source_id for record in normalized_records if record.country_id == country_id})
         source_depth_band = _source_depth_band(len(country_source_ids))
+        expected_domains = list(country_expected_domains.get(country_id, snapshot.active_domains))
         missing_domains = [
-            domain for domain in snapshot.active_domains if domain not in country_domain_states
+            domain for domain in expected_domains if domain not in country_domain_states
         ]
         gap_details = _build_gap_details(
             country_id=country_id,
@@ -171,7 +178,7 @@ def write_run_artifacts(
             source_countries_by_source=source_countries_by_source,
         )
         country_domain_gap_summary = {
-            "expected_domains": list(snapshot.active_domains),
+            "expected_domains": expected_domains,
             "observed_domains": sorted(country_domain_states.keys()),
             "missing_domains": missing_domains,
         }
@@ -212,6 +219,7 @@ def write_run_artifacts(
             country_context=country_context,
             source_depth={"source_ids": country_source_ids, "source_count": len(country_source_ids)},
             domain_gap_summary=country_domain_gap_summary,
+            configured_domains=expected_domains,
         )
         country_profile_path = country_profiles_dir / f"{country_id}.json"
         country_profile_path.write_text(json.dumps(country_profile, indent=2, sort_keys=True))
