@@ -27,11 +27,13 @@ _SUPPORTED_LIVE_PILOT_COUNTRIES = {
     "TWN": {"gdelt_query": "Taiwan", "gdelt_code": "TW"},
     "RUS": {"gdelt_query": "Russia", "gdelt_code": "RS"},
     "CHN": {"gdelt_query": "China", "gdelt_code": "CH"},
+    "IND": {"gdelt_query": "India", "gdelt_code": "IN"},
 }
 
 _REPRESENTATIVE_LIVE_PILOT_SET = ("UKR", "POL", "ISR", "TWN")
 _CORE_FOCUS_INITIAL_LIVE_PILOT_SET = ("UKR", "RUS", "CHN", "TWN", "ISR", "POL")
-_WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = ("UKR", "POL", "ISR", "RUS", "CHN")
+_CORE_FOCUS_EXPANDED_LIVE_PILOT_SET = ("UKR", "RUS", "CHN", "TWN", "ISR", "IND", "POL")
+_WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = ("UKR", "POL", "ISR", "RUS", "CHN", "IND")
 _MULTI_COUNTRY_GDELT_EVENTS_RECENT_EXPORT_COUNT = 8
 _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
     "UKR": ["A", "B", "D"],
@@ -40,10 +42,12 @@ _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
     "TWN": ["A", "B"],
     "RUS": ["A", "B", "D"],
     "CHN": ["A", "B", "D"],
+    "IND": ["A", "B", "D"],
 }
 _NAMED_LIVE_PILOT_SETS = {
     "representative": _REPRESENTATIVE_LIVE_PILOT_SET,
     "core-focus-initial": _CORE_FOCUS_INITIAL_LIVE_PILOT_SET,
+    "core-focus-expanded": _CORE_FOCUS_EXPANDED_LIVE_PILOT_SET,
 }
 
 
@@ -219,8 +223,19 @@ def _should_retry_pipeline_after_isolated_pol_domain_b_gap(
     result: DailyRunResult,
     requested_country_ids: tuple[str, ...],
 ) -> bool:
+    allowed_reason_pairs_by_subset = {
+        _REPRESENTATIVE_LIVE_PILOT_SET: {
+            ("SRC-GDACS", "zero_records_returned"),
+            ("SRC-GDELT-EVENTS", "records_only_for_other_countries_in_scope"),
+        },
+        _CORE_FOCUS_EXPANDED_LIVE_PILOT_SET: {
+            ("SRC-GDACS", "records_only_for_other_countries_in_scope"),
+            ("SRC-GDELT-EVENTS", "records_only_for_other_countries_in_scope"),
+        },
+    }
+    expected_reason_pairs = allowed_reason_pairs_by_subset.get(requested_country_ids)
     if (
-        requested_country_ids != _REPRESENTATIVE_LIVE_PILOT_SET
+        expected_reason_pairs is None
         or result.run_state.status != "success"
         or result.run_state.failed_sources
     ):
@@ -264,10 +279,7 @@ def _should_retry_pipeline_after_isolated_pol_domain_b_gap(
         for item in source_reason_details
         if isinstance(item, dict)
     }
-    return observed_reason_pairs == {
-        ("SRC-GDACS", "zero_records_returned"),
-        ("SRC-GDELT-EVENTS", "records_only_for_other_countries_in_scope"),
-    }
+    return observed_reason_pairs == expected_reason_pairs
 
 
 
@@ -442,7 +454,7 @@ def main(argv: list[str] | None = None) -> int:
         dest="country_ids",
         help=(
             "Governed live pilot country ISO3. Repeat for multi-country runs; "
-            "supported: UKR, POL, ISR, TWN, RUS, CHN."
+            "supported: UKR, POL, ISR, TWN, RUS, CHN, IND."
         ),
     )
     parser.add_argument(
@@ -451,7 +463,8 @@ def main(argv: list[str] | None = None) -> int:
         help=(
             "Named governed live pilot subset. "
             "'representative' expands to UKR,POL,ISR,TWN; "
-            "'core-focus-initial' expands to UKR,RUS,CHN,TWN,ISR,POL."
+            "'core-focus-initial' expands to UKR,RUS,CHN,TWN,ISR,POL; "
+            "'core-focus-expanded' expands to UKR,RUS,CHN,TWN,ISR,IND,POL."
         ),
     )
     parser.add_argument(

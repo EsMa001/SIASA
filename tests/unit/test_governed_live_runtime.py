@@ -204,6 +204,54 @@ def test_build_governed_live_orchestrator_supports_core_focus_initial_pilot_set(
 
 
 
+def test_build_governed_live_orchestrator_supports_core_focus_expanded_pilot_set() -> None:
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        pilot_set="core-focus-expanded",
+    )
+
+    world_bank = orchestrator.adapters[0]
+    gdelt_doc = orchestrator.adapters[1]
+    gdelt_events = orchestrator.adapters[2]
+    gdacs = orchestrator.adapters[3]
+
+    assert world_bank.country_ids == ("UKR", "RUS", "CHN", "ISR", "IND", "POL")
+    assert orchestrator.country_expected_domains == {
+        "UKR": ["A", "B", "D"],
+        "RUS": ["A", "B", "D"],
+        "CHN": ["A", "B", "D"],
+        "TWN": ["A", "B"],
+        "ISR": ["A", "B", "D"],
+        "IND": ["A", "B", "D"],
+        "POL": ["A", "B", "D"],
+    }
+    assert gdelt_doc.country_queries == {
+        "UKR": "Ukraine",
+        "RUS": "Russia",
+        "CHN": "China",
+        "TWN": "Taiwan",
+        "ISR": "Israel",
+        "IND": "India",
+        "POL": "Poland",
+    }
+    assert gdelt_doc.max_records == 5
+    assert gdelt_doc.inter_request_delay_seconds == 1.0
+    assert gdelt_doc.max_full_fetch_retries == 2
+    assert gdelt_doc.full_fetch_retry_cooldown_seconds == 40.0
+    assert gdelt_events.country_codes == {
+        "UKR": "UP",
+        "RUS": "RS",
+        "CHN": "CH",
+        "TWN": "TW",
+        "ISR": "IS",
+        "IND": "IN",
+        "POL": "PL",
+    }
+    assert gdelt_events.recent_export_count == 8
+    assert gdacs.country_ids == {"UKR", "RUS", "CHN", "TWN", "ISR", "IND", "POL"}
+
+
+
 def test_build_governed_live_orchestrator_rejects_combined_pilot_set_and_explicit_countries() -> None:
     try:
         build_governed_live_orchestrator(
@@ -320,6 +368,29 @@ def test_governed_live_runtime_module_accepts_core_focus_initial_pilot_set_flag(
 
 
 
+def test_governed_live_runtime_module_accepts_core_focus_expanded_pilot_set_flag() -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "siasa.runs.live_runtime",
+            "--pilot-set",
+            "core-focus-expanded",
+            "--help",
+        ],
+        cwd=REPO_ROOT,
+        env=_SUBPROCESS_ENV,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "--pilot-set" in result.stdout
+    assert "core-focus-expanded" in result.stdout
+
+
+
 def test_main_preserves_named_pilot_set_when_running_pipeline(monkeypatch) -> None:
     captured: dict[str, object] = {}
 
@@ -416,6 +487,75 @@ def test_run_governed_live_pipeline_retries_after_isolated_pol_domain_b_gap_for_
         repo_root=REPO_ROOT,
         run_id="RUN-1",
         pilot_set="representative",
+        orchestrator_factory=factory,
+        pipeline_retry_sleep=sleep_calls.append,
+        pipeline_retry_cooldown_seconds=40.0,
+        max_pipeline_retries=1,
+    )
+
+    assert result.artifact_bundle is second.artifact_bundle
+    assert sleep_calls == [40.0]
+    assert len(factory.calls) == 2
+
+
+
+def test_run_governed_live_pipeline_retries_after_isolated_pol_domain_b_gap_for_core_focus_expanded_set(tmp_path: Path) -> None:
+    readmodels_dir = tmp_path / "first-expanded" / "readmodels"
+    readmodels_dir.mkdir(parents=True)
+    (readmodels_dir / "system_status.json").write_text(
+        json.dumps(
+            {
+                "run_id": "RUN-EXP-1",
+                "run_status": "success",
+                "failed_sources": [],
+                "country_coverage_visibility": {
+                    "country_gap_rows": [
+                        {
+                            "country_id": "POL",
+                            "missing_domains": ["B"],
+                            "gap_details": [
+                                {
+                                    "domain": "B",
+                                    "reason": "no_usable_input_data",
+                                    "source_reason_details": [
+                                        {"source_id": "SRC-GDACS", "reason": "records_only_for_other_countries_in_scope"},
+                                        {"source_id": "SRC-GDELT-EVENTS", "reason": "records_only_for_other_countries_in_scope"},
+                                    ],
+                                }
+                            ],
+                        }
+                    ]
+                },
+            }
+        )
+    )
+    sleep_calls: list[float] = []
+    first = FakePipelineResult(
+        FakePipelineRunState("RUN-EXP-1", "success", []),
+        artifact_bundle=FakeArtifactBundle(output_dir=tmp_path / "first-expanded"),
+    )
+    second_dir = tmp_path / "second-expanded" / "readmodels"
+    second_dir.mkdir(parents=True)
+    (second_dir / "system_status.json").write_text(
+        json.dumps(
+            {
+                "run_id": "RUN-EXP-1",
+                "run_status": "success",
+                "failed_sources": [],
+                "country_coverage_visibility": {"country_gap_rows": []},
+            }
+        )
+    )
+    second = FakePipelineResult(
+        FakePipelineRunState("RUN-EXP-1", "success", []),
+        artifact_bundle=FakeArtifactBundle(output_dir=tmp_path / "second-expanded"),
+    )
+    factory = SequenceOrchestratorFactory([first, second])
+
+    result = run_governed_live_pipeline(
+        repo_root=REPO_ROOT,
+        run_id="RUN-EXP-1",
+        pilot_set="core-focus-expanded",
         orchestrator_factory=factory,
         pipeline_retry_sleep=sleep_calls.append,
         pipeline_retry_cooldown_seconds=40.0,
