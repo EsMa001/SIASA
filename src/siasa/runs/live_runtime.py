@@ -27,6 +27,8 @@ _SUPPORTED_LIVE_PILOT_COUNTRIES = {
 }
 
 _REPRESENTATIVE_LIVE_PILOT_SET = ("UKR", "POL", "ISR", "TWN")
+_WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = ("UKR", "POL", "ISR")
+_MULTI_COUNTRY_GDELT_EVENTS_RECENT_EXPORT_COUNT = 8
 
 
 
@@ -218,18 +220,29 @@ def build_governed_live_orchestrator(
             mappings=mappings,
         )
 
-    adapters = [
-        WorldBankIndicatorsAdapter(country_ids=resolved_country_ids),
-        GDELTDocAdapter(
-            country_queries=country_queries,
-            max_records=_gdelt_doc_max_records_for_country_count(len(resolved_country_ids)),
-            inter_request_delay_seconds=1.0 if len(resolved_country_ids) > 1 else 0.0,
-            max_full_fetch_retries=2 if len(resolved_country_ids) > 1 else 0,
-            full_fetch_retry_cooldown_seconds=40.0 if len(resolved_country_ids) > 1 else 0.0,
-        ),
-        GDELTEventsAdapter(country_codes=country_codes),
-        GDACSAdapter(country_ids=set(resolved_country_ids)),
-    ]
+    supported_world_bank_country_ids = tuple(
+        country_id for country_id in resolved_country_ids if country_id in _WORLD_BANK_SUPPORTED_LIVE_COUNTRIES
+    )
+
+    adapters = []
+    if supported_world_bank_country_ids:
+        adapters.append(WorldBankIndicatorsAdapter(country_ids=supported_world_bank_country_ids))
+    adapters.extend(
+        [
+            GDELTDocAdapter(
+                country_queries=country_queries,
+                max_records=_gdelt_doc_max_records_for_country_count(len(resolved_country_ids)),
+                inter_request_delay_seconds=1.0 if len(resolved_country_ids) > 1 else 0.0,
+                max_full_fetch_retries=2 if len(resolved_country_ids) > 1 else 0,
+                full_fetch_retry_cooldown_seconds=40.0 if len(resolved_country_ids) > 1 else 0.0,
+            ),
+            GDELTEventsAdapter(
+                country_codes=country_codes,
+                recent_export_count=_MULTI_COUNTRY_GDELT_EVENTS_RECENT_EXPORT_COUNT if len(resolved_country_ids) > 1 else 1,
+            ),
+            GDACSAdapter(country_ids=set(resolved_country_ids)),
+        ]
+    )
     runtime_profile = "live-multi-country-v1" if len(resolved_country_ids) > 1 else "live-single-country-v1"
     country_set_id = (
         "MVP-COUNTRIES-LIVE-MULTI-v1"

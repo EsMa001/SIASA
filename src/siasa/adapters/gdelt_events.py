@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from email.utils import parsedate_to_datetime
 import io
 import zipfile
@@ -67,13 +67,23 @@ class GDELTEventsAdapter(SourceAdapter):
     fetch_bytes: FetchBytes = _default_fetch_bytes
     now_provider: NowProvider = _utc_now
     retry_sleep: SleepFn = sleep
+    recent_export_count: int = 1
+    export_interval_minutes: int = 15
 
     def fetch(self) -> FetchResult:
         try:
-            export_url = self._discover_latest_export_url()
-            archive_bytes = self._fetch_bytes_with_retry(export_url)
-            records = self._build_records_from_export(archive_bytes)
-            diagnostics = f"gdelt_events_fetch_ok countries={len(self.country_codes)} records={len(records)}"
+            export_urls = self._discover_recent_export_urls()
+            archive_bytes_list, degraded_exports = self._fetch_recent_archives(export_urls)
+            records = self._build_records_from_exports(archive_bytes_list)
+            diagnostics = (
+                f"gdelt_events_fetch_ok countries={len(self.country_codes)} "
+                f"exports={len(archive_bytes_list)} records={len(records)}"
+            )
+            if degraded_exports:
+                diagnostics = (
+                    f"{diagnostics} degraded_exports={len(degraded_exports)} "
+                    f"degraded_reasons={' | '.join(str(reason) for reason in degraded_exports)}"
+                )
             return FetchResult(records=records, diagnostics=diagnostics, is_success=True)
         except Exception as exc:
             return FetchResult(records=[], diagnostics=f"gdelt_events_fetch_failed: {exc}", is_success=False)
@@ -85,6 +95,27 @@ class GDELTEventsAdapter(SourceAdapter):
             if parts and parts[-1].endswith('.export.CSV.zip'):
                 return parts[-1]
         raise ValueError("No export zip URL found in GDELT lastupdate feed")
+
+    def _discover_recent_export_urls(self) -> list[str]:
+        latest_export_url = self._discover_latest_export_url()
+        return self._recent_export_urls_from_latest(latest_export_url)
+
+    def _recent_export_urls_from_latest(self, latest_export_url: str) -> list[str]:
+        if self.recent_export_count <= 0:
+            raise ValueError("GDELT events adapter recent_export_count must be >= 1")
+        if self.export_interval_minutes <= 0:
+            raise ValueError("GDELT events adapter export_interval_minutes must be >= 1")
+        if not latest_export_url.endswith('.export.CSV.zip'):
+            raise ValueError("Latest GDELT export URL must end with .export.CSV.zip")
+
+        stem = latest_export_url.rsplit('/', 1)[-1].removesuffix('.export.CSV.zip')
+        latest_timestamp = datetime.strptime(stem, "%Y%m%d%H%M%S").replace(tzinfo=UTC)
+        prefix = latest_export_url[: -len(stem + '.export.CSV.zip')]
+
+        return [
+            f"{prefix}{(latest_timestamp - timedelta(minutes=self.export_interval_minutes * offset)).strftime('%Y%m%d%H%M%S')}.export.CSV.zip"
+            for offset in range(self.recent_export_count)
+        ]
 
     def _fetch_bytes_with_retry(self, url: str) -> bytes:
         last_error: Exception | None = None
@@ -104,31 +135,47 @@ class GDELTEventsAdapter(SourceAdapter):
         assert last_error is not None
         raise last_error
 
-    def _build_records_from_export(self, archive_bytes: bytes) -> list[dict[str, object]]:
+    def _fetch_recent_archives(self, export_urls: list[str]) -> tuple[list[bytes], list[str]]:
+        archives: list[bytes] = []
+        degraded_exports: list[str] = []
+        for index, export_url in enumerate(export_urls):
+            try:
+                archives.append(self._fetch_bytes_with_retry(export_url))
+            except Exception as exc:  # noqa: BLE001 - degraded recent-window fetches should not discard usable archives
+                if index == 0:
+                    raise
+                degraded_exports.append(f"{export_url}: {exc}")
+                continue
+        if not archives:
+            raise ValueError("No GDELT event exports could be fetched")
+        return archives, degraded_exports
+
+    def _build_records_from_exports(self, archives: list[bytes]) -> list[dict[str, object]]:
         counts: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
         latest_seen: dict[str, datetime] = {}
 
-        with zipfile.ZipFile(io.BytesIO(archive_bytes)) as archive:
-            name = archive.namelist()[0]
-            with archive.open(name) as handle:
-                for raw_line in handle:
-                    columns = raw_line.decode('utf-8', errors='replace').rstrip('\n').split('\t')
-                    if len(columns) < 60:
-                        continue
-                    country_id = self._resolve_country(columns[53])
-                    if country_id is None:
-                        continue
-                    event_root_code = columns[28]
-                    quad_class = columns[29]
-                    seen_at = datetime.strptime(columns[59], "%Y%m%d%H%M%S").replace(tzinfo=UTC)
-                    latest_seen[country_id] = max(seen_at, latest_seen.get(country_id, seen_at))
+        for archive_bytes in archives:
+            with zipfile.ZipFile(io.BytesIO(archive_bytes)) as archive:
+                name = archive.namelist()[0]
+                with archive.open(name) as handle:
+                    for raw_line in handle:
+                        columns = raw_line.decode('utf-8', errors='replace').rstrip('\n').split('\t')
+                        if len(columns) < 60:
+                            continue
+                        country_id = self._resolve_country(columns[53])
+                        if country_id is None:
+                            continue
+                        event_root_code = columns[28]
+                        quad_class = columns[29]
+                        seen_at = datetime.strptime(columns[59], "%Y%m%d%H%M%S").replace(tzinfo=UTC)
+                        latest_seen[country_id] = max(seen_at, latest_seen.get(country_id, seen_at))
 
-                    if quad_class in {"3", "4"} and event_root_code != "14":
-                        counts[country_id]["conflict_event_count"] += 1.0
-                    if event_root_code == "14":
-                        counts[country_id]["protest_event_count"] += 1.0
-                    if quad_class == "4":
-                        counts[country_id]["violent_event_count"] += 1.0
+                        if quad_class in {"3", "4"} and event_root_code != "14":
+                            counts[country_id]["conflict_event_count"] += 1.0
+                        if event_root_code == "14":
+                            counts[country_id]["protest_event_count"] += 1.0
+                        if quad_class == "4":
+                            counts[country_id]["violent_event_count"] += 1.0
 
         now = self.now_provider()
         records: list[dict[str, object]] = []

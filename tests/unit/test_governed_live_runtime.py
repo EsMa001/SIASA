@@ -71,6 +71,16 @@ def test_build_governed_live_orchestrator_uses_real_source_adapters_for_supporte
     assert orchestrator.country_set_id == "MVP-COUNTRIES-LIVE-UKR-v1"
 
 
+def test_build_governed_live_orchestrator_skips_world_bank_for_twn_only_runtime_scope() -> None:
+    orchestrator = build_governed_live_orchestrator(repo_root=REPO_ROOT, country_id="TWN")
+
+    assert [adapter.source_id for adapter in orchestrator.adapters] == [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+    ]
+
+
 
 def test_build_governed_live_orchestrator_supports_multi_country_live_pilot() -> None:
     orchestrator = build_governed_live_orchestrator(
@@ -94,6 +104,7 @@ def test_build_governed_live_orchestrator_supports_multi_country_live_pilot() ->
     assert gdelt_doc.max_full_fetch_retries == 2
     assert gdelt_doc.full_fetch_retry_cooldown_seconds == 40.0
     assert gdelt_events.country_codes == {"UKR": "UP", "POL": "PL"}
+    assert gdelt_events.recent_export_count == 8
     assert gdacs.country_ids == {"UKR", "POL"}
 
 
@@ -109,7 +120,7 @@ def test_build_governed_live_orchestrator_supports_representative_pilot_set() ->
     gdelt_events = orchestrator.adapters[2]
     gdacs = orchestrator.adapters[3]
 
-    assert world_bank.country_ids == ("UKR", "POL", "ISR", "TWN")
+    assert world_bank.country_ids == ("UKR", "POL", "ISR")
     assert gdelt_doc.country_queries == {
         "UKR": "Ukraine",
         "POL": "Poland",
@@ -126,6 +137,7 @@ def test_build_governed_live_orchestrator_supports_representative_pilot_set() ->
         "ISR": "IS",
         "TWN": "TW",
     }
+    assert gdelt_events.recent_export_count == 8
     assert gdacs.country_ids == {"UKR", "POL", "ISR", "TWN"}
 
 
