@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 from time import sleep
 from typing import Callable
@@ -202,6 +203,62 @@ def _should_retry_pipeline_after_gdelt_doc_failure(
 
 
 
+def _should_retry_pipeline_after_isolated_pol_domain_b_gap(
+    result: DailyRunResult,
+    requested_country_ids: tuple[str, ...],
+) -> bool:
+    if (
+        requested_country_ids != _REPRESENTATIVE_LIVE_PILOT_SET
+        or result.run_state.status != "success"
+        or result.run_state.failed_sources
+    ):
+        return False
+    artifact_bundle = result.artifact_bundle
+    output_dir = getattr(artifact_bundle, "output_dir", None)
+    if output_dir is None:
+        return False
+    system_status_path = Path(output_dir) / "readmodels" / "system_status.json"
+    if not system_status_path.exists():
+        return False
+    try:
+        system_status = json.loads(system_status_path.read_text())
+    except (OSError, ValueError, TypeError):
+        return False
+    coverage_visibility = system_status.get("country_coverage_visibility", {})
+    if not isinstance(coverage_visibility, dict):
+        return False
+    country_gap_rows = coverage_visibility.get("country_gap_rows", [])
+    if not isinstance(country_gap_rows, list) or len(country_gap_rows) != 1:
+        return False
+    gap_row = country_gap_rows[0]
+    if not isinstance(gap_row, dict) or str(gap_row.get("country_id")) != "POL":
+        return False
+    gap_details = gap_row.get("gap_details", [])
+    if not isinstance(gap_details, list) or len(gap_details) != 1:
+        return False
+    gap_detail = gap_details[0]
+    if not isinstance(gap_detail, dict):
+        return False
+    if not (
+        str(gap_detail.get("domain")) == "B"
+        and str(gap_detail.get("reason")) == "no_usable_input_data"
+    ):
+        return False
+    source_reason_details = gap_detail.get("source_reason_details", [])
+    if not isinstance(source_reason_details, list):
+        return False
+    observed_reason_pairs = {
+        (str(item.get("source_id")), str(item.get("reason")))
+        for item in source_reason_details
+        if isinstance(item, dict)
+    }
+    return observed_reason_pairs == {
+        ("SRC-GDACS", "zero_records_returned"),
+        ("SRC-GDELT-EVENTS", "records_only_for_other_countries_in_scope"),
+    }
+
+
+
 def build_governed_live_orchestrator(
     *,
     repo_root: Path,
@@ -345,7 +402,10 @@ def run_governed_live_pipeline(
         )
         result = orchestrator.run(run_id)
         last_result = result
-        if not _should_retry_pipeline_after_gdelt_doc_failure(result, resolved_country_ids):
+        if not (
+            _should_retry_pipeline_after_gdelt_doc_failure(result, resolved_country_ids)
+            or _should_retry_pipeline_after_isolated_pol_domain_b_gap(result, resolved_country_ids)
+        ):
             return result
         if pipeline_attempt == max_pipeline_retries:
             return result

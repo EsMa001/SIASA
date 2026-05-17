@@ -35,6 +35,12 @@ class FakePipelineRunState:
 @dataclass
 class FakePipelineResult:
     run_state: FakePipelineRunState
+    artifact_bundle: object | None = None
+
+
+@dataclass
+class FakeArtifactBundle:
+    output_dir: Path
 
 
 class SequenceOrchestratorFactory:
@@ -264,6 +270,166 @@ def test_run_governed_live_pipeline_retries_after_gdelt_doc_only_partial_success
     assert result.run_state.status == "success"
     assert sleep_calls == [40.0]
     assert len(factory.calls) == 2
+
+
+
+def test_run_governed_live_pipeline_retries_after_isolated_pol_domain_b_gap_for_multi_country(tmp_path: Path) -> None:
+    def _write_system_status(output_dir: Path, country_gap_rows: list[dict[str, object]]) -> FakeArtifactBundle:
+        readmodels_dir = output_dir / "readmodels"
+        readmodels_dir.mkdir(parents=True)
+        (readmodels_dir / "system_status.json").write_text(
+            json.dumps(
+                {
+                    "run_id": "RUN-1",
+                    "run_status": "success",
+                    "failed_sources": [],
+                    "country_coverage_visibility": {"country_gap_rows": country_gap_rows},
+                }
+            )
+        )
+        return FakeArtifactBundle(output_dir=output_dir)
+
+    sleep_calls: list[float] = []
+    first = FakePipelineResult(
+        FakePipelineRunState("RUN-1", "success", []),
+        artifact_bundle=_write_system_status(
+            tmp_path / "first",
+            [
+                {
+                    "country_id": "POL",
+                    "missing_domains": ["B"],
+                    "gap_details": [
+                        {
+                            "domain": "B",
+                            "reason": "no_usable_input_data",
+                            "source_reason_details": [
+                                {"source_id": "SRC-GDACS", "reason": "zero_records_returned"},
+                                {"source_id": "SRC-GDELT-EVENTS", "reason": "records_only_for_other_countries_in_scope"},
+                            ],
+                        }
+                    ],
+                }
+            ],
+        ),
+    )
+    second = FakePipelineResult(
+        FakePipelineRunState("RUN-1", "success", []),
+        artifact_bundle=_write_system_status(tmp_path / "second", []),
+    )
+    factory = SequenceOrchestratorFactory([first, second])
+
+    result = run_governed_live_pipeline(
+        repo_root=REPO_ROOT,
+        run_id="RUN-1",
+        pilot_set="representative",
+        orchestrator_factory=factory,
+        pipeline_retry_sleep=sleep_calls.append,
+        pipeline_retry_cooldown_seconds=40.0,
+        max_pipeline_retries=1,
+    )
+
+    assert result.artifact_bundle is second.artifact_bundle
+    assert sleep_calls == [40.0]
+    assert len(factory.calls) == 2
+
+
+
+def test_run_governed_live_pipeline_does_not_retry_for_non_target_country_gap(tmp_path: Path) -> None:
+    readmodels_dir = tmp_path / "single" / "readmodels"
+    readmodels_dir.mkdir(parents=True)
+    (readmodels_dir / "system_status.json").write_text(
+        json.dumps(
+            {
+                "run_id": "RUN-3",
+                "run_status": "success",
+                "failed_sources": [],
+                "country_coverage_visibility": {
+                    "country_gap_rows": [
+                        {
+                            "country_id": "POL",
+                            "missing_domains": ["B"],
+                            "gap_details": [
+                                {
+                                    "domain": "B",
+                                    "reason": "no_usable_input_data",
+                                    "source_reason_details": [
+                                        {"source_id": "SRC-GDACS", "reason": "zero_records_returned"},
+                                        {"source_id": "SRC-GDELT-EVENTS", "reason": "source_failed_this_run"},
+                                    ],
+                                }
+                            ],
+                        }
+                    ]
+                },
+            }
+        )
+    )
+    result_payload = FakePipelineResult(
+        FakePipelineRunState("RUN-3", "success", []),
+        artifact_bundle=FakeArtifactBundle(output_dir=tmp_path / "single"),
+    )
+    factory = SequenceOrchestratorFactory([result_payload])
+
+    result = run_governed_live_pipeline(
+        repo_root=REPO_ROOT,
+        run_id="RUN-3",
+        pilot_set="representative",
+        orchestrator_factory=factory,
+        max_pipeline_retries=1,
+    )
+
+    assert result is result_payload
+    assert len(factory.calls) == 1
+
+
+
+def test_run_governed_live_pipeline_does_not_retry_pol_gap_for_non_representative_multi_country_run(tmp_path: Path) -> None:
+    readmodels_dir = tmp_path / "non-representative" / "readmodels"
+    readmodels_dir.mkdir(parents=True)
+    (readmodels_dir / "system_status.json").write_text(
+        json.dumps(
+            {
+                "run_id": "RUN-4",
+                "run_status": "success",
+                "failed_sources": [],
+                "country_coverage_visibility": {
+                    "country_gap_rows": [
+                        {
+                            "country_id": "POL",
+                            "missing_domains": ["B"],
+                            "gap_details": [
+                                {
+                                    "domain": "B",
+                                    "reason": "no_usable_input_data",
+                                    "source_reason_details": [
+                                        {"source_id": "SRC-GDACS", "reason": "zero_records_returned"},
+                                        {"source_id": "SRC-GDELT-EVENTS", "reason": "records_only_for_other_countries_in_scope"},
+                                    ],
+                                }
+                            ],
+                        }
+                    ]
+                },
+            }
+        )
+    )
+    result_payload = FakePipelineResult(
+        FakePipelineRunState("RUN-4", "success", []),
+        artifact_bundle=FakeArtifactBundle(output_dir=tmp_path / "non-representative"),
+    )
+    factory = SequenceOrchestratorFactory([result_payload])
+
+    result = run_governed_live_pipeline(
+        repo_root=REPO_ROOT,
+        run_id="RUN-4",
+        country_id="UKR",
+        country_ids=("UKR", "POL"),
+        orchestrator_factory=factory,
+        max_pipeline_retries=1,
+    )
+
+    assert result is result_payload
+    assert len(factory.calls) == 1
 
 
 
