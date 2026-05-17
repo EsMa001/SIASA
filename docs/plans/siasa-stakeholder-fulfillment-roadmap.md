@@ -118,8 +118,8 @@ For time planning, the remaining work should be treated in three bands rather th
   - add operational annotation workflows and the first advanced source-intelligence features
 
 Practical recommendation for serial pacing:
-- 1 small cleanup package
-- 2 to 4 medium runtime/breadth packages
+- small cleanup package now closed: latest-bundle output hygiene
+- next: 2 to 4 medium runtime/breadth packages
 - then 2 larger analyst-workflow/content packages
 
 ---

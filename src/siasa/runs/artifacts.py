@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
@@ -34,6 +35,23 @@ class RunArtifactBundle:
     readmodel_paths: list[Path]
 
 
+
+def _reset_artifact_output_dir(output_dir: Path) -> None:
+    if not output_dir.exists():
+        return
+    for path in (
+        output_dir / "readmodels",
+        output_dir / "reports",
+        output_dir / "exports",
+    ):
+        if path.exists():
+            shutil.rmtree(path)
+    snapshot_path = output_dir / "snapshot.json"
+    if snapshot_path.exists():
+        snapshot_path.unlink()
+
+
+
 def write_run_artifacts(
     *,
     output_dir: Path,
@@ -57,6 +75,7 @@ def write_run_artifacts(
     requested_country_ids: list[str] | None = None,
     country_expected_domains: dict[str, list[str]] | None = None,
 ) -> RunArtifactBundle:
+    _reset_artifact_output_dir(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     readmodels_dir = output_dir / "readmodels"
     country_profiles_dir = readmodels_dir / "country_profiles"

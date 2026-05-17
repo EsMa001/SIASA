@@ -248,6 +248,71 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
 
 
 
+def test_daily_run_orchestrator_cleans_stale_artifacts_before_writing_new_bundle(tmp_path: Path) -> None:
+    bundle_dir = tmp_path / "bundle-clean"
+    stale_readmodels = bundle_dir / "readmodels"
+    stale_country_profiles = stale_readmodels / "country_profiles"
+    stale_domain_details = stale_readmodels / "domain_details"
+    stale_reports = bundle_dir / "reports"
+    stale_exports = bundle_dir / "exports" / "domain_report"
+    stale_country_profiles.mkdir(parents=True)
+    stale_domain_details.mkdir(parents=True)
+    stale_reports.mkdir(parents=True)
+    stale_exports.mkdir(parents=True)
+    (bundle_dir / "snapshot.json").write_text('{"snapshot_id": "STALE"}')
+    (stale_readmodels / "world_map.json").write_text('{"countries": ["STALE"]}')
+    (stale_country_profiles / "STALE.json").write_text('{"country_id": "STALE"}')
+    (stale_domain_details / "STALE__A.json").write_text('{"country_id": "STALE", "domain": "A"}')
+    (stale_reports / "old_report.json").write_text('{"report_id": "OLD"}')
+    (stale_exports / "OLD.md").write_text('stale')
+    (stale_exports / "OLD.json").write_text('{"stale": true}')
+
+    orchestrator = DailyRunOrchestrator(
+        adapters=[
+            FakeAdapter(
+                source_id="SRC-A",
+                domain="A",
+                _result=FetchResult(
+                    records=[
+                        {"signal_key": "article_count", "value": 3.0, "expected_source_count": 1, "freshness_hours": 6},
+                        {"signal_key": "tone", "value": -0.2, "expected_source_count": 1, "freshness_hours": 6},
+                    ]
+                ),
+            ),
+            FakeAdapter(
+                source_id="SRC-B",
+                domain="B",
+                _result=FetchResult(
+                    records=[
+                        {"signal_key": "conflict_event_count", "value": 4.0, "expected_source_count": 1, "freshness_hours": 12},
+                    ]
+                ),
+            ),
+        ],
+        normalizer=_normalize,
+        feature_services=[DomainAFeatureService(), DomainBFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A", "B"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+        artifacts_output_dir=bundle_dir,
+    )
+
+    result = orchestrator.run(run_id="RUN-200A")
+
+    assert result.artifact_bundle is not None
+    assert not (stale_country_profiles / "STALE.json").exists()
+    assert not (stale_domain_details / "STALE__A.json").exists()
+    assert not (stale_reports / "old_report.json").exists()
+    assert not (stale_exports / "OLD.md").exists()
+    assert not (stale_exports / "OLD.json").exists()
+    assert json.loads((bundle_dir / "snapshot.json").read_text())["snapshot_id"] == "SNAP-RUN-200A-v1"
+
+
+
 def test_daily_run_orchestrator_writes_multi_country_artifact_bundle(tmp_path: Path) -> None:
     orchestrator = DailyRunOrchestrator(
         adapters=[
