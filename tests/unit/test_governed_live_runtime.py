@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from siasa.adapters.base import FetchResult, SourceAdapter
+from siasa.runs import live_runtime
 from siasa.runs.live_runtime import build_governed_live_orchestrator, run_governed_live_pipeline
 
 
@@ -158,6 +159,51 @@ def test_build_governed_live_orchestrator_supports_representative_pilot_set() ->
 
 
 
+def test_build_governed_live_orchestrator_supports_core_focus_initial_pilot_set() -> None:
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        pilot_set="core-focus-initial",
+    )
+
+    world_bank = orchestrator.adapters[0]
+    gdelt_doc = orchestrator.adapters[1]
+    gdelt_events = orchestrator.adapters[2]
+    gdacs = orchestrator.adapters[3]
+
+    assert world_bank.country_ids == ("UKR", "RUS", "CHN", "ISR", "POL")
+    assert orchestrator.country_expected_domains == {
+        "UKR": ["A", "B", "D"],
+        "RUS": ["A", "B", "D"],
+        "CHN": ["A", "B", "D"],
+        "TWN": ["A", "B"],
+        "ISR": ["A", "B", "D"],
+        "POL": ["A", "B", "D"],
+    }
+    assert gdelt_doc.country_queries == {
+        "UKR": "Ukraine",
+        "RUS": "Russia",
+        "CHN": "China",
+        "TWN": "Taiwan",
+        "ISR": "Israel",
+        "POL": "Poland",
+    }
+    assert gdelt_doc.max_records == 5
+    assert gdelt_doc.inter_request_delay_seconds == 1.0
+    assert gdelt_doc.max_full_fetch_retries == 2
+    assert gdelt_doc.full_fetch_retry_cooldown_seconds == 40.0
+    assert gdelt_events.country_codes == {
+        "UKR": "UP",
+        "RUS": "RS",
+        "CHN": "CH",
+        "TWN": "TW",
+        "ISR": "IS",
+        "POL": "PL",
+    }
+    assert gdelt_events.recent_export_count == 8
+    assert gdacs.country_ids == {"UKR", "RUS", "CHN", "TWN", "ISR", "POL"}
+
+
+
 def test_build_governed_live_orchestrator_rejects_combined_pilot_set_and_explicit_countries() -> None:
     try:
         build_governed_live_orchestrator(
@@ -248,6 +294,54 @@ def test_governed_live_runtime_module_accepts_representative_pilot_set_flag() ->
     assert result.returncode == 0
     assert "--pilot-set" in result.stdout
     assert "representative" in result.stdout
+
+
+
+def test_governed_live_runtime_module_accepts_core_focus_initial_pilot_set_flag() -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "siasa.runs.live_runtime",
+            "--pilot-set",
+            "core-focus-initial",
+            "--help",
+        ],
+        cwd=REPO_ROOT,
+        env=_SUBPROCESS_ENV,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "--pilot-set" in result.stdout
+    assert "core-focus-initial" in result.stdout
+
+
+
+def test_main_preserves_named_pilot_set_when_running_pipeline(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_run_governed_live_pipeline(**kwargs):
+        captured.update(kwargs)
+        return FakePipelineResult(FakePipelineRunState("RUN-CLI", "success", []))
+
+    monkeypatch.setattr(live_runtime, "run_governed_live_pipeline", fake_run_governed_live_pipeline)
+
+    exit_code = live_runtime.main([
+        "--pilot-set",
+        "core-focus-initial",
+        "--run-id",
+        "RUN-CLI",
+        "--output-dir",
+        "build/run_artifacts/_cli_core_focus_initial",
+    ])
+
+    assert exit_code == 0
+    assert captured["pilot_set"] == "core-focus-initial"
+    assert captured["country_ids"] is None
+    assert captured["country_id"] == "UKR"
 
 
 

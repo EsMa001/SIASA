@@ -25,16 +25,25 @@ _SUPPORTED_LIVE_PILOT_COUNTRIES = {
     "POL": {"gdelt_query": "Poland", "gdelt_code": "PL"},
     "ISR": {"gdelt_query": "Israel", "gdelt_code": "IS"},
     "TWN": {"gdelt_query": "Taiwan", "gdelt_code": "TW"},
+    "RUS": {"gdelt_query": "Russia", "gdelt_code": "RS"},
+    "CHN": {"gdelt_query": "China", "gdelt_code": "CH"},
 }
 
 _REPRESENTATIVE_LIVE_PILOT_SET = ("UKR", "POL", "ISR", "TWN")
-_WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = ("UKR", "POL", "ISR")
+_CORE_FOCUS_INITIAL_LIVE_PILOT_SET = ("UKR", "RUS", "CHN", "TWN", "ISR", "POL")
+_WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = ("UKR", "POL", "ISR", "RUS", "CHN")
 _MULTI_COUNTRY_GDELT_EVENTS_RECENT_EXPORT_COUNT = 8
 _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
     "UKR": ["A", "B", "D"],
     "POL": ["A", "B", "D"],
     "ISR": ["A", "B", "D"],
     "TWN": ["A", "B"],
+    "RUS": ["A", "B", "D"],
+    "CHN": ["A", "B", "D"],
+}
+_NAMED_LIVE_PILOT_SETS = {
+    "representative": _REPRESENTATIVE_LIVE_PILOT_SET,
+    "core-focus-initial": _CORE_FOCUS_INITIAL_LIVE_PILOT_SET,
 }
 
 
@@ -51,10 +60,13 @@ def _resolve_requested_country_ids(
     country_ids: tuple[str, ...] | None = None,
     pilot_set: str | None = None,
 ) -> tuple[str, ...]:
-    if pilot_set == "representative":
+    if pilot_set is not None:
         if country_ids:
-            raise ValueError("pilot_set=representative cannot be combined with explicit country_ids")
-        return _REPRESENTATIVE_LIVE_PILOT_SET
+            raise ValueError(f"pilot_set={pilot_set} cannot be combined with explicit country_ids")
+        if pilot_set not in _NAMED_LIVE_PILOT_SETS:
+            supported_sets = ", ".join(sorted(_NAMED_LIVE_PILOT_SETS))
+            raise ValueError(f"Supported pilot_set values are: {supported_sets}")
+        return _NAMED_LIVE_PILOT_SETS[pilot_set]
     return _normalize_country_ids(country_id, country_ids)
 
 
@@ -430,13 +442,17 @@ def main(argv: list[str] | None = None) -> int:
         dest="country_ids",
         help=(
             "Governed live pilot country ISO3. Repeat for multi-country runs; "
-            "supported: UKR, POL, ISR, TWN."
+            "supported: UKR, POL, ISR, TWN, RUS, CHN."
         ),
     )
     parser.add_argument(
         "--pilot-set",
-        choices=["representative"],
-        help="Named governed live pilot subset. 'representative' expands to UKR,POL,ISR,TWN.",
+        choices=sorted(_NAMED_LIVE_PILOT_SETS),
+        help=(
+            "Named governed live pilot subset. "
+            "'representative' expands to UKR,POL,ISR,TWN; "
+            "'core-focus-initial' expands to UKR,RUS,CHN,TWN,ISR,POL."
+        ),
     )
     parser.add_argument(
         "--run-id",
@@ -458,7 +474,8 @@ def main(argv: list[str] | None = None) -> int:
     result = run_governed_live_pipeline(
         repo_root=Path(args.repo_root),
         country_id=resolved_country_ids[0],
-        country_ids=resolved_country_ids,
+        country_ids=tuple(args.country_ids) if args.country_ids else None,
+        pilot_set=args.pilot_set,
         run_id=args.run_id,
         output_dir=Path(args.output_dir),
     )

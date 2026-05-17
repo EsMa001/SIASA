@@ -84,10 +84,11 @@ Current repo-evidenced status on branch `hermes/repo-scaffold`:
   - latest bundle persists `readmodels/validation_backtest.json`
   - latest bundle also persists machine-readable `readmodels/readiness.json`
   - GUI artifact loads can reuse the persisted readiness model instead of recomputing from scratch
-- P2 is materially closed for the current representative pilot:
+- P2 is materially closed for the current representative pilot and now broadened by a first wider governed subset:
   - multi-country runtime/artifact path works
-  - representative evidence now covers `UKR`, `POL`, `ISR`, and `TWN`
+  - representative evidence covers `UKR`, `POL`, `ISR`, and `TWN`
   - TWN is explicitly scoped to A/B in the governed pilot rather than surfacing as a misleading D-gap
+  - a broader named `core-focus-initial` pilot set now also runs successfully with `UKR`, `RUS`, `CHN`, `TWN`, `ISR`, and `POL`
 - P3 is strongly advanced:
   - artifact-backed trend charts exist
   - world-map visualization exists
@@ -111,9 +112,9 @@ Interpretation:
 For time planning, the remaining work should be treated in three bands rather than as one flat backlog:
 
 - Near-term closure band:
-  - choose the next priority between broader live-source/runtime breadth and a richer validation/reference-case library
+  - choose the next priority between further live-source/runtime breadth expansion beyond `core-focus-initial` and a richer validation/reference-case library
 - Mid-term breadth/depth band:
-  - expand from the current representative pilot toward a broader MVP subset and/or deeper governed validation evidence
+  - expand from the current representative and `core-focus-initial` governed subsets toward a broader MVP subset and/or deeper governed validation evidence
 - Later analyst-depth band:
   - add operational annotation workflows and the first advanced source-intelligence features
 
