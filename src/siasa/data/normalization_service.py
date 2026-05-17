@@ -6,7 +6,7 @@ from .normalization_mappings import NormalizationMappingVersion, resolve_active_
 from .normalized_models import NormalizedRecord
 
 
-_ALLOWED_QUALITY_FIELDS = {"expected_source_count", "freshness_hours", "quality_flag", "period"}
+_ALLOWED_QUALITY_FIELDS = {"expected_source_count", "freshness_hours", "freshness_horizon_hours", "quality_flag", "period"}
 
 
 def normalize_records(

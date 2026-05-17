@@ -7,6 +7,7 @@ from siasa.data.normalization_mappings import NormalizationMappingVersion
 from siasa.data.normalization_service import normalize_records
 from siasa.features.domain_d import DomainDFeatureService
 from siasa.adapters.world_bank import WorldBankIndicatorsAdapter
+from siasa.scoring.data_sufficiency import evaluate_data_sufficiency
 
 
 class StubFetcher:
@@ -79,6 +80,7 @@ def test_world_bank_adapter_fetch_transforms_indicator_payloads_into_domain_d_re
         "value": 3.2,
         "expected_source_count": 1,
         "freshness_hours": 8760,
+        "freshness_horizon_hours": 8760,
         "quality_flag": "world_bank_api",
     }
     assert fetcher.urls == list(responses)
@@ -155,6 +157,47 @@ def test_world_bank_adapter_skips_empty_values_and_supports_domain_d_feature_com
     assert result.records[0]["signal_key"] == "gdp_growth"
     assert features["D_gdp_growth"].value == 3.2
     assert features["D_macro_data_freshness"].value == 8760
+
+
+
+def test_world_bank_adapter_preserves_annual_freshness_horizon_for_domain_d_sufficiency() -> None:
+    responses = {
+        "https://api.worldbank.org/v2/country/UKR/indicator/NY.GDP.MKTP.KD.ZG?format=json&per_page=1000&mrv=1": [
+            {"page": 1, "pages": 1},
+            [
+                {"country": {"id": "UKR"}, "date": "2024", "value": 3.2},
+            ],
+        ],
+        "https://api.worldbank.org/v2/country/UKR/indicator/NE.EXP.GNFS.KD.ZG?format=json&per_page=1000&mrv=1": [
+            {"page": 1, "pages": 1},
+            [
+                {"country": {"id": "UKR"}, "date": "2024", "value": 1.1},
+            ],
+        ],
+    }
+    adapter = WorldBankIndicatorsAdapter(country_ids=("UKR",), fetch_json=StubFetcher(responses))
+
+    result = adapter.fetch()
+    normalized = normalize_records(
+        source_id=adapter.source_id,
+        domain=adapter.domain,
+        raw_records=result.records,
+        mappings=[
+            NormalizationMappingVersion(
+                mapping_id="MAP-WB-INDICATORS-v1",
+                source_id=adapter.source_id,
+                version="v1",
+                is_active=True,
+            )
+        ],
+    )
+    sufficiency = evaluate_data_sufficiency(DomainDFeatureService().compute(normalized))
+
+    assert normalized[0].quality_context["freshness_horizon_hours"] == 8760
+    assert sufficiency.is_sufficient is True
+    assert sufficiency.reasons == []
+    assert sufficiency.freshness_hours == 8760.0
+
 
 
 def test_world_bank_adapter_returns_failed_fetch_result_when_provider_call_fails() -> None:

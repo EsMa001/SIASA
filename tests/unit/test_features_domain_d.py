@@ -51,3 +51,30 @@ def test_domain_d_feature_service_groups_outputs_per_country() -> None:
     }
 
     assert gdp_growth_by_country == {"UKR": 2.1, "POL": 1.5}
+
+
+
+def test_domain_d_feature_service_keeps_feature_specific_freshness_horizons() -> None:
+    service = DomainDFeatureService()
+    records = [
+        _record(
+            "gdp_growth",
+            2.1,
+            "SRC-MACRO",
+            expected_source_count=2,
+            freshness_hours=8760,
+            freshness_horizon_hours=8760,
+        ),
+        _record(
+            "trade_volume_change",
+            -5.0,
+            "SRC-TRADE",
+            expected_source_count=2,
+            freshness_hours=240,
+        ),
+    ]
+
+    features = {feature.feature_id: feature for feature in service.compute(records)}
+
+    assert features["D_gdp_growth"].confidence_inputs["freshness_horizon_hours"] == 8760
+    assert "freshness_horizon_hours" not in features["D_trade_volume_change"].confidence_inputs

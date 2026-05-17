@@ -32,7 +32,22 @@ def evaluate_data_sufficiency(
     reasons: list[str] = []
     if coverage < minimum_coverage:
         reasons.append("coverage below threshold")
-    if freshness_hours is not None and freshness_hours > maximum_freshness_hours:
+
+    freshness_violation = False
+    for feature in features:
+        feature_freshness = feature.confidence_inputs.get("freshness_hours")
+        if not isinstance(feature_freshness, int | float):
+            continue
+        feature_threshold = feature.confidence_inputs.get("freshness_horizon_hours")
+        resolved_threshold = (
+            float(feature_threshold)
+            if isinstance(feature_threshold, int | float)
+            else maximum_freshness_hours
+        )
+        if float(feature_freshness) > resolved_threshold:
+            freshness_violation = True
+            break
+    if freshness_hours is not None and freshness_violation:
         reasons.append("freshness beyond threshold")
 
     return DataSufficiencyResult(

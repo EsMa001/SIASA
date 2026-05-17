@@ -138,6 +138,7 @@ class WorldBankIndicatorsAdapter(SourceAdapter):
                     "value": float(value),
                     "expected_source_count": 1,
                     "freshness_hours": self.annual_freshness_hours,
+                    "freshness_horizon_hours": self.annual_freshness_hours,
                     "quality_flag": "world_bank_api",
                 }
             )

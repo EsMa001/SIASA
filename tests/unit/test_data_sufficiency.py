@@ -3,10 +3,17 @@ from siasa.scoring.data_sufficiency import evaluate_data_sufficiency
 
 
 
-def _feature(feature_id: str, coverage: float, freshness_hours: float | None) -> FeatureValue:
+def _feature(
+    feature_id: str,
+    coverage: float,
+    freshness_hours: float | None,
+    freshness_horizon_hours: float | None = None,
+) -> FeatureValue:
     confidence_inputs = {"record_count": 2, "source_count": 2}
     if freshness_hours is not None:
         confidence_inputs["freshness_hours"] = freshness_hours
+    if freshness_horizon_hours is not None:
+        confidence_inputs["freshness_horizon_hours"] = freshness_horizon_hours
     return FeatureValue(
         feature_id=feature_id,
         country_id="UKR",
@@ -49,3 +56,18 @@ def test_evaluate_data_sufficiency_accepts_governed_inputs_when_thresholds_are_m
     assert result.coverage == 0.75
     assert result.freshness_hours == 24.0
     assert result.reasons == []
+
+
+
+def test_evaluate_data_sufficiency_does_not_let_annual_horizon_mask_stale_short_horizon_features() -> None:
+    result = evaluate_data_sufficiency(
+        [
+            _feature("D_gdp_growth", coverage=1.0, freshness_hours=8760, freshness_horizon_hours=8760),
+            _feature("A_news_volume", coverage=1.0, freshness_hours=240),
+        ],
+        maximum_freshness_hours=168.0,
+    )
+
+    assert result.is_sufficient is False
+    assert result.reasons == ["freshness beyond threshold"]
+    assert result.freshness_hours == 8760.0

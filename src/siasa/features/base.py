@@ -57,9 +57,12 @@ def build_feature_value(
     domain: str,
     value: Any,
     records: list[NormalizedRecord],
+    freshness_records: list[NormalizedRecord] | None = None,
 ) -> FeatureValue:
     if not records:
         raise ValueError("records are required to build a feature value")
+
+    confidence_records = freshness_records or records
 
     provenance_source_ids = sorted({record.provenance_source_id for record in records})
     expected_source_count = max(
@@ -68,7 +71,7 @@ def build_feature_value(
     if expected_source_count <= 0:
         expected_source_count = len(provenance_source_ids) or 1
 
-    freshness_values = [record.quality_context.get("freshness_hours") for record in records]
+    freshness_values = [record.quality_context.get("freshness_hours") for record in confidence_records]
     freshness_hours = max(
         float(value) for value in freshness_values if isinstance(value, int | float)
     ) if any(isinstance(value, int | float) for value in freshness_values) else None
@@ -79,6 +82,17 @@ def build_feature_value(
     }
     if freshness_hours is not None:
         confidence_inputs["freshness_hours"] = int(freshness_hours) if freshness_hours.is_integer() else freshness_hours
+
+    freshness_horizon_values = [record.quality_context.get("freshness_horizon_hours") for record in confidence_records]
+    if any(isinstance(value, int | float) for value in freshness_horizon_values):
+        freshness_horizon_hours = max(
+            float(value) for value in freshness_horizon_values if isinstance(value, int | float)
+        )
+        confidence_inputs["freshness_horizon_hours"] = (
+            int(freshness_horizon_hours)
+            if freshness_horizon_hours.is_integer()
+            else freshness_horizon_hours
+        )
 
     return FeatureValue(
         feature_id=feature_id,
