@@ -49,6 +49,10 @@ def _retry_delay_seconds(exc: Exception, default_delay: float, now: datetime) ->
 
 
 
+def _is_rate_limit_error(exc: Exception) -> bool:
+    return getattr(exc, 'code', None) == 429
+
+
 @dataclass
 class GDELTDocAdapter(SourceAdapter):
     country_queries: dict[str, str]
@@ -61,26 +65,38 @@ class GDELTDocAdapter(SourceAdapter):
     max_retries: int = 3
     retry_backoff_seconds: float = 1.0
     inter_request_delay_seconds: float = 0.0
+    max_full_fetch_retries: int = 0
+    full_fetch_retry_cooldown_seconds: float = 0.0
     fetch_json: FetchJson = _default_fetch_json
     now_provider: NowProvider = _utc_now
     retry_sleep: SleepFn = sleep
 
     def fetch(self) -> FetchResult:
         try:
-            records: list[dict[str, Any]] = []
-            country_items = list(self.country_queries.items())
-            for index, (country_id, query) in enumerate(country_items):
-                url = self._build_url(query)
-                payload = self._fetch_with_retry(url)
-                records.extend(self._parse_payload(country_id, payload))
-                if index < len(country_items) - 1 and self.inter_request_delay_seconds > 0:
-                    self.retry_sleep(self.inter_request_delay_seconds)
-            diagnostics = (
-                f"gdelt_doc_fetch_ok countries={len(self.country_queries)} records={len(records)}"
-            )
-            return FetchResult(records=records, diagnostics=diagnostics, is_success=True)
+            for full_fetch_attempt in range(self.max_full_fetch_retries + 1):
+                try:
+                    records = self._fetch_country_batch()
+                    diagnostics = (
+                        f"gdelt_doc_fetch_ok countries={len(self.country_queries)} records={len(records)}"
+                    )
+                    return FetchResult(records=records, diagnostics=diagnostics, is_success=True)
+                except Exception as exc:
+                    if full_fetch_attempt == self.max_full_fetch_retries or not _is_rate_limit_error(exc):
+                        raise
+                    self.retry_sleep(self.full_fetch_retry_cooldown_seconds)
         except Exception as exc:
             return FetchResult(records=[], diagnostics=f"gdelt_doc_fetch_failed: {exc}", is_success=False)
+
+    def _fetch_country_batch(self) -> list[dict[str, Any]]:
+        records: list[dict[str, Any]] = []
+        country_items = list(self.country_queries.items())
+        for index, (country_id, query) in enumerate(country_items):
+            url = self._build_url(query)
+            payload = self._fetch_with_retry(url)
+            records.extend(self._parse_payload(country_id, payload))
+            if index < len(country_items) - 1 and self.inter_request_delay_seconds > 0:
+                self.retry_sleep(self.inter_request_delay_seconds)
+        return records
 
     def _build_url(self, query: str) -> str:
         encoded_query = quote_plus(query)

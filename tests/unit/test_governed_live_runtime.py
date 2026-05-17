@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from siasa.adapters.base import FetchResult, SourceAdapter
-from siasa.runs.live_runtime import build_governed_live_orchestrator
+from siasa.runs.live_runtime import build_governed_live_orchestrator, run_governed_live_pipeline
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -20,6 +20,41 @@ class FakeAdapter(SourceAdapter):
 
     def fetch(self) -> FetchResult:
         return self._result
+
+
+@dataclass
+class FakePipelineRunState:
+    run_id: str
+    status: str
+    failed_sources: list[str]
+
+
+@dataclass
+class FakePipelineResult:
+    run_state: FakePipelineRunState
+
+
+class SequenceOrchestratorFactory:
+    def __init__(self, results: list[FakePipelineResult]) -> None:
+        self.results = list(results)
+        self.calls: list[dict[str, object]] = []
+
+    def __call__(self, **kwargs):
+        self.calls.append(kwargs)
+        result = self.results.pop(0)
+
+        class _FakeOrchestrator:
+            def run(self, run_id: str):
+                return result
+
+        return _FakeOrchestrator()
+
+
+class ValidatingSequenceOrchestratorFactory(SequenceOrchestratorFactory):
+    def __call__(self, **kwargs):
+        if kwargs.get("pilot_set") == "representative" and kwargs.get("country_ids") is not None:
+            raise AssertionError("pilot_set=representative must not be combined with explicit country_ids")
+        return super().__call__(**kwargs)
 
 
 
@@ -56,6 +91,8 @@ def test_build_governed_live_orchestrator_supports_multi_country_live_pilot() ->
     assert gdelt_doc.country_queries == {"UKR": "Ukraine", "POL": "Poland"}
     assert gdelt_doc.max_records == 10
     assert gdelt_doc.inter_request_delay_seconds == 1.0
+    assert gdelt_doc.max_full_fetch_retries == 2
+    assert gdelt_doc.full_fetch_retry_cooldown_seconds == 40.0
     assert gdelt_events.country_codes == {"UKR": "UP", "POL": "PL"}
     assert gdacs.country_ids == {"UKR", "POL"}
 
@@ -81,6 +118,8 @@ def test_build_governed_live_orchestrator_supports_representative_pilot_set() ->
     }
     assert gdelt_doc.max_records == 5
     assert gdelt_doc.inter_request_delay_seconds == 1.0
+    assert gdelt_doc.max_full_fetch_retries == 2
+    assert gdelt_doc.full_fetch_retry_cooldown_seconds == 40.0
     assert gdelt_events.country_codes == {
         "UKR": "UP",
         "POL": "PL",
@@ -181,6 +220,47 @@ def test_governed_live_runtime_module_accepts_representative_pilot_set_flag() ->
     assert result.returncode == 0
     assert "--pilot-set" in result.stdout
     assert "representative" in result.stdout
+
+
+
+def test_run_governed_live_pipeline_retries_after_gdelt_doc_only_partial_success_for_multi_country() -> None:
+    sleep_calls: list[float] = []
+    first = FakePipelineResult(FakePipelineRunState("RUN-1", "partial_success", ["SRC-GDELT-DOC"]))
+    second = FakePipelineResult(FakePipelineRunState("RUN-1", "success", []))
+    factory = SequenceOrchestratorFactory([first, second])
+
+    result = run_governed_live_pipeline(
+        repo_root=REPO_ROOT,
+        run_id="RUN-1",
+        pilot_set="representative",
+        orchestrator_factory=factory,
+        pipeline_retry_sleep=sleep_calls.append,
+        pipeline_retry_cooldown_seconds=40.0,
+        max_pipeline_retries=1,
+    )
+
+    assert result.run_state.status == "success"
+    assert sleep_calls == [40.0]
+    assert len(factory.calls) == 2
+
+
+
+def test_run_governed_live_pipeline_does_not_mix_representative_pilot_set_with_explicit_country_ids_for_factory() -> None:
+    factory = ValidatingSequenceOrchestratorFactory(
+        [FakePipelineResult(FakePipelineRunState("RUN-2", "success", []))]
+    )
+
+    result = run_governed_live_pipeline(
+        repo_root=REPO_ROOT,
+        run_id="RUN-2",
+        pilot_set="representative",
+        orchestrator_factory=factory,
+        max_pipeline_retries=0,
+    )
+
+    assert result.run_state.status == "success"
+    assert factory.calls[0]["pilot_set"] == "representative"
+    assert factory.calls[0]["country_ids"] is None
 
 
 

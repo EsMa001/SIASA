@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+from time import sleep
 from typing import Callable
 
 from siasa.adapters import GDACSAdapter, GDELTDocAdapter, GDELTEventsAdapter, WorldBankIndicatorsAdapter
@@ -179,6 +180,18 @@ def _build_live_runtime_validation_view_model(
 
 
 
+def _should_retry_pipeline_after_gdelt_doc_failure(
+    result: DailyRunResult,
+    requested_country_ids: tuple[str, ...],
+) -> bool:
+    return (
+        len(requested_country_ids) > 1
+        and result.run_state.status == "partial_success"
+        and result.run_state.failed_sources == ["SRC-GDELT-DOC"]
+    )
+
+
+
 def build_governed_live_orchestrator(
     *,
     repo_root: Path,
@@ -211,6 +224,8 @@ def build_governed_live_orchestrator(
             country_queries=country_queries,
             max_records=_gdelt_doc_max_records_for_country_count(len(resolved_country_ids)),
             inter_request_delay_seconds=1.0 if len(resolved_country_ids) > 1 else 0.0,
+            max_full_fetch_retries=2 if len(resolved_country_ids) > 1 else 0,
+            full_fetch_retry_cooldown_seconds=40.0 if len(resolved_country_ids) > 1 else 0.0,
         ),
         GDELTEventsAdapter(country_codes=country_codes),
         GDACSAdapter(country_ids=set(resolved_country_ids)),
@@ -283,15 +298,33 @@ def run_governed_live_pipeline(
     country_ids: tuple[str, ...] | None = None,
     pilot_set: str | None = None,
     output_dir: Path | None = None,
+    orchestrator_factory: Callable[..., object] = build_governed_live_orchestrator,
+    pipeline_retry_sleep: Callable[[float], None] = sleep,
+    pipeline_retry_cooldown_seconds: float = 40.0,
+    max_pipeline_retries: int = 1,
 ) -> DailyRunResult:
-    orchestrator = build_governed_live_orchestrator(
-        repo_root=repo_root,
-        country_id=country_id,
-        country_ids=country_ids,
-        pilot_set=pilot_set,
-        output_dir=output_dir,
-    )
-    return orchestrator.run(run_id)
+    resolved_country_ids = _resolve_requested_country_ids(country_id, country_ids, pilot_set)
+    requested_country_ids_for_factory = None if pilot_set is not None else resolved_country_ids
+    requested_pilot_set_for_factory = pilot_set if pilot_set is not None else None
+    current_output_dir = output_dir
+    last_result: DailyRunResult | None = None
+    for pipeline_attempt in range(max_pipeline_retries + 1):
+        orchestrator = orchestrator_factory(
+            repo_root=repo_root,
+            country_id=resolved_country_ids[0],
+            country_ids=requested_country_ids_for_factory,
+            pilot_set=requested_pilot_set_for_factory,
+            output_dir=current_output_dir,
+        )
+        result = orchestrator.run(run_id)
+        last_result = result
+        if not _should_retry_pipeline_after_gdelt_doc_failure(result, resolved_country_ids):
+            return result
+        if pipeline_attempt == max_pipeline_retries:
+            return result
+        pipeline_retry_sleep(pipeline_retry_cooldown_seconds)
+    assert last_result is not None
+    return last_result
 
 
 

@@ -171,6 +171,61 @@ def test_gdelt_doc_adapter_sleeps_between_successful_multi_country_requests() ->
 
 
 
+def test_gdelt_doc_adapter_retries_the_full_multi_country_batch_after_terminal_rate_limit_failure() -> None:
+    sleep_calls: list[float] = []
+    fetcher = SequenceFetcher(
+        [
+            FakeRateLimitError("HTTP 429: Too Many Requests"),
+            {"articles": []},
+            {"articles": []},
+        ]
+    )
+    adapter = GDELTDocAdapter(
+        country_queries={"UKR": "ukraine", "POL": "poland"},
+        fetch_json=fetcher,
+        retry_sleep=sleep_calls.append,
+        max_retries=0,
+        max_full_fetch_retries=1,
+        full_fetch_retry_cooldown_seconds=40.0,
+    )
+
+    result = adapter.fetch()
+
+    assert result.is_success is True
+    assert result.diagnostics == "gdelt_doc_fetch_ok countries=2 records=0"
+    assert sleep_calls == [40.0]
+    assert len(fetcher.urls) == 3
+
+
+
+def test_gdelt_doc_adapter_can_retry_the_full_multi_country_batch_twice() -> None:
+    sleep_calls: list[float] = []
+    fetcher = SequenceFetcher(
+        [
+            FakeRateLimitError("HTTP 429: Too Many Requests"),
+            FakeRateLimitError("HTTP 429: Too Many Requests"),
+            {"articles": []},
+            {"articles": []},
+        ]
+    )
+    adapter = GDELTDocAdapter(
+        country_queries={"UKR": "ukraine", "POL": "poland"},
+        fetch_json=fetcher,
+        retry_sleep=sleep_calls.append,
+        max_retries=0,
+        max_full_fetch_retries=2,
+        full_fetch_retry_cooldown_seconds=40.0,
+    )
+
+    result = adapter.fetch()
+
+    assert result.is_success is True
+    assert result.diagnostics == "gdelt_doc_fetch_ok countries=2 records=0"
+    assert sleep_calls == [40.0, 40.0]
+    assert len(fetcher.urls) == 4
+
+
+
 def test_gdelt_doc_adapter_honors_retry_after_for_rate_limit_backoff() -> None:
     sleep_calls: list[float] = []
     fetcher = SequenceFetcher(
