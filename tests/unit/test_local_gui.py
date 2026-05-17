@@ -1197,6 +1197,97 @@ def test_load_site_payload_from_artifacts_falls_back_for_missing_readiness_suppo
     assert "missing_repo_closure_artifact" not in readiness_html
 
 
+def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_when_available(tmp_path: Path) -> None:
+    artifacts_dir = tmp_path / "artifacts-with-readiness"
+    (artifacts_dir / "readmodels" / "country_profiles").mkdir(parents=True)
+    (artifacts_dir / "readmodels" / "domain_details").mkdir(parents=True)
+    (artifacts_dir / "reports").mkdir(parents=True)
+
+    (artifacts_dir / "snapshot.json").write_text(
+        json.dumps(
+            {
+                "snapshot_id": "SNAP-RUN-321-v1",
+                "run_id": "RUN-321",
+                "country_set_id": "MVP-COUNTRIES-v1",
+                "active_domains": ["A", "B", "D"],
+                "rule_versions": {"domain_status": "rules-2026-05"},
+                "source_state": {"SRC-A": "success"},
+                "analytical_outputs": {"country_status": {"UKR": "S3"}},
+                "status": "success",
+                "algorithm_version": "alg-0.1",
+                "data_version": "data-0.1",
+            }
+        )
+    )
+    (artifacts_dir / "readmodels" / "world_map.json").write_text(
+        json.dumps({"baseline_mode": "Combined 30/90/365", "active_domains": ["A", "B", "D"], "countries": [{"country_id": "UKR", "status": "S3", "active_domains": ["A", "B", "D"]}]})
+    )
+    (artifacts_dir / "readmodels" / "source_coverage.json").write_text(
+        json.dumps({"sources": [{"source_id": "SRC-A", "status": "success", "history_horizon": "3y", "freshness_hours": 6, "confidence": 0.9}], "failed_sources": [], "missing_sources": []})
+    )
+    (artifacts_dir / "readmodels" / "system_status.json").write_text(
+        json.dumps({
+            "run_id": "RUN-321", "run_status": "success", "active_domains": ["A", "B", "D"], "coverage": {"countries_total": 1, "countries_with_updates": 1}, "failed_sources": [], "available_reports": ["REP-DAILY-SNAP-RUN-321-v1"], "snapshot_id": "SNAP-RUN-321-v1", "reprocessing_status": "idle", "last_run": "2026-05-11T18:00:00Z",
+            "artifact_status": {
+                "validation_backtest": {"status": "present", "reason": None},
+                "traceability_lineage": {"status": "present", "reason": None},
+                "repo_closure": {"status": "present", "reason": None},
+                "annotations": {"status": "present", "reason": None}
+            }
+        })
+    )
+    (artifacts_dir / "readmodels" / "country_profiles" / "UKR.json").write_text(
+        json.dumps({"country_id": "UKR", "multi_domain_status": "S3", "domain_states": {"A": "D3"}, "trends": {"yearly": ["2026-01"]}, "drivers": ["A_news_volume"], "linked_events": [], "coverage": 0.84, "confidence": 0.73, "counter_indicators": [], "uncertainty": []})
+    )
+    (artifacts_dir / "readmodels" / "domain_details" / "UKR__A.json").write_text(
+        json.dumps({"country_id": "UKR", "domain": "A", "anomaly_state": "D3", "time_series": [{"timestamp": "2026-05-11", "value": 0.67}], "baseline_comparison": {"delta_to_baseline": 0.36}, "feature_values": [{"feature_id": "A_article_count", "value": 12.0, "coverage": 0.9}], "source_context": [{"source_id": "SRC-A", "freshness_hours": 6, "history_horizon": "3y", "status": "success"}], "uncertainty": []})
+    )
+    (artifacts_dir / "readmodels" / "traceability_lineage.json").write_text(
+        json.dumps({"lineage_records": [{"source_id": "SRC-A", "raw_record_id": "RAW-SRC-A-1", "normalized_id": "NORM-SRC-A-1", "feature_id": "A_article_count", "domain_status_id": "DST-UKR-A-RUN-321", "multi_domain_status_id": "MST-UKR-RUN-321", "snapshot_id": "SNAP-RUN-321-v1", "report_id": "REP-DAILY-SNAP-RUN-321-v1"}]})
+    )
+    (artifacts_dir / "readmodels" / "repo_closure.json").write_text(
+        json.dumps({"summary": {"slice_count": 9, "requirement_count": 45, "closed": 45, "at_risk": 0}, "slices": []})
+    )
+    (artifacts_dir / "readmodels" / "annotations.json").write_text(
+        json.dumps({"annotations": [], "by_scope": {}, "by_linked_item": {}})
+    )
+    (artifacts_dir / "readmodels" / "validation_backtest.json").write_text(
+        json.dumps({"case_id": "VAL-UKR-2022-001", "country_id": "UKR"})
+    )
+    (artifacts_dir / "readmodels" / "readiness.json").write_text(
+        json.dumps(
+            {
+                "run_id": "RUN-321",
+                "snapshot_id": "SNAP-RUN-321-v1",
+                "demo_verdict": "ready",
+                "release_verdict": "ready",
+                "demo_checks": [{"label": "Persisted Demo Check", "ready": True}],
+                "evidence_checks": [{"label": "Persisted Evidence Check", "ready": True}],
+                "artifact_checks": [{"artifact": "validation_backtest", "status": "present", "reason": None}],
+                "known_gaps": [],
+                "report_count": 1,
+                "country_profile_count": 1,
+                "domain_detail_count": 1,
+            }
+        )
+    )
+    (artifacts_dir / "reports" / "daily_snapshot.json").write_text(
+        json.dumps({"report_id": "REP-DAILY-SNAP-RUN-321-v1", "report_type": "daily_snapshot", "format": "json", "payload": {"snapshot_id": "SNAP-RUN-321-v1", "status": "success"}})
+    )
+
+    payload = local_app.load_site_payload_from_artifacts(artifacts_dir)
+
+    assert payload["readiness_view_model"]["demo_checks"] == [{"label": "Persisted Demo Check", "ready": True}]
+
+    pages = build_local_mvp_site(output_dir=tmp_path / "site-with-readiness", **payload)
+    readiness_html = (pages.output_dir / "readiness.html").read_text()
+    readiness_json = json.loads((pages.output_dir / "readiness.json").read_text())
+
+    assert "Persisted Demo Check" in readiness_html
+    assert "Persisted Evidence Check" in readiness_html
+    assert readiness_json["demo_checks"] == [{"label": "Persisted Demo Check", "ready": True}]
+
+
 def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bundle(tmp_path: Path) -> None:
     repo_root = Path(__file__).resolve().parents[2]
     env = os.environ.copy()

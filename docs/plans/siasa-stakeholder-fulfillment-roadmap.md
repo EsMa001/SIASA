@@ -29,11 +29,11 @@ For project-lead steering, use `docs/plans/siasa-project-lead-capability-matrix.
 | Source / coverage trust layer | Source status, confidence, failures, gaps | Present | Trust summary, degraded sources, failures, missing sources visible | Mostly done |
 | Source lineage / epidemiology visualization | Spread / amplification / source graph | Absent | Only traceability table exists | Missing feature |
 | Reports / exports | Daily snapshot + manual exports with evidence context | Present | Export page and exported files exist | Mostly done |
-| Validation / backtest review | Validation cases and expected-vs-observed review | Present in GUI baseline, incomplete in artifacts | Validation page exists; latest artifact bundle still lacks `validation_backtest.json` | Artifact gap |
+| Validation / backtest review | Validation cases and expected-vs-observed review | Present in GUI baseline and governed artifacts | Validation page exists; latest artifact bundle carries both `validation_backtest.json` and `readiness.json` | Runtime-support depth still expandable later |
 | Analyst annotations visibility | Show analyst annotations in GUI | Present | Dedicated page and contextual rendering exist | Mostly done |
 | Annotation creation/editing in GUI | Create/manage annotations in GUI | Absent | Read-only visibility only | Missing feature |
 | Traceability / lineage | Follow evidence path from source to status/report | Present | Traceability page exists and artifact path is implemented | Mostly done |
-| Release/demo readiness | Explicit readiness page and machine-readable status | Present | `readiness.html` + `readiness.json` implemented | Done, still depends on artifact completeness |
+| Release/demo readiness | Explicit readiness page and machine-readable status | Present | `readiness.html` + `readiness.json` implemented, and governed latest bundles now persist `readmodels/readiness.json` | Done |
 | Role-based UI behavior | Role-specific available functions | Mostly absent | Hooks exist in software requirements area, but no real GUI behavior exposed | Missing feature |
 | GUI richness | Dashboard-like analyst tool instead of static report pages | Absent | Current GUI is a static HTML bundle viewer | Missing feature |
 
@@ -80,13 +80,14 @@ Current repo-evidenced status on branch `hermes/repo-scaffold`:
   - source-access assessment exists
   - real adapter baselines exist for World Bank, GDELT DOC, GDELT Events, and GDACS
   - governed live runtime pilot exists
-- P1 is still not fully closed:
-  - latest bundle still lacks `readmodels/validation_backtest.json`
-  - readiness still reports `missing_validation_artifact`
-- P2 is partly closed, but not yet stakeholder-complete:
+- P1 is now materially closed for the current governed pilot:
+  - latest bundle persists `readmodels/validation_backtest.json`
+  - latest bundle also persists machine-readable `readmodels/readiness.json`
+  - GUI artifact loads can reuse the persisted readiness model instead of recomputing from scratch
+- P2 is materially closed for the current representative pilot:
   - multi-country runtime/artifact path works
-  - latest bundle currently proves `POL` and `UKR`
-  - this is operationally meaningful, but still not representative breadth
+  - representative evidence now covers `UKR`, `POL`, `ISR`, and `TWN`
+  - TWN is explicitly scoped to A/B in the governed pilot rather than surfacing as a misleading D-gap
 - P3 is strongly advanced:
   - artifact-backed trend charts exist
   - world-map visualization exists
@@ -103,16 +104,16 @@ Current repo-evidenced status on branch `hermes/repo-scaffold`:
 Interpretation:
 - the old roadmap order was correct as a program scaffold
 - however, execution has now overtaken parts of the document
-- the critical remaining gap is no longer “basic GUI existence”, but the mismatch between a relatively rich GUI and still-incomplete runtime breadth / validation completeness
+- the critical remaining gap is no longer missing artifact completeness inside the current governed pilot, but how far runtime breadth and the validation/reference-case depth should be expanded next
 
 ## 3b. Updated planning horizon
 
 For time planning, the remaining work should be treated in three bands rather than as one flat backlog:
 
 - Near-term closure band:
-  - close the remaining runtime honesty gaps that still block a clean readiness claim
-- Mid-term breadth band:
-  - expand from the current 2-country proof to a representative MVP country subset
+  - choose the next priority between broader live-source/runtime breadth and a richer validation/reference-case library
+- Mid-term breadth/depth band:
+  - expand from the current representative pilot toward a broader MVP subset and/or deeper governed validation evidence
 - Later analyst-depth band:
   - add operational annotation workflows and the first advanced source-intelligence features
 

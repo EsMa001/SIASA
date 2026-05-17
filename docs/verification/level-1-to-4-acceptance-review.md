@@ -20,10 +20,10 @@ Verwendete Nachweise:
 - Level 1: bestanden
 - Level 2: bestanden
 - Level 3: bestanden
-- Level 4: bestanden, mit aktuell genau benannter Restlücke im artefaktgestützten Validation-Nachweis
+- Level 4: bestanden
 
 Das System ist damit auf Repo-Ebene und in der GUI grundsätzlich vorführbar.
-Die aktuelle `latest`-Artefaktlage wird in der Readiness-Sicht jetzt robuster ausgewertet: fehlende Repo-Closure-Dateien werden aus dem Repo-Kontext ergänzt, fehlende Annotations-Artefakte fallen auf eine leere, aber funktionsfähige Sicht zurück, und verbleibende Blocker werden explizit als bekannte Gaps ausgewiesen.
+Die aktuelle `latest`-Artefaktlage wird in der Readiness-Sicht robust ausgewertet: fehlende Repo-Closure-Dateien werden bei Bedarf aus dem Repo-Kontext ergänzt, fehlende Annotations-Artefakte fallen auf eine leere, aber funktionsfähige Sicht zurück, und der governed Bundle-Pfad persistiert jetzt zusätzlich ein maschinenlesbares `readmodels/readiness.json` neben `validation_backtest.json`.
 
 ## Level 1 – GUI Hardening
 
@@ -81,7 +81,7 @@ Prüffokus:
 - artefaktgestützte Vorführbarkeit
 
 Ergebnis:
-- bestanden, mit präzise benannter Restlücke
+- bestanden
 
 Begründung:
 - `readiness.html` und `readiness.json` existieren und funktionieren
@@ -89,26 +89,27 @@ Begründung:
 - Browser-Smoke der Readiness-Seite war erfolgreich
 - fehlende `repo_closure.json` wird im artefaktgestützten Load belastbar aus dem Repo-Kontext ergänzt
 - fehlende `annotations.json` fällt auf eine leere, aber funktionsfähige Annotations-Sicht zurück
-- verbleibende Blocker werden als bekannte Gaps explizit ausgewiesen statt nur implizit über fehlende Checkmarks
+- der governed Artefaktpfad persistiert jetzt zusätzlich `readmodels/readiness.json`, sodass die Bundle-Readiness maschinenlesbar direkt im Laufartefakt vorliegt
 
 ## Konkrete Befunde aus der artefaktgestützten Abnahme
 
 Positiv:
-- `world_map.json`, `country_profiles/UKR.json`, `domain_details/*.json`, `source_coverage.json`, `system_status.json`, `traceability_lineage.json` sind vorhanden
+- `world_map.json`, `country_profiles/UKR.json`, `domain_details/*.json`, `source_coverage.json`, `system_status.json`, `traceability_lineage.json`, `validation_backtest.json` und `readiness.json` sind im governed Bundle vorhanden
 - GUI aus `build/run_artifacts/latest` lässt sich erzeugen
 - Readiness-Seite ist aufrufbar und zeigt den realen Bundle-Zustand
+- das maschinenlesbare Bundle enthält die Readiness jetzt direkt unter `readmodels/readiness.json`
 
 Negativ / Restlücken:
-- im aktuellen `build/run_artifacts/latest/readmodels` fehlt weiterhin:
-  - `validation_backtest.json`
-- diese Restlücke bleibt im artefaktgestützten Build sichtbar und wird nun explizit als `missing_validation_artifact` ausgewiesen
+- keine offene Level-4-Artefaktlücke mehr im aktuellen governed Pilot-Bundle
+- verbleibende Verbesserungen betreffen eher spätere Breiten-/Tiefenexpansion als die Grundvollständigkeit des Bundles
 
 Abgebaut gegenüber dem ersten Abnahmestand:
+- fehlende `validation_backtest.json` blockiert die Readiness nicht mehr
 - fehlende `repo_closure.json` blockiert die Evidenzsicht nicht mehr, weil ein belastbarer Fallback aus dem Repo-Kontext erzeugt wird
 - fehlende `annotations.json` blockiert die Evidenzsicht nicht mehr, weil auf eine leere Annotations-Sicht zurückgefallen wird
 
 ## Empfehlung aus der Abnahme
 
-Nächster sinnvoller Schritt ist jetzt der gezielte Abbau des verbleibenden Validation-Artefakt-Gaps:
-- `validation_backtest.json` im regulären Artefaktpfad konsequent erzeugen oder aktualisieren
-- danach erneute artefaktgestützte Readiness-Prüfung gegen `build/run_artifacts/latest`
+Nächster sinnvoller Schritt ist jetzt nicht mehr der Abbau einer fehlenden Basis-Artefaktdatei, sondern die Priorisierung des nächsten Werthebels:
+- entweder breitere governed live-source/runtime coverage über den aktuellen representative pilot hinaus
+- oder eine tiefere Validation-/Reference-Case-Bibliothek über den jetzigen runtime-support check hinaus

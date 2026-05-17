@@ -156,6 +156,7 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert (tmp_path / "bundle" / "readmodels" / "domain_details" / "UKR__B.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "source_coverage.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "system_status.json").exists()
+    assert (tmp_path / "bundle" / "readmodels" / "readiness.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "traceability_lineage.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "repo_closure.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "annotations.json").exists()
@@ -181,6 +182,7 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     country_profile = json.loads((tmp_path / "bundle" / "readmodels" / "country_profiles" / "UKR.json").read_text())
     domain_detail_a = json.loads((tmp_path / "bundle" / "readmodels" / "domain_details" / "UKR__A.json").read_text())
     system_status = json.loads((tmp_path / "bundle" / "readmodels" / "system_status.json").read_text())
+    readiness = json.loads((tmp_path / "bundle" / "readmodels" / "readiness.json").read_text())
     traceability = json.loads((tmp_path / "bundle" / "readmodels" / "traceability_lineage.json").read_text())
     repo_closure = json.loads((tmp_path / "bundle" / "readmodels" / "repo_closure.json").read_text())
     annotations = json.loads((tmp_path / "bundle" / "readmodels" / "annotations.json").read_text())
@@ -202,6 +204,16 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert coverage_report["payload"]["run_id"] == "RUN-200"
     assert coverage_report["payload"]["failed_sources"] == []
     assert system_status["artifact_status"]["validation_backtest"] == {
+        "status": "absent",
+        "reason": "not_configured",
+    }
+    assert readiness["run_id"] == "RUN-200"
+    assert readiness["snapshot_id"] == "SNAP-RUN-200-v1"
+    assert readiness["demo_verdict"] == "blocked"
+    assert readiness["release_verdict"] == "blocked_by_known_gaps"
+    assert readiness["known_gaps"] == ["validation_backtest_absent:not_configured"]
+    assert readiness["artifact_checks"][0] == {
+        "artifact": "validation_backtest",
         "status": "absent",
         "reason": "not_configured",
     }
@@ -962,6 +974,7 @@ def test_daily_run_orchestrator_decomposes_mixed_no_usable_input_data_by_source(
     result = orchestrator.run(run_id="RUN-209")
     pol_profile = json.loads((tmp_path / "bundle-mixed-no-usable-input" / "readmodels" / "country_profiles" / "POL.json").read_text())
     system_status = json.loads((tmp_path / "bundle-mixed-no-usable-input" / "readmodels" / "system_status.json").read_text())
+    readiness = json.loads((tmp_path / "bundle-mixed-no-usable-input" / "readmodels" / "readiness.json").read_text())
 
     assert result.artifact_bundle is not None
     assert pol_profile["domain_gap_summary"]["gap_details"] == [
@@ -988,6 +1001,9 @@ def test_daily_run_orchestrator_decomposes_mixed_no_usable_input_data_by_source(
             ],
         }
     ]
+    assert readiness["release_verdict"] == "blocked_by_known_gaps"
+    assert "country_gap:POL:B:no_usable_input_data" in readiness["known_gaps"]
+    assert "validation_backtest_absent:not_configured" in readiness["known_gaps"]
 
 
 

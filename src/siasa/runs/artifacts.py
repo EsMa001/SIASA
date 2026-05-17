@@ -13,6 +13,7 @@ from siasa.features.base import FeatureValue
 from siasa.readmodels.annotations import build_annotations_view_model
 from siasa.readmodels.country_profile import build_country_profile_read_model
 from siasa.readmodels.domain_detail import build_domain_detail_read_model
+from siasa.readmodels.readiness import build_readiness_view_model
 from siasa.readmodels.source_coverage import build_source_coverage_read_model
 from siasa.readmodels.system_status import build_system_status_read_model
 from siasa.readmodels.world_map import build_world_map_read_model
@@ -373,6 +374,54 @@ def write_run_artifacts(
         validation_path = readmodels_dir / "validation_backtest.json"
         validation_path.write_text(json.dumps(validation_view_model, indent=2, sort_keys=True))
         readmodel_paths.append(validation_path)
+
+    readiness_available_pages = {
+        "index.html",
+        "coverage.html",
+        "reports.html",
+        "runs.html",
+        "trends.html",
+        "events.html",
+        "comparison.html",
+        "readiness.html",
+        "traceability.html",
+        "annotations.html",
+    }
+    if validation_view_model is not None:
+        readiness_available_pages.add("validation.html")
+    readiness_report_catalog = {
+        report_id: {"report_id": report_id}
+        for report_id in available_reports
+    }
+    readiness_path = readmodels_dir / "readiness.json"
+    readiness_path.write_text(
+        json.dumps(
+            build_readiness_view_model(
+                country_profile_read_models={
+                    country_file.stem: json.loads(country_file.read_text())
+                    for country_file in sorted(country_profiles_dir.glob("*.json"))
+                },
+                domain_detail_read_models={
+                    (str(read_model["country_id"]), str(read_model["domain"])): read_model
+                    for read_model in (
+                        json.loads(domain_file.read_text())
+                        for domain_file in sorted(domain_details_dir.glob("*.json"))
+                    )
+                },
+                report_catalog=readiness_report_catalog,
+                system_status_read_model=json.loads(system_status_path.read_text()),
+                source_coverage_read_model=json.loads(source_coverage_path.read_text()),
+                validation_view_model=validation_view_model,
+                traceability_view_model=json.loads(traceability_path.read_text()),
+                annotations_view_model=json.loads(annotations_path.read_text()),
+                repo_closure_view_model=json.loads(repo_closure_path.read_text()),
+                available_pages=readiness_available_pages,
+            ),
+            indent=2,
+            sort_keys=True,
+        )
+    )
+    readmodel_paths.append(readiness_path)
 
     report_paths = []
     daily_report_path = reports_dir / "daily_snapshot.json"
