@@ -1276,12 +1276,22 @@ def _prepare_report_catalog(report_catalog: dict[str, Any], output_dir: Path) ->
 
 
 def _render_reports(report_catalog: dict[str, Any], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
+    def _render_export_links(report_info: dict[str, Any]) -> str:
+        export_links = ''.join(
+            (
+                f"<div><a href=\"{html.escape(str(export_file.get('href', export_file.get('relative_path', ''))))}\">"
+                f"{html.escape(str(export_file.get('label', export_file.get('format', 'download'))))}</a></div>"
+            )
+            for export_file in report_info.get('export_files', [])
+        )
+        return export_links or '-'
+
     rows = ''.join(
         "<tr>"
         f"<td>{html.escape(report_type)}</td>"
         f"<td>{html.escape(str(report_info.get('report_id', '')))}</td>"
         f"<td>{html.escape(str(report_info.get('format', '')))}</td>"
-        f"<td>{''.join(f'<div><a href=\"{html.escape(str(export_file.get("href", export_file.get("relative_path", ""))))}\">{html.escape(str(export_file.get("label", export_file.get("format", "download"))))}</a></div>' for export_file in report_info.get('export_files', [])) or '-'}</td>"
+        f"<td>{_render_export_links(report_info)}</td>"
         f"<td>{html.escape(json.dumps({k: v for k, v in report_info.items() if k != 'export_files'}, sort_keys=True))}</td>"
         "</tr>"
         for report_type, report_info in sorted(report_catalog.items())
@@ -1447,6 +1457,11 @@ def _build_readiness_view_model(
 
 
 def _render_readiness(readiness_view_model: dict[str, Any], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
+    def _artifact_status_text(check: dict[str, Any]) -> str:
+        status = str(check.get('status', 'unknown'))
+        reason = check.get('reason')
+        return status if not reason else f"{status} ({reason})"
+
     demo_rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(check.get('label', '')))}</td>"
@@ -1464,7 +1479,7 @@ def _render_readiness(readiness_view_model: dict[str, Any], *, nav_prefix: str =
     artifact_rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(check.get('artifact', '')))}</td>"
-        f"<td>{html.escape(str(check.get('status', 'unknown')) if not check.get('reason') else f"{check.get('status', 'unknown')} ({check.get('reason')})")}</td>"
+        f"<td>{html.escape(_artifact_status_text(check))}</td>"
         "</tr>"
         for check in readiness_view_model.get('artifact_checks', [])
     )
@@ -1498,6 +1513,10 @@ def _render_trends(country_profile_read_models: dict[str, dict[str, Any]], *, na
     rows = []
     country_options = []
     trend_options = _trend_filter_options(country_profile_read_models)
+    trend_option_tags = ''.join(
+        f"<option value='{html.escape(label)}'>{html.escape(label)}</option>"
+        for label in trend_options
+    )
     for country_id, profile in sorted(country_profile_read_models.items()):
         yearly = profile.get('trends', {}).get('yearly', [])
         labels = ','.join(_trend_labels(yearly, label_key='label'))
@@ -1519,7 +1538,7 @@ def _render_trends(country_profile_read_models: dict[str, dict[str, Any]], *, na
         f"{''.join(country_options)}</select> "
         "<label for='trend-time-window'>Time Window</label> "
         "<select id='trend-time-window' name='trend-time-window'><option value='all'>All labels</option>"
-        f"{''.join(f"<option value='{html.escape(label)}'>{html.escape(label)}</option>" for label in trend_options)}</select> "
+        f"{trend_option_tags}</select> "
         "<label for='trend-view-mode'>Trend View Mode</label> "
         "<select id='trend-view-mode' name='trend-view-mode'><option value='chart'>Chart view</option><option value='events'>Event overlay view</option></select>"
         "<p id='trend-filter-result'>Selected Trend Window: all labels</p>"
