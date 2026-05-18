@@ -1092,8 +1092,14 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
         },
         "status_match_count": 4,
         "average_domain_match_ratio": 1.0,
+        "average_replay_evidence_score": 1.0,
+        "average_replay_source_coverage_ratio": 1.0,
+        "average_replay_provenance_completeness_ratio": 1.0,
         "replay_input_record_total": 28,
         "archival_data_file_count": 4,
+        "replay_evidence_tier_counts": {
+            "verified_replay_evidence": 4,
+        },
         "replay_input_source_coverage_counts": {
             "SRC-GDACS": 4,
             "SRC-GDELT-DOC": 4,
@@ -1119,6 +1125,8 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
     assert validation_backtest["historical_replay_reviews"][0]["archival_data_files"] == [
         "archival_replay_inputs/VAL-UKR-2022-001.json"
     ]
+    assert validation_backtest["historical_replay_reviews"][0]["replay_evidence_score"] == 1.0
+    assert validation_backtest["historical_replay_reviews"][0]["replay_evidence_tier"] == "verified_replay_evidence"
     assert [case["case_id"] for case in validation_backtest["reference_case_library"]] == [
         "VAL-UKR-2022-001",
         "VAL-POL-2023-001",

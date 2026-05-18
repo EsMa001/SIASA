@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from siasa.validation.cases import load_validation_case_library
-from siasa.validation.historical_replay import build_historical_replay_reviews, load_historical_replay_inputs
+from siasa.validation.cases import ValidationCase, load_validation_case_library
+from siasa.validation.historical_replay import HistoricalReplayInput, build_historical_replay_reviews, load_historical_replay_inputs
 
 
 
@@ -40,6 +40,10 @@ def test_build_historical_replay_reviews_executes_replay_against_fixture_backed_
             "archival_data_files": [],
             "provenance_notes": "",
             "replay_known_limitations": [],
+            "replay_source_coverage_ratio": 1.0,
+            "replay_provenance_completeness_ratio": 1.0,
+            "replay_evidence_score": 1.0,
+            "replay_evidence_tier": "verified_replay_evidence",
             "replayed_status": "S3",
             "expected_status": "S3",
             "status_match": True,
@@ -60,6 +64,10 @@ def test_build_historical_replay_reviews_executes_replay_against_fixture_backed_
             "archival_data_files": [],
             "provenance_notes": "",
             "replay_known_limitations": [],
+            "replay_source_coverage_ratio": 1.0,
+            "replay_provenance_completeness_ratio": 1.0,
+            "replay_evidence_score": 1.0,
+            "replay_evidence_tier": "verified_replay_evidence",
             "replayed_status": "S3",
             "expected_status": "S3",
             "status_match": True,
@@ -80,6 +88,10 @@ def test_build_historical_replay_reviews_executes_replay_against_fixture_backed_
             "archival_data_files": [],
             "provenance_notes": "",
             "replay_known_limitations": [],
+            "replay_source_coverage_ratio": 1.0,
+            "replay_provenance_completeness_ratio": 1.0,
+            "replay_evidence_score": 1.0,
+            "replay_evidence_tier": "verified_replay_evidence",
             "replayed_status": "S3",
             "expected_status": "S3",
             "status_match": True,
@@ -100,6 +112,10 @@ def test_build_historical_replay_reviews_executes_replay_against_fixture_backed_
             "archival_data_files": [],
             "provenance_notes": "",
             "replay_known_limitations": [],
+            "replay_source_coverage_ratio": 1.0,
+            "replay_provenance_completeness_ratio": 1.0,
+            "replay_evidence_score": 1.0,
+            "replay_evidence_tier": "verified_replay_evidence",
             "replayed_status": "S1",
             "expected_status": "S1",
             "status_match": True,
@@ -112,3 +128,42 @@ def test_build_historical_replay_reviews_executes_replay_against_fixture_backed_
             "replay_input_record_count": 4,
         },
     ]
+
+
+
+def test_build_historical_replay_reviews_assigns_lower_evidence_tier_when_replay_has_domain_and_source_gaps() -> None:
+    case = ValidationCase(
+        case_id="VAL-TST-001",
+        country_id="TWN",
+        case_name="Synthetic replay quality case",
+        case_type="synthetic",
+        time_start="2024-01-01",
+        time_end="2024-01-31",
+        expected_domains=["A", "B"],
+        expected_status="S1",
+        expected_signal_pattern="Synthetic pattern",
+        reference_sources=["SRC-GDELT-DOC", "SRC-GDELT-EVENTS"],
+        validation_goal="Exercise replay evidence scoring.",
+        known_limitations=["synthetic_test_case"],
+        validation_metrics=["Domain Match", "Status Match"],
+    )
+    base_input = load_historical_replay_inputs(
+        Path(__file__).resolve().parents[2] / "vmodel" / "verification" / "validation_replay_inputs.yaml"
+    )["VAL-TWN-2024-001"]
+    replay_inputs = {
+        "VAL-TST-001": HistoricalReplayInput(
+            case_id="VAL-TST-001",
+            review_basis="fixture_backed_historical_replay",
+            normalized_records=base_input.normalized_records[:2],
+            replay_input_source_ids=["SRC-GDELT-DOC"],
+            replay_input_country_ids=["TWN"],
+        )
+    }
+
+    reviews = build_historical_replay_reviews([case], replay_inputs)
+
+    assert reviews[0]["review_verdict"] == "replay_match_with_gaps"
+    assert reviews[0]["replay_source_coverage_ratio"] == 0.5
+    assert reviews[0]["replay_provenance_completeness_ratio"] == 1.0
+    assert reviews[0]["replay_evidence_score"] == 0.75
+    assert reviews[0]["replay_evidence_tier"] == "strong_replay_evidence"

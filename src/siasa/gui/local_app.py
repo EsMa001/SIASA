@@ -1673,12 +1673,18 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         f"<tr><td>{html.escape(str(source_id))}</td><td>{html.escape(str(count))}</td></tr>"
         for source_id, count in sorted((historical_replay_summary.get('replay_input_source_coverage_counts') or {}).items())
     ) or "<tr><td colspan='2'>No replay source coverage recorded.</td></tr>"
+    historical_replay_evidence_tier_rows = ''.join(
+        f"<tr><td>{html.escape(str(tier))}</td><td>{html.escape(str(count))}</td></tr>"
+        for tier, count in sorted((historical_replay_summary.get('replay_evidence_tier_counts') or {}).items())
+    ) or "<tr><td colspan='2'>No replay evidence tiers recorded.</td></tr>"
     historical_replay_rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(review.get('country_id', 'n/a')))}</td>"
         f"<td>{html.escape(str(review.get('case_id', 'n/a')))}</td>"
         f"<td>{html.escape(str(review.get('review_verdict', 'n/a')))}</td>"
         f"<td>{html.escape(str(review.get('review_basis', 'n/a')))}</td>"
+        f"<td>{html.escape(str(review.get('replay_evidence_tier', 'n/a')))}</td>"
+        f"<td>{html.escape(str(review.get('replay_evidence_score', 'n/a')))}</td>"
         f"<td>{html.escape(', '.join(str(item) for item in review.get('replay_input_source_ids', [])))}</td>"
         f"<td>{html.escape(', '.join(str(item) for item in review.get('archival_data_files', [])))}</td>"
         f"<td>{html.escape(str(review.get('expected_status', 'n/a')))}</td>"
@@ -1687,7 +1693,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         f"<td>{html.escape(str(review.get('replay_input_record_count', 'n/a')))}</td>"
         "</tr>"
         for review in historical_replay_reviews
-    ) or "<tr><td colspan='10'>No historical replay reviews recorded.</td></tr>"
+    ) or "<tr><td colspan='12'>No historical replay reviews recorded.</td></tr>"
     changed_versions = ''.join(
         f"<li>{html.escape(str(item))}</li>"
         for item in reprocessing.get('changed_versions', [])
@@ -1747,17 +1753,23 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         "<h3>Historical Replay Summary</h3>"
         f"<p>Average Domain Match Ratio: <strong>{html.escape(str(historical_replay_summary.get('average_domain_match_ratio', 'n/a')))}</strong></p>"
         f"<p>Status Match Count: <strong>{html.escape(str(historical_replay_summary.get('status_match_count', 'n/a')))}</strong></p>"
+        f"<p>Average Replay Evidence Score: <strong>{html.escape(str(historical_replay_summary.get('average_replay_evidence_score', 'n/a')))}</strong></p>"
+        f"<p>Average Replay Source Coverage Ratio: <strong>{html.escape(str(historical_replay_summary.get('average_replay_source_coverage_ratio', 'n/a')))}</strong></p>"
+        f"<p>Average Replay Provenance Completeness Ratio: <strong>{html.escape(str(historical_replay_summary.get('average_replay_provenance_completeness_ratio', 'n/a')))}</strong></p>"
         f"<p>Replay Input Record Total: <strong>{html.escape(str(historical_replay_summary.get('replay_input_record_total', 'n/a')))}</strong></p>"
         f"<p>Archival Data Files: <strong>{html.escape(str(historical_replay_summary.get('archival_data_file_count', 'n/a')))}</strong></p>"
         "<table><thead><tr><th>Replay Verdict</th><th>Count</th></tr></thead>"
         f"<tbody>{historical_replay_verdict_rows}</tbody></table>"
         "<table><thead><tr><th>Replay Basis</th><th>Count</th></tr></thead>"
         f"<tbody>{historical_replay_basis_rows}</tbody></table>"
+        "<h4>Replay Evidence Tiers</h4>"
+        "<table><thead><tr><th>Evidence Tier</th><th>Count</th></tr></thead>"
+        f"<tbody>{historical_replay_evidence_tier_rows}</tbody></table>"
         "<h4>Replay Source Coverage</h4>"
         "<table><thead><tr><th>Source</th><th>Case Count</th></tr></thead>"
         f"<tbody>{historical_replay_source_coverage_rows}</tbody></table>"
         "<h3>Historical Replay Reviews</h3>"
-        "<table><thead><tr><th>Country</th><th>Case ID</th><th>Replay Verdict</th><th>Replay Basis</th><th>Replay Sources</th><th>Archival Data Files</th><th>Expected Status</th><th>Replayed Status</th><th>Domain Match Ratio</th><th>Replay Input Records</th></tr></thead>"
+        "<table><thead><tr><th>Country</th><th>Case ID</th><th>Replay Verdict</th><th>Replay Basis</th><th>Replay Evidence Tier</th><th>Replay Evidence Score</th><th>Replay Sources</th><th>Archival Data Files</th><th>Expected Status</th><th>Replayed Status</th><th>Domain Match Ratio</th><th>Replay Input Records</th></tr></thead>"
         f"<tbody>{historical_replay_rows}</tbody></table>"
         "<h3>Changed Versions</h3>"
         f"<ul>{changed_versions}</ul>"

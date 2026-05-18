@@ -29,7 +29,7 @@ For project-lead steering, use `docs/plans/siasa-project-lead-capability-matrix.
 | Source / coverage trust layer | Source status, confidence, failures, gaps | Present | Trust summary, degraded sources, failures, missing sources visible | Mostly done |
 | Source lineage / epidemiology visualization | Spread / amplification / source graph | Absent | Only traceability table exists | Missing feature |
 | Reports / exports | Daily snapshot + manual exports with evidence context | Present | Export page and exported files exist | Mostly done |
-| Validation / backtest review | Validation cases and expected-vs-observed review | Present in GUI baseline and governed artifacts | Validation page exists; latest artifact bundle carries both `validation_backtest.json` and `readiness.json`, the validation artifact exposes a curated reference-case library beside the runtime-support portfolio, surfaces historical reference-review / evidence-scoring outputs for those curated cases, carries full curated-library `provider_backed_archival_replay`, and now also surfaces archival provenance details such as replay source coverage and archival data-file metadata | Runtime-support depth is no longer only conceptual and provenance governance is materially stronger, but replay verdict maturation beyond the current governed archival layer remains future work |
+| Validation / backtest review | Validation cases and expected-vs-observed review | Present in GUI baseline and governed artifacts | Validation page exists; latest artifact bundle carries both `validation_backtest.json` and `readiness.json`, the validation artifact exposes a curated reference-case library beside the runtime-support portfolio, surfaces historical reference-review / evidence-scoring outputs for those curated cases, carries full curated-library `provider_backed_archival_replay`, surfaces archival provenance details such as replay source coverage and archival data-file metadata, and now also renders replay evidence score/tier plus source/provenance coverage ratios | Runtime-support depth is no longer only conceptual and replay interpretation is materially stronger, but challenge-case diversity and richer mismatch realism remain future work |
 | Analyst annotations visibility | Show analyst annotations in GUI | Present | Dedicated page and contextual rendering exist | Mostly done |
 | Annotation creation/editing in GUI | Create/manage annotations in GUI | Absent | Read-only visibility only | Missing feature |
 | Traceability / lineage | Follow evidence path from source to status/report | Present | Traceability page exists and artifact path is implemented | Mostly done |
@@ -109,14 +109,14 @@ Interpretation:
 - the old roadmap order was correct as a program scaffold
 - however, execution has now overtaken parts of the document
 - the critical remaining gap is no longer missing artifact completeness inside the current governed pilot, but how far runtime breadth and the validation/reference-case depth should be expanded next
-- the current validation view is now richer than a single-country runtime-support check because the artifact carries a multi-case portfolio summary, a curated repo-backed reference-case library, historical reference-review / evidence-scoring outputs, a governed provider-backed archival replay layer across the full current 4-case library, and explicit archival provenance/accountability metadata
+- the current validation view is now richer than a single-country runtime-support check because the artifact carries a multi-case portfolio summary, a curated repo-backed reference-case library, historical reference-review / evidence-scoring outputs, a governed provider-backed archival replay layer across the full current 4-case library, explicit archival provenance/accountability metadata, and replay evidence score/tier interpretation
 
 ## 3b. Updated planning horizon
 
 For time planning, the remaining work should be treated in three bands rather than as one flat backlog:
 
 - Near-term closure band:
-  - choose the next priority between expanding breadth beyond the now-complete core-focus subset into broader MVP/P2 scope and enriching replay verdict depth beyond the now provenance-hardened current curated library
+  - choose the next priority between expanding breadth beyond the now-complete core-focus subset into broader MVP/P2 scope and adding harder challenge/mismatch diversity beyond the now provenance-hardened and verdict-enriched current curated library
 - Mid-term breadth/depth band:
   - expand from the current representative / `core-focus-initial` / `core-focus-expanded` / `core-focus-broader` / `core-focus-complete` governed subsets toward wider MVP coverage and/or deeper governed validation evidence
 - Later analyst-depth band:

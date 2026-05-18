@@ -117,6 +117,11 @@ def build_historical_replay_summary(historical_replay_reviews: list[dict[str, ob
         for review in historical_replay_reviews
         if isinstance(review, dict) and review.get("review_basis")
     )
+    replay_evidence_tier_counts = Counter(
+        str(review.get("replay_evidence_tier"))
+        for review in historical_replay_reviews
+        if isinstance(review, dict) and review.get("replay_evidence_tier")
+    )
     replay_input_source_coverage_counts = Counter(
         str(source_id)
         for review in historical_replay_reviews
@@ -134,6 +139,21 @@ def build_historical_replay_summary(historical_replay_reviews: list[dict[str, ob
         float(review.get("domain_match_ratio"))
         for review in historical_replay_reviews
         if isinstance(review, dict) and isinstance(review.get("domain_match_ratio"), (int, float))
+    ]
+    replay_evidence_scores = [
+        float(review.get("replay_evidence_score"))
+        for review in historical_replay_reviews
+        if isinstance(review, dict) and isinstance(review.get("replay_evidence_score"), (int, float))
+    ]
+    replay_source_coverage_ratios = [
+        float(review.get("replay_source_coverage_ratio"))
+        for review in historical_replay_reviews
+        if isinstance(review, dict) and isinstance(review.get("replay_source_coverage_ratio"), (int, float))
+    ]
+    replay_provenance_completeness_ratios = [
+        float(review.get("replay_provenance_completeness_ratio"))
+        for review in historical_replay_reviews
+        if isinstance(review, dict) and isinstance(review.get("replay_provenance_completeness_ratio"), (int, float))
     ]
     status_match_count = len(
         [review for review in historical_replay_reviews if isinstance(review, dict) and review.get("status_match") is True]
@@ -154,8 +174,12 @@ def build_historical_replay_summary(historical_replay_reviews: list[dict[str, ob
         "review_verdict_counts": dict(sorted(verdict_counts.items())),
         "status_match_count": status_match_count,
         "average_domain_match_ratio": round(sum(domain_match_ratios) / len(domain_match_ratios), 2) if domain_match_ratios else 0.0,
+        "average_replay_evidence_score": round(sum(replay_evidence_scores) / len(replay_evidence_scores), 2) if replay_evidence_scores else 0.0,
+        "average_replay_source_coverage_ratio": round(sum(replay_source_coverage_ratios) / len(replay_source_coverage_ratios), 2) if replay_source_coverage_ratios else 0.0,
+        "average_replay_provenance_completeness_ratio": round(sum(replay_provenance_completeness_ratios) / len(replay_provenance_completeness_ratios), 2) if replay_provenance_completeness_ratios else 0.0,
         "replay_input_record_total": replay_input_record_total,
         "archival_data_file_count": archival_data_file_count,
+        "replay_evidence_tier_counts": dict(sorted(replay_evidence_tier_counts.items())),
         "replay_input_source_coverage_counts": dict(sorted(replay_input_source_coverage_counts.items())),
         "review_basis_counts": dict(sorted(review_basis_counts.items())),
     }

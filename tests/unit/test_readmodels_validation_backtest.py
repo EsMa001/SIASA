@@ -194,8 +194,14 @@ def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> 
         },
         "status_match_count": 4,
         "average_domain_match_ratio": 1.0,
+        "average_replay_evidence_score": 1.0,
+        "average_replay_source_coverage_ratio": 1.0,
+        "average_replay_provenance_completeness_ratio": 1.0,
         "replay_input_record_total": 28,
         "archival_data_file_count": 4,
+        "replay_evidence_tier_counts": {
+            "verified_replay_evidence": 4,
+        },
         "replay_input_source_coverage_counts": {
             "SRC-GDACS": 4,
             "SRC-GDELT-DOC": 4,

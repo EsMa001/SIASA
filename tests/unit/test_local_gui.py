@@ -322,6 +322,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 "archival_data_files": ["archival_replay_inputs/VAL-UKR-2022-001.json"],
                 "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
                 "replay_known_limitations": ["provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"],
+                "replay_source_coverage_ratio": 1.0,
+                "replay_provenance_completeness_ratio": 1.0,
+                "replay_evidence_score": 1.0,
+                "replay_evidence_tier": "verified_replay_evidence",
                 "replayed_status": "S3",
                 "expected_status": "S3",
                 "status_match": True,
@@ -340,6 +344,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 "archival_data_files": ["archival_replay_inputs/VAL-POL-2023-001.json"],
                 "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
                 "replay_known_limitations": ["provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"],
+                "replay_source_coverage_ratio": 1.0,
+                "replay_provenance_completeness_ratio": 1.0,
+                "replay_evidence_score": 1.0,
+                "replay_evidence_tier": "verified_replay_evidence",
                 "replayed_status": "S3",
                 "expected_status": "S3",
                 "status_match": True,
@@ -358,6 +366,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 "archival_data_files": ["archival_replay_inputs/VAL-ISR-2023-001.json"],
                 "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
                 "replay_known_limitations": ["provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"],
+                "replay_source_coverage_ratio": 1.0,
+                "replay_provenance_completeness_ratio": 1.0,
+                "replay_evidence_score": 1.0,
+                "replay_evidence_tier": "verified_replay_evidence",
                 "replayed_status": "S3",
                 "expected_status": "S3",
                 "status_match": True,
@@ -376,6 +388,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 "archival_data_files": ["archival_replay_inputs/VAL-TWN-2024-001.json"],
                 "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
                 "replay_known_limitations": ["provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"],
+                "replay_source_coverage_ratio": 1.0,
+                "replay_provenance_completeness_ratio": 1.0,
+                "replay_evidence_score": 1.0,
+                "replay_evidence_tier": "verified_replay_evidence",
                 "replayed_status": "S1",
                 "expected_status": "S1",
                 "status_match": True,
@@ -392,8 +408,14 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             "review_verdict_counts": {"replay_match": 4},
             "status_match_count": 4,
             "average_domain_match_ratio": 1.0,
+            "average_replay_evidence_score": 1.0,
+            "average_replay_source_coverage_ratio": 1.0,
+            "average_replay_provenance_completeness_ratio": 1.0,
             "replay_input_record_total": 28,
             "archival_data_file_count": 4,
+            "replay_evidence_tier_counts": {
+                "verified_replay_evidence": 4,
+            },
             "replay_input_source_coverage_counts": {
                 "SRC-GDACS": 4,
                 "SRC-GDELT-DOC": 4,
@@ -642,6 +664,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Historical Replay Reviews" in validation_html
     assert "replay_match" in validation_html
     assert "provider_backed_archival_replay" in validation_html
+    assert "verified_replay_evidence" in validation_html
+    assert "Average Replay Evidence Score" in validation_html
+    assert "Replay Evidence Tiers" in validation_html
     assert "Replay Input Record Total" in validation_html
     assert "Archival Data Files" in validation_html
     assert "Replay Source Coverage" in validation_html

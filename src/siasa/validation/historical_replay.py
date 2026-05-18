@@ -41,6 +41,56 @@ def _normalized_record_country_ids(normalized_records: list[NormalizedRecord]) -
     return sorted({str(record.country_id) for record in normalized_records if record.country_id})
 
 
+def _replay_source_coverage_ratio(validation_case: ValidationCase, replay_input: HistoricalReplayInput) -> float:
+    expected_sources = {str(source_id) for source_id in validation_case.reference_sources if str(source_id)}
+    if not expected_sources:
+        return 1.0
+    observed_sources = {str(source_id) for source_id in replay_input.replay_input_source_ids if str(source_id)}
+    return round(len(expected_sources & observed_sources) / len(expected_sources), 2)
+
+
+def _replay_provenance_completeness_ratio(replay_input: HistoricalReplayInput) -> float:
+    checks = [
+        bool(replay_input.replay_input_source_ids),
+        bool(replay_input.replay_input_country_ids),
+    ]
+    if replay_input.review_basis == "provider_backed_archival_replay":
+        checks.extend(
+            [
+                bool(replay_input.archival_data_files),
+                bool(replay_input.provenance_notes),
+                bool(replay_input.known_limitations),
+            ]
+        )
+    return round(sum(1 for check in checks if check) / len(checks), 2) if checks else 0.0
+
+
+def _replay_evidence_score(
+    *,
+    status_match: bool,
+    domain_match_ratio: float,
+    replay_source_coverage_ratio: float,
+    replay_provenance_completeness_ratio: float,
+) -> float:
+    score = (
+        (0.4 if status_match else 0.0)
+        + (0.3 * domain_match_ratio)
+        + (0.2 * replay_source_coverage_ratio)
+        + (0.1 * replay_provenance_completeness_ratio)
+    )
+    return round(score, 2)
+
+
+def _replay_evidence_tier(replay_evidence_score: float) -> str:
+    if replay_evidence_score >= 0.95:
+        return "verified_replay_evidence"
+    if replay_evidence_score >= 0.75:
+        return "strong_replay_evidence"
+    if replay_evidence_score >= 0.5:
+        return "partial_replay_evidence"
+    return "weak_replay_evidence"
+
+
 
 def load_historical_replay_inputs(path: Path) -> dict[str, HistoricalReplayInput]:
     data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
@@ -137,6 +187,15 @@ def build_historical_replay_reviews(
             domain for domain in replayed_domains if domain not in validation_case.expected_domains
         ]
         status_match = bool(comparison["status_match"])
+        replay_source_coverage_ratio = _replay_source_coverage_ratio(validation_case, replay_input)
+        replay_provenance_completeness_ratio = _replay_provenance_completeness_ratio(replay_input)
+        replay_evidence_score = _replay_evidence_score(
+            status_match=status_match,
+            domain_match_ratio=float(comparison["domain_match_ratio"]),
+            replay_source_coverage_ratio=replay_source_coverage_ratio,
+            replay_provenance_completeness_ratio=replay_provenance_completeness_ratio,
+        )
+        replay_evidence_tier = _replay_evidence_tier(replay_evidence_score)
         review_verdict = (
             "replay_match"
             if status_match and not missing_expected_domains and not unexpected_observed_domains
@@ -154,6 +213,10 @@ def build_historical_replay_reviews(
                 "archival_data_files": list(replay_input.archival_data_files),
                 "provenance_notes": replay_input.provenance_notes,
                 "replay_known_limitations": list(replay_input.known_limitations),
+                "replay_source_coverage_ratio": replay_source_coverage_ratio,
+                "replay_provenance_completeness_ratio": replay_provenance_completeness_ratio,
+                "replay_evidence_score": replay_evidence_score,
+                "replay_evidence_tier": replay_evidence_tier,
                 "replayed_status": replayed_status,
                 "expected_status": validation_case.expected_status,
                 "status_match": status_match,
