@@ -1,4 +1,6 @@
-from siasa.validation.cases import ValidationCase, compare_expected_vs_observed
+from pathlib import Path
+
+from siasa.validation.cases import ValidationCase, compare_expected_vs_observed, load_validation_case_library
 
 
 def test_validation_case_persists_identity_time_range_domains_pattern_sources_and_metrics() -> None:
@@ -48,3 +50,15 @@ def test_backtest_comparison_service_compares_expected_and_observed_domain_patte
     assert comparison["case_id"] == "VAL-UKR-2022-001"
     assert comparison["domain_match_ratio"] == 2 / 3
     assert comparison["status_match"] is True
+
+
+def test_load_validation_case_library_reads_curated_reference_cases_from_repo_yaml() -> None:
+    cases = load_validation_case_library(
+        Path(__file__).resolve().parents[2] / "vmodel" / "verification" / "validation_reference_cases.yaml"
+    )
+
+    assert len(cases) >= 4
+    assert cases[0].case_id == "VAL-UKR-2022-001"
+    assert cases[0].country_id == "UKR"
+    assert "Domain Match" in cases[0].validation_metrics
+    assert any(case.country_id == "POL" for case in cases)

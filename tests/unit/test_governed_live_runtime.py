@@ -1053,6 +1053,23 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
         "review_verdict_counts": {"support_check": 2},
         "cases_with_gaps": [],
     }
+    assert validation_backtest["reference_case_library_summary"] == {
+        "case_count": 4,
+        "countries_covered": ["ISR", "POL", "TWN", "UKR"],
+        "case_type_counts": {
+            "disinformation_spike": 1,
+            "hybrid_pressure": 1,
+            "military_escalation": 1,
+            "strategic_posturing": 1,
+        },
+        "time_range": {"start": "2022-02-01", "end": "2024-05-31"},
+    }
+    assert [case["case_id"] for case in validation_backtest["reference_case_library"]] == [
+        "VAL-UKR-2022-001",
+        "VAL-POL-2023-001",
+        "VAL-ISR-2023-001",
+        "VAL-TWN-2024-001",
+    ]
     assert [case["country_id"] for case in validation_backtest["validation_cases"]] == ["UKR", "POL"]
     assert "pilot_runtime_support_case_not_historical_backtest" in validation_backtest["known_limitations"]
     assert pol_profile["country_context"] == {

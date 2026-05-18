@@ -1,6 +1,12 @@
-from siasa.readmodels.validation_backtest import build_validation_backtest_read_model, build_validation_portfolio_summary
+from pathlib import Path
+
+from siasa.readmodels.validation_backtest import (
+    build_reference_case_library_summary,
+    build_validation_backtest_read_model,
+    build_validation_portfolio_summary,
+)
 from siasa.runs.reprocessing import build_reprocessing_comparison
-from siasa.validation.cases import ValidationCase, compare_expected_vs_observed
+from siasa.validation.cases import ValidationCase, compare_expected_vs_observed, load_validation_case_library
 
 
 def test_validation_backtest_read_model_exposes_case_context_comparison_and_reprocessing_delta() -> None:
@@ -114,4 +120,24 @@ def test_validation_backtest_portfolio_summary_aggregates_case_counts_verdicts_a
                 "review_verdict": "support_check_with_gaps",
             }
         ],
+    }
+
+
+def test_reference_case_library_summary_aggregates_case_types_countries_and_time_bounds() -> None:
+    cases = load_validation_case_library(
+        Path(__file__).resolve().parents[2] / "vmodel" / "verification" / "validation_reference_cases.yaml"
+    )
+
+    summary = build_reference_case_library_summary(cases)
+
+    assert summary == {
+        "case_count": 4,
+        "countries_covered": ["ISR", "POL", "TWN", "UKR"],
+        "case_type_counts": {
+            "disinformation_spike": 1,
+            "hybrid_pressure": 1,
+            "military_escalation": 1,
+            "strategic_posturing": 1,
+        },
+        "time_range": {"start": "2022-02-01", "end": "2024-05-31"},
     }

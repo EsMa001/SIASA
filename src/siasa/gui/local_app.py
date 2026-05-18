@@ -1590,6 +1590,12 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
             review_verdict = 'mismatch'
     validation_cases = [item for item in validation_view_model.get('validation_cases', []) if isinstance(item, dict)]
     portfolio_summary = validation_view_model.get('portfolio_summary', {}) if isinstance(validation_view_model.get('portfolio_summary', {}), dict) else {}
+    reference_case_library = [item for item in validation_view_model.get('reference_case_library', []) if isinstance(item, dict)]
+    reference_case_library_summary = (
+        validation_view_model.get('reference_case_library_summary', {})
+        if isinstance(validation_view_model.get('reference_case_library_summary', {}), dict)
+        else {}
+    )
     verdict_count_rows = ''.join(
         f"<tr><td>{html.escape(str(verdict))}</td><td>{html.escape(str(count))}</td></tr>"
         for verdict, count in sorted((portfolio_summary.get('review_verdict_counts') or {}).items())
@@ -1604,6 +1610,21 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         "</tr>"
         for case in validation_cases
     ) or "<tr><td colspan='5'>No portfolio cases available.</td></tr>"
+    reference_case_type_rows = ''.join(
+        f"<tr><td>{html.escape(str(case_type))}</td><td>{html.escape(str(count))}</td></tr>"
+        for case_type, count in sorted((reference_case_library_summary.get('case_type_counts') or {}).items())
+    ) or "<tr><td colspan='2'>No case types recorded.</td></tr>"
+    reference_case_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(case.get('country_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(case.get('case_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(case.get('case_type', 'n/a')))}</td>"
+        f"<td>{html.escape(str(case.get('case_name', 'n/a')))}</td>"
+        f"<td>{html.escape(str((case.get('time_range') or {}).get('start', 'n/a')))} to {html.escape(str((case.get('time_range') or {}).get('end', 'n/a')))}</td>"
+        f"<td>{html.escape(', '.join(str(item) for item in case.get('expected_domains', [])))}</td>"
+        "</tr>"
+        for case in reference_case_library
+    ) or "<tr><td colspan='6'>No curated reference cases recorded.</td></tr>"
     changed_versions = ''.join(
         f"<li>{html.escape(str(item))}</li>"
         for item in reprocessing.get('changed_versions', [])
@@ -1643,6 +1664,14 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         "<h3>Validation Case Portfolio</h3>"
         "<table><thead><tr><th>Country</th><th>Case ID</th><th>Review Verdict</th><th>Expected Domains</th><th>Observed Domains</th></tr></thead>"
         f"<tbody>{portfolio_case_rows}</tbody></table>"
+        "<h3>Curated Reference Case Library</h3>"
+        f"<p>Library Cases: <strong>{html.escape(str(reference_case_library_summary.get('case_count', len(reference_case_library))))}</strong></p>"
+        f"<p>Countries Covered: {html.escape(', '.join(str(item) for item in reference_case_library_summary.get('countries_covered', [])))}</p>"
+        f"<p>Library Time Range: {html.escape(str((reference_case_library_summary.get('time_range') or {}).get('start', 'n/a')))} to {html.escape(str((reference_case_library_summary.get('time_range') or {}).get('end', 'n/a')))}</p>"
+        "<table><thead><tr><th>Case Type</th><th>Count</th></tr></thead>"
+        f"<tbody>{reference_case_type_rows}</tbody></table>"
+        "<table><thead><tr><th>Country</th><th>Case ID</th><th>Case Type</th><th>Case</th><th>Time Range</th><th>Expected Domains</th></tr></thead>"
+        f"<tbody>{reference_case_rows}</tbody></table>"
         "<h3>Changed Versions</h3>"
         f"<ul>{changed_versions}</ul>"
         f"<h3>Reprocessing Comparison</h3>{_json_block(reprocessing)}"

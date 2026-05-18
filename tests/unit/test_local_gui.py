@@ -249,6 +249,35 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             "review_verdict_counts": {"match": 1, "match_with_gaps": 1},
             "cases_with_gaps": [{"case_id": "VAL-UKR-2022-001", "country_id": "UKR", "review_verdict": "match_with_gaps"}],
         },
+        "reference_case_library": [
+            {
+                "case_id": "VAL-UKR-2022-001",
+                "country_id": "UKR",
+                "case_name": "Escalation reference case",
+                "case_type": "military_escalation",
+                "time_range": {"start": "2022-02-01", "end": "2022-03-01"},
+                "expected_domains": ["A", "B", "D"],
+            },
+            {
+                "case_id": "VAL-POL-2023-001",
+                "country_id": "POL",
+                "case_name": "Hybrid pressure reference case",
+                "case_type": "hybrid_pressure",
+                "time_range": {"start": "2023-10-01", "end": "2023-10-31"},
+                "expected_domains": ["A", "B", "D"],
+            },
+        ],
+        "reference_case_library_summary": {
+            "case_count": 4,
+            "countries_covered": ["ISR", "POL", "TWN", "UKR"],
+            "case_type_counts": {
+                "disinformation_spike": 1,
+                "hybrid_pressure": 1,
+                "military_escalation": 1,
+                "strategic_posturing": 1,
+            },
+            "time_range": {"start": "2022-02-01", "end": "2024-05-31"},
+        },
     }
     system_status = {
         "run_id": "RUN-200",
@@ -476,6 +505,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Review Summary" in validation_html
     assert "Reference Case Portfolio Summary" in validation_html
     assert "Validation Case Portfolio" in validation_html
+    assert "Curated Reference Case Library" in validation_html
+    assert "Library Cases" in validation_html
+    assert "military_escalation" in validation_html
+    assert "VAL-POL-2023-001" in validation_html
+    assert "2022-02-01 to 2024-05-31" in validation_html
     assert "VAL-POL-2022-001" in validation_html
     assert "POL, UKR" in validation_html
 
