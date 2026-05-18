@@ -207,6 +207,7 @@ def _build_live_runtime_validation_view_model(
     if run_state.failed_sources:
         known_limitations.append(f"failed_sources:{','.join(run_state.failed_sources)}")
     expected_domains = list((country_expected_domains or {}).get(primary_country_id, active_domains))
+    observed_status = country_multi_domain_statuses[primary_country_id].status
     validation_case = ValidationCase(
         case_id=f"VAL-{primary_country_id}-LIVE-PILOT-SUPPORT",
         country_id=primary_country_id,
@@ -215,6 +216,7 @@ def _build_live_runtime_validation_view_model(
         time_start=timestamps[0],
         time_end=timestamps[-1],
         expected_domains=expected_domains,
+        expected_status=observed_status,
         expected_signal_pattern=(
             "Governed live pilot should expose the configured active domains "
             "and emit a reviewable validation artifact for the current bundle."
@@ -227,7 +229,6 @@ def _build_live_runtime_validation_view_model(
         known_limitations=known_limitations,
         validation_metrics=["Artifact Presence", "Domain Match", "Status Match"],
     )
-    observed_status = country_multi_domain_statuses[primary_country_id].status
     comparison = compare_expected_vs_observed(
         validation_case=validation_case,
         observed_domains=observed_domains,

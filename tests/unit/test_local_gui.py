@@ -278,6 +278,40 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             },
             "time_range": {"start": "2022-02-01", "end": "2024-05-31"},
         },
+        "historical_reference_reviews": [
+            {
+                "case_id": "VAL-UKR-2022-001",
+                "country_id": "UKR",
+                "review_verdict": "historical_alignment_confirmed",
+                "evidence_tier": "verified_multi_source",
+                "evidence_score": 1.0,
+                "expected_status": "S3",
+                "historical_observed_status": "S3",
+            },
+            {
+                "case_id": "VAL-TWN-2024-001",
+                "country_id": "TWN",
+                "review_verdict": "historical_alignment_with_gaps",
+                "evidence_tier": "curated_public_source",
+                "evidence_score": 0.6,
+                "expected_status": "S1",
+                "historical_observed_status": "S1",
+            },
+        ],
+        "historical_reference_review_summary": {
+            "case_count": 4,
+            "countries_covered": ["ISR", "POL", "TWN", "UKR"],
+            "review_verdict_counts": {
+                "historical_alignment_confirmed": 3,
+                "historical_alignment_with_gaps": 1,
+            },
+            "evidence_tier_counts": {
+                "corroborated_multi_source": 1,
+                "curated_public_source": 1,
+                "verified_multi_source": 2,
+            },
+            "average_evidence_score": 0.85,
+        },
     }
     system_status = {
         "run_id": "RUN-200",
@@ -507,6 +541,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Validation Case Portfolio" in validation_html
     assert "Curated Reference Case Library" in validation_html
     assert "Library Cases" in validation_html
+    assert "Historical Reference Review Summary" in validation_html
+    assert "Historical Reference Reviews" in validation_html
+    assert "Average Evidence Score" in validation_html
+    assert "historical_alignment_confirmed" in validation_html
+    assert "verified_multi_source" in validation_html
     assert "military_escalation" in validation_html
     assert "VAL-POL-2023-001" in validation_html
     assert "2022-02-01 to 2024-05-31" in validation_html

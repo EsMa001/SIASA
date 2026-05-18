@@ -1596,6 +1596,14 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         if isinstance(validation_view_model.get('reference_case_library_summary', {}), dict)
         else {}
     )
+    historical_reference_reviews = [
+        item for item in validation_view_model.get('historical_reference_reviews', []) if isinstance(item, dict)
+    ]
+    historical_reference_review_summary = (
+        validation_view_model.get('historical_reference_review_summary', {})
+        if isinstance(validation_view_model.get('historical_reference_review_summary', {}), dict)
+        else {}
+    )
     verdict_count_rows = ''.join(
         f"<tr><td>{html.escape(str(verdict))}</td><td>{html.escape(str(count))}</td></tr>"
         for verdict, count in sorted((portfolio_summary.get('review_verdict_counts') or {}).items())
@@ -1625,6 +1633,26 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         "</tr>"
         for case in reference_case_library
     ) or "<tr><td colspan='6'>No curated reference cases recorded.</td></tr>"
+    historical_reference_verdict_rows = ''.join(
+        f"<tr><td>{html.escape(str(verdict))}</td><td>{html.escape(str(count))}</td></tr>"
+        for verdict, count in sorted((historical_reference_review_summary.get('review_verdict_counts') or {}).items())
+    ) or "<tr><td colspan='2'>No historical review verdicts recorded.</td></tr>"
+    historical_reference_tier_rows = ''.join(
+        f"<tr><td>{html.escape(str(tier))}</td><td>{html.escape(str(count))}</td></tr>"
+        for tier, count in sorted((historical_reference_review_summary.get('evidence_tier_counts') or {}).items())
+    ) or "<tr><td colspan='2'>No evidence tiers recorded.</td></tr>"
+    historical_reference_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(review.get('country_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(review.get('case_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(review.get('review_verdict', 'n/a')))}</td>"
+        f"<td>{html.escape(str(review.get('evidence_tier', 'n/a')))}</td>"
+        f"<td>{html.escape(str(review.get('evidence_score', 'n/a')))}</td>"
+        f"<td>{html.escape(str(review.get('expected_status', 'n/a')))}</td>"
+        f"<td>{html.escape(str(review.get('historical_observed_status', 'n/a')))}</td>"
+        "</tr>"
+        for review in historical_reference_reviews
+    ) or "<tr><td colspan='7'>No historical reference reviews recorded.</td></tr>"
     changed_versions = ''.join(
         f"<li>{html.escape(str(item))}</li>"
         for item in reprocessing.get('changed_versions', [])
@@ -1672,6 +1700,15 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         f"<tbody>{reference_case_type_rows}</tbody></table>"
         "<table><thead><tr><th>Country</th><th>Case ID</th><th>Case Type</th><th>Case</th><th>Time Range</th><th>Expected Domains</th></tr></thead>"
         f"<tbody>{reference_case_rows}</tbody></table>"
+        "<h3>Historical Reference Review Summary</h3>"
+        f"<p>Average Evidence Score: <strong>{html.escape(str(historical_reference_review_summary.get('average_evidence_score', 'n/a')))}</strong></p>"
+        "<table><thead><tr><th>Review Verdict</th><th>Count</th></tr></thead>"
+        f"<tbody>{historical_reference_verdict_rows}</tbody></table>"
+        "<table><thead><tr><th>Evidence Tier</th><th>Count</th></tr></thead>"
+        f"<tbody>{historical_reference_tier_rows}</tbody></table>"
+        "<h3>Historical Reference Reviews</h3>"
+        "<table><thead><tr><th>Country</th><th>Case ID</th><th>Review Verdict</th><th>Evidence Tier</th><th>Evidence Score</th><th>Expected Status</th><th>Historical Observed Status</th></tr></thead>"
+        f"<tbody>{historical_reference_rows}</tbody></table>"
         "<h3>Changed Versions</h3>"
         f"<ul>{changed_versions}</ul>"
         f"<h3>Reprocessing Comparison</h3>{_json_block(reprocessing)}"

@@ -15,11 +15,15 @@ class ValidationCase:
     time_start: str
     time_end: str
     expected_domains: list[str]
+    expected_status: str
     expected_signal_pattern: str
     reference_sources: list[str]
     validation_goal: str
     known_limitations: list[str]
     validation_metrics: list[str]
+    evidence_tier: str = "curated_public_source"
+    historical_observed_domains: list[str] | None = None
+    historical_observed_status: str | None = None
 
     def __post_init__(self) -> None:
         if not self.case_id or not self.country_id:
@@ -37,10 +41,14 @@ def validation_case_to_dict(validation_case: ValidationCase) -> dict[str, object
             "end": validation_case.time_end,
         },
         "expected_domains": list(validation_case.expected_domains),
+        "expected_status": validation_case.expected_status,
         "reference_sources": list(validation_case.reference_sources),
         "validation_goal": validation_case.validation_goal,
         "validation_metrics": list(validation_case.validation_metrics),
         "known_limitations": list(validation_case.known_limitations),
+        "evidence_tier": validation_case.evidence_tier,
+        "historical_observed_domains": list(validation_case.historical_observed_domains or []),
+        "historical_observed_status": validation_case.historical_observed_status,
     }
 
 
@@ -58,11 +66,19 @@ def load_validation_case_library(path: Path) -> list[ValidationCase]:
             time_start=str(record["time_start"]),
             time_end=str(record["time_end"]),
             expected_domains=[str(item) for item in record.get("expected_domains", [])],
+            expected_status=str(record.get("expected_status", "S0")),
             expected_signal_pattern=str(record.get("expected_signal_pattern", "")),
             reference_sources=[str(item) for item in record.get("reference_sources", [])],
             validation_goal=str(record.get("validation_goal", "")),
             known_limitations=[str(item) for item in record.get("known_limitations", [])],
             validation_metrics=[str(item) for item in record.get("validation_metrics", [])],
+            evidence_tier=str(record.get("evidence_tier", "curated_public_source")),
+            historical_observed_domains=[str(item) for item in record.get("historical_observed_domains", [])],
+            historical_observed_status=(
+                str(record.get("historical_observed_status"))
+                if record.get("historical_observed_status") is not None
+                else None
+            ),
         )
         for record in case_records
         if isinstance(record, dict)

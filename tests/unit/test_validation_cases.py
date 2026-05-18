@@ -12,6 +12,7 @@ def test_validation_case_persists_identity_time_range_domains_pattern_sources_an
         time_start="2022-02-01",
         time_end="2022-03-01",
         expected_domains=["A", "B", "D"],
+        expected_status="S3",
         expected_signal_pattern="Aligned information, event, and economic stress escalation.",
         reference_sources=["SRC-A", "SRC-B"],
         validation_goal="Check multi-domain alignment detection.",
@@ -33,6 +34,7 @@ def test_backtest_comparison_service_compares_expected_and_observed_domain_patte
         time_start="2022-02-01",
         time_end="2022-03-01",
         expected_domains=["A", "B", "D"],
+        expected_status="S3",
         expected_signal_pattern="Aligned information, event, and economic stress escalation.",
         reference_sources=["SRC-A", "SRC-B"],
         validation_goal="Check multi-domain alignment detection.",
@@ -60,5 +62,9 @@ def test_load_validation_case_library_reads_curated_reference_cases_from_repo_ya
     assert len(cases) >= 4
     assert cases[0].case_id == "VAL-UKR-2022-001"
     assert cases[0].country_id == "UKR"
+    assert cases[0].expected_status == "S3"
+    assert cases[0].evidence_tier == "verified_multi_source"
+    assert cases[0].historical_observed_status == "S3"
+    assert cases[0].historical_observed_domains == ["A", "B", "D"]
     assert "Domain Match" in cases[0].validation_metrics
     assert any(case.country_id == "POL" for case in cases)

@@ -1064,6 +1064,26 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
         },
         "time_range": {"start": "2022-02-01", "end": "2024-05-31"},
     }
+    assert validation_backtest["historical_reference_review_summary"] == {
+        "case_count": 4,
+        "countries_covered": ["ISR", "POL", "TWN", "UKR"],
+        "review_verdict_counts": {
+            "historical_alignment_confirmed": 3,
+            "historical_alignment_with_gaps": 1,
+        },
+        "evidence_tier_counts": {
+            "corroborated_multi_source": 1,
+            "curated_public_source": 1,
+            "verified_multi_source": 2,
+        },
+        "average_evidence_score": 0.85,
+    }
+    assert [review["case_id"] for review in validation_backtest["historical_reference_reviews"]] == [
+        "VAL-UKR-2022-001",
+        "VAL-POL-2023-001",
+        "VAL-ISR-2023-001",
+        "VAL-TWN-2024-001",
+    ]
     assert [case["case_id"] for case in validation_backtest["reference_case_library"]] == [
         "VAL-UKR-2022-001",
         "VAL-POL-2023-001",

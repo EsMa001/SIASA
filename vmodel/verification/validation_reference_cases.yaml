@@ -6,11 +6,16 @@ validation_cases:
     time_start: "2022-02-01"
     time_end: "2022-03-01"
     expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: verified_multi_source
     expected_signal_pattern: Aligned information, event, and economic stress escalation.
     reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, WB-INDICATORS]
     validation_goal: Check multi-domain alignment detection for the initial full-scale escalation window.
     known_limitations:
       - historical macro backfill still thinner than the full stakeholder target horizon
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
     validation_metrics: [Domain Match, Status Match]
 
   - case_id: VAL-POL-2023-001
@@ -20,11 +25,16 @@ validation_cases:
     time_start: "2023-10-01"
     time_end: "2023-10-31"
     expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: corroborated_multi_source
     expected_signal_pattern: Border-pressure and security spillover should create aligned information, event, and economic stress signals.
     reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
     validation_goal: Check that a pressured NATO-east flank case remains representable across A/B/D.
     known_limitations:
       - conflict/disaster windows can still be sparse in some daily live exports
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
     validation_metrics: [Domain Match, Status Match]
 
   - case_id: VAL-ISR-2023-001
@@ -34,11 +44,16 @@ validation_cases:
     time_start: "2023-10-07"
     time_end: "2023-11-07"
     expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: verified_multi_source
     expected_signal_pattern: Regional conflict escalation should align information pressure, event intensity, and macro stress context.
     reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
     validation_goal: Keep a clearly reviewable A/B/D reference case for regional-conflict escalation.
     known_limitations:
       - current governed pilot still uses runtime-support evaluation rather than full replay scoring
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
     validation_metrics: [Domain Match, Status Match]
 
   - case_id: VAL-TWN-2024-001
@@ -48,9 +63,14 @@ validation_cases:
     time_start: "2024-05-01"
     time_end: "2024-05-31"
     expected_domains: [A, B]
+    expected_status: S1
+    historical_observed_domains: [A]
+    historical_observed_status: S1
+    evidence_tier: curated_public_source
     expected_signal_pattern: Information and event pressure should be visible even where the governed pilot intentionally excludes live Domain D support.
     reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS]
     validation_goal: Preserve an explicit A/B-only reference case for TWN under the current governed pilot scope.
     known_limitations:
       - governed live runtime intentionally scopes TWN to A/B and does not claim historical Domain D support
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
     validation_metrics: [Domain Match, Status Match]

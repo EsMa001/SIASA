@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from siasa.readmodels.validation_backtest import (
+    build_historical_reference_review_summary,
     build_reference_case_library_summary,
     build_validation_backtest_read_model,
     build_validation_portfolio_summary,
@@ -18,6 +19,7 @@ def test_validation_backtest_read_model_exposes_case_context_comparison_and_repr
         time_start="2022-02-01",
         time_end="2022-03-01",
         expected_domains=["A", "B", "D"],
+        expected_status="S3",
         expected_signal_pattern="Aligned information, event, and economic stress escalation.",
         reference_sources=["SRC-A", "SRC-B"],
         validation_goal="Check multi-domain alignment detection.",
@@ -67,6 +69,7 @@ def test_validation_backtest_read_model_marks_runtime_support_checks_without_sta
         time_start="2024",
         time_end="2026-05-15T05:30:00Z",
         expected_domains=["A", "B", "D"],
+        expected_status="S3",
         expected_signal_pattern="Governed live pilot should expose the configured active domains and emit a reviewable validation artifact for the current bundle.",
         reference_sources=["SRC-GDELT-DOC", "SRC-GDELT-EVENTS", "WB-INDICATORS"],
         validation_goal="Check validation artifact generation and expected-versus-observed domain visibility for the governed live pilot bundle.",
@@ -140,4 +143,27 @@ def test_reference_case_library_summary_aggregates_case_types_countries_and_time
             "strategic_posturing": 1,
         },
         "time_range": {"start": "2022-02-01", "end": "2024-05-31"},
+    }
+
+
+def test_historical_reference_review_summary_scores_curated_case_alignment_and_evidence_tiers() -> None:
+    cases = load_validation_case_library(
+        Path(__file__).resolve().parents[2] / "vmodel" / "verification" / "validation_reference_cases.yaml"
+    )
+
+    summary = build_historical_reference_review_summary(cases)
+
+    assert summary == {
+        "case_count": 4,
+        "countries_covered": ["ISR", "POL", "TWN", "UKR"],
+        "review_verdict_counts": {
+            "historical_alignment_confirmed": 3,
+            "historical_alignment_with_gaps": 1,
+        },
+        "evidence_tier_counts": {
+            "corroborated_multi_source": 1,
+            "curated_public_source": 1,
+            "verified_multi_source": 2,
+        },
+        "average_evidence_score": 0.85,
     }

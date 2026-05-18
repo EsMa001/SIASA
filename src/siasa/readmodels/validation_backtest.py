@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import Counter
 
-from siasa.validation.cases import ValidationCase
+from siasa.validation.cases import ValidationCase, validation_case_to_dict
 
 
 def build_validation_portfolio_summary(validation_cases: list[dict[str, object]]) -> dict[str, object]:
@@ -32,6 +32,76 @@ def build_validation_portfolio_summary(validation_cases: list[dict[str, object]]
         "countries_covered": countries_covered,
         "review_verdict_counts": dict(sorted(verdict_counts.items())),
         "cases_with_gaps": cases_with_gaps,
+    }
+
+
+def _evidence_tier_score(evidence_tier: str) -> float:
+    return {
+        "verified_multi_source": 1.0,
+        "corroborated_multi_source": 0.8,
+        "curated_public_source": 0.6,
+        "provisional": 0.4,
+    }.get(evidence_tier, 0.5)
+
+
+def build_historical_reference_reviews(reference_case_library: list[ValidationCase | dict[str, object]]) -> list[dict[str, object]]:
+    reviews: list[dict[str, object]] = []
+    for item in reference_case_library:
+        case_dict = validation_case_to_dict(item) if isinstance(item, ValidationCase) else dict(item)
+        expected_domains = [str(domain) for domain in case_dict.get("expected_domains", [])]
+        observed_domains = [str(domain) for domain in case_dict.get("historical_observed_domains", [])]
+        expected_domain_set = set(expected_domains)
+        observed_domain_set = set(observed_domains)
+        match_count = len(expected_domain_set & observed_domain_set)
+        domain_match_ratio = match_count / len(expected_domain_set) if expected_domain_set else 0.0
+        expected_status = str(case_dict.get("expected_status", "S0"))
+        observed_status = case_dict.get("historical_observed_status")
+        status_match = observed_status == expected_status if observed_status is not None else False
+        missing_expected_domains = [domain for domain in expected_domains if domain not in observed_domains]
+        unexpected_observed_domains = [domain for domain in observed_domains if domain not in expected_domains]
+        review_verdict = (
+            "historical_alignment_confirmed"
+            if status_match and not missing_expected_domains and not unexpected_observed_domains
+            else "historical_alignment_with_gaps"
+            if status_match
+            else "historical_alignment_mismatch"
+        )
+        evidence_tier = str(case_dict.get("evidence_tier", "curated_public_source"))
+        evidence_score = round(_evidence_tier_score(evidence_tier), 2)
+        reviews.append(
+            {
+                "case_id": str(case_dict.get("case_id", "")),
+                "country_id": str(case_dict.get("country_id", "")),
+                "case_type": str(case_dict.get("case_type", "")),
+                "expected_status": expected_status,
+                "historical_observed_status": observed_status,
+                "expected_domains": expected_domains,
+                "historical_observed_domains": observed_domains,
+                "domain_match_ratio": domain_match_ratio,
+                "status_match": status_match,
+                "review_verdict": review_verdict,
+                "evidence_tier": evidence_tier,
+                "evidence_score": evidence_score,
+                "missing_expected_domains": missing_expected_domains,
+                "unexpected_observed_domains": unexpected_observed_domains,
+            }
+        )
+    return reviews
+
+
+def build_historical_reference_review_summary(reference_case_library: list[ValidationCase | dict[str, object]]) -> dict[str, object]:
+    reviews = build_historical_reference_reviews(reference_case_library)
+    verdict_counts = Counter(str(review.get("review_verdict")) for review in reviews if review.get("review_verdict"))
+    evidence_tier_counts = Counter(str(review.get("evidence_tier")) for review in reviews if review.get("evidence_tier"))
+    evidence_scores = [float(review.get("evidence_score")) for review in reviews if isinstance(review.get("evidence_score"), (int, float))]
+    countries_covered = sorted({str(review.get("country_id")) for review in reviews if review.get("country_id")})
+    average_evidence_score = round(sum(evidence_scores) / len(evidence_scores), 2) if evidence_scores else 0.0
+    return {
+        "case_count": len(reviews),
+        "countries_covered": countries_covered,
+        "review_verdict_counts": dict(sorted(verdict_counts.items())),
+        "evidence_tier_counts": dict(sorted(evidence_tier_counts.items())),
+        "average_evidence_score": average_evidence_score,
     }
 
 
@@ -92,6 +162,8 @@ def build_validation_backtest_read_model(
     portfolio_summary: dict[str, object] | None = None,
     reference_case_library: list[dict[str, object]] | None = None,
     reference_case_library_summary: dict[str, object] | None = None,
+    historical_reference_reviews: list[dict[str, object]] | None = None,
+    historical_reference_review_summary: dict[str, object] | None = None,
 ) -> dict[str, object]:
     expected_domains = list(validation_case.expected_domains)
     observed_domains = list(comparison.get("observed_domains", []))
@@ -136,5 +208,10 @@ def build_validation_backtest_read_model(
         read_model["reference_case_library"] = reference_case_library
         read_model["reference_case_library_summary"] = (
             reference_case_library_summary or build_reference_case_library_summary(reference_case_library)
+        )
+        historical_reviews = historical_reference_reviews or build_historical_reference_reviews(reference_case_library)
+        read_model["historical_reference_reviews"] = historical_reviews
+        read_model["historical_reference_review_summary"] = (
+            historical_reference_review_summary or build_historical_reference_review_summary(reference_case_library)
         )
     return read_model
