@@ -105,6 +105,44 @@ def build_historical_reference_review_summary(reference_case_library: list[Valid
     }
 
 
+
+def build_historical_replay_summary(historical_replay_reviews: list[dict[str, object]]) -> dict[str, object]:
+    verdict_counts = Counter(
+        str(review.get("review_verdict"))
+        for review in historical_replay_reviews
+        if isinstance(review, dict) and review.get("review_verdict")
+    )
+    review_basis_counts = Counter(
+        str(review.get("review_basis"))
+        for review in historical_replay_reviews
+        if isinstance(review, dict) and review.get("review_basis")
+    )
+    countries_covered = sorted(
+        {
+            str(review.get("country_id"))
+            for review in historical_replay_reviews
+            if isinstance(review, dict) and review.get("country_id")
+        }
+    )
+    domain_match_ratios = [
+        float(review.get("domain_match_ratio"))
+        for review in historical_replay_reviews
+        if isinstance(review, dict) and isinstance(review.get("domain_match_ratio"), (int, float))
+    ]
+    status_match_count = len(
+        [review for review in historical_replay_reviews if isinstance(review, dict) and review.get("status_match") is True]
+    )
+    return {
+        "case_count": len([review for review in historical_replay_reviews if isinstance(review, dict)]),
+        "countries_covered": countries_covered,
+        "review_verdict_counts": dict(sorted(verdict_counts.items())),
+        "status_match_count": status_match_count,
+        "average_domain_match_ratio": round(sum(domain_match_ratios) / len(domain_match_ratios), 2) if domain_match_ratios else 0.0,
+        "review_basis_counts": dict(sorted(review_basis_counts.items())),
+    }
+
+
+
 def build_reference_case_library_summary(reference_case_library: list[ValidationCase | dict[str, object]]) -> dict[str, object]:
     normalized_cases: list[dict[str, object]] = []
     for item in reference_case_library:
@@ -164,6 +202,8 @@ def build_validation_backtest_read_model(
     reference_case_library_summary: dict[str, object] | None = None,
     historical_reference_reviews: list[dict[str, object]] | None = None,
     historical_reference_review_summary: dict[str, object] | None = None,
+    historical_replay_reviews: list[dict[str, object]] | None = None,
+    historical_replay_summary: dict[str, object] | None = None,
 ) -> dict[str, object]:
     expected_domains = list(validation_case.expected_domains)
     observed_domains = list(comparison.get("observed_domains", []))
@@ -213,5 +253,10 @@ def build_validation_backtest_read_model(
         read_model["historical_reference_reviews"] = historical_reviews
         read_model["historical_reference_review_summary"] = (
             historical_reference_review_summary or build_historical_reference_review_summary(reference_case_library)
+        )
+    if historical_replay_reviews is not None:
+        read_model["historical_replay_reviews"] = historical_replay_reviews
+        read_model["historical_replay_summary"] = (
+            historical_replay_summary or build_historical_replay_summary(historical_replay_reviews)
         )
     return read_model

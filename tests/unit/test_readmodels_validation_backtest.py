@@ -2,12 +2,14 @@ from pathlib import Path
 
 from siasa.readmodels.validation_backtest import (
     build_historical_reference_review_summary,
+    build_historical_replay_summary,
     build_reference_case_library_summary,
     build_validation_backtest_read_model,
     build_validation_portfolio_summary,
 )
 from siasa.runs.reprocessing import build_reprocessing_comparison
 from siasa.validation.cases import ValidationCase, compare_expected_vs_observed, load_validation_case_library
+from siasa.validation.historical_replay import build_historical_replay_reviews, load_historical_replay_inputs
 
 
 def test_validation_backtest_read_model_exposes_case_context_comparison_and_reprocessing_delta() -> None:
@@ -166,4 +168,30 @@ def test_historical_reference_review_summary_scores_curated_case_alignment_and_e
             "verified_multi_source": 2,
         },
         "average_evidence_score": 0.85,
+    }
+
+
+def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    cases = load_validation_case_library(repo_root / "vmodel" / "verification" / "validation_reference_cases.yaml")
+    replay_inputs = load_historical_replay_inputs(repo_root / "vmodel" / "verification" / "validation_replay_inputs.yaml")
+
+    reviews = build_historical_replay_reviews(cases, replay_inputs)
+    summary = build_historical_replay_summary(reviews)
+
+    assert [review["case_id"] for review in reviews] == [
+        "VAL-UKR-2022-001",
+        "VAL-POL-2023-001",
+    ]
+    assert summary == {
+        "case_count": 2,
+        "countries_covered": ["POL", "UKR"],
+        "review_verdict_counts": {
+            "replay_match": 2,
+        },
+        "status_match_count": 2,
+        "average_domain_match_ratio": 1.0,
+        "review_basis_counts": {
+            "fixture_backed_historical_replay": 2,
+        },
     }

@@ -13,6 +13,7 @@ from siasa.features.domain_a import DomainAFeatureService
 from siasa.features.domain_b import DomainBFeatureService
 from siasa.features.domain_d import DomainDFeatureService
 from siasa.readmodels.validation_backtest import (
+    build_historical_replay_summary,
     build_reference_case_library_summary,
     build_validation_backtest_read_model,
     build_validation_portfolio_summary,
@@ -23,6 +24,7 @@ from siasa.scoring.domain_status import derive_domain_status
 from siasa.scoring.multi_domain_status import derive_multi_domain_status
 from siasa.catalog import load_country_set
 from siasa.validation.cases import ValidationCase, compare_expected_vs_observed, load_validation_case_library, validation_case_to_dict
+from siasa.validation.historical_replay import build_historical_replay_reviews, load_historical_replay_inputs
 
 _SUPPORTED_LIVE_PILOT_COUNTRIES = {
     "UKR": {"gdelt_query": "Ukraine", "gdelt_code": "UP"},
@@ -68,6 +70,9 @@ _NAMED_LIVE_PILOT_SETS = {
 
 _VALIDATION_REFERENCE_CASE_LIBRARY_PATH = (
     Path(__file__).resolve().parents[3] / "vmodel" / "verification" / "validation_reference_cases.yaml"
+)
+_HISTORICAL_REPLAY_INPUTS_PATH = (
+    Path(__file__).resolve().parents[3] / "vmodel" / "verification" / "validation_replay_inputs.yaml"
 )
 
 
@@ -196,6 +201,8 @@ def _build_live_runtime_validation_view_model(
     portfolio_summary: dict[str, object] | None = None,
     reference_case_library: list[dict[str, object]] | None = None,
     reference_case_library_summary: dict[str, object] | None = None,
+    historical_replay_reviews: list[dict[str, object]] | None = None,
+    historical_replay_summary: dict[str, object] | None = None,
 ) -> dict[str, object] | None:
     country_records = [record for record in normalized_records if record.country_id == primary_country_id]
     observed_domains = sorted(country_domain_statuses.get(primary_country_id, {}).keys())
@@ -244,6 +251,8 @@ def _build_live_runtime_validation_view_model(
         portfolio_summary=portfolio_summary,
         reference_case_library=reference_case_library,
         reference_case_library_summary=reference_case_library_summary,
+        historical_replay_reviews=historical_replay_reviews,
+        historical_replay_summary=historical_replay_summary,
     )
     validation_view_model["comparison_mode"] = "runtime_support_check"
     validation_view_model["snapshot_id"] = snapshot.snapshot_id
@@ -406,6 +415,10 @@ def build_governed_live_orchestrator(
 
     reference_case_library = _load_reference_case_library()
     reference_case_library_summary = build_reference_case_library_summary(reference_case_library)
+    replay_inputs = load_historical_replay_inputs(_HISTORICAL_REPLAY_INPUTS_PATH)
+    replay_case_library = load_validation_case_library(_VALIDATION_REFERENCE_CASE_LIBRARY_PATH)
+    historical_replay_reviews = build_historical_replay_reviews(replay_case_library, replay_inputs)
+    historical_replay_summary = build_historical_replay_summary(historical_replay_reviews)
 
     def _validation_view_model_builder(
         _primary_country_id: str,
@@ -454,6 +467,8 @@ def build_governed_live_orchestrator(
             portfolio_summary=portfolio_summary,
             reference_case_library=reference_case_library,
             reference_case_library_summary=reference_case_library_summary,
+            historical_replay_reviews=historical_replay_reviews,
+            historical_replay_summary=historical_replay_summary,
         )
 
     return DailyRunOrchestrator(

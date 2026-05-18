@@ -29,7 +29,7 @@ For project-lead steering, use `docs/plans/siasa-project-lead-capability-matrix.
 | Source / coverage trust layer | Source status, confidence, failures, gaps | Present | Trust summary, degraded sources, failures, missing sources visible | Mostly done |
 | Source lineage / epidemiology visualization | Spread / amplification / source graph | Absent | Only traceability table exists | Missing feature |
 | Reports / exports | Daily snapshot + manual exports with evidence context | Present | Export page and exported files exist | Mostly done |
-| Validation / backtest review | Validation cases and expected-vs-observed review | Present in GUI baseline and governed artifacts | Validation page exists; latest artifact bundle carries both `validation_backtest.json` and `readiness.json`, the validation artifact exposes a curated reference-case library beside the runtime-support portfolio, and it now also surfaces historical reference-review / evidence-scoring outputs for those curated cases | Runtime-support depth still expandable later toward true replay execution |
+| Validation / backtest review | Validation cases and expected-vs-observed review | Present in GUI baseline and governed artifacts | Validation page exists; latest artifact bundle carries both `validation_backtest.json` and `readiness.json`, the validation artifact exposes a curated reference-case library beside the runtime-support portfolio, surfaces historical reference-review / evidence-scoring outputs for those curated cases, and now also includes a first fixture-backed true historical replay slice for `UKR` and `POL` | Runtime-support depth is no longer only conceptual, but broader replay coverage and provider-backed archival replay are still future work |
 | Analyst annotations visibility | Show analyst annotations in GUI | Present | Dedicated page and contextual rendering exist | Mostly done |
 | Annotation creation/editing in GUI | Create/manage annotations in GUI | Absent | Read-only visibility only | Missing feature |
 | Traceability / lineage | Follow evidence path from source to status/report | Present | Traceability page exists and artifact path is implemented | Mostly done |
@@ -109,14 +109,14 @@ Interpretation:
 - the old roadmap order was correct as a program scaffold
 - however, execution has now overtaken parts of the document
 - the critical remaining gap is no longer missing artifact completeness inside the current governed pilot, but how far runtime breadth and the validation/reference-case depth should be expanded next
-- the current validation view is now richer than a single-country runtime-support check because the artifact carries a multi-case portfolio summary, a curated repo-backed reference-case library, and first historical reference-review / evidence-scoring outputs, but it is still not yet true historical replay execution
+- the current validation view is now richer than a single-country runtime-support check because the artifact carries a multi-case portfolio summary, a curated repo-backed reference-case library, historical reference-review / evidence-scoring outputs, and a first true fixture-backed replay slice for `UKR` and `POL`, but it is still not yet provider-backfilled archival replay execution
 
 ## 3b. Updated planning horizon
 
 For time planning, the remaining work should be treated in three bands rather than as one flat backlog:
 
 - Near-term closure band:
-  - choose the next priority between expanding breadth beyond the now-complete core-focus subset into broader MVP/P2 scope and moving validation depth from the current historical reference-review / evidence-scoring layer toward true replay execution
+  - choose the next priority between expanding breadth beyond the now-complete core-focus subset into broader MVP/P2 scope and broadening replay-backed validation beyond the first fixture-based `UKR`/`POL` slice
 - Mid-term breadth/depth band:
   - expand from the current representative / `core-focus-initial` / `core-focus-expanded` / `core-focus-broader` / `core-focus-complete` governed subsets toward wider MVP coverage and/or deeper governed validation evidence
 - Later analyst-depth band:

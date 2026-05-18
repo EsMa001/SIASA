@@ -312,6 +312,42 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             },
             "average_evidence_score": 0.85,
         },
+        "historical_replay_reviews": [
+            {
+                "case_id": "VAL-UKR-2022-001",
+                "country_id": "UKR",
+                "review_basis": "fixture_backed_historical_replay",
+                "replayed_status": "S3",
+                "expected_status": "S3",
+                "status_match": True,
+                "expected_domains": ["A", "B", "D"],
+                "replayed_domains": ["A", "B", "D"],
+                "domain_match_ratio": 1.0,
+                "review_verdict": "replay_match",
+                "replay_input_record_count": 8,
+            },
+            {
+                "case_id": "VAL-POL-2023-001",
+                "country_id": "POL",
+                "review_basis": "fixture_backed_historical_replay",
+                "replayed_status": "S3",
+                "expected_status": "S3",
+                "status_match": True,
+                "expected_domains": ["A", "B", "D"],
+                "replayed_domains": ["A", "B", "D"],
+                "domain_match_ratio": 1.0,
+                "review_verdict": "replay_match",
+                "replay_input_record_count": 8,
+            },
+        ],
+        "historical_replay_summary": {
+            "case_count": 2,
+            "countries_covered": ["POL", "UKR"],
+            "review_verdict_counts": {"replay_match": 2},
+            "status_match_count": 2,
+            "average_domain_match_ratio": 1.0,
+            "review_basis_counts": {"fixture_backed_historical_replay": 2},
+        },
     }
     system_status = {
         "run_id": "RUN-200",
@@ -546,6 +582,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Average Evidence Score" in validation_html
     assert "historical_alignment_confirmed" in validation_html
     assert "verified_multi_source" in validation_html
+    assert "Historical Replay Summary" in validation_html
+    assert "Historical Replay Reviews" in validation_html
+    assert "replay_match" in validation_html
+    assert "fixture_backed_historical_replay" in validation_html
+    assert "Replay Input Records" in validation_html
     assert "military_escalation" in validation_html
     assert "VAL-POL-2023-001" in validation_html
     assert "2022-02-01 to 2024-05-31" in validation_html

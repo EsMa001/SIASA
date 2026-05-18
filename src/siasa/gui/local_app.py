@@ -1604,6 +1604,14 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         if isinstance(validation_view_model.get('historical_reference_review_summary', {}), dict)
         else {}
     )
+    historical_replay_reviews = [
+        item for item in validation_view_model.get('historical_replay_reviews', []) if isinstance(item, dict)
+    ]
+    historical_replay_summary = (
+        validation_view_model.get('historical_replay_summary', {})
+        if isinstance(validation_view_model.get('historical_replay_summary', {}), dict)
+        else {}
+    )
     verdict_count_rows = ''.join(
         f"<tr><td>{html.escape(str(verdict))}</td><td>{html.escape(str(count))}</td></tr>"
         for verdict, count in sorted((portfolio_summary.get('review_verdict_counts') or {}).items())
@@ -1653,6 +1661,27 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         "</tr>"
         for review in historical_reference_reviews
     ) or "<tr><td colspan='7'>No historical reference reviews recorded.</td></tr>"
+    historical_replay_verdict_rows = ''.join(
+        f"<tr><td>{html.escape(str(verdict))}</td><td>{html.escape(str(count))}</td></tr>"
+        for verdict, count in sorted((historical_replay_summary.get('review_verdict_counts') or {}).items())
+    ) or "<tr><td colspan='2'>No replay verdicts recorded.</td></tr>"
+    historical_replay_basis_rows = ''.join(
+        f"<tr><td>{html.escape(str(basis))}</td><td>{html.escape(str(count))}</td></tr>"
+        for basis, count in sorted((historical_replay_summary.get('review_basis_counts') or {}).items())
+    ) or "<tr><td colspan='2'>No replay bases recorded.</td></tr>"
+    historical_replay_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(review.get('country_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(review.get('case_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(review.get('review_verdict', 'n/a')))}</td>"
+        f"<td>{html.escape(str(review.get('review_basis', 'n/a')))}</td>"
+        f"<td>{html.escape(str(review.get('expected_status', 'n/a')))}</td>"
+        f"<td>{html.escape(str(review.get('replayed_status', 'n/a')))}</td>"
+        f"<td>{html.escape(str(review.get('domain_match_ratio', 'n/a')))}</td>"
+        f"<td>{html.escape(str(review.get('replay_input_record_count', 'n/a')))}</td>"
+        "</tr>"
+        for review in historical_replay_reviews
+    ) or "<tr><td colspan='8'>No historical replay reviews recorded.</td></tr>"
     changed_versions = ''.join(
         f"<li>{html.escape(str(item))}</li>"
         for item in reprocessing.get('changed_versions', [])
@@ -1709,6 +1738,16 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         "<h3>Historical Reference Reviews</h3>"
         "<table><thead><tr><th>Country</th><th>Case ID</th><th>Review Verdict</th><th>Evidence Tier</th><th>Evidence Score</th><th>Expected Status</th><th>Historical Observed Status</th></tr></thead>"
         f"<tbody>{historical_reference_rows}</tbody></table>"
+        "<h3>Historical Replay Summary</h3>"
+        f"<p>Average Domain Match Ratio: <strong>{html.escape(str(historical_replay_summary.get('average_domain_match_ratio', 'n/a')))}</strong></p>"
+        f"<p>Status Match Count: <strong>{html.escape(str(historical_replay_summary.get('status_match_count', 'n/a')))}</strong></p>"
+        "<table><thead><tr><th>Replay Verdict</th><th>Count</th></tr></thead>"
+        f"<tbody>{historical_replay_verdict_rows}</tbody></table>"
+        "<table><thead><tr><th>Replay Basis</th><th>Count</th></tr></thead>"
+        f"<tbody>{historical_replay_basis_rows}</tbody></table>"
+        "<h3>Historical Replay Reviews</h3>"
+        "<table><thead><tr><th>Country</th><th>Case ID</th><th>Replay Verdict</th><th>Replay Basis</th><th>Expected Status</th><th>Replayed Status</th><th>Domain Match Ratio</th><th>Replay Input Records</th></tr></thead>"
+        f"<tbody>{historical_replay_rows}</tbody></table>"
         "<h3>Changed Versions</h3>"
         f"<ul>{changed_versions}</ul>"
         f"<h3>Reprocessing Comparison</h3>{_json_block(reprocessing)}"
