@@ -90,7 +90,8 @@ Current repo-evidenced status on branch `hermes/repo-scaffold`:
   - TWN is explicitly scoped to A/B in the governed pilot rather than surfacing as a misleading D-gap
   - a broader named `core-focus-initial` pilot set runs successfully with `UKR`, `RUS`, `CHN`, `TWN`, `ISR`, and `POL`
   - a further `core-focus-expanded` subset adds `IND`
-  - a new `core-focus-broader` subset now also adds `IRN` and `TUR`, and this 9-country subset has a successful `release_verdict=ready` probe
+  - a `core-focus-broader` subset adds `IRN` and `TUR`
+  - a new `core-focus-complete` subset now also adds `PAK` and `GEO`, and this 11-country subset has a successful `release_verdict=ready` probe
 - P3 is strongly advanced:
   - artifact-backed trend charts exist
   - world-map visualization exists
@@ -114,9 +115,9 @@ Interpretation:
 For time planning, the remaining work should be treated in three bands rather than as one flat backlog:
 
 - Near-term closure band:
-  - choose the next priority between extending breadth from `core-focus-broader` to the remaining obvious P1 candidates (`PAK`, `GEO`) and a richer validation/reference-case library
+  - choose the next priority between expanding breadth beyond the now-complete core-focus subset into broader MVP/P2 scope and a richer validation/reference-case library
 - Mid-term breadth/depth band:
-  - expand from the current representative / `core-focus-initial` / `core-focus-expanded` / `core-focus-broader` governed subsets toward a broader MVP subset and/or deeper governed validation evidence
+  - expand from the current representative / `core-focus-initial` / `core-focus-expanded` / `core-focus-broader` / `core-focus-complete` governed subsets toward wider MVP coverage and/or deeper governed validation evidence
 - Later analyst-depth band:
   - add operational annotation workflows and the first advanced source-intelligence features
 

@@ -74,18 +74,23 @@ oder als breiteres Core-Focus-Subset:
 
 `PYTHONPATH=src /opt/hermes/.venv/bin/python -m siasa.runs.live_runtime --pilot-set core-focus-broader --run-id RUN-LIVE-CORE-BROAD-001 --output-dir build/run_artifacts/latest`
 
+oder als vollständiges aktuelles Core-Focus-Subset:
+
+`PYTHONPATH=src /opt/hermes/.venv/bin/python -m siasa.runs.live_runtime --pilot-set core-focus-complete --run-id RUN-LIVE-CORE-COMPLETE-001 --output-dir build/run_artifacts/latest`
+
 oder nach Installation:
 
 `siasa-live-runtime --country-id UKR --country-id POL --run-id RUN-LIVE-MULTI-001 --output-dir build/run_artifacts/latest`
 
 Aktueller Runtime-Stand:
-- der Runtime-Pfad unterstützt jetzt Single- und Multi-Country-Runs für die aktuell freigegebenen Live-Pilot-Länder `UKR`, `POL`, `ISR`, `TWN`, `RUS`, `CHN`, `IND`, `IRN`, `TUR`
+- der Runtime-Pfad unterstützt jetzt Single- und Multi-Country-Runs für die aktuell freigegebenen Live-Pilot-Länder `UKR`, `POL`, `ISR`, `TWN`, `RUS`, `CHN`, `IND`, `IRN`, `TUR`, `PAK`, `GEO`
 - wiederhole `--country-id`, um mehrere Länder in einem Run zu verarbeiten
 - alternativ wähle ein named `--pilot-set`:
   - `representative` = `UKR`, `POL`, `ISR`, `TWN`
   - `core-focus-initial` = `UKR`, `RUS`, `CHN`, `TWN`, `ISR`, `POL`
   - `core-focus-expanded` = `UKR`, `RUS`, `CHN`, `TWN`, `ISR`, `IND`, `POL`
   - `core-focus-broader` = `UKR`, `RUS`, `CHN`, `TWN`, `IRN`, `ISR`, `TUR`, `IND`, `POL`
+  - `core-focus-complete` = `UKR`, `RUS`, `CHN`, `TWN`, `IRN`, `ISR`, `TUR`, `IND`, `PAK`, `GEO`, `POL`
 - der Pilot ersetzt die bisherigen rein synthetischen `SRC-A` / `SRC-B` Latest-Artefakte durch reale Source-IDs (`WB-INDICATORS`, `SRC-GDELT-DOC`, `SRC-GDELT-EVENTS`, `SRC-GDACS`)
 - reale Multi-Country-Runs bleiben quellenabhängig: einzelne Sources können weiterhin partiell fehlschlagen und als `partial_success` im Bundle erscheinen
 - der governed Live-Runtime-Pfad erzeugt jetzt zusätzlich `readmodels/validation_backtest.json` als transparenten `runtime_support_check`; diese Sicht ist explizit keine historische Referenzfall-Backtest-Wertung

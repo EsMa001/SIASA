@@ -30,13 +30,16 @@ _SUPPORTED_LIVE_PILOT_COUNTRIES = {
     "IND": {"gdelt_query": "India", "gdelt_code": "IN"},
     "IRN": {"gdelt_query": "Iran", "gdelt_code": "IR"},
     "TUR": {"gdelt_query": "Turkey", "gdelt_code": "TU"},
+    "PAK": {"gdelt_query": "Pakistan", "gdelt_code": "PK"},
+    "GEO": {"gdelt_query": "Georgia", "gdelt_code": "GG"},
 }
 
 _REPRESENTATIVE_LIVE_PILOT_SET = ("UKR", "POL", "ISR", "TWN")
 _CORE_FOCUS_INITIAL_LIVE_PILOT_SET = ("UKR", "RUS", "CHN", "TWN", "ISR", "POL")
 _CORE_FOCUS_EXPANDED_LIVE_PILOT_SET = ("UKR", "RUS", "CHN", "TWN", "ISR", "IND", "POL")
 _CORE_FOCUS_BROADER_LIVE_PILOT_SET = ("UKR", "RUS", "CHN", "TWN", "IRN", "ISR", "TUR", "IND", "POL")
-_WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = ("UKR", "POL", "ISR", "RUS", "CHN", "IND", "IRN", "TUR")
+_CORE_FOCUS_COMPLETE_LIVE_PILOT_SET = ("UKR", "RUS", "CHN", "TWN", "IRN", "ISR", "TUR", "IND", "PAK", "GEO", "POL")
+_WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = ("UKR", "POL", "ISR", "RUS", "CHN", "IND", "IRN", "TUR", "PAK", "GEO")
 _MULTI_COUNTRY_GDELT_EVENTS_RECENT_EXPORT_COUNT = 8
 _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
     "UKR": ["A", "B", "D"],
@@ -48,12 +51,15 @@ _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
     "IND": ["A", "B", "D"],
     "IRN": ["A", "B", "D"],
     "TUR": ["A", "B", "D"],
+    "PAK": ["A", "B", "D"],
+    "GEO": ["A", "B", "D"],
 }
 _NAMED_LIVE_PILOT_SETS = {
     "representative": _REPRESENTATIVE_LIVE_PILOT_SET,
     "core-focus-initial": _CORE_FOCUS_INITIAL_LIVE_PILOT_SET,
     "core-focus-expanded": _CORE_FOCUS_EXPANDED_LIVE_PILOT_SET,
     "core-focus-broader": _CORE_FOCUS_BROADER_LIVE_PILOT_SET,
+    "core-focus-complete": _CORE_FOCUS_COMPLETE_LIVE_PILOT_SET,
 }
 
 
@@ -62,6 +68,15 @@ def _gdelt_doc_max_records_for_country_count(country_count: int) -> int:
     if country_count <= 1:
         return 50
     return max(5, 20 // country_count)
+
+
+
+def _gdelt_doc_inter_request_delay_seconds_for_country_count(country_count: int) -> float:
+    if country_count <= 1:
+        return 0.0
+    if country_count >= 11:
+        return 2.0
+    return 1.0
 
 
 
@@ -331,7 +346,7 @@ def build_governed_live_orchestrator(
             GDELTDocAdapter(
                 country_queries=country_queries,
                 max_records=_gdelt_doc_max_records_for_country_count(len(resolved_country_ids)),
-                inter_request_delay_seconds=1.0 if len(resolved_country_ids) > 1 else 0.0,
+                inter_request_delay_seconds=_gdelt_doc_inter_request_delay_seconds_for_country_count(len(resolved_country_ids)),
                 max_full_fetch_retries=2 if len(resolved_country_ids) > 1 else 0,
                 full_fetch_retry_cooldown_seconds=40.0 if len(resolved_country_ids) > 1 else 0.0,
             ),
@@ -472,7 +487,7 @@ def main(argv: list[str] | None = None) -> int:
         dest="country_ids",
         help=(
             "Governed live pilot country ISO3. Repeat for multi-country runs; "
-            "supported: UKR, POL, ISR, TWN, RUS, CHN, IND, IRN, TUR."
+            "supported: UKR, POL, ISR, TWN, RUS, CHN, IND, IRN, TUR, PAK, GEO."
         ),
     )
     parser.add_argument(
@@ -483,7 +498,8 @@ def main(argv: list[str] | None = None) -> int:
             "'representative' expands to UKR,POL,ISR,TWN; "
             "'core-focus-initial' expands to UKR,RUS,CHN,TWN,ISR,POL; "
             "'core-focus-expanded' expands to UKR,RUS,CHN,TWN,ISR,IND,POL; "
-            "'core-focus-broader' expands to UKR,RUS,CHN,TWN,IRN,ISR,TUR,IND,POL."
+            "'core-focus-broader' expands to UKR,RUS,CHN,TWN,IRN,ISR,TUR,IND,POL; "
+            "'core-focus-complete' expands to UKR,RUS,CHN,TWN,IRN,ISR,TUR,IND,PAK,GEO,POL."
         ),
     )
     parser.add_argument(
