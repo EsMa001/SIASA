@@ -1,0 +1,76 @@
+{
+  "normalized_records": [
+    {
+      "country_id": "UKR",
+      "timestamp": "2022-02-24T08:00:00Z",
+      "domain": "A",
+      "signal_key": "article_count",
+      "value": 12,
+      "provenance_source_id": "SRC-GDELT-DOC",
+      "quality_context": {"freshness_hours": 6}
+    },
+    {
+      "country_id": "UKR",
+      "timestamp": "2022-02-24T08:00:00Z",
+      "domain": "A",
+      "signal_key": "tone",
+      "value": -1.4,
+      "provenance_source_id": "SRC-GDELT-DOC",
+      "quality_context": {"freshness_hours": 6}
+    },
+    {
+      "country_id": "UKR",
+      "timestamp": "2022-02-24T09:00:00Z",
+      "domain": "B",
+      "signal_key": "conflict_event_count",
+      "value": 5,
+      "provenance_source_id": "SRC-GDELT-EVENTS",
+      "quality_context": {"freshness_hours": 5}
+    },
+    {
+      "country_id": "UKR",
+      "timestamp": "2022-02-24T09:00:00Z",
+      "domain": "B",
+      "signal_key": "violent_event_count",
+      "value": 2,
+      "provenance_source_id": "SRC-GDELT-EVENTS",
+      "quality_context": {"freshness_hours": 5}
+    },
+    {
+      "country_id": "UKR",
+      "timestamp": "2022-02-24T07:00:00Z",
+      "domain": "B",
+      "signal_key": "disaster_alert_level",
+      "value": 2,
+      "provenance_source_id": "SRC-GDACS",
+      "quality_context": {"freshness_hours": 8}
+    },
+    {
+      "country_id": "UKR",
+      "timestamp": "2022-02-01",
+      "domain": "D",
+      "signal_key": "gdp_growth",
+      "value": 2.1,
+      "provenance_source_id": "WB-INDICATORS",
+      "quality_context": {"freshness_hours": 24}
+    },
+    {
+      "country_id": "UKR",
+      "timestamp": "2022-02-01",
+      "domain": "D",
+      "signal_key": "energy_price_stress",
+      "value": 0.7,
+      "provenance_source_id": "WB-INDICATORS",
+      "quality_context": {"freshness_hours": 24}
+    },
+    {
+      "country_id": "UKR",
+      "timestamp": "2022-02-01",
+      "domain": "D",
+      "signal_key": "trade_volume_change",
+      "value": -0.6,
+      "provenance_source_id": "WB-INDICATORS",
+      "quality_context": {"freshness_hours": 24}
+    }
+  ]
+}

@@ -29,7 +29,7 @@ For project-lead steering, use `docs/plans/siasa-project-lead-capability-matrix.
 | Source / coverage trust layer | Source status, confidence, failures, gaps | Present | Trust summary, degraded sources, failures, missing sources visible | Mostly done |
 | Source lineage / epidemiology visualization | Spread / amplification / source graph | Absent | Only traceability table exists | Missing feature |
 | Reports / exports | Daily snapshot + manual exports with evidence context | Present | Export page and exported files exist | Mostly done |
-| Validation / backtest review | Validation cases and expected-vs-observed review | Present in GUI baseline and governed artifacts | Validation page exists; latest artifact bundle carries both `validation_backtest.json` and `readiness.json`, the validation artifact exposes a curated reference-case library beside the runtime-support portfolio, surfaces historical reference-review / evidence-scoring outputs for those curated cases, and now also includes a fixture-backed true historical replay slice for the full current 4-case library (`UKR`, `POL`, `ISR`, `TWN`) | Runtime-support depth is no longer only conceptual, but provider-backed archival replay and richer replay verdict maturation are still future work |
+| Validation / backtest review | Validation cases and expected-vs-observed review | Present in GUI baseline and governed artifacts | Validation page exists; latest artifact bundle carries both `validation_backtest.json` and `readiness.json`, the validation artifact exposes a curated reference-case library beside the runtime-support portfolio, surfaces historical reference-review / evidence-scoring outputs for those curated cases, and now also includes a governed archival replay layer with mixed basis: `UKR` and `POL` provider-backed, `ISR` and `TWN` fixture-backed fallback | Runtime-support depth is no longer only conceptual, but archival provider coverage is still partial and replay verdict maturation remains future work |
 | Analyst annotations visibility | Show analyst annotations in GUI | Present | Dedicated page and contextual rendering exist | Mostly done |
 | Annotation creation/editing in GUI | Create/manage annotations in GUI | Absent | Read-only visibility only | Missing feature |
 | Traceability / lineage | Follow evidence path from source to status/report | Present | Traceability page exists and artifact path is implemented | Mostly done |
@@ -109,14 +109,14 @@ Interpretation:
 - the old roadmap order was correct as a program scaffold
 - however, execution has now overtaken parts of the document
 - the critical remaining gap is no longer missing artifact completeness inside the current governed pilot, but how far runtime breadth and the validation/reference-case depth should be expanded next
-- the current validation view is now richer than a single-country runtime-support check because the artifact carries a multi-case portfolio summary, a curated repo-backed reference-case library, historical reference-review / evidence-scoring outputs, and a fixture-backed replay slice for the full current 4-case library, but it is still not yet provider-backfilled archival replay execution
+- the current validation view is now richer than a single-country runtime-support check because the artifact carries a multi-case portfolio summary, a curated repo-backed reference-case library, historical reference-review / evidence-scoring outputs, and a governed archival replay layer with mixed basis across the current 4-case library, but it is still not yet a fully provider-backed archival replay surface across all cases
 
 ## 3b. Updated planning horizon
 
 For time planning, the remaining work should be treated in three bands rather than as one flat backlog:
 
 - Near-term closure band:
-  - choose the next priority between expanding breadth beyond the now-complete core-focus subset into broader MVP/P2 scope and moving validation depth from full repo-fixture replay coverage toward provider-backed archival replay inputs
+  - choose the next priority between expanding breadth beyond the now-complete core-focus subset into broader MVP/P2 scope and extending provider-backed archival replay beyond the current mixed-basis `UKR`/`POL` foundation
 - Mid-term breadth/depth band:
   - expand from the current representative / `core-focus-initial` / `core-focus-expanded` / `core-focus-broader` / `core-focus-complete` governed subsets toward wider MVP coverage and/or deeper governed validation evidence
 - Later analyst-depth band:

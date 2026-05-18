@@ -316,7 +316,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             {
                 "case_id": "VAL-UKR-2022-001",
                 "country_id": "UKR",
-                "review_basis": "fixture_backed_historical_replay",
+                "review_basis": "provider_backed_archival_replay",
                 "replayed_status": "S3",
                 "expected_status": "S3",
                 "status_match": True,
@@ -329,7 +329,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             {
                 "case_id": "VAL-POL-2023-001",
                 "country_id": "POL",
-                "review_basis": "fixture_backed_historical_replay",
+                "review_basis": "provider_backed_archival_replay",
                 "replayed_status": "S3",
                 "expected_status": "S3",
                 "status_match": True,
@@ -372,7 +372,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             "review_verdict_counts": {"replay_match": 4},
             "status_match_count": 4,
             "average_domain_match_ratio": 1.0,
-            "review_basis_counts": {"fixture_backed_historical_replay": 4},
+            "review_basis_counts": {
+                "fixture_backed_historical_replay": 2,
+                "provider_backed_archival_replay": 2,
+            },
         },
     }
     system_status = {

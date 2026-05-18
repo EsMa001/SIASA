@@ -8,6 +8,7 @@ from siasa.readmodels.validation_backtest import (
     build_validation_portfolio_summary,
 )
 from siasa.runs.reprocessing import build_reprocessing_comparison
+from siasa.validation.archival_replay import load_governed_historical_replay_inputs
 from siasa.validation.cases import ValidationCase, compare_expected_vs_observed, load_validation_case_library
 from siasa.validation.historical_replay import build_historical_replay_reviews, load_historical_replay_inputs
 
@@ -174,7 +175,7 @@ def test_historical_reference_review_summary_scores_curated_case_alignment_and_e
 def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> None:
     repo_root = Path(__file__).resolve().parents[2]
     cases = load_validation_case_library(repo_root / "vmodel" / "verification" / "validation_reference_cases.yaml")
-    replay_inputs = load_historical_replay_inputs(repo_root / "vmodel" / "verification" / "validation_replay_inputs.yaml")
+    replay_inputs = load_governed_historical_replay_inputs(repo_root)
 
     reviews = build_historical_replay_reviews(cases, replay_inputs)
     summary = build_historical_replay_summary(reviews)
@@ -194,6 +195,7 @@ def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> 
         "status_match_count": 4,
         "average_domain_match_ratio": 1.0,
         "review_basis_counts": {
-            "fixture_backed_historical_replay": 4,
+            "fixture_backed_historical_replay": 2,
+            "provider_backed_archival_replay": 2,
         },
     }

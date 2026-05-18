@@ -23,8 +23,9 @@ from siasa.scoring.data_sufficiency import evaluate_data_sufficiency
 from siasa.scoring.domain_status import derive_domain_status
 from siasa.scoring.multi_domain_status import derive_multi_domain_status
 from siasa.catalog import load_country_set
+from siasa.validation.archival_replay import load_governed_historical_replay_inputs
 from siasa.validation.cases import ValidationCase, compare_expected_vs_observed, load_validation_case_library, validation_case_to_dict
-from siasa.validation.historical_replay import build_historical_replay_reviews, load_historical_replay_inputs
+from siasa.validation.historical_replay import build_historical_replay_reviews
 
 _SUPPORTED_LIVE_PILOT_COUNTRIES = {
     "UKR": {"gdelt_query": "Ukraine", "gdelt_code": "UP"},
@@ -70,9 +71,6 @@ _NAMED_LIVE_PILOT_SETS = {
 
 _VALIDATION_REFERENCE_CASE_LIBRARY_PATH = (
     Path(__file__).resolve().parents[3] / "vmodel" / "verification" / "validation_reference_cases.yaml"
-)
-_HISTORICAL_REPLAY_INPUTS_PATH = (
-    Path(__file__).resolve().parents[3] / "vmodel" / "verification" / "validation_replay_inputs.yaml"
 )
 
 
@@ -415,7 +413,7 @@ def build_governed_live_orchestrator(
 
     reference_case_library = _load_reference_case_library()
     reference_case_library_summary = build_reference_case_library_summary(reference_case_library)
-    replay_inputs = load_historical_replay_inputs(_HISTORICAL_REPLAY_INPUTS_PATH)
+    replay_inputs = load_governed_historical_replay_inputs(repo_root)
     replay_case_library = load_validation_case_library(_VALIDATION_REFERENCE_CASE_LIBRARY_PATH)
     historical_replay_reviews = build_historical_replay_reviews(replay_case_library, replay_inputs)
     historical_replay_summary = build_historical_replay_summary(historical_replay_reviews)
