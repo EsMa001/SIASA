@@ -137,15 +137,15 @@ def test_reference_case_library_summary_aggregates_case_types_countries_and_time
     summary = build_reference_case_library_summary(cases)
 
     assert summary == {
-        "case_count": 4,
+        "case_count": 6,
         "countries_covered": ["ISR", "POL", "TWN", "UKR"],
         "case_type_counts": {
             "disinformation_spike": 1,
-            "hybrid_pressure": 1,
+            "hybrid_pressure": 2,
             "military_escalation": 1,
-            "strategic_posturing": 1,
+            "strategic_posturing": 2,
         },
-        "time_range": {"start": "2022-02-01", "end": "2024-05-31"},
+        "time_range": {"start": "2022-02-01", "end": "2024-06-30"},
     }
 
 
@@ -157,18 +157,20 @@ def test_historical_reference_review_summary_scores_curated_case_alignment_and_e
     summary = build_historical_reference_review_summary(cases)
 
     assert summary == {
-        "case_count": 4,
+        "case_count": 6,
         "countries_covered": ["ISR", "POL", "TWN", "UKR"],
         "review_verdict_counts": {
             "historical_alignment_confirmed": 3,
-            "historical_alignment_with_gaps": 1,
+            "historical_alignment_mismatch": 1,
+            "historical_alignment_with_gaps": 2,
         },
         "evidence_tier_counts": {
-            "corroborated_multi_source": 1,
+            "corroborated_multi_source": 2,
             "curated_public_source": 1,
+            "provisional": 1,
             "verified_multi_source": 2,
         },
-        "average_evidence_score": 0.85,
+        "average_evidence_score": 0.77,
     }
 
 
@@ -183,32 +185,38 @@ def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> 
     assert [review["case_id"] for review in reviews] == [
         "VAL-UKR-2022-001",
         "VAL-POL-2023-001",
+        "VAL-POL-2024-002",
         "VAL-ISR-2023-001",
+        "VAL-ISR-2024-002",
         "VAL-TWN-2024-001",
     ]
     assert summary == {
-        "case_count": 4,
+        "case_count": 6,
         "countries_covered": ["ISR", "POL", "TWN", "UKR"],
         "review_verdict_counts": {
             "replay_match": 4,
+            "replay_match_with_gaps": 1,
+            "replay_mismatch": 1,
         },
-        "status_match_count": 4,
-        "average_domain_match_ratio": 1.0,
-        "average_replay_evidence_score": 1.0,
-        "average_replay_source_coverage_ratio": 1.0,
+        "status_match_count": 5,
+        "average_domain_match_ratio": 0.83,
+        "average_replay_evidence_score": 0.85,
+        "average_replay_source_coverage_ratio": 0.83,
         "average_replay_provenance_completeness_ratio": 1.0,
-        "replay_input_record_total": 28,
-        "archival_data_file_count": 4,
+        "replay_input_record_total": 35,
+        "archival_data_file_count": 6,
         "replay_evidence_tier_counts": {
+            "strong_replay_evidence": 1,
             "verified_replay_evidence": 4,
+            "weak_replay_evidence": 1,
         },
         "replay_input_source_coverage_counts": {
-            "SRC-GDACS": 4,
-            "SRC-GDELT-DOC": 4,
-            "SRC-GDELT-EVENTS": 4,
+            "SRC-GDACS": 5,
+            "SRC-GDELT-DOC": 6,
+            "SRC-GDELT-EVENTS": 5,
             "WB-INDICATORS": 3,
         },
         "review_basis_counts": {
-            "provider_backed_archival_replay": 4,
+            "provider_backed_archival_replay": 6,
         },
     }

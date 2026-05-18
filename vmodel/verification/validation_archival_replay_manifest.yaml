@@ -17,6 +17,16 @@ archival_replay_cases:
     provenance_notes: Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.
     known_limitations:
       - provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime
+  - case_id: VAL-POL-2024-002
+    review_basis: provider_backed_archival_replay
+    storage_mode: archival_normalized_records
+    data_files:
+      - archival_replay_inputs/VAL-POL-2024-002.json
+    archival_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS]
+    provenance_notes: Provider-derived archival normalized-record bundle intentionally captured with no usable governed Domain D record to exercise replay gap behavior.
+    known_limitations:
+      - provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime
+      - governed_archival_bundle_intentionally_omits_domain_d_records_to_exercise_partial_replay_behavior
   - case_id: VAL-ISR-2023-001
     review_basis: provider_backed_archival_replay
     storage_mode: archival_normalized_records
@@ -26,6 +36,16 @@ archival_replay_cases:
     provenance_notes: Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.
     known_limitations:
       - provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime
+  - case_id: VAL-ISR-2024-002
+    review_basis: provider_backed_archival_replay
+    storage_mode: archival_normalized_records
+    data_files:
+      - archival_replay_inputs/VAL-ISR-2024-002.json
+    archival_sources: [SRC-GDELT-DOC]
+    provenance_notes: Provider-derived archival normalized-record bundle intentionally constrained to information-domain evidence to exercise replay mismatch behavior.
+    known_limitations:
+      - provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime
+      - governed_archival_bundle_intentionally_constrained_to_information_domain_records_to_exercise_mismatch_behavior
   - case_id: VAL-TWN-2024-001
     review_basis: provider_backed_archival_replay
     storage_mode: archival_normalized_records

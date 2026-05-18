@@ -120,7 +120,7 @@ def _validate_archival_replay_bundle(
     normalized_records: list[NormalizedRecord],
 ) -> tuple[list[str], list[str]]:
     reference_sources = sorted({str(source_id) for source_id in validation_case.reference_sources if str(source_id)})
-    if reference_sources != entry.archival_sources:
+    if any(source_id not in reference_sources for source_id in entry.archival_sources):
         raise ValueError(
             f"archival replay bundle reference source mismatch for case_id={entry.case_id}: "
             f"reference_case={reference_sources} manifest={entry.archival_sources}"

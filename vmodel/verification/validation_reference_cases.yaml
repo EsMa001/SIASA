@@ -37,6 +37,25 @@ validation_cases:
       - curated_historical_observed_outcome_not_generated_by_runtime_replay
     validation_metrics: [Domain Match, Status Match]
 
+  - case_id: VAL-POL-2024-002
+    country_id: POL
+    case_name: Hybrid pressure constrained-coverage challenge case
+    case_type: hybrid_pressure
+    time_start: "2024-04-01"
+    time_end: "2024-04-30"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B]
+    historical_observed_status: S3
+    evidence_tier: corroborated_multi_source
+    expected_signal_pattern: Pressure indicators should still align to S3 even when archived replay evidence for Domain D is incomplete.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Exercise honest replay_match_with_gaps behavior where status still aligns but governed replay coverage remains incomplete.
+    known_limitations:
+      - governed_archival_replay_intentionally_omits_domain_d_records_to_exercise_partial_replay_behavior
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+
   - case_id: VAL-ISR-2023-001
     country_id: ISR
     case_name: Regional conflict pressure reference case
@@ -53,6 +72,25 @@ validation_cases:
     validation_goal: Keep a clearly reviewable A/B/D reference case for regional-conflict escalation.
     known_limitations:
       - current governed pilot still uses runtime-support evaluation rather than full replay scoring
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+
+  - case_id: VAL-ISR-2024-002
+    country_id: ISR
+    case_name: Regional conflict mismatch challenge case
+    case_type: strategic_posturing
+    time_start: "2024-06-01"
+    time_end: "2024-06-30"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A]
+    historical_observed_status: S1
+    evidence_tier: provisional
+    expected_signal_pattern: A narrow information-domain-only replay should be surfaced honestly as a mismatch against the broader escalation expectation.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Exercise replay_mismatch behavior on a governed archival challenge case instead of only clean-match references.
+    known_limitations:
+      - governed_archival_replay_intentionally_constrained_to_information_domain_records_to_exercise_mismatch_behavior
       - curated_historical_observed_outcome_not_generated_by_runtime_replay
     validation_metrics: [Domain Match, Status Match]
 

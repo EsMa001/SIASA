@@ -14,7 +14,9 @@ def test_load_archival_replay_manifest_reads_provider_backed_case_entries() -> N
     assert [entry.case_id for entry in manifest] == [
         "VAL-UKR-2022-001",
         "VAL-POL-2023-001",
+        "VAL-POL-2024-002",
         "VAL-ISR-2023-001",
+        "VAL-ISR-2024-002",
         "VAL-TWN-2024-001",
     ]
     assert manifest[0].review_basis == "provider_backed_archival_replay"
@@ -84,13 +86,17 @@ def test_load_governed_historical_replay_inputs_prefers_archival_provider_backed
 
     assert sorted(replay_inputs) == [
         "VAL-ISR-2023-001",
+        "VAL-ISR-2024-002",
         "VAL-POL-2023-001",
+        "VAL-POL-2024-002",
         "VAL-TWN-2024-001",
         "VAL-UKR-2022-001",
     ]
     assert replay_inputs["VAL-UKR-2022-001"].review_basis == "provider_backed_archival_replay"
     assert replay_inputs["VAL-POL-2023-001"].review_basis == "provider_backed_archival_replay"
+    assert replay_inputs["VAL-POL-2024-002"].review_basis == "provider_backed_archival_replay"
     assert replay_inputs["VAL-ISR-2023-001"].review_basis == "provider_backed_archival_replay"
+    assert replay_inputs["VAL-ISR-2024-002"].review_basis == "provider_backed_archival_replay"
     assert replay_inputs["VAL-TWN-2024-001"].review_basis == "provider_backed_archival_replay"
     assert replay_inputs["VAL-UKR-2022-001"].replay_input_source_ids == [
         "SRC-GDACS",
@@ -105,8 +111,16 @@ def test_load_governed_historical_replay_inputs_prefers_archival_provider_backed
     assert replay_inputs["VAL-UKR-2022-001"].provenance_notes
     assert len(replay_inputs["VAL-UKR-2022-001"].normalized_records) == 8
     assert len(replay_inputs["VAL-POL-2023-001"].normalized_records) == 8
+    assert len(replay_inputs["VAL-POL-2024-002"].normalized_records) == 5
     assert len(replay_inputs["VAL-ISR-2023-001"].normalized_records) == 8
+    assert len(replay_inputs["VAL-ISR-2024-002"].normalized_records) == 2
     assert len(replay_inputs["VAL-TWN-2024-001"].normalized_records) == 4
+    assert replay_inputs["VAL-POL-2024-002"].replay_input_source_ids == [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+    ]
+    assert replay_inputs["VAL-ISR-2024-002"].replay_input_source_ids == ["SRC-GDELT-DOC"]
 
 
 
@@ -129,7 +143,7 @@ validation_cases:
     expected_domains: [A, B, D]
     expected_status: S3
     expected_signal_pattern: test
-    reference_sources: [SRC-GDELT-DOC]
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, WB-INDICATORS]
     validation_goal: test
     known_limitations: [test]
     validation_metrics: [Domain Match]
@@ -236,7 +250,7 @@ archival_replay_cases:
 
 
 
-def test_load_governed_historical_replay_inputs_rejects_reference_source_mismatch(tmp_path: Path) -> None:
+def test_load_governed_historical_replay_inputs_allows_archival_sources_to_be_a_reference_source_subset(tmp_path: Path) -> None:
     repo_root = tmp_path / "repo"
     (repo_root / "vmodel" / "verification" / "archival_replay_inputs").mkdir(parents=True)
     (repo_root / "vmodel" / "verification" / "validation_replay_inputs.yaml").write_text(
@@ -255,7 +269,7 @@ validation_cases:
     expected_domains: [A, B, D]
     expected_status: S3
     expected_signal_pattern: test
-    reference_sources: [SRC-GDELT-DOC]
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, WB-INDICATORS]
     validation_goal: test
     known_limitations: [test]
     validation_metrics: [Domain Match]
@@ -303,5 +317,9 @@ archival_replay_cases:
         encoding="utf-8",
     )
 
-    with pytest.raises(ValueError, match="reference source mismatch for case_id=VAL-UKR-2022-001"):
-        load_governed_historical_replay_inputs(repo_root)
+    replay_inputs = load_governed_historical_replay_inputs(repo_root)
+
+    assert replay_inputs["VAL-UKR-2022-001"].replay_input_source_ids == [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+    ]

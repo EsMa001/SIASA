@@ -358,6 +358,31 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 "replay_input_record_count": 8,
             },
             {
+                "case_id": "VAL-POL-2024-002",
+                "country_id": "POL",
+                "review_basis": "provider_backed_archival_replay",
+                "replay_input_source_ids": ["SRC-GDACS", "SRC-GDELT-DOC", "SRC-GDELT-EVENTS"],
+                "replay_input_country_ids": ["POL"],
+                "archival_data_files": ["archival_replay_inputs/VAL-POL-2024-002.json"],
+                "provenance_notes": "Provider-derived archival normalized-record bundle intentionally captured with no usable governed Domain D record to exercise replay gap behavior.",
+                "replay_known_limitations": [
+                    "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime",
+                    "governed_archival_bundle_intentionally_omits_domain_d_records_to_exercise_partial_replay_behavior",
+                ],
+                "replay_source_coverage_ratio": 0.75,
+                "replay_provenance_completeness_ratio": 1.0,
+                "replay_evidence_score": 0.85,
+                "replay_evidence_tier": "strong_replay_evidence",
+                "replayed_status": "S3",
+                "expected_status": "S3",
+                "status_match": True,
+                "expected_domains": ["A", "B", "D"],
+                "replayed_domains": ["A", "B"],
+                "domain_match_ratio": 2 / 3,
+                "review_verdict": "replay_match_with_gaps",
+                "replay_input_record_count": 5,
+            },
+            {
                 "case_id": "VAL-ISR-2023-001",
                 "country_id": "ISR",
                 "review_basis": "provider_backed_archival_replay",
@@ -378,6 +403,31 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 "domain_match_ratio": 1.0,
                 "review_verdict": "replay_match",
                 "replay_input_record_count": 8,
+            },
+            {
+                "case_id": "VAL-ISR-2024-002",
+                "country_id": "ISR",
+                "review_basis": "provider_backed_archival_replay",
+                "replay_input_source_ids": ["SRC-GDELT-DOC"],
+                "replay_input_country_ids": ["ISR"],
+                "archival_data_files": ["archival_replay_inputs/VAL-ISR-2024-002.json"],
+                "provenance_notes": "Provider-derived archival normalized-record bundle intentionally constrained to information-domain evidence to exercise replay mismatch behavior.",
+                "replay_known_limitations": [
+                    "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime",
+                    "governed_archival_bundle_intentionally_constrained_to_information_domain_records_to_exercise_mismatch_behavior",
+                ],
+                "replay_source_coverage_ratio": 0.25,
+                "replay_provenance_completeness_ratio": 1.0,
+                "replay_evidence_score": 0.25,
+                "replay_evidence_tier": "weak_replay_evidence",
+                "replayed_status": "S1",
+                "expected_status": "S3",
+                "status_match": False,
+                "expected_domains": ["A", "B", "D"],
+                "replayed_domains": ["A"],
+                "domain_match_ratio": 1 / 3,
+                "review_verdict": "replay_mismatch",
+                "replay_input_record_count": 2,
             },
             {
                 "case_id": "VAL-TWN-2024-001",
@@ -403,27 +453,33 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             },
         ],
         "historical_replay_summary": {
-            "case_count": 4,
+            "case_count": 6,
             "countries_covered": ["ISR", "POL", "TWN", "UKR"],
-            "review_verdict_counts": {"replay_match": 4},
-            "status_match_count": 4,
-            "average_domain_match_ratio": 1.0,
-            "average_replay_evidence_score": 1.0,
-            "average_replay_source_coverage_ratio": 1.0,
+            "review_verdict_counts": {
+                "replay_match": 4,
+                "replay_match_with_gaps": 1,
+                "replay_mismatch": 1,
+            },
+            "status_match_count": 5,
+            "average_domain_match_ratio": 0.83,
+            "average_replay_evidence_score": 0.85,
+            "average_replay_source_coverage_ratio": 0.83,
             "average_replay_provenance_completeness_ratio": 1.0,
-            "replay_input_record_total": 28,
-            "archival_data_file_count": 4,
+            "replay_input_record_total": 35,
+            "archival_data_file_count": 6,
             "replay_evidence_tier_counts": {
+                "strong_replay_evidence": 1,
                 "verified_replay_evidence": 4,
+                "weak_replay_evidence": 1,
             },
             "replay_input_source_coverage_counts": {
-                "SRC-GDACS": 4,
-                "SRC-GDELT-DOC": 4,
-                "SRC-GDELT-EVENTS": 4,
+                "SRC-GDACS": 5,
+                "SRC-GDELT-DOC": 6,
+                "SRC-GDELT-EVENTS": 5,
                 "WB-INDICATORS": 3,
             },
             "review_basis_counts": {
-                "provider_backed_archival_replay": 4,
+                "provider_backed_archival_replay": 6,
             },
         },
     }
@@ -663,8 +719,12 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Historical Replay Summary" in validation_html
     assert "Historical Replay Reviews" in validation_html
     assert "replay_match" in validation_html
+    assert "replay_match_with_gaps" in validation_html
+    assert "replay_mismatch" in validation_html
     assert "provider_backed_archival_replay" in validation_html
+    assert "strong_replay_evidence" in validation_html
     assert "verified_replay_evidence" in validation_html
+    assert "weak_replay_evidence" in validation_html
     assert "Average Replay Evidence Score" in validation_html
     assert "Replay Evidence Tiers" in validation_html
     assert "Replay Input Record Total" in validation_html

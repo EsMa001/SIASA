@@ -1,0 +1,22 @@
+{
+  "normalized_records": [
+    {
+      "country_id": "ISR",
+      "timestamp": "2024-06-12T08:00:00Z",
+      "domain": "A",
+      "signal_key": "article_count",
+      "value": 11,
+      "provenance_source_id": "SRC-GDELT-DOC",
+      "quality_context": {"freshness_hours": 5}
+    },
+    {
+      "country_id": "ISR",
+      "timestamp": "2024-06-12T08:00:00Z",
+      "domain": "A",
+      "signal_key": "tone",
+      "value": -1.0,
+      "provenance_source_id": "SRC-GDELT-DOC",
+      "quality_context": {"freshness_hours": 5}
+    }
+  ]
+}
