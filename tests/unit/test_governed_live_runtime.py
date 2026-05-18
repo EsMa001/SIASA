@@ -1093,8 +1093,7 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
         "status_match_count": 4,
         "average_domain_match_ratio": 1.0,
         "review_basis_counts": {
-            "fixture_backed_historical_replay": 2,
-            "provider_backed_archival_replay": 2,
+            "provider_backed_archival_replay": 4,
         },
     }
     assert [review["case_id"] for review in validation_backtest["historical_replay_reviews"]] == [

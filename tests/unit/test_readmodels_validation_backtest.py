@@ -195,7 +195,6 @@ def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> 
         "status_match_count": 4,
         "average_domain_match_ratio": 1.0,
         "review_basis_counts": {
-            "fixture_backed_historical_replay": 2,
-            "provider_backed_archival_replay": 2,
+            "provider_backed_archival_replay": 4,
         },
     }

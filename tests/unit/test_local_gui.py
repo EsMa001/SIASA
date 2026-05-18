@@ -342,7 +342,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             {
                 "case_id": "VAL-ISR-2023-001",
                 "country_id": "ISR",
-                "review_basis": "fixture_backed_historical_replay",
+                "review_basis": "provider_backed_archival_replay",
                 "replayed_status": "S3",
                 "expected_status": "S3",
                 "status_match": True,
@@ -355,7 +355,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             {
                 "case_id": "VAL-TWN-2024-001",
                 "country_id": "TWN",
-                "review_basis": "fixture_backed_historical_replay",
+                "review_basis": "provider_backed_archival_replay",
                 "replayed_status": "S1",
                 "expected_status": "S1",
                 "status_match": True,
@@ -373,8 +373,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             "status_match_count": 4,
             "average_domain_match_ratio": 1.0,
             "review_basis_counts": {
-                "fixture_backed_historical_replay": 2,
-                "provider_backed_archival_replay": 2,
+                "provider_backed_archival_replay": 4,
             },
         },
     }
@@ -614,7 +613,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Historical Replay Summary" in validation_html
     assert "Historical Replay Reviews" in validation_html
     assert "replay_match" in validation_html
-    assert "fixture_backed_historical_replay" in validation_html
+    assert "provider_backed_archival_replay" in validation_html
     assert "Replay Input Records" in validation_html
     assert "military_escalation" in validation_html
     assert "VAL-POL-2023-001" in validation_html

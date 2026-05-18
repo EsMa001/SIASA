@@ -109,14 +109,14 @@ Interpretation:
 - the old roadmap order was correct as a program scaffold
 - however, execution has now overtaken parts of the document
 - the critical remaining gap is no longer missing artifact completeness inside the current governed pilot, but how far runtime breadth and the validation/reference-case depth should be expanded next
-- the current validation view is now richer than a single-country runtime-support check because the artifact carries a multi-case portfolio summary, a curated repo-backed reference-case library, historical reference-review / evidence-scoring outputs, and a governed archival replay layer with mixed basis across the current 4-case library, but it is still not yet a fully provider-backed archival replay surface across all cases
+- the current validation view is now richer than a single-country runtime-support check because the artifact carries a multi-case portfolio summary, a curated repo-backed reference-case library, historical reference-review / evidence-scoring outputs, and a governed provider-backed archival replay layer across the full current 4-case library
 
 ## 3b. Updated planning horizon
 
 For time planning, the remaining work should be treated in three bands rather than as one flat backlog:
 
 - Near-term closure band:
-  - choose the next priority between expanding breadth beyond the now-complete core-focus subset into broader MVP/P2 scope and extending provider-backed archival replay beyond the current mixed-basis `UKR`/`POL` foundation
+  - choose the next priority between expanding breadth beyond the now-complete core-focus subset into broader MVP/P2 scope and enriching provider-backed archival replay provenance/acquisition rigor beyond the now-complete current curated library
 - Mid-term breadth/depth band:
   - expand from the current representative / `core-focus-initial` / `core-focus-expanded` / `core-focus-broader` / `core-focus-complete` governed subsets toward wider MVP coverage and/or deeper governed validation evidence
 - Later analyst-depth band:

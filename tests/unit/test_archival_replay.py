@@ -12,6 +12,8 @@ def test_load_archival_replay_manifest_reads_provider_backed_case_entries() -> N
     assert [entry.case_id for entry in manifest] == [
         "VAL-UKR-2022-001",
         "VAL-POL-2023-001",
+        "VAL-ISR-2023-001",
+        "VAL-TWN-2024-001",
     ]
     assert manifest[0].review_basis == "provider_backed_archival_replay"
     assert manifest[0].storage_mode == "archival_normalized_records"
@@ -19,7 +21,7 @@ def test_load_archival_replay_manifest_reads_provider_backed_case_entries() -> N
 
 
 
-def test_load_governed_historical_replay_inputs_prefers_archival_provider_backed_cases_and_falls_back_to_fixtures() -> None:
+def test_load_governed_historical_replay_inputs_prefers_archival_provider_backed_cases_for_all_curated_cases() -> None:
     repo_root = Path(__file__).resolve().parents[2]
 
     replay_inputs = load_governed_historical_replay_inputs(repo_root)
@@ -32,7 +34,9 @@ def test_load_governed_historical_replay_inputs_prefers_archival_provider_backed
     ]
     assert replay_inputs["VAL-UKR-2022-001"].review_basis == "provider_backed_archival_replay"
     assert replay_inputs["VAL-POL-2023-001"].review_basis == "provider_backed_archival_replay"
-    assert replay_inputs["VAL-ISR-2023-001"].review_basis == "fixture_backed_historical_replay"
-    assert replay_inputs["VAL-TWN-2024-001"].review_basis == "fixture_backed_historical_replay"
+    assert replay_inputs["VAL-ISR-2023-001"].review_basis == "provider_backed_archival_replay"
+    assert replay_inputs["VAL-TWN-2024-001"].review_basis == "provider_backed_archival_replay"
     assert len(replay_inputs["VAL-UKR-2022-001"].normalized_records) == 8
     assert len(replay_inputs["VAL-POL-2023-001"].normalized_records) == 8
+    assert len(replay_inputs["VAL-ISR-2023-001"].normalized_records) == 8
+    assert len(replay_inputs["VAL-TWN-2024-001"].normalized_records) == 4
