@@ -11,7 +11,7 @@ validation_cases:
     historical_observed_status: S3
     evidence_tier: verified_multi_source
     expected_signal_pattern: Aligned information, event, and economic stress escalation.
-    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, WB-INDICATORS]
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
     validation_goal: Check multi-domain alignment detection for the initial full-scale escalation window.
     known_limitations:
       - historical macro backfill still thinner than the full stakeholder target horizon

@@ -117,6 +117,12 @@ def build_historical_replay_summary(historical_replay_reviews: list[dict[str, ob
         for review in historical_replay_reviews
         if isinstance(review, dict) and review.get("review_basis")
     )
+    replay_input_source_coverage_counts = Counter(
+        str(source_id)
+        for review in historical_replay_reviews
+        if isinstance(review, dict)
+        for source_id in review.get("replay_input_source_ids", [])
+    )
     countries_covered = sorted(
         {
             str(review.get("country_id"))
@@ -132,12 +138,25 @@ def build_historical_replay_summary(historical_replay_reviews: list[dict[str, ob
     status_match_count = len(
         [review for review in historical_replay_reviews if isinstance(review, dict) and review.get("status_match") is True]
     )
+    replay_input_record_total = sum(
+        int(review.get("replay_input_record_count", 0))
+        for review in historical_replay_reviews
+        if isinstance(review, dict) and isinstance(review.get("replay_input_record_count"), (int, float))
+    )
+    archival_data_file_count = sum(
+        len([item for item in review.get("archival_data_files", []) if item])
+        for review in historical_replay_reviews
+        if isinstance(review, dict)
+    )
     return {
         "case_count": len([review for review in historical_replay_reviews if isinstance(review, dict)]),
         "countries_covered": countries_covered,
         "review_verdict_counts": dict(sorted(verdict_counts.items())),
         "status_match_count": status_match_count,
         "average_domain_match_ratio": round(sum(domain_match_ratios) / len(domain_match_ratios), 2) if domain_match_ratios else 0.0,
+        "replay_input_record_total": replay_input_record_total,
+        "archival_data_file_count": archival_data_file_count,
+        "replay_input_source_coverage_counts": dict(sorted(replay_input_source_coverage_counts.items())),
         "review_basis_counts": dict(sorted(review_basis_counts.items())),
     }
 

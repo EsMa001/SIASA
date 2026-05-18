@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import yaml
@@ -20,10 +20,25 @@ class HistoricalReplayInput:
     case_id: str
     review_basis: str
     normalized_records: list[NormalizedRecord]
+    replay_input_source_ids: list[str] = field(default_factory=list)
+    replay_input_country_ids: list[str] = field(default_factory=list)
+    archival_data_files: list[str] = field(default_factory=list)
+    provenance_notes: str = ""
+    known_limitations: list[str] = field(default_factory=list)
 
 
 _FEATURE_SERVICES = (DomainAFeatureService(), DomainBFeatureService(), DomainDFeatureService())
 _DOMAIN_ANOMALY_SCORES = {"A": 0.7, "B": 0.3, "D": 0.1}
+
+
+
+def _normalized_record_source_ids(normalized_records: list[NormalizedRecord]) -> list[str]:
+    return sorted({str(record.provenance_source_id) for record in normalized_records if record.provenance_source_id})
+
+
+
+def _normalized_record_country_ids(normalized_records: list[NormalizedRecord]) -> list[str]:
+    return sorted({str(record.country_id) for record in normalized_records if record.country_id})
 
 
 
@@ -64,6 +79,8 @@ def load_historical_replay_inputs(path: Path) -> dict[str, HistoricalReplayInput
             case_id=case_id,
             review_basis=review_basis,
             normalized_records=normalized_records,
+            replay_input_source_ids=_normalized_record_source_ids(normalized_records),
+            replay_input_country_ids=_normalized_record_country_ids(normalized_records),
         )
     return loaded
 
@@ -132,6 +149,11 @@ def build_historical_replay_reviews(
                 "case_id": validation_case.case_id,
                 "country_id": validation_case.country_id,
                 "review_basis": replay_input.review_basis,
+                "replay_input_source_ids": list(replay_input.replay_input_source_ids),
+                "replay_input_country_ids": list(replay_input.replay_input_country_ids),
+                "archival_data_files": list(replay_input.archival_data_files),
+                "provenance_notes": replay_input.provenance_notes,
+                "replay_known_limitations": list(replay_input.known_limitations),
                 "replayed_status": replayed_status,
                 "expected_status": validation_case.expected_status,
                 "status_match": status_match,

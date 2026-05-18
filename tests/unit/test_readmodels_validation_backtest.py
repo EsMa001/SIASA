@@ -194,6 +194,14 @@ def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> 
         },
         "status_match_count": 4,
         "average_domain_match_ratio": 1.0,
+        "replay_input_record_total": 28,
+        "archival_data_file_count": 4,
+        "replay_input_source_coverage_counts": {
+            "SRC-GDACS": 4,
+            "SRC-GDELT-DOC": 4,
+            "SRC-GDELT-EVENTS": 4,
+            "WB-INDICATORS": 3,
+        },
         "review_basis_counts": {
             "provider_backed_archival_replay": 4,
         },
