@@ -28,12 +28,15 @@ _SUPPORTED_LIVE_PILOT_COUNTRIES = {
     "RUS": {"gdelt_query": "Russia", "gdelt_code": "RS"},
     "CHN": {"gdelt_query": "China", "gdelt_code": "CH"},
     "IND": {"gdelt_query": "India", "gdelt_code": "IN"},
+    "IRN": {"gdelt_query": "Iran", "gdelt_code": "IR"},
+    "TUR": {"gdelt_query": "Turkey", "gdelt_code": "TU"},
 }
 
 _REPRESENTATIVE_LIVE_PILOT_SET = ("UKR", "POL", "ISR", "TWN")
 _CORE_FOCUS_INITIAL_LIVE_PILOT_SET = ("UKR", "RUS", "CHN", "TWN", "ISR", "POL")
 _CORE_FOCUS_EXPANDED_LIVE_PILOT_SET = ("UKR", "RUS", "CHN", "TWN", "ISR", "IND", "POL")
-_WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = ("UKR", "POL", "ISR", "RUS", "CHN", "IND")
+_CORE_FOCUS_BROADER_LIVE_PILOT_SET = ("UKR", "RUS", "CHN", "TWN", "IRN", "ISR", "TUR", "IND", "POL")
+_WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = ("UKR", "POL", "ISR", "RUS", "CHN", "IND", "IRN", "TUR")
 _MULTI_COUNTRY_GDELT_EVENTS_RECENT_EXPORT_COUNT = 8
 _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
     "UKR": ["A", "B", "D"],
@@ -43,11 +46,14 @@ _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
     "RUS": ["A", "B", "D"],
     "CHN": ["A", "B", "D"],
     "IND": ["A", "B", "D"],
+    "IRN": ["A", "B", "D"],
+    "TUR": ["A", "B", "D"],
 }
 _NAMED_LIVE_PILOT_SETS = {
     "representative": _REPRESENTATIVE_LIVE_PILOT_SET,
     "core-focus-initial": _CORE_FOCUS_INITIAL_LIVE_PILOT_SET,
     "core-focus-expanded": _CORE_FOCUS_EXPANDED_LIVE_PILOT_SET,
+    "core-focus-broader": _CORE_FOCUS_BROADER_LIVE_PILOT_SET,
 }
 
 
@@ -466,7 +472,7 @@ def main(argv: list[str] | None = None) -> int:
         dest="country_ids",
         help=(
             "Governed live pilot country ISO3. Repeat for multi-country runs; "
-            "supported: UKR, POL, ISR, TWN, RUS, CHN, IND."
+            "supported: UKR, POL, ISR, TWN, RUS, CHN, IND, IRN, TUR."
         ),
     )
     parser.add_argument(
@@ -476,7 +482,8 @@ def main(argv: list[str] | None = None) -> int:
             "Named governed live pilot subset. "
             "'representative' expands to UKR,POL,ISR,TWN; "
             "'core-focus-initial' expands to UKR,RUS,CHN,TWN,ISR,POL; "
-            "'core-focus-expanded' expands to UKR,RUS,CHN,TWN,ISR,IND,POL."
+            "'core-focus-expanded' expands to UKR,RUS,CHN,TWN,ISR,IND,POL; "
+            "'core-focus-broader' expands to UKR,RUS,CHN,TWN,IRN,ISR,TUR,IND,POL."
         ),
     )
     parser.add_argument(
