@@ -1085,20 +1085,22 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
         "VAL-TWN-2024-001",
     ]
     assert validation_backtest["historical_replay_summary"] == {
-        "case_count": 2,
-        "countries_covered": ["POL", "UKR"],
+        "case_count": 4,
+        "countries_covered": ["ISR", "POL", "TWN", "UKR"],
         "review_verdict_counts": {
-            "replay_match": 2,
+            "replay_match": 4,
         },
-        "status_match_count": 2,
+        "status_match_count": 4,
         "average_domain_match_ratio": 1.0,
         "review_basis_counts": {
-            "fixture_backed_historical_replay": 2,
+            "fixture_backed_historical_replay": 4,
         },
     }
     assert [review["case_id"] for review in validation_backtest["historical_replay_reviews"]] == [
         "VAL-UKR-2022-001",
         "VAL-POL-2023-001",
+        "VAL-ISR-2023-001",
+        "VAL-TWN-2024-001",
     ]
     assert [case["case_id"] for case in validation_backtest["reference_case_library"]] == [
         "VAL-UKR-2022-001",

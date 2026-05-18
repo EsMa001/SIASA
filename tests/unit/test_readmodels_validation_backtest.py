@@ -182,16 +182,18 @@ def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> 
     assert [review["case_id"] for review in reviews] == [
         "VAL-UKR-2022-001",
         "VAL-POL-2023-001",
+        "VAL-ISR-2023-001",
+        "VAL-TWN-2024-001",
     ]
     assert summary == {
-        "case_count": 2,
-        "countries_covered": ["POL", "UKR"],
+        "case_count": 4,
+        "countries_covered": ["ISR", "POL", "TWN", "UKR"],
         "review_verdict_counts": {
-            "replay_match": 2,
+            "replay_match": 4,
         },
-        "status_match_count": 2,
+        "status_match_count": 4,
         "average_domain_match_ratio": 1.0,
         "review_basis_counts": {
-            "fixture_backed_historical_replay": 2,
+            "fixture_backed_historical_replay": 4,
         },
     }

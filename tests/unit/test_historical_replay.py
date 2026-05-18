@@ -10,9 +10,16 @@ def test_load_historical_replay_inputs_reads_fixture_backed_cases_from_repo_yaml
         Path(__file__).resolve().parents[2] / "vmodel" / "verification" / "validation_replay_inputs.yaml"
     )
 
-    assert sorted(replay_inputs) == ["VAL-POL-2023-001", "VAL-UKR-2022-001"]
+    assert sorted(replay_inputs) == [
+        "VAL-ISR-2023-001",
+        "VAL-POL-2023-001",
+        "VAL-TWN-2024-001",
+        "VAL-UKR-2022-001",
+    ]
     assert replay_inputs["VAL-UKR-2022-001"].review_basis == "fixture_backed_historical_replay"
     assert len(replay_inputs["VAL-UKR-2022-001"].normalized_records) == 8
+    assert len(replay_inputs["VAL-ISR-2023-001"].normalized_records) == 8
+    assert len(replay_inputs["VAL-TWN-2024-001"].normalized_records) == 4
 
 
 
@@ -53,5 +60,35 @@ def test_build_historical_replay_reviews_executes_replay_against_fixture_backed_
             "missing_expected_domains": [],
             "unexpected_observed_domains": [],
             "replay_input_record_count": 8,
+        },
+        {
+            "case_id": "VAL-ISR-2023-001",
+            "country_id": "ISR",
+            "review_basis": "fixture_backed_historical_replay",
+            "replayed_status": "S3",
+            "expected_status": "S3",
+            "status_match": True,
+            "expected_domains": ["A", "B", "D"],
+            "replayed_domains": ["A", "B", "D"],
+            "domain_match_ratio": 1.0,
+            "review_verdict": "replay_match",
+            "missing_expected_domains": [],
+            "unexpected_observed_domains": [],
+            "replay_input_record_count": 8,
+        },
+        {
+            "case_id": "VAL-TWN-2024-001",
+            "country_id": "TWN",
+            "review_basis": "fixture_backed_historical_replay",
+            "replayed_status": "S1",
+            "expected_status": "S1",
+            "status_match": True,
+            "expected_domains": ["A", "B"],
+            "replayed_domains": ["A", "B"],
+            "domain_match_ratio": 1.0,
+            "review_verdict": "replay_match",
+            "missing_expected_domains": [],
+            "unexpected_observed_domains": [],
+            "replay_input_record_count": 4,
         },
     ]
