@@ -12,7 +12,7 @@ from siasa.data.normalization_service import normalize_records
 from siasa.features.domain_a import DomainAFeatureService
 from siasa.features.domain_b import DomainBFeatureService
 from siasa.features.domain_d import DomainDFeatureService
-from siasa.readmodels.validation_backtest import build_validation_backtest_read_model
+from siasa.readmodels.validation_backtest import build_validation_backtest_read_model, build_validation_portfolio_summary
 from siasa.runs.orchestrator import DailyRunOrchestrator, DailyRunResult
 from siasa.scoring.data_sufficiency import evaluate_data_sufficiency
 from siasa.scoring.domain_status import derive_domain_status
@@ -177,6 +177,8 @@ def _build_live_runtime_validation_view_model(
     country_multi_domain_statuses,
     snapshot,
     country_expected_domains: dict[str, list[str]] | None = None,
+    validation_cases: list[dict[str, object]] | None = None,
+    portfolio_summary: dict[str, object] | None = None,
 ) -> dict[str, object] | None:
     country_records = [record for record in normalized_records if record.country_id == primary_country_id]
     observed_domains = sorted(country_domain_statuses.get(primary_country_id, {}).keys())
@@ -220,11 +222,29 @@ def _build_live_runtime_validation_view_model(
         validation_case=validation_case,
         comparison=comparison,
         reprocessing_comparison={},
+        validation_cases=validation_cases,
+        portfolio_summary=portfolio_summary,
     )
     validation_view_model["comparison_mode"] = "runtime_support_check"
     validation_view_model["snapshot_id"] = snapshot.snapshot_id
     validation_view_model["run_id"] = run_state.run_id
     return validation_view_model
+
+
+
+def _validation_candidate_country_ids(
+    resolved_country_ids: tuple[str, ...],
+    normalized_records,
+    country_domain_statuses,
+    country_multi_domain_statuses,
+) -> list[str]:
+    return [
+        country_id
+        for country_id in resolved_country_ids
+        if country_id in country_multi_domain_statuses
+        and any(record.country_id == country_id for record in normalized_records)
+        and country_domain_statuses.get(country_id)
+    ]
 
 
 
@@ -373,20 +393,33 @@ def build_governed_live_orchestrator(
         country_multi_domain_statuses,
         snapshot,
     ) -> dict[str, object] | None:
-        validation_country_id = next(
-            (
-                country_id
-                for country_id in resolved_country_ids
-                if country_id in country_multi_domain_statuses
-                and any(record.country_id == country_id for record in normalized_records)
-                and country_domain_statuses.get(country_id)
-            ),
-            None,
+        validation_country_ids = _validation_candidate_country_ids(
+            resolved_country_ids,
+            normalized_records,
+            country_domain_statuses,
+            country_multi_domain_statuses,
         )
-        if validation_country_id is None:
+        if not validation_country_ids:
             return None
+        validation_cases = [
+            _build_live_runtime_validation_view_model(
+                country_id,
+                active_domains,
+                run_state,
+                normalized_records,
+                country_domain_statuses,
+                country_multi_domain_statuses,
+                snapshot,
+                country_expected_domains,
+            )
+            for country_id in validation_country_ids
+        ]
+        validation_cases = [case for case in validation_cases if case is not None]
+        if not validation_cases:
+            return None
+        portfolio_summary = build_validation_portfolio_summary(validation_cases)
         return _build_live_runtime_validation_view_model(
-            validation_country_id,
+            validation_country_ids[0],
             active_domains,
             run_state,
             normalized_records,
@@ -394,6 +427,8 @@ def build_governed_live_orchestrator(
             country_multi_domain_statuses,
             snapshot,
             country_expected_domains,
+            validation_cases=validation_cases,
+            portfolio_summary=portfolio_summary,
         )
 
     return DailyRunOrchestrator(

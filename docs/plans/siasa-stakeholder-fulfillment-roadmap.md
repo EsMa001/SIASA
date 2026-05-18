@@ -109,6 +109,7 @@ Interpretation:
 - the old roadmap order was correct as a program scaffold
 - however, execution has now overtaken parts of the document
 - the critical remaining gap is no longer missing artifact completeness inside the current governed pilot, but how far runtime breadth and the validation/reference-case depth should be expanded next
+- the current validation view is now richer than a single-country runtime-support check because the artifact also carries a multi-case portfolio summary, but it is still not yet a historical reference-case library
 
 ## 3b. Updated planning horizon
 

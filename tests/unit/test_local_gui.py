@@ -227,6 +227,28 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
         "validation_metrics": ["Domain Match", "Status Match"],
         "known_limitations": ["historical coverage incomplete"],
         "reprocessing_comparison": {"prior_snapshot_id": "SNAP-RUN-001-v1", "new_snapshot_id": "SNAP-RUN-001-v2", "changed_versions": ["rule_version"]},
+        "validation_cases": [
+            {
+                "case_id": "VAL-UKR-2022-001",
+                "country_id": "UKR",
+                "review_verdict": "match_with_gaps",
+                "expected_domains": ["A", "B", "D"],
+                "observed_domains": ["A", "B"],
+            },
+            {
+                "case_id": "VAL-POL-2022-001",
+                "country_id": "POL",
+                "review_verdict": "match",
+                "expected_domains": ["A", "B"],
+                "observed_domains": ["A", "B"],
+            },
+        ],
+        "portfolio_summary": {
+            "case_count": 2,
+            "countries_covered": ["POL", "UKR"],
+            "review_verdict_counts": {"match": 1, "match_with_gaps": 1},
+            "cases_with_gaps": [{"case_id": "VAL-UKR-2022-001", "country_id": "UKR", "review_verdict": "match_with_gaps"}],
+        },
     }
     system_status = {
         "run_id": "RUN-200",
@@ -452,9 +474,13 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "VAL-UKR-2022-001" in validation_html
     assert "Domain Match" in validation_html
     assert "Review Summary" in validation_html
-    assert "match_with_gaps" in validation_html
-    assert "Missing Expected Domains" in validation_html
-    assert "D" in validation_html
+    assert "Reference Case Portfolio Summary" in validation_html
+    assert "Validation Case Portfolio" in validation_html
+    assert "VAL-POL-2022-001" in validation_html
+    assert "POL, UKR" in validation_html
+
+    traceability_html = (pages.output_dir / "traceability.html").read_text()
+
     assert "Changed Versions" in validation_html
 
     readiness_html = (pages.output_dir / "readiness.html").read_text()

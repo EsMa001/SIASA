@@ -1047,6 +1047,13 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
     assert validation_backtest["observed_domains"] == ["A", "B", "D"]
     assert validation_backtest["status_match"] is None
     assert validation_backtest["review_verdict"] == "support_check"
+    assert validation_backtest["portfolio_summary"] == {
+        "case_count": 2,
+        "countries_covered": ["POL", "UKR"],
+        "review_verdict_counts": {"support_check": 2},
+        "cases_with_gaps": [],
+    }
+    assert [case["country_id"] for case in validation_backtest["validation_cases"]] == ["UKR", "POL"]
     assert "pilot_runtime_support_case_not_historical_backtest" in validation_backtest["known_limitations"]
     assert pol_profile["country_context"] == {
         "country_name": "Poland",

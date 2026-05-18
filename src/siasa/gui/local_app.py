@@ -1588,6 +1588,22 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
             review_verdict = 'match_with_gaps'
         else:
             review_verdict = 'mismatch'
+    validation_cases = [item for item in validation_view_model.get('validation_cases', []) if isinstance(item, dict)]
+    portfolio_summary = validation_view_model.get('portfolio_summary', {}) if isinstance(validation_view_model.get('portfolio_summary', {}), dict) else {}
+    verdict_count_rows = ''.join(
+        f"<tr><td>{html.escape(str(verdict))}</td><td>{html.escape(str(count))}</td></tr>"
+        for verdict, count in sorted((portfolio_summary.get('review_verdict_counts') or {}).items())
+    ) or "<tr><td colspan='2'>No portfolio verdict counts.</td></tr>"
+    portfolio_case_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(case.get('country_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(case.get('case_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(case.get('review_verdict', 'n/a')))}</td>"
+        f"<td>{html.escape(', '.join(str(item) for item in case.get('expected_domains', [])))}</td>"
+        f"<td>{html.escape(', '.join(str(item) for item in case.get('observed_domains', [])))}</td>"
+        "</tr>"
+        for case in validation_cases
+    ) or "<tr><td colspan='5'>No portfolio cases available.</td></tr>"
     changed_versions = ''.join(
         f"<li>{html.escape(str(item))}</li>"
         for item in reprocessing.get('changed_versions', [])
@@ -1619,6 +1635,14 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         f"<h3>Reference Sources</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in validation_view_model.get('reference_sources', []))}</ul>"
         f"<h3>Validation Metrics</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in validation_view_model.get('validation_metrics', []))}</ul>"
         f"<h3>Known Limitations</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in validation_view_model.get('known_limitations', []))}</ul>"
+        "<h3>Reference Case Portfolio Summary</h3>"
+        f"<p>Validation Cases: <strong>{html.escape(str(portfolio_summary.get('case_count', len(validation_cases))))}</strong></p>"
+        f"<p>Countries Covered: {html.escape(', '.join(str(item) for item in portfolio_summary.get('countries_covered', [])))}</p>"
+        "<table><thead><tr><th>Review Verdict</th><th>Count</th></tr></thead>"
+        f"<tbody>{verdict_count_rows}</tbody></table>"
+        "<h3>Validation Case Portfolio</h3>"
+        "<table><thead><tr><th>Country</th><th>Case ID</th><th>Review Verdict</th><th>Expected Domains</th><th>Observed Domains</th></tr></thead>"
+        f"<tbody>{portfolio_case_rows}</tbody></table>"
         "<h3>Changed Versions</h3>"
         f"<ul>{changed_versions}</ul>"
         f"<h3>Reprocessing Comparison</h3>{_json_block(reprocessing)}"

@@ -1,4 +1,4 @@
-from siasa.readmodels.validation_backtest import build_validation_backtest_read_model
+from siasa.readmodels.validation_backtest import build_validation_backtest_read_model, build_validation_portfolio_summary
 from siasa.runs.reprocessing import build_reprocessing_comparison
 from siasa.validation.cases import ValidationCase, compare_expected_vs_observed
 
@@ -79,3 +79,39 @@ def test_validation_backtest_read_model_marks_runtime_support_checks_without_sta
 
     assert read_model["status_match"] is None
     assert read_model["review_verdict"] == "support_check"
+
+
+
+def test_validation_backtest_portfolio_summary_aggregates_case_counts_verdicts_and_gap_cases() -> None:
+    portfolio = build_validation_portfolio_summary(
+        [
+            {
+                "case_id": "VAL-UKR-LIVE-PILOT-SUPPORT",
+                "country_id": "UKR",
+                "review_verdict": "support_check",
+            },
+            {
+                "case_id": "VAL-POL-LIVE-PILOT-SUPPORT",
+                "country_id": "POL",
+                "review_verdict": "support_check_with_gaps",
+            },
+            {
+                "case_id": "VAL-ISR-LIVE-PILOT-SUPPORT",
+                "country_id": "ISR",
+                "review_verdict": "support_check",
+            },
+        ]
+    )
+
+    assert portfolio == {
+        "case_count": 3,
+        "countries_covered": ["ISR", "POL", "UKR"],
+        "review_verdict_counts": {"support_check": 2, "support_check_with_gaps": 1},
+        "cases_with_gaps": [
+            {
+                "case_id": "VAL-POL-LIVE-PILOT-SUPPORT",
+                "country_id": "POL",
+                "review_verdict": "support_check_with_gaps",
+            }
+        ],
+    }
