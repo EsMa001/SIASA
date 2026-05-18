@@ -438,6 +438,28 @@ def test_run_governed_live_pipeline_retries_after_gdelt_doc_only_partial_success
 
 
 
+def test_run_governed_live_pipeline_uses_extra_default_retry_budget_for_core_focus_expanded_gdelt_doc_recovery() -> None:
+    sleep_calls: list[float] = []
+    first = FakePipelineResult(FakePipelineRunState("RUN-EXP-RETRY", "partial_success", ["SRC-GDELT-DOC"]))
+    second = FakePipelineResult(FakePipelineRunState("RUN-EXP-RETRY", "partial_success", ["SRC-GDELT-DOC"]))
+    third = FakePipelineResult(FakePipelineRunState("RUN-EXP-RETRY", "success", []))
+    factory = SequenceOrchestratorFactory([first, second, third])
+
+    result = run_governed_live_pipeline(
+        repo_root=REPO_ROOT,
+        run_id="RUN-EXP-RETRY",
+        pilot_set="core-focus-expanded",
+        orchestrator_factory=factory,
+        pipeline_retry_sleep=sleep_calls.append,
+        pipeline_retry_cooldown_seconds=40.0,
+    )
+
+    assert result.run_state.status == "success"
+    assert sleep_calls == [40.0, 40.0]
+    assert len(factory.calls) == 3
+
+
+
 def test_run_governed_live_pipeline_retries_after_isolated_pol_domain_b_gap_for_multi_country(tmp_path: Path) -> None:
     def _write_system_status(output_dir: Path, country_gap_rows: list[dict[str, object]]) -> FakeArtifactBundle:
         readmodels_dir = output_dir / "readmodels"

@@ -398,6 +398,13 @@ def build_governed_live_orchestrator(
 
 
 
+def _default_pipeline_retry_budget(requested_country_ids: tuple[str, ...]) -> int:
+    if len(requested_country_ids) >= 7:
+        return 2
+    return 1
+
+
+
 def run_governed_live_pipeline(
     *,
     repo_root: Path,
@@ -409,14 +416,19 @@ def run_governed_live_pipeline(
     orchestrator_factory: Callable[..., object] = build_governed_live_orchestrator,
     pipeline_retry_sleep: Callable[[float], None] = sleep,
     pipeline_retry_cooldown_seconds: float = 40.0,
-    max_pipeline_retries: int = 1,
+    max_pipeline_retries: int | None = None,
 ) -> DailyRunResult:
     resolved_country_ids = _resolve_requested_country_ids(country_id, country_ids, pilot_set)
+    effective_max_pipeline_retries = (
+        max_pipeline_retries
+        if max_pipeline_retries is not None
+        else _default_pipeline_retry_budget(resolved_country_ids)
+    )
     requested_country_ids_for_factory = None if pilot_set is not None else resolved_country_ids
     requested_pilot_set_for_factory = pilot_set if pilot_set is not None else None
     current_output_dir = output_dir
     last_result: DailyRunResult | None = None
-    for pipeline_attempt in range(max_pipeline_retries + 1):
+    for pipeline_attempt in range(effective_max_pipeline_retries + 1):
         orchestrator = orchestrator_factory(
             repo_root=repo_root,
             country_id=resolved_country_ids[0],
@@ -431,7 +443,7 @@ def run_governed_live_pipeline(
             or _should_retry_pipeline_after_isolated_pol_domain_b_gap(result, resolved_country_ids)
         ):
             return result
-        if pipeline_attempt == max_pipeline_retries:
+        if pipeline_attempt == effective_max_pipeline_retries:
             return result
         pipeline_retry_sleep(pipeline_retry_cooldown_seconds)
     assert last_result is not None

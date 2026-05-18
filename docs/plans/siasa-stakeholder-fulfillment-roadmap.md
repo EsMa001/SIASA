@@ -89,7 +89,7 @@ Current repo-evidenced status on branch `hermes/repo-scaffold`:
   - representative evidence covers `UKR`, `POL`, `ISR`, and `TWN`
   - TWN is explicitly scoped to A/B in the governed pilot rather than surfacing as a misleading D-gap
   - a broader named `core-focus-initial` pilot set runs successfully with `UKR`, `RUS`, `CHN`, `TWN`, `ISR`, and `POL`
-  - a further `core-focus-expanded` subset now also adds `IND`, but this broader subset still has an honestly surfaced residual `POL/B` release-gap pattern in live evidence
+  - a further `core-focus-expanded` subset now also adds `IND`, and the broader 7-country subset has a successful `release_verdict=ready` probe after the extra GDELT DOC recovery-budget hardening
 - P3 is strongly advanced:
   - artifact-backed trend charts exist
   - world-map visualization exists
