@@ -1054,31 +1054,31 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
         "cases_with_gaps": [],
     }
     assert validation_backtest["reference_case_library_summary"] == {
-        "case_count": 6,
-        "countries_covered": ["ISR", "POL", "TWN", "UKR"],
+        "case_count": 8,
+        "countries_covered": ["GEO", "ISR", "PAK", "POL", "TWN", "UKR"],
         "case_type_counts": {
             "disinformation_spike": 1,
-            "hybrid_pressure": 2,
+            "hybrid_pressure": 3,
             "military_escalation": 1,
-            "strategic_posturing": 2,
+            "strategic_posturing": 3,
         },
         "time_range": {"start": "2022-02-01", "end": "2024-06-30"},
     }
     assert validation_backtest["historical_reference_review_summary"] == {
-        "case_count": 6,
-        "countries_covered": ["ISR", "POL", "TWN", "UKR"],
+        "case_count": 8,
+        "countries_covered": ["GEO", "ISR", "PAK", "POL", "TWN", "UKR"],
         "review_verdict_counts": {
-            "historical_alignment_confirmed": 3,
+            "historical_alignment_confirmed": 5,
             "historical_alignment_mismatch": 1,
             "historical_alignment_with_gaps": 2,
         },
         "evidence_tier_counts": {
-            "corroborated_multi_source": 2,
+            "corroborated_multi_source": 4,
             "curated_public_source": 1,
             "provisional": 1,
             "verified_multi_source": 2,
         },
-        "average_evidence_score": 0.77,
+        "average_evidence_score": 0.78,
     }
     assert [review["case_id"] for review in validation_backtest["historical_reference_reviews"]] == [
         "VAL-UKR-2022-001",
@@ -1086,36 +1086,38 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
         "VAL-POL-2024-002",
         "VAL-ISR-2023-001",
         "VAL-ISR-2024-002",
+        "VAL-PAK-2024-001",
+        "VAL-GEO-2024-001",
         "VAL-TWN-2024-001",
     ]
     assert validation_backtest["historical_replay_summary"] == {
-        "case_count": 6,
-        "countries_covered": ["ISR", "POL", "TWN", "UKR"],
+        "case_count": 8,
+        "countries_covered": ["GEO", "ISR", "PAK", "POL", "TWN", "UKR"],
         "review_verdict_counts": {
-            "replay_match": 4,
+            "replay_match": 6,
             "replay_match_with_gaps": 1,
             "replay_mismatch": 1,
         },
-        "status_match_count": 5,
-        "average_domain_match_ratio": 0.83,
-        "average_replay_evidence_score": 0.85,
-        "average_replay_source_coverage_ratio": 0.83,
+        "status_match_count": 7,
+        "average_domain_match_ratio": 0.88,
+        "average_replay_evidence_score": 0.89,
+        "average_replay_source_coverage_ratio": 0.88,
         "average_replay_provenance_completeness_ratio": 1.0,
-        "replay_input_record_total": 35,
-        "archival_data_file_count": 6,
+        "replay_input_record_total": 51,
+        "archival_data_file_count": 8,
         "replay_evidence_tier_counts": {
             "strong_replay_evidence": 1,
-            "verified_replay_evidence": 4,
+            "verified_replay_evidence": 6,
             "weak_replay_evidence": 1,
         },
         "replay_input_source_coverage_counts": {
-            "SRC-GDACS": 5,
-            "SRC-GDELT-DOC": 6,
-            "SRC-GDELT-EVENTS": 5,
-            "WB-INDICATORS": 3,
+            "SRC-GDACS": 7,
+            "SRC-GDELT-DOC": 8,
+            "SRC-GDELT-EVENTS": 7,
+            "WB-INDICATORS": 5,
         },
         "review_basis_counts": {
-            "provider_backed_archival_replay": 6,
+            "provider_backed_archival_replay": 8,
         },
     }
     assert [review["case_id"] for review in validation_backtest["historical_replay_reviews"]] == [
@@ -1124,6 +1126,8 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
         "VAL-POL-2024-002",
         "VAL-ISR-2023-001",
         "VAL-ISR-2024-002",
+        "VAL-PAK-2024-001",
+        "VAL-GEO-2024-001",
         "VAL-TWN-2024-001",
     ]
     assert validation_backtest["historical_replay_reviews"][0]["replay_input_source_ids"] == [
@@ -1143,6 +1147,8 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
         "VAL-POL-2024-002",
         "VAL-ISR-2023-001",
         "VAL-ISR-2024-002",
+        "VAL-PAK-2024-001",
+        "VAL-GEO-2024-001",
         "VAL-TWN-2024-001",
     ]
     assert [case["country_id"] for case in validation_backtest["validation_cases"]] == ["UKR", "POL"]

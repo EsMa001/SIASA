@@ -94,6 +94,42 @@ validation_cases:
       - curated_historical_observed_outcome_not_generated_by_runtime_replay
     validation_metrics: [Domain Match, Status Match]
 
+  - case_id: VAL-PAK-2024-001
+    country_id: PAK
+    case_name: Regional escalation reference case
+    case_type: strategic_posturing
+    time_start: "2024-04-01"
+    time_end: "2024-04-30"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: corroborated_multi_source
+    expected_signal_pattern: Cross-border pressure and domestic fragility should align information, event, and macro stress signals.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Extend the governed validation library into South Asia with a full A/B/D reference case after the live-runtime breadth expansion.
+    known_limitations:
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+
+  - case_id: VAL-GEO-2024-001
+    country_id: GEO
+    case_name: Governance pressure reference case
+    case_type: hybrid_pressure
+    time_start: "2024-05-01"
+    time_end: "2024-05-31"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: corroborated_multi_source
+    expected_signal_pattern: Protest-driven governance pressure should remain reviewable across information, event, and macro context signals.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Extend the governed validation library into the South Caucasus with another full A/B/D reference case.
+    known_limitations:
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+
   - case_id: VAL-TWN-2024-001
     country_id: TWN
     case_name: Information pressure reference case

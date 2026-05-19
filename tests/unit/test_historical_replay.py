@@ -11,8 +11,10 @@ def test_load_historical_replay_inputs_reads_fixture_backed_cases_from_repo_yaml
     )
 
     assert sorted(replay_inputs) == [
+        "VAL-GEO-2024-001",
         "VAL-ISR-2023-001",
         "VAL-ISR-2024-002",
+        "VAL-PAK-2024-001",
         "VAL-POL-2023-001",
         "VAL-POL-2024-002",
         "VAL-TWN-2024-001",
@@ -21,6 +23,8 @@ def test_load_historical_replay_inputs_reads_fixture_backed_cases_from_repo_yaml
     assert replay_inputs["VAL-UKR-2022-001"].review_basis == "fixture_backed_historical_replay"
     assert len(replay_inputs["VAL-UKR-2022-001"].normalized_records) == 8
     assert len(replay_inputs["VAL-ISR-2023-001"].normalized_records) == 8
+    assert len(replay_inputs["VAL-PAK-2024-001"].normalized_records) == 8
+    assert len(replay_inputs["VAL-GEO-2024-001"].normalized_records) == 8
     assert len(replay_inputs["VAL-TWN-2024-001"].normalized_records) == 4
 
 
@@ -152,6 +156,54 @@ def test_build_historical_replay_reviews_executes_replay_against_fixture_backed_
             "missing_expected_domains": ["B", "D"],
             "unexpected_observed_domains": [],
             "replay_input_record_count": 2,
+        },
+        {
+            "case_id": "VAL-PAK-2024-001",
+            "country_id": "PAK",
+            "review_basis": "fixture_backed_historical_replay",
+            "replay_input_source_ids": ["SRC-GDACS", "SRC-GDELT-DOC", "SRC-GDELT-EVENTS", "WB-INDICATORS"],
+            "replay_input_country_ids": ["PAK"],
+            "archival_data_files": [],
+            "provenance_notes": "",
+            "replay_known_limitations": [],
+            "replay_source_coverage_ratio": 1.0,
+            "replay_provenance_completeness_ratio": 1.0,
+            "replay_evidence_score": 1.0,
+            "replay_evidence_tier": "verified_replay_evidence",
+            "replayed_status": "S3",
+            "expected_status": "S3",
+            "status_match": True,
+            "expected_domains": ["A", "B", "D"],
+            "replayed_domains": ["A", "B", "D"],
+            "domain_match_ratio": 1.0,
+            "review_verdict": "replay_match",
+            "missing_expected_domains": [],
+            "unexpected_observed_domains": [],
+            "replay_input_record_count": 8,
+        },
+        {
+            "case_id": "VAL-GEO-2024-001",
+            "country_id": "GEO",
+            "review_basis": "fixture_backed_historical_replay",
+            "replay_input_source_ids": ["SRC-GDACS", "SRC-GDELT-DOC", "SRC-GDELT-EVENTS", "WB-INDICATORS"],
+            "replay_input_country_ids": ["GEO"],
+            "archival_data_files": [],
+            "provenance_notes": "",
+            "replay_known_limitations": [],
+            "replay_source_coverage_ratio": 1.0,
+            "replay_provenance_completeness_ratio": 1.0,
+            "replay_evidence_score": 1.0,
+            "replay_evidence_tier": "verified_replay_evidence",
+            "replayed_status": "S3",
+            "expected_status": "S3",
+            "status_match": True,
+            "expected_domains": ["A", "B", "D"],
+            "replayed_domains": ["A", "B", "D"],
+            "domain_match_ratio": 1.0,
+            "review_verdict": "replay_match",
+            "missing_expected_domains": [],
+            "unexpected_observed_domains": [],
+            "replay_input_record_count": 8,
         },
         {
             "case_id": "VAL-TWN-2024-001",
