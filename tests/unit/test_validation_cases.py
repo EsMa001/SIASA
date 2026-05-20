@@ -68,3 +68,6 @@ def test_load_validation_case_library_reads_curated_reference_cases_from_repo_ya
     assert cases[0].historical_observed_domains == ["A", "B", "D"]
     assert "Domain Match" in cases[0].validation_metrics
     assert any(case.country_id == "POL" for case in cases)
+    assert any(case.country_id == "IND" for case in cases)
+    assert any(case.country_id == "IRN" for case in cases)
+    assert any(case.country_id == "TUR" for case in cases)

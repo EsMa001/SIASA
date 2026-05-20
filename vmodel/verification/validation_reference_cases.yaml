@@ -54,6 +54,60 @@ validation_cases:
       - curated_historical_observed_outcome_not_generated_by_runtime_replay
     validation_metrics: [Domain Match, Status Match]
 
+  - case_id: VAL-IND-2024-001
+    country_id: IND
+    case_name: Regional mobilization reference case
+    case_type: strategic_posturing
+    time_start: "2024-02-01"
+    time_end: "2024-02-29"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: corroborated_multi_source
+    expected_signal_pattern: Regional mobilization and cross-border pressure should remain reviewable across information, event, and macro stress signals.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Close the remaining South-Asia core-focus validation gap with a governed A/B/D archival replay case for India.
+    known_limitations:
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+
+  - case_id: VAL-IRN-2024-001
+    country_id: IRN
+    case_name: Regional coercion reference case
+    case_type: strategic_posturing
+    time_start: "2024-07-01"
+    time_end: "2024-07-31"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: corroborated_multi_source
+    expected_signal_pattern: Regional coercion and security pressure should remain reviewable across information, event, and macro stress signals.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Close the remaining Middle-East core-focus validation gap with a governed A/B/D archival replay case for Iran.
+    known_limitations:
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+
+  - case_id: VAL-TUR-2024-001
+    country_id: TUR
+    case_name: Regional spillover pressure reference case
+    case_type: strategic_posturing
+    time_start: "2024-08-01"
+    time_end: "2024-08-31"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: corroborated_multi_source
+    expected_signal_pattern: Regional spillover and security pressure should remain reviewable across information, event, and macro stress signals.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Close the remaining Europe/Middle-East core-focus validation gap with a governed A/B/D archival replay case for Turkey.
+    known_limitations:
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+
   - case_id: VAL-POL-2023-001
     country_id: POL
     case_name: Hybrid pressure reference case
