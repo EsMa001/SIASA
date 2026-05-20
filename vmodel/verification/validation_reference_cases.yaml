@@ -108,6 +108,78 @@ validation_cases:
       - curated_historical_observed_outcome_not_generated_by_runtime_replay
     validation_metrics: [Domain Match, Status Match]
 
+  - case_id: VAL-USA-2024-001
+    country_id: USA
+    case_name: Global narrative pressure reference case
+    case_type: strategic_posturing
+    time_start: "2024-08-01"
+    time_end: "2024-08-31"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: corroborated_multi_source
+    expected_signal_pattern: Global narrative pressure and externalized security attention should remain reviewable across information, event, and macro stress signals.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Start the extended-focus validation tranche with a governed A/B/D archival replay case for the United States.
+    known_limitations:
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+
+  - case_id: VAL-DEU-2024-001
+    country_id: DEU
+    case_name: European security pressure reference case
+    case_type: strategic_posturing
+    time_start: "2024-09-01"
+    time_end: "2024-09-30"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: corroborated_multi_source
+    expected_signal_pattern: European security pressure and critical-infrastructure sensitivity should remain reviewable across information, event, and macro stress signals.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Extend the governed validation library into central Europe with a full A/B/D archival replay case for Germany.
+    known_limitations:
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+
+  - case_id: VAL-EST-2024-001
+    country_id: EST
+    case_name: Baltic resilience pressure reference case
+    case_type: strategic_posturing
+    time_start: "2024-10-01"
+    time_end: "2024-10-31"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: corroborated_multi_source
+    expected_signal_pattern: Baltic security pressure and resilience signaling should remain reviewable across information, event, and macro stress signals.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Extend the governed validation library into the Baltic extended-focus lane with a full A/B/D archival replay case for Estonia.
+    known_limitations:
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+
+  - case_id: VAL-FIN-2024-001
+    country_id: FIN
+    case_name: Nordic frontier pressure reference case
+    case_type: strategic_posturing
+    time_start: "2024-10-01"
+    time_end: "2024-10-31"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: corroborated_multi_source
+    expected_signal_pattern: Nordic frontier pressure and regional security attention should remain reviewable across information, event, and macro stress signals.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Extend the governed validation library into the Nordic extended-focus lane with a full A/B/D archival replay case for Finland.
+    known_limitations:
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+
   - case_id: VAL-POL-2023-001
     country_id: POL
     case_name: Hybrid pressure reference case
