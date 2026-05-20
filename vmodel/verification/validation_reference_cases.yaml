@@ -180,6 +180,60 @@ validation_cases:
       - curated_historical_observed_outcome_not_generated_by_runtime_replay
     validation_metrics: [Domain Match, Status Match]
 
+  - case_id: VAL-SAU-2024-001
+    country_id: SAU
+    case_name: Gulf strategic energy pressure reference case
+    case_type: strategic_posturing
+    time_start: "2024-09-01"
+    time_end: "2024-09-30"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: corroborated_multi_source
+    expected_signal_pattern: Gulf security signaling and energy-market sensitivity should remain reviewable across information, event, and macro stress signals.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Extend the governed validation library into the Gulf energy lane with a full A/B/D archival replay case for Saudi Arabia.
+    known_limitations:
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+
+  - case_id: VAL-QAT-2024-001
+    country_id: QAT
+    case_name: LNG corridor pressure reference case
+    case_type: strategic_posturing
+    time_start: "2024-09-01"
+    time_end: "2024-09-30"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: corroborated_multi_source
+    expected_signal_pattern: LNG corridor signaling and regional diplomatic pressure should remain reviewable across information, event, and macro stress signals.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Extend the governed validation library into the Gulf energy lane with a full A/B/D archival replay case for Qatar.
+    known_limitations:
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+
+  - case_id: VAL-EGY-2024-001
+    country_id: EGY
+    case_name: Canal corridor and regional pressure reference case
+    case_type: strategic_posturing
+    time_start: "2024-09-01"
+    time_end: "2024-09-30"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: corroborated_multi_source
+    expected_signal_pattern: Canal-security signaling and regional spillover pressure should remain reviewable across information, event, and macro stress signals.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Extend the governed validation library into the eastern Mediterranean energy lane with a full A/B/D archival replay case for Egypt.
+    known_limitations:
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+
   - case_id: VAL-POL-2023-001
     country_id: POL
     case_name: Hybrid pressure reference case
