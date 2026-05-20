@@ -45,92 +45,141 @@ def _page(title: str, body: str, *, nav_prefix: str = '', available_pages: set[s
         for href, label in nav_entries
         if href in available_pages
     )
+    # Google Fonts: Inter (narrative) + Space Grotesk (machine-data labels)
+    font_link = (
+        "<link rel='preconnect' href='https://fonts.googleapis.com'>"
+        "<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
+        "<link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;"
+        "family=Space+Grotesk:wght@400;500;600;700&display=swap' rel='stylesheet'>"
+    )
     css = (
         # === Reset & Base ===
         "*{box-sizing:border-box;margin:0;padding:0;}"
-        "body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;"
-        "background:#0d1117;color:#e6edf3;font-size:14px;line-height:1.5;min-height:100vh;}"
-        # === Navigation ===
-        "nav{position:sticky;top:0;z-index:100;background:#161b22;border-bottom:1px solid #30363d;"
-        "padding:0 24px;height:48px;display:flex;align-items:center;gap:4px;overflow-x:auto;}"
-        "nav a{color:#8b949e;text-decoration:none;font-size:13px;font-weight:500;padding:6px 12px;"
-        "border-radius:6px;white-space:nowrap;transition:color .15s,background .15s;}"
-        "nav a:hover{color:#e6edf3;background:#21262d;}"
+        # Surface depth stack (AEGIS-inspired, no shadows — depth via color only):
+        # #060e20 lowest → #0b1326 base → #131b2e container-low → #171f33 container
+        # → #222a3d container-high → #2d3449 container-highest
+        "body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;"
+        "background:#0b1326;color:#dae2fd;font-size:14px;line-height:1.5;min-height:100vh;}"
+        # Data / machine-text font — IDs, codes, timestamps, labels
+        ".mono,code,pre,th,.kpi-label,.badge,figcaption,"
+        ".panel-header{font-family:'Space Grotesk','Cascadia Code','Fira Code',monospace;}"
+        # === Navigation (topbar) ===
+        "nav{position:sticky;top:0;z-index:100;"
+        "background:rgba(11,19,38,.85);backdrop-filter:blur(16px);"
+        "-webkit-backdrop-filter:blur(16px);"
+        "border-bottom:1px solid rgba(78,222,163,.08);"
+        "padding:0 24px;height:52px;display:flex;align-items:center;gap:2px;overflow-x:auto;}"
+        # Brand mark left
+        "nav::before{content:'SIASA';font-family:'Space Grotesk',monospace;"
+        "font-size:11px;font-weight:700;letter-spacing:.18em;color:#4edea3;"
+        "margin-right:20px;white-space:nowrap;}"
+        "nav a{color:#8b9ab8;text-decoration:none;font-size:12px;font-weight:500;"
+        "font-family:'Space Grotesk',monospace;letter-spacing:.04em;"
+        "padding:5px 11px;border-radius:2px;white-space:nowrap;"
+        "transition:color .15s,background .15s;border:1px solid transparent;}"
+        "nav a:hover{color:#dae2fd;background:#171f33;border-color:rgba(78,222,163,.15);}"
         # === Page wrapper ===
-        ".page-content{padding:24px;max-width:1600px;margin:0 auto;}"
+        ".page-content{padding:28px 32px;max-width:1600px;margin:0 auto;}"
         # === Headings ===
-        "h1{font-size:1.4rem;font-weight:600;color:#e6edf3;margin-bottom:20px;padding-bottom:12px;"
-        "border-bottom:1px solid #21262d;}"
-        "h2{font-size:1.1rem;font-weight:600;color:#c9d1d9;margin:20px 0 12px;}"
-        "h3{font-size:0.9rem;font-weight:600;color:#8b949e;text-transform:uppercase;"
-        "letter-spacing:0.05em;margin:16px 0 8px;}"
-        "h4{font-size:0.85rem;font-weight:600;color:#8b949e;margin:12px 0 6px;}"
-        # === Panels & Cards ===
-        ".panel{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px;margin-bottom:16px;}"
-        ".panel-header{font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;"
-        "color:#8b949e;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #21262d;}"
-        ".kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;}"
-        ".kpi-card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px 16px;}"
-        ".kpi-label{font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#8b949e;margin-bottom:4px;}"
-        ".kpi-value{font-size:1.5rem;font-weight:700;color:#e6edf3;line-height:1.2;}"
-        ".kpi-sub{font-size:0.75rem;color:#8b949e;margin-top:4px;}"
+        "h1{font-size:1.3rem;font-weight:700;color:#dae2fd;margin-bottom:24px;"
+        "padding-bottom:14px;border-bottom:1px solid rgba(78,222,163,.12);"
+        "display:flex;align-items:center;gap:10px;}"
+        # HUD accent bar on h1
+        "h1::before{content:'';display:inline-block;width:3px;height:1.1em;"
+        "background:#4edea3;border-radius:1px;flex-shrink:0;}"
+        "h2{font-size:1rem;font-weight:600;color:#b9c7e0;margin:24px 0 12px;}"
+        "h3{font-size:0.75rem;font-weight:700;color:#6b7d99;text-transform:uppercase;"
+        "letter-spacing:.1em;margin:16px 0 8px;font-family:'Space Grotesk',monospace;}"
+        "h4{font-size:0.75rem;font-weight:600;color:#6b7d99;margin:12px 0 6px;}"
+        # === Panels — HUD corner marker via ::before ===
+        ".panel{background:#131b2e;border:1px solid rgba(78,222,163,.1);"
+        "border-radius:2px;padding:16px;margin-bottom:16px;position:relative;}"
+        ".panel::before{content:'';position:absolute;top:0;left:0;"
+        "width:16px;height:2px;background:#4edea3;border-radius:0;}"
+        ".panel-header{font-size:0.7rem;font-weight:700;text-transform:uppercase;"
+        "letter-spacing:.1em;color:#6b7d99;margin-bottom:12px;padding-bottom:8px;"
+        "border-bottom:1px solid rgba(78,222,163,.08);}"
+        # === KPI grid ===
+        ".kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));"
+        "gap:12px;margin-bottom:24px;}"
+        ".kpi-card{background:#131b2e;border:1px solid rgba(78,222,163,.1);"
+        "border-radius:2px;padding:16px;position:relative;}"
+        ".kpi-card::before{content:'';position:absolute;top:0;left:0;"
+        "width:16px;height:2px;background:#4edea3;}"
+        ".kpi-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;"
+        "letter-spacing:.12em;color:#6b7d99;margin-bottom:6px;display:block;}"
+        ".kpi-value{font-size:1.6rem;font-weight:700;color:#dae2fd;line-height:1.1;"
+        "font-family:'Inter',sans-serif;}"
+        ".kpi-sub{font-size:0.7rem;color:#6b7d99;margin-top:5px;}"
         # === Tables ===
         "table{border-collapse:collapse;width:100%;margin:8px 0;}"
-        "thead th{background:#161b22;color:#8b949e;font-size:11px;font-weight:600;"
-        "text-transform:uppercase;letter-spacing:0.05em;padding:8px 12px;"
-        "border-bottom:2px solid #30363d;text-align:left;white-space:nowrap;}"
-        "tbody td{padding:8px 12px;border-bottom:1px solid #21262d;font-size:13px;color:#e6edf3;vertical-align:top;}"
-        "tbody tr:hover td{background:#1c2333;}"
+        "thead th{background:#0f1828;color:#6b7d99;font-size:10px;font-weight:700;"
+        "text-transform:uppercase;letter-spacing:.1em;padding:8px 12px;"
+        "border-bottom:1px solid rgba(78,222,163,.15);text-align:left;white-space:nowrap;}"
+        "tbody td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04);"
+        "font-size:13px;color:#dae2fd;vertical-align:top;}"
+        "tbody tr:hover td{background:#171f33;}"
         "th,td{text-align:left;}"
-        ".table-container{overflow-x:auto;border:1px solid #30363d;border-radius:8px;}"
+        ".table-container{overflow-x:auto;border:1px solid rgba(78,222,163,.1);"
+        "border-radius:2px;}"
         # === Code & Pre ===
-        "code{background:#1c2333;color:#79c0ff;padding:2px 6px;border-radius:4px;"
-        "font-family:'Cascadia Code','Fira Code','Courier New',monospace;font-size:12px;}"
-        "pre{background:#161b22;color:#79c0ff;padding:16px;border-radius:8px;overflow-x:auto;"
-        "font-family:'Cascadia Code','Fira Code','Courier New',monospace;font-size:12px;"
-        "border:1px solid #30363d;line-height:1.6;}"
+        "code{background:#0f1828;color:#4edea3;padding:2px 7px;border-radius:2px;"
+        "font-size:12px;border:1px solid rgba(78,222,163,.2);}"
+        "pre{background:#0f1828;color:#4edea3;padding:16px;border-radius:2px;overflow-x:auto;"
+        "font-size:12px;border:1px solid rgba(78,222,163,.15);line-height:1.7;}"
         # === Status & Badges ===
-        ".status{font-weight:600;}"
-        ".badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;"
-        "font-weight:600;border:1px solid;line-height:1.6;white-space:nowrap;}"
-        ".badge-red{color:#f85149;border-color:#f85149;background:rgba(248,81,73,.1);}"
-        ".badge-orange{color:#e3602b;border-color:#e3602b;background:rgba(227,96,43,.1);}"
-        ".badge-amber{color:#d29922;border-color:#d29922;background:rgba(210,153,34,.1);}"
-        ".badge-green{color:#3fb950;border-color:#3fb950;background:rgba(63,185,80,.1);}"
-        ".badge-blue{color:#388bfd;border-color:#388bfd;background:rgba(56,139,253,.1);}"
-        ".badge-gray{color:#8b949e;border-color:#8b949e;background:rgba(139,148,158,.1);}"
+        ".status{font-weight:700;font-family:'Space Grotesk',monospace;}"
+        ".badge{display:inline-block;padding:2px 7px;border-radius:2px;font-size:10px;"
+        "font-weight:700;border:1px solid;line-height:1.7;white-space:nowrap;"
+        "letter-spacing:.05em;text-transform:uppercase;}"
+        ".badge-red{color:#ffb4ab;border-color:rgba(255,180,171,.3);background:rgba(255,180,171,.08);}"
+        ".badge-orange{color:#ffb347;border-color:rgba(255,179,71,.3);background:rgba(255,179,71,.08);}"
+        ".badge-amber{color:#e3b341;border-color:rgba(227,179,65,.3);background:rgba(227,179,65,.08);}"
+        ".badge-green{color:#4edea3;border-color:rgba(78,222,163,.3);background:rgba(78,222,163,.08);}"
+        ".badge-blue{color:#8ed0ff;border-color:rgba(142,208,255,.3);background:rgba(142,208,255,.08);}"
+        ".badge-gray{color:#6b7d99;border-color:rgba(107,125,153,.3);background:rgba(107,125,153,.08);}"
         # === Uncertainty badges ===
         ".uncertainty-badge{display:inline-block;margin:2px 4px 2px 0;padding:2px 8px;"
-        "border-radius:12px;background:rgba(248,81,73,.12);color:#f85149;"
-        "border:1px solid rgba(248,81,73,.35);font-size:11px;font-weight:500;}"
-        ".uncertainty-none{background:rgba(139,148,158,.1);color:#8b949e;"
-        "border:1px solid rgba(139,148,158,.3);}"
+        "border-radius:2px;background:rgba(255,180,171,.08);color:#ffb4ab;"
+        "border:1px solid rgba(255,180,171,.25);font-size:10px;font-weight:600;"
+        "font-family:'Space Grotesk',monospace;text-transform:uppercase;letter-spacing:.05em;}"
+        ".uncertainty-none{background:rgba(107,125,153,.08);color:#6b7d99;"
+        "border:1px solid rgba(107,125,153,.2);}"
         # === Metric meter ===
-        ".metric-meter{margin:6px 0;}"
-        ".metric-meter p{font-size:12px;color:#8b949e;margin-bottom:4px;font-weight:500;}"
+        ".metric-meter{margin:8px 0;}"
+        ".metric-meter p{font-size:11px;color:#6b7d99;margin-bottom:5px;font-weight:600;"
+        "text-transform:uppercase;letter-spacing:.06em;}"
         # === Lists ===
-        "ul,ol{padding-left:20px;margin:6px 0;}"
-        "li{margin:3px 0;color:#c9d1d9;font-size:13px;}"
+        "ul,ol{padding-left:18px;margin:6px 0;}"
+        "li{margin:3px 0;color:#b9c7e0;font-size:13px;}"
         # === Links ===
-        "a{color:#388bfd;text-decoration:none;}"
-        "a:hover{color:#58a6ff;text-decoration:underline;}"
+        "a{color:#4edea3;text-decoration:none;}"
+        "a:hover{color:#6ffbbe;text-decoration:underline;}"
         # === Figures / charts ===
         "figure{margin:12px 0;}"
-        "figcaption{font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;}"
-        "figure ul{font-size:11px;color:#8b949e;list-style:none;padding:0;margin-top:6px;}"
+        "figcaption{font-size:11px;color:#6b7d99;margin-bottom:6px;font-weight:600;"
+        "text-transform:uppercase;letter-spacing:.08em;}"
+        "figure ul{font-size:11px;color:#6b7d99;list-style:none;padding:0;margin-top:6px;}"
         # === Misc ===
-        "hr{border:none;border-top:1px solid #21262d;margin:16px 0;}"
-        "p{color:#c9d1d9;font-size:13px;margin:6px 0;}"
-        "strong{color:#e6edf3;font-weight:600;}"
+        "hr{border:none;border-top:1px solid rgba(78,222,163,.08);margin:16px 0;}"
+        "p{color:#b9c7e0;font-size:13px;margin:6px 0;}"
+        "strong{color:#dae2fd;font-weight:600;}"
         "details{margin:8px 0;}"
-        "summary{cursor:pointer;color:#388bfd;font-size:13px;font-weight:500;padding:4px 0;}"
-        "summary:hover{color:#58a6ff;}"
+        "summary{cursor:pointer;color:#4edea3;font-size:13px;font-weight:600;"
+        "font-family:'Space Grotesk',monospace;padding:4px 0;letter-spacing:.03em;}"
+        "summary:hover{color:#6ffbbe;}"
+        # === Scrollbar (thin, dark) ===
+        "::-webkit-scrollbar{width:4px;height:4px;}"
+        "::-webkit-scrollbar-track{background:#0b1326;}"
+        "::-webkit-scrollbar-thumb{background:#2d3449;border-radius:2px;}"
+        "::-webkit-scrollbar-thumb:hover{background:#4edea3;}"
     )
     return (
         "<!DOCTYPE html>"
         "<html lang='en'><head><meta charset='utf-8'>"
         "<meta name='viewport' content='width=device-width,initial-scale=1'>"
         f"<title>SIASA — {html.escape(title)}</title>"
+        f"{font_link}"
         f"<style>{css}</style>"
         "</head><body>"
         f"<nav>{nav_html}</nav>"
@@ -204,7 +253,7 @@ def _render_line_chart(series: list[Any], *, label_key: str, chart_label: str) -
             y = margin + ((max_value - value) / value_range) * usable_height
         coordinates.append(f"{x:.1f},{y:.1f}")
         circle_markup.append(
-            f"<circle cx='{x:.1f}' cy='{y:.1f}' r='3' fill='#388bfd'><title>{html.escape(label)}: {value:.2f}</title></circle>"
+            f"<circle cx='{x:.1f}' cy='{y:.1f}' r='3' fill='#4edea3'><title>{html.escape(label)}: {value:.2f}</title></circle>"
         )
 
     labels_html = ''.join(
@@ -213,10 +262,10 @@ def _render_line_chart(series: list[Any], *, label_key: str, chart_label: str) -
     )
     return (
         f"<figure><figcaption>{html.escape(chart_label)}</figcaption>"
-        f"<svg viewBox='0 0 {width} {height}' width='{width}' height='{height}' role='img' aria-label='{html.escape(chart_label)}' style='background:#161b22;border-radius:6px;display:block;'>"
-        f"<line x1='{margin}' y1='{height - margin}' x2='{width - margin}' y2='{height - margin}' stroke='#30363d' stroke-width='1' />"
-        f"<line x1='{margin}' y1='{margin}' x2='{margin}' y2='{height - margin}' stroke='#30363d' stroke-width='1' />"
-        f"<polyline fill='none' stroke='#388bfd' stroke-width='2' points='{' '.join(coordinates)}' />"
+        f"<svg viewBox='0 0 {width} {height}' width='{width}' height='{height}' role='img' aria-label='{html.escape(chart_label)}' style='background:#0f1828;border-radius:2px;display:block;border:1px solid rgba(78,222,163,.12);'>"
+        f"<line x1='{margin}' y1='{height - margin}' x2='{width - margin}' y2='{height - margin}' stroke='rgba(78,222,163,.15)' stroke-width='1' />"
+        f"<line x1='{margin}' y1='{margin}' x2='{margin}' y2='{height - margin}' stroke='rgba(78,222,163,.15)' stroke-width='1' />"
+        f"<polyline fill='none' stroke='#4edea3' stroke-width='2' points='{' '.join(coordinates)}' />"
         f"{''.join(circle_markup)}</svg>"
         f"<ul>{labels_html}</ul></figure>"
     )
@@ -322,17 +371,23 @@ def _region_anchor(region: str) -> tuple[float, float]:
 
 
 def _status_color(status: str) -> str:
-    # S0 = no data (grey) → S6 = critical/confirmed (deep red)
-    # Orange-red escalation scale inspired by threat intelligence dashboards
+    # AEGIS-inspired escalation scale:
+    # S0-S1 = grey (no data / unvalidated)
+    # S2 = amber (low confidence)
+    # S3 = gold (moderate signal)
+    # S4 = orange (meaningful signal)
+    # S5 = salmon-red (strong signal / alert)
+    # S6 = bright red (confirmed / critical)
+    # Emerald (#4edea3) reserved for nominal/stable status indicators
     return {
-        'S0': '#6e7681',   # grey — unknown / no data
-        'S1': '#8b949e',   # light grey — data present, unvalidated
-        'S2': '#d29922',   # amber — low confidence
-        'S3': '#e3b341',   # gold — moderate signal
+        'S0': '#6b7d99',   # grey — unknown / no data
+        'S1': '#8b9ab8',   # light grey — data present, unvalidated
+        'S2': '#e3b341',   # amber — low confidence
+        'S3': '#ffb347',   # gold/orange — moderate signal
         'S4': '#e3602b',   # orange — meaningful signal
-        'S5': '#f85149',   # red — strong signal
-        'S6': '#ff0000',   # bright red — confirmed / critical
-    }.get(status, '#6e7681')
+        'S5': '#ffb4ab',   # salmon — strong signal / alert
+        'S6': '#ff6b6b',   # bright red — confirmed / critical
+    }.get(status, '#6b7d99')
 
 
 
@@ -413,9 +468,9 @@ def _render_metric_meter(label: str, value: Any, *, fill_color: str) -> str:
         f"<div class='metric-meter metric-meter-{html.escape(label.lower().replace(' ', '-'))}'>"
         f"<p><strong>{html.escape(label)}</strong>: {html.escape(value_label)} ({html.escape(band)})</p>"
         f"<svg viewBox='0 0 {width} {height}' width='{width}' height='{height}' role='img' aria-label='{html.escape(label)} meter'>"
-        f"<rect x='0' y='0' width='{width}' height='{height}' rx='6' fill='#21262d'></rect>"
-        f"<rect x='0' y='0' width='{fill_width}' height='{height}' rx='6' fill='{html.escape(fill_color)}'></rect>"
-        f"<text x='{min(fill_width + 6, width - 36)}' y='12' font-size='10'>{percent}%</text>"
+        f"<rect x='0' y='0' width='{width}' height='{height}' rx='1' fill='#2d3449'></rect>"
+        f"<rect x='0' y='0' width='{fill_width}' height='{height}' rx='1' fill='{html.escape(fill_color)}'></rect>"
+        f"<text x='{min(fill_width + 6, width - 36)}' y='12' font-size='9' fill='#dae2fd' font-family='Space Grotesk,monospace'>{percent}%</text>"
         "</svg>"
         "</div>"
     )
