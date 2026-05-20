@@ -137,13 +137,13 @@ def test_reference_case_library_summary_aggregates_case_types_countries_and_time
     summary = build_reference_case_library_summary(cases)
 
     assert summary == {
-        "case_count": 20,
-        "countries_covered": ["CHN", "DEU", "EGY", "EST", "FIN", "GEO", "IND", "IRN", "ISR", "PAK", "POL", "QAT", "RUS", "SAU", "TUR", "TWN", "UKR", "USA"],
+        "case_count": 23,
+        "countries_covered": ["CHN", "DEU", "EGY", "EST", "FIN", "GEO", "IND", "IRN", "ISR", "MMR", "NGA", "PAK", "POL", "QAT", "RUS", "SAU", "SDN", "TUR", "TWN", "UKR", "USA"],
         "case_type_counts": {
             "disinformation_spike": 1,
             "hybrid_pressure": 3,
             "military_escalation": 1,
-            "strategic_posturing": 15,
+            "strategic_posturing": 18,
         },
         "time_range": {"start": "2022-02-01", "end": "2024-10-31"},
     }
@@ -157,15 +157,15 @@ def test_historical_reference_review_summary_scores_curated_case_alignment_and_e
     summary = build_historical_reference_review_summary(cases)
 
     assert summary == {
-        "case_count": 20,
-        "countries_covered": ["CHN", "DEU", "EGY", "EST", "FIN", "GEO", "IND", "IRN", "ISR", "PAK", "POL", "QAT", "RUS", "SAU", "TUR", "TWN", "UKR", "USA"],
+        "case_count": 23,
+        "countries_covered": ["CHN", "DEU", "EGY", "EST", "FIN", "GEO", "IND", "IRN", "ISR", "MMR", "NGA", "PAK", "POL", "QAT", "RUS", "SAU", "SDN", "TUR", "TWN", "UKR", "USA"],
         "review_verdict_counts": {
-            "historical_alignment_confirmed": 17,
+            "historical_alignment_confirmed": 20,
             "historical_alignment_mismatch": 1,
             "historical_alignment_with_gaps": 2,
         },
         "evidence_tier_counts": {
-            "corroborated_multi_source": 16,
+            "corroborated_multi_source": 19,
             "curated_public_source": 1,
             "provisional": 1,
             "verified_multi_source": 2,
@@ -443,6 +443,9 @@ def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> 
         "VAL-SAU-2024-001",
         "VAL-QAT-2024-001",
         "VAL-EGY-2024-001",
+        "VAL-NGA-2024-001",
+        "VAL-SDN-2024-001",
+        "VAL-MMR-2024-001",
         "VAL-POL-2023-001",
         "VAL-POL-2024-002",
         "VAL-ISR-2023-001",
@@ -452,33 +455,33 @@ def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> 
         "VAL-TWN-2024-001",
     ]
     assert summary == {
-        "case_count": 20,
-        "countries_covered": ["CHN", "DEU", "EGY", "EST", "FIN", "GEO", "IND", "IRN", "ISR", "PAK", "POL", "QAT", "RUS", "SAU", "TUR", "TWN", "UKR", "USA"],
+        "case_count": 23,
+        "countries_covered": ["CHN", "DEU", "EGY", "EST", "FIN", "GEO", "IND", "IRN", "ISR", "MMR", "NGA", "PAK", "POL", "QAT", "RUS", "SAU", "SDN", "TUR", "TWN", "UKR", "USA"],
         "review_verdict_counts": {
-            "replay_match": 18,
+            "replay_match": 21,
             "replay_match_with_gaps": 1,
             "replay_mismatch": 1,
         },
-        "status_match_count": 19,
-        "average_domain_match_ratio": 0.95,
+        "status_match_count": 22,
+        "average_domain_match_ratio": 0.96,
         "average_replay_evidence_score": 0.96,
-        "average_replay_source_coverage_ratio": 0.95,
+        "average_replay_source_coverage_ratio": 0.96,
         "average_replay_provenance_completeness_ratio": 1.0,
-        "replay_input_record_total": 147,
-        "archival_data_file_count": 20,
+        "replay_input_record_total": 171,
+        "archival_data_file_count": 23,
         "replay_evidence_tier_counts": {
             "strong_replay_evidence": 1,
-            "verified_replay_evidence": 18,
+            "verified_replay_evidence": 21,
             "weak_replay_evidence": 1,
         },
         "replay_input_source_coverage_counts": {
-            "SRC-GDACS": 19,
-            "SRC-GDELT-DOC": 20,
-            "SRC-GDELT-EVENTS": 19,
-            "WB-INDICATORS": 17,
+            "SRC-GDACS": 22,
+            "SRC-GDELT-DOC": 23,
+            "SRC-GDELT-EVENTS": 22,
+            "WB-INDICATORS": 20,
         },
         "review_basis_counts": {
-            "provider_backed_archival_replay": 20,
+            "provider_backed_archival_replay": 23,
         },
         "attention_case_count": 2,
         "attention_level_counts": {

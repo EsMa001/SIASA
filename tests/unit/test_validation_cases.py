@@ -78,3 +78,6 @@ def test_load_validation_case_library_reads_curated_reference_cases_from_repo_ya
     assert any(case.country_id == "SAU" for case in cases)
     assert any(case.country_id == "QAT" for case in cases)
     assert any(case.country_id == "EGY" for case in cases)
+    assert any(case.country_id == "NGA" for case in cases)
+    assert any(case.country_id == "SDN" for case in cases)
+    assert any(case.country_id == "MMR" for case in cases)

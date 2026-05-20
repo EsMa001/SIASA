@@ -25,6 +25,9 @@ def test_load_archival_replay_manifest_reads_provider_backed_case_entries() -> N
         "VAL-SAU-2024-001",
         "VAL-QAT-2024-001",
         "VAL-EGY-2024-001",
+        "VAL-NGA-2024-001",
+        "VAL-SDN-2024-001",
+        "VAL-MMR-2024-001",
         "VAL-POL-2023-001",
         "VAL-POL-2024-002",
         "VAL-ISR-2023-001",
@@ -109,12 +112,15 @@ def test_load_governed_historical_replay_inputs_prefers_archival_provider_backed
         "VAL-IRN-2024-001",
         "VAL-ISR-2023-001",
         "VAL-ISR-2024-002",
+        "VAL-MMR-2024-001",
+        "VAL-NGA-2024-001",
         "VAL-PAK-2024-001",
         "VAL-POL-2023-001",
         "VAL-POL-2024-002",
         "VAL-QAT-2024-001",
         "VAL-RUS-2024-001",
         "VAL-SAU-2024-001",
+        "VAL-SDN-2024-001",
         "VAL-TUR-2024-001",
         "VAL-TWN-2024-001",
         "VAL-UKR-2022-001",
@@ -133,6 +139,9 @@ def test_load_governed_historical_replay_inputs_prefers_archival_provider_backed
     assert replay_inputs["VAL-SAU-2024-001"].review_basis == "provider_backed_archival_replay"
     assert replay_inputs["VAL-QAT-2024-001"].review_basis == "provider_backed_archival_replay"
     assert replay_inputs["VAL-EGY-2024-001"].review_basis == "provider_backed_archival_replay"
+    assert replay_inputs["VAL-NGA-2024-001"].review_basis == "provider_backed_archival_replay"
+    assert replay_inputs["VAL-SDN-2024-001"].review_basis == "provider_backed_archival_replay"
+    assert replay_inputs["VAL-MMR-2024-001"].review_basis == "provider_backed_archival_replay"
     assert replay_inputs["VAL-POL-2023-001"].review_basis == "provider_backed_archival_replay"
     assert replay_inputs["VAL-POL-2024-002"].review_basis == "provider_backed_archival_replay"
     assert replay_inputs["VAL-ISR-2023-001"].review_basis == "provider_backed_archival_replay"
@@ -164,6 +173,9 @@ def test_load_governed_historical_replay_inputs_prefers_archival_provider_backed
     assert len(replay_inputs["VAL-SAU-2024-001"].normalized_records) == 8
     assert len(replay_inputs["VAL-QAT-2024-001"].normalized_records) == 8
     assert len(replay_inputs["VAL-EGY-2024-001"].normalized_records) == 8
+    assert len(replay_inputs["VAL-NGA-2024-001"].normalized_records) == 8
+    assert len(replay_inputs["VAL-SDN-2024-001"].normalized_records) == 8
+    assert len(replay_inputs["VAL-MMR-2024-001"].normalized_records) == 8
     assert len(replay_inputs["VAL-POL-2023-001"].normalized_records) == 8
     assert len(replay_inputs["VAL-POL-2024-002"].normalized_records) == 5
     assert len(replay_inputs["VAL-ISR-2023-001"].normalized_records) == 8
@@ -255,6 +267,24 @@ def test_load_governed_historical_replay_inputs_prefers_archival_provider_backed
         "WB-INDICATORS",
     ]
     assert replay_inputs["VAL-EGY-2024-001"].replay_input_source_ids == [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS",
+    ]
+    assert replay_inputs["VAL-NGA-2024-001"].replay_input_source_ids == [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS",
+    ]
+    assert replay_inputs["VAL-SDN-2024-001"].replay_input_source_ids == [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS",
+    ]
+    assert replay_inputs["VAL-MMR-2024-001"].replay_input_source_ids == [
         "SRC-GDACS",
         "SRC-GDELT-DOC",
         "SRC-GDELT-EVENTS",
