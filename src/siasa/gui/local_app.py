@@ -173,6 +173,25 @@ def _page(title: str, body: str, *, nav_prefix: str = '', available_pages: set[s
         "::-webkit-scrollbar-track{background:#0b1326;}"
         "::-webkit-scrollbar-thumb{background:#2d3449;border-radius:2px;}"
         "::-webkit-scrollbar-thumb:hover{background:#4edea3;}"
+        # === Form Controls ===
+        "label{font-size:11px;font-weight:600;color:#6b7d99;text-transform:uppercase;"
+        "letter-spacing:.08em;margin-right:4px;font-family:'Space Grotesk',monospace;}"
+        "select,input[type='text'],textarea{"
+        "background:#0f1828;color:#dae2fd;border:1px solid rgba(78,222,163,.2);"
+        "border-radius:2px;padding:5px 10px;font-size:12px;font-family:'Space Grotesk',monospace;"
+        "outline:none;transition:border-color .15s;margin-right:12px;margin-bottom:6px;}"
+        "select:focus,input[type='text']:focus,textarea:focus{"
+        "border-color:rgba(78,222,163,.6);box-shadow:0 0 0 2px rgba(78,222,163,.08);}"
+        "select option{background:#0f1828;color:#dae2fd;}"
+        "button,input[type='submit']{"
+        "background:rgba(78,222,163,.1);color:#4edea3;border:1px solid rgba(78,222,163,.3);"
+        "border-radius:2px;padding:5px 14px;font-size:11px;font-weight:700;"
+        "font-family:'Space Grotesk',monospace;text-transform:uppercase;letter-spacing:.06em;"
+        "cursor:pointer;transition:background .15s,border-color .15s;}"
+        "button:hover,input[type='submit']:hover{"
+        "background:rgba(78,222,163,.18);border-color:rgba(78,222,163,.6);}"
+        # === Controls bar ===
+        ".controls-bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:12px 0 4px;}"
     )
     return (
         "<!DOCTYPE html>"
@@ -444,6 +463,20 @@ def _freshness_band_color(band: str) -> str:
         'stale':   '#f85149',   # red
         'unknown': '#6e7681',   # grey
     }.get(band, '#6e7681')
+
+
+def _run_status_color(status: str) -> str:
+    """Color for system run_status values."""
+    s = status.lower()
+    if s in ('ok', 'success', 'complete', 'completed', 'done'):
+        return '#4edea3'   # emerald — nominal
+    if s in ('running', 'in_progress', 'pending'):
+        return '#8ed0ff'   # blue — active
+    if s in ('warning', 'partial', 'degraded'):
+        return '#e3b341'   # amber — warning
+    if s in ('error', 'failed', 'failure', 'critical'):
+        return '#ffb4ab'   # salmon — error
+    return '#6b7d99'       # grey — unknown
 
 
 
@@ -740,11 +773,11 @@ def _render_country_trust_visualization(country_profile_read_models: dict[str, d
         confidence_ratio = _coerce_ratio(confidence) or 0.0
         y = 28 + (index * 26)
         svg_rows.append(
-            f"<text x='8' y='{y + 11}' font-size='10'>{html.escape(country_id)}</text>"
-            f"<rect x='64' y='{y}' width='100' height='8' rx='4' fill='#e5e7eb'></rect>"
-            f"<rect x='64' y='{y}' width='{int(round(coverage_ratio * 100))}' height='8' rx='4' fill='#0ea5e9'></rect>"
-            f"<rect x='182' y='{y}' width='100' height='8' rx='4' fill='#e5e7eb'></rect>"
-            f"<rect x='182' y='{y}' width='{int(round(confidence_ratio * 100))}' height='8' rx='4' fill='#8b5cf6'></rect>"
+            f"<text x='8' y='{y + 11}' font-size='9' fill='#b9c7e0' font-family='Space Grotesk,monospace'>{html.escape(country_id)}</text>"
+            f"<rect x='64' y='{y}' width='100' height='8' rx='1' fill='#2d3449'></rect>"
+            f"<rect x='64' y='{y}' width='{int(round(coverage_ratio * 100))}' height='8' rx='1' fill='{html.escape(_band_color(_ratio_band(coverage)))}'></rect>"
+            f"<rect x='182' y='{y}' width='100' height='8' rx='1' fill='#2d3449'></rect>"
+            f"<rect x='182' y='{y}' width='{int(round(confidence_ratio * 100))}' height='8' rx='1' fill='{html.escape(_band_color(_ratio_band(confidence)))}'></rect>"
         )
         rows.append(
             "<tr>"
@@ -760,9 +793,9 @@ def _render_country_trust_visualization(country_profile_read_models: dict[str, d
     return (
         "<h3>Coverage / Confidence Visualization</h3>"
         "<p>Coverage and confidence are rendered as country-level trust bars so gaps remain visually explicit.</p>"
-        "<svg viewBox='0 0 300 {height}' width='300' height='{height}' role='img' aria-label='Coverage and confidence by country'>"
-        "<text x='64' y='18' font-size='10'>Coverage</text>"
-        "<text x='182' y='18' font-size='10'>Confidence</text>"
+        "<svg viewBox='0 0 300 {height}' width='300' height='{height}' role='img' aria-label='Coverage and confidence by country' style='background:#0f1828;border:1px solid rgba(78,222,163,.12);border-radius:2px;display:block;padding:4px;'>"
+        "<text x='64' y='16' font-size='9' fill='#4edea3' font-family='Space Grotesk,monospace' font-weight='700' letter-spacing='.08em'>COVERAGE</text>"
+        "<text x='182' y='16' font-size='9' fill='#4edea3' font-family='Space Grotesk,monospace' font-weight='700' letter-spacing='.08em'>CONFIDENCE</text>"
         "{rows}"
         "</svg>"
         "<table><thead><tr><th>Country</th><th>Coverage</th><th>Coverage Band</th><th>Confidence</th><th>Confidence Band</th><th>Uncertainty</th></tr></thead>"
@@ -837,7 +870,7 @@ def _render_world_map_visualization(
                  f"<title>{html.escape(country_id)} — {html.escape(status)} — {html.escape(region)} — freshness={html.escape(freshness_label)}</title></circle>"
         )
         markers.append(marker)
-        labels.append(f"<text x='{x + 10:.1f}' y='{y + 4:.1f}' font-size='10'>{html.escape(country_id)}</text>")
+        labels.append(f"<text x='{x + 10:.1f}' y='{y + 4:.1f}' font-size='9' fill='#b9c7e0' font-family='Space Grotesk,monospace'>{html.escape(country_id)}</text>")
         legend_rows.append(
             "<tr>"
             f"<td>{html.escape(country_id)}</td>"
@@ -852,12 +885,12 @@ def _render_world_map_visualization(
     return (
         "<h3>Map Visualization</h3>"
         "<p>Region-anchored anomaly markers based on governed MVP country metadata, with freshness-colored marker outlines.</p>"
-        "<svg viewBox='0 0 340 210' width='340' height='210' role='img' aria-label='World anomaly map'>"
-        "<rect x='5' y='5' width='330' height='200' rx='8' fill='#eef6ff' stroke='#cbd5e1' />"
-        "<text x='25' y='35' font-size='12'>North America</text>"
-        "<text x='165' y='35' font-size='12'>Europe</text>"
-        "<text x='245' y='35' font-size='12'>Asia</text>"
-        "<text x='165' y='150' font-size='12'>Africa / Middle East</text>"
+        "<svg viewBox='0 0 340 210' width='340' height='210' role='img' aria-label='World anomaly map' style='background:#0f1828;border:1px solid rgba(78,222,163,.12);border-radius:2px;display:block;'>"
+        "<rect x='5' y='5' width='330' height='200' fill='#0b1326' />"
+        "<text x='12' y='22' font-size='9' fill='#4edea3' font-family='Space Grotesk,monospace' font-weight='700' letter-spacing='.1em'>NORTH AMERICA</text>"
+        "<text x='148' y='22' font-size='9' fill='#4edea3' font-family='Space Grotesk,monospace' font-weight='700' letter-spacing='.1em'>EUROPE</text>"
+        "<text x='232' y='22' font-size='9' fill='#4edea3' font-family='Space Grotesk,monospace' font-weight='700' letter-spacing='.1em'>ASIA</text>"
+        "<text x='148' y='148' font-size='9' fill='#4edea3' font-family='Space Grotesk,monospace' font-weight='700' letter-spacing='.06em'>AFRICA / MIDDLE EAST</text>"
         f"{''.join(markers)}{''.join(labels)}"
         "</svg>"
         "<table><thead><tr><th>Country</th><th>Name</th><th>Region</th><th>Priority</th><th>Freshness</th><th>Status</th></tr></thead>"
@@ -1129,28 +1162,37 @@ def _render_index(
     )
 
     body = (
-        "<h2>Daily Global Review</h2>"
-        f"<p>Run status: <span class='status'>{html.escape(str(system_status_read_model.get('run_status', 'n/a')))}</span></p>"
-        f"<p>Snapshot ID: {html.escape(str(system_status_read_model.get('snapshot_id', 'n/a')))}</p>"
-        f"<p>Coverage summary: {html.escape(str(system_status_read_model.get('coverage', {})))}</p>"
-        f"<h3>Failed Sources</h3><ul>{failed_sources}</ul>"
-        "<h3>Data Gaps / Trust Limits</h3>"
-        f"<ul>{data_gap_items}</ul>"
-        "<h3>Top Status Changes</h3>"
+        # === KPI Header Zone ===
+        f"<div class='kpi-grid'>"
+        f"<div class='kpi-card'><span class='kpi-label'>Run Status</span><div class='kpi-value' style='font-size:1rem;color:{html.escape(_run_status_color(str(system_status_read_model.get('run_status','n/a'))))}'>{html.escape(str(system_status_read_model.get('run_status','n/a')))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Countries Monitored</span><div class='kpi-value'>{html.escape(str(len(world_map_read_model.get('countries',[]))))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Active Domains</span><div class='kpi-value'>{html.escape(', '.join(world_map_read_model.get('active_domains',[])) or 'n/a')}</div><div class='kpi-sub'>A–E domain slices</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Baseline Mode</span><div class='kpi-value' style='font-size:0.85rem;'>{html.escape(str(world_map_read_model.get('baseline_mode','unknown')))}</div></div>"
+        "<div class='kpi-card'><span class='kpi-label'>Failed Sources</span><div class='kpi-value' style='color:" + ("#ffb4ab" if system_status_read_model.get("failed_sources") else "#4edea3") + f"'>{html.escape(str(len(system_status_read_model.get('failed_sources',[]))))}</div></div>"
+        "<div class='kpi-card'><span class='kpi-label'>Data Gaps</span><div class='kpi-value' style='color:" + ("#e3b341" if system_status_read_model.get("data_gaps") else "#4edea3") + f"'>{html.escape(str(len(system_status_read_model.get('data_gaps',[]))))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Snapshot</span><div class='kpi-value' style='font-size:0.75rem;color:#6b7d99;'>{html.escape(str(system_status_read_model.get('snapshot_id','n/a')))}</div></div>"
+        f"</div>"
+        # === Status Changes ===
+        f"<div class='panel'><div class='panel-header'>Top Status Changes</div>"
         "<table><thead><tr><th>Country</th><th>Status Change</th><th>Direction</th></tr></thead>"
-        f"<tbody>{top_status_changes_rows}</tbody></table>"
-        "<h2>World Anomaly Map</h2>"
-        f"<p>Baseline mode: <strong>{html.escape(str(world_map_read_model.get('baseline_mode', 'unknown')))}</strong></p>"
-        f"<p>Active domains: {html.escape(', '.join(world_map_read_model.get('active_domains', [])))}</p>"
-        f"{controls_html}"
-        "<p id='overview-filter-result'>Selected Time Window: all trend labels | View Mode: multi-domain status</p>"
+        f"<tbody>{top_status_changes_rows}</tbody></table></div>"
+        # === Failed Sources / Data Gaps (collapsible) ===
+        f"<details><summary>Failed Sources ({len(system_status_read_model.get('failed_sources',[]))})</summary><ul>{failed_sources}</ul></details>"
+        f"<details><summary>Data Gaps / Trust Limits ({len(system_status_read_model.get('data_gaps',[]))})</summary><ul>{data_gap_items}</ul></details>"
+        # === World Anomaly Map ===
+        f"<div class='panel'><div class='panel-header'>World Anomaly Map — {html.escape(str(world_map_read_model.get('baseline_mode','unknown')))} Baseline</div>"
+        f"<div class='controls-bar'>{controls_html}</div>"
+        "<p id='overview-filter-result' style='font-size:11px;color:#6b7d99;margin-top:8px;font-family:Space Grotesk,monospace;'>Selected Time Window: all trend labels | View Mode: multi-domain status</p>"
         f"<div id='map-visualization-block'>{_render_world_map_visualization(world_map_read_model, available_country_ids, coverage_visibility)}</div>"
         f"<div id='coverage-visualization-block' style='display:none'>{_render_country_trust_visualization(country_profile_read_models)}</div>"
         f"<div id='domain-projection-block' style='display:none'>{_render_domain_projection(country_profile_read_models, [str(domain) for domain in world_map_read_model.get('active_domains', [])])}</div>"
-        f"{_render_country_coverage_visibility(coverage_visibility)}"
-        "<h2>Global Overview</h2>"
-        "<div id='overview-table-block'><table id='overview-table'><thead><tr><th>Country</th><th>Support Status</th><th>Priority Class</th><th>Multi-Domain Status</th><th>Active Domains</th><th>Source Depth</th><th>Depth Band</th><th>Freshness</th><th>Domain Gaps</th><th>Drill-down</th></tr></thead>"
-        f"<tbody>{''.join(rows)}</tbody></table></div>"
+        f"</div>"
+        # === Coverage Visibility ===
+        f"<div class='panel'><div class='panel-header'>Coverage Visibility</div>{_render_country_coverage_visibility(coverage_visibility)}</div>"
+        # === Global Overview Table ===
+        f"<div class='panel'><div class='panel-header'>Global Overview — All Countries</div>"
+        "<div class='table-container'><table id='overview-table'><thead><tr><th>Country</th><th>Support</th><th>Priority</th><th>Multi-Domain Status</th><th>Active Domains</th><th>Source Depth</th><th>Depth Band</th><th>Freshness</th><th>Domain Gaps</th><th>Drill-down</th></tr></thead>"
+        f"<tbody>{''.join(rows)}</tbody></table></div></div>"
         "<script>"
         "function applyOverviewViewMode(){"
         "const viewMode=document.getElementById('view-mode').value;"
@@ -1249,43 +1291,69 @@ def _render_country(
         if annotations_view_model is not None and available_pages is not None and 'annotations.html' in available_pages
         else ''
     )
+    # Pre-compute styled KPI values to avoid f-string quote conflicts
+    _md_status = str(country_profile.get('multi_domain_status', 'S0'))
+    _md_color = html.escape(_status_color(_md_status))
+    _cov_band = _ratio_band(country_profile.get('coverage'))
+    _con_band = _ratio_band(country_profile.get('confidence'))
+    _cov_color = html.escape(_band_color(_cov_band))
+    _con_color = html.escape(_band_color(_con_band))
+
     trust_summary_html = (
         "<h3>Trust / Uncertainty Summary</h3>"
-        f"<p>Coverage band: <strong>{html.escape(_ratio_band(country_profile.get('coverage')))}</strong> | Confidence band: <strong>{html.escape(_ratio_band(country_profile.get('confidence')))}</strong></p>"
-        f"<h4>Coverage Meter</h4>{_render_metric_meter('Coverage', country_profile.get('coverage'), fill_color='#0ea5e9')}"
-        f"<h4>Confidence Meter</h4>{_render_metric_meter('Confidence', country_profile.get('confidence'), fill_color='#8b5cf6')}"
+        f"<p>Coverage band: <strong>{html.escape(_cov_band)}</strong> | Confidence band: <strong>{html.escape(_con_band)}</strong></p>"
+        f"<h4>Coverage Meter</h4>{_render_metric_meter('Coverage', country_profile.get('coverage'), fill_color=_band_color(_cov_band))}"
+        f"<h4>Confidence Meter</h4>{_render_metric_meter('Confidence', country_profile.get('confidence'), fill_color=_band_color(_con_band))}"
         f"<h4>Uncertainty Flags</h4><div>{_render_uncertainty_badges(country_profile.get('uncertainty', []))}</div>"
     )
     body = (
-        "<h2>Country Profile</h2>"
-        f"<p>Country: <strong>{html.escape(str(country_profile.get('country_id', 'UNKNOWN')))}</strong></p>"
-        f"<p>Priority: <strong>{html.escape(str(country_context.get('priority', 'n/a')))}</strong> | Selection Type: <strong>{html.escape(str(country_context.get('selection_type', 'n/a')))}</strong> | Region: <strong>{html.escape(str(country_context.get('region', 'n/a')))}</strong></p>"
-        f"<p>Multi-domain status: <span class='status'>{html.escape(str(country_profile.get('multi_domain_status', 'n/a')))}</span></p>"
-        f"<p>Coverage: {html.escape(str(country_profile.get('coverage', 'n/a')))} | Confidence: {html.escape(str(country_profile.get('confidence', 'n/a')))}</p>"
-        f"{trust_summary_html}"
-        "<h3>Source Depth</h3>"
-        f"<p>Source count: <strong>{html.escape(str(source_depth.get('source_count', 0)))}</strong></p>"
+        # === KPI Header Zone ===
+        "<div class='kpi-grid'>"
+        f"<div class='kpi-card'><span class='kpi-label'>Country</span><div class='kpi-value' style='font-size:1.1rem;'>{html.escape(str(country_profile.get('country_id', 'UNKNOWN')))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Multi-Domain Status</span><div class='kpi-value' style='font-size:1rem;color:{_md_color}'>{html.escape(_md_status)}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Priority</span><div class='kpi-value'>{html.escape(str(country_context.get('priority', 'n/a')))}</div><div class='kpi-sub'>{html.escape(str(country_context.get('region', 'n/a')))} · {html.escape(str(country_context.get('selection_type', 'n/a')))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Coverage</span><div class='kpi-value' style='color:{_cov_color}'>{html.escape(_cov_band)}</div><div class='kpi-sub'>{html.escape(str(country_profile.get('coverage','n/a')))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Confidence</span><div class='kpi-value' style='color:{_con_color}'>{html.escape(_con_band)}</div><div class='kpi-sub'>{html.escape(str(country_profile.get('confidence','n/a')))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Sources</span><div class='kpi-value'>{html.escape(str(source_depth.get('source_count', 0)))}</div><div class='kpi-sub'>{html.escape(_source_depth_band(source_depth.get('source_count', 0)))}</div></div>"
+        "</div>"
+        # === Trust / Uncertainty ===
+        "<div class='panel'><div class='panel-header'>Trust / Uncertainty</div>"
+        f"{_render_metric_meter('Coverage', country_profile.get('coverage'), fill_color=_band_color(_cov_band))}"
+        f"{_render_metric_meter('Confidence', country_profile.get('confidence'), fill_color=_band_color(_con_band))}"
+        f"<div style='margin-top:8px;'>{_render_uncertainty_badges(country_profile.get('uncertainty', []))}</div>"
+        "</div>"
+        # === Domain States ===
+        "<div class='panel'><div class='panel-header'>Domain States</div>"
+        "<table><thead><tr><th>Domain</th><th>Status</th></tr></thead>"
+        f"<tbody>{domain_rows}</tbody></table>"
+        "<h3>Domain Deep Dives</h3>"
+        "<table><thead><tr><th>Domain</th><th>Detail</th></tr></thead>"
+        f"<tbody>{domain_link_rows}</tbody></table></div>"
+        # === Explanation ===
+        "<div class='panel'><div class='panel-header'>Analysis Path — Why is this country in this state?</div>"
+        f"<p>{html.escape(str(explanation_summary))}</p>"
+        f"<h3>Drivers</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in country_profile.get('drivers', []))}</ul>"
+        f"<h3>Counter Indicators</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in country_profile.get('counter_indicators', []))}</ul>"
+        f"<h3>Linked Events</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in country_profile.get('linked_events', []))}</ul>"
+        "</div>"
+        # === Source Depth & Gaps ===
+        "<div class='panel'><div class='panel-header'>Source Depth &amp; Domain Gaps</div>"
+        f"<p>Sources: <strong>{html.escape(str(source_depth.get('source_count', 0)))}</strong> | Depth: <strong>{html.escape(_source_depth_band(source_depth.get('source_count', 0)))}</strong></p>"
         f"<ul>{''.join(f'<li>{html.escape(item)}</li>' for item in source_ids) or '<li>none</li>'}</ul>"
         "<h3>Domain Gap Summary</h3>"
-        f"<p>Expected domains: {html.escape(', '.join(str(item) for item in domain_gap_summary.get('expected_domains', [])) or 'none')}</p>"
-        f"<p>Observed domains: {html.escape(', '.join(str(item) for item in domain_gap_summary.get('observed_domains', [])) or 'none')}</p>"
-        f"<p>Missing domains: {html.escape(', '.join(missing_domains) or 'none')}</p>"
+        f"<p>Expected: {html.escape(', '.join(str(item) for item in domain_gap_summary.get('expected_domains', [])) or 'none')} | "
+        f"Observed: {html.escape(', '.join(str(item) for item in domain_gap_summary.get('observed_domains', [])) or 'none')} | "
+        f"Missing: {_render_missing_domain_badges(missing_domains)}</p>"
         f"<h4>Gap Cause Details</h4>{_render_gap_details(gap_details, coverage_href_prefix='../coverage.html')}"
-        "<h3>Why this country is in this state</h3>"
-        f"<p>{html.escape(str(explanation_summary))}</p>"
-        "<h3>Domain States</h3>"
-        f"<table><thead><tr><th>Domain</th><th>Status</th></tr></thead><tbody>{domain_rows}</tbody></table>"
-        "<h3>Domain Deep Dives</h3>"
-        f"<table><thead><tr><th>Domain</th><th>Target</th></tr></thead><tbody>{domain_link_rows}</tbody></table>"
-        "<h3>Explanation Overview</h3>"
-        f"<h4>Drivers</h4><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in country_profile.get('drivers', []))}</ul>"
-        f"<h4>Counter Indicators</h4><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in country_profile.get('counter_indicators', []))}</ul>"
-        f"<h4>Linked Events</h4><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in country_profile.get('linked_events', []))}</ul>"
-        f"<h4>Uncertainty</h4><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in country_profile.get('uncertainty', []))}</ul>"
-        f"<h3>Annotation IDs</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in annotation_ids)}</ul>"
+        "</div>"
+        # === Annotations ===
         f"{annotation_workflow_link_html}"
-        f"<h3>Analyst Annotations in Context</h3>{_annotation_details_html(annotation_ids, annotations_view_model)}"
-        f"<h3>Trends</h3>{_json_block(country_profile.get('trends', {}))}"
+        "<div class='panel'><div class='panel-header'>Analyst Annotations</div>"
+        f"<p>Annotation IDs: {html.escape(', '.join(annotation_ids) or 'none')}</p>"
+        f"{_annotation_details_html(annotation_ids, annotations_view_model)}"
+        "</div>"
+        # === Trends (collapsible) ===
+        f"<details><summary>Trends (raw data)</summary>{_json_block(country_profile.get('trends', {}))}</details>"
     )
     return _page(f"Country Profile - {country_profile.get('country_id', 'UNKNOWN')}", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
@@ -1479,16 +1547,25 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
             "<table><thead><tr><th>Slice</th><th>Closed</th><th>At Risk</th></tr></thead>"
             f"<tbody>{repo_closure_rows}</tbody></table>"
         )
+    _run_color = html.escape(_run_status_color(str(system_status_read_model.get('run_status', 'n/a'))))
     body = (
-        "<h2>System Status / Runs</h2>"
-        f"<p>Run ID: <strong>{html.escape(str(system_status_read_model.get('run_id', 'n/a')))}</strong></p>"
-        f"<p>Run status: <span class='status'>{html.escape(str(system_status_read_model.get('run_status', 'n/a')))}</span></p>"
-        f"<p>Last run: {html.escape(str(system_status_read_model.get('last_run', 'n/a')))}</p>"
-        f"<p>Snapshot ID: {html.escape(str(system_status_read_model.get('snapshot_id', 'n/a')))}</p>"
-        f"<p>Reprocessing status: {html.escape(str(system_status_read_model.get('reprocessing_status', 'n/a')))}</p>"
-        f"<h3>Coverage</h3>{_json_block(system_status_read_model.get('coverage', {}))}"
+        # === KPI Header ===
+        "<div class='kpi-grid'>"
+        f"<div class='kpi-card'><span class='kpi-label'>Run ID</span><div class='kpi-value' style='font-size:0.85rem;'>{html.escape(str(system_status_read_model.get('run_id', 'n/a')))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Run Status</span><div class='kpi-value' style='color:{_run_color}'>{html.escape(str(system_status_read_model.get('run_status', 'n/a')))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Last Run</span><div class='kpi-value' style='font-size:0.8rem;'>{html.escape(str(system_status_read_model.get('last_run', 'n/a')))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Snapshot</span><div class='kpi-value' style='font-size:0.8rem;color:#6b7d99;'>{html.escape(str(system_status_read_model.get('snapshot_id', 'n/a')))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Reprocessing</span><div class='kpi-value' style='font-size:0.8rem;'>{html.escape(str(system_status_read_model.get('reprocessing_status', 'n/a')))}</div></div>"
+        "</div>"
+        # === Coverage ===
+        "<div class='panel'><div class='panel-header'>Coverage</div>"
+        f"<details><summary>Coverage Details</summary>{_json_block(system_status_read_model.get('coverage', {}))}</details>"
+        "</div>"
+        # === Issues ===
+        "<div class='panel'><div class='panel-header'>Failed Sources &amp; Available Reports</div>"
         f"<h3>Failed Sources</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in system_status_read_model.get('failed_sources', []))}</ul>"
         f"<h3>Available Reports</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in system_status_read_model.get('available_reports', []))}</ul>"
+        "</div>"
         f"{repo_closure_section}"
     )
     return _page("System Status / Runs", body, nav_prefix=nav_prefix, available_pages=available_pages)
@@ -1525,24 +1602,36 @@ def _render_readiness(readiness_view_model: dict[str, Any], *, nav_prefix: str =
         f"<li>{html.escape(str(item))}</li>"
         for item in readiness_view_model.get('known_gaps', [])
     ) or "<li>none</li>"
+    _demo_v = str(readiness_view_model.get('demo_verdict', 'n/a'))
+    _rel_v = str(readiness_view_model.get('release_verdict', 'n/a'))
+    _demo_ok = _demo_v.lower() in ('ready', 'pass', 'ok', 'green')
+    _rel_ok = _rel_v.lower() in ('ready', 'pass', 'ok', 'green')
+    _demo_color = '#4edea3' if _demo_ok else ('#e3b341' if 'partial' in _demo_v.lower() else '#ffb4ab')
+    _rel_color = '#4edea3' if _rel_ok else ('#e3b341' if 'partial' in _rel_v.lower() else '#ffb4ab')
+
     body = (
-        "<h2>Demo / Release Readiness</h2>"
-        f"<p>Run ID: <strong>{html.escape(str(readiness_view_model.get('run_id', 'n/a')))}</strong></p>"
-        f"<p>Snapshot ID: <strong>{html.escape(str(readiness_view_model.get('snapshot_id', 'n/a')))}</strong></p>"
-        f"<p>Demo Verdict: <strong>{html.escape(str(readiness_view_model.get('demo_verdict', 'n/a')))}</strong></p>"
-        f"<p>Release Verdict: <strong>{html.escape(str(readiness_view_model.get('release_verdict', 'n/a')))}</strong></p>"
-        f"<p>Country Profiles: <strong>{html.escape(str(readiness_view_model.get('country_profile_count', 0)))}</strong> | Domain Details: <strong>{html.escape(str(readiness_view_model.get('domain_detail_count', 0)))}</strong> | Reports: <strong>{html.escape(str(readiness_view_model.get('report_count', 0)))}</strong></p>"
-        "<h3>Demo Flow Checklist</h3>"
+        # === KPI Header ===
+        "<div class='kpi-grid'>"
+        f"<div class='kpi-card'><span class='kpi-label'>Demo Verdict</span><div class='kpi-value' style='color:{_demo_color}'>{html.escape(_demo_v)}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Release Verdict</span><div class='kpi-value' style='color:{_rel_color}'>{html.escape(_rel_v)}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Country Profiles</span><div class='kpi-value'>{html.escape(str(readiness_view_model.get('country_profile_count', 0)))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Domain Details</span><div class='kpi-value'>{html.escape(str(readiness_view_model.get('domain_detail_count', 0)))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Reports</span><div class='kpi-value'>{html.escape(str(readiness_view_model.get('report_count', 0)))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Run ID</span><div class='kpi-value' style='font-size:0.75rem;color:#6b7d99;'>{html.escape(str(readiness_view_model.get('run_id', 'n/a')))}</div></div>"
+        "</div>"
+        # === Checklists ===
+        "<div class='panel'><div class='panel-header'>Demo Flow Checklist</div>"
         "<table><thead><tr><th>Flow Step</th><th>Status</th></tr></thead>"
-        f"<tbody>{demo_rows}</tbody></table>"
-        "<h3>Evidence Checklist</h3>"
+        f"<tbody>{demo_rows}</tbody></table></div>"
+        "<div class='panel'><div class='panel-header'>Evidence Checklist</div>"
         "<table><thead><tr><th>Evidence</th><th>Status</th></tr></thead>"
-        f"<tbody>{evidence_rows}</tbody></table>"
-        "<h3>Artifact Readiness Summary</h3>"
+        f"<tbody>{evidence_rows}</tbody></table></div>"
+        "<div class='panel'><div class='panel-header'>Artifact Readiness</div>"
         "<table><thead><tr><th>Artifact</th><th>Status</th></tr></thead>"
-        f"<tbody>{artifact_rows}</tbody></table>"
-        "<h3>Known Gaps Before Release</h3>"
-        f"<ul>{known_gap_items}</ul>"
+        f"<tbody>{artifact_rows}</tbody></table></div>"
+        # === Known Gaps ===
+        "<div class='panel'><div class='panel-header'>Known Gaps Before Release</div>"
+        f"<ul>{known_gap_items}</ul></div>"
     )
     return _page("Demo / Release Readiness", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
@@ -2058,17 +2147,17 @@ def _render_traceability(traceability_view_model: dict[str, Any], *, nav_prefix:
     dependency_rows = _traceability_dependency_rows(lineage_records)
     origin_rows = _traceability_origin_rows(lineage_records)
     body = (
-        "<h2>Traceability / Lineage View</h2>"
-        "<table><thead><tr><th>Source</th><th>Raw</th><th>Normalized</th><th>Feature</th><th>Domain Status</th><th>Multi-Domain Status</th><th>Snapshot</th><th>Report</th></tr></thead>"
-        f"<tbody>{rows}</tbody></table>"
-        "<h3>Source Dependency Groundwork</h3>"
-        "<h4>Dependency Cluster Candidates</h4>"
-        "<table><thead><tr><th>Feature</th><th>Domain Status</th><th>Snapshot</th><th>Sources</th><th>Reports</th><th>Coupling Signal</th></tr></thead>"
-        f"<tbody>{dependency_rows}</tbody></table>"
-        "<h3>Source-Origin Groundwork</h3>"
-        "<p>This slice surfaces what the current lineage artifact can already support while explicitly marking origin inference as unresolved where no first-seen / propagation timestamps exist.</p>"
-        "<table><thead><tr><th>Source</th><th>Raw Records</th><th>Features</th><th>Reports</th><th>Origin Inference Status</th><th>Origin Uncertainty</th></tr></thead>"
-        f"<tbody>{origin_rows}</tbody></table>"
+        "<div class='panel'><div class='panel-header'>Lineage Records</div>"
+        "<div class='table-container'><table><thead><tr><th>Source</th><th>Raw</th><th>Normalized</th><th>Feature</th><th>Domain Status</th><th>Multi-Domain Status</th><th>Snapshot</th><th>Report</th></tr></thead>"
+        f"<tbody>{rows}</tbody></table></div></div>"
+        "<div class='panel'><div class='panel-header'>Source Dependency Groundwork — Cluster Candidates</div>"
+        "<p>Features and domain statuses produced by multiple sources simultaneously — potential replication or shared dependency candidates.</p>"
+        "<div class='table-container'><table><thead><tr><th>Feature</th><th>Domain Status</th><th>Snapshot</th><th>Sources</th><th>Reports</th><th>Coupling Signal</th></tr></thead>"
+        f"<tbody>{dependency_rows}</tbody></table></div></div>"
+        "<div class='panel'><div class='panel-header'>Source-Origin Groundwork</div>"
+        "<p>What the current lineage artifact can support. Origin inference is explicitly marked as unresolved where no first-seen / propagation timestamps exist.</p>"
+        "<div class='table-container'><table><thead><tr><th>Source</th><th>Raw Records</th><th>Features</th><th>Reports</th><th>Origin Inference Status</th><th>Origin Uncertainty</th></tr></thead>"
+        f"<tbody>{origin_rows}</tbody></table></div></div>"
     )
     return _page("Traceability / Lineage View", body, nav_prefix=nav_prefix, available_pages=available_pages)
 

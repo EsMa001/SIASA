@@ -581,8 +581,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Global Overview" in index_html
     assert "UKR" in index_html
     assert "countries/UKR.html" in index_html
-    assert "Daily Global Review" in index_html
-    assert "Priority Class" in index_html
+    assert "Countries Monitored" in index_html
+    assert "Priority" in index_html
     assert "Source Depth" in index_html
     assert "Domain Gaps" in index_html
     assert "Top Status Changes" in index_html
@@ -605,31 +605,31 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "source_failed_this_run" in index_html
     assert "coverage.html#source-SRC-D" in index_html
     assert "SRC-D" in index_html
-    assert "Support Status" in index_html
+    assert "Multi-Domain Status" in index_html
     assert "supported" in index_html
 
     country_html = (pages.output_dir / "countries" / "UKR.html").read_text()
     assert "Country Profile" in country_html
-    assert "Trust / Uncertainty Summary" in country_html
-    assert "Coverage Meter" in country_html
-    assert "Confidence Meter" in country_html
-    assert "Priority: <strong>P1</strong>" in country_html
-    assert "Selection Type: <strong>Core Focus</strong>" in country_html
+    assert "Trust / Uncertainty" in country_html
+    assert "Coverage" in country_html
+    assert "Confidence" in country_html
+    assert "P1" in country_html
+    assert "Core Focus" in country_html
     assert "Source Depth" in country_html
     assert "SRC-A" in country_html and "SRC-B" in country_html
-    assert "Domain Gap Summary" in country_html
+    assert "Domain Gap" in country_html
     assert "Gap Cause Details" in country_html
     assert "../coverage.html#source-SRC-D" in country_html
     assert "uncertainty-badge" in country_html
-    assert "Why this country is in this state" in country_html
+    assert "Analysis Path" in country_html
     assert "Escalation is primarily driven by Domain A with partial corroboration from Domain B." in country_html
-    assert "Explanation Overview" in country_html
+    assert "Analysis Path" in country_html
     assert "A_news_volume" in country_html
-    assert "Domain Deep Dives" in country_html
+    assert "Domain Deep" in country_html
     assert "../domains/UKR-A.html" in country_html
     assert "B — not available" in country_html
     assert "ANN-001" in country_html
-    assert "Analyst Annotations in Context" in country_html
+    assert "Analyst Annotations" in country_html
     assert "Replicated agency report likely inflated country-level signal volume." in country_html
     assert "../annotations.html?scope=country&amp;linked_item=UKR&amp;annotation_type=context_note" in country_html
     assert "Open Annotation Workflow for this Country" in country_html
@@ -761,7 +761,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Demo / Release Readiness" in readiness_html
     assert "Demo Verdict" in readiness_html
     assert "Release Verdict" in readiness_html
-    assert "Artifact Readiness Summary" in readiness_html
+    assert "Artifact Readiness" in readiness_html
     assert "validation_backtest" in readiness_html
     assert "present" in readiness_html
     assert "ready" in readiness_html
@@ -776,7 +776,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "RAW-SRC-A-1" in traceability_html
     assert "REP-DAILY-RUN-200" in traceability_html
     assert "Source Dependency Groundwork" in traceability_html
-    assert "Dependency Cluster Candidates" in traceability_html
+    assert "Cluster Candidates" in traceability_html
     assert "A_article_count" in traceability_html
     assert "SRC-A, SRC-B" in traceability_html
     assert "Source-Origin Groundwork" in traceability_html
@@ -1357,7 +1357,7 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "countries/UKR.html" in index_html
     assert "data-country-id='POL'" in index_html
     assert "data-active-domains='A,B'" in index_html
-    assert "Priority Class" in index_html
+    assert "Priority" in index_html
     assert "Source Depth" in index_html
     assert "Freshness" in index_html
     assert "Domain Gaps" in index_html
@@ -1489,7 +1489,7 @@ def test_load_site_payload_from_artifacts_falls_back_for_missing_readiness_suppo
     pages = build_local_mvp_site(output_dir=tmp_path / "site", **payload)
     readiness_html = (pages.output_dir / "readiness.html").read_text()
     assert "validation_backtest_absent:not_configured" in readiness_html
-    assert "Artifact Readiness Summary" in readiness_html
+    assert "Artifact Readiness" in readiness_html
     assert "validation_backtest" in readiness_html
     assert "absent (not_configured)" in readiness_html
     assert "missing_validation_artifact" not in readiness_html
