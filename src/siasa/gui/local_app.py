@@ -28,39 +28,116 @@ class SiteBuildResult:
 def _page(title: str, body: str, *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
     available_pages = available_pages or set()
     nav_entries = [
-        ('index.html', 'Home'),
-        ('coverage.html', 'Source / Coverage'),
-        ('trends.html', 'Yearly Trend Page'),
-        ('events.html', 'Current Events Page'),
-        ('comparison.html', 'Cross-Country Comparison'),
-        ('validation.html', 'Validation / Backtest View'),
-        ('traceability.html', 'Traceability / Lineage View'),
-        ('annotations.html', 'Analyst Annotations View'),
-        ('reports.html', 'Report / Export View'),
-        ('runs.html', 'System Status / Runs'),
-        ('readiness.html', 'Demo / Release Readiness'),
+        ('index.html', '🌍 Overview'),
+        ('coverage.html', '📡 Coverage'),
+        ('trends.html', '📈 Trends'),
+        ('events.html', '⚡ Events'),
+        ('comparison.html', '🔀 Comparison'),
+        ('validation.html', '✅ Validation'),
+        ('traceability.html', '🔗 Traceability'),
+        ('annotations.html', '📝 Annotations'),
+        ('reports.html', '📄 Reports'),
+        ('runs.html', '⚙ System'),
+        ('readiness.html', '🚦 Readiness'),
     ]
     nav_html = ''.join(
         f"<a href='{html.escape(nav_prefix + href)}'>{html.escape(label)}</a>"
         for href, label in nav_entries
         if href in available_pages
     )
+    css = (
+        # === Reset & Base ===
+        "*{box-sizing:border-box;margin:0;padding:0;}"
+        "body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;"
+        "background:#0d1117;color:#e6edf3;font-size:14px;line-height:1.5;min-height:100vh;}"
+        # === Navigation ===
+        "nav{position:sticky;top:0;z-index:100;background:#161b22;border-bottom:1px solid #30363d;"
+        "padding:0 24px;height:48px;display:flex;align-items:center;gap:4px;overflow-x:auto;}"
+        "nav a{color:#8b949e;text-decoration:none;font-size:13px;font-weight:500;padding:6px 12px;"
+        "border-radius:6px;white-space:nowrap;transition:color .15s,background .15s;}"
+        "nav a:hover{color:#e6edf3;background:#21262d;}"
+        # === Page wrapper ===
+        ".page-content{padding:24px;max-width:1600px;margin:0 auto;}"
+        # === Headings ===
+        "h1{font-size:1.4rem;font-weight:600;color:#e6edf3;margin-bottom:20px;padding-bottom:12px;"
+        "border-bottom:1px solid #21262d;}"
+        "h2{font-size:1.1rem;font-weight:600;color:#c9d1d9;margin:20px 0 12px;}"
+        "h3{font-size:0.9rem;font-weight:600;color:#8b949e;text-transform:uppercase;"
+        "letter-spacing:0.05em;margin:16px 0 8px;}"
+        "h4{font-size:0.85rem;font-weight:600;color:#8b949e;margin:12px 0 6px;}"
+        # === Panels & Cards ===
+        ".panel{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px;margin-bottom:16px;}"
+        ".panel-header{font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;"
+        "color:#8b949e;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #21262d;}"
+        ".kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;}"
+        ".kpi-card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px 16px;}"
+        ".kpi-label{font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#8b949e;margin-bottom:4px;}"
+        ".kpi-value{font-size:1.5rem;font-weight:700;color:#e6edf3;line-height:1.2;}"
+        ".kpi-sub{font-size:0.75rem;color:#8b949e;margin-top:4px;}"
+        # === Tables ===
+        "table{border-collapse:collapse;width:100%;margin:8px 0;}"
+        "thead th{background:#161b22;color:#8b949e;font-size:11px;font-weight:600;"
+        "text-transform:uppercase;letter-spacing:0.05em;padding:8px 12px;"
+        "border-bottom:2px solid #30363d;text-align:left;white-space:nowrap;}"
+        "tbody td{padding:8px 12px;border-bottom:1px solid #21262d;font-size:13px;color:#e6edf3;vertical-align:top;}"
+        "tbody tr:hover td{background:#1c2333;}"
+        "th,td{text-align:left;}"
+        ".table-container{overflow-x:auto;border:1px solid #30363d;border-radius:8px;}"
+        # === Code & Pre ===
+        "code{background:#1c2333;color:#79c0ff;padding:2px 6px;border-radius:4px;"
+        "font-family:'Cascadia Code','Fira Code','Courier New',monospace;font-size:12px;}"
+        "pre{background:#161b22;color:#79c0ff;padding:16px;border-radius:8px;overflow-x:auto;"
+        "font-family:'Cascadia Code','Fira Code','Courier New',monospace;font-size:12px;"
+        "border:1px solid #30363d;line-height:1.6;}"
+        # === Status & Badges ===
+        ".status{font-weight:600;}"
+        ".badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;"
+        "font-weight:600;border:1px solid;line-height:1.6;white-space:nowrap;}"
+        ".badge-red{color:#f85149;border-color:#f85149;background:rgba(248,81,73,.1);}"
+        ".badge-orange{color:#e3602b;border-color:#e3602b;background:rgba(227,96,43,.1);}"
+        ".badge-amber{color:#d29922;border-color:#d29922;background:rgba(210,153,34,.1);}"
+        ".badge-green{color:#3fb950;border-color:#3fb950;background:rgba(63,185,80,.1);}"
+        ".badge-blue{color:#388bfd;border-color:#388bfd;background:rgba(56,139,253,.1);}"
+        ".badge-gray{color:#8b949e;border-color:#8b949e;background:rgba(139,148,158,.1);}"
+        # === Uncertainty badges ===
+        ".uncertainty-badge{display:inline-block;margin:2px 4px 2px 0;padding:2px 8px;"
+        "border-radius:12px;background:rgba(248,81,73,.12);color:#f85149;"
+        "border:1px solid rgba(248,81,73,.35);font-size:11px;font-weight:500;}"
+        ".uncertainty-none{background:rgba(139,148,158,.1);color:#8b949e;"
+        "border:1px solid rgba(139,148,158,.3);}"
+        # === Metric meter ===
+        ".metric-meter{margin:6px 0;}"
+        ".metric-meter p{font-size:12px;color:#8b949e;margin-bottom:4px;font-weight:500;}"
+        # === Lists ===
+        "ul,ol{padding-left:20px;margin:6px 0;}"
+        "li{margin:3px 0;color:#c9d1d9;font-size:13px;}"
+        # === Links ===
+        "a{color:#388bfd;text-decoration:none;}"
+        "a:hover{color:#58a6ff;text-decoration:underline;}"
+        # === Figures / charts ===
+        "figure{margin:12px 0;}"
+        "figcaption{font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;}"
+        "figure ul{font-size:11px;color:#8b949e;list-style:none;padding:0;margin-top:6px;}"
+        # === Misc ===
+        "hr{border:none;border-top:1px solid #21262d;margin:16px 0;}"
+        "p{color:#c9d1d9;font-size:13px;margin:6px 0;}"
+        "strong{color:#e6edf3;font-weight:600;}"
+        "details{margin:8px 0;}"
+        "summary{cursor:pointer;color:#388bfd;font-size:13px;font-weight:500;padding:4px 0;}"
+        "summary:hover{color:#58a6ff;}"
+    )
     return (
         "<!DOCTYPE html>"
         "<html lang='en'><head><meta charset='utf-8'>"
-        f"<title>{html.escape(title)}</title>"
-        "<style>body{font-family:Arial,sans-serif;margin:2rem;line-height:1.4;}"
-        "table{border-collapse:collapse;width:100%;margin:1rem 0;}"
-        "th,td{border:1px solid #ccc;padding:0.5rem;text-align:left;vertical-align:top;}"
-        "code,pre{background:#f5f5f5;padding:0.2rem 0.4rem;}"
-        "nav a{margin-right:1rem;} .status{font-weight:bold;} ul{margin-top:0.3rem;}"
-        ".uncertainty-badge{display:inline-block;margin:0.1rem 0.25rem 0.1rem 0;padding:0.15rem 0.45rem;border-radius:999px;background:#fee2e2;color:#991b1b;font-size:0.85rem;}"
-        ".uncertainty-none{background:#e5e7eb;color:#374151;}"
-        ".metric-meter p{margin:0.2rem 0;}"
-        "</style></head><body>"
+        "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+        f"<title>SIASA — {html.escape(title)}</title>"
+        f"<style>{css}</style>"
+        "</head><body>"
         f"<nav>{nav_html}</nav>"
+        "<div class='page-content'>"
         f"<h1>{html.escape(title)}</h1>"
         f"{body}"
+        "</div>"
         "</body></html>"
     )
 
@@ -127,7 +204,7 @@ def _render_line_chart(series: list[Any], *, label_key: str, chart_label: str) -
             y = margin + ((max_value - value) / value_range) * usable_height
         coordinates.append(f"{x:.1f},{y:.1f}")
         circle_markup.append(
-            f"<circle cx='{x:.1f}' cy='{y:.1f}' r='3' fill='#0b6cff'><title>{html.escape(label)}: {value:.2f}</title></circle>"
+            f"<circle cx='{x:.1f}' cy='{y:.1f}' r='3' fill='#388bfd'><title>{html.escape(label)}: {value:.2f}</title></circle>"
         )
 
     labels_html = ''.join(
@@ -136,10 +213,10 @@ def _render_line_chart(series: list[Any], *, label_key: str, chart_label: str) -
     )
     return (
         f"<figure><figcaption>{html.escape(chart_label)}</figcaption>"
-        f"<svg viewBox='0 0 {width} {height}' width='{width}' height='{height}' role='img' aria-label='{html.escape(chart_label)}'>"
-        f"<line x1='{margin}' y1='{height - margin}' x2='{width - margin}' y2='{height - margin}' stroke='#999' stroke-width='1' />"
-        f"<line x1='{margin}' y1='{margin}' x2='{margin}' y2='{height - margin}' stroke='#999' stroke-width='1' />"
-        f"<polyline fill='none' stroke='#0b6cff' stroke-width='2' points='{' '.join(coordinates)}' />"
+        f"<svg viewBox='0 0 {width} {height}' width='{width}' height='{height}' role='img' aria-label='{html.escape(chart_label)}' style='background:#161b22;border-radius:6px;display:block;'>"
+        f"<line x1='{margin}' y1='{height - margin}' x2='{width - margin}' y2='{height - margin}' stroke='#30363d' stroke-width='1' />"
+        f"<line x1='{margin}' y1='{margin}' x2='{margin}' y2='{height - margin}' stroke='#30363d' stroke-width='1' />"
+        f"<polyline fill='none' stroke='#388bfd' stroke-width='2' points='{' '.join(coordinates)}' />"
         f"{''.join(circle_markup)}</svg>"
         f"<ul>{labels_html}</ul></figure>"
     )
@@ -245,15 +322,17 @@ def _region_anchor(region: str) -> tuple[float, float]:
 
 
 def _status_color(status: str) -> str:
+    # S0 = no data (grey) → S6 = critical/confirmed (deep red)
+    # Orange-red escalation scale inspired by threat intelligence dashboards
     return {
-        'S0': '#6b7280',
-        'S1': '#2563eb',
-        'S2': '#0ea5e9',
-        'S3': '#f59e0b',
-        'S4': '#f97316',
-        'S5': '#dc2626',
-        'S6': '#7f1d1d',
-    }.get(status, '#6b7280')
+        'S0': '#6e7681',   # grey — unknown / no data
+        'S1': '#8b949e',   # light grey — data present, unvalidated
+        'S2': '#d29922',   # amber — low confidence
+        'S3': '#e3b341',   # gold — moderate signal
+        'S4': '#e3602b',   # orange — meaningful signal
+        'S5': '#f85149',   # red — strong signal
+        'S6': '#ff0000',   # bright red — confirmed / critical
+    }.get(status, '#6e7681')
 
 
 
@@ -280,11 +359,11 @@ def _ratio_band(value: Any) -> str:
 
 def _band_color(band: str) -> str:
     return {
-        'high': '#15803d',
-        'medium': '#d97706',
-        'low': '#dc2626',
-        'unknown': '#6b7280',
-    }.get(band, '#6b7280')
+        'high':    '#3fb950',   # green — good coverage / stable
+        'medium':  '#d29922',   # amber — partial
+        'low':     '#f85149',   # red — weak / critical gap
+        'unknown': '#6e7681',   # grey — no data
+    }.get(band, '#6e7681')
 
 
 
@@ -305,11 +384,11 @@ def _freshness_band(value: Any) -> str:
 
 def _freshness_band_color(band: str) -> str:
     return {
-        'fresh': '#15803d',
-        'aging': '#d97706',
-        'stale': '#dc2626',
-        'unknown': '#6b7280',
-    }.get(band, '#6b7280')
+        'fresh':   '#3fb950',   # green
+        'aging':   '#d29922',   # amber
+        'stale':   '#f85149',   # red
+        'unknown': '#6e7681',   # grey
+    }.get(band, '#6e7681')
 
 
 
@@ -334,7 +413,7 @@ def _render_metric_meter(label: str, value: Any, *, fill_color: str) -> str:
         f"<div class='metric-meter metric-meter-{html.escape(label.lower().replace(' ', '-'))}'>"
         f"<p><strong>{html.escape(label)}</strong>: {html.escape(value_label)} ({html.escape(band)})</p>"
         f"<svg viewBox='0 0 {width} {height}' width='{width}' height='{height}' role='img' aria-label='{html.escape(label)} meter'>"
-        f"<rect x='0' y='0' width='{width}' height='{height}' rx='6' fill='#e5e7eb'></rect>"
+        f"<rect x='0' y='0' width='{width}' height='{height}' rx='6' fill='#21262d'></rect>"
         f"<rect x='0' y='0' width='{fill_width}' height='{height}' rx='6' fill='{html.escape(fill_color)}'></rect>"
         f"<text x='{min(fill_width + 6, width - 36)}' y='12' font-size='10'>{percent}%</text>"
         "</svg>"
