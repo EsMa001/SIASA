@@ -174,6 +174,170 @@ def test_historical_reference_review_summary_scores_curated_case_alignment_and_e
     }
 
 
+def test_historical_replay_summary_marks_status_only_mismatch_without_domain_gap_distinctly() -> None:
+    summary = build_historical_replay_summary(
+        [
+            {
+                "case_id": "VAL-TST-MISMATCH-001",
+                "country_id": "UKR",
+                "review_verdict": "replay_mismatch",
+                "status_match": False,
+                "missing_expected_domains": [],
+                "unexpected_observed_domains": [],
+                "replay_evidence_tier": "verified_replay_evidence",
+                "replay_source_coverage_ratio": 1.0,
+                "replay_provenance_completeness_ratio": 1.0,
+                "replay_evidence_score": 0.7,
+                "domain_match_ratio": 1.0,
+                "review_basis": "provider_backed_archival_replay",
+                "replay_input_source_ids": ["SRC-GDELT-DOC"],
+                "replay_input_record_count": 2,
+                "archival_data_files": ["archival_replay_inputs/VAL-TST-MISMATCH-001.json"],
+            }
+        ]
+    )
+
+    assert summary["attention_cases"] == [
+        {
+            "case_id": "VAL-TST-MISMATCH-001",
+            "country_id": "UKR",
+            "review_verdict": "replay_mismatch",
+            "attention_level": "high",
+            "attention_reason": "status_mismatch",
+            "replay_evidence_tier": "verified_replay_evidence",
+            "replay_source_coverage_ratio": 1.0,
+            "missing_expected_domains": [],
+            "unexpected_observed_domains": [],
+            "suggested_next_action": "Review reference-case expectation alignment before using this case as a strong validation signal.",
+        }
+    ]
+
+
+def test_historical_replay_summary_preserves_unexpected_observed_domain_attention_details() -> None:
+    summary = build_historical_replay_summary(
+        [
+            {
+                "case_id": "VAL-TST-UNEXPECTED-001",
+                "country_id": "UKR",
+                "review_verdict": "replay_match_with_gaps",
+                "status_match": True,
+                "missing_expected_domains": [],
+                "unexpected_observed_domains": ["E"],
+                "replay_evidence_tier": "strong_replay_evidence",
+                "replay_source_coverage_ratio": 1.0,
+                "replay_provenance_completeness_ratio": 1.0,
+                "replay_evidence_score": 0.8,
+                "domain_match_ratio": 0.75,
+                "review_basis": "provider_backed_archival_replay",
+                "replay_input_source_ids": ["SRC-GDELT-DOC"],
+                "replay_input_record_count": 3,
+                "archival_data_files": ["archival_replay_inputs/VAL-TST-UNEXPECTED-001.json"],
+            }
+        ]
+    )
+
+    assert summary["attention_cases"] == [
+        {
+            "case_id": "VAL-TST-UNEXPECTED-001",
+            "country_id": "UKR",
+            "review_verdict": "replay_match_with_gaps",
+            "attention_level": "medium",
+            "attention_reason": "domain_coverage_gap",
+            "replay_evidence_tier": "strong_replay_evidence",
+            "replay_source_coverage_ratio": 1.0,
+            "missing_expected_domains": [],
+            "unexpected_observed_domains": ["E"],
+            "suggested_next_action": "Review unexpected replayed domains and reference-case scoping before treating this replay as fully representative.",
+        }
+    ]
+
+
+def test_historical_replay_summary_prioritizes_zero_source_coverage_before_partial_coverage() -> None:
+    summary = build_historical_replay_summary(
+        [
+            {
+                "case_id": "VAL-TST-ZERO-COVERAGE-001",
+                "country_id": "UKR",
+                "review_verdict": "replay_match_with_gaps",
+                "status_match": True,
+                "missing_expected_domains": ["D"],
+                "unexpected_observed_domains": [],
+                "replay_evidence_tier": "strong_replay_evidence",
+                "replay_source_coverage_ratio": 0.0,
+                "replay_provenance_completeness_ratio": 1.0,
+                "replay_evidence_score": 0.6,
+                "domain_match_ratio": 0.66,
+                "review_basis": "provider_backed_archival_replay",
+                "replay_input_source_ids": [],
+                "replay_input_record_count": 0,
+                "archival_data_files": [],
+            },
+            {
+                "case_id": "VAL-TST-PARTIAL-COVERAGE-001",
+                "country_id": "POL",
+                "review_verdict": "replay_match_with_gaps",
+                "status_match": True,
+                "missing_expected_domains": ["D"],
+                "unexpected_observed_domains": [],
+                "replay_evidence_tier": "strong_replay_evidence",
+                "replay_source_coverage_ratio": 0.5,
+                "replay_provenance_completeness_ratio": 1.0,
+                "replay_evidence_score": 0.7,
+                "domain_match_ratio": 0.66,
+                "review_basis": "provider_backed_archival_replay",
+                "replay_input_source_ids": ["SRC-GDELT-DOC"],
+                "replay_input_record_count": 2,
+                "archival_data_files": ["archival_replay_inputs/VAL-TST-PARTIAL-COVERAGE-001.json"],
+            },
+        ]
+    )
+
+    assert [item["case_id"] for item in summary["attention_cases"]] == [
+        "VAL-TST-ZERO-COVERAGE-001",
+        "VAL-TST-PARTIAL-COVERAGE-001",
+    ]
+
+
+def test_historical_replay_summary_tolerates_legacy_null_domain_lists_and_non_numeric_coverage() -> None:
+    summary = build_historical_replay_summary(
+        [
+            {
+                "case_id": "VAL-TST-LEGACY-001",
+                "country_id": "UKR",
+                "review_verdict": "replay_match_with_gaps",
+                "status_match": True,
+                "missing_expected_domains": None,
+                "unexpected_observed_domains": None,
+                "replay_evidence_tier": "strong_replay_evidence",
+                "replay_source_coverage_ratio": "n/a",
+                "replay_provenance_completeness_ratio": 1.0,
+                "replay_evidence_score": 0.8,
+                "domain_match_ratio": 0.75,
+                "review_basis": "provider_backed_archival_replay",
+                "replay_input_source_ids": ["SRC-GDELT-DOC"],
+                "replay_input_record_count": 3,
+                "archival_data_files": ["archival_replay_inputs/VAL-TST-LEGACY-001.json"],
+            }
+        ]
+    )
+
+    assert summary["attention_case_count"] == 1
+    assert summary["attention_cases"] == [
+        {
+            "case_id": "VAL-TST-LEGACY-001",
+            "country_id": "UKR",
+            "review_verdict": "replay_match_with_gaps",
+            "attention_level": "medium",
+            "attention_reason": "domain_coverage_gap",
+            "replay_evidence_tier": "strong_replay_evidence",
+            "replay_source_coverage_ratio": "n/a",
+            "missing_expected_domains": [],
+            "unexpected_observed_domains": [],
+            "suggested_next_action": "Review missing expected domains and source coverage before treating this replay as fully representative.",
+        }
+    ]
+
+
 def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> None:
     repo_root = Path(__file__).resolve().parents[2]
     cases = load_validation_case_library(repo_root / "vmodel" / "verification" / "validation_reference_cases.yaml")
@@ -221,4 +385,31 @@ def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> 
         "review_basis_counts": {
             "provider_backed_archival_replay": 8,
         },
+        "attention_case_count": 2,
+        "attention_cases": [
+            {
+                "case_id": "VAL-ISR-2024-002",
+                "country_id": "ISR",
+                "review_verdict": "replay_mismatch",
+                "attention_level": "high",
+                "attention_reason": "status_mismatch_and_domain_gap",
+                "replay_evidence_tier": "weak_replay_evidence",
+                "replay_source_coverage_ratio": 0.25,
+                "missing_expected_domains": ["B", "D"],
+                "unexpected_observed_domains": [],
+                "suggested_next_action": "Review reference-case expectation alignment and archival replay provenance before using this case as a strong validation signal.",
+            },
+            {
+                "case_id": "VAL-POL-2024-002",
+                "country_id": "POL",
+                "review_verdict": "replay_match_with_gaps",
+                "attention_level": "medium",
+                "attention_reason": "domain_coverage_gap",
+                "replay_evidence_tier": "strong_replay_evidence",
+                "replay_source_coverage_ratio": 0.75,
+                "missing_expected_domains": ["D"],
+                "unexpected_observed_domains": [],
+                "suggested_next_action": "Review missing expected domains and source coverage before treating this replay as fully representative.",
+            },
+        ],
     }

@@ -378,6 +378,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 "status_match": True,
                 "expected_domains": ["A", "B", "D"],
                 "replayed_domains": ["A", "B"],
+                "missing_expected_domains": ["D"],
                 "domain_match_ratio": 2 / 3,
                 "review_verdict": "replay_match_with_gaps",
                 "replay_input_record_count": 5,
@@ -425,6 +426,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 "status_match": False,
                 "expected_domains": ["A", "B", "D"],
                 "replayed_domains": ["A"],
+                "missing_expected_domains": ["B", "D"],
                 "domain_match_ratio": 1 / 3,
                 "review_verdict": "replay_mismatch",
                 "replay_input_record_count": 2,
@@ -730,6 +732,13 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Replay Input Record Total" in validation_html
     assert "Archival Data Files" in validation_html
     assert "Replay Source Coverage" in validation_html
+    assert "Replay Attention Watchlist" in validation_html
+    assert "status_mismatch_and_domain_gap" in validation_html
+    assert "domain_coverage_gap" in validation_html
+    assert "Review reference-case expectation alignment and archival replay provenance before using this case as a strong validation signal." in validation_html
+    assert "Review missing expected domains and source coverage before treating this replay as fully representative." in validation_html
+    assert "VAL-ISR-2024-002" in validation_html
+    assert "VAL-POL-2024-002" in validation_html
     assert "archival_replay_inputs/VAL-UKR-2022-001.json" in validation_html
     assert "Replay Input Records" in validation_html
     assert "military_escalation" in validation_html

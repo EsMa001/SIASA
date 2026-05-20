@@ -106,6 +106,104 @@ def build_historical_reference_review_summary(reference_case_library: list[Valid
 
 
 
+def _coerce_string_list(value: object) -> list[str]:
+    if isinstance(value, (list, tuple, set)):
+        return [str(item) for item in value if item is not None and str(item) != ""]
+    return []
+
+
+def _safe_sortable_ratio(value: object) -> float:
+    if value is None:
+        return 1.0
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return 1.0
+
+
+def _replay_attention_cases(historical_replay_reviews: list[dict[str, object]]) -> list[dict[str, object]]:
+    attention_cases: list[dict[str, object]] = []
+    for review in historical_replay_reviews:
+        if not isinstance(review, dict):
+            continue
+        review_verdict = str(review.get("review_verdict", ""))
+        replay_evidence_tier = str(review.get("replay_evidence_tier", ""))
+        if review_verdict == "replay_mismatch":
+            missing_expected_domains = _coerce_string_list(review.get("missing_expected_domains"))
+            unexpected_observed_domains = _coerce_string_list(review.get("unexpected_observed_domains"))
+            has_domain_gap = bool(missing_expected_domains or unexpected_observed_domains)
+            attention_level = "high"
+            if has_domain_gap:
+                attention_reason = "status_mismatch_and_domain_gap"
+                if missing_expected_domains and unexpected_observed_domains:
+                    suggested_next_action = (
+                        "Review missing expected domains, unexpected replayed domains, and archival replay provenance before using this case as a strong validation signal."
+                    )
+                elif unexpected_observed_domains:
+                    suggested_next_action = (
+                        "Review unexpected replayed domains and archival replay provenance before using this case as a strong validation signal."
+                    )
+                else:
+                    suggested_next_action = (
+                        "Review reference-case expectation alignment and archival replay provenance before using this case as a strong validation signal."
+                    )
+            else:
+                attention_reason = "status_mismatch"
+                suggested_next_action = (
+                    "Review reference-case expectation alignment before using this case as a strong validation signal."
+                )
+        elif review_verdict == "replay_match_with_gaps":
+            missing_expected_domains = _coerce_string_list(review.get("missing_expected_domains"))
+            unexpected_observed_domains = _coerce_string_list(review.get("unexpected_observed_domains"))
+            attention_level = "medium"
+            attention_reason = "domain_coverage_gap"
+            if missing_expected_domains and unexpected_observed_domains:
+                suggested_next_action = (
+                    "Review missing expected domains, unexpected replayed domains, and source coverage before treating this replay as fully representative."
+                )
+            elif unexpected_observed_domains:
+                suggested_next_action = (
+                    "Review unexpected replayed domains and reference-case scoping before treating this replay as fully representative."
+                )
+            else:
+                suggested_next_action = (
+                    "Review missing expected domains and source coverage before treating this replay as fully representative."
+                )
+        elif replay_evidence_tier == "weak_replay_evidence":
+            missing_expected_domains = _coerce_string_list(review.get("missing_expected_domains"))
+            unexpected_observed_domains = _coerce_string_list(review.get("unexpected_observed_domains"))
+            attention_level = "medium"
+            attention_reason = "weak_replay_evidence"
+            suggested_next_action = (
+                "Review archival replay input quality and provenance completeness before using this case as a strong validation signal."
+            )
+        else:
+            continue
+        attention_cases.append(
+            {
+                "case_id": str(review.get("case_id", "")),
+                "country_id": str(review.get("country_id", "")),
+                "review_verdict": review_verdict,
+                "attention_level": attention_level,
+                "attention_reason": attention_reason,
+                "replay_evidence_tier": replay_evidence_tier,
+                "replay_source_coverage_ratio": review.get("replay_source_coverage_ratio"),
+                "missing_expected_domains": missing_expected_domains,
+                "unexpected_observed_domains": unexpected_observed_domains,
+                "suggested_next_action": suggested_next_action,
+            }
+        )
+    severity_order = {"high": 0, "medium": 1, "low": 2}
+    return sorted(
+        attention_cases,
+        key=lambda item: (
+            severity_order.get(str(item.get("attention_level", "low")), 9),
+            _safe_sortable_ratio(item.get("replay_source_coverage_ratio")),
+            str(item.get("case_id", "")),
+        ),
+    )
+
+
 def build_historical_replay_summary(historical_replay_reviews: list[dict[str, object]]) -> dict[str, object]:
     verdict_counts = Counter(
         str(review.get("review_verdict"))
@@ -168,6 +266,7 @@ def build_historical_replay_summary(historical_replay_reviews: list[dict[str, ob
         for review in historical_replay_reviews
         if isinstance(review, dict)
     )
+    attention_cases = _replay_attention_cases(historical_replay_reviews)
     return {
         "case_count": len([review for review in historical_replay_reviews if isinstance(review, dict)]),
         "countries_covered": countries_covered,
@@ -182,6 +281,8 @@ def build_historical_replay_summary(historical_replay_reviews: list[dict[str, ob
         "replay_evidence_tier_counts": dict(sorted(replay_evidence_tier_counts.items())),
         "replay_input_source_coverage_counts": dict(sorted(replay_input_source_coverage_counts.items())),
         "review_basis_counts": dict(sorted(review_basis_counts.items())),
+        "attention_case_count": len(attention_cases),
+        "attention_cases": attention_cases,
     }
 
 

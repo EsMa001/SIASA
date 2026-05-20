@@ -12,6 +12,7 @@ from urllib.parse import quote
 
 from siasa.catalog import load_country_set
 from siasa.readmodels.readiness import build_readiness_view_model
+from siasa.readmodels.validation_backtest import build_historical_replay_summary
 from siasa.traceability.consistency import build_repo_closure_report
 
 
@@ -1612,6 +1613,11 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         if isinstance(validation_view_model.get('historical_replay_summary', {}), dict)
         else {}
     )
+    if historical_replay_reviews and not historical_replay_summary.get('attention_cases'):
+        historical_replay_summary = {
+            **historical_replay_summary,
+            **build_historical_replay_summary(historical_replay_reviews),
+        }
     verdict_count_rows = ''.join(
         f"<tr><td>{html.escape(str(verdict))}</td><td>{html.escape(str(count))}</td></tr>"
         for verdict, count in sorted((portfolio_summary.get('review_verdict_counts') or {}).items())
@@ -1677,6 +1683,20 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         f"<tr><td>{html.escape(str(tier))}</td><td>{html.escape(str(count))}</td></tr>"
         for tier, count in sorted((historical_replay_summary.get('replay_evidence_tier_counts') or {}).items())
     ) or "<tr><td colspan='2'>No replay evidence tiers recorded.</td></tr>"
+    replay_attention_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(item.get('country_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('case_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('attention_level', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('attention_reason', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('review_verdict', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('replay_evidence_tier', 'n/a')))}</td>"
+        f"<td>{html.escape('missing=' + (', '.join(str(domain) for domain in item.get('missing_expected_domains', [])) or 'none') + '; unexpected=' + (', '.join(str(domain) for domain in item.get('unexpected_observed_domains', [])) or 'none'))}</td>"
+        f"<td>{html.escape(str(item.get('suggested_next_action', 'n/a')))}</td>"
+        "</tr>"
+        for item in historical_replay_summary.get('attention_cases', [])
+        if isinstance(item, dict)
+    ) or "<tr><td colspan='8'>No replay attention cases recorded.</td></tr>"
     historical_replay_rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(review.get('country_id', 'n/a')))}</td>"
@@ -1768,6 +1788,10 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         "<h4>Replay Source Coverage</h4>"
         "<table><thead><tr><th>Source</th><th>Case Count</th></tr></thead>"
         f"<tbody>{historical_replay_source_coverage_rows}</tbody></table>"
+        "<h4>Replay Attention Watchlist</h4>"
+        f"<p>Attention Cases: <strong>{html.escape(str(historical_replay_summary.get('attention_case_count', 0)))}</strong></p>"
+        "<table><thead><tr><th>Country</th><th>Case ID</th><th>Attention Level</th><th>Reason</th><th>Replay Verdict</th><th>Replay Evidence Tier</th><th>Gap Signals</th><th>Suggested Next Action</th></tr></thead>"
+        f"<tbody>{replay_attention_rows}</tbody></table>"
         "<h3>Historical Replay Reviews</h3>"
         "<table><thead><tr><th>Country</th><th>Case ID</th><th>Replay Verdict</th><th>Replay Basis</th><th>Replay Evidence Tier</th><th>Replay Evidence Score</th><th>Replay Sources</th><th>Archival Data Files</th><th>Expected Status</th><th>Replayed Status</th><th>Domain Match Ratio</th><th>Replay Input Records</th></tr></thead>"
         f"<tbody>{historical_replay_rows}</tbody></table>"

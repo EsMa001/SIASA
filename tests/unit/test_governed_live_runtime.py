@@ -1119,6 +1119,33 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
         "review_basis_counts": {
             "provider_backed_archival_replay": 8,
         },
+        "attention_case_count": 2,
+        "attention_cases": [
+            {
+                "case_id": "VAL-ISR-2024-002",
+                "country_id": "ISR",
+                "review_verdict": "replay_mismatch",
+                "attention_level": "high",
+                "attention_reason": "status_mismatch_and_domain_gap",
+                "replay_evidence_tier": "weak_replay_evidence",
+                "replay_source_coverage_ratio": 0.25,
+                "missing_expected_domains": ["B", "D"],
+                "unexpected_observed_domains": [],
+                "suggested_next_action": "Review reference-case expectation alignment and archival replay provenance before using this case as a strong validation signal.",
+            },
+            {
+                "case_id": "VAL-POL-2024-002",
+                "country_id": "POL",
+                "review_verdict": "replay_match_with_gaps",
+                "attention_level": "medium",
+                "attention_reason": "domain_coverage_gap",
+                "replay_evidence_tier": "strong_replay_evidence",
+                "replay_source_coverage_ratio": 0.75,
+                "missing_expected_domains": ["D"],
+                "unexpected_observed_domains": [],
+                "suggested_next_action": "Review missing expected domains and source coverage before treating this replay as fully representative.",
+            },
+        ],
     }
     assert [review["case_id"] for review in validation_backtest["historical_replay_reviews"]] == [
         "VAL-UKR-2022-001",
