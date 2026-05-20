@@ -18,6 +18,42 @@ validation_cases:
       - curated_historical_observed_outcome_not_generated_by_runtime_replay
     validation_metrics: [Domain Match, Status Match]
 
+  - case_id: VAL-RUS-2024-001
+    country_id: RUS
+    case_name: Strategic coercion reference case
+    case_type: strategic_posturing
+    time_start: "2024-03-01"
+    time_end: "2024-03-31"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: corroborated_multi_source
+    expected_signal_pattern: Strategic coercion and externalized pressure should align information, event, and macro stress signals in a governed A/B/D replay case.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Extend the governed validation library into the Russia core-focus lane with a full A/B/D archival replay case.
+    known_limitations:
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+
+  - case_id: VAL-CHN-2024-001
+    country_id: CHN
+    case_name: Regional pressure reference case
+    case_type: strategic_posturing
+    time_start: "2024-05-01"
+    time_end: "2024-05-31"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: corroborated_multi_source
+    expected_signal_pattern: Regional power projection and policy pressure should remain reviewable across information, event, and macro stress signals.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Extend the governed validation library into East Asia with a full A/B/D archival replay case for China.
+    known_limitations:
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+
   - case_id: VAL-POL-2023-001
     country_id: POL
     case_name: Hybrid pressure reference case

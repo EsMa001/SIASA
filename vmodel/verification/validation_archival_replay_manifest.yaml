@@ -8,6 +8,24 @@ archival_replay_cases:
     provenance_notes: Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.
     known_limitations:
       - provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime
+  - case_id: VAL-RUS-2024-001
+    review_basis: provider_backed_archival_replay
+    storage_mode: archival_normalized_records
+    data_files:
+      - archival_replay_inputs/VAL-RUS-2024-001.json
+    archival_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    provenance_notes: Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.
+    known_limitations:
+      - provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime
+  - case_id: VAL-CHN-2024-001
+    review_basis: provider_backed_archival_replay
+    storage_mode: archival_normalized_records
+    data_files:
+      - archival_replay_inputs/VAL-CHN-2024-001.json
+    archival_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    provenance_notes: Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.
+    known_limitations:
+      - provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime
   - case_id: VAL-POL-2023-001
     review_basis: provider_backed_archival_replay
     storage_mode: archival_normalized_records
