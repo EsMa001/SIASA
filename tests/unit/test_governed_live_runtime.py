@@ -1120,6 +1120,32 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
             "provider_backed_archival_replay": 8,
         },
         "attention_case_count": 2,
+        "attention_level_counts": {
+            "high": 1,
+            "medium": 1,
+        },
+        "attention_reason_counts": {
+            "domain_coverage_gap": 1,
+            "status_mismatch_and_domain_gap": 1,
+        },
+        "attention_owner_counts": {
+            "runtime/source coverage": 1,
+            "validation governance": 1,
+        },
+        "attention_country_summary": [
+            {
+                "country_id": "ISR",
+                "attention_case_count": 1,
+                "highest_attention_level": "high",
+                "case_ids": ["VAL-ISR-2024-002"],
+            },
+            {
+                "country_id": "POL",
+                "attention_case_count": 1,
+                "highest_attention_level": "medium",
+                "case_ids": ["VAL-POL-2024-002"],
+            },
+        ],
         "attention_cases": [
             {
                 "case_id": "VAL-ISR-2024-002",
@@ -1127,6 +1153,7 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
                 "review_verdict": "replay_mismatch",
                 "attention_level": "high",
                 "attention_reason": "status_mismatch_and_domain_gap",
+                "owner_hint": "validation governance",
                 "replay_evidence_tier": "weak_replay_evidence",
                 "replay_source_coverage_ratio": 0.25,
                 "missing_expected_domains": ["B", "D"],
@@ -1139,6 +1166,7 @@ def test_governed_live_orchestrator_can_write_artifacts_with_real_source_ids(tmp
                 "review_verdict": "replay_match_with_gaps",
                 "attention_level": "medium",
                 "attention_reason": "domain_coverage_gap",
+                "owner_hint": "runtime/source coverage",
                 "replay_evidence_tier": "strong_replay_evidence",
                 "replay_source_coverage_ratio": 0.75,
                 "missing_expected_domains": ["D"],

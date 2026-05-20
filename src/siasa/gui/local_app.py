@@ -1683,12 +1683,35 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         f"<tr><td>{html.escape(str(tier))}</td><td>{html.escape(str(count))}</td></tr>"
         for tier, count in sorted((historical_replay_summary.get('replay_evidence_tier_counts') or {}).items())
     ) or "<tr><td colspan='2'>No replay evidence tiers recorded.</td></tr>"
+    replay_attention_level_rows = ''.join(
+        f"<tr><td>{html.escape(str(level))}</td><td>{html.escape(str(count))}</td></tr>"
+        for level, count in sorted((historical_replay_summary.get('attention_level_counts') or {}).items())
+    ) or "<tr><td colspan='2'>No attention levels recorded.</td></tr>"
+    replay_attention_reason_rows = ''.join(
+        f"<tr><td>{html.escape(str(reason))}</td><td>{html.escape(str(count))}</td></tr>"
+        for reason, count in sorted((historical_replay_summary.get('attention_reason_counts') or {}).items())
+    ) or "<tr><td colspan='2'>No attention reasons recorded.</td></tr>"
+    replay_attention_owner_rows = ''.join(
+        f"<tr><td>{html.escape(str(owner))}</td><td>{html.escape(str(count))}</td></tr>"
+        for owner, count in sorted((historical_replay_summary.get('attention_owner_counts') or {}).items())
+    ) or "<tr><td colspan='2'>No follow-up owners recorded.</td></tr>"
+    replay_attention_country_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(item.get('country_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('attention_case_count', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('highest_attention_level', 'n/a')))}</td>"
+        f"<td>{html.escape(', '.join(str(case_id) for case_id in item.get('case_ids', [])) or 'none')}</td>"
+        "</tr>"
+        for item in historical_replay_summary.get('attention_country_summary', [])
+        if isinstance(item, dict)
+    ) or "<tr><td colspan='4'>No country attention summary recorded.</td></tr>"
     replay_attention_rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(item.get('country_id', 'n/a')))}</td>"
         f"<td>{html.escape(str(item.get('case_id', 'n/a')))}</td>"
         f"<td>{html.escape(str(item.get('attention_level', 'n/a')))}</td>"
         f"<td>{html.escape(str(item.get('attention_reason', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('owner_hint', 'n/a')))}</td>"
         f"<td>{html.escape(str(item.get('review_verdict', 'n/a')))}</td>"
         f"<td>{html.escape(str(item.get('replay_evidence_tier', 'n/a')))}</td>"
         f"<td>{html.escape('missing=' + (', '.join(str(domain) for domain in item.get('missing_expected_domains', [])) or 'none') + '; unexpected=' + (', '.join(str(domain) for domain in item.get('unexpected_observed_domains', [])) or 'none'))}</td>"
@@ -1696,7 +1719,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         "</tr>"
         for item in historical_replay_summary.get('attention_cases', [])
         if isinstance(item, dict)
-    ) or "<tr><td colspan='8'>No replay attention cases recorded.</td></tr>"
+    ) or "<tr><td colspan='9'>No replay attention cases recorded.</td></tr>"
     historical_replay_rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(review.get('country_id', 'n/a')))}</td>"
@@ -1788,9 +1811,19 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         "<h4>Replay Source Coverage</h4>"
         "<table><thead><tr><th>Source</th><th>Case Count</th></tr></thead>"
         f"<tbody>{historical_replay_source_coverage_rows}</tbody></table>"
+        "<h4>Replay Attention Summary</h4>"
+        "<table><thead><tr><th>Attention Level</th><th>Count</th></tr></thead>"
+        f"<tbody>{replay_attention_level_rows}</tbody></table>"
+        "<table><thead><tr><th>Reason</th><th>Count</th></tr></thead>"
+        f"<tbody>{replay_attention_reason_rows}</tbody></table>"
+        "<table><thead><tr><th>Follow-up Owner</th><th>Count</th></tr></thead>"
+        f"<tbody>{replay_attention_owner_rows}</tbody></table>"
+        "<h5>Attention by Country</h5>"
+        "<table><thead><tr><th>Country</th><th>Attention Cases</th><th>Highest Attention Level</th><th>Case IDs</th></tr></thead>"
+        f"<tbody>{replay_attention_country_rows}</tbody></table>"
         "<h4>Replay Attention Watchlist</h4>"
         f"<p>Attention Cases: <strong>{html.escape(str(historical_replay_summary.get('attention_case_count', 0)))}</strong></p>"
-        "<table><thead><tr><th>Country</th><th>Case ID</th><th>Attention Level</th><th>Reason</th><th>Replay Verdict</th><th>Replay Evidence Tier</th><th>Gap Signals</th><th>Suggested Next Action</th></tr></thead>"
+        "<table><thead><tr><th>Country</th><th>Case ID</th><th>Attention Level</th><th>Reason</th><th>Follow-up Owner</th><th>Replay Verdict</th><th>Replay Evidence Tier</th><th>Gap Signals</th><th>Suggested Next Action</th></tr></thead>"
         f"<tbody>{replay_attention_rows}</tbody></table>"
         "<h3>Historical Replay Reviews</h3>"
         "<table><thead><tr><th>Country</th><th>Case ID</th><th>Replay Verdict</th><th>Replay Basis</th><th>Replay Evidence Tier</th><th>Replay Evidence Score</th><th>Replay Sources</th><th>Archival Data Files</th><th>Expected Status</th><th>Replayed Status</th><th>Domain Match Ratio</th><th>Replay Input Records</th></tr></thead>"

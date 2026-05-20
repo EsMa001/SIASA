@@ -733,6 +733,12 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Archival Data Files" in validation_html
     assert "Replay Source Coverage" in validation_html
     assert "Replay Attention Watchlist" in validation_html
+    assert "Replay Attention Summary" in validation_html
+    assert "Attention Level" in validation_html
+    assert "Follow-up Owner" in validation_html
+    assert "validation governance" in validation_html
+    assert "runtime/source coverage" in validation_html
+    assert "Attention by Country" in validation_html
     assert "status_mismatch_and_domain_gap" in validation_html
     assert "domain_coverage_gap" in validation_html
     assert "Review reference-case expectation alignment and archival replay provenance before using this case as a strong validation signal." in validation_html

@@ -204,6 +204,7 @@ def test_historical_replay_summary_marks_status_only_mismatch_without_domain_gap
             "review_verdict": "replay_mismatch",
             "attention_level": "high",
             "attention_reason": "status_mismatch",
+            "owner_hint": "validation governance",
             "replay_evidence_tier": "verified_replay_evidence",
             "replay_source_coverage_ratio": 1.0,
             "missing_expected_domains": [],
@@ -243,6 +244,7 @@ def test_historical_replay_summary_preserves_unexpected_observed_domain_attentio
             "review_verdict": "replay_match_with_gaps",
             "attention_level": "medium",
             "attention_reason": "domain_coverage_gap",
+            "owner_hint": "runtime/source coverage",
             "replay_evidence_tier": "strong_replay_evidence",
             "replay_source_coverage_ratio": 1.0,
             "missing_expected_domains": [],
@@ -322,6 +324,17 @@ def test_historical_replay_summary_tolerates_legacy_null_domain_lists_and_non_nu
     )
 
     assert summary["attention_case_count"] == 1
+    assert summary["attention_level_counts"] == {"medium": 1}
+    assert summary["attention_reason_counts"] == {"domain_coverage_gap": 1}
+    assert summary["attention_owner_counts"] == {"runtime/source coverage": 1}
+    assert summary["attention_country_summary"] == [
+        {
+            "country_id": "UKR",
+            "attention_case_count": 1,
+            "highest_attention_level": "medium",
+            "case_ids": ["VAL-TST-LEGACY-001"],
+        }
+    ]
     assert summary["attention_cases"] == [
         {
             "case_id": "VAL-TST-LEGACY-001",
@@ -329,12 +342,82 @@ def test_historical_replay_summary_tolerates_legacy_null_domain_lists_and_non_nu
             "review_verdict": "replay_match_with_gaps",
             "attention_level": "medium",
             "attention_reason": "domain_coverage_gap",
+            "owner_hint": "runtime/source coverage",
             "replay_evidence_tier": "strong_replay_evidence",
             "replay_source_coverage_ratio": "n/a",
             "missing_expected_domains": [],
             "unexpected_observed_domains": [],
             "suggested_next_action": "Review missing expected domains and source coverage before treating this replay as fully representative.",
         }
+    ]
+
+
+def test_historical_replay_summary_aggregates_attention_by_country_and_owner() -> None:
+    summary = build_historical_replay_summary(
+        [
+            {
+                "case_id": "VAL-TST-UKR-MISMATCH-001",
+                "country_id": "UKR",
+                "review_verdict": "replay_mismatch",
+                "status_match": False,
+                "missing_expected_domains": ["B"],
+                "unexpected_observed_domains": [],
+                "replay_evidence_tier": "verified_replay_evidence",
+                "replay_source_coverage_ratio": 0.5,
+                "review_basis": "provider_backed_archival_replay",
+                "replay_input_source_ids": ["SRC-GDELT-DOC"],
+            },
+            {
+                "case_id": "VAL-TST-UKR-GAP-002",
+                "country_id": "UKR",
+                "review_verdict": "replay_match_with_gaps",
+                "status_match": True,
+                "missing_expected_domains": ["D"],
+                "unexpected_observed_domains": [],
+                "replay_evidence_tier": "strong_replay_evidence",
+                "replay_source_coverage_ratio": 0.75,
+                "review_basis": "provider_backed_archival_replay",
+                "replay_input_source_ids": ["SRC-GDELT-EVENTS"],
+            },
+            {
+                "case_id": "VAL-TST-POL-WEAK-003",
+                "country_id": "POL",
+                "review_verdict": "replay_match",
+                "status_match": True,
+                "missing_expected_domains": [],
+                "unexpected_observed_domains": [],
+                "replay_evidence_tier": "weak_replay_evidence",
+                "replay_source_coverage_ratio": 1.0,
+                "review_basis": "provider_backed_archival_replay",
+                "replay_input_source_ids": ["SRC-GDACS"],
+            },
+        ]
+    )
+
+    assert summary["attention_level_counts"] == {"high": 1, "medium": 2}
+    assert summary["attention_reason_counts"] == {
+        "domain_coverage_gap": 1,
+        "status_mismatch_and_domain_gap": 1,
+        "weak_replay_evidence": 1,
+    }
+    assert summary["attention_owner_counts"] == {
+        "archival replay provenance": 1,
+        "runtime/source coverage": 1,
+        "validation governance": 1,
+    }
+    assert summary["attention_country_summary"] == [
+        {
+            "country_id": "UKR",
+            "attention_case_count": 2,
+            "highest_attention_level": "high",
+            "case_ids": ["VAL-TST-UKR-MISMATCH-001", "VAL-TST-UKR-GAP-002"],
+        },
+        {
+            "country_id": "POL",
+            "attention_case_count": 1,
+            "highest_attention_level": "medium",
+            "case_ids": ["VAL-TST-POL-WEAK-003"],
+        },
     ]
 
 
@@ -386,6 +469,32 @@ def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> 
             "provider_backed_archival_replay": 8,
         },
         "attention_case_count": 2,
+        "attention_level_counts": {
+            "high": 1,
+            "medium": 1,
+        },
+        "attention_reason_counts": {
+            "domain_coverage_gap": 1,
+            "status_mismatch_and_domain_gap": 1,
+        },
+        "attention_owner_counts": {
+            "runtime/source coverage": 1,
+            "validation governance": 1,
+        },
+        "attention_country_summary": [
+            {
+                "country_id": "ISR",
+                "attention_case_count": 1,
+                "highest_attention_level": "high",
+                "case_ids": ["VAL-ISR-2024-002"],
+            },
+            {
+                "country_id": "POL",
+                "attention_case_count": 1,
+                "highest_attention_level": "medium",
+                "case_ids": ["VAL-POL-2024-002"],
+            },
+        ],
         "attention_cases": [
             {
                 "case_id": "VAL-ISR-2024-002",
@@ -393,6 +502,7 @@ def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> 
                 "review_verdict": "replay_mismatch",
                 "attention_level": "high",
                 "attention_reason": "status_mismatch_and_domain_gap",
+                "owner_hint": "validation governance",
                 "replay_evidence_tier": "weak_replay_evidence",
                 "replay_source_coverage_ratio": 0.25,
                 "missing_expected_domains": ["B", "D"],
@@ -405,6 +515,7 @@ def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> 
                 "review_verdict": "replay_match_with_gaps",
                 "attention_level": "medium",
                 "attention_reason": "domain_coverage_gap",
+                "owner_hint": "runtime/source coverage",
                 "replay_evidence_tier": "strong_replay_evidence",
                 "replay_source_coverage_ratio": 0.75,
                 "missing_expected_domains": ["D"],

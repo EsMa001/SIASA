@@ -121,6 +121,79 @@ def _safe_sortable_ratio(value: object) -> float:
         return 1.0
 
 
+def _attention_owner_hint(attention_reason: str) -> str:
+    if attention_reason in {"status_mismatch", "status_mismatch_and_domain_gap"}:
+        return "validation governance"
+    if attention_reason == "domain_coverage_gap":
+        return "runtime/source coverage"
+    if attention_reason == "weak_replay_evidence":
+        return "archival replay provenance"
+    return "analyst review"
+
+
+def _attention_level_rank(attention_level: str) -> int:
+    return {"high": 0, "medium": 1, "low": 2}.get(attention_level, 9)
+
+
+def _attention_country_summary(attention_cases: list[dict[str, object]]) -> list[dict[str, object]]:
+    by_country: dict[str, dict[str, object]] = {}
+    for item in attention_cases:
+        if not isinstance(item, dict):
+            continue
+        country_id = str(item.get("country_id", ""))
+        if not country_id:
+            continue
+        entry = by_country.setdefault(
+            country_id,
+            {
+                "country_id": country_id,
+                "attention_case_count": 0,
+                "highest_attention_level": "low",
+                "_highest_attention_rank": 9,
+                "case_ids": [],
+            },
+        )
+        attention_level = str(item.get("attention_level", "low"))
+        attention_rank = _attention_level_rank(attention_level)
+        entry["attention_case_count"] = int(entry["attention_case_count"]) + 1
+        if attention_rank < int(entry["_highest_attention_rank"]):
+            entry["highest_attention_level"] = attention_level
+            entry["_highest_attention_rank"] = attention_rank
+        case_id = str(item.get("case_id", ""))
+        if case_id:
+            entry_case_ids = entry.setdefault("case_ids", [])
+            if isinstance(entry_case_ids, list):
+                entry_case_ids.append(case_id)
+    summaries = []
+    for entry in by_country.values():
+        case_ids = [str(case_id) for case_id in entry.get("case_ids", []) if case_id]
+        summaries.append(
+            {
+                "country_id": str(entry.get("country_id", "")),
+                "attention_case_count": int(entry.get("attention_case_count", 0)),
+                "highest_attention_level": str(entry.get("highest_attention_level", "low")),
+                "case_ids": case_ids,
+                "_highest_attention_rank": int(entry.get("_highest_attention_rank", 9)),
+            }
+        )
+    summaries.sort(
+        key=lambda item: (
+            int(item.get("_highest_attention_rank", 9)),
+            -int(item.get("attention_case_count", 0)),
+            str(item.get("country_id", "")),
+        )
+    )
+    return [
+        {
+            "country_id": str(item.get("country_id", "")),
+            "attention_case_count": int(item.get("attention_case_count", 0)),
+            "highest_attention_level": str(item.get("highest_attention_level", "low")),
+            "case_ids": list(item.get("case_ids", [])),
+        }
+        for item in summaries
+    ]
+
+
 def _replay_attention_cases(historical_replay_reviews: list[dict[str, object]]) -> list[dict[str, object]]:
     attention_cases: list[dict[str, object]] = []
     for review in historical_replay_reviews:
@@ -186,6 +259,7 @@ def _replay_attention_cases(historical_replay_reviews: list[dict[str, object]]) 
                 "review_verdict": review_verdict,
                 "attention_level": attention_level,
                 "attention_reason": attention_reason,
+                "owner_hint": _attention_owner_hint(attention_reason),
                 "replay_evidence_tier": replay_evidence_tier,
                 "replay_source_coverage_ratio": review.get("replay_source_coverage_ratio"),
                 "missing_expected_domains": missing_expected_domains,
@@ -193,11 +267,10 @@ def _replay_attention_cases(historical_replay_reviews: list[dict[str, object]]) 
                 "suggested_next_action": suggested_next_action,
             }
         )
-    severity_order = {"high": 0, "medium": 1, "low": 2}
     return sorted(
         attention_cases,
         key=lambda item: (
-            severity_order.get(str(item.get("attention_level", "low")), 9),
+            _attention_level_rank(str(item.get("attention_level", "low"))),
             _safe_sortable_ratio(item.get("replay_source_coverage_ratio")),
             str(item.get("case_id", "")),
         ),
@@ -267,6 +340,22 @@ def build_historical_replay_summary(historical_replay_reviews: list[dict[str, ob
         if isinstance(review, dict)
     )
     attention_cases = _replay_attention_cases(historical_replay_reviews)
+    attention_level_counts = Counter(
+        str(item.get("attention_level"))
+        for item in attention_cases
+        if isinstance(item, dict) and item.get("attention_level")
+    )
+    attention_reason_counts = Counter(
+        str(item.get("attention_reason"))
+        for item in attention_cases
+        if isinstance(item, dict) and item.get("attention_reason")
+    )
+    attention_owner_counts = Counter(
+        str(item.get("owner_hint"))
+        for item in attention_cases
+        if isinstance(item, dict) and item.get("owner_hint")
+    )
+    attention_country_summary = _attention_country_summary(attention_cases)
     return {
         "case_count": len([review for review in historical_replay_reviews if isinstance(review, dict)]),
         "countries_covered": countries_covered,
@@ -282,6 +371,10 @@ def build_historical_replay_summary(historical_replay_reviews: list[dict[str, ob
         "replay_input_source_coverage_counts": dict(sorted(replay_input_source_coverage_counts.items())),
         "review_basis_counts": dict(sorted(review_basis_counts.items())),
         "attention_case_count": len(attention_cases),
+        "attention_level_counts": dict(sorted(attention_level_counts.items())),
+        "attention_reason_counts": dict(sorted(attention_reason_counts.items())),
+        "attention_owner_counts": dict(sorted(attention_owner_counts.items())),
+        "attention_country_summary": attention_country_summary,
         "attention_cases": attention_cases,
     }
 
