@@ -146,9 +146,17 @@ def _page(title: str, body: str, *, nav_prefix: str = '', available_pages: set[s
         ".uncertainty-none{background:rgba(107,125,153,.08);color:#6b7d99;"
         "border:1px solid rgba(107,125,153,.2);}"
         # === Metric meter ===
-        ".metric-meter{margin:8px 0;}"
-        ".metric-meter p{font-size:11px;color:#6b7d99;margin-bottom:5px;font-weight:600;"
-        "text-transform:uppercase;letter-spacing:.06em;}"
+        ".metric-meter{margin:12px 0;max-width:320px;}"
+        ".metric-meter-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}"
+        ".metric-meter-label{font-size:11px;color:#6b7d99;font-weight:600;text-transform:uppercase;letter-spacing:.06em;}"
+        ".metric-meter-value{font-size:13px;font-weight:700;font-family:'Space Grotesk',monospace;}"
+        ".metric-meter-band{font-size:10px;font-weight:400;color:#6b7d99;}"
+        # === Charts ===
+        ".chart-figure{margin:16px 0;}"
+        ".chart-label{font-size:11px;color:#6b7d99;margin-bottom:8px;font-weight:600;"
+        "text-transform:uppercase;letter-spacing:.06em;display:block;}"
+        ".chart-empty{font-size:12px;color:#6b7d99;padding:16px;background:#1c2740;"
+        "border-radius:6px;border:1px solid rgba(78,222,163,.1);}"
         # === Lists ===
         "ul,ol{padding-left:18px;margin:6px 0;}"
         "li{margin:3px 0;color:#b9c7e0;font-size:13px;}"
@@ -159,7 +167,6 @@ def _page(title: str, body: str, *, nav_prefix: str = '', available_pages: set[s
         "figure{margin:12px 0;}"
         "figcaption{font-size:11px;color:#6b7d99;margin-bottom:6px;font-weight:600;"
         "text-transform:uppercase;letter-spacing:.08em;}"
-        "figure ul{font-size:11px;color:#6b7d99;list-style:none;padding:0;margin-top:6px;}"
         # === Misc ===
         "hr{border:none;border-top:1px solid rgba(78,222,163,.08);margin:16px 0;}"
         "p{color:#b9c7e0;font-size:13px;margin:6px 0;}"
@@ -250,43 +257,94 @@ def _trend_labels(series: list[Any], *, label_key: str) -> list[str]:
 def _render_line_chart(series: list[Any], *, label_key: str, chart_label: str) -> str:
     points = _coerce_chart_points(series, label_key=label_key)
     if not points:
-        return "<p>No chartable data available.</p>"
+        return "<div class='chart-empty'>No chartable data available.</div>"
 
-    width = 320
-    height = 120
-    margin = 16
-    values = [value for _, value in points]
+    width = 560
+    height = 180
+    pad_left = 52    # room for Y-axis labels
+    pad_right = 16
+    pad_top = 16
+    pad_bottom = 36  # room for X-axis labels
+
+    values = [v for _, v in points]
     min_value = min(values)
     max_value = max(values)
     value_range = max_value - min_value
 
-    coordinates: list[str] = []
-    circle_markup: list[str] = []
-    usable_width = max(width - (2 * margin), 1)
-    usable_height = max(height - (2 * margin), 1)
-    for index, (label, value) in enumerate(points):
-        x = margin if len(points) == 1 else margin + (usable_width * index / (len(points) - 1))
-        if value_range == 0:
-            y = margin + (usable_height / 2)
-        else:
-            y = margin + ((max_value - value) / value_range) * usable_height
-        coordinates.append(f"{x:.1f},{y:.1f}")
-        circle_markup.append(
-            f"<circle cx='{x:.1f}' cy='{y:.1f}' r='3' fill='#4edea3'><title>{html.escape(label)}: {value:.2f}</title></circle>"
+    uw = max(width - pad_left - pad_right, 1)
+    uh = max(height - pad_top - pad_bottom, 1)
+
+    def to_xy(index: int, value: float) -> tuple[float, float]:
+        x = pad_left if len(points) == 1 else pad_left + uw * index / (len(points) - 1)
+        y = pad_top + uh / 2 if value_range == 0 else pad_top + ((max_value - value) / value_range) * uh
+        return x, y
+
+    # --- grid lines (4 horizontal) ---
+    grid_lines: list[str] = []
+    y_labels: list[str] = []
+    steps = 4
+    for i in range(steps + 1):
+        gv = min_value + value_range * i / steps if value_range else min_value
+        gy = pad_top + uh * (1 - i / steps)
+        grid_lines.append(
+            f"<line x1='{pad_left}' y1='{gy:.1f}' x2='{width - pad_right}' y2='{gy:.1f}' "
+            f"stroke='rgba(78,222,163,.10)' stroke-width='1' stroke-dasharray='4 3'/>"
+        )
+        y_labels.append(
+            f"<text x='{pad_left - 6}' y='{gy + 4:.1f}' text-anchor='end' "
+            f"font-size='9' fill='#4a6480' font-family='Space Grotesk,monospace'>{gv:.1f}</text>"
         )
 
-    labels_html = ''.join(
-        f"<li>{html.escape(label)}: {value:.2f}</li>"
-        for label, value in points
+    # --- area fill ---
+    coords: list[str] = []
+    circles: list[str] = []
+    x_labels: list[str] = []
+    for i, (lbl, val) in enumerate(points):
+        x, y = to_xy(i, val)
+        coords.append(f"{x:.1f},{y:.1f}")
+        circles.append(
+            f"<circle cx='{x:.1f}' cy='{y:.1f}' r='4' fill='#0b1326' stroke='#4edea3' stroke-width='1.5'>"
+            f"<title>{html.escape(lbl)}: {val:.2f}</title></circle>"
+        )
+        # x-axis label (every point, rotated if many)
+        anchor = 'middle' if len(points) <= 6 else 'end'
+        rotate = '' if len(points) <= 6 else f" transform='rotate(-35,{x:.1f},{height - pad_bottom + 14})'"
+        x_labels.append(
+            f"<text x='{x:.1f}' y='{height - pad_bottom + 14}' text-anchor='{anchor}'"
+            f" font-size='9' fill='#4a6480' font-family='Space Grotesk,monospace'{rotate}>"
+            f"{html.escape(lbl[:10])}</text>"
+        )
+
+    # area polygon (line + bottom fill)
+    bx0, _ = to_xy(0, values[0])
+    bxN, _ = to_xy(len(points) - 1, values[-1])
+    area_points = (
+        f"{bx0:.1f},{height - pad_bottom} "
+        + ' '.join(coords)
+        + f" {bxN:.1f},{height - pad_bottom}"
     )
+
     return (
-        f"<figure><figcaption>{html.escape(chart_label)}</figcaption>"
-        f"<svg viewBox='0 0 {width} {height}' width='{width}' height='{height}' role='img' aria-label='{html.escape(chart_label)}' style='background:#0f1828;border-radius:2px;display:block;border:1px solid rgba(78,222,163,.12);'>"
-        f"<line x1='{margin}' y1='{height - margin}' x2='{width - margin}' y2='{height - margin}' stroke='rgba(78,222,163,.15)' stroke-width='1' />"
-        f"<line x1='{margin}' y1='{margin}' x2='{margin}' y2='{height - margin}' stroke='rgba(78,222,163,.15)' stroke-width='1' />"
-        f"<polyline fill='none' stroke='#4edea3' stroke-width='2' points='{' '.join(coordinates)}' />"
-        f"{''.join(circle_markup)}</svg>"
-        f"<ul>{labels_html}</ul></figure>"
+        f"<figure class='chart-figure'>"
+        f"<figcaption class='chart-label'>{html.escape(chart_label)}</figcaption>"
+        f"<svg viewBox='0 0 {width} {height}' width='100%' style='max-width:{width}px;' "
+        f"role='img' aria-label='{html.escape(chart_label)}' "
+        f"style='display:block;background:#0b1326;border-radius:6px;border:1px solid rgba(78,222,163,.15);'>"
+        # grid
+        + ''.join(grid_lines)
+        # axes
+        + f"<line x1='{pad_left}' y1='{pad_top}' x2='{pad_left}' y2='{height - pad_bottom}' stroke='rgba(78,222,163,.25)' stroke-width='1'/>"
+        + f"<line x1='{pad_left}' y1='{height - pad_bottom}' x2='{width - pad_right}' y2='{height - pad_bottom}' stroke='rgba(78,222,163,.25)' stroke-width='1'/>"
+        # area
+        + f"<polygon points='{area_points}' fill='rgba(78,222,163,.07)'/>"
+        # line
+        + f"<polyline fill='none' stroke='#4edea3' stroke-width='2' stroke-linejoin='round' points='{' '.join(coords)}'/>"
+        # dots
+        + ''.join(circles)
+        # labels
+        + ''.join(y_labels)
+        + ''.join(x_labels)
+        + "</svg></figure>"
     )
 
 
@@ -493,19 +551,28 @@ def _render_metric_meter(label: str, value: Any, *, fill_color: str) -> str:
     ratio = _coerce_ratio(value)
     band = _ratio_band(value)
     percent = int(round((ratio or 0.0) * 100))
-    value_label = 'n/a' if ratio is None else f'{ratio:.2f}'
-    width = 220
-    height = 16
+    value_label = 'N/A' if ratio is None else f'{ratio:.2f}'
+    width = 300
+    height = 28
     fill_width = int(round((ratio or 0.0) * width))
+    # band label color
+    band_color = {'high': '#4edea3', 'medium': '#d29922', 'low': '#f85149', 'unknown': '#6e7681'}.get(band, '#6e7681')
     return (
-        f"<div class='metric-meter metric-meter-{html.escape(label.lower().replace(' ', '-'))}'>"
-        f"<p><strong>{html.escape(label)}</strong>: {html.escape(value_label)} ({html.escape(band)})</p>"
-        f"<svg viewBox='0 0 {width} {height}' width='{width}' height='{height}' role='img' aria-label='{html.escape(label)} meter'>"
-        f"<rect x='0' y='0' width='{width}' height='{height}' rx='1' fill='#2d3449'></rect>"
-        f"<rect x='0' y='0' width='{fill_width}' height='{height}' rx='1' fill='{html.escape(fill_color)}'></rect>"
-        f"<text x='{min(fill_width + 6, width - 36)}' y='12' font-size='9' fill='#dae2fd' font-family='Space Grotesk,monospace'>{percent}%</text>"
-        "</svg>"
-        "</div>"
+        f"<div class='metric-meter'>"
+        f"<div class='metric-meter-header'>"
+        f"<span class='metric-meter-label'>{html.escape(label)}</span>"
+        f"<span class='metric-meter-value' style='color:{band_color};'>{html.escape(value_label)}"
+        f" <span class='metric-meter-band'>({html.escape(band)})</span></span>"
+        f"</div>"
+        f"<svg viewBox='0 0 {width} {height}' width='100%' style='max-width:{width}px;display:block;' "
+        f"role='img' aria-label='{html.escape(label)} meter'>"
+        f"<rect x='0' y='0' width='{width}' height='{height}' rx='4' fill='#1c2740'></rect>"
+        f"<rect x='0' y='0' width='{fill_width}' height='{height}' rx='4' fill='{html.escape(fill_color)}' opacity='0.85'></rect>"
+        f"<rect x='0' y='0' width='{width}' height='{height}' rx='4' fill='none' stroke='rgba(78,222,163,.15)' stroke-width='1'></rect>"
+        f"<text x='{width // 2}' y='19' text-anchor='middle' font-size='11' font-weight='600' "
+        f"fill='#dae2fd' font-family='Space Grotesk,monospace'>{percent}%</text>"
+        f"</svg>"
+        f"</div>"
     )
 
 
