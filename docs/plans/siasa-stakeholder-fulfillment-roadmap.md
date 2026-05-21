@@ -324,9 +324,9 @@ The old order should now be updated to the current repo state.
 
 Recommended serial order from here:
 
-1. Next broader MVP/P2 runtime-breadth tranche beyond the current `extended-focus-initial` slice
+1. First new-country extended-focus runtime slice beyond current supported set (recommended tranche: `SAU`, `QAT`, `EGY`)
    - size: medium to large
-   - reason: the first beyond-core-focus breadth tranche is now closed in ready-state evidence and should be followed by the next controlled breadth step
+   - reason: current runtime breadth now includes a ready-state `extended-focus-broader` slice (`USA`, `DEU`, `EST`, `FIN`, `POL`), so the next highest-value delta is adding truly new P2 countries with governed support
 2. Follow-up runtime robustness package(s) only if the next breadth probes expose a concrete new failure mode
    - size: small to medium
    - reason: hardening remains probe-driven and targeted (no speculative broad retry expansion)
@@ -338,7 +338,7 @@ Recommended serial order from here:
    - reason: groundwork exists, but full origin inference and information-spread analysis remain intentionally later
 
 Suggested planning cadence:
-- next work package: next broader MVP/P2 runtime-breadth tranche beyond `extended-focus-initial`
+- next work package: first new-country extended-focus runtime slice (`SAU`, `QAT`, `EGY`) with governed mapping/tests/probe evidence
 - following 1 package: targeted robustness follow-up only if probe evidence from that tranche demands it
 - after that: deeper analyst interpretation / source-origin features based on capability-matrix priority
 
@@ -374,7 +374,7 @@ Only then is the program close to the stakeholder intent, not merely the current
 
 ## 7. Immediate recommendation
 
-Next serial work package should be: the next broader MVP/P2 live-runtime breadth tranche beyond `extended-focus-initial`, with probe-driven robustness only if new concrete gaps appear.
+Next serial work package should be: first new-country extended-focus runtime integration tranche (`SAU`, `QAT`, `EGY`) with governed support, tests, and live probe evidence.
 
 Current rationale:
 - the annotation create/edit workflow gap has been closed with a governed static-site workflow baseline
@@ -382,7 +382,8 @@ Current rationale:
 - the first source-dependency / source-origin groundwork slice is now also present in the traceability view without overclaiming full origin inference
 - the readiness-honesty closure slice is now also in place: artifact presence/absence is explicit and `validation_backtest` is visibly present in the current latest bundle
 - the latest runtime-hardening slice (`d7f6a85`) now also retries isolated `SRC-GDELT-EVENTS` partial-success failures and is backed by representative live evidence (`RUN-LIVE-REP-RETRY-EVT-001`: `run_status=success`, `failed_sources=none`, `countries_with_updates=4/4`, `release_verdict=ready`)
-- the first beyond-core-focus breadth slice is now ready-state repo-evidenced with `--pilot-set extended-focus-initial` and probe `RUN-LIVE-EXT-FOCUS-INIT-003` (`run_status=success`, `failed_sources=none`, `countries_with_updates=4/4`, `known_gaps=[]`, `release_verdict=ready`) plus generated GUI `build/local_gui/_ext_focus_init_probe_3`
-- with that tranche now closed without known gaps, the next package should resume controlled breadth expansion, keeping robustness strictly probe-driven
+- the first beyond-core-focus broader slice is now ready-state repo-evidenced with `--pilot-set extended-focus-broader` and probe `RUN-LIVE-EXT-FOCUS-BROAD-002` (`run_status=success`, `failed_sources=none`, `countries_with_updates=5/5`, `known_gaps=[]`, `release_verdict=ready`) plus generated GUI `build/local_gui/_ext_focus_broad_probe_2`
+- this slice also adds probe-driven resilience for repeated isolated `SRC-GDELT-DOC` partial-success windows (extra default retry budget only for this tranche)
+- with that tranche now closed without known gaps, the next package should move to truly new-country extended-focus integration rather than recombining already-supported country sets
 
 After that, proceed with the strongest remaining breadth package indicated by the capability matrix.

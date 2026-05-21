@@ -415,6 +415,60 @@ def test_build_governed_live_orchestrator_supports_extended_focus_initial_pilot_
 
 
 
+def test_build_governed_live_orchestrator_supports_extended_focus_broader_pilot_set() -> None:
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        pilot_set="extended-focus-broader",
+    )
+
+    world_bank = orchestrator.adapters[0]
+    gdelt_doc = orchestrator.adapters[1]
+    gdelt_events = orchestrator.adapters[2]
+    gdacs = orchestrator.adapters[3]
+
+    assert world_bank.country_ids == (
+        "USA",
+        "DEU",
+        "EST",
+        "FIN",
+        "POL",
+    )
+    assert orchestrator.country_expected_domains == {
+        "USA": ["A", "B", "D"],
+        "DEU": ["A", "B", "D"],
+        "EST": ["A", "B", "D"],
+        "FIN": ["A", "D"],
+        "POL": ["A", "B", "D"],
+    }
+    assert gdelt_doc.country_queries == {
+        "USA": "United States",
+        "DEU": "Germany",
+        "EST": "Estonia",
+        "FIN": "Finland",
+        "POL": "Poland",
+    }
+    assert gdelt_doc.max_records == 5
+    assert gdelt_doc.inter_request_delay_seconds == 1.0
+    assert gdelt_doc.max_full_fetch_retries == 2
+    assert gdelt_doc.full_fetch_retry_cooldown_seconds == 40.0
+    assert gdelt_events.country_codes == {
+        "USA": "US",
+        "DEU": "GM",
+        "EST": "EN",
+        "FIN": "FI",
+        "POL": "PL",
+    }
+    assert gdelt_events.recent_export_count == 8
+    assert gdacs.country_ids == {
+        "USA",
+        "DEU",
+        "EST",
+        "FIN",
+        "POL",
+    }
+
+
+
 def test_build_governed_live_orchestrator_rejects_combined_pilot_set_and_explicit_countries() -> None:
     try:
         build_governed_live_orchestrator(
@@ -623,6 +677,29 @@ def test_governed_live_runtime_module_accepts_extended_focus_initial_pilot_set_f
 
 
 
+def test_governed_live_runtime_module_accepts_extended_focus_broader_pilot_set_flag() -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "siasa.runs.live_runtime",
+            "--pilot-set",
+            "extended-focus-broader",
+            "--help",
+        ],
+        cwd=REPO_ROOT,
+        env=_SUBPROCESS_ENV,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "--pilot-set" in result.stdout
+    assert "extended-focus-broader" in result.stdout
+
+
+
 def test_main_preserves_named_pilot_set_when_running_pipeline(monkeypatch) -> None:
     captured: dict[str, object] = {}
 
@@ -703,6 +780,28 @@ def test_run_governed_live_pipeline_uses_extra_default_retry_budget_for_core_foc
         repo_root=REPO_ROOT,
         run_id="RUN-EXP-RETRY",
         pilot_set="core-focus-expanded",
+        orchestrator_factory=factory,
+        pipeline_retry_sleep=sleep_calls.append,
+        pipeline_retry_cooldown_seconds=40.0,
+    )
+
+    assert result.run_state.status == "success"
+    assert sleep_calls == [40.0, 40.0]
+    assert len(factory.calls) == 3
+
+
+
+def test_run_governed_live_pipeline_uses_extra_default_retry_budget_for_extended_focus_broader_gdelt_doc_recovery() -> None:
+    sleep_calls: list[float] = []
+    first = FakePipelineResult(FakePipelineRunState("RUN-EXT-BROAD-RETRY", "partial_success", ["SRC-GDELT-DOC"]))
+    second = FakePipelineResult(FakePipelineRunState("RUN-EXT-BROAD-RETRY", "partial_success", ["SRC-GDELT-DOC"]))
+    third = FakePipelineResult(FakePipelineRunState("RUN-EXT-BROAD-RETRY", "success", []))
+    factory = SequenceOrchestratorFactory([first, second, third])
+
+    result = run_governed_live_pipeline(
+        repo_root=REPO_ROOT,
+        run_id="RUN-EXT-BROAD-RETRY",
+        pilot_set="extended-focus-broader",
         orchestrator_factory=factory,
         pipeline_retry_sleep=sleep_calls.append,
         pipeline_retry_cooldown_seconds=40.0,

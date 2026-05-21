@@ -56,6 +56,13 @@ _EXTENDED_FOCUS_INITIAL_LIVE_PILOT_SET = (
     "EST",
     "FIN",
 )
+_EXTENDED_FOCUS_BROADER_LIVE_PILOT_SET = (
+    "USA",
+    "DEU",
+    "EST",
+    "FIN",
+    "POL",
+)
 _WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = (
     "UKR",
     "POL",
@@ -97,6 +104,7 @@ _NAMED_LIVE_PILOT_SETS = {
     "core-focus-broader": _CORE_FOCUS_BROADER_LIVE_PILOT_SET,
     "core-focus-complete": _CORE_FOCUS_COMPLETE_LIVE_PILOT_SET,
     "extended-focus-initial": _EXTENDED_FOCUS_INITIAL_LIVE_PILOT_SET,
+    "extended-focus-broader": _EXTENDED_FOCUS_BROADER_LIVE_PILOT_SET,
 }
 
 _VALIDATION_REFERENCE_CASE_LIBRARY_PATH = (
@@ -549,6 +557,8 @@ def build_governed_live_orchestrator(
 
 
 def _default_pipeline_retry_budget(requested_country_ids: tuple[str, ...]) -> int:
+    if requested_country_ids == _EXTENDED_FOCUS_BROADER_LIVE_PILOT_SET:
+        return 2
     if len(requested_country_ids) >= 7:
         return 2
     return 1
@@ -630,7 +640,8 @@ def main(argv: list[str] | None = None) -> int:
             "'core-focus-expanded' expands to UKR,RUS,CHN,TWN,ISR,IND,POL; "
             "'core-focus-broader' expands to UKR,RUS,CHN,TWN,IRN,ISR,TUR,IND,POL; "
             "'core-focus-complete' expands to UKR,RUS,CHN,TWN,IRN,ISR,TUR,IND,PAK,GEO,POL; "
-            "'extended-focus-initial' expands to USA,DEU,EST,FIN."
+            "'extended-focus-initial' expands to USA,DEU,EST,FIN; "
+            "'extended-focus-broader' expands to USA,DEU,EST,FIN,POL."
         ),
     )
     parser.add_argument(
