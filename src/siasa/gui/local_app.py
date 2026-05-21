@@ -1962,9 +1962,9 @@ def _render_events(country_profile_read_models: dict[str, dict[str, Any]], *, na
         "<div class='panel'><div class='panel-header'>Event List</div>"
         "<div class='table-container'><table id='event-table'><thead><tr>"
         "<th>Country</th><th>Event ID</th><th>Context Status</th>"
-        "</tr></thead>"
-        f"<tbody>{''.join(rows) if rows else '<tr><td colspan=3 style=\"color:#6b7d99;\">No events recorded in current dataset.</td></tr>'}"
-        "</tbody></table></div></div>"
+        "</tr></thead><tbody>"
+        + ("".join(rows) if rows else "<tr><td colspan=3 style='color:#6b7d99;'>No events recorded in current dataset.</td></tr>")
+        + "</tbody></table></div></div>"
         "<script>"
         "function applyEventFilters(){"
         "const country=document.getElementById('event-country-filter').value;"
