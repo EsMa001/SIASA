@@ -324,23 +324,23 @@ The old order should now be updated to the current repo state.
 
 Recommended serial order from here:
 
-1. Broader MVP/P2 runtime-breadth tranche beyond current core-focus subsets
-   - size: medium to large
-   - reason: P1 closure and representative/core-focus runtime hardening are now materially advanced; the biggest remaining delivery delta is breadth toward wider MVP/P2 coverage
-2. Follow-up runtime robustness package(s) only if new probe evidence shows a concrete new failure mode
+1. Targeted robustness closure for the observed `extended-focus-initial` gap (`country_gap:FIN:B:no_usable_input_data`)
    - size: small to medium
-   - reason: hardening should stay evidence-driven and targeted (no speculative broad retry expansion)
-3. Next validation interpretation/depth package after breadth tranche closure
+   - reason: the first beyond-core-focus breadth tranche is now proven in runtime artifacts, but one concrete Domain-B country gap remains and should be closed before chaining more breadth
+2. Next broader MVP/P2 runtime-breadth tranche after the FIN gap is closed
+   - size: medium to large
+   - reason: continue breadth expansion only after the current tranche is operationally stable
+3. Next validation interpretation/depth package
    - size: medium
-   - reason: validation baseline is already strong (23 cases / 21 countries), so the next depth slice should be selective and analyst-value-driven
+   - reason: validation baseline is already strong (23 cases / 21 countries), so further depth should remain selective and analyst-value-driven
 4. Later source-origin / epidemiology extension package(s)
    - size: large
    - reason: groundwork exists, but full origin inference and information-spread analysis remain intentionally later
 
 Suggested planning cadence:
-- next work package: broader MVP/P2 runtime-breadth tranche
-- following 1 package: targeted runtime robustness follow-up only if probe evidence demands it
-- after that: resume deeper analyst interpretation / source-origin features based on capability-matrix priority
+- next work package: FIN Domain-B runtime robustness closure in the `extended-focus-initial` tranche
+- following 1 package: next breadth tranche once that gap is closed and re-verified
+- after that: deeper analyst interpretation / source-origin features based on capability-matrix priority
 
 This updated order is recommended because breadth, transparency, and core GUI usability are now materially stronger than this document originally assumed.
 
@@ -374,7 +374,7 @@ Only then is the program close to the stakeholder intent, not merely the current
 
 ## 7. Immediate recommendation
 
-Next serial work package should be: broader MVP/P2 live-runtime breadth expansion beyond the current core-focus subsets.
+Next serial work package should be: targeted runtime robustness closure for the observed `extended-focus-initial` FIN Domain-B gap (`country_gap:FIN:B:no_usable_input_data`).
 
 Current rationale:
 - the annotation create/edit workflow gap has been closed with a governed static-site workflow baseline
@@ -382,6 +382,7 @@ Current rationale:
 - the first source-dependency / source-origin groundwork slice is now also present in the traceability view without overclaiming full origin inference
 - the readiness-honesty closure slice is now also in place: artifact presence/absence is explicit and `validation_backtest` is visibly present in the current latest bundle
 - the latest runtime-hardening slice (`d7f6a85`) now also retries isolated `SRC-GDELT-EVENTS` partial-success failures and is backed by representative live evidence (`RUN-LIVE-REP-RETRY-EVT-001`: `run_status=success`, `failed_sources=none`, `countries_with_updates=4/4`, `release_verdict=ready`)
-- the most important remaining project-level gap is therefore broader governed runtime breadth toward wider MVP/P2 scope, not another immediate fragility patch and not a GUI-only slice
+- the first beyond-core-focus breadth slice is now repo-evidenced with `--pilot-set extended-focus-initial` and probe `RUN-LIVE-EXT-FOCUS-INIT-001` (`run_status=success`, `failed_sources=none`, `countries_with_updates=4/4`) plus generated GUI `build/local_gui/_ext_focus_init_probe_1`
+- readiness truthfulness now highlights one concrete next closure item in that tranche (`country_gap:FIN:B:no_usable_input_data`), so the next package should be targeted robustness for that gap before adding another breadth tranche
 
 After that, proceed with the strongest remaining breadth package indicated by the capability matrix.

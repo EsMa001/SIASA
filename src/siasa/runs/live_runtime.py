@@ -39,6 +39,10 @@ _SUPPORTED_LIVE_PILOT_COUNTRIES = {
     "TUR": {"gdelt_query": "Turkey", "gdelt_code": "TU"},
     "PAK": {"gdelt_query": "Pakistan", "gdelt_code": "PK"},
     "GEO": {"gdelt_query": "Georgia", "gdelt_code": "GG"},
+    "USA": {"gdelt_query": "United States", "gdelt_code": "US"},
+    "DEU": {"gdelt_query": "Germany", "gdelt_code": "GM"},
+    "EST": {"gdelt_query": "Estonia", "gdelt_code": "EN"},
+    "FIN": {"gdelt_query": "Finland", "gdelt_code": "FI"},
 }
 
 _REPRESENTATIVE_LIVE_PILOT_SET = ("UKR", "POL", "ISR", "TWN")
@@ -46,7 +50,28 @@ _CORE_FOCUS_INITIAL_LIVE_PILOT_SET = ("UKR", "RUS", "CHN", "TWN", "ISR", "POL")
 _CORE_FOCUS_EXPANDED_LIVE_PILOT_SET = ("UKR", "RUS", "CHN", "TWN", "ISR", "IND", "POL")
 _CORE_FOCUS_BROADER_LIVE_PILOT_SET = ("UKR", "RUS", "CHN", "TWN", "IRN", "ISR", "TUR", "IND", "POL")
 _CORE_FOCUS_COMPLETE_LIVE_PILOT_SET = ("UKR", "RUS", "CHN", "TWN", "IRN", "ISR", "TUR", "IND", "PAK", "GEO", "POL")
-_WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = ("UKR", "POL", "ISR", "RUS", "CHN", "IND", "IRN", "TUR", "PAK", "GEO")
+_EXTENDED_FOCUS_INITIAL_LIVE_PILOT_SET = (
+    "USA",
+    "DEU",
+    "EST",
+    "FIN",
+)
+_WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = (
+    "UKR",
+    "POL",
+    "ISR",
+    "RUS",
+    "CHN",
+    "IND",
+    "IRN",
+    "TUR",
+    "PAK",
+    "GEO",
+    "USA",
+    "DEU",
+    "EST",
+    "FIN",
+)
 _MULTI_COUNTRY_GDELT_EVENTS_RECENT_EXPORT_COUNT = 8
 _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
     "UKR": ["A", "B", "D"],
@@ -60,6 +85,10 @@ _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
     "TUR": ["A", "B", "D"],
     "PAK": ["A", "B", "D"],
     "GEO": ["A", "B", "D"],
+    "USA": ["A", "B", "D"],
+    "DEU": ["A", "B", "D"],
+    "EST": ["A", "B", "D"],
+    "FIN": ["A", "B", "D"],
 }
 _NAMED_LIVE_PILOT_SETS = {
     "representative": _REPRESENTATIVE_LIVE_PILOT_SET,
@@ -67,6 +96,7 @@ _NAMED_LIVE_PILOT_SETS = {
     "core-focus-expanded": _CORE_FOCUS_EXPANDED_LIVE_PILOT_SET,
     "core-focus-broader": _CORE_FOCUS_BROADER_LIVE_PILOT_SET,
     "core-focus-complete": _CORE_FOCUS_COMPLETE_LIVE_PILOT_SET,
+    "extended-focus-initial": _EXTENDED_FOCUS_INITIAL_LIVE_PILOT_SET,
 }
 
 _VALIDATION_REFERENCE_CASE_LIBRARY_PATH = (
@@ -573,7 +603,7 @@ def main(argv: list[str] | None = None) -> int:
         dest="country_ids",
         help=(
             "Governed live pilot country ISO3. Repeat for multi-country runs; "
-            "supported: UKR, POL, ISR, TWN, RUS, CHN, IND, IRN, TUR, PAK, GEO."
+            "supported: UKR, POL, ISR, TWN, RUS, CHN, IND, IRN, TUR, PAK, GEO, USA, DEU, EST, FIN."
         ),
     )
     parser.add_argument(
@@ -585,7 +615,8 @@ def main(argv: list[str] | None = None) -> int:
             "'core-focus-initial' expands to UKR,RUS,CHN,TWN,ISR,POL; "
             "'core-focus-expanded' expands to UKR,RUS,CHN,TWN,ISR,IND,POL; "
             "'core-focus-broader' expands to UKR,RUS,CHN,TWN,IRN,ISR,TUR,IND,POL; "
-            "'core-focus-complete' expands to UKR,RUS,CHN,TWN,IRN,ISR,TUR,IND,PAK,GEO,POL."
+            "'core-focus-complete' expands to UKR,RUS,CHN,TWN,IRN,ISR,TUR,IND,PAK,GEO,POL; "
+            "'extended-focus-initial' expands to USA,DEU,EST,FIN."
         ),
     )
     parser.add_argument(

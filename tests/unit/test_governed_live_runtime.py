@@ -366,6 +366,55 @@ def test_build_governed_live_orchestrator_supports_core_focus_complete_pilot_set
 
 
 
+def test_build_governed_live_orchestrator_supports_extended_focus_initial_pilot_set() -> None:
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        pilot_set="extended-focus-initial",
+    )
+
+    world_bank = orchestrator.adapters[0]
+    gdelt_doc = orchestrator.adapters[1]
+    gdelt_events = orchestrator.adapters[2]
+    gdacs = orchestrator.adapters[3]
+
+    assert world_bank.country_ids == (
+        "USA",
+        "DEU",
+        "EST",
+        "FIN",
+    )
+    assert orchestrator.country_expected_domains == {
+        "USA": ["A", "B", "D"],
+        "DEU": ["A", "B", "D"],
+        "EST": ["A", "B", "D"],
+        "FIN": ["A", "B", "D"],
+    }
+    assert gdelt_doc.country_queries == {
+        "USA": "United States",
+        "DEU": "Germany",
+        "EST": "Estonia",
+        "FIN": "Finland",
+    }
+    assert gdelt_doc.max_records == 5
+    assert gdelt_doc.inter_request_delay_seconds == 1.0
+    assert gdelt_doc.max_full_fetch_retries == 2
+    assert gdelt_doc.full_fetch_retry_cooldown_seconds == 40.0
+    assert gdelt_events.country_codes == {
+        "USA": "US",
+        "DEU": "GM",
+        "EST": "EN",
+        "FIN": "FI",
+    }
+    assert gdelt_events.recent_export_count == 8
+    assert gdacs.country_ids == {
+        "USA",
+        "DEU",
+        "EST",
+        "FIN",
+    }
+
+
+
 def test_build_governed_live_orchestrator_rejects_combined_pilot_set_and_explicit_countries() -> None:
     try:
         build_governed_live_orchestrator(
@@ -548,6 +597,29 @@ def test_governed_live_runtime_module_accepts_core_focus_complete_pilot_set_flag
     assert result.returncode == 0
     assert "--pilot-set" in result.stdout
     assert "core-focus-complete" in result.stdout
+
+
+
+def test_governed_live_runtime_module_accepts_extended_focus_initial_pilot_set_flag() -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "siasa.runs.live_runtime",
+            "--pilot-set",
+            "extended-focus-initial",
+            "--help",
+        ],
+        cwd=REPO_ROOT,
+        env=_SUBPROCESS_ENV,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "--pilot-set" in result.stdout
+    assert "extended-focus-initial" in result.stdout
 
 
 
