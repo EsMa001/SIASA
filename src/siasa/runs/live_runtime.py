@@ -287,6 +287,18 @@ def _should_retry_pipeline_after_gdelt_doc_failure(
 
 
 
+def _should_retry_pipeline_after_gdelt_events_failure(
+    result: DailyRunResult,
+    requested_country_ids: tuple[str, ...],
+) -> bool:
+    return (
+        len(requested_country_ids) > 1
+        and result.run_state.status == "partial_success"
+        and result.run_state.failed_sources == ["SRC-GDELT-EVENTS"]
+    )
+
+
+
 def _should_retry_pipeline_after_isolated_pol_domain_b_gap(
     result: DailyRunResult,
     requested_country_ids: tuple[str, ...],
@@ -534,6 +546,7 @@ def run_governed_live_pipeline(
         last_result = result
         if not (
             _should_retry_pipeline_after_gdelt_doc_failure(result, resolved_country_ids)
+            or _should_retry_pipeline_after_gdelt_events_failure(result, resolved_country_ids)
             or _should_retry_pipeline_after_isolated_pol_domain_b_gap(result, resolved_country_ids)
         ):
             return result

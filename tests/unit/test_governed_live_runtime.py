@@ -598,6 +598,28 @@ def test_run_governed_live_pipeline_retries_after_gdelt_doc_only_partial_success
 
 
 
+def test_run_governed_live_pipeline_retries_after_gdelt_events_only_partial_success_for_multi_country() -> None:
+    sleep_calls: list[float] = []
+    first = FakePipelineResult(FakePipelineRunState("RUN-1", "partial_success", ["SRC-GDELT-EVENTS"]))
+    second = FakePipelineResult(FakePipelineRunState("RUN-1", "success", []))
+    factory = SequenceOrchestratorFactory([first, second])
+
+    result = run_governed_live_pipeline(
+        repo_root=REPO_ROOT,
+        run_id="RUN-1",
+        pilot_set="representative",
+        orchestrator_factory=factory,
+        pipeline_retry_sleep=sleep_calls.append,
+        pipeline_retry_cooldown_seconds=40.0,
+        max_pipeline_retries=1,
+    )
+
+    assert result.run_state.status == "success"
+    assert sleep_calls == [40.0]
+    assert len(factory.calls) == 2
+
+
+
 def test_run_governed_live_pipeline_uses_extra_default_retry_budget_for_core_focus_expanded_gdelt_doc_recovery() -> None:
     sleep_calls: list[float] = []
     first = FakePipelineResult(FakePipelineRunState("RUN-EXP-RETRY", "partial_success", ["SRC-GDELT-DOC"]))
