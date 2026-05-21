@@ -88,7 +88,7 @@ _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
     "USA": ["A", "B", "D"],
     "DEU": ["A", "B", "D"],
     "EST": ["A", "B", "D"],
-    "FIN": ["A", "B", "D"],
+    "FIN": ["A", "D"],
 }
 _NAMED_LIVE_PILOT_SETS = {
     "representative": _REPRESENTATIVE_LIVE_PILOT_SET,
@@ -329,27 +329,41 @@ def _should_retry_pipeline_after_gdelt_events_failure(
 
 
 
-def _should_retry_pipeline_after_isolated_pol_domain_b_gap(
+def _should_retry_pipeline_after_isolated_country_domain_b_gap(
     result: DailyRunResult,
     requested_country_ids: tuple[str, ...],
 ) -> bool:
-    allowed_reason_pairs_by_subset = {
-        _REPRESENTATIVE_LIVE_PILOT_SET: {
-            ("SRC-GDACS", "zero_records_returned"),
-            ("SRC-GDELT-EVENTS", "records_only_for_other_countries_in_scope"),
-        },
-        _CORE_FOCUS_EXPANDED_LIVE_PILOT_SET: {
-            ("SRC-GDACS", "records_only_for_other_countries_in_scope"),
-            ("SRC-GDELT-EVENTS", "records_only_for_other_countries_in_scope"),
-        },
+    retryable_domain_b_gap_signatures = {
+        _REPRESENTATIVE_LIVE_PILOT_SET: (
+            "POL",
+            {
+                ("SRC-GDACS", "zero_records_returned"),
+                ("SRC-GDELT-EVENTS", "records_only_for_other_countries_in_scope"),
+            },
+        ),
+        _CORE_FOCUS_EXPANDED_LIVE_PILOT_SET: (
+            "POL",
+            {
+                ("SRC-GDACS", "records_only_for_other_countries_in_scope"),
+                ("SRC-GDELT-EVENTS", "records_only_for_other_countries_in_scope"),
+            },
+        ),
+        _EXTENDED_FOCUS_INITIAL_LIVE_PILOT_SET: (
+            "FIN",
+            {
+                ("SRC-GDACS", "records_only_for_other_countries_in_scope"),
+                ("SRC-GDELT-EVENTS", "records_only_for_other_countries_in_scope"),
+            },
+        ),
     }
-    expected_reason_pairs = allowed_reason_pairs_by_subset.get(requested_country_ids)
+    target_signature = retryable_domain_b_gap_signatures.get(requested_country_ids)
     if (
-        expected_reason_pairs is None
+        target_signature is None
         or result.run_state.status != "success"
         or result.run_state.failed_sources
     ):
         return False
+    target_country_id, expected_reason_pairs = target_signature
     artifact_bundle = result.artifact_bundle
     output_dir = getattr(artifact_bundle, "output_dir", None)
     if output_dir is None:
@@ -368,7 +382,7 @@ def _should_retry_pipeline_after_isolated_pol_domain_b_gap(
     if not isinstance(country_gap_rows, list) or len(country_gap_rows) != 1:
         return False
     gap_row = country_gap_rows[0]
-    if not isinstance(gap_row, dict) or str(gap_row.get("country_id")) != "POL":
+    if not isinstance(gap_row, dict) or str(gap_row.get("country_id")) != target_country_id:
         return False
     gap_details = gap_row.get("gap_details", [])
     if not isinstance(gap_details, list) or len(gap_details) != 1:
@@ -577,7 +591,7 @@ def run_governed_live_pipeline(
         if not (
             _should_retry_pipeline_after_gdelt_doc_failure(result, resolved_country_ids)
             or _should_retry_pipeline_after_gdelt_events_failure(result, resolved_country_ids)
-            or _should_retry_pipeline_after_isolated_pol_domain_b_gap(result, resolved_country_ids)
+            or _should_retry_pipeline_after_isolated_country_domain_b_gap(result, resolved_country_ids)
         ):
             return result
         if pipeline_attempt == effective_max_pipeline_retries:

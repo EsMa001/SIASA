@@ -387,7 +387,7 @@ def test_build_governed_live_orchestrator_supports_extended_focus_initial_pilot_
         "USA": ["A", "B", "D"],
         "DEU": ["A", "B", "D"],
         "EST": ["A", "B", "D"],
-        "FIN": ["A", "B", "D"],
+        "FIN": ["A", "D"],
     }
     assert gdelt_doc.country_queries == {
         "USA": "United States",
@@ -832,6 +832,75 @@ def test_run_governed_live_pipeline_retries_after_isolated_pol_domain_b_gap_for_
         repo_root=REPO_ROOT,
         run_id="RUN-EXP-1",
         pilot_set="core-focus-expanded",
+        orchestrator_factory=factory,
+        pipeline_retry_sleep=sleep_calls.append,
+        pipeline_retry_cooldown_seconds=40.0,
+        max_pipeline_retries=1,
+    )
+
+    assert result.artifact_bundle is second.artifact_bundle
+    assert sleep_calls == [40.0]
+    assert len(factory.calls) == 2
+
+
+
+def test_run_governed_live_pipeline_retries_after_isolated_fin_domain_b_gap_for_extended_focus_initial_set(tmp_path: Path) -> None:
+    readmodels_dir = tmp_path / "first-extended" / "readmodels"
+    readmodels_dir.mkdir(parents=True)
+    (readmodels_dir / "system_status.json").write_text(
+        json.dumps(
+            {
+                "run_id": "RUN-EXT-1",
+                "run_status": "success",
+                "failed_sources": [],
+                "country_coverage_visibility": {
+                    "country_gap_rows": [
+                        {
+                            "country_id": "FIN",
+                            "missing_domains": ["B"],
+                            "gap_details": [
+                                {
+                                    "domain": "B",
+                                    "reason": "no_usable_input_data",
+                                    "source_reason_details": [
+                                        {"source_id": "SRC-GDACS", "reason": "records_only_for_other_countries_in_scope"},
+                                        {"source_id": "SRC-GDELT-EVENTS", "reason": "records_only_for_other_countries_in_scope"},
+                                    ],
+                                }
+                            ],
+                        }
+                    ]
+                },
+            }
+        )
+    )
+    sleep_calls: list[float] = []
+    first = FakePipelineResult(
+        FakePipelineRunState("RUN-EXT-1", "success", []),
+        artifact_bundle=FakeArtifactBundle(output_dir=tmp_path / "first-extended"),
+    )
+    second_dir = tmp_path / "second-extended" / "readmodels"
+    second_dir.mkdir(parents=True)
+    (second_dir / "system_status.json").write_text(
+        json.dumps(
+            {
+                "run_id": "RUN-EXT-1",
+                "run_status": "success",
+                "failed_sources": [],
+                "country_coverage_visibility": {"country_gap_rows": []},
+            }
+        )
+    )
+    second = FakePipelineResult(
+        FakePipelineRunState("RUN-EXT-1", "success", []),
+        artifact_bundle=FakeArtifactBundle(output_dir=tmp_path / "second-extended"),
+    )
+    factory = SequenceOrchestratorFactory([first, second])
+
+    result = run_governed_live_pipeline(
+        repo_root=REPO_ROOT,
+        run_id="RUN-EXT-1",
+        pilot_set="extended-focus-initial",
         orchestrator_factory=factory,
         pipeline_retry_sleep=sleep_calls.append,
         pipeline_retry_cooldown_seconds=40.0,

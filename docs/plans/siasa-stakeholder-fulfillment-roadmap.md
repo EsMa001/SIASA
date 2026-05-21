@@ -324,12 +324,12 @@ The old order should now be updated to the current repo state.
 
 Recommended serial order from here:
 
-1. Targeted robustness closure for the observed `extended-focus-initial` gap (`country_gap:FIN:B:no_usable_input_data`)
-   - size: small to medium
-   - reason: the first beyond-core-focus breadth tranche is now proven in runtime artifacts, but one concrete Domain-B country gap remains and should be closed before chaining more breadth
-2. Next broader MVP/P2 runtime-breadth tranche after the FIN gap is closed
+1. Next broader MVP/P2 runtime-breadth tranche beyond the current `extended-focus-initial` slice
    - size: medium to large
-   - reason: continue breadth expansion only after the current tranche is operationally stable
+   - reason: the first beyond-core-focus breadth tranche is now closed in ready-state evidence and should be followed by the next controlled breadth step
+2. Follow-up runtime robustness package(s) only if the next breadth probes expose a concrete new failure mode
+   - size: small to medium
+   - reason: hardening remains probe-driven and targeted (no speculative broad retry expansion)
 3. Next validation interpretation/depth package
    - size: medium
    - reason: validation baseline is already strong (23 cases / 21 countries), so further depth should remain selective and analyst-value-driven
@@ -338,8 +338,8 @@ Recommended serial order from here:
    - reason: groundwork exists, but full origin inference and information-spread analysis remain intentionally later
 
 Suggested planning cadence:
-- next work package: FIN Domain-B runtime robustness closure in the `extended-focus-initial` tranche
-- following 1 package: next breadth tranche once that gap is closed and re-verified
+- next work package: next broader MVP/P2 runtime-breadth tranche beyond `extended-focus-initial`
+- following 1 package: targeted robustness follow-up only if probe evidence from that tranche demands it
 - after that: deeper analyst interpretation / source-origin features based on capability-matrix priority
 
 This updated order is recommended because breadth, transparency, and core GUI usability are now materially stronger than this document originally assumed.
@@ -374,7 +374,7 @@ Only then is the program close to the stakeholder intent, not merely the current
 
 ## 7. Immediate recommendation
 
-Next serial work package should be: targeted runtime robustness closure for the observed `extended-focus-initial` FIN Domain-B gap (`country_gap:FIN:B:no_usable_input_data`).
+Next serial work package should be: the next broader MVP/P2 live-runtime breadth tranche beyond `extended-focus-initial`, with probe-driven robustness only if new concrete gaps appear.
 
 Current rationale:
 - the annotation create/edit workflow gap has been closed with a governed static-site workflow baseline
@@ -382,7 +382,7 @@ Current rationale:
 - the first source-dependency / source-origin groundwork slice is now also present in the traceability view without overclaiming full origin inference
 - the readiness-honesty closure slice is now also in place: artifact presence/absence is explicit and `validation_backtest` is visibly present in the current latest bundle
 - the latest runtime-hardening slice (`d7f6a85`) now also retries isolated `SRC-GDELT-EVENTS` partial-success failures and is backed by representative live evidence (`RUN-LIVE-REP-RETRY-EVT-001`: `run_status=success`, `failed_sources=none`, `countries_with_updates=4/4`, `release_verdict=ready`)
-- the first beyond-core-focus breadth slice is now repo-evidenced with `--pilot-set extended-focus-initial` and probe `RUN-LIVE-EXT-FOCUS-INIT-001` (`run_status=success`, `failed_sources=none`, `countries_with_updates=4/4`) plus generated GUI `build/local_gui/_ext_focus_init_probe_1`
-- readiness truthfulness now highlights one concrete next closure item in that tranche (`country_gap:FIN:B:no_usable_input_data`), so the next package should be targeted robustness for that gap before adding another breadth tranche
+- the first beyond-core-focus breadth slice is now ready-state repo-evidenced with `--pilot-set extended-focus-initial` and probe `RUN-LIVE-EXT-FOCUS-INIT-003` (`run_status=success`, `failed_sources=none`, `countries_with_updates=4/4`, `known_gaps=[]`, `release_verdict=ready`) plus generated GUI `build/local_gui/_ext_focus_init_probe_3`
+- with that tranche now closed without known gaps, the next package should resume controlled breadth expansion, keeping robustness strictly probe-driven
 
 After that, proceed with the strongest remaining breadth package indicated by the capability matrix.
