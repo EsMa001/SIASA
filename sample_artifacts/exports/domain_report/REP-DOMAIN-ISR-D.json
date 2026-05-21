@@ -1,0 +1,29 @@
+{
+  "anomaly_state": "D1",
+  "capability": "analysis",
+  "contains_personal_data": false,
+  "country_id": "ISR",
+  "domain": "D",
+  "feature_values": [
+    {
+      "coverage": 1.0,
+      "feature_id": "D_trade_volume_change",
+      "value": -4.90082997253937
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "D_gdp_growth",
+      "value": 0.871968424377442
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "D_macro_data_freshness",
+      "value": 8760
+    }
+  ],
+  "linked_event_ids": [],
+  "source_state": {
+    "WB-INDICATORS": "success"
+  },
+  "uncertainty": []
+}

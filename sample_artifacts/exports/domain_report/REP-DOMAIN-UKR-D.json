@@ -1,0 +1,29 @@
+{
+  "anomaly_state": "D1",
+  "capability": "analysis",
+  "contains_personal_data": false,
+  "country_id": "UKR",
+  "domain": "D",
+  "feature_values": [
+    {
+      "coverage": 1.0,
+      "feature_id": "D_trade_volume_change",
+      "value": 10.2526784140751
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "D_gdp_growth",
+      "value": 2.9138222142611
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "D_macro_data_freshness",
+      "value": 8760
+    }
+  ],
+  "linked_event_ids": [],
+  "source_state": {
+    "WB-INDICATORS": "success"
+  },
+  "uncertainty": []
+}

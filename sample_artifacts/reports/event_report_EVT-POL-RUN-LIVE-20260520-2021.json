@@ -1,0 +1,34 @@
+{
+  "export_files": [
+    {
+      "format": "md",
+      "label": "Markdown",
+      "path": "build/run_artifacts/latest/exports/event_report/REP-EVENT-EVT-POL-RUN-LIVE-20260520-2021.md",
+      "relative_path": "exports/event_report/REP-EVENT-EVT-POL-RUN-LIVE-20260520-2021.md"
+    },
+    {
+      "format": "json",
+      "label": "JSON",
+      "path": "build/run_artifacts/latest/exports/event_report/REP-EVENT-EVT-POL-RUN-LIVE-20260520-2021.json",
+      "relative_path": "exports/event_report/REP-EVENT-EVT-POL-RUN-LIVE-20260520-2021.json"
+    }
+  ],
+  "format": "json+markdown",
+  "markdown": "# Event report: EVT-POL-RUN-LIVE-20260520-2021\nCountry: POL\nTitle: Event context for POL\nSummary: Signals: conflict_event_count, violent_event_count\nRelated domains: B\nSource state: {'SRC-GDELT-EVENTS': 'success'}",
+  "payload": {
+    "capability": "analysis",
+    "contains_personal_data": false,
+    "country_id": "POL",
+    "event_id": "EVT-POL-RUN-LIVE-20260520-2021",
+    "related_domains": [
+      "B"
+    ],
+    "source_state": {
+      "SRC-GDELT-EVENTS": "success"
+    },
+    "summary": "Signals: conflict_event_count, violent_event_count",
+    "title": "Event context for POL"
+  },
+  "report_id": "REP-EVENT-EVT-POL-RUN-LIVE-20260520-2021",
+  "report_type": "event_report"
+}

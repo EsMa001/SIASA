@@ -1,0 +1,81 @@
+{
+  "annotations": [],
+  "confidence": 1.0,
+  "configured_domains": [
+    "A",
+    "B",
+    "D"
+  ],
+  "counter_indicators": [],
+  "country_context": {
+    "country_name": "Israel",
+    "priority": "P1",
+    "rationale": "Konfliktstaat, hohe Ereignis- und Informationsdynamik",
+    "region": "Middle East",
+    "selection_type": "Core Focus"
+  },
+  "country_id": "ISR",
+  "coverage": 1.0,
+  "domain_gap_summary": {
+    "expected_domains": [
+      "A",
+      "B",
+      "D"
+    ],
+    "missing_domains": [],
+    "observed_domains": [
+      "A",
+      "B",
+      "D"
+    ]
+  },
+  "domain_states": {
+    "A": "D0",
+    "B": "D2",
+    "D": "D1"
+  },
+  "drivers": [
+    "A_news_volume",
+    "A_source_count",
+    "A_source_diversity_index",
+    "B_disaster_alert_level",
+    "B_event_count",
+    "B_event_type_distribution",
+    "B_protest_event_count",
+    "B_violent_event_count",
+    "B_violent_event_share",
+    "D_gdp_growth",
+    "D_macro_data_freshness",
+    "D_trade_volume_change"
+  ],
+  "explanation_summary": null,
+  "linked_events": [
+    "EVT-ISR-RUN-LIVE-20260520-2021"
+  ],
+  "multi_domain_status": "S1",
+  "source_depth": {
+    "source_count": 3,
+    "source_ids": [
+      "SRC-GDELT-DOC",
+      "SRC-GDELT-EVENTS",
+      "WB-INDICATORS"
+    ]
+  },
+  "trends": {
+    "yearly": [
+      {
+        "label": "2024",
+        "value": -2.0144307740809637
+      },
+      {
+        "label": "2026-02",
+        "value": 1.0
+      },
+      {
+        "label": "2026-05",
+        "value": 139.0
+      }
+    ]
+  },
+  "uncertainty": []
+}

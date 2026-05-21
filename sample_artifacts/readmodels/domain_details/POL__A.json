@@ -1,0 +1,66 @@
+{
+  "annotations": [],
+  "anomaly_state": "D0",
+  "baseline_comparison": {
+    "current_window": 1.0,
+    "delta_to_baseline": 0.7
+  },
+  "country_id": "POL",
+  "domain": "A",
+  "feature_values": [
+    {
+      "coverage": 1.0,
+      "feature_id": "A_news_volume",
+      "value": 5.0
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "A_source_count",
+      "value": 1.0
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "A_source_diversity_index",
+      "value": 0.2
+    }
+  ],
+  "source_context": [
+    {
+      "confidence": null,
+      "freshness_hours": null,
+      "history_horizon": "n/a",
+      "source_id": "SRC-GDELT-DOC",
+      "status": "success"
+    }
+  ],
+  "time_series": [
+    {
+      "signal_key": "article_count",
+      "timestamp": "2026-04-10T06:45:00Z",
+      "value": 1.0
+    },
+    {
+      "signal_key": "article_count",
+      "timestamp": "2026-03-11T08:30:00Z",
+      "value": 1.0
+    },
+    {
+      "signal_key": "article_count",
+      "timestamp": "2026-03-09T10:45:00Z",
+      "value": 1.0
+    },
+    {
+      "signal_key": "article_count",
+      "timestamp": "2026-03-11T08:30:00Z",
+      "value": 1.0
+    },
+    {
+      "signal_key": "article_count",
+      "timestamp": "2026-03-13T15:30:00Z",
+      "value": 1.0
+    }
+  ],
+  "uncertainty": [
+    "freshness beyond threshold"
+  ]
+}

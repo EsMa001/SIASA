@@ -1,0 +1,51 @@
+{
+  "export_files": [
+    {
+      "format": "md",
+      "label": "Markdown",
+      "path": "build/run_artifacts/latest/exports/country_profile/REP-COUNTRY-ISR.md",
+      "relative_path": "exports/country_profile/REP-COUNTRY-ISR.md"
+    },
+    {
+      "format": "json",
+      "label": "JSON",
+      "path": "build/run_artifacts/latest/exports/country_profile/REP-COUNTRY-ISR.json",
+      "relative_path": "exports/country_profile/REP-COUNTRY-ISR.json"
+    }
+  ],
+  "format": "json+markdown",
+  "markdown": "# Country Report: ISR\nMulti-domain status: S1\nCoverage: 1.0\nDrivers: A_news_volume, A_source_count, A_source_diversity_index, B_disaster_alert_level, B_event_count, B_event_type_distribution, B_protest_event_count, B_violent_event_count, B_violent_event_share, D_gdp_growth, D_macro_data_freshness, D_trade_volume_change\nCounter indicators: -\nUncertainty: -\nLinked events: EVT-ISR-RUN-LIVE-20260520-2021",
+  "payload": {
+    "capability": "analysis",
+    "contains_personal_data": false,
+    "counter_indicators": [],
+    "country_id": "ISR",
+    "coverage": 1.0,
+    "domain_states": {
+      "A": "D0",
+      "B": "D2",
+      "D": "D1"
+    },
+    "drivers": [
+      "A_news_volume",
+      "A_source_count",
+      "A_source_diversity_index",
+      "B_disaster_alert_level",
+      "B_event_count",
+      "B_event_type_distribution",
+      "B_protest_event_count",
+      "B_violent_event_count",
+      "B_violent_event_share",
+      "D_gdp_growth",
+      "D_macro_data_freshness",
+      "D_trade_volume_change"
+    ],
+    "linked_events": [
+      "EVT-ISR-RUN-LIVE-20260520-2021"
+    ],
+    "multi_domain_status": "S1",
+    "uncertainty": []
+  },
+  "report_id": "REP-COUNTRY-ISR",
+  "report_type": "country_profile"
+}

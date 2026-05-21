@@ -1,0 +1,76 @@
+{
+  "artifact_checks": [
+    {
+      "artifact": "validation_backtest",
+      "reason": null,
+      "status": "present"
+    },
+    {
+      "artifact": "traceability_lineage",
+      "reason": null,
+      "status": "present"
+    },
+    {
+      "artifact": "repo_closure",
+      "reason": null,
+      "status": "present"
+    },
+    {
+      "artifact": "annotations",
+      "reason": null,
+      "status": "present"
+    }
+  ],
+  "country_profile_count": 4,
+  "demo_checks": [
+    {
+      "label": "Home",
+      "ready": true
+    },
+    {
+      "label": "Country Profile",
+      "ready": true
+    },
+    {
+      "label": "Domain Detail",
+      "ready": true
+    },
+    {
+      "label": "Source / Coverage",
+      "ready": true
+    },
+    {
+      "label": "Report / Export",
+      "ready": true
+    },
+    {
+      "label": "Validation / Backtest",
+      "ready": true
+    }
+  ],
+  "demo_verdict": "ready",
+  "domain_detail_count": 11,
+  "evidence_checks": [
+    {
+      "label": "Traceability / Lineage",
+      "ready": true
+    },
+    {
+      "label": "Analyst Annotations",
+      "ready": true
+    },
+    {
+      "label": "Repo Closure Summary",
+      "ready": true
+    },
+    {
+      "label": "Available Reports",
+      "ready": true
+    }
+  ],
+  "known_gaps": [],
+  "release_verdict": "ready",
+  "report_count": 21,
+  "run_id": "RUN-LIVE-20260520-2021",
+  "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1"
+}

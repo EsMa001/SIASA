@@ -1,0 +1,69 @@
+{
+  "annotations": [],
+  "confidence": 1.0,
+  "configured_domains": [
+    "A",
+    "B"
+  ],
+  "counter_indicators": [],
+  "country_context": {
+    "country_name": "Taiwan",
+    "priority": "P1",
+    "rationale": "Spannungsraum, physische Aktivit\u00e4t, Informationsraum, Fr\u00fchwarnfall",
+    "region": "East Asia",
+    "selection_type": "Core Focus"
+  },
+  "country_id": "TWN",
+  "coverage": 1.0,
+  "domain_gap_summary": {
+    "expected_domains": [
+      "A",
+      "B"
+    ],
+    "missing_domains": [],
+    "observed_domains": [
+      "A",
+      "B"
+    ]
+  },
+  "domain_states": {
+    "A": "D0",
+    "B": "D2"
+  },
+  "drivers": [
+    "A_news_volume",
+    "A_source_count",
+    "A_source_diversity_index",
+    "B_disaster_alert_level",
+    "B_event_count",
+    "B_event_type_distribution",
+    "B_protest_event_count",
+    "B_violent_event_count",
+    "B_violent_event_share"
+  ],
+  "explanation_summary": null,
+  "linked_events": [
+    "EVT-TWN-RUN-LIVE-20260520-2021"
+  ],
+  "multi_domain_status": "S1",
+  "source_depth": {
+    "source_count": 2,
+    "source_ids": [
+      "SRC-GDELT-DOC",
+      "SRC-GDELT-EVENTS"
+    ]
+  },
+  "trends": {
+    "yearly": [
+      {
+        "label": "2026-02",
+        "value": 1.0
+      },
+      {
+        "label": "2026-05",
+        "value": 4.0
+      }
+    ]
+  },
+  "uncertainty": []
+}

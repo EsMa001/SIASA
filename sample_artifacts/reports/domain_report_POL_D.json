@@ -1,0 +1,49 @@
+{
+  "export_files": [
+    {
+      "format": "md",
+      "label": "Markdown",
+      "path": "build/run_artifacts/latest/exports/domain_report/REP-DOMAIN-POL-D.md",
+      "relative_path": "exports/domain_report/REP-DOMAIN-POL-D.md"
+    },
+    {
+      "format": "json",
+      "label": "JSON",
+      "path": "build/run_artifacts/latest/exports/domain_report/REP-DOMAIN-POL-D.json",
+      "relative_path": "exports/domain_report/REP-DOMAIN-POL-D.json"
+    }
+  ],
+  "format": "json+markdown",
+  "markdown": "# Domain report: POL / D\nAnomaly state: D1\nSource state: {'WB-INDICATORS': 'success'}\nUncertainty: -\nLinked events: -\nFeature count: 3",
+  "payload": {
+    "anomaly_state": "D1",
+    "capability": "analysis",
+    "contains_personal_data": false,
+    "country_id": "POL",
+    "domain": "D",
+    "feature_values": [
+      {
+        "coverage": 1.0,
+        "feature_id": "D_trade_volume_change",
+        "value": 2.00034070114312
+      },
+      {
+        "coverage": 1.0,
+        "feature_id": "D_gdp_growth",
+        "value": 3.02841630700273
+      },
+      {
+        "coverage": 1.0,
+        "feature_id": "D_macro_data_freshness",
+        "value": 8760
+      }
+    ],
+    "linked_event_ids": [],
+    "source_state": {
+      "WB-INDICATORS": "success"
+    },
+    "uncertainty": []
+  },
+  "report_id": "REP-DOMAIN-POL-D",
+  "report_type": "domain_report"
+}

@@ -1,0 +1,18 @@
+{
+  "active_domains": [
+    "A",
+    "B",
+    "D"
+  ],
+  "capability": "analysis",
+  "contains_personal_data": false,
+  "country_status": {
+    "ISR": "S1",
+    "POL": "S1",
+    "TWN": "S1",
+    "UKR": "S1"
+  },
+  "run_id": "RUN-LIVE-20260520-2021",
+  "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+  "status": "success"
+}

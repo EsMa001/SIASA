@@ -1,0 +1,47 @@
+{
+  "export_files": [
+    {
+      "format": "md",
+      "label": "Markdown",
+      "path": "build/run_artifacts/latest/exports/country_profile/REP-COUNTRY-TWN.md",
+      "relative_path": "exports/country_profile/REP-COUNTRY-TWN.md"
+    },
+    {
+      "format": "json",
+      "label": "JSON",
+      "path": "build/run_artifacts/latest/exports/country_profile/REP-COUNTRY-TWN.json",
+      "relative_path": "exports/country_profile/REP-COUNTRY-TWN.json"
+    }
+  ],
+  "format": "json+markdown",
+  "markdown": "# Country Report: TWN\nMulti-domain status: S1\nCoverage: 1.0\nDrivers: A_news_volume, A_source_count, A_source_diversity_index, B_disaster_alert_level, B_event_count, B_event_type_distribution, B_protest_event_count, B_violent_event_count, B_violent_event_share\nCounter indicators: -\nUncertainty: -\nLinked events: EVT-TWN-RUN-LIVE-20260520-2021",
+  "payload": {
+    "capability": "analysis",
+    "contains_personal_data": false,
+    "counter_indicators": [],
+    "country_id": "TWN",
+    "coverage": 1.0,
+    "domain_states": {
+      "A": "D0",
+      "B": "D2"
+    },
+    "drivers": [
+      "A_news_volume",
+      "A_source_count",
+      "A_source_diversity_index",
+      "B_disaster_alert_level",
+      "B_event_count",
+      "B_event_type_distribution",
+      "B_protest_event_count",
+      "B_violent_event_count",
+      "B_violent_event_share"
+    ],
+    "linked_events": [
+      "EVT-TWN-RUN-LIVE-20260520-2021"
+    ],
+    "multi_domain_status": "S1",
+    "uncertainty": []
+  },
+  "report_id": "REP-COUNTRY-TWN",
+  "report_type": "country_profile"
+}

@@ -1,0 +1,14 @@
+{
+  "capability": "analysis",
+  "contains_personal_data": false,
+  "country_id": "UKR",
+  "event_id": "EVT-UKR-RUN-LIVE-20260520-2021",
+  "related_domains": [
+    "B"
+  ],
+  "source_state": {
+    "SRC-GDELT-EVENTS": "success"
+  },
+  "summary": "Signals: conflict_event_count, violent_event_count",
+  "title": "Event context for UKR"
+}

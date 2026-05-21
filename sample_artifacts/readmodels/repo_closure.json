@@ -1,0 +1,907 @@
+{
+  "slice_ids": [
+    "baseline-and-status-engines",
+    "catalog-and-ingestion-foundation",
+    "feature-computation-foundation",
+    "governance-and-run-controls",
+    "gui-readmodels-and-annotations",
+    "normalization-and-mapping",
+    "reporting-and-export",
+    "snapshot-and-lineage",
+    "validation-and-backtest"
+  ],
+  "slices": [
+    {
+      "requirements": [
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/scoring/baselines.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-017",
+          "test_paths": [
+            "tests/unit/test_baselines.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-017-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/scoring/baselines.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-018",
+          "test_paths": [
+            "tests/unit/test_baselines.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-018-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/scoring/baselines.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-019",
+          "test_paths": [
+            "tests/unit/test_baselines.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-019-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/scoring/data_sufficiency.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-020",
+          "test_paths": [
+            "tests/unit/test_data_sufficiency.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-020-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/scoring/domain_status.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-021",
+          "test_paths": [
+            "tests/unit/test_domain_status.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-021-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/scoring/domain_status.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-022",
+          "test_paths": [
+            "tests/unit/test_domain_status.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-022-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/scoring/multi_domain_status.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-023",
+          "test_paths": [
+            "tests/unit/test_multi_domain_status.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-023-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/scoring/multi_domain_status.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-024",
+          "test_paths": [
+            "tests/unit/test_multi_domain_status.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-024-001"
+          ]
+        }
+      ],
+      "slice_id": "baseline-and-status-engines",
+      "summary": {
+        "at_risk": 0,
+        "closed": 8
+      }
+    },
+    {
+      "requirements": [
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/catalog/models.py",
+            "src/siasa/catalog/loaders.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-001",
+          "test_paths": [
+            "tests/unit/test_catalog_models.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-001-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/catalog/models.py",
+            "src/siasa/catalog/loaders.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-002",
+          "test_paths": [
+            "tests/unit/test_catalog_models.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-002-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/catalog/models.py",
+            "src/siasa/catalog/loaders.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-003",
+          "test_paths": [
+            "tests/unit/test_catalog_models.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-003-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/adapters/base.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-004",
+          "test_paths": [
+            "tests/unit/test_adapter_base.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-004-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/runs/run_state.py",
+            "src/siasa/runs/orchestrator.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-005",
+          "test_paths": [
+            "tests/unit/test_run_state.py",
+            "tests/unit/test_run_orchestrator.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-005-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/adapters/fetch_metadata.py",
+            "src/siasa/runs/orchestrator.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-006",
+          "test_paths": [
+            "tests/unit/test_adapter_base.py",
+            "tests/unit/test_run_orchestrator.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-006-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/data/raw_models.py",
+            "src/siasa/runs/orchestrator.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-007",
+          "test_paths": [
+            "tests/unit/test_data_models.py",
+            "tests/unit/test_run_orchestrator.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-007-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/data/raw_models.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-008",
+          "test_paths": [
+            "tests/unit/test_data_models.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-008-001"
+          ]
+        }
+      ],
+      "slice_id": "catalog-and-ingestion-foundation",
+      "summary": {
+        "at_risk": 0,
+        "closed": 8
+      }
+    },
+    {
+      "requirements": [
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/features/base.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-011",
+          "test_paths": [
+            "tests/unit/test_features_base.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-011-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/features/domain_a.py",
+            "src/siasa/features/base.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-012",
+          "test_paths": [
+            "tests/unit/test_features_domain_a.py",
+            "tests/unit/test_features_base.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-012-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/features/domain_b.py",
+            "src/siasa/features/base.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-013",
+          "test_paths": [
+            "tests/unit/test_features_domain_b.py",
+            "tests/unit/test_features_base.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-013-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/features/domain_d.py",
+            "src/siasa/features/base.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-014",
+          "test_paths": [
+            "tests/unit/test_features_domain_d.py",
+            "tests/unit/test_features_base.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-014-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/features/base.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-015",
+          "test_paths": [
+            "tests/unit/test_features_domain_a.py",
+            "tests/unit/test_features_base.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-015-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/features/base.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-016",
+          "test_paths": [
+            "tests/unit/test_features_base.py",
+            "tests/unit/test_features_domain_a.py",
+            "tests/unit/test_features_domain_b.py",
+            "tests/unit/test_features_domain_d.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-016-001"
+          ]
+        }
+      ],
+      "slice_id": "feature-computation-foundation",
+      "summary": {
+        "at_risk": 0,
+        "closed": 6
+      }
+    },
+    {
+      "requirements": [
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/governance/roles.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-040",
+          "test_paths": [
+            "tests/unit/test_governance_guards.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-040-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/governance/roles.py",
+            "src/siasa/runs/orchestrator.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-041",
+          "test_paths": [
+            "tests/unit/test_governance_guards.py",
+            "tests/unit/test_run_orchestrator.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-041-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/governance/export_policy.py",
+            "src/siasa/reporting/country_report.py",
+            "src/siasa/reporting/daily_snapshot.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-042",
+          "test_paths": [
+            "tests/unit/test_governance_guards.py",
+            "tests/unit/test_reporting_daily_snapshot.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-042-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/runs/orchestrator.py",
+            "src/siasa/reporting/country_report.py",
+            "src/siasa/reporting/daily_snapshot.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-043",
+          "test_paths": [
+            "tests/unit/test_run_orchestrator.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-043-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/runs/run_state.py",
+            "src/siasa/snapshots/models.py",
+            "src/siasa/snapshots/service.py",
+            "src/siasa/runs/orchestrator.py",
+            "src/siasa/runs/artifacts.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-044",
+          "test_paths": [
+            "tests/unit/test_run_state.py",
+            "tests/unit/test_run_orchestrator.py",
+            "tests/unit/test_run_artifacts.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-044-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/governance/roles.py",
+            "src/siasa/runs/reprocessing.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-045",
+          "test_paths": [
+            "tests/unit/test_governance_guards.py",
+            "tests/unit/test_reprocessing.py",
+            "tests/unit/test_reprocessing_workflow.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-045-001"
+          ]
+        }
+      ],
+      "slice_id": "governance-and-run-controls",
+      "summary": {
+        "at_risk": 0,
+        "closed": 6
+      }
+    },
+    {
+      "requirements": [
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/readmodels/world_map.py",
+            "src/siasa/gui/local_app.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-032",
+          "test_paths": [
+            "tests/unit/test_local_gui.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-032-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/readmodels/country_profile.py",
+            "src/siasa/gui/local_app.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-033",
+          "test_paths": [
+            "tests/unit/test_local_gui.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-033-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/readmodels/domain_detail.py",
+            "src/siasa/gui/local_app.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-034",
+          "test_paths": [
+            "tests/unit/test_local_gui.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-034-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/readmodels/source_coverage.py",
+            "src/siasa/gui/local_app.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-035",
+          "test_paths": [
+            "tests/unit/test_local_gui.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-035-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/annotations/models.py",
+            "src/siasa/readmodels/annotations.py",
+            "src/siasa/runs/artifacts.py",
+            "src/siasa/runs/orchestrator.py",
+            "src/siasa/gui/local_app.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-036",
+          "test_paths": [
+            "tests/unit/test_annotations.py",
+            "tests/unit/test_local_gui.py",
+            "tests/unit/test_run_artifacts.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-036-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/annotations/models.py",
+            "src/siasa/gui/local_app.py",
+            "src/siasa/runs/artifacts.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-037",
+          "test_paths": [
+            "tests/unit/test_annotations.py",
+            "tests/unit/test_run_artifacts.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-037-001"
+          ]
+        }
+      ],
+      "slice_id": "gui-readmodels-and-annotations",
+      "summary": {
+        "at_risk": 0,
+        "closed": 6
+      }
+    },
+    {
+      "requirements": [
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/data/normalized_models.py",
+            "src/siasa/data/normalization_service.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-009",
+          "test_paths": [
+            "tests/unit/test_normalization_service.py",
+            "tests/unit/test_data_models.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-009-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/data/normalization_mappings.py",
+            "src/siasa/data/normalization_service.py",
+            "src/siasa/runs/orchestrator.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-010",
+          "test_paths": [
+            "tests/unit/test_normalization_service.py",
+            "tests/unit/test_data_models.py",
+            "tests/unit/test_run_orchestrator.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-010-001"
+          ]
+        }
+      ],
+      "slice_id": "normalization-and-mapping",
+      "summary": {
+        "at_risk": 0,
+        "closed": 2
+      }
+    },
+    {
+      "requirements": [
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/reporting/daily_snapshot.py",
+            "src/siasa/runs/orchestrator.py",
+            "src/siasa/runs/artifacts.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-028",
+          "test_paths": [
+            "tests/unit/test_reporting_daily_snapshot.py",
+            "tests/unit/test_run_orchestrator.py",
+            "tests/unit/test_run_artifacts.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-028-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/reporting/country_report.py",
+            "src/siasa/runs/orchestrator.py",
+            "src/siasa/runs/artifacts.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-029",
+          "test_paths": [
+            "tests/unit/test_reporting_daily_snapshot.py",
+            "tests/unit/test_run_orchestrator.py",
+            "tests/unit/test_run_artifacts.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-029-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/reporting/__init__.py",
+            "src/siasa/reporting/manual_reports.py",
+            "src/siasa/traceability/lineage.py",
+            "src/siasa/runs/artifacts.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-030",
+          "test_paths": [
+            "tests/unit/test_reporting_manual_reports.py",
+            "tests/unit/test_run_orchestrator.py",
+            "tests/unit/test_run_artifacts.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-030-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/governance/export_policy.py",
+            "src/siasa/reporting/country_report.py",
+            "src/siasa/reporting/daily_snapshot.py",
+            "src/siasa/reporting/manual_reports.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-031",
+          "test_paths": [
+            "tests/unit/test_governance_guards.py",
+            "tests/unit/test_reporting_daily_snapshot.py",
+            "tests/unit/test_reporting_manual_reports.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-031-001"
+          ]
+        }
+      ],
+      "slice_id": "reporting-and-export",
+      "summary": {
+        "at_risk": 0,
+        "closed": 4
+      }
+    },
+    {
+      "requirements": [
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/snapshots/models.py",
+            "src/siasa/snapshots/service.py",
+            "src/siasa/runs/artifacts.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-025",
+          "test_paths": [
+            "tests/unit/test_snapshot_service.py",
+            "tests/unit/test_run_artifacts.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-025-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/snapshots/service.py",
+            "src/siasa/runs/orchestrator.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-026",
+          "test_paths": [
+            "tests/unit/test_snapshot_service.py",
+            "tests/unit/test_run_orchestrator.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-026-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/traceability/lineage.py",
+            "src/siasa/runs/orchestrator.py",
+            "src/siasa/runs/artifacts.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-027",
+          "test_paths": [
+            "tests/unit/test_snapshot_service.py",
+            "tests/unit/test_run_orchestrator.py",
+            "tests/unit/test_run_artifacts.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-027-001"
+          ]
+        }
+      ],
+      "slice_id": "snapshot-and-lineage",
+      "summary": {
+        "at_risk": 0,
+        "closed": 3
+      }
+    },
+    {
+      "requirements": [
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/validation/cases.py",
+            "src/siasa/readmodels/validation_backtest.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-038",
+          "test_paths": [
+            "tests/unit/test_validation_cases.py",
+            "tests/unit/test_readmodels_validation_backtest.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-038-001"
+          ]
+        },
+        {
+          "closure_status": "closed",
+          "code_paths": [
+            "src/siasa/validation/cases.py",
+            "src/siasa/readmodels/validation_backtest.py"
+          ],
+          "issues": [],
+          "missing_files": [],
+          "requirement_id": "SwR-039",
+          "test_paths": [
+            "tests/unit/test_validation_cases.py",
+            "tests/unit/test_readmodels_validation_backtest.py"
+          ],
+          "trace_links_present": true,
+          "verifying_test_specs": [
+            "TC-SwR-039-001"
+          ]
+        }
+      ],
+      "slice_id": "validation-and-backtest",
+      "summary": {
+        "at_risk": 0,
+        "closed": 2
+      }
+    }
+  ],
+  "summary": {
+    "at_risk": 0,
+    "closed": 45,
+    "requirement_count": 45,
+    "slice_count": 9
+  }
+}

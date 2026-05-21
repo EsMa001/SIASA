@@ -1,0 +1,49 @@
+{
+  "active_domains": [
+    "A",
+    "B",
+    "D"
+  ],
+  "baseline_mode": "Combined 30/90/365",
+  "countries": [
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "ISR",
+      "drill_down_target": "/countries/ISR",
+      "status": "S1"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "POL",
+      "drill_down_target": "/countries/POL",
+      "status": "S1"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B"
+      ],
+      "country_id": "TWN",
+      "drill_down_target": "/countries/TWN",
+      "status": "S1"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "UKR",
+      "drill_down_target": "/countries/UKR",
+      "status": "S1"
+    }
+  ]
+}

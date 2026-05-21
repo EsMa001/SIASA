@@ -1,0 +1,40 @@
+{
+  "active_domains": [
+    "A",
+    "B",
+    "D"
+  ],
+  "algorithm_version": "live-multi-country-v1",
+  "analytical_outputs": {
+    "country_status": {
+      "ISR": "S1",
+      "POL": "S1",
+      "TWN": "S1",
+      "UKR": "S1"
+    },
+    "domain_statuses": {
+      "A": "D0",
+      "B": "D2",
+      "D": "D1"
+    }
+  },
+  "country_set_id": "MVP-COUNTRIES-LIVE-MULTI-v1",
+  "data_version": "governed-live-sources-v1",
+  "rule_versions": {
+    "domain_status": "v1",
+    "multi_domain_status": "v1",
+    "normalization:SRC-GDELT-DOC": "v1",
+    "normalization:SRC-GDELT-EVENTS": "v1",
+    "normalization:WB-INDICATORS": "v1",
+    "runtime_profile": "live-multi-country-v1"
+  },
+  "run_id": "RUN-LIVE-20260520-2021",
+  "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+  "source_state": {
+    "SRC-GDACS": "success",
+    "SRC-GDELT-DOC": "success",
+    "SRC-GDELT-EVENTS": "success",
+    "WB-INDICATORS": "success"
+  },
+  "status": "success"
+}

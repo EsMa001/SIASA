@@ -1,0 +1,51 @@
+{
+  "export_files": [
+    {
+      "format": "md",
+      "label": "Markdown",
+      "path": "build/run_artifacts/latest/exports/domain_report/REP-DOMAIN-POL-A.md",
+      "relative_path": "exports/domain_report/REP-DOMAIN-POL-A.md"
+    },
+    {
+      "format": "json",
+      "label": "JSON",
+      "path": "build/run_artifacts/latest/exports/domain_report/REP-DOMAIN-POL-A.json",
+      "relative_path": "exports/domain_report/REP-DOMAIN-POL-A.json"
+    }
+  ],
+  "format": "json+markdown",
+  "markdown": "# Domain report: POL / A\nAnomaly state: D0\nSource state: {'SRC-GDELT-DOC': 'success'}\nUncertainty: freshness beyond threshold\nLinked events: -\nFeature count: 3",
+  "payload": {
+    "anomaly_state": "D0",
+    "capability": "analysis",
+    "contains_personal_data": false,
+    "country_id": "POL",
+    "domain": "A",
+    "feature_values": [
+      {
+        "coverage": 1.0,
+        "feature_id": "A_news_volume",
+        "value": 5.0
+      },
+      {
+        "coverage": 1.0,
+        "feature_id": "A_source_count",
+        "value": 1.0
+      },
+      {
+        "coverage": 1.0,
+        "feature_id": "A_source_diversity_index",
+        "value": 0.2
+      }
+    ],
+    "linked_event_ids": [],
+    "source_state": {
+      "SRC-GDELT-DOC": "success"
+    },
+    "uncertainty": [
+      "freshness beyond threshold"
+    ]
+  },
+  "report_id": "REP-DOMAIN-POL-A",
+  "report_type": "domain_report"
+}

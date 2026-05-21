@@ -1,0 +1,163 @@
+{
+  "active_domains": [
+    "A",
+    "B",
+    "D"
+  ],
+  "artifact_status": {
+    "annotations": {
+      "reason": null,
+      "status": "present"
+    },
+    "repo_closure": {
+      "reason": null,
+      "status": "present"
+    },
+    "traceability_lineage": {
+      "reason": null,
+      "status": "present"
+    },
+    "validation_backtest": {
+      "reason": null,
+      "status": "present"
+    }
+  },
+  "available_reports": [
+    "REP-COUNTRY-ISR",
+    "REP-COUNTRY-POL",
+    "REP-COUNTRY-TWN",
+    "REP-COUNTRY-UKR",
+    "REP-COVERAGE-RUN-LIVE-20260520-2021",
+    "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+    "REP-DOMAIN-ISR-A",
+    "REP-DOMAIN-ISR-B",
+    "REP-DOMAIN-ISR-D",
+    "REP-DOMAIN-POL-A",
+    "REP-DOMAIN-POL-B",
+    "REP-DOMAIN-POL-D",
+    "REP-DOMAIN-TWN-A",
+    "REP-DOMAIN-TWN-B",
+    "REP-DOMAIN-UKR-A",
+    "REP-DOMAIN-UKR-B",
+    "REP-DOMAIN-UKR-D",
+    "REP-EVENT-EVT-ISR-RUN-LIVE-20260520-2021",
+    "REP-EVENT-EVT-POL-RUN-LIVE-20260520-2021",
+    "REP-EVENT-EVT-TWN-RUN-LIVE-20260520-2021",
+    "REP-EVENT-EVT-UKR-RUN-LIVE-20260520-2021"
+  ],
+  "country_coverage_visibility": {
+    "country_freshness_rows": [
+      {
+        "country_id": "ISR",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P1",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "POL",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P2",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "TWN",
+        "freshness_band": "stale",
+        "freshness_hours": 2010.0,
+        "priority": "P1",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "UKR",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P1",
+        "source_depth_band": "moderate"
+      }
+    ],
+    "country_gap_rows": [],
+    "freshness_band_summary": [
+      {
+        "band": "fresh",
+        "countries": [],
+        "country_count": 0
+      },
+      {
+        "band": "aging",
+        "countries": [],
+        "country_count": 0
+      },
+      {
+        "band": "stale",
+        "countries": [
+          "ISR",
+          "POL",
+          "TWN",
+          "UKR"
+        ],
+        "country_count": 4
+      },
+      {
+        "band": "unknown",
+        "countries": [],
+        "country_count": 0
+      }
+    ],
+    "missing_domain_totals": {},
+    "priority_summary": [
+      {
+        "countries": [
+          "ISR",
+          "TWN",
+          "UKR"
+        ],
+        "country_count": 3,
+        "priority": "P1"
+      },
+      {
+        "countries": [
+          "POL"
+        ],
+        "country_count": 1,
+        "priority": "P2"
+      }
+    ],
+    "remediation_watchlist": [],
+    "source_depth_band_summary": [
+      {
+        "band": "minimal",
+        "countries": [],
+        "country_count": 0
+      },
+      {
+        "band": "moderate",
+        "countries": [
+          "ISR",
+          "POL",
+          "TWN",
+          "UKR"
+        ],
+        "country_count": 4
+      },
+      {
+        "band": "deep",
+        "countries": [],
+        "country_count": 0
+      }
+    ]
+  },
+  "coverage": {
+    "countries_total": 4,
+    "countries_with_updates": 4,
+    "countries_without_updates": []
+  },
+  "data_gaps": [],
+  "failed_sources": [],
+  "last_run": "RUN-LIVE-20260520-2021",
+  "reprocessing_status": "idle",
+  "run_id": "RUN-LIVE-20260520-2021",
+  "run_status": "success",
+  "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+  "top_status_changes": []
+}

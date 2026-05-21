@@ -1,0 +1,66 @@
+{
+  "annotations": [],
+  "anomaly_state": "D0",
+  "baseline_comparison": {
+    "current_window": 1.0,
+    "delta_to_baseline": 0.7
+  },
+  "country_id": "TWN",
+  "domain": "A",
+  "feature_values": [
+    {
+      "coverage": 1.0,
+      "feature_id": "A_news_volume",
+      "value": 5.0
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "A_source_count",
+      "value": 1.0
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "A_source_diversity_index",
+      "value": 0.2
+    }
+  ],
+  "source_context": [
+    {
+      "confidence": null,
+      "freshness_hours": null,
+      "history_horizon": "n/a",
+      "source_id": "SRC-GDELT-DOC",
+      "status": "success"
+    }
+  ],
+  "time_series": [
+    {
+      "signal_key": "article_count",
+      "timestamp": "2026-02-27T06:15:00Z",
+      "value": 1.0
+    },
+    {
+      "signal_key": "article_count",
+      "timestamp": "2026-02-27T06:15:00Z",
+      "value": 1.0
+    },
+    {
+      "signal_key": "article_count",
+      "timestamp": "2026-02-27T08:15:00Z",
+      "value": 1.0
+    },
+    {
+      "signal_key": "article_count",
+      "timestamp": "2026-02-26T01:30:00Z",
+      "value": 1.0
+    },
+    {
+      "signal_key": "article_count",
+      "timestamp": "2026-02-26T02:45:00Z",
+      "value": 1.0
+    }
+  ],
+  "uncertainty": [
+    "freshness beyond threshold"
+  ]
+}

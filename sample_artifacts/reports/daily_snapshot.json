@@ -1,0 +1,38 @@
+{
+  "export_files": [
+    {
+      "format": "md",
+      "label": "Markdown",
+      "path": "build/run_artifacts/latest/exports/daily_snapshot/REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1.md",
+      "relative_path": "exports/daily_snapshot/REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1.md"
+    },
+    {
+      "format": "json",
+      "label": "JSON",
+      "path": "build/run_artifacts/latest/exports/daily_snapshot/REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1.json",
+      "relative_path": "exports/daily_snapshot/REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1.json"
+    }
+  ],
+  "format": "json+markdown",
+  "markdown": "# Daily Snapshot\nSnapshot ID: SNAP-RUN-LIVE-20260520-2021-v1\nRun ID: RUN-LIVE-20260520-2021\nStatus: success\nActive domains: A, B, D\nCountry status: {'ISR': 'S1', 'POL': 'S1', 'TWN': 'S1', 'UKR': 'S1'}",
+  "payload": {
+    "active_domains": [
+      "A",
+      "B",
+      "D"
+    ],
+    "capability": "analysis",
+    "contains_personal_data": false,
+    "country_status": {
+      "ISR": "S1",
+      "POL": "S1",
+      "TWN": "S1",
+      "UKR": "S1"
+    },
+    "run_id": "RUN-LIVE-20260520-2021",
+    "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+    "status": "success"
+  },
+  "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+  "report_type": "daily_snapshot"
+}

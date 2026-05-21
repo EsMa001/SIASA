@@ -1,0 +1,69 @@
+{
+  "export_files": [
+    {
+      "format": "md",
+      "label": "Markdown",
+      "path": "build/run_artifacts/latest/exports/domain_report/REP-DOMAIN-UKR-B.md",
+      "relative_path": "exports/domain_report/REP-DOMAIN-UKR-B.md"
+    },
+    {
+      "format": "json",
+      "label": "JSON",
+      "path": "build/run_artifacts/latest/exports/domain_report/REP-DOMAIN-UKR-B.json",
+      "relative_path": "exports/domain_report/REP-DOMAIN-UKR-B.json"
+    }
+  ],
+  "format": "json+markdown",
+  "markdown": "# Domain report: UKR / B\nAnomaly state: D2\nSource state: {'SRC-GDELT-EVENTS': 'success'}\nUncertainty: -\nLinked events: EVT-UKR-RUN-LIVE-20260520-2021\nFeature count: 6",
+  "payload": {
+    "anomaly_state": "D2",
+    "capability": "analysis",
+    "contains_personal_data": false,
+    "country_id": "UKR",
+    "domain": "B",
+    "feature_values": [
+      {
+        "coverage": 1.0,
+        "feature_id": "B_event_count",
+        "value": 31.0
+      },
+      {
+        "coverage": 1.0,
+        "feature_id": "B_violent_event_count",
+        "value": 11.0
+      },
+      {
+        "coverage": 1.0,
+        "feature_id": "B_protest_event_count",
+        "value": 0
+      },
+      {
+        "coverage": 1.0,
+        "feature_id": "B_violent_event_share",
+        "value": 0.3548387096774194
+      },
+      {
+        "coverage": 1.0,
+        "feature_id": "B_disaster_alert_level",
+        "value": 0.0
+      },
+      {
+        "coverage": 1.0,
+        "feature_id": "B_event_type_distribution",
+        "value": {
+          "conflict": 0.6451612903225806,
+          "violent": 0.3548387096774194
+        }
+      }
+    ],
+    "linked_event_ids": [
+      "EVT-UKR-RUN-LIVE-20260520-2021"
+    ],
+    "source_state": {
+      "SRC-GDELT-EVENTS": "success"
+    },
+    "uncertainty": []
+  },
+  "report_id": "REP-DOMAIN-UKR-B",
+  "report_type": "domain_report"
+}

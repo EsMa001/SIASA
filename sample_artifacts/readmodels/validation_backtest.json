@@ -1,0 +1,2817 @@
+{
+  "case_id": "VAL-UKR-LIVE-PILOT-SUPPORT",
+  "case_name": "Governed live runtime support case for UKR",
+  "case_type": "pilot_runtime_support_case",
+  "comparison_mode": "runtime_support_check",
+  "country_id": "UKR",
+  "domain_match_ratio": 1.0,
+  "expected_domains": [
+    "A",
+    "B",
+    "D"
+  ],
+  "expected_pattern": "Governed live pilot should expose the configured active domains and emit a reviewable validation artifact for the current bundle.",
+  "historical_reference_review_summary": {
+    "average_evidence_score": 0.79,
+    "case_count": 23,
+    "countries_covered": [
+      "CHN",
+      "DEU",
+      "EGY",
+      "EST",
+      "FIN",
+      "GEO",
+      "IND",
+      "IRN",
+      "ISR",
+      "MMR",
+      "NGA",
+      "PAK",
+      "POL",
+      "QAT",
+      "RUS",
+      "SAU",
+      "SDN",
+      "TUR",
+      "TWN",
+      "UKR",
+      "USA"
+    ],
+    "evidence_tier_counts": {
+      "corroborated_multi_source": 19,
+      "curated_public_source": 1,
+      "provisional": 1,
+      "verified_multi_source": 2
+    },
+    "review_verdict_counts": {
+      "historical_alignment_confirmed": 20,
+      "historical_alignment_mismatch": 1,
+      "historical_alignment_with_gaps": 2
+    }
+  },
+  "historical_reference_reviews": [
+    {
+      "case_id": "VAL-UKR-2022-001",
+      "case_type": "military_escalation",
+      "country_id": "UKR",
+      "domain_match_ratio": 1.0,
+      "evidence_score": 1.0,
+      "evidence_tier": "verified_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "missing_expected_domains": [],
+      "review_verdict": "historical_alignment_confirmed",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-RUS-2024-001",
+      "case_type": "strategic_posturing",
+      "country_id": "RUS",
+      "domain_match_ratio": 1.0,
+      "evidence_score": 0.8,
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "missing_expected_domains": [],
+      "review_verdict": "historical_alignment_confirmed",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-CHN-2024-001",
+      "case_type": "strategic_posturing",
+      "country_id": "CHN",
+      "domain_match_ratio": 1.0,
+      "evidence_score": 0.8,
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "missing_expected_domains": [],
+      "review_verdict": "historical_alignment_confirmed",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-IND-2024-001",
+      "case_type": "strategic_posturing",
+      "country_id": "IND",
+      "domain_match_ratio": 1.0,
+      "evidence_score": 0.8,
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "missing_expected_domains": [],
+      "review_verdict": "historical_alignment_confirmed",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-IRN-2024-001",
+      "case_type": "strategic_posturing",
+      "country_id": "IRN",
+      "domain_match_ratio": 1.0,
+      "evidence_score": 0.8,
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "missing_expected_domains": [],
+      "review_verdict": "historical_alignment_confirmed",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-TUR-2024-001",
+      "case_type": "strategic_posturing",
+      "country_id": "TUR",
+      "domain_match_ratio": 1.0,
+      "evidence_score": 0.8,
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "missing_expected_domains": [],
+      "review_verdict": "historical_alignment_confirmed",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-USA-2024-001",
+      "case_type": "strategic_posturing",
+      "country_id": "USA",
+      "domain_match_ratio": 1.0,
+      "evidence_score": 0.8,
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "missing_expected_domains": [],
+      "review_verdict": "historical_alignment_confirmed",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-DEU-2024-001",
+      "case_type": "strategic_posturing",
+      "country_id": "DEU",
+      "domain_match_ratio": 1.0,
+      "evidence_score": 0.8,
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "missing_expected_domains": [],
+      "review_verdict": "historical_alignment_confirmed",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-EST-2024-001",
+      "case_type": "strategic_posturing",
+      "country_id": "EST",
+      "domain_match_ratio": 1.0,
+      "evidence_score": 0.8,
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "missing_expected_domains": [],
+      "review_verdict": "historical_alignment_confirmed",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-FIN-2024-001",
+      "case_type": "strategic_posturing",
+      "country_id": "FIN",
+      "domain_match_ratio": 1.0,
+      "evidence_score": 0.8,
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "missing_expected_domains": [],
+      "review_verdict": "historical_alignment_confirmed",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-SAU-2024-001",
+      "case_type": "strategic_posturing",
+      "country_id": "SAU",
+      "domain_match_ratio": 1.0,
+      "evidence_score": 0.8,
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "missing_expected_domains": [],
+      "review_verdict": "historical_alignment_confirmed",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-QAT-2024-001",
+      "case_type": "strategic_posturing",
+      "country_id": "QAT",
+      "domain_match_ratio": 1.0,
+      "evidence_score": 0.8,
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "missing_expected_domains": [],
+      "review_verdict": "historical_alignment_confirmed",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-EGY-2024-001",
+      "case_type": "strategic_posturing",
+      "country_id": "EGY",
+      "domain_match_ratio": 1.0,
+      "evidence_score": 0.8,
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "missing_expected_domains": [],
+      "review_verdict": "historical_alignment_confirmed",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-NGA-2024-001",
+      "case_type": "strategic_posturing",
+      "country_id": "NGA",
+      "domain_match_ratio": 1.0,
+      "evidence_score": 0.8,
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "missing_expected_domains": [],
+      "review_verdict": "historical_alignment_confirmed",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-SDN-2024-001",
+      "case_type": "strategic_posturing",
+      "country_id": "SDN",
+      "domain_match_ratio": 1.0,
+      "evidence_score": 0.8,
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "missing_expected_domains": [],
+      "review_verdict": "historical_alignment_confirmed",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-MMR-2024-001",
+      "case_type": "strategic_posturing",
+      "country_id": "MMR",
+      "domain_match_ratio": 1.0,
+      "evidence_score": 0.8,
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "missing_expected_domains": [],
+      "review_verdict": "historical_alignment_confirmed",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-POL-2023-001",
+      "case_type": "hybrid_pressure",
+      "country_id": "POL",
+      "domain_match_ratio": 1.0,
+      "evidence_score": 0.8,
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "missing_expected_domains": [],
+      "review_verdict": "historical_alignment_confirmed",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-POL-2024-002",
+      "case_type": "hybrid_pressure",
+      "country_id": "POL",
+      "domain_match_ratio": 0.6666666666666666,
+      "evidence_score": 0.8,
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B"
+      ],
+      "historical_observed_status": "S3",
+      "missing_expected_domains": [
+        "D"
+      ],
+      "review_verdict": "historical_alignment_with_gaps",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-ISR-2023-001",
+      "case_type": "strategic_posturing",
+      "country_id": "ISR",
+      "domain_match_ratio": 1.0,
+      "evidence_score": 1.0,
+      "evidence_tier": "verified_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "missing_expected_domains": [],
+      "review_verdict": "historical_alignment_confirmed",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-ISR-2024-002",
+      "case_type": "strategic_posturing",
+      "country_id": "ISR",
+      "domain_match_ratio": 0.3333333333333333,
+      "evidence_score": 0.4,
+      "evidence_tier": "provisional",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A"
+      ],
+      "historical_observed_status": "S1",
+      "missing_expected_domains": [
+        "B",
+        "D"
+      ],
+      "review_verdict": "historical_alignment_mismatch",
+      "status_match": false,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-PAK-2024-001",
+      "case_type": "strategic_posturing",
+      "country_id": "PAK",
+      "domain_match_ratio": 1.0,
+      "evidence_score": 0.8,
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "missing_expected_domains": [],
+      "review_verdict": "historical_alignment_confirmed",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-GEO-2024-001",
+      "case_type": "hybrid_pressure",
+      "country_id": "GEO",
+      "domain_match_ratio": 1.0,
+      "evidence_score": 0.8,
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "missing_expected_domains": [],
+      "review_verdict": "historical_alignment_confirmed",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "case_id": "VAL-TWN-2024-001",
+      "case_type": "disinformation_spike",
+      "country_id": "TWN",
+      "domain_match_ratio": 0.5,
+      "evidence_score": 0.6,
+      "evidence_tier": "curated_public_source",
+      "expected_domains": [
+        "A",
+        "B"
+      ],
+      "expected_status": "S1",
+      "historical_observed_domains": [
+        "A"
+      ],
+      "historical_observed_status": "S1",
+      "missing_expected_domains": [
+        "B"
+      ],
+      "review_verdict": "historical_alignment_with_gaps",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    }
+  ],
+  "historical_replay_reviews": [
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-UKR-2022-001.json"
+      ],
+      "case_id": "VAL-UKR-2022-001",
+      "country_id": "UKR",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [],
+      "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
+      "replay_evidence_score": 1.0,
+      "replay_evidence_tier": "verified_replay_evidence",
+      "replay_input_country_ids": [
+        "UKR"
+      ],
+      "replay_input_record_count": 8,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 1.0,
+      "replayed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "replayed_status": "S3",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-RUS-2024-001.json"
+      ],
+      "case_id": "VAL-RUS-2024-001",
+      "country_id": "RUS",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [],
+      "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
+      "replay_evidence_score": 1.0,
+      "replay_evidence_tier": "verified_replay_evidence",
+      "replay_input_country_ids": [
+        "RUS"
+      ],
+      "replay_input_record_count": 8,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 1.0,
+      "replayed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "replayed_status": "S3",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-CHN-2024-001.json"
+      ],
+      "case_id": "VAL-CHN-2024-001",
+      "country_id": "CHN",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [],
+      "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
+      "replay_evidence_score": 1.0,
+      "replay_evidence_tier": "verified_replay_evidence",
+      "replay_input_country_ids": [
+        "CHN"
+      ],
+      "replay_input_record_count": 8,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 1.0,
+      "replayed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "replayed_status": "S3",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-IND-2024-001.json"
+      ],
+      "case_id": "VAL-IND-2024-001",
+      "country_id": "IND",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [],
+      "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
+      "replay_evidence_score": 1.0,
+      "replay_evidence_tier": "verified_replay_evidence",
+      "replay_input_country_ids": [
+        "IND"
+      ],
+      "replay_input_record_count": 8,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 1.0,
+      "replayed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "replayed_status": "S3",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-IRN-2024-001.json"
+      ],
+      "case_id": "VAL-IRN-2024-001",
+      "country_id": "IRN",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [],
+      "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
+      "replay_evidence_score": 1.0,
+      "replay_evidence_tier": "verified_replay_evidence",
+      "replay_input_country_ids": [
+        "IRN"
+      ],
+      "replay_input_record_count": 8,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 1.0,
+      "replayed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "replayed_status": "S3",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-TUR-2024-001.json"
+      ],
+      "case_id": "VAL-TUR-2024-001",
+      "country_id": "TUR",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [],
+      "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
+      "replay_evidence_score": 1.0,
+      "replay_evidence_tier": "verified_replay_evidence",
+      "replay_input_country_ids": [
+        "TUR"
+      ],
+      "replay_input_record_count": 8,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 1.0,
+      "replayed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "replayed_status": "S3",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-USA-2024-001.json"
+      ],
+      "case_id": "VAL-USA-2024-001",
+      "country_id": "USA",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [],
+      "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
+      "replay_evidence_score": 1.0,
+      "replay_evidence_tier": "verified_replay_evidence",
+      "replay_input_country_ids": [
+        "USA"
+      ],
+      "replay_input_record_count": 8,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 1.0,
+      "replayed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "replayed_status": "S3",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-DEU-2024-001.json"
+      ],
+      "case_id": "VAL-DEU-2024-001",
+      "country_id": "DEU",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [],
+      "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
+      "replay_evidence_score": 1.0,
+      "replay_evidence_tier": "verified_replay_evidence",
+      "replay_input_country_ids": [
+        "DEU"
+      ],
+      "replay_input_record_count": 8,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 1.0,
+      "replayed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "replayed_status": "S3",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-EST-2024-001.json"
+      ],
+      "case_id": "VAL-EST-2024-001",
+      "country_id": "EST",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [],
+      "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
+      "replay_evidence_score": 1.0,
+      "replay_evidence_tier": "verified_replay_evidence",
+      "replay_input_country_ids": [
+        "EST"
+      ],
+      "replay_input_record_count": 8,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 1.0,
+      "replayed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "replayed_status": "S3",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-FIN-2024-001.json"
+      ],
+      "case_id": "VAL-FIN-2024-001",
+      "country_id": "FIN",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [],
+      "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
+      "replay_evidence_score": 1.0,
+      "replay_evidence_tier": "verified_replay_evidence",
+      "replay_input_country_ids": [
+        "FIN"
+      ],
+      "replay_input_record_count": 8,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 1.0,
+      "replayed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "replayed_status": "S3",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-SAU-2024-001.json"
+      ],
+      "case_id": "VAL-SAU-2024-001",
+      "country_id": "SAU",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [],
+      "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
+      "replay_evidence_score": 1.0,
+      "replay_evidence_tier": "verified_replay_evidence",
+      "replay_input_country_ids": [
+        "SAU"
+      ],
+      "replay_input_record_count": 8,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 1.0,
+      "replayed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "replayed_status": "S3",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-QAT-2024-001.json"
+      ],
+      "case_id": "VAL-QAT-2024-001",
+      "country_id": "QAT",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [],
+      "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
+      "replay_evidence_score": 1.0,
+      "replay_evidence_tier": "verified_replay_evidence",
+      "replay_input_country_ids": [
+        "QAT"
+      ],
+      "replay_input_record_count": 8,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 1.0,
+      "replayed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "replayed_status": "S3",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-EGY-2024-001.json"
+      ],
+      "case_id": "VAL-EGY-2024-001",
+      "country_id": "EGY",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [],
+      "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
+      "replay_evidence_score": 1.0,
+      "replay_evidence_tier": "verified_replay_evidence",
+      "replay_input_country_ids": [
+        "EGY"
+      ],
+      "replay_input_record_count": 8,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 1.0,
+      "replayed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "replayed_status": "S3",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-NGA-2024-001.json"
+      ],
+      "case_id": "VAL-NGA-2024-001",
+      "country_id": "NGA",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [],
+      "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
+      "replay_evidence_score": 1.0,
+      "replay_evidence_tier": "verified_replay_evidence",
+      "replay_input_country_ids": [
+        "NGA"
+      ],
+      "replay_input_record_count": 8,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 1.0,
+      "replayed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "replayed_status": "S3",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-SDN-2024-001.json"
+      ],
+      "case_id": "VAL-SDN-2024-001",
+      "country_id": "SDN",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [],
+      "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
+      "replay_evidence_score": 1.0,
+      "replay_evidence_tier": "verified_replay_evidence",
+      "replay_input_country_ids": [
+        "SDN"
+      ],
+      "replay_input_record_count": 8,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 1.0,
+      "replayed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "replayed_status": "S3",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-MMR-2024-001.json"
+      ],
+      "case_id": "VAL-MMR-2024-001",
+      "country_id": "MMR",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [],
+      "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
+      "replay_evidence_score": 1.0,
+      "replay_evidence_tier": "verified_replay_evidence",
+      "replay_input_country_ids": [
+        "MMR"
+      ],
+      "replay_input_record_count": 8,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 1.0,
+      "replayed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "replayed_status": "S3",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-POL-2023-001.json"
+      ],
+      "case_id": "VAL-POL-2023-001",
+      "country_id": "POL",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [],
+      "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
+      "replay_evidence_score": 1.0,
+      "replay_evidence_tier": "verified_replay_evidence",
+      "replay_input_country_ids": [
+        "POL"
+      ],
+      "replay_input_record_count": 8,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 1.0,
+      "replayed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "replayed_status": "S3",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-POL-2024-002.json"
+      ],
+      "case_id": "VAL-POL-2024-002",
+      "country_id": "POL",
+      "domain_match_ratio": 0.6666666666666666,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [
+        "D"
+      ],
+      "provenance_notes": "Provider-derived archival normalized-record bundle intentionally captured with no usable governed Domain D record to exercise replay gap behavior.",
+      "replay_evidence_score": 0.85,
+      "replay_evidence_tier": "strong_replay_evidence",
+      "replay_input_country_ids": [
+        "POL"
+      ],
+      "replay_input_record_count": 5,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime",
+        "governed_archival_bundle_intentionally_omits_domain_d_records_to_exercise_partial_replay_behavior"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 0.75,
+      "replayed_domains": [
+        "A",
+        "B"
+      ],
+      "replayed_status": "S3",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match_with_gaps",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-ISR-2023-001.json"
+      ],
+      "case_id": "VAL-ISR-2023-001",
+      "country_id": "ISR",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [],
+      "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
+      "replay_evidence_score": 1.0,
+      "replay_evidence_tier": "verified_replay_evidence",
+      "replay_input_country_ids": [
+        "ISR"
+      ],
+      "replay_input_record_count": 8,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 1.0,
+      "replayed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "replayed_status": "S3",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-ISR-2024-002.json"
+      ],
+      "case_id": "VAL-ISR-2024-002",
+      "country_id": "ISR",
+      "domain_match_ratio": 0.3333333333333333,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [
+        "B",
+        "D"
+      ],
+      "provenance_notes": "Provider-derived archival normalized-record bundle intentionally constrained to information-domain evidence to exercise replay mismatch behavior.",
+      "replay_evidence_score": 0.25,
+      "replay_evidence_tier": "weak_replay_evidence",
+      "replay_input_country_ids": [
+        "ISR"
+      ],
+      "replay_input_record_count": 2,
+      "replay_input_source_ids": [
+        "SRC-GDELT-DOC"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime",
+        "governed_archival_bundle_intentionally_constrained_to_information_domain_records_to_exercise_mismatch_behavior"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 0.25,
+      "replayed_domains": [
+        "A"
+      ],
+      "replayed_status": "S1",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_mismatch",
+      "status_match": false,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-PAK-2024-001.json"
+      ],
+      "case_id": "VAL-PAK-2024-001",
+      "country_id": "PAK",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [],
+      "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
+      "replay_evidence_score": 1.0,
+      "replay_evidence_tier": "verified_replay_evidence",
+      "replay_input_country_ids": [
+        "PAK"
+      ],
+      "replay_input_record_count": 8,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 1.0,
+      "replayed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "replayed_status": "S3",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-GEO-2024-001.json"
+      ],
+      "case_id": "VAL-GEO-2024-001",
+      "country_id": "GEO",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "missing_expected_domains": [],
+      "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
+      "replay_evidence_score": 1.0,
+      "replay_evidence_tier": "verified_replay_evidence",
+      "replay_input_country_ids": [
+        "GEO"
+      ],
+      "replay_input_record_count": 8,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 1.0,
+      "replayed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "replayed_status": "S3",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    },
+    {
+      "archival_data_files": [
+        "archival_replay_inputs/VAL-TWN-2024-001.json"
+      ],
+      "case_id": "VAL-TWN-2024-001",
+      "country_id": "TWN",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B"
+      ],
+      "expected_status": "S1",
+      "missing_expected_domains": [],
+      "provenance_notes": "Provider-derived archival normalized-record bundle captured and governed in repo for replay reproducibility.",
+      "replay_evidence_score": 1.0,
+      "replay_evidence_tier": "verified_replay_evidence",
+      "replay_input_country_ids": [
+        "TWN"
+      ],
+      "replay_input_record_count": 4,
+      "replay_input_source_ids": [
+        "SRC-GDACS",
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS"
+      ],
+      "replay_known_limitations": [
+        "provider_backed_archival_replay_uses_repo_stored_archival_inputs_not_live_backfill_at_runtime"
+      ],
+      "replay_provenance_completeness_ratio": 1.0,
+      "replay_source_coverage_ratio": 1.0,
+      "replayed_domains": [
+        "A",
+        "B"
+      ],
+      "replayed_status": "S1",
+      "review_basis": "provider_backed_archival_replay",
+      "review_verdict": "replay_match",
+      "status_match": true,
+      "unexpected_observed_domains": []
+    }
+  ],
+  "historical_replay_summary": {
+    "archival_data_file_count": 23,
+    "attention_case_count": 2,
+    "attention_cases": [
+      {
+        "attention_level": "high",
+        "attention_reason": "status_mismatch_and_domain_gap",
+        "case_id": "VAL-ISR-2024-002",
+        "country_id": "ISR",
+        "missing_expected_domains": [
+          "B",
+          "D"
+        ],
+        "owner_hint": "validation governance",
+        "replay_evidence_tier": "weak_replay_evidence",
+        "replay_source_coverage_ratio": 0.25,
+        "review_verdict": "replay_mismatch",
+        "suggested_next_action": "Review reference-case expectation alignment and archival replay provenance before using this case as a strong validation signal.",
+        "unexpected_observed_domains": []
+      },
+      {
+        "attention_level": "medium",
+        "attention_reason": "domain_coverage_gap",
+        "case_id": "VAL-POL-2024-002",
+        "country_id": "POL",
+        "missing_expected_domains": [
+          "D"
+        ],
+        "owner_hint": "runtime/source coverage",
+        "replay_evidence_tier": "strong_replay_evidence",
+        "replay_source_coverage_ratio": 0.75,
+        "review_verdict": "replay_match_with_gaps",
+        "suggested_next_action": "Review missing expected domains and source coverage before treating this replay as fully representative.",
+        "unexpected_observed_domains": []
+      }
+    ],
+    "attention_country_summary": [
+      {
+        "attention_case_count": 1,
+        "case_ids": [
+          "VAL-ISR-2024-002"
+        ],
+        "country_id": "ISR",
+        "highest_attention_level": "high"
+      },
+      {
+        "attention_case_count": 1,
+        "case_ids": [
+          "VAL-POL-2024-002"
+        ],
+        "country_id": "POL",
+        "highest_attention_level": "medium"
+      }
+    ],
+    "attention_level_counts": {
+      "high": 1,
+      "medium": 1
+    },
+    "attention_owner_counts": {
+      "runtime/source coverage": 1,
+      "validation governance": 1
+    },
+    "attention_reason_counts": {
+      "domain_coverage_gap": 1,
+      "status_mismatch_and_domain_gap": 1
+    },
+    "average_domain_match_ratio": 0.96,
+    "average_replay_evidence_score": 0.96,
+    "average_replay_provenance_completeness_ratio": 1.0,
+    "average_replay_source_coverage_ratio": 0.96,
+    "case_count": 23,
+    "countries_covered": [
+      "CHN",
+      "DEU",
+      "EGY",
+      "EST",
+      "FIN",
+      "GEO",
+      "IND",
+      "IRN",
+      "ISR",
+      "MMR",
+      "NGA",
+      "PAK",
+      "POL",
+      "QAT",
+      "RUS",
+      "SAU",
+      "SDN",
+      "TUR",
+      "TWN",
+      "UKR",
+      "USA"
+    ],
+    "replay_evidence_tier_counts": {
+      "strong_replay_evidence": 1,
+      "verified_replay_evidence": 21,
+      "weak_replay_evidence": 1
+    },
+    "replay_input_record_total": 171,
+    "replay_input_source_coverage_counts": {
+      "SRC-GDACS": 22,
+      "SRC-GDELT-DOC": 23,
+      "SRC-GDELT-EVENTS": 22,
+      "WB-INDICATORS": 20
+    },
+    "review_basis_counts": {
+      "provider_backed_archival_replay": 23
+    },
+    "review_verdict_counts": {
+      "replay_match": 21,
+      "replay_match_with_gaps": 1,
+      "replay_mismatch": 1
+    },
+    "status_match_count": 22
+  },
+  "known_limitations": [
+    "pilot_runtime_support_case_not_historical_backtest"
+  ],
+  "missing_expected_domains": [],
+  "observed_domains": [
+    "A",
+    "B",
+    "D"
+  ],
+  "portfolio_summary": {
+    "case_count": 4,
+    "cases_with_gaps": [],
+    "countries_covered": [
+      "ISR",
+      "POL",
+      "TWN",
+      "UKR"
+    ],
+    "review_verdict_counts": {
+      "support_check": 4
+    }
+  },
+  "reference_case_library": [
+    {
+      "case_id": "VAL-UKR-2022-001",
+      "case_name": "Escalation reference case",
+      "case_type": "military_escalation",
+      "country_id": "UKR",
+      "evidence_tier": "verified_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "known_limitations": [
+        "historical macro backfill still thinner than the full stakeholder target horizon",
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2022-03-01",
+        "start": "2022-02-01"
+      },
+      "validation_goal": "Check multi-domain alignment detection for the initial full-scale escalation window.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-RUS-2024-001",
+      "case_name": "Strategic coercion reference case",
+      "case_type": "strategic_posturing",
+      "country_id": "RUS",
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "known_limitations": [
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2024-03-31",
+        "start": "2024-03-01"
+      },
+      "validation_goal": "Extend the governed validation library into the Russia core-focus lane with a full A/B/D archival replay case.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-CHN-2024-001",
+      "case_name": "Regional pressure reference case",
+      "case_type": "strategic_posturing",
+      "country_id": "CHN",
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "known_limitations": [
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2024-05-31",
+        "start": "2024-05-01"
+      },
+      "validation_goal": "Extend the governed validation library into East Asia with a full A/B/D archival replay case for China.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-IND-2024-001",
+      "case_name": "Regional mobilization reference case",
+      "case_type": "strategic_posturing",
+      "country_id": "IND",
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "known_limitations": [
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2024-02-29",
+        "start": "2024-02-01"
+      },
+      "validation_goal": "Close the remaining South-Asia core-focus validation gap with a governed A/B/D archival replay case for India.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-IRN-2024-001",
+      "case_name": "Regional coercion reference case",
+      "case_type": "strategic_posturing",
+      "country_id": "IRN",
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "known_limitations": [
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2024-07-31",
+        "start": "2024-07-01"
+      },
+      "validation_goal": "Close the remaining Middle-East core-focus validation gap with a governed A/B/D archival replay case for Iran.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-TUR-2024-001",
+      "case_name": "Regional spillover pressure reference case",
+      "case_type": "strategic_posturing",
+      "country_id": "TUR",
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "known_limitations": [
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2024-08-31",
+        "start": "2024-08-01"
+      },
+      "validation_goal": "Close the remaining Europe/Middle-East core-focus validation gap with a governed A/B/D archival replay case for Turkey.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-USA-2024-001",
+      "case_name": "Global narrative pressure reference case",
+      "case_type": "strategic_posturing",
+      "country_id": "USA",
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "known_limitations": [
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2024-08-31",
+        "start": "2024-08-01"
+      },
+      "validation_goal": "Start the extended-focus validation tranche with a governed A/B/D archival replay case for the United States.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-DEU-2024-001",
+      "case_name": "European security pressure reference case",
+      "case_type": "strategic_posturing",
+      "country_id": "DEU",
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "known_limitations": [
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2024-09-30",
+        "start": "2024-09-01"
+      },
+      "validation_goal": "Extend the governed validation library into central Europe with a full A/B/D archival replay case for Germany.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-EST-2024-001",
+      "case_name": "Baltic resilience pressure reference case",
+      "case_type": "strategic_posturing",
+      "country_id": "EST",
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "known_limitations": [
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2024-10-31",
+        "start": "2024-10-01"
+      },
+      "validation_goal": "Extend the governed validation library into the Baltic extended-focus lane with a full A/B/D archival replay case for Estonia.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-FIN-2024-001",
+      "case_name": "Nordic frontier pressure reference case",
+      "case_type": "strategic_posturing",
+      "country_id": "FIN",
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "known_limitations": [
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2024-10-31",
+        "start": "2024-10-01"
+      },
+      "validation_goal": "Extend the governed validation library into the Nordic extended-focus lane with a full A/B/D archival replay case for Finland.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-SAU-2024-001",
+      "case_name": "Gulf strategic energy pressure reference case",
+      "case_type": "strategic_posturing",
+      "country_id": "SAU",
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "known_limitations": [
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2024-09-30",
+        "start": "2024-09-01"
+      },
+      "validation_goal": "Extend the governed validation library into the Gulf energy lane with a full A/B/D archival replay case for Saudi Arabia.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-QAT-2024-001",
+      "case_name": "LNG corridor pressure reference case",
+      "case_type": "strategic_posturing",
+      "country_id": "QAT",
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "known_limitations": [
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2024-09-30",
+        "start": "2024-09-01"
+      },
+      "validation_goal": "Extend the governed validation library into the Gulf energy lane with a full A/B/D archival replay case for Qatar.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-EGY-2024-001",
+      "case_name": "Canal corridor and regional pressure reference case",
+      "case_type": "strategic_posturing",
+      "country_id": "EGY",
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "known_limitations": [
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2024-09-30",
+        "start": "2024-09-01"
+      },
+      "validation_goal": "Extend the governed validation library into the eastern Mediterranean energy lane with a full A/B/D archival replay case for Egypt.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-NGA-2024-001",
+      "case_name": "Regional fragility pressure reference case",
+      "case_type": "strategic_posturing",
+      "country_id": "NGA",
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "known_limitations": [
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2024-07-31",
+        "start": "2024-07-01"
+      },
+      "validation_goal": "Extend the governed validation library into the West Africa fragility lane with a full A/B/D archival replay case for Nigeria.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-SDN-2024-001",
+      "case_name": "Humanitarian conflict pressure reference case",
+      "case_type": "strategic_posturing",
+      "country_id": "SDN",
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "known_limitations": [
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2024-08-31",
+        "start": "2024-08-01"
+      },
+      "validation_goal": "Extend the governed validation library into the Horn/Nile crisis lane with a full A/B/D archival replay case for Sudan.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-MMR-2024-001",
+      "case_name": "Civil conflict and displacement pressure reference case",
+      "case_type": "strategic_posturing",
+      "country_id": "MMR",
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "known_limitations": [
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2024-08-31",
+        "start": "2024-08-01"
+      },
+      "validation_goal": "Extend the governed validation library into the Southeast Asia crisis lane with a full A/B/D archival replay case for Myanmar.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-POL-2023-001",
+      "case_name": "Hybrid pressure reference case",
+      "case_type": "hybrid_pressure",
+      "country_id": "POL",
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "known_limitations": [
+        "conflict/disaster windows can still be sparse in some daily live exports",
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2023-10-31",
+        "start": "2023-10-01"
+      },
+      "validation_goal": "Check that a pressured NATO-east flank case remains representable across A/B/D.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-POL-2024-002",
+      "case_name": "Hybrid pressure constrained-coverage challenge case",
+      "case_type": "hybrid_pressure",
+      "country_id": "POL",
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B"
+      ],
+      "historical_observed_status": "S3",
+      "known_limitations": [
+        "governed_archival_replay_intentionally_omits_domain_d_records_to_exercise_partial_replay_behavior",
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2024-04-30",
+        "start": "2024-04-01"
+      },
+      "validation_goal": "Exercise honest replay_match_with_gaps behavior where status still aligns but governed replay coverage remains incomplete.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-ISR-2023-001",
+      "case_name": "Regional conflict pressure reference case",
+      "case_type": "strategic_posturing",
+      "country_id": "ISR",
+      "evidence_tier": "verified_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "known_limitations": [
+        "current governed pilot still uses runtime-support evaluation rather than full replay scoring",
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2023-11-07",
+        "start": "2023-10-07"
+      },
+      "validation_goal": "Keep a clearly reviewable A/B/D reference case for regional-conflict escalation.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-ISR-2024-002",
+      "case_name": "Regional conflict mismatch challenge case",
+      "case_type": "strategic_posturing",
+      "country_id": "ISR",
+      "evidence_tier": "provisional",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A"
+      ],
+      "historical_observed_status": "S1",
+      "known_limitations": [
+        "governed_archival_replay_intentionally_constrained_to_information_domain_records_to_exercise_mismatch_behavior",
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2024-06-30",
+        "start": "2024-06-01"
+      },
+      "validation_goal": "Exercise replay_mismatch behavior on a governed archival challenge case instead of only clean-match references.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-PAK-2024-001",
+      "case_name": "Regional escalation reference case",
+      "case_type": "strategic_posturing",
+      "country_id": "PAK",
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "known_limitations": [
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2024-04-30",
+        "start": "2024-04-01"
+      },
+      "validation_goal": "Extend the governed validation library into South Asia with a full A/B/D reference case after the live-runtime breadth expansion.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-GEO-2024-001",
+      "case_name": "Governance pressure reference case",
+      "case_type": "hybrid_pressure",
+      "country_id": "GEO",
+      "evidence_tier": "corroborated_multi_source",
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_status": "S3",
+      "historical_observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "historical_observed_status": "S3",
+      "known_limitations": [
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS",
+        "WB-INDICATORS"
+      ],
+      "time_range": {
+        "end": "2024-05-31",
+        "start": "2024-05-01"
+      },
+      "validation_goal": "Extend the governed validation library into the South Caucasus with another full A/B/D reference case.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-TWN-2024-001",
+      "case_name": "Information pressure reference case",
+      "case_type": "disinformation_spike",
+      "country_id": "TWN",
+      "evidence_tier": "curated_public_source",
+      "expected_domains": [
+        "A",
+        "B"
+      ],
+      "expected_status": "S1",
+      "historical_observed_domains": [
+        "A"
+      ],
+      "historical_observed_status": "S1",
+      "known_limitations": [
+        "governed live runtime intentionally scopes TWN to A/B and does not claim historical Domain D support",
+        "curated_historical_observed_outcome_not_generated_by_runtime_replay"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "SRC-GDACS"
+      ],
+      "time_range": {
+        "end": "2024-05-31",
+        "start": "2024-05-01"
+      },
+      "validation_goal": "Preserve an explicit A/B-only reference case for TWN under the current governed pilot scope.",
+      "validation_metrics": [
+        "Domain Match",
+        "Status Match"
+      ]
+    }
+  ],
+  "reference_case_library_summary": {
+    "case_count": 23,
+    "case_type_counts": {
+      "disinformation_spike": 1,
+      "hybrid_pressure": 3,
+      "military_escalation": 1,
+      "strategic_posturing": 18
+    },
+    "countries_covered": [
+      "CHN",
+      "DEU",
+      "EGY",
+      "EST",
+      "FIN",
+      "GEO",
+      "IND",
+      "IRN",
+      "ISR",
+      "MMR",
+      "NGA",
+      "PAK",
+      "POL",
+      "QAT",
+      "RUS",
+      "SAU",
+      "SDN",
+      "TUR",
+      "TWN",
+      "UKR",
+      "USA"
+    ],
+    "time_range": {
+      "end": "2024-10-31",
+      "start": "2022-02-01"
+    }
+  },
+  "reference_sources": [
+    "SRC-GDELT-DOC",
+    "SRC-GDELT-EVENTS",
+    "WB-INDICATORS"
+  ],
+  "reprocessing_comparison": {},
+  "review_verdict": "support_check",
+  "run_id": "RUN-LIVE-20260520-2021",
+  "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+  "status_match": null,
+  "time_range": {
+    "end": "2026-05-20T20:30:00Z",
+    "start": "2024"
+  },
+  "unexpected_observed_domains": [],
+  "validation_cases": [
+    {
+      "case_id": "VAL-UKR-LIVE-PILOT-SUPPORT",
+      "case_name": "Governed live runtime support case for UKR",
+      "case_type": "pilot_runtime_support_case",
+      "comparison_mode": "runtime_support_check",
+      "country_id": "UKR",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_pattern": "Governed live pilot should expose the configured active domains and emit a reviewable validation artifact for the current bundle.",
+      "known_limitations": [
+        "pilot_runtime_support_case_not_historical_backtest"
+      ],
+      "missing_expected_domains": [],
+      "observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "reprocessing_comparison": {},
+      "review_verdict": "support_check",
+      "run_id": "RUN-LIVE-20260520-2021",
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "status_match": null,
+      "time_range": {
+        "end": "2026-05-20T20:30:00Z",
+        "start": "2024"
+      },
+      "unexpected_observed_domains": [],
+      "validation_goal": "Check validation artifact generation and expected-versus-observed domain visibility for the governed live pilot bundle.",
+      "validation_metrics": [
+        "Artifact Presence",
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-POL-LIVE-PILOT-SUPPORT",
+      "case_name": "Governed live runtime support case for POL",
+      "case_type": "pilot_runtime_support_case",
+      "comparison_mode": "runtime_support_check",
+      "country_id": "POL",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_pattern": "Governed live pilot should expose the configured active domains and emit a reviewable validation artifact for the current bundle.",
+      "known_limitations": [
+        "pilot_runtime_support_case_not_historical_backtest"
+      ],
+      "missing_expected_domains": [],
+      "observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "reprocessing_comparison": {},
+      "review_verdict": "support_check",
+      "run_id": "RUN-LIVE-20260520-2021",
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "status_match": null,
+      "time_range": {
+        "end": "2026-05-20T20:00:00Z",
+        "start": "2024"
+      },
+      "unexpected_observed_domains": [],
+      "validation_goal": "Check validation artifact generation and expected-versus-observed domain visibility for the governed live pilot bundle.",
+      "validation_metrics": [
+        "Artifact Presence",
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-ISR-LIVE-PILOT-SUPPORT",
+      "case_name": "Governed live runtime support case for ISR",
+      "case_type": "pilot_runtime_support_case",
+      "comparison_mode": "runtime_support_check",
+      "country_id": "ISR",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "expected_pattern": "Governed live pilot should expose the configured active domains and emit a reviewable validation artifact for the current bundle.",
+      "known_limitations": [
+        "pilot_runtime_support_case_not_historical_backtest"
+      ],
+      "missing_expected_domains": [],
+      "observed_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS",
+        "WB-INDICATORS"
+      ],
+      "reprocessing_comparison": {},
+      "review_verdict": "support_check",
+      "run_id": "RUN-LIVE-20260520-2021",
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "status_match": null,
+      "time_range": {
+        "end": "2026-05-20T20:30:00Z",
+        "start": "2024"
+      },
+      "unexpected_observed_domains": [],
+      "validation_goal": "Check validation artifact generation and expected-versus-observed domain visibility for the governed live pilot bundle.",
+      "validation_metrics": [
+        "Artifact Presence",
+        "Domain Match",
+        "Status Match"
+      ]
+    },
+    {
+      "case_id": "VAL-TWN-LIVE-PILOT-SUPPORT",
+      "case_name": "Governed live runtime support case for TWN",
+      "case_type": "pilot_runtime_support_case",
+      "comparison_mode": "runtime_support_check",
+      "country_id": "TWN",
+      "domain_match_ratio": 1.0,
+      "expected_domains": [
+        "A",
+        "B"
+      ],
+      "expected_pattern": "Governed live pilot should expose the configured active domains and emit a reviewable validation artifact for the current bundle.",
+      "known_limitations": [
+        "pilot_runtime_support_case_not_historical_backtest"
+      ],
+      "missing_expected_domains": [],
+      "observed_domains": [
+        "A",
+        "B"
+      ],
+      "reference_sources": [
+        "SRC-GDELT-DOC",
+        "SRC-GDELT-EVENTS"
+      ],
+      "reprocessing_comparison": {},
+      "review_verdict": "support_check",
+      "run_id": "RUN-LIVE-20260520-2021",
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "status_match": null,
+      "time_range": {
+        "end": "2026-05-20T20:30:00Z",
+        "start": "2026-02-26T01:30:00Z"
+      },
+      "unexpected_observed_domains": [],
+      "validation_goal": "Check validation artifact generation and expected-versus-observed domain visibility for the governed live pilot bundle.",
+      "validation_metrics": [
+        "Artifact Presence",
+        "Domain Match",
+        "Status Match"
+      ]
+    }
+  ],
+  "validation_goal": "Check validation artifact generation and expected-versus-observed domain visibility for the governed live pilot bundle.",
+  "validation_metrics": [
+    "Artifact Presence",
+    "Domain Match",
+    "Status Match"
+  ]
+}

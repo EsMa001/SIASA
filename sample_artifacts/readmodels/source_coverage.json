@@ -1,0 +1,46 @@
+{
+  "degraded_sources": [],
+  "failed_sources": [],
+  "missing_sources": [],
+  "source_status_summary": {
+    "success": 4
+  },
+  "sources": [
+    {
+      "confidence": null,
+      "diagnostics": "world_bank_fetch_ok countries=3 indicators=2 records=6",
+      "freshness_hours": null,
+      "history_horizon": "n/a",
+      "record_count": 6,
+      "source_id": "WB-INDICATORS",
+      "status": "success"
+    },
+    {
+      "confidence": null,
+      "diagnostics": "gdelt_doc_fetch_ok countries=4 records=20",
+      "freshness_hours": null,
+      "history_horizon": "n/a",
+      "record_count": 20,
+      "source_id": "SRC-GDELT-DOC",
+      "status": "success"
+    },
+    {
+      "confidence": null,
+      "diagnostics": "gdelt_events_fetch_ok countries=4 exports=8 records=9",
+      "freshness_hours": null,
+      "history_horizon": "n/a",
+      "record_count": 9,
+      "source_id": "SRC-GDELT-EVENTS",
+      "status": "success"
+    },
+    {
+      "confidence": null,
+      "diagnostics": "gdacs_fetch_ok countries=0 records=0",
+      "freshness_hours": null,
+      "history_horizon": "n/a",
+      "record_count": 0,
+      "source_id": "SRC-GDACS",
+      "status": "success"
+    }
+  ]
+}

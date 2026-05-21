@@ -1,0 +1,49 @@
+{
+  "anomaly_state": "D2",
+  "capability": "analysis",
+  "contains_personal_data": false,
+  "country_id": "TWN",
+  "domain": "B",
+  "feature_values": [
+    {
+      "coverage": 1.0,
+      "feature_id": "B_event_count",
+      "value": 8.0
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "B_violent_event_count",
+      "value": 2.0
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "B_protest_event_count",
+      "value": 0
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "B_violent_event_share",
+      "value": 0.25
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "B_disaster_alert_level",
+      "value": 0.0
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "B_event_type_distribution",
+      "value": {
+        "conflict": 0.75,
+        "violent": 0.25
+      }
+    }
+  ],
+  "linked_event_ids": [
+    "EVT-TWN-RUN-LIVE-20260520-2021"
+  ],
+  "source_state": {
+    "SRC-GDELT-EVENTS": "success"
+  },
+  "uncertainty": []
+}

@@ -1,0 +1,70 @@
+{
+  "export_files": [
+    {
+      "format": "md",
+      "label": "Markdown",
+      "path": "build/run_artifacts/latest/exports/domain_report/REP-DOMAIN-ISR-B.md",
+      "relative_path": "exports/domain_report/REP-DOMAIN-ISR-B.md"
+    },
+    {
+      "format": "json",
+      "label": "JSON",
+      "path": "build/run_artifacts/latest/exports/domain_report/REP-DOMAIN-ISR-B.json",
+      "relative_path": "exports/domain_report/REP-DOMAIN-ISR-B.json"
+    }
+  ],
+  "format": "json+markdown",
+  "markdown": "# Domain report: ISR / B\nAnomaly state: D2\nSource state: {'SRC-GDELT-EVENTS': 'success'}\nUncertainty: -\nLinked events: EVT-ISR-RUN-LIVE-20260520-2021\nFeature count: 6",
+  "payload": {
+    "anomaly_state": "D2",
+    "capability": "analysis",
+    "contains_personal_data": false,
+    "country_id": "ISR",
+    "domain": "B",
+    "feature_values": [
+      {
+        "coverage": 1.0,
+        "feature_id": "B_event_count",
+        "value": 417.0
+      },
+      {
+        "coverage": 1.0,
+        "feature_id": "B_violent_event_count",
+        "value": 111.0
+      },
+      {
+        "coverage": 1.0,
+        "feature_id": "B_protest_event_count",
+        "value": 16.0
+      },
+      {
+        "coverage": 1.0,
+        "feature_id": "B_violent_event_share",
+        "value": 0.26618705035971224
+      },
+      {
+        "coverage": 1.0,
+        "feature_id": "B_disaster_alert_level",
+        "value": 0.0
+      },
+      {
+        "coverage": 1.0,
+        "feature_id": "B_event_type_distribution",
+        "value": {
+          "conflict": 0.6954436450839329,
+          "protest": 0.03836930455635491,
+          "violent": 0.26618705035971224
+        }
+      }
+    ],
+    "linked_event_ids": [
+      "EVT-ISR-RUN-LIVE-20260520-2021"
+    ],
+    "source_state": {
+      "SRC-GDELT-EVENTS": "success"
+    },
+    "uncertainty": []
+  },
+  "report_id": "REP-DOMAIN-ISR-B",
+  "report_type": "domain_report"
+}

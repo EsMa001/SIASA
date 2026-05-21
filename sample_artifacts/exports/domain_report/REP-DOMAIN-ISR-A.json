@@ -1,0 +1,31 @@
+{
+  "anomaly_state": "D0",
+  "capability": "analysis",
+  "contains_personal_data": false,
+  "country_id": "ISR",
+  "domain": "A",
+  "feature_values": [
+    {
+      "coverage": 1.0,
+      "feature_id": "A_news_volume",
+      "value": 5.0
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "A_source_count",
+      "value": 1.0
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "A_source_diversity_index",
+      "value": 0.2
+    }
+  ],
+  "linked_event_ids": [],
+  "source_state": {
+    "SRC-GDELT-DOC": "success"
+  },
+  "uncertainty": [
+    "freshness beyond threshold"
+  ]
+}

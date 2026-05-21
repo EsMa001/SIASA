@@ -1,0 +1,744 @@
+{
+  "lineage_records": [
+    {
+      "domain_status_id": "DST-ISR-A-RUN-LIVE-20260520-2021",
+      "feature_id": "A_news_volume",
+      "multi_domain_status_id": "MST-ISR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-DOC-11",
+      "raw_record_id": "RAW-SRC-GDELT-DOC-11",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-ISR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-ISR-A"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-DOC"
+    },
+    {
+      "domain_status_id": "DST-ISR-A-RUN-LIVE-20260520-2021",
+      "feature_id": "A_source_count",
+      "multi_domain_status_id": "MST-ISR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-DOC-11",
+      "raw_record_id": "RAW-SRC-GDELT-DOC-11",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-ISR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-ISR-A"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-DOC"
+    },
+    {
+      "domain_status_id": "DST-ISR-A-RUN-LIVE-20260520-2021",
+      "feature_id": "A_source_diversity_index",
+      "multi_domain_status_id": "MST-ISR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-DOC-11",
+      "raw_record_id": "RAW-SRC-GDELT-DOC-11",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-ISR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-ISR-A"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-DOC"
+    },
+    {
+      "domain_status_id": "DST-POL-A-RUN-LIVE-20260520-2021",
+      "feature_id": "A_news_volume",
+      "multi_domain_status_id": "MST-POL-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-DOC-6",
+      "raw_record_id": "RAW-SRC-GDELT-DOC-6",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-POL",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-POL-A"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-DOC"
+    },
+    {
+      "domain_status_id": "DST-POL-A-RUN-LIVE-20260520-2021",
+      "feature_id": "A_source_count",
+      "multi_domain_status_id": "MST-POL-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-DOC-6",
+      "raw_record_id": "RAW-SRC-GDELT-DOC-6",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-POL",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-POL-A"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-DOC"
+    },
+    {
+      "domain_status_id": "DST-POL-A-RUN-LIVE-20260520-2021",
+      "feature_id": "A_source_diversity_index",
+      "multi_domain_status_id": "MST-POL-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-DOC-6",
+      "raw_record_id": "RAW-SRC-GDELT-DOC-6",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-POL",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-POL-A"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-DOC"
+    },
+    {
+      "domain_status_id": "DST-TWN-A-RUN-LIVE-20260520-2021",
+      "feature_id": "A_news_volume",
+      "multi_domain_status_id": "MST-TWN-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-DOC-16",
+      "raw_record_id": "RAW-SRC-GDELT-DOC-16",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-TWN",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-TWN-A"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-DOC"
+    },
+    {
+      "domain_status_id": "DST-TWN-A-RUN-LIVE-20260520-2021",
+      "feature_id": "A_source_count",
+      "multi_domain_status_id": "MST-TWN-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-DOC-16",
+      "raw_record_id": "RAW-SRC-GDELT-DOC-16",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-TWN",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-TWN-A"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-DOC"
+    },
+    {
+      "domain_status_id": "DST-TWN-A-RUN-LIVE-20260520-2021",
+      "feature_id": "A_source_diversity_index",
+      "multi_domain_status_id": "MST-TWN-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-DOC-16",
+      "raw_record_id": "RAW-SRC-GDELT-DOC-16",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-TWN",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-TWN-A"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-DOC"
+    },
+    {
+      "domain_status_id": "DST-UKR-A-RUN-LIVE-20260520-2021",
+      "feature_id": "A_news_volume",
+      "multi_domain_status_id": "MST-UKR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-DOC-1",
+      "raw_record_id": "RAW-SRC-GDELT-DOC-1",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-UKR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-UKR-A"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-DOC"
+    },
+    {
+      "domain_status_id": "DST-UKR-A-RUN-LIVE-20260520-2021",
+      "feature_id": "A_source_count",
+      "multi_domain_status_id": "MST-UKR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-DOC-1",
+      "raw_record_id": "RAW-SRC-GDELT-DOC-1",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-UKR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-UKR-A"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-DOC"
+    },
+    {
+      "domain_status_id": "DST-UKR-A-RUN-LIVE-20260520-2021",
+      "feature_id": "A_source_diversity_index",
+      "multi_domain_status_id": "MST-UKR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-DOC-1",
+      "raw_record_id": "RAW-SRC-GDELT-DOC-1",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-UKR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-UKR-A"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-DOC"
+    },
+    {
+      "domain_status_id": "DST-ISR-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_event_count",
+      "multi_domain_status_id": "MST-ISR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-1",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-1",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-ISR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-ISR-B",
+        "REP-EVENT-EVT-ISR-RUN-LIVE-20260520-2021"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-ISR-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_violent_event_count",
+      "multi_domain_status_id": "MST-ISR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-1",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-1",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-ISR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-ISR-B",
+        "REP-EVENT-EVT-ISR-RUN-LIVE-20260520-2021"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-ISR-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_protest_event_count",
+      "multi_domain_status_id": "MST-ISR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-1",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-1",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-ISR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-ISR-B",
+        "REP-EVENT-EVT-ISR-RUN-LIVE-20260520-2021"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-ISR-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_violent_event_share",
+      "multi_domain_status_id": "MST-ISR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-1",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-1",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-ISR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-ISR-B",
+        "REP-EVENT-EVT-ISR-RUN-LIVE-20260520-2021"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-ISR-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_disaster_alert_level",
+      "multi_domain_status_id": "MST-ISR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-1",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-1",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-ISR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-ISR-B"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-ISR-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_event_type_distribution",
+      "multi_domain_status_id": "MST-ISR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-1",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-1",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-ISR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-ISR-B",
+        "REP-EVENT-EVT-ISR-RUN-LIVE-20260520-2021"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-POL-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_event_count",
+      "multi_domain_status_id": "MST-POL-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-4",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-4",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-POL",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-POL-B",
+        "REP-EVENT-EVT-POL-RUN-LIVE-20260520-2021"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-POL-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_violent_event_count",
+      "multi_domain_status_id": "MST-POL-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-4",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-4",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-POL",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-POL-B",
+        "REP-EVENT-EVT-POL-RUN-LIVE-20260520-2021"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-POL-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_protest_event_count",
+      "multi_domain_status_id": "MST-POL-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-4",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-4",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-POL",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-POL-B",
+        "REP-EVENT-EVT-POL-RUN-LIVE-20260520-2021"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-POL-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_violent_event_share",
+      "multi_domain_status_id": "MST-POL-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-4",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-4",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-POL",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-POL-B",
+        "REP-EVENT-EVT-POL-RUN-LIVE-20260520-2021"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-POL-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_disaster_alert_level",
+      "multi_domain_status_id": "MST-POL-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-4",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-4",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-POL",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-POL-B"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-POL-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_event_type_distribution",
+      "multi_domain_status_id": "MST-POL-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-4",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-4",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-POL",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-POL-B",
+        "REP-EVENT-EVT-POL-RUN-LIVE-20260520-2021"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-TWN-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_event_count",
+      "multi_domain_status_id": "MST-TWN-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-6",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-6",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-TWN",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-TWN-B",
+        "REP-EVENT-EVT-TWN-RUN-LIVE-20260520-2021"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-TWN-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_violent_event_count",
+      "multi_domain_status_id": "MST-TWN-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-6",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-6",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-TWN",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-TWN-B",
+        "REP-EVENT-EVT-TWN-RUN-LIVE-20260520-2021"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-TWN-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_protest_event_count",
+      "multi_domain_status_id": "MST-TWN-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-6",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-6",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-TWN",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-TWN-B",
+        "REP-EVENT-EVT-TWN-RUN-LIVE-20260520-2021"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-TWN-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_violent_event_share",
+      "multi_domain_status_id": "MST-TWN-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-6",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-6",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-TWN",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-TWN-B",
+        "REP-EVENT-EVT-TWN-RUN-LIVE-20260520-2021"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-TWN-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_disaster_alert_level",
+      "multi_domain_status_id": "MST-TWN-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-6",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-6",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-TWN",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-TWN-B"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-TWN-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_event_type_distribution",
+      "multi_domain_status_id": "MST-TWN-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-6",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-6",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-TWN",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-TWN-B",
+        "REP-EVENT-EVT-TWN-RUN-LIVE-20260520-2021"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-UKR-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_event_count",
+      "multi_domain_status_id": "MST-UKR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-8",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-8",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-UKR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-UKR-B",
+        "REP-EVENT-EVT-UKR-RUN-LIVE-20260520-2021"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-UKR-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_violent_event_count",
+      "multi_domain_status_id": "MST-UKR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-8",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-8",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-UKR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-UKR-B",
+        "REP-EVENT-EVT-UKR-RUN-LIVE-20260520-2021"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-UKR-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_protest_event_count",
+      "multi_domain_status_id": "MST-UKR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-8",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-8",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-UKR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-UKR-B",
+        "REP-EVENT-EVT-UKR-RUN-LIVE-20260520-2021"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-UKR-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_violent_event_share",
+      "multi_domain_status_id": "MST-UKR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-8",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-8",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-UKR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-UKR-B",
+        "REP-EVENT-EVT-UKR-RUN-LIVE-20260520-2021"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-UKR-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_disaster_alert_level",
+      "multi_domain_status_id": "MST-UKR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-8",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-8",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-UKR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-UKR-B"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-UKR-B-RUN-LIVE-20260520-2021",
+      "feature_id": "B_event_type_distribution",
+      "multi_domain_status_id": "MST-UKR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-SRC-GDELT-EVENTS-8",
+      "raw_record_id": "RAW-SRC-GDELT-EVENTS-8",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-UKR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-UKR-B",
+        "REP-EVENT-EVT-UKR-RUN-LIVE-20260520-2021"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "SRC-GDELT-EVENTS"
+    },
+    {
+      "domain_status_id": "DST-ISR-D-RUN-LIVE-20260520-2021",
+      "feature_id": "D_trade_volume_change",
+      "multi_domain_status_id": "MST-ISR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-WB-INDICATORS-1",
+      "raw_record_id": "RAW-WB-INDICATORS-1",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-ISR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-ISR-D"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "WB-INDICATORS"
+    },
+    {
+      "domain_status_id": "DST-ISR-D-RUN-LIVE-20260520-2021",
+      "feature_id": "D_gdp_growth",
+      "multi_domain_status_id": "MST-ISR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-WB-INDICATORS-1",
+      "raw_record_id": "RAW-WB-INDICATORS-1",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-ISR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-ISR-D"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "WB-INDICATORS"
+    },
+    {
+      "domain_status_id": "DST-ISR-D-RUN-LIVE-20260520-2021",
+      "feature_id": "D_macro_data_freshness",
+      "multi_domain_status_id": "MST-ISR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-WB-INDICATORS-1",
+      "raw_record_id": "RAW-WB-INDICATORS-1",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-ISR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-ISR-D"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "WB-INDICATORS"
+    },
+    {
+      "domain_status_id": "DST-POL-D-RUN-LIVE-20260520-2021",
+      "feature_id": "D_trade_volume_change",
+      "multi_domain_status_id": "MST-POL-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-WB-INDICATORS-2",
+      "raw_record_id": "RAW-WB-INDICATORS-2",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-POL",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-POL-D"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "WB-INDICATORS"
+    },
+    {
+      "domain_status_id": "DST-POL-D-RUN-LIVE-20260520-2021",
+      "feature_id": "D_gdp_growth",
+      "multi_domain_status_id": "MST-POL-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-WB-INDICATORS-2",
+      "raw_record_id": "RAW-WB-INDICATORS-2",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-POL",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-POL-D"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "WB-INDICATORS"
+    },
+    {
+      "domain_status_id": "DST-POL-D-RUN-LIVE-20260520-2021",
+      "feature_id": "D_macro_data_freshness",
+      "multi_domain_status_id": "MST-POL-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-WB-INDICATORS-2",
+      "raw_record_id": "RAW-WB-INDICATORS-2",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-POL",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-POL-D"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "WB-INDICATORS"
+    },
+    {
+      "domain_status_id": "DST-UKR-D-RUN-LIVE-20260520-2021",
+      "feature_id": "D_trade_volume_change",
+      "multi_domain_status_id": "MST-UKR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-WB-INDICATORS-3",
+      "raw_record_id": "RAW-WB-INDICATORS-3",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-UKR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-UKR-D"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "WB-INDICATORS"
+    },
+    {
+      "domain_status_id": "DST-UKR-D-RUN-LIVE-20260520-2021",
+      "feature_id": "D_gdp_growth",
+      "multi_domain_status_id": "MST-UKR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-WB-INDICATORS-3",
+      "raw_record_id": "RAW-WB-INDICATORS-3",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-UKR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-UKR-D"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "WB-INDICATORS"
+    },
+    {
+      "domain_status_id": "DST-UKR-D-RUN-LIVE-20260520-2021",
+      "feature_id": "D_macro_data_freshness",
+      "multi_domain_status_id": "MST-UKR-RUN-LIVE-20260520-2021",
+      "normalized_id": "NORM-WB-INDICATORS-3",
+      "raw_record_id": "RAW-WB-INDICATORS-3",
+      "report_id": "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+      "report_ids": [
+        "REP-COUNTRY-UKR",
+        "REP-COVERAGE-RUN-LIVE-20260520-2021",
+        "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
+        "REP-DOMAIN-UKR-D"
+      ],
+      "snapshot_id": "SNAP-RUN-LIVE-20260520-2021-v1",
+      "source_id": "WB-INDICATORS"
+    }
+  ]
+}
