@@ -351,7 +351,7 @@ def _render_baseline_comparison_summary(baseline_comparison: dict[str, Any], tim
 
 
 def _load_json(path: Path) -> dict[str, Any]:
-    return json.loads(path.read_text())
+    return json.loads(path.read_text(encoding='utf-8'))
 
 
 
@@ -2661,7 +2661,8 @@ def build_local_mvp_site(
             system_status_read_model=system_status_read_model,
             nav_prefix='',
             available_pages=available_pages,
-        )
+        ),
+        encoding='utf-8',
     )
     generated_files.append(index_file)
 
@@ -2678,7 +2679,8 @@ def build_local_mvp_site(
                 available_domain_targets=available_domain_targets_by_country.get(country_id, {}),
                 nav_prefix='../',
                 available_pages=available_pages,
-            )
+            ),
+            encoding='utf-8',
         )
         generated_files.append(country_file)
 
@@ -2690,7 +2692,8 @@ def build_local_mvp_site(
                 annotations_view_model,
                 nav_prefix='../',
                 available_pages=available_pages,
-            )
+            ),
+            encoding='utf-8',
         )
         generated_files.append(domain_file)
 
@@ -2701,45 +2704,46 @@ def build_local_mvp_site(
             system_status_read_model=system_status_read_model,
             nav_prefix='',
             available_pages=available_pages,
-        )
+        ),
+        encoding='utf-8',
     )
     generated_files.append(coverage_file)
 
     prepared_report_catalog, copied_export_files = _prepare_report_catalog(report_catalog, output_dir)
     generated_files.extend(copied_export_files)
     reports_file = output_dir / 'reports.html'
-    reports_file.write_text(_render_reports(prepared_report_catalog, nav_prefix='', available_pages=available_pages))
+    reports_file.write_text(_render_reports(prepared_report_catalog, nav_prefix='', available_pages=available_pages), encoding='utf-8')
     generated_files.append(reports_file)
 
     runs_file = output_dir / 'runs.html'
-    runs_file.write_text(_render_runs(system_status_read_model, repo_closure_view_model, nav_prefix='', available_pages=available_pages))
+    runs_file.write_text(_render_runs(system_status_read_model, repo_closure_view_model, nav_prefix='', available_pages=available_pages), encoding='utf-8')
     generated_files.append(runs_file)
 
     trends_file = output_dir / 'trends.html'
-    trends_file.write_text(_render_trends(country_profile_read_models, nav_prefix='', available_pages=available_pages))
+    trends_file.write_text(_render_trends(country_profile_read_models, nav_prefix='', available_pages=available_pages), encoding='utf-8')
     generated_files.append(trends_file)
 
     events_file = output_dir / 'events.html'
-    events_file.write_text(_render_events(country_profile_read_models, nav_prefix='', available_pages=available_pages))
+    events_file.write_text(_render_events(country_profile_read_models, nav_prefix='', available_pages=available_pages), encoding='utf-8')
     generated_files.append(events_file)
 
     comparison_file = output_dir / 'comparison.html'
-    comparison_file.write_text(_render_comparison(country_profile_read_models, nav_prefix='', available_pages=available_pages))
+    comparison_file.write_text(_render_comparison(country_profile_read_models, nav_prefix='', available_pages=available_pages), encoding='utf-8')
     generated_files.append(comparison_file)
 
     if validation_view_model is not None:
         validation_file = output_dir / 'validation.html'
-        validation_file.write_text(_render_validation(validation_view_model, nav_prefix='', available_pages=available_pages))
+        validation_file.write_text(_render_validation(validation_view_model, nav_prefix='', available_pages=available_pages), encoding='utf-8')
         generated_files.append(validation_file)
 
     if traceability_view_model is not None:
         traceability_file = output_dir / 'traceability.html'
-        traceability_file.write_text(_render_traceability(traceability_view_model, nav_prefix='', available_pages=available_pages))
+        traceability_file.write_text(_render_traceability(traceability_view_model, nav_prefix='', available_pages=available_pages), encoding='utf-8')
         generated_files.append(traceability_file)
 
     if annotations_view_model is not None:
         annotations_file = output_dir / 'annotations.html'
-        annotations_file.write_text(_render_annotations(annotations_view_model, nav_prefix='', available_pages=available_pages))
+        annotations_file.write_text(_render_annotations(annotations_view_model, nav_prefix='', available_pages=available_pages), encoding='utf-8')
         generated_files.append(annotations_file)
 
     if readiness_view_model is None:
@@ -2756,10 +2760,10 @@ def build_local_mvp_site(
             available_pages=available_pages,
         )
     readiness_file = output_dir / 'readiness.html'
-    readiness_file.write_text(_render_readiness(readiness_view_model, nav_prefix='', available_pages=available_pages))
+    readiness_file.write_text(_render_readiness(readiness_view_model, nav_prefix='', available_pages=available_pages), encoding='utf-8')
     generated_files.append(readiness_file)
     readiness_json_file = output_dir / 'readiness.json'
-    readiness_json_file.write_text(json.dumps(readiness_view_model, indent=2, sort_keys=True))
+    readiness_json_file.write_text(json.dumps(readiness_view_model, indent=2, sort_keys=True), encoding='utf-8')
     generated_files.append(readiness_json_file)
 
     return SiteBuildResult(output_dir=output_dir, generated_files=generated_files)
