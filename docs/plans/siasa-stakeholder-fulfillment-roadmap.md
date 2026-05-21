@@ -324,23 +324,23 @@ The old order should now be updated to the current repo state.
 
 Recommended serial order from here:
 
-1. P1 closure package(s) for latest-bundle validation completeness, if readiness honesty remains blocked
+1. Broader MVP/P2 runtime-breadth tranche beyond current core-focus subsets
+   - size: medium to large
+   - reason: P1 closure and representative/core-focus runtime hardening are now materially advanced; the biggest remaining delivery delta is breadth toward wider MVP/P2 coverage
+2. Follow-up runtime robustness package(s) only if new probe evidence shows a concrete new failure mode
    - size: small to medium
-   - reason: readiness claims should not remain artificially weaker than the now richer GUI baseline
-2. broader live-source/runtime hardening beyond the current governed pilot subset
-   - size: medium to large
-   - reason: remaining operational issues are now mostly source/runtime robustness rather than missing GUI transparency structure
-3. P2 representative-breadth continuation packages
-   - size: medium to large
-   - reason: stakeholder breadth remains materially below the governed country set even though the path now exists
-4. later source-origin / epidemiology extension package(s)
+   - reason: hardening should stay evidence-driven and targeted (no speculative broad retry expansion)
+3. Next validation interpretation/depth package after breadth tranche closure
+   - size: medium
+   - reason: validation baseline is already strong (23 cases / 21 countries), so the next depth slice should be selective and analyst-value-driven
+4. Later source-origin / epidemiology extension package(s)
    - size: large
-   - reason: the groundwork now exists, but full origin inference and information-spread analysis are still intentionally deferred beyond the current baseline
+   - reason: groundwork exists, but full origin inference and information-spread analysis remain intentionally later
 
 Suggested planning cadence:
-- next work package: validation completeness / readiness honesty closure
-- following 1 to 2 work packages: selected runtime hardening and representative breadth expansion
-- after that: resume extended source-origin / epidemiology features only when the capability matrix shows the runtime baseline is strong enough
+- next work package: broader MVP/P2 runtime-breadth tranche
+- following 1 package: targeted runtime robustness follow-up only if probe evidence demands it
+- after that: resume deeper analyst interpretation / source-origin features based on capability-matrix priority
 
 This updated order is recommended because breadth, transparency, and core GUI usability are now materially stronger than this document originally assumed.
 
@@ -374,13 +374,14 @@ Only then is the program close to the stakeholder intent, not merely the current
 
 ## 7. Immediate recommendation
 
-Next serial work package should be: broader live-source/runtime hardening.
+Next serial work package should be: broader MVP/P2 live-runtime breadth expansion beyond the current core-focus subsets.
 
 Current rationale:
 - the annotation create/edit workflow gap has been closed with a governed static-site workflow baseline
 - the trend/domain baseline-historical interpretation gap has been closed for the current static GUI baseline
 - the first source-dependency / source-origin groundwork slice is now also present in the traceability view without overclaiming full origin inference
 - the readiness-honesty closure slice is now also in place: artifact presence/absence is explicit and `validation_backtest` is visibly present in the current latest bundle
-- the most important remaining project-level gap is therefore operational robustness of the governed live runtime, not another GUI-only slice
+- the latest runtime-hardening slice (`d7f6a85`) now also retries isolated `SRC-GDELT-EVENTS` partial-success failures and is backed by representative live evidence (`RUN-LIVE-REP-RETRY-EVT-001`: `run_status=success`, `failed_sources=none`, `countries_with_updates=4/4`, `release_verdict=ready`)
+- the most important remaining project-level gap is therefore broader governed runtime breadth toward wider MVP/P2 scope, not another immediate fragility patch and not a GUI-only slice
 
 After that, proceed with the strongest remaining breadth package indicated by the capability matrix.
