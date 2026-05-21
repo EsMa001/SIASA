@@ -513,6 +513,50 @@ def test_build_governed_live_orchestrator_supports_extended_focus_energy_initial
 
 
 
+def test_build_governed_live_orchestrator_supports_extended_focus_crisis_initial_pilot_set() -> None:
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        pilot_set="extended-focus-crisis-initial",
+    )
+
+    world_bank = orchestrator.adapters[0]
+    gdelt_doc = orchestrator.adapters[1]
+    gdelt_events = orchestrator.adapters[2]
+    gdacs = orchestrator.adapters[3]
+
+    assert world_bank.country_ids == (
+        "NGA",
+        "SDN",
+        "MMR",
+    )
+    assert orchestrator.country_expected_domains == {
+        "NGA": ["A", "B", "D"],
+        "SDN": ["A", "B", "D"],
+        "MMR": ["A", "B", "D"],
+    }
+    assert gdelt_doc.country_queries == {
+        "NGA": "Nigeria",
+        "SDN": "Sudan",
+        "MMR": "Myanmar",
+    }
+    assert gdelt_doc.max_records == 6
+    assert gdelt_doc.inter_request_delay_seconds == 1.0
+    assert gdelt_doc.max_full_fetch_retries == 2
+    assert gdelt_doc.full_fetch_retry_cooldown_seconds == 40.0
+    assert gdelt_events.country_codes == {
+        "NGA": "NI",
+        "SDN": "SU",
+        "MMR": "BM",
+    }
+    assert gdelt_events.recent_export_count == 8
+    assert gdacs.country_ids == {
+        "NGA",
+        "SDN",
+        "MMR",
+    }
+
+
+
 def test_build_governed_live_orchestrator_rejects_combined_pilot_set_and_explicit_countries() -> None:
     try:
         build_governed_live_orchestrator(
@@ -764,6 +808,29 @@ def test_governed_live_runtime_module_accepts_extended_focus_energy_initial_pilo
     assert result.returncode == 0
     assert "--pilot-set" in result.stdout
     assert "extended-focus-energy-initial" in result.stdout
+
+
+
+def test_governed_live_runtime_module_accepts_extended_focus_crisis_initial_pilot_set_flag() -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "siasa.runs.live_runtime",
+            "--pilot-set",
+            "extended-focus-crisis-initial",
+            "--help",
+        ],
+        cwd=REPO_ROOT,
+        env=_SUBPROCESS_ENV,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "--pilot-set" in result.stdout
+    assert "extended-focus-crisis-initial" in result.stdout
 
 
 

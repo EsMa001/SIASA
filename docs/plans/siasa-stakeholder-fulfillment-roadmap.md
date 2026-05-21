@@ -324,9 +324,9 @@ The old order should now be updated to the current repo state.
 
 Recommended serial order from here:
 
-1. Next new-country extended-focus runtime slice beyond the now-closed energy tranche (recommended tranche: `NGA`, `SDN`, `MMR`)
+1. First control/reference runtime slice beyond the now-closed crisis tranche (recommended tranche: `CHE`, `NLD`, `SWE`)
    - size: medium to large
-   - reason: the first truly new-country extended-focus runtime slice (`SAU`, `QAT`, `EGY`) is now closed in ready-state evidence, so the next value step is extending governed support into the fragility/crisis cluster
+   - reason: the new-country extended-focus crisis tranche (`NGA`, `SDN`, `MMR`) is now closed in ready-state evidence, so the next value step is extending governed support into the first control/reference cluster
 2. Follow-up runtime robustness package(s) only if the next breadth probes expose a concrete new failure mode
    - size: small to medium
    - reason: hardening remains probe-driven and targeted (no speculative broad retry expansion)
@@ -338,7 +338,7 @@ Recommended serial order from here:
    - reason: groundwork exists, but full origin inference and information-spread analysis remain intentionally later
 
 Suggested planning cadence:
-- next work package: next new-country extended-focus runtime slice (`NGA`, `SDN`, `MMR`) with governed mapping/tests/probe evidence
+- next work package: first control/reference runtime slice (`CHE`, `NLD`, `SWE`) with governed mapping/tests/probe evidence
 - following 1 package: targeted robustness follow-up only if probe evidence from that tranche demands it
 - after that: deeper analyst interpretation / source-origin features based on capability-matrix priority
 
@@ -374,7 +374,7 @@ Only then is the program close to the stakeholder intent, not merely the current
 
 ## 7. Immediate recommendation
 
-Next serial work package should be: next new-country extended-focus runtime integration tranche (`NGA`, `SDN`, `MMR`) with governed support, tests, and live probe evidence.
+Next serial work package should be: first control/reference runtime integration tranche (`CHE`, `NLD`, `SWE`) with governed support, tests, and live probe evidence.
 
 Current rationale:
 - the annotation create/edit workflow gap has been closed with a governed static-site workflow baseline
@@ -383,7 +383,8 @@ Current rationale:
 - the readiness-honesty closure slice is now also in place: artifact presence/absence is explicit and `validation_backtest` is visibly present in the current latest bundle
 - the latest runtime-hardening slice (`d7f6a85`) now also retries isolated `SRC-GDELT-EVENTS` partial-success failures and is backed by representative live evidence (`RUN-LIVE-REP-RETRY-EVT-001`: `run_status=success`, `failed_sources=none`, `countries_with_updates=4/4`, `release_verdict=ready`)
 - the first truly new-country extended-focus runtime slice is now ready-state repo-evidenced with `--pilot-set extended-focus-energy-initial` and probe `RUN-LIVE-EXT-ENERGY-INIT-001` (`run_status=success`, `failed_sources=none`, `countries_with_updates=3/3`, `known_gaps=[]`, `release_verdict=ready`) plus generated GUI `build/local_gui/_ext_energy_init_probe_1`
-- runtime support now includes `SAU`, `QAT`, and `EGY` with governed mappings, expected domains, pilot-set semantics, and regression coverage
-- with this tranche now closed without known gaps, the next package should continue new-country extended-focus integration with the fragility/crisis tranche (`NGA`, `SDN`, `MMR`)
+- the next new-country extended-focus runtime tranche is now also closed in ready-state evidence with `--pilot-set extended-focus-crisis-initial` and probe `RUN-LIVE-EXT-CRISIS-INIT-001` (`run_status=success`, `failed_sources=none`, `countries_with_updates=3/3`, `known_gaps=[]`, `release_verdict=ready`) plus generated GUI `build/local_gui/_ext_crisis_init_probe_1`
+- runtime support now includes `SAU`, `QAT`, `EGY`, `NGA`, `SDN`, and `MMR` with governed mappings, expected domains, pilot-set semantics, and regression coverage
+- with this tranche now closed without known gaps, the next package should move to the first control/reference runtime slice (`CHE`, `NLD`, `SWE`)
 
 After that, proceed with the strongest remaining breadth package indicated by the capability matrix.

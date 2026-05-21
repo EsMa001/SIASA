@@ -46,6 +46,9 @@ _SUPPORTED_LIVE_PILOT_COUNTRIES = {
     "SAU": {"gdelt_query": "Saudi Arabia", "gdelt_code": "SA"},
     "QAT": {"gdelt_query": "Qatar", "gdelt_code": "QA"},
     "EGY": {"gdelt_query": "Egypt", "gdelt_code": "EG"},
+    "NGA": {"gdelt_query": "Nigeria", "gdelt_code": "NI"},
+    "SDN": {"gdelt_query": "Sudan", "gdelt_code": "SU"},
+    "MMR": {"gdelt_query": "Myanmar", "gdelt_code": "BM"},
 }
 
 _REPRESENTATIVE_LIVE_PILOT_SET = ("UKR", "POL", "ISR", "TWN")
@@ -71,6 +74,11 @@ _EXTENDED_FOCUS_ENERGY_INITIAL_LIVE_PILOT_SET = (
     "QAT",
     "EGY",
 )
+_EXTENDED_FOCUS_CRISIS_INITIAL_LIVE_PILOT_SET = (
+    "NGA",
+    "SDN",
+    "MMR",
+)
 _WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = (
     "UKR",
     "POL",
@@ -89,6 +97,9 @@ _WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = (
     "SAU",
     "QAT",
     "EGY",
+    "NGA",
+    "SDN",
+    "MMR",
 )
 _MULTI_COUNTRY_GDELT_EVENTS_RECENT_EXPORT_COUNT = 8
 _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
@@ -110,6 +121,9 @@ _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
     "SAU": ["A", "B", "D"],
     "QAT": ["A", "B", "D"],
     "EGY": ["A", "B", "D"],
+    "NGA": ["A", "B", "D"],
+    "SDN": ["A", "B", "D"],
+    "MMR": ["A", "B", "D"],
 }
 _NAMED_LIVE_PILOT_SETS = {
     "representative": _REPRESENTATIVE_LIVE_PILOT_SET,
@@ -120,6 +134,7 @@ _NAMED_LIVE_PILOT_SETS = {
     "extended-focus-initial": _EXTENDED_FOCUS_INITIAL_LIVE_PILOT_SET,
     "extended-focus-broader": _EXTENDED_FOCUS_BROADER_LIVE_PILOT_SET,
     "extended-focus-energy-initial": _EXTENDED_FOCUS_ENERGY_INITIAL_LIVE_PILOT_SET,
+    "extended-focus-crisis-initial": _EXTENDED_FOCUS_CRISIS_INITIAL_LIVE_PILOT_SET,
 }
 
 _VALIDATION_REFERENCE_CASE_LIBRARY_PATH = (
@@ -642,7 +657,7 @@ def main(argv: list[str] | None = None) -> int:
         dest="country_ids",
         help=(
             "Governed live pilot country ISO3. Repeat for multi-country runs; "
-            "supported: UKR, POL, ISR, TWN, RUS, CHN, IND, IRN, TUR, PAK, GEO, USA, DEU, EST, FIN, SAU, QAT, EGY."
+            "supported: UKR, POL, ISR, TWN, RUS, CHN, IND, IRN, TUR, PAK, GEO, USA, DEU, EST, FIN, SAU, QAT, EGY, NGA, SDN, MMR."
         ),
     )
     parser.add_argument(
@@ -657,7 +672,8 @@ def main(argv: list[str] | None = None) -> int:
             "'core-focus-complete' expands to UKR,RUS,CHN,TWN,IRN,ISR,TUR,IND,PAK,GEO,POL; "
             "'extended-focus-initial' expands to USA,DEU,EST,FIN; "
             "'extended-focus-broader' expands to USA,DEU,EST,FIN,POL; "
-            "'extended-focus-energy-initial' expands to SAU,QAT,EGY."
+            "'extended-focus-energy-initial' expands to SAU,QAT,EGY; "
+            "'extended-focus-crisis-initial' expands to NGA,SDN,MMR."
         ),
     )
     parser.add_argument(
