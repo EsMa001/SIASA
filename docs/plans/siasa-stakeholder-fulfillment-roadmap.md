@@ -108,6 +108,9 @@ Current repo-evidenced status on branch `hermes/repo-scaffold`:
   - analyst annotation create/edit workflow now exists as a governed static-site workflow baseline
   - baseline/historical comparison overlays on trends and domain views now exist as analyst-friendly comparison summaries
   - source-dependency cluster candidates and explicit source-origin groundwork are now visible in the traceability view
+- project-lead fulfillment steering is now explicit and reproducible:
+  - new functional stakeholder-fulfillment estimator is available in code (`src/siasa/readmodels/functional_fulfillment.py`) with unit tests
+  - default weighted steering estimate from the current capability matrix is now `78.1%` (`Done=8`, `Partial=7`, `Weak=1`, `N=16`)
 
 Interpretation:
 - the old roadmap order was correct as a program scaffold
