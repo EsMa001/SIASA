@@ -1802,3 +1802,30 @@ def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bund
     assert "RAW-SRC-A-1" in (tmp_path / "site" / "traceability.html").read_text()
     assert "CLI verification annotation." in (tmp_path / "site" / "annotations.html").read_text()
     assert "Demo / Release Readiness" in (tmp_path / "site" / "readiness.html").read_text()
+
+
+def test_build_local_mvp_site_viewer_role_hides_annotation_and_ops_pages(tmp_path: Path) -> None:
+    payload = local_app._demo_payload()
+    pages = build_local_mvp_site(output_dir=tmp_path / "viewer-site", ui_role="viewer", **payload)
+
+    assert not (pages.output_dir / "annotations.html").exists()
+    assert not (pages.output_dir / "reports.html").exists()
+    assert not (pages.output_dir / "runs.html").exists()
+
+    index_html = (pages.output_dir / "index.html").read_text()
+    assert "📝 Annotations" not in index_html
+    assert "📄 Reports" not in index_html
+    assert "⚙ System" not in index_html
+
+    country_html = (pages.output_dir / "countries" / "UKR.html").read_text()
+    assert "Open Annotation Workflow for this Country" not in country_html
+
+
+def test_build_local_mvp_site_rejects_unknown_role(tmp_path: Path) -> None:
+    payload = local_app._demo_payload()
+    try:
+        build_local_mvp_site(output_dir=tmp_path / "invalid-role-site", ui_role="operator", **payload)
+    except ValueError as exc:
+        assert "Unsupported ui_role" in str(exc)
+    else:
+        raise AssertionError("Expected ValueError for unsupported ui_role")

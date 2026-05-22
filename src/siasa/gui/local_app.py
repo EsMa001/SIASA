@@ -17,6 +17,7 @@ from siasa.traceability.consistency import build_repo_closure_report
 
 
 SitePayload = dict[str, Any]
+_UI_ROLES = {'viewer', 'analyst', 'admin'}
 
 
 @dataclass(frozen=True)
@@ -2711,9 +2712,16 @@ renderAnnotationWorkflow();
     )
     return _page("Analyst Annotations View", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
+def _normalize_ui_role(ui_role: str) -> str:
+    normalized = ui_role.strip().lower()
+    if normalized not in _UI_ROLES:
+        raise ValueError(f"Unsupported ui_role '{ui_role}'. Expected one of: {', '.join(sorted(_UI_ROLES))}")
+    return normalized
+
 
 def build_local_mvp_site(
     output_dir: Path,
+    *,
     world_map_read_model: dict[str, Any],
     country_profile_read_models: dict[str, dict[str, Any]],
     domain_detail_read_models: dict[tuple[str, str], dict[str, Any]],
@@ -2725,7 +2733,10 @@ def build_local_mvp_site(
     repo_closure_view_model: dict[str, Any] | None = None,
     annotations_view_model: dict[str, Any] | None = None,
     readiness_view_model: dict[str, Any] | None = None,
+    ui_role: str = 'analyst',
 ) -> SiteBuildResult:
+    normalized_role = _normalize_ui_role(ui_role)
+
     output_dir.mkdir(parents=True, exist_ok=True)
     countries_dir = output_dir / 'countries'
     domains_dir = output_dir / 'domains'
@@ -2743,11 +2754,16 @@ def build_local_mvp_site(
         'comparison.html',
         'readiness.html',
     }
+
+    if normalized_role == 'viewer':
+        available_pages.discard('reports.html')
+        available_pages.discard('runs.html')
+
     if validation_view_model is not None:
         available_pages.add('validation.html')
     if traceability_view_model is not None:
         available_pages.add('traceability.html')
-    if annotations_view_model is not None:
+    if annotations_view_model is not None and normalized_role in {'analyst', 'admin'}:
         available_pages.add('annotations.html')
 
     index_file = output_dir / 'index.html'
@@ -2809,13 +2825,15 @@ def build_local_mvp_site(
 
     prepared_report_catalog, copied_export_files = _prepare_report_catalog(report_catalog, output_dir)
     generated_files.extend(copied_export_files)
-    reports_file = output_dir / 'reports.html'
-    reports_file.write_text(_render_reports(prepared_report_catalog, nav_prefix='', available_pages=available_pages), encoding='utf-8')
-    generated_files.append(reports_file)
+    if 'reports.html' in available_pages:
+        reports_file = output_dir / 'reports.html'
+        reports_file.write_text(_render_reports(prepared_report_catalog, nav_prefix='', available_pages=available_pages), encoding='utf-8')
+        generated_files.append(reports_file)
 
-    runs_file = output_dir / 'runs.html'
-    runs_file.write_text(_render_runs(system_status_read_model, repo_closure_view_model, nav_prefix='', available_pages=available_pages), encoding='utf-8')
-    generated_files.append(runs_file)
+    if 'runs.html' in available_pages:
+        runs_file = output_dir / 'runs.html'
+        runs_file.write_text(_render_runs(system_status_read_model, repo_closure_view_model, nav_prefix='', available_pages=available_pages), encoding='utf-8')
+        generated_files.append(runs_file)
 
     trends_file = output_dir / 'trends.html'
     trends_file.write_text(_render_trends(country_profile_read_models, nav_prefix='', available_pages=available_pages), encoding='utf-8')
@@ -2839,7 +2857,7 @@ def build_local_mvp_site(
         traceability_file.write_text(_render_traceability(traceability_view_model, nav_prefix='', available_pages=available_pages), encoding='utf-8')
         generated_files.append(traceability_file)
 
-    if annotations_view_model is not None:
+    if annotations_view_model is not None and 'annotations.html' in available_pages:
         annotations_file = output_dir / 'annotations.html'
         annotations_file.write_text(_render_annotations(annotations_view_model, nav_prefix='', available_pages=available_pages), encoding='utf-8')
         generated_files.append(annotations_file)
@@ -2988,13 +3006,19 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help='Optional directory containing persisted snapshot, report, and read-model JSON artifacts.',
     )
+    parser.add_argument(
+        '--ui-role',
+        default='analyst',
+        choices=sorted(_UI_ROLES),
+        help='Role-based GUI profile to apply when generating pages.',
+    )
     args = parser.parse_args(argv)
 
     if args.artifacts_dir:
         payload = load_site_payload_from_artifacts(Path(args.artifacts_dir))
     else:
         payload = _demo_payload()
-    result = build_local_mvp_site(output_dir=Path(args.output_dir), **payload)
+    result = build_local_mvp_site(output_dir=Path(args.output_dir), ui_role=args.ui_role, **payload)
     print(f'Generated SIASA local GUI at {result.output_dir / "index.html"}')
     return 0
 
