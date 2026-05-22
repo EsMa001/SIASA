@@ -327,7 +327,7 @@ def test_build_governed_live_orchestrator_supports_core_focus_complete_pilot_set
         "ISR": ["A", "B", "D"],
         "TUR": ["A", "B", "D"],
         "IND": ["A", "B", "D"],
-        "PAK": ["A", "B", "D"],
+        "PAK": ["A", "D"],
         "GEO": ["A", "D"],
         "POL": ["A", "B", "D"],
     }
@@ -486,9 +486,9 @@ def test_build_governed_live_orchestrator_supports_extended_focus_energy_initial
         "EGY",
     )
     assert orchestrator.country_expected_domains == {
-        "SAU": ["A", "B", "D"],
+        "SAU": ["A", "D"],
         "QAT": ["A", "D"],
-        "EGY": ["A", "B", "D"],
+        "EGY": ["A", "D"],
     }
     assert gdelt_doc.country_queries == {
         "SAU": "Saudi Arabia",
@@ -531,7 +531,7 @@ def test_build_governed_live_orchestrator_supports_extended_focus_crisis_initial
     )
     assert orchestrator.country_expected_domains == {
         "NGA": ["A", "B", "D"],
-        "SDN": ["A", "B", "D"],
+        "SDN": ["A", "D"],
         "MMR": ["A", "D"],
     }
     assert gdelt_doc.country_queries == {
@@ -575,8 +575,8 @@ def test_build_governed_live_orchestrator_supports_control_reference_initial_pil
     )
     assert orchestrator.country_expected_domains == {
         "CHE": ["A", "B", "D"],
-        "NLD": ["A", "B", "D"],
-        "SWE": ["A", "B", "D"],
+        "NLD": ["A", "D"],
+        "SWE": ["A", "D"],
     }
     assert gdelt_doc.country_queries == {
         "CHE": "Switzerland",
@@ -662,7 +662,7 @@ def test_build_governed_live_orchestrator_supports_control_reference_third_pilot
         "IRL",
     )
     assert orchestrator.country_expected_domains == {
-        "NZL": ["A", "B", "D"],
+        "NZL": ["A", "D"],
         "PRT": ["A", "D"],
         "IRL": ["A", "B", "D"],
     }
@@ -714,11 +714,11 @@ def test_build_governed_live_orchestrator_supports_control_reference_complete_pi
     assert orchestrator.country_expected_domains == {
         "NOR": ["A", "D"],
         "CHE": ["A", "B", "D"],
-        "SWE": ["A", "B", "D"],
-        "NLD": ["A", "B", "D"],
+        "SWE": ["A", "D"],
+        "NLD": ["A", "D"],
         "IRL": ["A", "B", "D"],
         "PRT": ["A", "D"],
-        "NZL": ["A", "B", "D"],
+        "NZL": ["A", "D"],
         "CAN": ["A", "B", "D"],
         "AUS": ["A", "B", "D"],
     }
@@ -779,9 +779,9 @@ def test_build_governed_live_orchestrator_supports_extended_focus_complete_pilot
     )
     assert orchestrator.country_expected_domains == {
         "USA": ["A", "B", "D"], "DEU": ["A", "B", "D"], "EST": ["A", "D"],
-        "FIN": ["A", "D"], "POL": ["A", "B", "D"], "SAU": ["A", "B", "D"],
-        "QAT": ["A", "D"], "EGY": ["A", "B", "D"], "NGA": ["A", "B", "D"],
-        "SDN": ["A", "B", "D"], "MMR": ["A", "D"],
+        "FIN": ["A", "D"], "POL": ["A", "B", "D"], "SAU": ["A", "D"],
+        "QAT": ["A", "D"], "EGY": ["A", "D"], "NGA": ["A", "B", "D"],
+        "SDN": ["A", "D"], "MMR": ["A", "D"],
     }
     assert gdelt_doc.max_records == 5
     assert gdelt_doc.inter_request_delay_seconds == 2.0
@@ -811,11 +811,11 @@ def test_build_governed_live_orchestrator_supports_focus_complete_pilot_set() ->
     assert orchestrator.country_expected_domains == {
         "UKR": ["A", "B", "D"], "RUS": ["A", "B", "D"], "CHN": ["A", "B", "D"],
         "TWN": ["A", "B"], "IRN": ["A", "B", "D"], "ISR": ["A", "B", "D"],
-        "TUR": ["A", "B", "D"], "IND": ["A", "B", "D"], "PAK": ["A", "B", "D"],
+        "TUR": ["A", "B", "D"], "IND": ["A", "B", "D"], "PAK": ["A", "D"],
         "GEO": ["A", "D"], "POL": ["A", "B", "D"], "USA": ["A", "B", "D"],
         "DEU": ["A", "B", "D"], "EST": ["A", "D"], "FIN": ["A", "D"],
-        "SAU": ["A", "B", "D"], "QAT": ["A", "D"], "EGY": ["A", "B", "D"],
-        "NGA": ["A", "B", "D"], "SDN": ["A", "B", "D"], "MMR": ["A", "D"],
+        "SAU": ["A", "D"], "QAT": ["A", "D"], "EGY": ["A", "D"],
+        "NGA": ["A", "B", "D"], "SDN": ["A", "D"], "MMR": ["A", "D"],
     }
     assert gdelt_doc.max_records == 5
     assert gdelt_doc.inter_request_delay_seconds == 2.0
@@ -847,14 +847,14 @@ def test_build_governed_live_orchestrator_supports_mvp_complete_pilot_set() -> N
     assert orchestrator.country_expected_domains == {
         "UKR": ["A", "B", "D"], "RUS": ["A", "B", "D"], "CHN": ["A", "B", "D"],
         "TWN": ["A", "B"], "IRN": ["A", "B", "D"], "ISR": ["A", "B", "D"],
-        "TUR": ["A", "B", "D"], "IND": ["A", "B", "D"], "PAK": ["A", "B", "D"],
+        "TUR": ["A", "B", "D"], "IND": ["A", "B", "D"], "PAK": ["A", "D"],
         "GEO": ["A", "D"], "POL": ["A", "B", "D"], "USA": ["A", "B", "D"],
         "DEU": ["A", "B", "D"], "EST": ["A", "D"], "FIN": ["A", "D"],
-        "SAU": ["A", "B", "D"], "QAT": ["A", "D"], "EGY": ["A", "B", "D"],
-        "NGA": ["A", "B", "D"], "SDN": ["A", "B", "D"], "MMR": ["A", "D"],
-        "NOR": ["A", "D"], "CHE": ["A", "B", "D"], "SWE": ["A", "B", "D"],
-        "NLD": ["A", "B", "D"], "IRL": ["A", "B", "D"], "PRT": ["A", "D"],
-        "NZL": ["A", "B", "D"], "CAN": ["A", "B", "D"], "AUS": ["A", "B", "D"],
+        "SAU": ["A", "D"], "QAT": ["A", "D"], "EGY": ["A", "D"],
+        "NGA": ["A", "B", "D"], "SDN": ["A", "D"], "MMR": ["A", "D"],
+        "NOR": ["A", "D"], "CHE": ["A", "B", "D"], "SWE": ["A", "D"],
+        "NLD": ["A", "D"], "IRL": ["A", "B", "D"], "PRT": ["A", "D"],
+        "NZL": ["A", "D"], "CAN": ["A", "B", "D"], "AUS": ["A", "B", "D"],
     }
     assert gdelt_doc.max_records == 3
     assert gdelt_doc.inter_request_delay_seconds == 3.0

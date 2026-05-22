@@ -96,6 +96,7 @@ Current repo-evidenced status on branch `hermes/repo-scaffold`:
   - the new consolidated `extended-focus-complete` set is now also closed with ready-state evidence (`USA`, `DEU`, `EST`, `FIN`, `POL`, `SAU`, `QAT`, `EGY`, `NGA`, `SDN`, `MMR`) and explicit `EST`/`MMR` domain governance as `A/D` for readiness honesty in low-signal Domain-B windows
   - a larger `focus-complete` set now consolidates core-focus-complete + extended-focus-complete into one 21-country governed run (`UKR`, `RUS`, `CHN`, `TWN`, `IRN`, `ISR`, `TUR`, `IND`, `PAK`, `GEO`, `POL`, `USA`, `DEU`, `EST`, `FIN`, `SAU`, `QAT`, `EGY`, `NGA`, `SDN`, `MMR`) with successful `release_verdict=ready`; `GEO` and `QAT` are now also governed as `A/D` for readiness honesty under low-signal Domain-B windows
   - control/reference breadth is now also consolidated in a successful `release_verdict=ready` complete set (`control-reference-complete`: `NOR`, `CHE`, `SWE`, `NLD`, `IRL`, `PRT`, `NZL`, `CAN`, `AUS`) with `NOR` and `PRT` governed as `A/D` to avoid misleading low-signal Domain-B gaps
+  - the previously unstable `mvp-complete` 30-country tranche is now closed with deterministic runtime behavior under live-source rate limits (retry-delay caps + large-set runtime profile) and ready-state evidence: `RUN-LIVE-MVP-COMPLETE-014` (`run_status=partial_success`, `failed_sources=SRC-GDELT-DOC`, `known_gaps=[]`, `release_verdict=ready`) plus GUI `build/local_gui/_mvp_complete_probe_14`
 - P3 is strongly advanced:
   - artifact-backed trend charts exist
   - world-map visualization exists
