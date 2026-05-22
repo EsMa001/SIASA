@@ -557,6 +557,50 @@ def test_build_governed_live_orchestrator_supports_extended_focus_crisis_initial
 
 
 
+def test_build_governed_live_orchestrator_supports_control_reference_initial_pilot_set() -> None:
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        pilot_set="control-reference-initial",
+    )
+
+    world_bank = orchestrator.adapters[0]
+    gdelt_doc = orchestrator.adapters[1]
+    gdelt_events = orchestrator.adapters[2]
+    gdacs = orchestrator.adapters[3]
+
+    assert world_bank.country_ids == (
+        "CHE",
+        "NLD",
+        "SWE",
+    )
+    assert orchestrator.country_expected_domains == {
+        "CHE": ["A", "B", "D"],
+        "NLD": ["A", "B", "D"],
+        "SWE": ["A", "B", "D"],
+    }
+    assert gdelt_doc.country_queries == {
+        "CHE": "Switzerland",
+        "NLD": "Netherlands",
+        "SWE": "Sweden",
+    }
+    assert gdelt_doc.max_records == 6
+    assert gdelt_doc.inter_request_delay_seconds == 1.0
+    assert gdelt_doc.max_full_fetch_retries == 2
+    assert gdelt_doc.full_fetch_retry_cooldown_seconds == 40.0
+    assert gdelt_events.country_codes == {
+        "CHE": "SZ",
+        "NLD": "NL",
+        "SWE": "SW",
+    }
+    assert gdelt_events.recent_export_count == 8
+    assert gdacs.country_ids == {
+        "CHE",
+        "NLD",
+        "SWE",
+    }
+
+
+
 def test_build_governed_live_orchestrator_rejects_combined_pilot_set_and_explicit_countries() -> None:
     try:
         build_governed_live_orchestrator(
@@ -573,10 +617,10 @@ def test_build_governed_live_orchestrator_rejects_combined_pilot_set_and_explici
 
 def test_build_governed_live_orchestrator_rejects_unsupported_country_for_gdelt_events() -> None:
     try:
-        build_governed_live_orchestrator(repo_root=REPO_ROOT, country_id="CHE")
+        build_governed_live_orchestrator(repo_root=REPO_ROOT, country_id="ZZZ")
     except ValueError as exc:
         assert "Supported live pilot countries" in str(exc)
-        assert "CHE" in str(exc)
+        assert "ZZZ" in str(exc)
     else:
         raise AssertionError("Expected unsupported live pilot country to raise ValueError")
 
@@ -831,6 +875,29 @@ def test_governed_live_runtime_module_accepts_extended_focus_crisis_initial_pilo
     assert result.returncode == 0
     assert "--pilot-set" in result.stdout
     assert "extended-focus-crisis-initial" in result.stdout
+
+
+
+def test_governed_live_runtime_module_accepts_control_reference_initial_pilot_set_flag() -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "siasa.runs.live_runtime",
+            "--pilot-set",
+            "control-reference-initial",
+            "--help",
+        ],
+        cwd=REPO_ROOT,
+        env=_SUBPROCESS_ENV,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "--pilot-set" in result.stdout
+    assert "control-reference-initial" in result.stdout
 
 
 

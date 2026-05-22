@@ -49,6 +49,9 @@ _SUPPORTED_LIVE_PILOT_COUNTRIES = {
     "NGA": {"gdelt_query": "Nigeria", "gdelt_code": "NI"},
     "SDN": {"gdelt_query": "Sudan", "gdelt_code": "SU"},
     "MMR": {"gdelt_query": "Myanmar", "gdelt_code": "BM"},
+    "CHE": {"gdelt_query": "Switzerland", "gdelt_code": "SZ"},
+    "NLD": {"gdelt_query": "Netherlands", "gdelt_code": "NL"},
+    "SWE": {"gdelt_query": "Sweden", "gdelt_code": "SW"},
 }
 
 _REPRESENTATIVE_LIVE_PILOT_SET = ("UKR", "POL", "ISR", "TWN")
@@ -79,6 +82,11 @@ _EXTENDED_FOCUS_CRISIS_INITIAL_LIVE_PILOT_SET = (
     "SDN",
     "MMR",
 )
+_CONTROL_REFERENCE_INITIAL_LIVE_PILOT_SET = (
+    "CHE",
+    "NLD",
+    "SWE",
+)
 _WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = (
     "UKR",
     "POL",
@@ -100,6 +108,9 @@ _WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = (
     "NGA",
     "SDN",
     "MMR",
+    "CHE",
+    "NLD",
+    "SWE",
 )
 _MULTI_COUNTRY_GDELT_EVENTS_RECENT_EXPORT_COUNT = 8
 _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
@@ -124,6 +135,9 @@ _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
     "NGA": ["A", "B", "D"],
     "SDN": ["A", "B", "D"],
     "MMR": ["A", "B", "D"],
+    "CHE": ["A", "B", "D"],
+    "NLD": ["A", "B", "D"],
+    "SWE": ["A", "B", "D"],
 }
 _NAMED_LIVE_PILOT_SETS = {
     "representative": _REPRESENTATIVE_LIVE_PILOT_SET,
@@ -135,6 +149,7 @@ _NAMED_LIVE_PILOT_SETS = {
     "extended-focus-broader": _EXTENDED_FOCUS_BROADER_LIVE_PILOT_SET,
     "extended-focus-energy-initial": _EXTENDED_FOCUS_ENERGY_INITIAL_LIVE_PILOT_SET,
     "extended-focus-crisis-initial": _EXTENDED_FOCUS_CRISIS_INITIAL_LIVE_PILOT_SET,
+    "control-reference-initial": _CONTROL_REFERENCE_INITIAL_LIVE_PILOT_SET,
 }
 
 _VALIDATION_REFERENCE_CASE_LIBRARY_PATH = (
