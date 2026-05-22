@@ -823,6 +823,37 @@ def _build_country_coverage_visibility(country_rows: list[dict[str, object]]) ->
         for row in sorted(country_rows, key=lambda row: str(row.get("country_id", "UNKNOWN")))
     ]
 
+    stale_priority_watchlist = [
+        {
+            "priority_rank": index + 1,
+            "country_id": str(row.get("country_id", "UNKNOWN")),
+            "priority": str(row.get("priority", "unassigned")),
+            "freshness_hours": row.get("freshness_hours"),
+            "source_depth_band": str(row.get("source_depth_band", "minimal")),
+        }
+        for index, row in enumerate(
+            sorted(
+                [
+                    row
+                    for row in country_freshness_rows
+                    if str(row.get("freshness_band", "unknown")) == "stale"
+                ],
+                key=lambda row: (
+                    _priority_sort_key(str(row.get("priority", "unassigned"))),
+                    -(float(row.get("freshness_hours")) if isinstance(row.get("freshness_hours"), (int, float)) else -1.0),
+                    str(row.get("country_id", "UNKNOWN")),
+                ),
+            )
+        )
+    ]
+
+    stale_priority_summary = {
+        "stale_country_count": len(stale_priority_watchlist),
+        "p1_stale_count": sum(1 for row in stale_priority_watchlist if str(row.get("priority")) == "P1"),
+        "p2_stale_count": sum(1 for row in stale_priority_watchlist if str(row.get("priority")) == "P2"),
+        "p3_stale_count": sum(1 for row in stale_priority_watchlist if str(row.get("priority")) == "P3"),
+    }
+
     country_gap_rows = [
         {
             "country_id": str(row.get("country_id", "UNKNOWN")),
@@ -925,10 +956,17 @@ def _build_country_coverage_visibility(country_rows: list[dict[str, object]]) ->
         "source_depth_band_summary": source_depth_band_summary,
         "freshness_band_summary": freshness_band_summary,
         "country_freshness_rows": country_freshness_rows,
+        "stale_priority_summary": stale_priority_summary,
+        "stale_priority_watchlist": stale_priority_watchlist,
         "country_gap_rows": country_gap_rows,
         "missing_domain_totals": dict(sorted(missing_domain_totals.items())),
         "remediation_watchlist": remediation_watchlist,
     }
+
+
+
+def _priority_sort_key(priority: str) -> int:
+    return {"P1": 0, "P2": 1, "P3": 2}.get(priority, 3)
 
 
 

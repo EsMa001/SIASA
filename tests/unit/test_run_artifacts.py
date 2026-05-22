@@ -389,6 +389,13 @@ def test_daily_run_orchestrator_writes_multi_country_artifact_bundle(tmp_path: P
         "country_gap_rows": [],
         "missing_domain_totals": {},
         "remediation_watchlist": [],
+        "stale_priority_summary": {
+            "stale_country_count": 0,
+            "p1_stale_count": 0,
+            "p2_stale_count": 0,
+            "p3_stale_count": 0,
+        },
+        "stale_priority_watchlist": [],
     }
     assert sorted(result.country_reports) == ["POL", "UKR"]
     assert pol_profile["multi_domain_status"] == "S3"
@@ -500,6 +507,13 @@ def test_daily_run_orchestrator_records_country_gap_visibility_in_system_status(
         {"country_id": "POL", "freshness_hours": 8.0, "freshness_band": "fresh", "priority": "P2", "source_depth_band": "minimal"},
         {"country_id": "UKR", "freshness_hours": 12.0, "freshness_band": "fresh", "priority": "P1", "source_depth_band": "moderate"},
     ]
+    assert system_status["country_coverage_visibility"]["stale_priority_summary"] == {
+        "stale_country_count": 0,
+        "p1_stale_count": 0,
+        "p2_stale_count": 0,
+        "p3_stale_count": 0,
+    }
+    assert system_status["country_coverage_visibility"]["stale_priority_watchlist"] == []
 
 
 
@@ -594,6 +608,78 @@ def test_build_country_coverage_visibility_assigns_priority_scores_and_stable_ra
             "owner_hint": "runtime/source configuration",
             "evidence_link": "coverage.html#source-SRC-B",
         },
+    ]
+    assert visibility["stale_priority_summary"] == {
+        "stale_country_count": 0,
+        "p1_stale_count": 0,
+        "p2_stale_count": 0,
+        "p3_stale_count": 0,
+    }
+    assert visibility["stale_priority_watchlist"] == []
+
+
+
+def test_build_country_coverage_visibility_builds_stale_priority_watchlist_by_priority_then_staleness() -> None:
+    visibility = _build_country_coverage_visibility(
+        [
+            {
+                "country_id": "UKR",
+                "priority": "P1",
+                "freshness_hours": 8760.0,
+                "freshness_band": "stale",
+                "source_depth_band": "moderate",
+                "source_count": 2,
+                "missing_domains": [],
+                "missing_domain_count": 0,
+                "gap_details": [],
+            },
+            {
+                "country_id": "POL",
+                "priority": "P2",
+                "freshness_hours": 300.0,
+                "freshness_band": "stale",
+                "source_depth_band": "minimal",
+                "source_count": 1,
+                "missing_domains": [],
+                "missing_domain_count": 0,
+                "gap_details": [],
+            },
+            {
+                "country_id": "CAN",
+                "priority": "P2",
+                "freshness_hours": 1200.0,
+                "freshness_band": "stale",
+                "source_depth_band": "moderate",
+                "source_count": 1,
+                "missing_domains": [],
+                "missing_domain_count": 0,
+                "gap_details": [],
+            },
+            {
+                "country_id": "AUS",
+                "priority": "P3",
+                "freshness_hours": 1000.0,
+                "freshness_band": "stale",
+                "source_depth_band": "minimal",
+                "source_count": 1,
+                "missing_domains": [],
+                "missing_domain_count": 0,
+                "gap_details": [],
+            },
+        ]
+    )
+
+    assert visibility["stale_priority_summary"] == {
+        "stale_country_count": 4,
+        "p1_stale_count": 1,
+        "p2_stale_count": 2,
+        "p3_stale_count": 1,
+    }
+    assert visibility["stale_priority_watchlist"] == [
+        {"priority_rank": 1, "country_id": "UKR", "priority": "P1", "freshness_hours": 8760.0, "source_depth_band": "moderate"},
+        {"priority_rank": 2, "country_id": "CAN", "priority": "P2", "freshness_hours": 1200.0, "source_depth_band": "moderate"},
+        {"priority_rank": 3, "country_id": "POL", "priority": "P2", "freshness_hours": 300.0, "source_depth_band": "minimal"},
+        {"priority_rank": 4, "country_id": "AUS", "priority": "P3", "freshness_hours": 1000.0, "source_depth_band": "minimal"},
     ]
 
 

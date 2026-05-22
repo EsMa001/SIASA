@@ -32,9 +32,42 @@ def test_render_watchlist_evidence_link_allows_internal_coverage_targets_only() 
 
 def test_render_remediation_watchlist_shows_empty_state_when_no_priorities_exist() -> None:
     html = local_app._render_remediation_watchlist({"remediation_watchlist": []})
-
-    assert "Remediation Watchlist" in html
     assert "No remediation priorities recorded." in html
+
+
+
+def test_render_stale_priority_watchlist_shows_summary_and_rows() -> None:
+    html = local_app._render_stale_priority_watchlist(
+        {
+            "stale_priority_summary": {
+                "stale_country_count": 2,
+                "p1_stale_count": 1,
+                "p2_stale_count": 1,
+                "p3_stale_count": 0,
+            },
+            "stale_priority_watchlist": [
+                {
+                    "priority_rank": 1,
+                    "country_id": "UKR",
+                    "priority": "P1",
+                    "freshness_hours": 8760.0,
+                    "source_depth_band": "moderate",
+                },
+                {
+                    "priority_rank": 2,
+                    "country_id": "POL",
+                    "priority": "P2",
+                    "freshness_hours": 744.0,
+                    "source_depth_band": "minimal",
+                },
+            ],
+        }
+    )
+    assert "Stale Coverage Priority Queue" in html
+    assert "Stale countries: 2 | P1=1, P2=1, P3=0" in html
+    assert "UKR" in html and "POL" in html
+
+
 
 
 

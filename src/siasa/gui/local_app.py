@@ -678,6 +678,8 @@ def _country_coverage_visibility_rows(system_status_read_model: dict[str, Any]) 
         'country_gap_rows': [],
         'missing_domain_totals': {},
         'remediation_watchlist': [],
+        'stale_priority_summary': {},
+        'stale_priority_watchlist': [],
     }
     return {
         'priority_summary': list(visibility.get('priority_summary', [])),
@@ -687,6 +689,8 @@ def _country_coverage_visibility_rows(system_status_read_model: dict[str, Any]) 
         'country_gap_rows': list(visibility.get('country_gap_rows', [])),
         'missing_domain_totals': dict(visibility.get('missing_domain_totals', {})),
         'remediation_watchlist': list(visibility.get('remediation_watchlist', [])),
+        'stale_priority_summary': dict(visibility.get('stale_priority_summary', {})),
+        'stale_priority_watchlist': list(visibility.get('stale_priority_watchlist', [])),
     }
 
 
@@ -729,6 +733,31 @@ def _render_watchlist_evidence_link(evidence_link: str) -> str:
 
 def _is_safe_internal_evidence_link(evidence_link: str) -> bool:
     return bool(re.fullmatch(r"coverage\.html(?:#source-[A-Za-z0-9_.-]+)?", evidence_link))
+
+
+
+def _render_stale_priority_watchlist(visibility: dict[str, Any]) -> str:
+    summary = visibility.get('stale_priority_summary', {})
+    stale_count = int(summary.get('stale_country_count', 0)) if isinstance(summary, dict) else 0
+    p1_count = int(summary.get('p1_stale_count', 0)) if isinstance(summary, dict) else 0
+    p2_count = int(summary.get('p2_stale_count', 0)) if isinstance(summary, dict) else 0
+    p3_count = int(summary.get('p3_stale_count', 0)) if isinstance(summary, dict) else 0
+    rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(row.get('priority_rank', 'n/a')))}</td>"
+        f"<td>{html.escape(str(row.get('country_id', 'unknown')))}</td>"
+        f"<td>{html.escape(str(row.get('priority', 'unassigned')))}</td>"
+        f"<td>{html.escape(_format_freshness(row.get('freshness_hours')))}</td>"
+        f"<td>{html.escape(str(row.get('source_depth_band', 'minimal')))}</td>"
+        "</tr>"
+        for row in visibility.get('stale_priority_watchlist', [])
+    ) or "<tr><td colspan='5'>No stale-country remediation priorities recorded.</td></tr>"
+    return (
+        "<h3>Stale Coverage Priority Queue</h3>"
+        f"<p>Stale countries: {stale_count} | P1={p1_count}, P2={p2_count}, P3={p3_count}. Prioritized by stakeholder priority then staleness.</p>"
+        "<table><thead><tr><th>Rank</th><th>Country</th><th>Priority</th><th>Freshness</th><th>Depth Band</th></tr></thead>"
+        f"<tbody>{rows}</tbody></table>"
+    )
 
 
 
@@ -783,6 +812,7 @@ def _render_country_coverage_visibility(visibility: dict[str, Any]) -> str:
         "<h3>Freshness Band Summary</h3>"
         "<table><thead><tr><th>Freshness Band</th><th>Countries</th><th>Country IDs</th></tr></thead>"
         f"<tbody>{freshness_rows}</tbody></table>"
+        f"{_render_stale_priority_watchlist(visibility)}"
         f"{_render_remediation_watchlist(visibility)}"
         "<h3>Country Coverage / Gap Watchlist</h3>"
         f"<div><strong>Missing domain totals</strong><ul>{missing_domain_totals}</ul></div>"
@@ -815,6 +845,7 @@ def _render_country_coverage_matrix(visibility: dict[str, Any]) -> str:
         for row in visibility.get('country_gap_rows', [])
     ) or "<tr><td colspan='8'>No per-country coverage gaps recorded.</td></tr>"
     return (
+        f"{_render_stale_priority_watchlist(visibility)}"
         f"{_render_remediation_watchlist(visibility)}"
         "<h3>Freshness Band Summary</h3>"
         "<table><thead><tr><th>Freshness Band</th><th>Countries</th><th>Country IDs</th></tr></thead>"
