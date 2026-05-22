@@ -103,6 +103,17 @@ _CONTROL_REFERENCE_THIRD_LIVE_PILOT_SET = (
     "PRT",
     "IRL",
 )
+_CONTROL_REFERENCE_COMPLETE_LIVE_PILOT_SET = (
+    "NOR",
+    "CHE",
+    "SWE",
+    "NLD",
+    "IRL",
+    "PRT",
+    "NZL",
+    "CAN",
+    "AUS",
+)
 _WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = (
     "UKR",
     "POL",
@@ -160,7 +171,7 @@ _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
     "CHE": ["A", "B", "D"],
     "NLD": ["A", "B", "D"],
     "SWE": ["A", "B", "D"],
-    "NOR": ["A", "B", "D"],
+    "NOR": ["A", "D"],
     "CAN": ["A", "B", "D"],
     "AUS": ["A", "B", "D"],
     "NZL": ["A", "B", "D"],
@@ -180,6 +191,7 @@ _NAMED_LIVE_PILOT_SETS = {
     "control-reference-initial": _CONTROL_REFERENCE_INITIAL_LIVE_PILOT_SET,
     "control-reference-broader": _CONTROL_REFERENCE_BROADER_LIVE_PILOT_SET,
     "control-reference-third": _CONTROL_REFERENCE_THIRD_LIVE_PILOT_SET,
+    "control-reference-complete": _CONTROL_REFERENCE_COMPLETE_LIVE_PILOT_SET,
 }
 
 _VALIDATION_REFERENCE_CASE_LIBRARY_PATH = (

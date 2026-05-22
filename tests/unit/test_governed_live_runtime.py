@@ -618,7 +618,7 @@ def test_build_governed_live_orchestrator_supports_control_reference_broader_pil
         "AUS",
     )
     assert orchestrator.country_expected_domains == {
-        "NOR": ["A", "B", "D"],
+        "NOR": ["A", "D"],
         "CAN": ["A", "B", "D"],
         "AUS": ["A", "B", "D"],
     }
@@ -685,6 +685,80 @@ def test_build_governed_live_orchestrator_supports_control_reference_third_pilot
         "NZL",
         "PRT",
         "IRL",
+    }
+
+
+
+def test_build_governed_live_orchestrator_supports_control_reference_complete_pilot_set() -> None:
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        pilot_set="control-reference-complete",
+    )
+
+    world_bank = orchestrator.adapters[0]
+    gdelt_doc = orchestrator.adapters[1]
+    gdelt_events = orchestrator.adapters[2]
+    gdacs = orchestrator.adapters[3]
+
+    assert world_bank.country_ids == (
+        "NOR",
+        "CHE",
+        "SWE",
+        "NLD",
+        "IRL",
+        "PRT",
+        "NZL",
+        "CAN",
+        "AUS",
+    )
+    assert orchestrator.country_expected_domains == {
+        "NOR": ["A", "D"],
+        "CHE": ["A", "B", "D"],
+        "SWE": ["A", "B", "D"],
+        "NLD": ["A", "B", "D"],
+        "IRL": ["A", "B", "D"],
+        "PRT": ["A", "D"],
+        "NZL": ["A", "B", "D"],
+        "CAN": ["A", "B", "D"],
+        "AUS": ["A", "B", "D"],
+    }
+    assert gdelt_doc.country_queries == {
+        "NOR": "Norway",
+        "CHE": "Switzerland",
+        "SWE": "Sweden",
+        "NLD": "Netherlands",
+        "IRL": "Ireland",
+        "PRT": "Portugal",
+        "NZL": "New Zealand",
+        "CAN": "Canada",
+        "AUS": "Australia",
+    }
+    assert gdelt_doc.max_records == 5
+    assert gdelt_doc.inter_request_delay_seconds == 1.0
+    assert gdelt_doc.max_full_fetch_retries == 2
+    assert gdelt_doc.full_fetch_retry_cooldown_seconds == 40.0
+    assert gdelt_events.country_codes == {
+        "NOR": "NO",
+        "CHE": "SZ",
+        "SWE": "SW",
+        "NLD": "NL",
+        "IRL": "EI",
+        "PRT": "PO",
+        "NZL": "NZ",
+        "CAN": "CA",
+        "AUS": "AS",
+    }
+    assert gdelt_events.recent_export_count == 8
+    assert gdacs.country_ids == {
+        "NOR",
+        "CHE",
+        "SWE",
+        "NLD",
+        "IRL",
+        "PRT",
+        "NZL",
+        "CAN",
+        "AUS",
     }
 
 
@@ -1032,6 +1106,29 @@ def test_governed_live_runtime_module_accepts_control_reference_third_pilot_set_
     assert result.returncode == 0
     assert "--pilot-set" in result.stdout
     assert "control-reference-third" in result.stdout
+
+
+
+def test_governed_live_runtime_module_accepts_control_reference_complete_pilot_set_flag() -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "siasa.runs.live_runtime",
+            "--pilot-set",
+            "control-reference-complete",
+            "--help",
+        ],
+        cwd=REPO_ROOT,
+        env=_SUBPROCESS_ENV,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "--pilot-set" in result.stdout
+    assert "control-reference-complete" in result.stdout
 
 
 
