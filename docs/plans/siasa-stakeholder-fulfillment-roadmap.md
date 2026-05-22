@@ -93,6 +93,7 @@ Current repo-evidenced status on branch `hermes/repo-scaffold`:
   - a `core-focus-broader` subset adds `IRN` and `TUR`
   - a new `core-focus-complete` subset now also adds `PAK` and `GEO`, and this 11-country subset has a successful `release_verdict=ready` probe
   - extended-focus slices (`extended-focus-initial`, `extended-focus-broader`, `extended-focus-energy-initial`, `extended-focus-crisis-initial`) are closed with ready-state probes
+  - the new consolidated `extended-focus-complete` set is now also closed with ready-state evidence (`USA`, `DEU`, `EST`, `FIN`, `POL`, `SAU`, `QAT`, `EGY`, `NGA`, `SDN`, `MMR`) and explicit `EST`/`MMR` domain governance as `A/D` for readiness honesty in low-signal Domain-B windows
   - control/reference breadth is now also consolidated in a successful `release_verdict=ready` complete set (`control-reference-complete`: `NOR`, `CHE`, `SWE`, `NLD`, `IRL`, `PRT`, `NZL`, `CAN`, `AUS`) with `NOR` and `PRT` governed as `A/D` to avoid misleading low-signal Domain-B gaps
 - P3 is strongly advanced:
   - artifact-backed trend charts exist

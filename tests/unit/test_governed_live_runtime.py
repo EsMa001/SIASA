@@ -386,7 +386,7 @@ def test_build_governed_live_orchestrator_supports_extended_focus_initial_pilot_
     assert orchestrator.country_expected_domains == {
         "USA": ["A", "B", "D"],
         "DEU": ["A", "B", "D"],
-        "EST": ["A", "B", "D"],
+        "EST": ["A", "D"],
         "FIN": ["A", "D"],
     }
     assert gdelt_doc.country_queries == {
@@ -436,7 +436,7 @@ def test_build_governed_live_orchestrator_supports_extended_focus_broader_pilot_
     assert orchestrator.country_expected_domains == {
         "USA": ["A", "B", "D"],
         "DEU": ["A", "B", "D"],
-        "EST": ["A", "B", "D"],
+        "EST": ["A", "D"],
         "FIN": ["A", "D"],
         "POL": ["A", "B", "D"],
     }
@@ -532,7 +532,7 @@ def test_build_governed_live_orchestrator_supports_extended_focus_crisis_initial
     assert orchestrator.country_expected_domains == {
         "NGA": ["A", "B", "D"],
         "SDN": ["A", "B", "D"],
-        "MMR": ["A", "B", "D"],
+        "MMR": ["A", "D"],
     }
     assert gdelt_doc.country_queries == {
         "NGA": "Nigeria",
@@ -761,6 +761,36 @@ def test_build_governed_live_orchestrator_supports_control_reference_complete_pi
         "AUS",
     }
 
+
+
+def test_build_governed_live_orchestrator_supports_extended_focus_complete_pilot_set() -> None:
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        pilot_set="extended-focus-complete",
+    )
+
+    world_bank = orchestrator.adapters[0]
+    gdelt_doc = orchestrator.adapters[1]
+    gdelt_events = orchestrator.adapters[2]
+    gdacs = orchestrator.adapters[3]
+
+    assert world_bank.country_ids == (
+        "USA", "DEU", "EST", "FIN", "POL", "SAU", "QAT", "EGY", "NGA", "SDN", "MMR",
+    )
+    assert orchestrator.country_expected_domains == {
+        "USA": ["A", "B", "D"], "DEU": ["A", "B", "D"], "EST": ["A", "D"],
+        "FIN": ["A", "D"], "POL": ["A", "B", "D"], "SAU": ["A", "B", "D"],
+        "QAT": ["A", "B", "D"], "EGY": ["A", "B", "D"], "NGA": ["A", "B", "D"],
+        "SDN": ["A", "B", "D"], "MMR": ["A", "D"],
+    }
+    assert gdelt_doc.max_records == 5
+    assert gdelt_doc.inter_request_delay_seconds == 2.0
+    assert gdelt_doc.max_full_fetch_retries == 2
+    assert gdelt_doc.full_fetch_retry_cooldown_seconds == 40.0
+    assert gdelt_events.recent_export_count == 8
+    assert gdacs.country_ids == {
+        "USA", "DEU", "EST", "FIN", "POL", "SAU", "QAT", "EGY", "NGA", "SDN", "MMR",
+    }
 
 
 def test_build_governed_live_orchestrator_rejects_combined_pilot_set_and_explicit_countries() -> None:
@@ -1130,6 +1160,28 @@ def test_governed_live_runtime_module_accepts_control_reference_complete_pilot_s
     assert "--pilot-set" in result.stdout
     assert "control-reference-complete" in result.stdout
 
+
+
+def test_governed_live_runtime_module_accepts_extended_focus_complete_pilot_set_flag() -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "siasa.runs.live_runtime",
+            "--pilot-set",
+            "extended-focus-complete",
+            "--help",
+        ],
+        cwd=REPO_ROOT,
+        env=_SUBPROCESS_ENV,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "--pilot-set" in result.stdout
+    assert "extended-focus-complete" in result.stdout
 
 
 def test_main_preserves_named_pilot_set_when_running_pipeline(monkeypatch) -> None:
