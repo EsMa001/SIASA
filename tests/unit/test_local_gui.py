@@ -705,6 +705,12 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Report / Export View" in reports_html
     assert "REP-COVERAGE-001" in reports_html
     assert "Evidence Summary" in reports_html
+    assert "Report Scope Controls" in reports_html
+    assert "report-type-filter" in reports_html
+    assert "report-id-filter" in reports_html
+    assert "report-visible-count" in reports_html
+    assert "class='report-row'" in reports_html
+    assert "applyReportFilters" in reports_html
     assert "partial_success" in reports_html
     assert "SRC-B" in reports_html
     assert "SNAP-RUN-200-v1" in reports_html
@@ -1003,6 +1009,11 @@ def test_build_local_mvp_site_copies_report_export_files_and_renders_download_li
     assert "exports/daily_snapshot.md" in reports_html
     assert "exports/daily_snapshot.json" in reports_html
     assert "Evidence Summary" in reports_html
+    assert "Report Scope Controls" in reports_html
+    assert "report-type-filter" in reports_html
+    assert "report-id-filter" in reports_html
+    assert "report-visible-count" in reports_html
+    assert "class='report-row'" in reports_html
     assert "partial_success" in reports_html
     assert "SRC-B" in reports_html
     assert "SNAP-RUN-200-v1" in reports_html

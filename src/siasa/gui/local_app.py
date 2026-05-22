@@ -1825,8 +1825,17 @@ def _render_reports(report_catalog: dict[str, Any], *, nav_prefix: str = '', ava
         )
         return export_links or '-'
 
+    report_types = sorted(report_catalog.keys())
+    type_options = ''.join(
+        f"<option value='{html.escape(report_type)}'>{html.escape(report_type)}</option>"
+        for report_type in report_types
+    )
+
     rows = ''.join(
-        "<tr>"
+        "<tr class='report-row' "
+        f"data-report-type='{html.escape(report_type)}' "
+        f"data-report-id='{html.escape(str(report_info.get('report_id', '')))}' "
+        f"data-format='{html.escape(str(report_info.get('format', '')))}'>"
         f"<td>{html.escape(report_type)}</td>"
         f"<td>{html.escape(str(report_info.get('report_id', '')))}</td>"
         f"<td>{html.escape(str(report_info.get('format', '')))}</td>"
@@ -1845,14 +1854,56 @@ def _render_reports(report_catalog: dict[str, Any], *, nav_prefix: str = '', ava
         "</li>"
         for report_type, report_info in sorted(report_catalog.items())
     ) or "<li>none</li>"
+    filter_script = """
+<script>
+(function() {
+  const typeFilter = document.getElementById('report-type-filter');
+  const idFilter = document.getElementById('report-id-filter');
+  const rows = Array.from(document.querySelectorAll('.report-row'));
+  const visibleCount = document.getElementById('report-visible-count');
+
+  function applyReportFilters() {
+    const typeValue = (typeFilter?.value || '').trim().toLowerCase();
+    const idValue = (idFilter?.value || '').trim().toLowerCase();
+    let count = 0;
+
+    rows.forEach((row) => {
+      const rowType = (row.getAttribute('data-report-type') || '').toLowerCase();
+      const rowId = (row.getAttribute('data-report-id') || '').toLowerCase();
+      const typeOk = !typeValue || rowType === typeValue;
+      const idOk = !idValue || rowId.includes(idValue);
+      const show = typeOk && idOk;
+      row.style.display = show ? '' : 'none';
+      if (show) count += 1;
+    });
+
+    if (visibleCount) {
+      visibleCount.textContent = String(count);
+    }
+  }
+
+  if (typeFilter) typeFilter.addEventListener('change', applyReportFilters);
+  if (idFilter) idFilter.addEventListener('input', applyReportFilters);
+  applyReportFilters();
+})();
+</script>
+"""
     body = (
         "<h2>Report / Export View</h2>"
         "<h3>Evidence Summary</h3>"
         f"<p>Reports available: <strong>{html.escape(str(len(report_catalog)))}</strong></p>"
         f"<p>Download-ready artifacts: <strong>{html.escape(str(export_count))}</strong></p>"
         f"<ul>{evidence_items}</ul>"
+        "<h3>Report Scope Controls</h3>"
+        "<p>Filter reports by type and report ID to focus export review scope.</p>"
+        "<label for='report-type-filter'>Type:</label> "
+        f"<select id='report-type-filter'><option value=''>All</option>{type_options}</select> "
+        "<label for='report-id-filter'>Report ID contains:</label> "
+        "<input id='report-id-filter' type='text' placeholder='e.g. REP-COVERAGE'/>"
+        f"<p>Visible reports: <strong id='report-visible-count'>{html.escape(str(len(report_catalog)))}</strong></p>"
         "<table><thead><tr><th>Type</th><th>Report ID</th><th>Format</th><th>Downloads</th><th>Metadata</th></tr></thead>"
         f"<tbody>{rows}</tbody></table>"
+        f"{filter_script}"
     )
     return _page("Report / Export View", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
