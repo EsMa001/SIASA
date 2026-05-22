@@ -93,7 +93,7 @@ Current repo-evidenced status on branch `hermes/repo-scaffold`:
   - a `core-focus-broader` subset adds `IRN` and `TUR`
   - a new `core-focus-complete` subset now also adds `PAK` and `GEO`, and this 11-country subset has a successful `release_verdict=ready` probe
   - extended-focus slices (`extended-focus-initial`, `extended-focus-broader`, `extended-focus-energy-initial`, `extended-focus-crisis-initial`) are closed with ready-state probes
-  - a first control/reference slice (`control-reference-initial`: `CHE`, `NLD`, `SWE`) is now also closed with a successful `release_verdict=ready` probe
+  - two control/reference slices are now also closed with successful `release_verdict=ready` probes (`control-reference-initial`: `CHE`, `NLD`, `SWE`; `control-reference-broader`: `NOR`, `CAN`, `AUS`)
 - P3 is strongly advanced:
   - artifact-backed trend charts exist
   - world-map visualization exists
