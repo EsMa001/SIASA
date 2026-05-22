@@ -127,6 +127,29 @@ _EXTENDED_FOCUS_COMPLETE_LIVE_PILOT_SET = (
     "SDN",
     "MMR",
 )
+_FOCUS_COMPLETE_LIVE_PILOT_SET = (
+    "UKR",
+    "RUS",
+    "CHN",
+    "TWN",
+    "IRN",
+    "ISR",
+    "TUR",
+    "IND",
+    "PAK",
+    "GEO",
+    "POL",
+    "USA",
+    "DEU",
+    "EST",
+    "FIN",
+    "SAU",
+    "QAT",
+    "EGY",
+    "NGA",
+    "SDN",
+    "MMR",
+)
 _WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = (
     "UKR",
     "POL",
@@ -170,13 +193,13 @@ _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
     "IRN": ["A", "B", "D"],
     "TUR": ["A", "B", "D"],
     "PAK": ["A", "B", "D"],
-    "GEO": ["A", "B", "D"],
+    "GEO": ["A", "D"],
     "USA": ["A", "B", "D"],
     "DEU": ["A", "B", "D"],
     "EST": ["A", "D"],
     "FIN": ["A", "D"],
     "SAU": ["A", "B", "D"],
-    "QAT": ["A", "B", "D"],
+    "QAT": ["A", "D"],
     "EGY": ["A", "B", "D"],
     "NGA": ["A", "B", "D"],
     "SDN": ["A", "B", "D"],
@@ -206,6 +229,7 @@ _NAMED_LIVE_PILOT_SETS = {
     "control-reference-third": _CONTROL_REFERENCE_THIRD_LIVE_PILOT_SET,
     "control-reference-complete": _CONTROL_REFERENCE_COMPLETE_LIVE_PILOT_SET,
     "extended-focus-complete": _EXTENDED_FOCUS_COMPLETE_LIVE_PILOT_SET,
+    "focus-complete": _FOCUS_COMPLETE_LIVE_PILOT_SET,
 }
 
 _VALIDATION_REFERENCE_CASE_LIBRARY_PATH = (
