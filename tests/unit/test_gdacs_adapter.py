@@ -245,6 +245,27 @@ def test_gdacs_adapter_honors_http_date_retry_after_for_rate_limit_backoff() -> 
     assert sleep_calls == [7.0]
 
 
+def test_gdacs_adapter_caps_retry_after_backoff_to_max_retry_delay_seconds() -> None:
+    sleep_calls: list[float] = []
+    adapter = GDACSAdapter(
+        country_ids={"UKR"},
+        fetch_text=SequenceTextFetcher(
+            [
+                FakeRateLimitError("HTTP 429: Too Many Requests", retry_after="9999"),
+                _rss_feed([]),
+            ]
+        ),
+        retry_sleep=sleep_calls.append,
+        max_retries=1,
+        max_retry_delay_seconds=12.0,
+    )
+
+    result = adapter.fetch()
+
+    assert result.is_success is True
+    assert sleep_calls == [12.0]
+
+
 
 def test_gdacs_adapter_max_retries_counts_retries_after_initial_attempt() -> None:
     fetcher = SequenceTextFetcher([RuntimeError("gdacs unavailable"), _rss_feed([])])

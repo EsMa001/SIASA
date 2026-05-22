@@ -272,6 +272,34 @@ def test_world_bank_adapter_honors_http_date_retry_after_for_rate_limit_backoff(
     assert sleep_calls == [7.0]
 
 
+def test_world_bank_adapter_caps_retry_after_backoff_to_max_retry_delay_seconds() -> None:
+    sleep_calls: list[float] = []
+    payload = [
+        {"page": 1, "pages": 1},
+        [
+            {"country": {"id": "UKR"}, "date": "2024", "value": 3.2},
+        ],
+    ]
+    adapter = WorldBankIndicatorsAdapter(
+        country_ids=("UKR",),
+        fetch_json=SequenceFetcher(
+            [
+                FakeRateLimitError("HTTP 429: Too Many Requests", retry_after="9999"),
+                payload,
+                payload,
+            ]
+        ),
+        retry_sleep=sleep_calls.append,
+        max_retries=1,
+        max_retry_delay_seconds=12.0,
+    )
+
+    result = adapter.fetch()
+
+    assert result.is_success is True
+    assert sleep_calls == [12.0]
+
+
 
 def test_world_bank_adapter_returns_failed_fetch_result_for_invalid_retry_configuration() -> None:
     adapter = WorldBankIndicatorsAdapter(

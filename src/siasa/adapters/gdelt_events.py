@@ -63,6 +63,7 @@ class GDELTEventsAdapter(SourceAdapter):
     lastupdate_url: str = "http://data.gdeltproject.org/gdeltv2/lastupdate.txt"
     max_retries: int = 3
     retry_backoff_seconds: float = 1.0
+    max_retry_delay_seconds: float = 60.0
     fetch_text: FetchText = _default_fetch_text
     fetch_bytes: FetchBytes = _default_fetch_bytes
     now_provider: NowProvider = _utc_now
@@ -131,6 +132,7 @@ class GDELTEventsAdapter(SourceAdapter):
                     self.retry_backoff_seconds * (2**attempt),
                     self.now_provider(),
                 )
+                retry_delay = min(retry_delay, self.max_retry_delay_seconds)
                 self.retry_sleep(retry_delay)
         assert last_error is not None
         raise last_error

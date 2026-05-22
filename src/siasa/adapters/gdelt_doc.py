@@ -64,6 +64,7 @@ class GDELTDocAdapter(SourceAdapter):
     output_format: str = "json"
     max_retries: int = 3
     retry_backoff_seconds: float = 1.0
+    max_retry_delay_seconds: float = 60.0
     inter_request_delay_seconds: float = 0.0
     max_full_fetch_retries: int = 0
     full_fetch_retry_cooldown_seconds: float = 0.0
@@ -119,6 +120,7 @@ class GDELTDocAdapter(SourceAdapter):
                     self.retry_backoff_seconds * (2**attempt),
                     self.now_provider(),
                 )
+                retry_delay = min(retry_delay, self.max_retry_delay_seconds)
                 self.retry_sleep(retry_delay)
         assert last_error is not None
         raise last_error

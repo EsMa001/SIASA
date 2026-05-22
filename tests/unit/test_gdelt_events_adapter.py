@@ -430,6 +430,29 @@ def test_gdelt_events_adapter_honors_http_date_retry_after_for_rate_limit_backof
     assert sleep_calls == [7.0]
 
 
+def test_gdelt_events_adapter_caps_retry_after_backoff_to_max_retry_delay_seconds() -> None:
+    export_url = "http://data.gdeltproject.org/gdeltv2/20260513130000.export.CSV.zip"
+    sleep_calls: list[float] = []
+    adapter = GDELTEventsAdapter(
+        country_codes={"UKR": "UP"},
+        fetch_text=StubTextFetcher(f"100 abc {export_url}\n"),
+        fetch_bytes=SequenceBytesFetcher(
+            [
+                FakeRateLimitError("HTTP 429: Too Many Requests", retry_after="9999"),
+                _build_export_zip([]),
+            ]
+        ),
+        retry_sleep=sleep_calls.append,
+        max_retries=1,
+        max_retry_delay_seconds=12.0,
+    )
+
+    result = adapter.fetch()
+
+    assert result.is_success is True
+    assert sleep_calls == [12.0]
+
+
 def test_gdelt_events_adapter_returns_failed_fetch_result_for_invalid_recent_export_window_configuration() -> None:
     adapter = GDELTEventsAdapter(
         country_codes={"UKR": "UP"},

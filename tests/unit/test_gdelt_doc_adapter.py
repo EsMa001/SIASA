@@ -272,3 +272,25 @@ def test_gdelt_doc_adapter_honors_retry_after_http_date_for_rate_limit_backoff()
 
     assert result.is_success is True
     assert sleep_calls == [7.0]
+
+
+def test_gdelt_doc_adapter_caps_retry_after_backoff_to_max_retry_delay_seconds() -> None:
+    sleep_calls: list[float] = []
+    fetcher = SequenceFetcher(
+        [
+            FakeRateLimitError("HTTP 429: Too Many Requests", retry_after="9999"),
+            {"articles": []},
+        ]
+    )
+    adapter = GDELTDocAdapter(
+        country_queries={"UKR": "ukraine"},
+        fetch_json=fetcher,
+        retry_sleep=sleep_calls.append,
+        max_retries=1,
+        max_retry_delay_seconds=12.0,
+    )
+
+    result = adapter.fetch()
+
+    assert result.is_success is True
+    assert sleep_calls == [12.0]

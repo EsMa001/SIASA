@@ -150,6 +150,38 @@ _FOCUS_COMPLETE_LIVE_PILOT_SET = (
     "SDN",
     "MMR",
 )
+_MVP_COMPLETE_LIVE_PILOT_SET = (
+    "UKR",
+    "RUS",
+    "CHN",
+    "TWN",
+    "IRN",
+    "ISR",
+    "TUR",
+    "IND",
+    "PAK",
+    "GEO",
+    "POL",
+    "USA",
+    "DEU",
+    "EST",
+    "FIN",
+    "SAU",
+    "QAT",
+    "EGY",
+    "NGA",
+    "SDN",
+    "MMR",
+    "NOR",
+    "CHE",
+    "SWE",
+    "NLD",
+    "IRL",
+    "PRT",
+    "NZL",
+    "CAN",
+    "AUS",
+)
 _WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = (
     "UKR",
     "POL",
@@ -182,6 +214,14 @@ _WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = (
     "IRL",
 )
 _MULTI_COUNTRY_GDELT_EVENTS_RECENT_EXPORT_COUNT = 8
+
+
+def _gdelt_events_recent_export_count_for_country_count(country_count: int) -> int:
+    if country_count >= 30:
+        return 2
+    if country_count >= 24:
+        return 4
+    return _MULTI_COUNTRY_GDELT_EVENTS_RECENT_EXPORT_COUNT
 _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
     "UKR": ["A", "B", "D"],
     "POL": ["A", "B", "D"],
@@ -230,6 +270,7 @@ _NAMED_LIVE_PILOT_SETS = {
     "control-reference-complete": _CONTROL_REFERENCE_COMPLETE_LIVE_PILOT_SET,
     "extended-focus-complete": _EXTENDED_FOCUS_COMPLETE_LIVE_PILOT_SET,
     "focus-complete": _FOCUS_COMPLETE_LIVE_PILOT_SET,
+    "mvp-complete": _MVP_COMPLETE_LIVE_PILOT_SET,
 }
 
 _VALIDATION_REFERENCE_CASE_LIBRARY_PATH = (
@@ -248,6 +289,8 @@ def _load_reference_case_library() -> list[dict[str, object]]:
 def _gdelt_doc_max_records_for_country_count(country_count: int) -> int:
     if country_count <= 1:
         return 50
+    if country_count >= 24:
+        return 3
     return max(5, 20 // country_count)
 
 
@@ -255,9 +298,27 @@ def _gdelt_doc_max_records_for_country_count(country_count: int) -> int:
 def _gdelt_doc_inter_request_delay_seconds_for_country_count(country_count: int) -> float:
     if country_count <= 1:
         return 0.0
+    if country_count >= 24:
+        return 3.0
     if country_count >= 11:
         return 2.0
     return 1.0
+
+
+def _gdelt_doc_max_full_fetch_retries_for_country_count(country_count: int) -> int:
+    if country_count >= 24:
+        return 0
+    if country_count > 1:
+        return 2
+    return 0
+
+
+def _gdelt_doc_full_fetch_retry_cooldown_seconds_for_country_count(country_count: int) -> float:
+    if country_count >= 24:
+        return 0.0
+    if country_count > 1:
+        return 40.0
+    return 0.0
 
 
 
@@ -583,12 +644,16 @@ def build_governed_live_orchestrator(
                 country_queries=country_queries,
                 max_records=_gdelt_doc_max_records_for_country_count(len(resolved_country_ids)),
                 inter_request_delay_seconds=_gdelt_doc_inter_request_delay_seconds_for_country_count(len(resolved_country_ids)),
-                max_full_fetch_retries=2 if len(resolved_country_ids) > 1 else 0,
-                full_fetch_retry_cooldown_seconds=40.0 if len(resolved_country_ids) > 1 else 0.0,
+                max_full_fetch_retries=_gdelt_doc_max_full_fetch_retries_for_country_count(len(resolved_country_ids)),
+                full_fetch_retry_cooldown_seconds=_gdelt_doc_full_fetch_retry_cooldown_seconds_for_country_count(len(resolved_country_ids)),
             ),
             GDELTEventsAdapter(
                 country_codes=country_codes,
-                recent_export_count=_MULTI_COUNTRY_GDELT_EVENTS_RECENT_EXPORT_COUNT if len(resolved_country_ids) > 1 else 1,
+                recent_export_count=(
+                    _gdelt_events_recent_export_count_for_country_count(len(resolved_country_ids))
+                    if len(resolved_country_ids) > 1
+                    else 1
+                ),
             ),
             GDACSAdapter(country_ids=set(resolved_country_ids)),
         ]
@@ -684,6 +749,8 @@ def build_governed_live_orchestrator(
 def _default_pipeline_retry_budget(requested_country_ids: tuple[str, ...]) -> int:
     if requested_country_ids == _EXTENDED_FOCUS_BROADER_LIVE_PILOT_SET:
         return 2
+    if len(requested_country_ids) >= 24:
+        return 0
     if len(requested_country_ids) >= 7:
         return 2
     return 1

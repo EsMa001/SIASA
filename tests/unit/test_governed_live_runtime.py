@@ -828,6 +828,46 @@ def test_build_governed_live_orchestrator_supports_focus_complete_pilot_set() ->
     }
 
 
+def test_build_governed_live_orchestrator_supports_mvp_complete_pilot_set() -> None:
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        pilot_set="mvp-complete",
+    )
+
+    world_bank = orchestrator.adapters[0]
+    gdelt_doc = orchestrator.adapters[1]
+    gdelt_events = orchestrator.adapters[2]
+    gdacs = orchestrator.adapters[3]
+
+    assert world_bank.country_ids == (
+        "UKR", "RUS", "CHN", "IRN", "ISR", "TUR", "IND", "PAK", "GEO", "POL",
+        "USA", "DEU", "EST", "FIN", "SAU", "QAT", "EGY", "NGA", "SDN", "MMR",
+        "NOR", "CHE", "SWE", "NLD", "IRL", "PRT", "NZL", "CAN", "AUS",
+    )
+    assert orchestrator.country_expected_domains == {
+        "UKR": ["A", "B", "D"], "RUS": ["A", "B", "D"], "CHN": ["A", "B", "D"],
+        "TWN": ["A", "B"], "IRN": ["A", "B", "D"], "ISR": ["A", "B", "D"],
+        "TUR": ["A", "B", "D"], "IND": ["A", "B", "D"], "PAK": ["A", "B", "D"],
+        "GEO": ["A", "D"], "POL": ["A", "B", "D"], "USA": ["A", "B", "D"],
+        "DEU": ["A", "B", "D"], "EST": ["A", "D"], "FIN": ["A", "D"],
+        "SAU": ["A", "B", "D"], "QAT": ["A", "D"], "EGY": ["A", "B", "D"],
+        "NGA": ["A", "B", "D"], "SDN": ["A", "B", "D"], "MMR": ["A", "D"],
+        "NOR": ["A", "D"], "CHE": ["A", "B", "D"], "SWE": ["A", "B", "D"],
+        "NLD": ["A", "B", "D"], "IRL": ["A", "B", "D"], "PRT": ["A", "D"],
+        "NZL": ["A", "B", "D"], "CAN": ["A", "B", "D"], "AUS": ["A", "B", "D"],
+    }
+    assert gdelt_doc.max_records == 3
+    assert gdelt_doc.inter_request_delay_seconds == 3.0
+    assert gdelt_doc.max_full_fetch_retries == 0
+    assert gdelt_doc.full_fetch_retry_cooldown_seconds == 0.0
+    assert gdelt_events.recent_export_count == 2
+    assert gdacs.country_ids == {
+        "UKR", "RUS", "CHN", "TWN", "IRN", "ISR", "TUR", "IND", "PAK", "GEO", "POL",
+        "USA", "DEU", "EST", "FIN", "SAU", "QAT", "EGY", "NGA", "SDN", "MMR",
+        "NOR", "CHE", "SWE", "NLD", "IRL", "PRT", "NZL", "CAN", "AUS",
+    }
+
+
 def test_build_governed_live_orchestrator_rejects_combined_pilot_set_and_explicit_countries() -> None:
     try:
         build_governed_live_orchestrator(
@@ -1239,6 +1279,29 @@ def test_governed_live_runtime_module_accepts_focus_complete_pilot_set_flag() ->
     assert result.returncode == 0
     assert "--pilot-set" in result.stdout
     assert "focus-complete" in result.stdout
+
+
+
+def test_governed_live_runtime_module_accepts_mvp_complete_pilot_set_flag() -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "siasa.runs.live_runtime",
+            "--pilot-set",
+            "mvp-complete",
+            "--help",
+        ],
+        cwd=REPO_ROOT,
+        env=_SUBPROCESS_ENV,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "--pilot-set" in result.stdout
+    assert "mvp-complete" in result.stdout
 
 
 def test_main_preserves_named_pilot_set_when_running_pipeline(monkeypatch) -> None:

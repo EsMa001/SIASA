@@ -60,6 +60,7 @@ class WorldBankIndicatorsAdapter(SourceAdapter):
     fetch_json: FetchJson = _default_fetch_json
     max_retries: int = 3
     retry_backoff_seconds: float = 1.0
+    max_retry_delay_seconds: float = 60.0
     now_provider: NowProvider = _utc_now
     retry_sleep: SleepFn = sleep
     indicators: dict[str, str] = field(
@@ -103,6 +104,7 @@ class WorldBankIndicatorsAdapter(SourceAdapter):
                     self.retry_backoff_seconds * (2**attempt),
                     self.now_provider(),
                 )
+                retry_delay = min(retry_delay, self.max_retry_delay_seconds)
                 self.retry_sleep(retry_delay)
         assert last_error is not None
         raise last_error

@@ -64,6 +64,7 @@ class GDACSAdapter(SourceAdapter):
     now_provider: NowProvider = _utc_now
     max_retries: int = 3
     retry_backoff_seconds: float = 1.0
+    max_retry_delay_seconds: float = 60.0
     retry_sleep: SleepFn = sleep
 
     def fetch(self) -> FetchResult:
@@ -94,6 +95,7 @@ class GDACSAdapter(SourceAdapter):
                     self.retry_backoff_seconds * (2**attempt),
                     self.now_provider(),
                 )
+                retry_delay = min(retry_delay, self.max_retry_delay_seconds)
                 self.retry_sleep(retry_delay)
         assert last_error is not None
         raise last_error
