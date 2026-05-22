@@ -101,6 +101,7 @@ Current repo-evidenced status on branch `hermes/repo-scaffold`:
   - stale-coverage operator actionability is now hardened: `country_coverage_visibility` includes `stale_priority_summary` + ranked `stale_priority_watchlist`, and GUI coverage views render a dedicated “Stale Coverage Priority Queue”; closure evidence from `RUN-LIVE-REP-FRESH-QUEUE-002` (`run_status=success`, `failed_sources=none`, `countries_with_updates=4/4`, `known_gaps=[]`, `release_verdict=ready`) plus GUI `build/local_gui/_rep_fresh_queue_2`
   - role-based GUI behavior is now materially implemented: `--ui-role` (`viewer`,`analyst`,`admin`) enables role-gated navigation/page generation; representative closure evidence `RUN-LIVE-REP-ROLE-001` (`run_status=success`, `failed_sources=none`, `countries_with_updates=4/4`, `known_gaps=[]`, `release_verdict=ready`) plus dual role bundles `build/local_gui/_rep_role_1_analyst` and `build/local_gui/_rep_role_1_viewer`
   - report/export scoping UX is now materially interactive: `reports.html` now provides type/id filters and visible-row count for governed report catalogs; closure evidence `RUN-LIVE-REP-REPORT-SCOPE-001` (`run_status=success`, `failed_sources=none`, `countries_with_updates=4/4`, `known_gaps=[]`, `release_verdict=ready`) plus GUI bundle `build/local_gui/_rep_report_scope_1`
+  - domain deep-dive interpretation UX is now materially interactive: domain detail views provide feature/source scoping controls with visible-row counters and filtered tables; closure evidence `RUN-LIVE-REP-DOMAIN-DEEP-001` (`run_status=success`, `failed_sources=none`, `countries_with_updates=4/4`, `known_gaps=[]`, `release_verdict=ready`) plus GUI bundle `build/local_gui/_rep_domain_deep_1`
 - P3 is strongly advanced:
   - artifact-backed trend charts exist
   - world-map visualization exists
@@ -115,7 +116,7 @@ Current repo-evidenced status on branch `hermes/repo-scaffold`:
   - source-dependency cluster candidates and explicit source-origin groundwork are now visible in the traceability view
 - project-lead fulfillment steering is now explicit and reproducible:
   - new functional stakeholder-fulfillment estimator is available in code (`src/siasa/readmodels/functional_fulfillment.py`) with unit tests
-  - default weighted steering estimate from the current capability matrix is now `85.0%` (`Done=10`, `Partial=6`, `Weak=0`, `N=16`)
+  - default weighted steering estimate from the current capability matrix is now `87.5%` (`Done=11`, `Partial=5`, `Weak=0`, `N=16`)
 
 Interpretation:
 - the old roadmap order was correct as a program scaffold

@@ -1697,6 +1697,38 @@ def _render_domain_detail(domain_detail: dict[str, Any], annotations_view_model:
             for item in annotations_view_model.get('by_linked_item', {}).get(linked_item_key, [])
         ]
     time_series = domain_detail.get('time_series', [])
+    feature_values = domain_detail.get('feature_values', [])
+    source_context = domain_detail.get('source_context', [])
+    feature_rows = ''.join(
+        "<tr class='domain-feature-row' "
+        f"data-feature-id='{html.escape(str(item.get('feature_id', '')))}' "
+        f"data-feature-coverage='{html.escape(str(item.get('coverage', '')))}'>"
+        f"<td>{html.escape(str(item.get('feature_id', '')))}</td>"
+        f"<td>{html.escape(str(item.get('value', '')))}</td>"
+        f"<td>{html.escape(str(item.get('coverage', '')))}</td>"
+        "</tr>"
+        for item in feature_values
+    ) or "<tr><td colspan='3'>No feature values available.</td></tr>"
+    source_rows = ''.join(
+        "<tr class='domain-source-row' "
+        f"data-source-id='{html.escape(str(item.get('source_id', '')))}'>"
+        f"<td>{html.escape(str(item.get('source_id', '')))}</td>"
+        f"<td>{html.escape(str(item.get('status', '')))}</td>"
+        f"<td>{html.escape(str(item.get('freshness_hours', '')))}</td>"
+        f"<td>{html.escape(str(item.get('history_horizon', '')))}</td>"
+        "</tr>"
+        for item in source_context
+    ) or "<tr><td colspan='4'>No source context available.</td></tr>"
+    feature_options = ''.join(
+        f"<option value='{html.escape(str(item.get('feature_id', '')))}'>{html.escape(str(item.get('feature_id', '')))}</option>"
+        for item in feature_values
+        if item.get('feature_id')
+    )
+    source_options = ''.join(
+        f"<option value='{html.escape(str(item.get('source_id', '')))}'>{html.escape(str(item.get('source_id', '')))}</option>"
+        for item in source_context
+        if item.get('source_id')
+    )
     domain_linked_item = f"{domain_detail.get('country_id', 'UNKNOWN')}:{domain_detail.get('domain', 'UNKNOWN')}"
     annotation_workflow_href = _annotation_workflow_href(
         nav_prefix=nav_prefix,
@@ -1714,16 +1746,49 @@ def _render_domain_detail(domain_detail: dict[str, Any], annotations_view_model:
         f"<p>Country: <strong>{html.escape(str(domain_detail.get('country_id', 'UNKNOWN')))}</strong></p>"
         f"<p>Domain: <strong>{html.escape(str(domain_detail.get('domain', 'UNKNOWN')))}</strong></p>"
         f"<p>Anomaly state: <span class='status'>{html.escape(str(domain_detail.get('anomaly_state', 'n/a')))}</span></p>"
+        "<h3>Domain Deep-Dive Controls</h3>"
+        "<label for='domain-feature-filter'>Feature:</label> "
+        f"<select id='domain-feature-filter'><option value='all'>All features</option>{feature_options}</select> "
+        "<label for='domain-source-filter'>Source:</label> "
+        f"<select id='domain-source-filter'><option value='all'>All sources</option>{source_options}</select>"
+        "<p>Visible features: <strong id='domain-feature-visible-count'>0</strong> | Visible sources: <strong id='domain-source-visible-count'>0</strong></p>"
         f"<h3>Time Series Chart</h3>{_render_line_chart(time_series, label_key='timestamp', chart_label='Domain time series') }"
         f"<h3>Time Series</h3>{_json_block(time_series)}"
         f"{_render_baseline_comparison_summary(domain_detail.get('baseline_comparison', {}), time_series)}"
         f"<h3>Raw Baseline Comparison Payload</h3>{_json_block(domain_detail.get('baseline_comparison', {}))}"
-        f"<h3>Feature Values</h3>{_json_block(domain_detail.get('feature_values', []))}"
-        f"<h3>Source Context</h3>{_json_block(domain_detail.get('source_context', []))}"
+        "<h3>Feature Values Table</h3>"
+        "<table><thead><tr><th>Feature ID</th><th>Value</th><th>Coverage</th></tr></thead>"
+        f"<tbody>{feature_rows}</tbody></table>"
+        "<h3>Source Context Table</h3>"
+        "<table><thead><tr><th>Source ID</th><th>Status</th><th>Freshness (h)</th><th>History Horizon</th></tr></thead>"
+        f"<tbody>{source_rows}</tbody></table>"
         f"<h3>Uncertainty</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in domain_detail.get('uncertainty', []))}</ul>"
         f"<h3>Annotation IDs</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in annotation_ids)}</ul>"
         f"{annotation_workflow_link_html}"
         f"<h3>Annotation Details</h3>{_annotation_details_html(annotation_ids, annotations_view_model)}"
+        "<script>"
+        "(function(){"
+        "const featureFilter=document.getElementById('domain-feature-filter');"
+        "const sourceFilter=document.getElementById('domain-source-filter');"
+        "const featureRows=Array.from(document.querySelectorAll('.domain-feature-row'));"
+        "const sourceRows=Array.from(document.querySelectorAll('.domain-source-row'));"
+        "const featureCount=document.getElementById('domain-feature-visible-count');"
+        "const sourceCount=document.getElementById('domain-source-visible-count');"
+        "function applyDomainFilters(){"
+        "const featureValue=featureFilter?featureFilter.value:'all';"
+        "const sourceValue=sourceFilter?sourceFilter.value:'all';"
+        "let featureVisible=0;"
+        "let sourceVisible=0;"
+        "featureRows.forEach((row)=>{const show=(featureValue==='all'||row.dataset.featureId===featureValue);row.style.display=show?'':'none';if(show)featureVisible+=1;});"
+        "sourceRows.forEach((row)=>{const show=(sourceValue==='all'||row.dataset.sourceId===sourceValue);row.style.display=show?'':'none';if(show)sourceVisible+=1;});"
+        "if(featureCount){featureCount.textContent=String(featureVisible);}"
+        "if(sourceCount){sourceCount.textContent=String(sourceVisible);}"
+        "}"
+        "if(featureFilter){featureFilter.addEventListener('change',applyDomainFilters);}"
+        "if(sourceFilter){sourceFilter.addEventListener('change',applyDomainFilters);}"
+        "applyDomainFilters();"
+        "})();"
+        "</script>"
     )
     return _page(
         f"Domain Detail - {domain_detail.get('country_id', 'UNKNOWN')} / {domain_detail.get('domain', 'UNKNOWN')}",

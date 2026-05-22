@@ -671,6 +671,16 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Domain Detail" in domain_html
     assert "delta_to_baseline" in domain_html
     assert "Time Series Chart" in domain_html
+    assert "Domain Deep-Dive Controls" in domain_html
+    assert "domain-feature-filter" in domain_html
+    assert "domain-source-filter" in domain_html
+    assert "domain-feature-visible-count" in domain_html
+    assert "domain-source-visible-count" in domain_html
+    assert "domain-feature-row" in domain_html
+    assert "domain-source-row" in domain_html
+    assert "applyDomainFilters" in domain_html
+    assert "Feature Values Table" in domain_html
+    assert "Source Context Table" in domain_html
     assert "2026-05-09" in domain_html
     assert "<svg" in domain_html
     assert "SRC-A" in domain_html
