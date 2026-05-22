@@ -55,6 +55,9 @@ _SUPPORTED_LIVE_PILOT_COUNTRIES = {
     "NOR": {"gdelt_query": "Norway", "gdelt_code": "NO"},
     "CAN": {"gdelt_query": "Canada", "gdelt_code": "CA"},
     "AUS": {"gdelt_query": "Australia", "gdelt_code": "AS"},
+    "NZL": {"gdelt_query": "New Zealand", "gdelt_code": "NZ"},
+    "PRT": {"gdelt_query": "Portugal", "gdelt_code": "PO"},
+    "IRL": {"gdelt_query": "Ireland", "gdelt_code": "EI"},
 }
 
 _REPRESENTATIVE_LIVE_PILOT_SET = ("UKR", "POL", "ISR", "TWN")
@@ -95,6 +98,11 @@ _CONTROL_REFERENCE_BROADER_LIVE_PILOT_SET = (
     "CAN",
     "AUS",
 )
+_CONTROL_REFERENCE_THIRD_LIVE_PILOT_SET = (
+    "NZL",
+    "PRT",
+    "IRL",
+)
 _WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = (
     "UKR",
     "POL",
@@ -122,6 +130,9 @@ _WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = (
     "NOR",
     "CAN",
     "AUS",
+    "NZL",
+    "PRT",
+    "IRL",
 )
 _MULTI_COUNTRY_GDELT_EVENTS_RECENT_EXPORT_COUNT = 8
 _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
@@ -152,6 +163,9 @@ _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
     "NOR": ["A", "B", "D"],
     "CAN": ["A", "B", "D"],
     "AUS": ["A", "B", "D"],
+    "NZL": ["A", "B", "D"],
+    "PRT": ["A", "D"],
+    "IRL": ["A", "B", "D"],
 }
 _NAMED_LIVE_PILOT_SETS = {
     "representative": _REPRESENTATIVE_LIVE_PILOT_SET,
@@ -165,6 +179,7 @@ _NAMED_LIVE_PILOT_SETS = {
     "extended-focus-crisis-initial": _EXTENDED_FOCUS_CRISIS_INITIAL_LIVE_PILOT_SET,
     "control-reference-initial": _CONTROL_REFERENCE_INITIAL_LIVE_PILOT_SET,
     "control-reference-broader": _CONTROL_REFERENCE_BROADER_LIVE_PILOT_SET,
+    "control-reference-third": _CONTROL_REFERENCE_THIRD_LIVE_PILOT_SET,
 }
 
 _VALIDATION_REFERENCE_CASE_LIBRARY_PATH = (
