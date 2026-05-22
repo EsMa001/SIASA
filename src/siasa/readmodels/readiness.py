@@ -61,11 +61,14 @@ def build_readiness_view_model(
         + ([] if repo_closure_view_model is not None else _optional_artifact_gap(system_status_read_model, "repo_closure", missing_fallback="missing_repo_closure_artifact"))
         + ([] if annotations_view_model is not None else _optional_artifact_gap(system_status_read_model, "annotations", missing_fallback="missing_annotations_artifact"))
     )
-    known_gaps = _filter_known_gaps_for_large_pilot_rate_limit_outage(
+    gap_filtering = _filter_known_gaps_for_large_pilot_rate_limit_outage(
         known_gaps,
         system_status_read_model=system_status_read_model,
     )
-    release_verdict = "blocked_by_known_gaps" if known_gaps else ("ready" if demo_verdict == "ready" else "blocked")
+    filtered_known_gaps = gap_filtering["known_gaps"]
+    suppressed_known_gaps = gap_filtering["suppressed_known_gaps"]
+    known_gap_suppression_reason = gap_filtering["suppression_reason"]
+    release_verdict = "blocked_by_known_gaps" if filtered_known_gaps else ("ready" if demo_verdict == "ready" else "blocked")
     return {
         "run_id": system_status_read_model.get("run_id"),
         "snapshot_id": system_status_read_model.get("snapshot_id"),
@@ -74,7 +77,9 @@ def build_readiness_view_model(
         "demo_checks": demo_checks,
         "evidence_checks": evidence_checks,
         "artifact_checks": artifact_checks,
-        "known_gaps": known_gaps,
+        "known_gaps": filtered_known_gaps,
+        "suppressed_known_gaps": suppressed_known_gaps,
+        "known_gap_suppression_reason": known_gap_suppression_reason,
         "report_count": len(report_catalog),
         "country_profile_count": len(country_profile_read_models),
         "domain_detail_count": len(domain_detail_read_models),
@@ -135,19 +140,34 @@ def _filter_known_gaps_for_large_pilot_rate_limit_outage(
     known_gaps: list[str],
     *,
     system_status_read_model: dict[str, Any],
-) -> list[str]:
+) -> dict[str, Any]:
     coverage = system_status_read_model.get("coverage", {})
     countries_total = coverage.get("countries_total") if isinstance(coverage, dict) else None
     failed_sources = system_status_read_model.get("failed_sources", [])
     if countries_total != 30:
-        return known_gaps
+        return {
+            "known_gaps": known_gaps,
+            "suppressed_known_gaps": [],
+            "suppression_reason": None,
+        }
     if not isinstance(failed_sources, list) or failed_sources != ["SRC-GDELT-DOC"]:
-        return known_gaps
+        return {
+            "known_gaps": known_gaps,
+            "suppressed_known_gaps": [],
+            "suppression_reason": None,
+        }
     filtered: list[str] = []
+    suppressed: list[str] = []
     for marker in known_gaps:
         if marker == "failed_source:SRC-GDELT-DOC":
+            suppressed.append(marker)
             continue
         if marker.startswith("country_gap:") and marker.endswith(":A:source_failed_this_run"):
+            suppressed.append(marker)
             continue
         filtered.append(marker)
-    return filtered
+    return {
+        "known_gaps": filtered,
+        "suppressed_known_gaps": suppressed,
+        "suppression_reason": "large_pilot_global_gdelt_doc_outage",
+    }
