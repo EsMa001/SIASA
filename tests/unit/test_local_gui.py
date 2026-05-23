@@ -807,6 +807,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "suggested_next_action" in validation_html
     assert "Level (high→low)" in validation_html
     assert "Visible attention rows:" in validation_html
+    assert "replay-attention-visible-breakdown" in validation_html
+    assert "high='+visibleHigh" in validation_html
     assert "replay-attention-row" in validation_html
     assert "Attention Level" in validation_html
     assert "Follow-up Owner" in validation_html
