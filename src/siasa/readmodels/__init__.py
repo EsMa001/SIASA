@@ -5,6 +5,7 @@ from .country_profile import build_country_profile_read_model
 from .domain_detail import build_domain_detail_read_model
 from .readiness import build_readiness_view_model
 from .release_evidence import (
+    build_release_failure_drill_report,
     build_release_readiness_index,
     build_repo_release_gate_assessment,
     render_release_evidence_markdown,
@@ -20,6 +21,7 @@ __all__ = [
     "build_country_profile_read_model",
     "build_domain_detail_read_model",
     "build_readiness_view_model",
+    "build_release_failure_drill_report",
     "build_release_readiness_index",
     "build_repo_release_gate_assessment",
     "render_release_evidence_markdown",

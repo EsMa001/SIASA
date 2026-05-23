@@ -56,7 +56,23 @@ Sonst:
 - Entscheidung: Go / No-Go
 - Nächste Maßnahme:
 
-## 6) Hinweise
+## 6) Failure Drill (verbindlich vor Release)
+
+Ziel: Nachweisen, dass Governance im Fehlerfall wirklich auf `no_go` kippt und nicht nur im Happy Path grün ist.
+
+Ausführung:
+- `PYTHONPATH=src python scripts/release_failure_drill_check.py`
+
+Geprüfte Negativ-Szenarien:
+- synthetischer Known-Gap (`known_gaps_clear` muss als Blocker erscheinen, Gate = `no_go`)
+- traceability closure risk (`traceability_integrity_clean` muss als Blocker erscheinen, Gate = `no_go`)
+- geöffneter Stakeholder-Focus-Cluster (Readiness-Index-Gate `stakeholder_functional_focus_cluster_closed` muss fehlschlagen)
+
+Regel:
+- Script-Exitcode `0` nur wenn alle Drill-Checks wie erwartet greifen.
+- Script-Exitcode `!=0` blockiert Release bis Ursache korrigiert ist.
+
+## 7) Hinweise
 
 - Das Gate ist absichtlich streng: bei `no_go` keine Freigabe.
 - Für Steering ist die Markdown-Zusammenfassung ausreichend; für Automatisierung immer JSON verwenden.

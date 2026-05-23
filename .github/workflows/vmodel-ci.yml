@@ -24,3 +24,5 @@ jobs:
         run: PYTHONPATH=src python scripts/ci_stakeholder_closure_check.py
       - name: Build release evidence pack
         run: PYTHONPATH=src python scripts/build_release_evidence_pack.py --output-dir build/release_evidence/latest
+      - name: Run release failure drill (negative scenarios must fail gates)
+        run: PYTHONPATH=src python scripts/release_failure_drill_check.py

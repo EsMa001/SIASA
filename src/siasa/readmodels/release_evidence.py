@@ -10,8 +10,14 @@ from siasa.readmodels.stakeholder_functional_closure import build_stakeholder_fu
 from siasa.traceability.consistency import build_traceability_integrity_report
 
 
-def build_repo_release_gate_assessment(*, repo_root: Path) -> dict[str, Any]:
-    readiness_view_model = build_readiness_view_model(
+def build_repo_release_gate_assessment(
+    *,
+    repo_root: Path,
+    readiness_view_model_override: dict[str, Any] | None = None,
+    traceability_integrity_override: dict[str, Any] | None = None,
+    stakeholder_functional_closure_override: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    readiness_view_model = readiness_view_model_override or build_readiness_view_model(
         country_profile_read_models={"UKR": {"country_id": "UKR"}},
         domain_detail_read_models={("UKR", "A"): {"country_id": "UKR", "domain": "A"}},
         report_catalog={"REP-1": {"id": "REP-1"}},
@@ -31,8 +37,8 @@ def build_repo_release_gate_assessment(*, repo_root: Path) -> dict[str, Any]:
         repo_closure_view_model={"ok": True},
         available_pages={"index.html", "coverage.html", "reports.html", "validation.html"},
     )
-    traceability_integrity = build_traceability_integrity_report(repo_root=repo_root)
-    stakeholder_functional_closure = build_stakeholder_functional_closure_report(repo_root=repo_root)
+    traceability_integrity = traceability_integrity_override or build_traceability_integrity_report(repo_root=repo_root)
+    stakeholder_functional_closure = stakeholder_functional_closure_override or build_stakeholder_functional_closure_report(repo_root=repo_root)
     release_gate = build_release_gate_view_model(
         readiness_view_model=readiness_view_model,
         traceability_integrity_report=traceability_integrity,
@@ -117,6 +123,61 @@ def build_release_readiness_index(
         "total_gates": total_count,
         "percent": percent,
         "gates": gates,
+    }
+
+
+def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
+    baseline = build_repo_release_gate_assessment(repo_root=repo_root)
+
+    readiness_with_known_gap = dict(baseline["readiness"])
+    readiness_with_known_gap["known_gaps"] = ["DRILL-SYNTHETIC-GAP"]
+    readiness_with_known_gap["release_verdict"] = "blocked_by_known_gaps"
+    scenario_known_gaps = build_repo_release_gate_assessment(
+        repo_root=repo_root,
+        readiness_view_model_override=readiness_with_known_gap,
+    )
+
+    traceability_dirty = dict(baseline["traceability_integrity"])
+    traceability_dirty["summary"] = dict(traceability_dirty.get("summary") or {})
+    traceability_dirty["summary"]["closure_at_risk"] = 1
+    scenario_traceability_dirty = build_repo_release_gate_assessment(
+        repo_root=repo_root,
+        traceability_integrity_override=traceability_dirty,
+    )
+
+    stakeholder_open = dict(baseline["stakeholder_functional_closure"])
+    stakeholder_open["focus_gap_cluster"] = dict(stakeholder_open.get("focus_gap_cluster") or {})
+    stakeholder_open["focus_gap_cluster"]["covered_count"] = 18
+    stakeholder_open["focus_gap_cluster"]["not_implemented_count"] = 1
+    stakeholder_open["focus_gap_cluster"]["not_implemented_ids"] = ["StR-DRILL-001"]
+    scenario_stakeholder_open = build_repo_release_gate_assessment(
+        repo_root=repo_root,
+        stakeholder_functional_closure_override=stakeholder_open,
+    )
+
+    scenarios = {
+        "baseline": baseline,
+        "known_gap_injected": scenario_known_gaps,
+        "traceability_closure_at_risk_injected": scenario_traceability_dirty,
+        "stakeholder_focus_cluster_open_injected": scenario_stakeholder_open,
+    }
+
+    checks = {
+        "baseline_go": baseline["release_gate"].get("gate_verdict") == "go",
+        "known_gap_no_go": scenario_known_gaps["release_gate"].get("gate_verdict") == "no_go",
+        "known_gap_blocker_present": "known_gaps_clear" in scenario_known_gaps["release_gate"].get("blockers", []),
+        "traceability_no_go": scenario_traceability_dirty["release_gate"].get("gate_verdict") == "no_go",
+        "traceability_blocker_present": "traceability_integrity_clean" in scenario_traceability_dirty["release_gate"].get("blockers", []),
+        "stakeholder_gate_fails": any(
+            (not bool(gate.get("passed"))) and gate.get("gate_id") == "stakeholder_functional_focus_cluster_closed"
+            for gate in scenario_stakeholder_open["release_readiness_index"].get("gates", [])
+        ),
+    }
+
+    return {
+        "drill_verdict": "pass" if all(checks.values()) else "fail",
+        "checks": checks,
+        "scenarios": scenarios,
     }
 
 
