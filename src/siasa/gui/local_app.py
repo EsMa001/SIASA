@@ -13,8 +13,9 @@ from urllib.parse import quote
 
 from siasa.catalog import load_country_set
 from siasa.readmodels.readiness import build_readiness_view_model
+from siasa.readmodels.release_gate import build_release_gate_view_model
 from siasa.readmodels.validation_backtest import build_historical_replay_summary
-from siasa.traceability.consistency import build_repo_closure_report
+from siasa.traceability.consistency import build_repo_closure_report, build_traceability_integrity_report
 
 
 SitePayload = dict[str, Any]
@@ -1356,6 +1357,10 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
     readiness_view_path = readmodels_dir / 'readiness.json'
     if readiness_view_path.exists():
         readiness_view_model = _load_json(readiness_view_path)
+    release_gate_view_model = None
+    release_gate_view_path = readmodels_dir / 'release_gate.json'
+    if release_gate_view_path.exists():
+        release_gate_view_model = _load_json(release_gate_view_path)
 
     return {
         'world_map_read_model': world_map_read_model,
@@ -1369,6 +1374,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
         'repo_closure_view_model': repo_closure_view_model,
         'annotations_view_model': annotations_view_model,
         'readiness_view_model': readiness_view_model,
+        'release_gate_view_model': release_gate_view_model,
     }
 
 
@@ -2115,7 +2121,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     return _page("System Status / Runs", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
-def _render_readiness(readiness_view_model: dict[str, Any], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
+def _render_readiness(readiness_view_model: dict[str, Any], release_gate_view_model: dict[str, Any] | None = None, *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
     def _artifact_status_text(check: dict[str, Any]) -> str:
         status = str(check.get('status', 'unknown'))
         reason = check.get('reason')
@@ -2152,12 +2158,18 @@ def _render_readiness(readiness_view_model: dict[str, Any], *, nav_prefix: str =
     _rel_ok = _rel_v.lower() in ('ready', 'pass', 'ok', 'green')
     _demo_color = '#4edea3' if _demo_ok else ('#e3b341' if 'partial' in _demo_v.lower() else '#ffb4ab')
     _rel_color = '#4edea3' if _rel_ok else ('#e3b341' if 'partial' in _rel_v.lower() else '#ffb4ab')
+    _gate_v = str((release_gate_view_model or {}).get('gate_verdict', 'n/a'))
+    _gate_ok = _gate_v.lower() in ('go', 'ready', 'pass', 'ok', 'green')
+    _gate_color = '#4edea3' if _gate_ok else '#ffb4ab'
+    _gate_blockers = [str(item) for item in (release_gate_view_model or {}).get('blockers', [])]
+    _gate_blocker_items = ''.join(f"<li>{html.escape(item)}</li>" for item in _gate_blockers) or "<li>none</li>"
 
     body = (
         # === KPI Header ===
         "<div class='kpi-grid'>"
         f"<div class='kpi-card'><span class='kpi-label'>Demo Verdict</span><div class='kpi-value' style='color:{_demo_color}'>{html.escape(_demo_v)}</div></div>"
         f"<div class='kpi-card'><span class='kpi-label'>Release Verdict</span><div class='kpi-value' style='color:{_rel_color}'>{html.escape(_rel_v)}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Gate Verdict</span><div class='kpi-value' style='color:{_gate_color}'>{html.escape(_gate_v)}</div></div>"
         f"<div class='kpi-card'><span class='kpi-label'>Country Profiles</span><div class='kpi-value'>{html.escape(str(readiness_view_model.get('country_profile_count', 0)))}</div></div>"
         f"<div class='kpi-card'><span class='kpi-label'>Domain Details</span><div class='kpi-value'>{html.escape(str(readiness_view_model.get('domain_detail_count', 0)))}</div></div>"
         f"<div class='kpi-card'><span class='kpi-label'>Reports</span><div class='kpi-value'>{html.escape(str(readiness_view_model.get('report_count', 0)))}</div></div>"
@@ -2176,6 +2188,8 @@ def _render_readiness(readiness_view_model: dict[str, Any], *, nav_prefix: str =
         # === Known Gaps ===
         "<div class='panel'><div class='panel-header'>Known Gaps Before Release</div>"
         f"<ul>{known_gap_items}</ul></div>"
+        "<div class='panel'><div class='panel-header'>Release Gate Blockers</div>"
+        f"<ul>{_gate_blocker_items}</ul></div>"
     )
     return _page("Demo / Release Readiness", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
@@ -3202,6 +3216,7 @@ def build_local_mvp_site(
     repo_closure_view_model: dict[str, Any] | None = None,
     annotations_view_model: dict[str, Any] | None = None,
     readiness_view_model: dict[str, Any] | None = None,
+    release_gate_view_model: dict[str, Any] | None = None,
     ui_role: str = 'analyst',
 ) -> SiteBuildResult:
     normalized_role = _normalize_ui_role(ui_role)
@@ -3344,12 +3359,20 @@ def build_local_mvp_site(
             repo_closure_view_model=repo_closure_view_model,
             available_pages=available_pages,
         )
+    if release_gate_view_model is None:
+        release_gate_view_model = build_release_gate_view_model(
+            readiness_view_model=readiness_view_model,
+            traceability_integrity_report=build_traceability_integrity_report(repo_root=Path(__file__).resolve().parents[3]),
+        )
     readiness_file = output_dir / 'readiness.html'
-    readiness_file.write_text(_render_readiness(readiness_view_model, nav_prefix='', available_pages=available_pages), encoding='utf-8')
+    readiness_file.write_text(_render_readiness(readiness_view_model, release_gate_view_model, nav_prefix='', available_pages=available_pages), encoding='utf-8')
     generated_files.append(readiness_file)
     readiness_json_file = output_dir / 'readiness.json'
     readiness_json_file.write_text(json.dumps(readiness_view_model, indent=2, sort_keys=True), encoding='utf-8')
     generated_files.append(readiness_json_file)
+    release_gate_json_file = output_dir / 'release_gate.json'
+    release_gate_json_file.write_text(json.dumps(release_gate_view_model, indent=2, sort_keys=True), encoding='utf-8')
+    generated_files.append(release_gate_json_file)
 
     return SiteBuildResult(output_dir=output_dir, generated_files=generated_files)
 

@@ -602,6 +602,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert (pages.output_dir / "traceability.html").exists()
     assert (pages.output_dir / "annotations.html").exists()
     assert (pages.output_dir / "readiness.html").exists()
+    assert (pages.output_dir / "release_gate.json").exists()
 
     index_html = (pages.output_dir / "index.html").read_text()
     assert "World Anomaly Map" in index_html
@@ -869,6 +870,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Demo / Release Readiness" in readiness_html
     assert "Demo Verdict" in readiness_html
     assert "Release Verdict" in readiness_html
+    assert "Gate Verdict" in readiness_html
+    assert "Release Gate Blockers" in readiness_html
     assert "Artifact Readiness" in readiness_html
     assert "validation_backtest" in readiness_html
     assert "present" in readiness_html
@@ -1689,6 +1692,15 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
             }
         )
     )
+    (artifacts_dir / "readmodels" / "release_gate.json").write_text(
+        json.dumps(
+            {
+                "gate_verdict": "go",
+                "blocker_count": 0,
+                "blockers": [],
+            }
+        )
+    )
     (artifacts_dir / "reports" / "daily_snapshot.json").write_text(
         json.dumps({"report_id": "REP-DAILY-SNAP-RUN-321-v1", "report_type": "daily_snapshot", "format": "json", "payload": {"snapshot_id": "SNAP-RUN-321-v1", "status": "success"}})
     )
@@ -1696,6 +1708,7 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     payload = local_app.load_site_payload_from_artifacts(artifacts_dir)
 
     assert payload["readiness_view_model"]["demo_checks"] == [{"label": "Persisted Demo Check", "ready": True}]
+    assert payload["release_gate_view_model"]["gate_verdict"] == "go"
 
     pages = build_local_mvp_site(output_dir=tmp_path / "site-with-readiness", **payload)
     readiness_html = (pages.output_dir / "readiness.html").read_text()
@@ -1703,6 +1716,8 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
 
     assert "Persisted Demo Check" in readiness_html
     assert "Persisted Evidence Check" in readiness_html
+    assert "Gate Verdict" in readiness_html
+    assert "go" in readiness_html
     assert readiness_json["demo_checks"] == [{"label": "Persisted Demo Check", "ready": True}]
 
 
