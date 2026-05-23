@@ -783,6 +783,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Replay Source Coverage" in validation_html
     assert "Replay Attention Watchlist" in validation_html
     assert "Replay Attention Summary" in validation_html
+    assert "replay-attention-level-filter" in validation_html
+    assert "replay-attention-owner-filter" in validation_html
+    assert "replay-attention-reason-filter" in validation_html
+    assert "Visible attention rows:" in validation_html
+    assert "replay-attention-row" in validation_html
     assert "Attention Level" in validation_html
     assert "Follow-up Owner" in validation_html
     assert "validation governance" in validation_html
