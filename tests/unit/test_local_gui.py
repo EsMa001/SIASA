@@ -167,6 +167,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 "domain_status_id": "DST-UKR-A-RUN-200",
                 "multi_domain_status_id": "MST-UKR-RUN-200",
                 "snapshot_id": "SNAP-RUN-200-v1",
+                "observed_at": "2026-05-11T17:00:00Z",
                 "report_id": "REP-DAILY-RUN-200",
             },
             {
@@ -177,6 +178,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 "domain_status_id": "DST-UKR-A-RUN-200",
                 "multi_domain_status_id": "MST-UKR-RUN-200",
                 "snapshot_id": "SNAP-RUN-200-v1",
+                "observed_at": "2026-05-11T17:20:00Z",
                 "report_id": "REP-DAILY-RUN-200",
             },
             {
@@ -187,6 +189,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 "domain_status_id": "DST-UKR-D-RUN-200",
                 "multi_domain_status_id": "MST-UKR-RUN-200",
                 "snapshot_id": "SNAP-RUN-200-v1",
+                "observed_at": "2026-05-11T18:05:00Z",
                 "report_id": "REP-DAILY-RUN-200",
             },
         ]
@@ -868,8 +871,12 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Cluster Candidates" in traceability_html
     assert "A_article_count" in traceability_html
     assert "SRC-A, SRC-B" in traceability_html
+    assert "Observed Lag (min)" in traceability_html
+    assert "tight_temporal_coupling_candidate" in traceability_html
     assert "Source-Origin Groundwork" in traceability_html
-    assert "not yet inferable from current lineage artifact" in traceability_html
+    assert "First Observed (window)" in traceability_html
+    assert "earliest_observed_source_in_window" in traceability_html
+    assert "later_observed_source_in_window" in traceability_html
 
     annotations_html = (pages.output_dir / "annotations.html").read_text()
     assert "Analyst Annotations View" in annotations_html
@@ -1178,6 +1185,7 @@ def test_load_site_payload_from_artifacts_reads_persisted_json_bundle(tmp_path: 
                 "domain_status_id": "DST-UKR-A-RUN-300",
                 "multi_domain_status_id": "MST-UKR-RUN-300",
                 "snapshot_id": "SNAP-RUN-300-v1",
+                "observed_at": "2026-05-11T17:00:00Z",
                 "report_id": "REP-DAILY-SNAP-RUN-300-v1",
             }
         ]

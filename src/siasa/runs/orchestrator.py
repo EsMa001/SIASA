@@ -490,6 +490,7 @@ class DailyRunOrchestrator:
                     domain_status_id=f"DST-{feature.country_id}-{feature.domain}-{snapshot.run_id}",
                     multi_domain_status_id=f"MST-{feature.country_id}-{snapshot.run_id}",
                     snapshot_id=snapshot.snapshot_id,
+                    observed_at=raw_record.fetched_at,
                     report_id=report.report_id,
                     report_ids=sorted(set(report_ids)),
                 )

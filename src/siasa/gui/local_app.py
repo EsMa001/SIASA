@@ -6,6 +6,7 @@ import json
 import re
 import shutil
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote
@@ -2715,6 +2716,19 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
     return _page("Validation / Backtest View", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
+def _parse_traceability_timestamp(value: str) -> datetime | None:
+    text = str(value or '').strip()
+    if not text:
+        return None
+    if text.endswith('Z'):
+        text = f"{text[:-1]}+00:00"
+    try:
+        return datetime.fromisoformat(text)
+    except ValueError:
+        return None
+
+
+
 def _traceability_dependency_rows(lineage_records: list[dict[str, Any]]) -> str:
     clusters: dict[tuple[str, str, str], dict[str, Any]] = {}
     for record in lineage_records:
@@ -2730,16 +2744,27 @@ def _traceability_dependency_rows(lineage_records: list[dict[str, Any]]) -> str:
                 'snapshot_id': snapshot_id,
                 'source_ids': set(),
                 'report_ids': set(),
+                'observed_times': [],
             },
         )
         entry['source_ids'].add(str(record.get('source_id', '')))
         if record.get('report_id'):
             entry['report_ids'].add(str(record.get('report_id')))
+        observed_at = _parse_traceability_timestamp(str(record.get('observed_at') or ''))
+        if observed_at is not None:
+            entry['observed_times'].append(observed_at)
     rows = []
     for cluster in clusters.values():
         source_ids = sorted(source_id for source_id in cluster['source_ids'] if source_id)
         if len(source_ids) < 2:
             continue
+        lag_minutes = 'n/a'
+        coupling_signal = 'replication_or_shared_dependency_candidate'
+        observed_times = cluster['observed_times']
+        if len(observed_times) >= 2:
+            lag_seconds = (max(observed_times) - min(observed_times)).total_seconds()
+            lag_minutes = str(int(round(lag_seconds / 60.0)))
+            coupling_signal = 'tight_temporal_coupling_candidate' if lag_seconds <= 3600 else 'shared_dependency_candidate_with_lag'
         rows.append(
             "<tr>"
             f"<td>{html.escape(cluster['feature_id'])}</td>"
@@ -2747,15 +2772,17 @@ def _traceability_dependency_rows(lineage_records: list[dict[str, Any]]) -> str:
             f"<td>{html.escape(cluster['snapshot_id'])}</td>"
             f"<td>{html.escape(', '.join(source_ids))}</td>"
             f"<td>{html.escape(', '.join(sorted(cluster['report_ids'])) or 'n/a')}</td>"
-            f"<td>{html.escape('replication_or_shared_dependency_candidate')}</td>"
+            f"<td>{html.escape(coupling_signal)}</td>"
+            f"<td>{html.escape(lag_minutes)}</td>"
             "</tr>"
         )
-    return ''.join(rows) or "<tr><td colspan='6'>No dependency cluster candidates in current lineage artifact.</td></tr>"
+    return ''.join(rows) or "<tr><td colspan='7'>No dependency cluster candidates in current lineage artifact.</td></tr>"
 
 
 
 def _traceability_origin_rows(lineage_records: list[dict[str, Any]]) -> str:
     by_source: dict[str, dict[str, Any]] = {}
+    source_first_seen: dict[str, datetime] = {}
     for record in lineage_records:
         source_id = str(record.get('source_id', ''))
         entry = by_source.setdefault(
@@ -2770,19 +2797,48 @@ def _traceability_origin_rows(lineage_records: list[dict[str, Any]]) -> str:
         entry['feature_ids'].add(str(record.get('feature_id', '')))
         if record.get('report_id'):
             entry['report_ids'].add(str(record.get('report_id')))
+        observed_at = _parse_traceability_timestamp(str(record.get('observed_at') or ''))
+        if observed_at is not None:
+            current = source_first_seen.get(source_id)
+            if current is None or observed_at < current:
+                source_first_seen[source_id] = observed_at
+    earliest_seen = min(source_first_seen.values()) if source_first_seen else None
+    earliest_sources = {
+        source_id
+        for source_id, observed_at in source_first_seen.items()
+        if earliest_seen is not None and observed_at == earliest_seen
+    }
     rows = []
     for source_id, entry in sorted(by_source.items()):
+        first_seen = source_first_seen.get(source_id)
+        if first_seen is None:
+            inference_status = 'insufficient_timestamp_evidence'
+            uncertainty = 'no observed_at timestamps available for this source in current artifact window'
+            first_seen_text = 'n/a'
+        elif len(earliest_sources) == 1 and source_id in earliest_sources:
+            inference_status = 'earliest_observed_source_in_window'
+            uncertainty = 'artifact-window inference only; does not prove true global origin'
+            first_seen_text = first_seen.isoformat()
+        elif source_id in earliest_sources:
+            inference_status = 'co-earliest_observed_sources_in_window'
+            uncertainty = 'multiple sources share same first-seen timestamp; origin remains ambiguous'
+            first_seen_text = first_seen.isoformat()
+        else:
+            inference_status = 'later_observed_source_in_window'
+            uncertainty = 'appears after earliest observed source(s); may still reflect upstream coupling'
+            first_seen_text = first_seen.isoformat()
         rows.append(
             "<tr>"
             f"<td>{html.escape(source_id)}</td>"
             f"<td>{len([item for item in entry['raw_record_ids'] if item])}</td>"
             f"<td>{len([item for item in entry['feature_ids'] if item])}</td>"
             f"<td>{html.escape(', '.join(sorted(item for item in entry['report_ids'] if item)) or 'n/a')}</td>"
-            f"<td>{html.escape('not yet inferable from current lineage artifact')}</td>"
-            f"<td>{html.escape('current artifact lacks earliest-seen / propagation timestamps needed for origin inference')}</td>"
+            f"<td>{html.escape(first_seen_text)}</td>"
+            f"<td>{html.escape(inference_status)}</td>"
+            f"<td>{html.escape(uncertainty)}</td>"
             "</tr>"
         )
-    return ''.join(rows) or "<tr><td colspan='6'>No source-origin groundwork available.</td></tr>"
+    return ''.join(rows) or "<tr><td colspan='7'>No source-origin groundwork available.</td></tr>"
 
 
 
@@ -2808,12 +2864,12 @@ def _render_traceability(traceability_view_model: dict[str, Any], *, nav_prefix:
         "<div class='table-container'><table><thead><tr><th>Source</th><th>Raw</th><th>Normalized</th><th>Feature</th><th>Domain Status</th><th>Multi-Domain Status</th><th>Snapshot</th><th>Report</th></tr></thead>"
         f"<tbody>{rows}</tbody></table></div></div>"
         "<div class='panel'><div class='panel-header'>Source Dependency Groundwork — Cluster Candidates</div>"
-        "<p>Features and domain statuses produced by multiple sources simultaneously — potential replication or shared dependency candidates.</p>"
-        "<div class='table-container'><table><thead><tr><th>Feature</th><th>Domain Status</th><th>Snapshot</th><th>Sources</th><th>Reports</th><th>Coupling Signal</th></tr></thead>"
+        "<p>Features and domain statuses produced by multiple sources simultaneously — potential replication/shared-dependency signals with timing-lag context where observed timestamps exist.</p>"
+        "<div class='table-container'><table><thead><tr><th>Feature</th><th>Domain Status</th><th>Snapshot</th><th>Sources</th><th>Reports</th><th>Coupling Signal</th><th>Observed Lag (min)</th></tr></thead>"
         f"<tbody>{dependency_rows}</tbody></table></div></div>"
         "<div class='panel'><div class='panel-header'>Source-Origin Groundwork</div>"
-        "<p>What the current lineage artifact can support. Origin inference is explicitly marked as unresolved where no first-seen / propagation timestamps exist.</p>"
-        "<div class='table-container'><table><thead><tr><th>Source</th><th>Raw Records</th><th>Features</th><th>Reports</th><th>Origin Inference Status</th><th>Origin Uncertainty</th></tr></thead>"
+        "<p>Origin inference from current artifact-window observed timestamps (`observed_at`) with explicit uncertainty labels.</p>"
+        "<div class='table-container'><table><thead><tr><th>Source</th><th>Raw Records</th><th>Features</th><th>Reports</th><th>First Observed (window)</th><th>Origin Inference Status</th><th>Origin Uncertainty</th></tr></thead>"
         f"<tbody>{origin_rows}</tbody></table></div></div>"
     )
     return _page("Traceability / Lineage View", body, nav_prefix=nav_prefix, available_pages=available_pages)

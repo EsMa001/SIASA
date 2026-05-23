@@ -12,6 +12,7 @@ class LineageRecord:
     domain_status_id: str
     multi_domain_status_id: str
     snapshot_id: str
+    observed_at: str | None = None
     report_id: str | None = None
     report_ids: list[str] = field(default_factory=list)
 
@@ -25,6 +26,7 @@ def build_lineage_record(
     domain_status_id: str,
     multi_domain_status_id: str,
     snapshot_id: str,
+    observed_at: str | None = None,
     report_id: str | None = None,
     report_ids: list[str] | None = None,
 ) -> LineageRecord:
@@ -36,6 +38,7 @@ def build_lineage_record(
         domain_status_id=domain_status_id,
         multi_domain_status_id=multi_domain_status_id,
         snapshot_id=snapshot_id,
+        observed_at=observed_at,
         report_id=report_id,
         report_ids=list(report_ids or ([report_id] if report_id else [])),
     )
