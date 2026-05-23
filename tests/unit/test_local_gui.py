@@ -8,6 +8,7 @@ from pathlib import Path
 
 from siasa.gui import local_app
 from siasa.gui.local_app import build_local_mvp_site
+from siasa.readmodels.release_evidence import build_release_failure_drill_report
 
 
 _HREF_PATTERN = re.compile(r"href='([^']+)'")
@@ -1756,6 +1757,43 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert "Covered IDs: 19 / 19 | Open IDs: 0" in readiness_html
     assert "go" in readiness_html
     assert readiness_json["demo_checks"] == [{"label": "Persisted Demo Check", "ready": True}]
+
+
+def test_readiness_view_renders_failure_drill_scenarios_with_expected_no_go_signals(tmp_path: Path) -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    drill_report = build_release_failure_drill_report(repo_root=repo_root)
+    base_payload = local_app._demo_payload()
+
+    for scenario_id, assessment in drill_report["scenarios"].items():
+        scenario_dir = tmp_path / "drill-gui" / scenario_id
+        pages = build_local_mvp_site(
+            output_dir=scenario_dir,
+            world_map_read_model=base_payload["world_map_read_model"],
+            country_profile_read_models=base_payload["country_profile_read_models"],
+            domain_detail_read_models=base_payload["domain_detail_read_models"],
+            source_coverage_read_model=base_payload["source_coverage_read_model"],
+            report_catalog=base_payload["report_catalog"],
+            system_status_read_model=base_payload["system_status_read_model"],
+            validation_view_model=base_payload["validation_view_model"],
+            annotations_view_model=base_payload["annotations_view_model"],
+            readiness_view_model=assessment["readiness"],
+            release_gate_view_model=assessment["release_gate"],
+            stakeholder_functional_closure_view_model=assessment["stakeholder_functional_closure"],
+        )
+        readiness_html = (pages.output_dir / "readiness.html").read_text(encoding="utf-8")
+
+        if scenario_id == "baseline":
+            assert "go" in readiness_html
+            assert "Covered IDs: 19 / 19 | Open IDs: 0" in readiness_html
+        if scenario_id == "known_gap_injected":
+            assert "no_go" in readiness_html
+            assert "known_gaps_clear" in readiness_html
+        if scenario_id == "traceability_closure_at_risk_injected":
+            assert "no_go" in readiness_html
+            assert "traceability_integrity_clean" in readiness_html
+        if scenario_id == "stakeholder_focus_cluster_open_injected":
+            assert "Covered IDs: 18 / 19 | Open IDs: 1" in readiness_html
+            assert "StR-DRILL-001" in readiness_html
 
 
 def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bundle(tmp_path: Path) -> None:

@@ -64,6 +64,8 @@ Ausführung:
 - `PYTHONPATH=src python scripts/release_failure_drill_check.py`
 - optional Artifact-Pack für Review/UI-Nachweis:
   - `PYTHONPATH=src python scripts/build_release_failure_drill_pack.py --output-dir build/release_failure_drill/latest`
+- optional GUI-Szenario-Bundles für visuelle Ready/No-Go-Prüfung:
+  - `PYTHONPATH=src python scripts/build_release_failure_drill_gui_samples.py --output-dir build/release_failure_drill/gui_samples`
 
 Geprüfte Negativ-Szenarien:
 - synthetischer Known-Gap (`known_gaps_clear` muss als Blocker erscheinen, Gate = `no_go`)
