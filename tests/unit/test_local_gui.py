@@ -788,6 +788,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "replay-attention-reason-filter" in validation_html
     assert "replay-attention-sort" in validation_html
     assert "replay-attention-reset" in validation_html
+    assert "replay-attention-export-csv" in validation_html
+    assert "Export visible as CSV" in validation_html
+    assert "replay_attention_watchlist.csv" in validation_html
+    assert "exportVisibleReplayAttentionCsv" in validation_html
+    assert "suggested_next_action" in validation_html
     assert "Level (high→low)" in validation_html
     assert "Visible attention rows:" in validation_html
     assert "replay-attention-row" in validation_html
