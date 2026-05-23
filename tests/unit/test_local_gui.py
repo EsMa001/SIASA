@@ -792,6 +792,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Export visible as CSV" in validation_html
     assert "replay_attention_watchlist.csv" in validation_html
     assert "exportVisibleReplayAttentionCsv" in validation_html
+    assert "replay-attention-preset" in validation_html
+    assert "Quick preset:" in validation_html
+    assert "high-only" in validation_html
+    assert "governance-only" in validation_html
+    assert "domain-gap-only" in validation_html
     assert "suggested_next_action" in validation_html
     assert "Level (high→low)" in validation_html
     assert "Visible attention rows:" in validation_html
