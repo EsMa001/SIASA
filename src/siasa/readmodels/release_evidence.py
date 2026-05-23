@@ -6,6 +6,7 @@ from typing import Any
 
 from siasa.readmodels.readiness import build_readiness_view_model
 from siasa.readmodels.release_gate import build_release_gate_view_model
+from siasa.readmodels.stakeholder_functional_closure import build_stakeholder_functional_closure_report
 from siasa.traceability.consistency import build_traceability_integrity_report
 
 
@@ -31,21 +32,32 @@ def build_repo_release_gate_assessment(*, repo_root: Path) -> dict[str, Any]:
         available_pages={"index.html", "coverage.html", "reports.html", "validation.html"},
     )
     traceability_integrity = build_traceability_integrity_report(repo_root=repo_root)
+    stakeholder_functional_closure = build_stakeholder_functional_closure_report(repo_root=repo_root)
     release_gate = build_release_gate_view_model(
         readiness_view_model=readiness_view_model,
         traceability_integrity_report=traceability_integrity,
     )
-    release_readiness_index = build_release_readiness_index(repo_root=repo_root, release_gate_view_model=release_gate)
+    release_readiness_index = build_release_readiness_index(
+        repo_root=repo_root,
+        release_gate_view_model=release_gate,
+        stakeholder_functional_closure_report=stakeholder_functional_closure,
+    )
     return {
         "generated_at_utc": datetime.now(UTC).isoformat(),
         "release_gate": release_gate,
         "release_readiness_index": release_readiness_index,
         "readiness": readiness_view_model,
         "traceability_integrity": traceability_integrity,
+        "stakeholder_functional_closure": stakeholder_functional_closure,
     }
 
 
-def build_release_readiness_index(*, repo_root: Path, release_gate_view_model: dict[str, Any]) -> dict[str, Any]:
+def build_release_readiness_index(
+    *,
+    repo_root: Path,
+    release_gate_view_model: dict[str, Any],
+    stakeholder_functional_closure_report: dict[str, Any],
+) -> dict[str, Any]:
     workflow_path = repo_root / ".github" / "workflows" / "vmodel-ci.yml"
     runbook_path = repo_root / "docs" / "verification" / "release-go-no-go-runbook.md"
     evidence_script = repo_root / "scripts" / "build_release_evidence_pack.py"
@@ -69,6 +81,15 @@ def build_release_readiness_index(*, repo_root: Path, release_gate_view_model: d
                 str(item) for item in release_gate_view_model.get("blockers", [])
             ],
             "detail": "derived_from_release_gate_blockers",
+        },
+        {
+            "gate_id": "stakeholder_functional_focus_cluster_closed",
+            "passed": (
+                int((stakeholder_functional_closure_report.get("focus_gap_cluster") or {}).get("covered_count", 0)) == 19
+                and int((stakeholder_functional_closure_report.get("focus_gap_cluster") or {}).get("not_implemented_count", 1))
+                == 0
+            ),
+            "detail": "focus_gap_cluster.covered_count==19 and not_implemented_count==0",
         },
         {
             "gate_id": "ci_gate_enforced",

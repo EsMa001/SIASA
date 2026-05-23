@@ -9,9 +9,11 @@ def test_build_repo_release_gate_assessment_is_go_for_current_repo() -> None:
     assert assessment["release_gate"]["gate_verdict"] == "go"
     assert assessment["release_gate"]["blockers"] == []
     readiness_index = assessment["release_readiness_index"]
-    assert readiness_index["total_gates"] == 5
-    assert readiness_index["passed_gates"] == 5
+    assert readiness_index["total_gates"] == 6
+    assert readiness_index["passed_gates"] == 6
     assert readiness_index["percent"] == 100.0
+    gate_ids = [item["gate_id"] for item in readiness_index["gates"]]
+    assert "stakeholder_functional_focus_cluster_closed" in gate_ids
 
 
 def test_render_release_evidence_markdown_contains_gate_summary() -> None:
@@ -21,10 +23,11 @@ def test_render_release_evidence_markdown_contains_gate_summary() -> None:
             "release_gate": {"gate_verdict": "no_go", "blocker_count": 1, "blockers": ["known_gaps_clear"]},
             "release_readiness_index": {
                 "passed_gates": 3,
-                "total_gates": 5,
-                "percent": 60.0,
+                "total_gates": 6,
+                "percent": 50.0,
                 "gates": [
                     {"gate_id": "release_gate_go", "passed": False},
+                    {"gate_id": "stakeholder_functional_focus_cluster_closed", "passed": False},
                     {"gate_id": "go_no_go_runbook_present", "passed": True},
                 ],
             },
@@ -34,6 +37,7 @@ def test_render_release_evidence_markdown_contains_gate_summary() -> None:
     )
     assert "SIASA Release Evidence Pack" in markdown
     assert "gate_verdict: no_go" in markdown
-    assert "release_readiness_gates: 3/5" in markdown
+    assert "release_readiness_gates: 3/6" in markdown
     assert "release_gate_go: fail" in markdown
+    assert "stakeholder_functional_focus_cluster_closed: fail" in markdown
     assert "known_gaps_clear" in markdown

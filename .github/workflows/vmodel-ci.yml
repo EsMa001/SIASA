@@ -20,5 +20,7 @@ jobs:
         run: pytest tests -q
       - name: Enforce release gate (fail on no_go)
         run: PYTHONPATH=src python scripts/ci_release_gate_check.py
+      - name: Enforce stakeholder functional closure focus cluster
+        run: PYTHONPATH=src python scripts/ci_stakeholder_closure_check.py
       - name: Build release evidence pack
         run: PYTHONPATH=src python scripts/build_release_evidence_pack.py --output-dir build/release_evidence/latest
