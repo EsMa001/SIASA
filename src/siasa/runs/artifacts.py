@@ -15,6 +15,7 @@ from siasa.readmodels.annotations import build_annotations_view_model
 from siasa.readmodels.country_profile import build_country_profile_read_model
 from siasa.readmodels.domain_detail import build_domain_detail_read_model
 from siasa.readmodels.readiness import build_readiness_view_model
+from siasa.readmodels.release_gate import build_release_gate_view_model
 from siasa.readmodels.source_coverage import build_source_coverage_read_model
 from siasa.readmodels.system_status import build_system_status_read_model
 from siasa.readmodels.world_map import build_world_map_read_model
@@ -23,7 +24,7 @@ from siasa.reporting.manual_reports import generate_coverage_report, generate_do
 from siasa.runs.run_state import RunState
 from siasa.scoring.domain_status import DomainStatusResult
 from siasa.snapshots.models import Snapshot
-from siasa.traceability.consistency import build_repo_closure_report
+from siasa.traceability.consistency import build_repo_closure_report, build_traceability_integrity_report
 from siasa.traceability.lineage import LineageRecord
 
 
@@ -412,10 +413,7 @@ def write_run_artifacts(
         report_id: {"report_id": report_id}
         for report_id in available_reports
     }
-    readiness_path = readmodels_dir / "readiness.json"
-    readiness_path.write_text(
-        json.dumps(
-            build_readiness_view_model(
+    readiness_view_model = build_readiness_view_model(
                 country_profile_read_models={
                     country_file.stem: json.loads(country_file.read_text())
                     for country_file in sorted(country_profiles_dir.glob("*.json"))
@@ -435,12 +433,35 @@ def write_run_artifacts(
                 annotations_view_model=json.loads(annotations_path.read_text()),
                 repo_closure_view_model=json.loads(repo_closure_path.read_text()),
                 available_pages=readiness_available_pages,
+            )
+    readiness_path = readmodels_dir / "readiness.json"
+    readiness_path.write_text(
+        json.dumps(readiness_view_model, indent=2, sort_keys=True)
+    )
+    readmodel_paths.append(readiness_path)
+
+    traceability_integrity_path = readmodels_dir / "traceability_integrity.json"
+    traceability_integrity_path.write_text(
+        json.dumps(
+            build_traceability_integrity_report(repo_root=Path(__file__).resolve().parents[3]),
+            indent=2,
+            sort_keys=True,
+        )
+    )
+    readmodel_paths.append(traceability_integrity_path)
+
+    release_gate_path = readmodels_dir / "release_gate.json"
+    release_gate_path.write_text(
+        json.dumps(
+            build_release_gate_view_model(
+                readiness_view_model=readiness_view_model,
+                traceability_integrity_report=json.loads(traceability_integrity_path.read_text()),
             ),
             indent=2,
             sort_keys=True,
         )
     )
-    readmodel_paths.append(readiness_path)
+    readmodel_paths.append(release_gate_path)
 
     report_paths = []
     daily_report_path = reports_dir / "daily_snapshot.json"

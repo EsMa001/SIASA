@@ -157,6 +157,8 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert (tmp_path / "bundle" / "readmodels" / "source_coverage.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "system_status.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "readiness.json").exists()
+    assert (tmp_path / "bundle" / "readmodels" / "traceability_integrity.json").exists()
+    assert (tmp_path / "bundle" / "readmodels" / "release_gate.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "traceability_lineage.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "repo_closure.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "annotations.json").exists()
@@ -183,6 +185,8 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     domain_detail_a = json.loads((tmp_path / "bundle" / "readmodels" / "domain_details" / "UKR__A.json").read_text())
     system_status = json.loads((tmp_path / "bundle" / "readmodels" / "system_status.json").read_text())
     readiness = json.loads((tmp_path / "bundle" / "readmodels" / "readiness.json").read_text())
+    traceability_integrity = json.loads((tmp_path / "bundle" / "readmodels" / "traceability_integrity.json").read_text())
+    release_gate = json.loads((tmp_path / "bundle" / "readmodels" / "release_gate.json").read_text())
     traceability = json.loads((tmp_path / "bundle" / "readmodels" / "traceability_lineage.json").read_text())
     repo_closure = json.loads((tmp_path / "bundle" / "readmodels" / "repo_closure.json").read_text())
     annotations = json.loads((tmp_path / "bundle" / "readmodels" / "annotations.json").read_text())
@@ -212,6 +216,10 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert readiness["demo_verdict"] == "blocked"
     assert readiness["release_verdict"] == "blocked_by_known_gaps"
     assert readiness["known_gaps"] == ["validation_backtest_absent:not_configured"]
+    assert traceability_integrity["summary"]["requirement_count"] == 45
+    assert release_gate["gate_verdict"] == "no_go"
+    assert "release_verdict_ready" in release_gate["blockers"]
+    assert "known_gaps_clear" in release_gate["blockers"]
     assert readiness["artifact_checks"][0] == {
         "artifact": "validation_backtest",
         "status": "absent",
