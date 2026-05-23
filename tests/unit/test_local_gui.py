@@ -793,6 +793,12 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "replay_attention_watchlist_" in validation_html
     assert "const sortKey=(sortSelect&&sortSelect.value)?sortSelect.value:'default';" in validation_html
     assert "exportVisibleReplayAttentionCsv" in validation_html
+    assert "replay-attention-copy-csv" in validation_html
+    assert "Copy visible CSV" in validation_html
+    assert "replay-attention-copy-status" in validation_html
+    assert "copyVisibleReplayAttentionCsv" in validation_html
+    assert "Copied CSV" in validation_html
+    assert "Clipboard API unavailable" in validation_html
     assert "replay-attention-preset" in validation_html
     assert "Quick preset:" in validation_html
     assert "high-only" in validation_html
