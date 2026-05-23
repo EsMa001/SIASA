@@ -16,7 +16,18 @@ def test_release_failure_drill_report_detects_expected_failure_modes() -> None:
     assert checks["traceability_blocker_present"] is True
     assert checks["stakeholder_gate_fails"] is True
 
-    stakeholder_scenario = report["scenarios"]["stakeholder_focus_cluster_open_injected"]
+    scenarios = report["scenarios"]
+    assert set(scenarios.keys()) == {
+        "baseline",
+        "known_gap_injected",
+        "traceability_closure_at_risk_injected",
+        "stakeholder_focus_cluster_open_injected",
+    }
+    assert scenarios["baseline"]["release_gate"]["gate_verdict"] == "go"
+    assert scenarios["known_gap_injected"]["release_gate"]["gate_verdict"] == "no_go"
+    assert scenarios["traceability_closure_at_risk_injected"]["release_gate"]["gate_verdict"] == "no_go"
+
+    stakeholder_scenario = scenarios["stakeholder_focus_cluster_open_injected"]
     stakeholder_gate = {
         item["gate_id"]: item["passed"]
         for item in stakeholder_scenario["release_readiness_index"]["gates"]

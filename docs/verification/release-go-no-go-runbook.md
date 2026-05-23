@@ -62,6 +62,8 @@ Ziel: Nachweisen, dass Governance im Fehlerfall wirklich auf `no_go` kippt und n
 
 Ausführung:
 - `PYTHONPATH=src python scripts/release_failure_drill_check.py`
+- optional Artifact-Pack für Review/UI-Nachweis:
+  - `PYTHONPATH=src python scripts/build_release_failure_drill_pack.py --output-dir build/release_failure_drill/latest`
 
 Geprüfte Negativ-Szenarien:
 - synthetischer Known-Gap (`known_gaps_clear` muss als Blocker erscheinen, Gate = `no_go`)
