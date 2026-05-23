@@ -1,0 +1,201 @@
+metadata:
+  project: SIASA
+  artifact_type: stakeholder_e2e_flow_suite
+  work_package: AP-04
+  purpose: >-
+    Define prioritized stakeholder-facing end-to-end flows after AP-01 quality normalization,
+    AP-02 StR->SyR closure, and AP-03 verification-route coverage. AP-04 focuses on
+    role/user journeys and visible evidence, not on adding new low-level requirements.
+  decision_model: 5.5-class flow-design review per docs/verification/siasa-model-routing-matrix.md
+  execution_model: Codex 5.3 for repository artifact updates
+coverage_rules:
+  required_flow_fields:
+  - id
+  - role
+  - intent
+  - stakeholder_requirement_refs
+  - system_requirement_refs
+  - happy_path
+  - failure_paths
+  - evidence_refs
+  minimum_flow_count: 6
+  required_roles:
+  - project_lead
+  - analyst
+  - governance_admin
+  - viewer
+  required_path_types:
+  - happy_path
+  - failure_path
+flows:
+- id: FLOW-PL-READINESS-GONO-001
+  role: project_lead
+  intent: Review release readiness, gate verdict, stakeholder closure, and no-go blockers from generated evidence.
+  stakeholder_requirement_refs:
+  - StR-562
+  - StR-583
+  - StR-584
+  - StR-600
+  - StR-601
+  system_requirement_refs:
+  - SyR-023
+  - SyR-040
+  - SyR-048
+  happy_path:
+  - Open readiness.html from a generated GUI bundle.
+  - Confirm demo/release verdict, gate verdict, stakeholder focus closure, and blocker list.
+  - Open generated release/stakeholder evidence JSON for audit.
+  failure_paths:
+  - Known-gap injected scenario shows no_go and blocker known_gaps_clear.
+  - Traceability-risk injected scenario shows no_go and blocker traceability_integrity_clean.
+  - Stakeholder-focus-open scenario shows open focus IDs.
+  evidence_refs:
+  - type: pytest
+    path: tests/unit/test_local_gui.py
+    test: test_readiness_view_renders_failure_drill_scenarios_with_expected_no_go_signals
+  - type: script
+    path: scripts/build_release_failure_drill_gui_samples.py
+  - type: script
+    path: scripts/build_release_evidence_pack.py
+- id: FLOW-AN-COUNTRY-DOMAIN-001
+  role: analyst
+  intent: Start from global overview, drill into a country, and inspect domain-level drivers, coverage, baseline comparison, and uncertainty.
+  stakeholder_requirement_refs:
+  - StR-018
+  - StR-020
+  - StR-089
+  - StR-311
+  - StR-312
+  system_requirement_refs:
+  - SyR-020
+  - SyR-021
+  - SyR-022
+  happy_path:
+  - Open index.html and use overview controls.
+  - Follow country drill-down to countries/<country>.html.
+  - Follow domain detail link to domains/<country>-<domain>.html.
+  failure_paths:
+  - Country drill-down links are suppressed when target pages are not generated.
+  - Internal HTML links must resolve inside the bundle.
+  evidence_refs:
+  - type: pytest
+    path: tests/unit/test_local_gui.py
+    test: test_build_local_mvp_site_creates_required_mvp_pages_and_exports
+  - type: pytest
+    path: tests/unit/test_local_gui.py
+    test: test_build_local_mvp_site_suppresses_country_drill_down_links_without_generated_country_pages
+  - type: pytest
+    path: tests/unit/test_local_gui.py
+    test: test_build_local_mvp_site_emits_only_resolvable_internal_html_links
+- id: FLOW-AN-VALIDATION-REPLAY-001
+  role: analyst
+  intent: Review validation/backtest evidence and triage non-perfect replay attention cases.
+  stakeholder_requirement_refs:
+  - StR-358
+  - StR-359
+  - StR-360
+  - StR-600
+  system_requirement_refs:
+  - SyR-026
+  - SyR-040
+  happy_path:
+  - Open validation.html.
+  - Inspect reference cases, replay evidence, attention summary, and watchlist controls.
+  - Use filters/search/export/copy/share-link controls for triage handoff.
+  failure_paths:
+  - Partial/mismatch replay outcomes remain visible rather than being hidden as pass.
+  - Validation artifact absence is surfaced as readiness artifact status.
+  evidence_refs:
+  - type: pytest
+    path: tests/unit/test_local_gui.py
+    test: test_build_local_mvp_site_creates_required_mvp_pages_and_exports
+  - type: pytest
+    path: tests/unit/test_validation_replay_depth_probe_readmodels.py
+    test: test_validation_replay_depth_probe_has_replay_evidence_depth_signals
+  - type: pytest
+    path: tests/unit/test_local_gui.py
+    test: test_load_site_payload_from_artifacts_falls_back_for_missing_readiness_support_files
+- id: FLOW-GOV-SOURCE-TRACE-001
+  role: governance_admin
+  intent: Inspect source coverage, freshness, stale remediation priority, and source-to-status traceability.
+  stakeholder_requirement_refs:
+  - StR-013
+  - StR-016
+  - StR-382
+  - StR-383
+  - StR-584
+  system_requirement_refs:
+  - SyR-006
+  - SyR-019
+  - SyR-023
+  - SyR-034
+  happy_path:
+  - Open coverage.html for source status and stale priority queue.
+  - Open traceability.html for lineage/source-origin/dependency signals.
+  - Confirm source failures and freshness risks remain visible.
+  failure_paths:
+  - Invalid evidence links are rejected.
+  - Missing optional artifacts produce explicit readiness statuses.
+  evidence_refs:
+  - type: pytest
+    path: tests/unit/test_local_gui.py
+    test: test_render_watchlist_evidence_link_allows_internal_coverage_targets_only
+  - type: pytest
+    path: tests/unit/test_local_gui.py
+    test: test_render_stale_priority_watchlist_shows_summary_and_rows
+  - type: pytest
+    path: tests/unit/test_traceability_consistency.py
+    test: test_build_traceability_integrity_report_is_globally_clean
+- id: FLOW-GOV-REPORT-EVIDENCE-001
+  role: governance_admin
+  intent: Generate and inspect governed reports, exports, release evidence packs, and AP-01/AP-02/AP-03 assurance reports.
+  stakeholder_requirement_refs:
+  - StR-291
+  - StR-301
+  - StR-382
+  - StR-600
+  system_requirement_refs:
+  - SyR-018
+  - SyR-025
+  - SyR-044
+  - SyR-048
+  happy_path:
+  - Generate release/stakeholder assurance reports.
+  - Open reports.html and download/copy governed export files.
+  - Verify evidence JSON and Markdown are sufficient for steering.
+  failure_paths:
+  - Missing gate/evidence artifacts are detected by build scripts or readiness page.
+  evidence_refs:
+  - type: pytest
+    path: tests/unit/test_local_gui.py
+    test: test_build_local_mvp_site_copies_report_export_files_and_renders_download_links
+  - type: script
+    path: scripts/build_stakeholder_requirement_quality_report.py
+  - type: script
+    path: scripts/build_stakeholder_system_traceability_report.py
+  - type: script
+    path: scripts/build_stakeholder_verification_coverage_report.py
+- id: FLOW-VIEWER-ROLE-BOUNDARY-001
+  role: viewer
+  intent: Verify role-specific GUI boundaries so viewer access does not expose annotation or operations surfaces.
+  stakeholder_requirement_refs:
+  - StR-606
+  - StR-607
+  - StR-608
+  - StR-609
+  system_requirement_refs:
+  - SyR-029
+  - SyR-049
+  happy_path:
+  - Build GUI in viewer role.
+  - Confirm overview/readiness/navigation remain usable.
+  - Confirm restricted analyst/admin pages are absent.
+  failure_paths:
+  - Unknown role is rejected.
+  evidence_refs:
+  - type: pytest
+    path: tests/unit/test_local_gui.py
+    test: test_build_local_mvp_site_viewer_role_hides_annotation_and_ops_pages
+  - type: pytest
+    path: tests/unit/test_local_gui.py
+    test: test_build_local_mvp_site_rejects_unknown_role

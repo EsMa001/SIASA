@@ -13,6 +13,10 @@ from .release_evidence import (
 from .release_gate import build_release_gate_view_model
 from .source_coverage import build_source_coverage_read_model
 from .stakeholder_functional_closure import build_stakeholder_functional_closure_report
+from .stakeholder_e2e_flow_coverage import (
+    build_stakeholder_e2e_flow_coverage_report,
+    render_stakeholder_e2e_flow_coverage_markdown,
+)
 from .stakeholder_requirement_quality import (
     build_stakeholder_requirement_quality_report,
     render_stakeholder_requirement_quality_markdown,
@@ -40,6 +44,8 @@ __all__ = [
     "build_release_gate_view_model",
     "build_source_coverage_read_model",
     "build_stakeholder_functional_closure_report",
+    "build_stakeholder_e2e_flow_coverage_report",
+    "render_stakeholder_e2e_flow_coverage_markdown",
     "build_stakeholder_requirement_quality_report",
     "render_stakeholder_requirement_quality_markdown",
     "build_stakeholder_system_traceability_report",
