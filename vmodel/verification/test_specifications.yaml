@@ -830,3 +830,63 @@ test_specifications:
   preconditions:
   - Derived software requirements and software architecture are available.
   expected_result: The software shall support controlled reprocessing using versioned rules, mappings, and configuration tables so that outputs from different versions can be compared.
+- id: TC-SwR-046-001
+  requirement_ids:
+  - SwR-046
+  title: Verify Country-centric multi-domain assessment output contract
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall produce country-centric multi-domain assessment artifacts that explicitly separate and expose domains A, B, C, D, and E for structured situation understanding.
+- id: TC-SwR-047-001
+  requirement_ids:
+  - SwR-047
+  title: Verify Non-deterministic and anti-naive-fusion guardrails
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall prevent deterministic event-prediction outputs and shall prevent naive additive cross-domain A-E fusion-score pathways in the governed MVP baseline.
+- id: TC-SwR-048-001
+  requirement_ids:
+  - SwR-048
+  title: Verify Relative-baseline anomaly evaluation
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall evaluate signal abnormality relative to historical, country-specific, domain-specific, and source-specific baselines, not by absolute raw magnitude alone.
+- id: TC-SwR-049-001
+  requirement_ids:
+  - SwR-049
+  title: Verify Historical data foundation horizon policy
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall maintain a governed historical data foundation with a target horizon of at least three years for core sources where available and shall explicitly record shorter-horizon constraints per source.
+- id: TC-SwR-050-001
+  requirement_ids:
+  - SwR-050
+  title: Verify Daily incremental run and snapshot manifest contract
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall execute daily incremental runs that fetch, normalize, persist, and snapshot new data and shall emit run and snapshot manifests for reproducibility.
+- id: TC-SwR-051-001
+  requirement_ids:
+  - SwR-051
+  title: Verify Layered data-state separation
+  level: software
+  method: software_specification_review
+  status: specified
+  preconditions:
+  - Derived software requirements and software architecture are available.
+  expected_result: The software shall preserve explicit layer separation across raw data, normalized data, features, status or score outputs, and report or export artifacts.

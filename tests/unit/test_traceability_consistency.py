@@ -192,7 +192,7 @@ def test_build_requirement_closure_report_for_governance_and_run_controls_slice(
     )
 
     assert report["slice_id"] == "governance-and-run-controls"
-    assert report["summary"] == {"closed": 6, "at_risk": 0}
+    assert report["summary"] == {"closed": 12, "at_risk": 0}
     assert report["requirements"][0]["requirement_id"] == "SwR-040"
     assert report["requirements"][0]["verifying_test_specs"] == ["TC-SwR-040-001"]
     assert "src/siasa/governance/roles.py" in report["requirements"][0]["code_paths"]
@@ -454,8 +454,8 @@ def test_build_repo_closure_report_aggregates_all_governed_slices() -> None:
 
     assert report["summary"] == {
         "slice_count": 9,
-        "requirement_count": 45,
-        "closed": 45,
+        "requirement_count": 51,
+        "closed": 51,
         "at_risk": 0,
     }
     assert report["slice_ids"] == [
@@ -483,8 +483,8 @@ def test_build_traceability_integrity_report_is_globally_clean() -> None:
     report = build_traceability_integrity_report(repo_root=repo_root)
 
     assert report["summary"] == {
-        "requirement_count": 45,
-        "mapped_requirement_count": 45,
+        "requirement_count": 51,
+        "mapped_requirement_count": 51,
         "missing_requirement_mapping_count": 0,
         "orphan_mapped_requirement_count": 0,
         "slice_count": 9,
@@ -496,7 +496,7 @@ def test_build_traceability_integrity_report_is_globally_clean() -> None:
     assert report["unhealthy_slices"] == []
     assert report["repo_closure"]["summary"] == {
         "slice_count": 9,
-        "requirement_count": 45,
-        "closed": 45,
+        "requirement_count": 51,
+        "closed": 51,
         "at_risk": 0,
     }

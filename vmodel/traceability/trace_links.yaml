@@ -1146,4 +1146,83 @@ traceability:
     relation: verifies
     target_ids:
     - SwR-045
+  - source_id: SwR-046
+    relation: derives_from
+    target_ids:
+    - SyR-001
+    - SyR-002
+  - source_id: SwR-046
+    relation: allocated_to
+    target_ids:
+    - DDS-009
+    - DDS-010
+  - source_id: TC-SwR-046-001
+    relation: verifies
+    target_ids:
+    - SwR-046
+  - source_id: SwR-047
+    relation: derives_from
+    target_ids:
+    - SyR-003
+  - source_id: SwR-047
+    relation: allocated_to
+    target_ids:
+    - DDS-004
+    - DDS-011
+  - source_id: TC-SwR-047-001
+    relation: verifies
+    target_ids:
+    - SwR-047
+  - source_id: SwR-048
+    relation: derives_from
+    target_ids:
+    - SyR-001
+  - source_id: SwR-048
+    relation: allocated_to
+    target_ids:
+    - DDS-004
+  - source_id: TC-SwR-048-001
+    relation: verifies
+    target_ids:
+    - SwR-048
+  - source_id: SwR-049
+    relation: derives_from
+    target_ids:
+    - SyR-008
+  - source_id: SwR-049
+    relation: allocated_to
+    target_ids:
+    - DDS-001
+    - DDS-003
+  - source_id: TC-SwR-049-001
+    relation: verifies
+    target_ids:
+    - SwR-049
+  - source_id: SwR-050
+    relation: derives_from
+    target_ids:
+    - SyR-008
+    - SyR-009
+  - source_id: SwR-050
+    relation: allocated_to
+    target_ids:
+    - DDS-012
+  - source_id: TC-SwR-050-001
+    relation: verifies
+    target_ids:
+    - SwR-050
+  - source_id: SwR-051
+    relation: derives_from
+    target_ids:
+    - SyR-008
+    - SyR-019
+  - source_id: SwR-051
+    relation: allocated_to
+    target_ids:
+    - DDS-003
+    - DDS-009
+  - source_id: TC-SwR-051-001
+    relation: verifies
+    target_ids:
+    - SwR-051
   waivers: []

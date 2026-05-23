@@ -216,7 +216,7 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert readiness["demo_verdict"] == "blocked"
     assert readiness["release_verdict"] == "blocked_by_known_gaps"
     assert readiness["known_gaps"] == ["validation_backtest_absent:not_configured"]
-    assert traceability_integrity["summary"]["requirement_count"] == 45
+    assert traceability_integrity["summary"]["requirement_count"] == 51
     assert release_gate["gate_verdict"] == "no_go"
     assert "release_verdict_ready" in release_gate["blockers"]
     assert "known_gaps_clear" in release_gate["blockers"]
@@ -232,7 +232,7 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert event_report["payload"]["source_state"] == {"SRC-B": "success"}
     assert "REP-COVERAGE-RUN-200" in traceability["lineage_records"][0]["report_ids"]
     assert "REP-COUNTRY-UKR" in traceability["lineage_records"][0]["report_ids"]
-    assert repo_closure["summary"] == {"slice_count": 9, "requirement_count": 45, "closed": 45, "at_risk": 0}
+    assert repo_closure["summary"] == {"slice_count": 9, "requirement_count": 51, "closed": 51, "at_risk": 0}
     assert repo_closure["slice_ids"] == [
         "baseline-and-status-engines",
         "catalog-and-ingestion-foundation",

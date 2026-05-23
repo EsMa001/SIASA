@@ -1605,7 +1605,7 @@ def test_load_site_payload_from_artifacts_falls_back_for_missing_readiness_suppo
 
     assert payload["validation_view_model"] is None
     assert payload["annotations_view_model"] == {"annotations": [], "by_scope": {}, "by_linked_item": {}}
-    assert payload["repo_closure_view_model"]["summary"] == {"slice_count": 9, "requirement_count": 45, "closed": 45, "at_risk": 0}
+    assert payload["repo_closure_view_model"]["summary"] == {"slice_count": 9, "requirement_count": 51, "closed": 51, "at_risk": 0}
 
     pages = build_local_mvp_site(output_dir=tmp_path / "site", **payload)
     readiness_html = (pages.output_dir / "readiness.html").read_text()

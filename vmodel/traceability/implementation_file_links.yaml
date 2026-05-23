@@ -267,6 +267,12 @@ implementation_slices:
       - SwR-043
       - SwR-044
       - SwR-045
+      - SwR-046
+      - SwR-047
+      - SwR-048
+      - SwR-049
+      - SwR-050
+      - SwR-051
     implementation_map:
       SwR-040:
         code_paths:
@@ -314,6 +320,51 @@ implementation_slices:
           - tests/unit/test_governance_guards.py
           - tests/unit/test_reprocessing.py
           - tests/unit/test_reprocessing_workflow.py
+      SwR-046:
+        code_paths:
+          - src/siasa/readmodels/world_map.py
+          - src/siasa/readmodels/country_profile.py
+          - src/siasa/readmodels/domain_detail.py
+        test_paths:
+          - tests/unit/test_local_gui.py
+      SwR-047:
+        code_paths:
+          - src/siasa/governance/export_policy.py
+          - src/siasa/reporting/manual_reports.py
+        test_paths:
+          - tests/unit/test_governance_guards.py
+      SwR-048:
+        code_paths:
+          - src/siasa/scoring/baselines.py
+          - src/siasa/scoring/domain_status.py
+        test_paths:
+          - tests/unit/test_baselines.py
+          - tests/unit/test_domain_status.py
+      SwR-049:
+        code_paths:
+          - src/siasa/catalog/models.py
+          - src/siasa/runs/orchestrator.py
+        test_paths:
+          - tests/unit/test_catalog_models.py
+          - tests/unit/test_run_orchestrator.py
+      SwR-050:
+        code_paths:
+          - src/siasa/runs/orchestrator.py
+          - src/siasa/snapshots/service.py
+          - src/siasa/runs/artifacts.py
+        test_paths:
+          - tests/unit/test_run_orchestrator.py
+          - tests/unit/test_run_artifacts.py
+      SwR-051:
+        code_paths:
+          - src/siasa/data/raw_models.py
+          - src/siasa/data/normalized_models.py
+          - src/siasa/features/base.py
+          - src/siasa/reporting/daily_snapshot.py
+        test_paths:
+          - tests/unit/test_data_models.py
+          - tests/unit/test_features_base.py
+          - tests/unit/test_reporting_daily_snapshot.py
     known_code_paths:
       - src/siasa/governance/roles.py
       - src/siasa/governance/export_policy.py
@@ -325,6 +376,16 @@ implementation_slices:
       - src/siasa/snapshots/service.py
       - src/siasa/runs/artifacts.py
       - src/siasa/runs/reprocessing.py
+      - src/siasa/readmodels/world_map.py
+      - src/siasa/readmodels/country_profile.py
+      - src/siasa/readmodels/domain_detail.py
+      - src/siasa/reporting/manual_reports.py
+      - src/siasa/scoring/baselines.py
+      - src/siasa/scoring/domain_status.py
+      - src/siasa/catalog/models.py
+      - src/siasa/data/raw_models.py
+      - src/siasa/data/normalized_models.py
+      - src/siasa/features/base.py
     known_test_paths:
       - tests/unit/test_governance_guards.py
       - tests/unit/test_reporting_daily_snapshot.py
@@ -333,6 +394,12 @@ implementation_slices:
       - tests/unit/test_run_artifacts.py
       - tests/unit/test_reprocessing.py
       - tests/unit/test_reprocessing_workflow.py
+      - tests/unit/test_local_gui.py
+      - tests/unit/test_baselines.py
+      - tests/unit/test_domain_status.py
+      - tests/unit/test_catalog_models.py
+      - tests/unit/test_data_models.py
+      - tests/unit/test_features_base.py
   normalization-and-mapping:
     requirement_ids:
       - SwR-009
