@@ -13,7 +13,9 @@ from urllib.parse import quote
 
 from siasa.catalog import load_country_set
 from siasa.readmodels.readiness import build_readiness_view_model
+from siasa.readmodels.release_evidence import build_release_readiness_index
 from siasa.readmodels.release_gate import build_release_gate_view_model
+from siasa.readmodels.stakeholder_e2e_flow_coverage import build_stakeholder_e2e_flow_coverage_report
 from siasa.readmodels.validation_backtest import build_historical_replay_summary
 from siasa.traceability.consistency import build_repo_closure_report, build_traceability_integrity_report
 
@@ -1365,6 +1367,14 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
     stakeholder_functional_closure_view_path = readmodels_dir / 'stakeholder_functional_closure.json'
     if stakeholder_functional_closure_view_path.exists():
         stakeholder_functional_closure_view_model = _load_json(stakeholder_functional_closure_view_path)
+    stakeholder_e2e_flow_coverage_view_model = None
+    stakeholder_e2e_flow_coverage_view_path = readmodels_dir / 'stakeholder_e2e_flow_coverage.json'
+    if stakeholder_e2e_flow_coverage_view_path.exists():
+        stakeholder_e2e_flow_coverage_view_model = _load_json(stakeholder_e2e_flow_coverage_view_path)
+    release_readiness_index_view_model = None
+    release_readiness_index_view_path = readmodels_dir / 'release_readiness_index.json'
+    if release_readiness_index_view_path.exists():
+        release_readiness_index_view_model = _load_json(release_readiness_index_view_path)
 
     return {
         'world_map_read_model': world_map_read_model,
@@ -1380,6 +1390,8 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
         'readiness_view_model': readiness_view_model,
         'release_gate_view_model': release_gate_view_model,
         'stakeholder_functional_closure_view_model': stakeholder_functional_closure_view_model,
+        'stakeholder_e2e_flow_coverage_view_model': stakeholder_e2e_flow_coverage_view_model,
+        'release_readiness_index_view_model': release_readiness_index_view_model,
     }
 
 
@@ -2130,6 +2142,8 @@ def _render_readiness(
     readiness_view_model: dict[str, Any],
     release_gate_view_model: dict[str, Any] | None = None,
     stakeholder_functional_closure_view_model: dict[str, Any] | None = None,
+    stakeholder_e2e_flow_coverage_view_model: dict[str, Any] | None = None,
+    release_readiness_index_view_model: dict[str, Any] | None = None,
     *,
     nav_prefix: str = '',
     available_pages: set[str] | None = None,
@@ -2183,6 +2197,33 @@ def _render_readiness(
     _stakeholder_color = '#4edea3' if _stakeholder_status == 'closed' else '#ffb4ab'
     _stakeholder_open_ids = [str(item) for item in _stakeholder_focus.get('not_implemented_ids', [])] if _stakeholder_focus else []
     _stakeholder_open_items = ''.join(f"<li>{html.escape(item)}</li>" for item in _stakeholder_open_ids) or "<li>none</li>"
+    _readiness_index = release_readiness_index_view_model or {}
+    _readiness_passed = int(_readiness_index.get('passed_gates', 0)) if _readiness_index else 0
+    _readiness_total = int(_readiness_index.get('total_gates', 0)) if _readiness_index else 0
+    _readiness_percent = _readiness_index.get('percent', 'n/a') if _readiness_index else 'n/a'
+    _readiness_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(item.get('gate_id', 'n/a')))}</td>"
+        f"<td>{'pass' if bool(item.get('passed')) else 'fail'}</td>"
+        f"<td>{html.escape(str(item.get('detail', 'n/a')))}</td>"
+        "</tr>"
+        for item in _readiness_index.get('gates', [])
+        if isinstance(item, dict)
+    ) or "<tr><td colspan='3'>No readiness gates available.</td></tr>"
+    _e2e_summary = (stakeholder_e2e_flow_coverage_view_model or {}).get('summary', {})
+    _e2e_stop_criteria = (stakeholder_e2e_flow_coverage_view_model or {}).get('stop_criteria', {})
+    _e2e_flow_count = int(_e2e_summary.get('flow_count', 0)) if _e2e_summary else 0
+    _e2e_covered_flow_count = int(_e2e_summary.get('covered_flow_count', 0)) if _e2e_summary else 0
+    _e2e_flow_gap_count = int(_e2e_summary.get('flow_gap_count', 0)) if _e2e_summary else 0
+    _e2e_missing_evidence_refs = int(_e2e_summary.get('missing_evidence_ref_count', 0)) if _e2e_summary else 0
+    _e2e_missing_requirement_refs = int(_e2e_summary.get('missing_requirement_ref_count', 0)) if _e2e_summary else 0
+    _e2e_stop_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(key))}</td>"
+        f"<td>{'pass' if bool(value) else 'fail'}</td>"
+        "</tr>"
+        for key, value in sorted(_e2e_stop_criteria.items())
+    ) or "<tr><td colspan='2'>No AP-04 stop-criteria data available.</td></tr>"
 
     body = (
         # === KPI Header ===
@@ -2206,6 +2247,14 @@ def _render_readiness(
         "<div class='panel'><div class='panel-header'>Artifact Readiness</div>"
         "<table><thead><tr><th>Artifact</th><th>Status</th></tr></thead>"
         f"<tbody>{artifact_rows}</tbody></table></div>"
+        "<div class='panel'><div class='panel-header'>Release Readiness Index</div>"
+        f"<p>Passed Gates: <strong>{html.escape(str(_readiness_passed))}/{html.escape(str(_readiness_total))}</strong> ({html.escape(str(_readiness_percent))}%)</p>"
+        "<table><thead><tr><th>Gate</th><th>Status</th><th>Detail</th></tr></thead>"
+        f"<tbody>{_readiness_rows}</tbody></table></div>"
+        "<div class='panel'><div class='panel-header'>Stakeholder E2E Flow Coverage (AP-04/AP-05)</div>"
+        f"<p>Covered Flows: <strong>{html.escape(str(_e2e_covered_flow_count))}/{html.escape(str(_e2e_flow_count))}</strong> | Flow Gaps: {html.escape(str(_e2e_flow_gap_count))} | Missing Evidence Refs: {html.escape(str(_e2e_missing_evidence_refs))} | Missing Requirement Refs: {html.escape(str(_e2e_missing_requirement_refs))}</p>"
+        "<table><thead><tr><th>Stop Criterion</th><th>Status</th></tr></thead>"
+        f"<tbody>{_e2e_stop_rows}</tbody></table></div>"
         # === Known Gaps ===
         "<div class='panel'><div class='panel-header'>Known Gaps Before Release</div>"
         f"<ul>{known_gap_items}</ul></div>"
@@ -3242,6 +3291,8 @@ def build_local_mvp_site(
     readiness_view_model: dict[str, Any] | None = None,
     release_gate_view_model: dict[str, Any] | None = None,
     stakeholder_functional_closure_view_model: dict[str, Any] | None = None,
+    stakeholder_e2e_flow_coverage_view_model: dict[str, Any] | None = None,
+    release_readiness_index_view_model: dict[str, Any] | None = None,
     ui_role: str = 'analyst',
 ) -> SiteBuildResult:
     normalized_role = _normalize_ui_role(ui_role)
@@ -3389,12 +3440,25 @@ def build_local_mvp_site(
             readiness_view_model=readiness_view_model,
             traceability_integrity_report=build_traceability_integrity_report(repo_root=Path(__file__).resolve().parents[3]),
         )
+    if stakeholder_e2e_flow_coverage_view_model is None:
+        stakeholder_e2e_flow_coverage_view_model = build_stakeholder_e2e_flow_coverage_report(
+            repo_root=Path(__file__).resolve().parents[3]
+        )
+    if release_readiness_index_view_model is None:
+        release_readiness_index_view_model = build_release_readiness_index(
+            repo_root=Path(__file__).resolve().parents[3],
+            release_gate_view_model=release_gate_view_model,
+            stakeholder_functional_closure_report=stakeholder_functional_closure_view_model or {},
+            stakeholder_e2e_flow_coverage_report=stakeholder_e2e_flow_coverage_view_model,
+        )
     readiness_file = output_dir / 'readiness.html'
     readiness_file.write_text(
         _render_readiness(
             readiness_view_model,
             release_gate_view_model,
             stakeholder_functional_closure_view_model,
+            stakeholder_e2e_flow_coverage_view_model,
+            release_readiness_index_view_model,
             nav_prefix='',
             available_pages=available_pages,
         ),
@@ -3414,6 +3478,20 @@ def build_local_mvp_site(
             encoding='utf-8',
         )
         generated_files.append(stakeholder_closure_json_file)
+    if stakeholder_e2e_flow_coverage_view_model is not None:
+        stakeholder_e2e_flow_json_file = output_dir / 'stakeholder_e2e_flow_coverage.json'
+        stakeholder_e2e_flow_json_file.write_text(
+            json.dumps(stakeholder_e2e_flow_coverage_view_model, indent=2, sort_keys=True),
+            encoding='utf-8',
+        )
+        generated_files.append(stakeholder_e2e_flow_json_file)
+    if release_readiness_index_view_model is not None:
+        release_readiness_index_json_file = output_dir / 'release_readiness_index.json'
+        release_readiness_index_json_file.write_text(
+            json.dumps(release_readiness_index_view_model, indent=2, sort_keys=True),
+            encoding='utf-8',
+        )
+        generated_files.append(release_readiness_index_json_file)
 
     return SiteBuildResult(output_dir=output_dir, generated_files=generated_files)
 

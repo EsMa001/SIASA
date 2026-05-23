@@ -619,6 +619,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert (pages.output_dir / "readiness.html").exists()
     assert (pages.output_dir / "release_gate.json").exists()
     assert (pages.output_dir / "stakeholder_functional_closure.json").exists()
+    assert (pages.output_dir / "stakeholder_e2e_flow_coverage.json").exists()
+    assert (pages.output_dir / "release_readiness_index.json").exists()
 
     index_html = (pages.output_dir / "index.html").read_text()
     assert "World Anomaly Map" in index_html
@@ -887,10 +889,13 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Demo Verdict" in readiness_html
     assert "Release Verdict" in readiness_html
     assert "Gate Verdict" in readiness_html
-    assert "Stakeholder Focus Closure" in readiness_html
+    assert "Gate Verdict" in readiness_html
+    assert "Release Readiness Index" in readiness_html
+    assert "stakeholder_e2e_flows_covered" in readiness_html
+    assert "Stakeholder E2E Flow Coverage (AP-04/AP-05)" in readiness_html
     assert "Stakeholder Functional Closure Focus Cluster" in readiness_html
     assert "Release Gate Blockers" in readiness_html
-    assert "Artifact Readiness" in readiness_html
+
     assert "validation_backtest" in readiness_html
     assert "present" in readiness_html
     assert "ready" in readiness_html
@@ -1736,6 +1741,37 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
             }
         )
     )
+    (artifacts_dir / "readmodels" / "stakeholder_e2e_flow_coverage.json").write_text(
+        json.dumps(
+            {
+                "summary": {
+                    "flow_count": 6,
+                    "covered_flow_count": 6,
+                    "flow_gap_count": 0,
+                    "missing_evidence_ref_count": 0,
+                    "missing_requirement_ref_count": 0,
+                },
+                "stop_criteria": {
+                    "all_flows_covered": True,
+                    "all_flow_evidence_refs_resolve": True,
+                    "all_flow_requirement_refs_resolve": True,
+                    "required_roles_covered": True,
+                },
+            }
+        )
+    )
+    (artifacts_dir / "readmodels" / "release_readiness_index.json").write_text(
+        json.dumps(
+            {
+                "passed_gates": 7,
+                "total_gates": 7,
+                "percent": 100.0,
+                "gates": [
+                    {"gate_id": "stakeholder_e2e_flows_covered", "passed": True, "detail": "ok"},
+                ],
+            }
+        )
+    )
     (artifacts_dir / "reports" / "daily_snapshot.json").write_text(
         json.dumps({"report_id": "REP-DAILY-SNAP-RUN-321-v1", "report_type": "daily_snapshot", "format": "json", "payload": {"snapshot_id": "SNAP-RUN-321-v1", "status": "success"}})
     )
@@ -1745,6 +1781,8 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert payload["readiness_view_model"]["demo_checks"] == [{"label": "Persisted Demo Check", "ready": True}]
     assert payload["release_gate_view_model"]["gate_verdict"] == "go"
     assert payload["stakeholder_functional_closure_view_model"]["focus_gap_cluster"]["covered_count"] == 19
+    assert payload["stakeholder_e2e_flow_coverage_view_model"]["summary"]["flow_count"] == 6
+    assert payload["release_readiness_index_view_model"]["passed_gates"] == 7
 
     pages = build_local_mvp_site(output_dir=tmp_path / "site-with-readiness", **payload)
     readiness_html = (pages.output_dir / "readiness.html").read_text()
@@ -1753,6 +1791,10 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert "Persisted Demo Check" in readiness_html
     assert "Persisted Evidence Check" in readiness_html
     assert "Gate Verdict" in readiness_html
+    assert "Release Readiness Index" in readiness_html
+    assert "stakeholder_e2e_flows_covered" in readiness_html
+    assert "Stakeholder E2E Flow Coverage (AP-04/AP-05)" in readiness_html
+    assert "Covered Flows: <strong>6/6</strong>" in readiness_html
     assert "Stakeholder Focus Closure" in readiness_html
     assert "Covered IDs: 19 / 19 | Open IDs: 0" in readiness_html
     assert "go" in readiness_html
@@ -1779,6 +1821,8 @@ def test_readiness_view_renders_failure_drill_scenarios_with_expected_no_go_sign
             readiness_view_model=assessment["readiness"],
             release_gate_view_model=assessment["release_gate"],
             stakeholder_functional_closure_view_model=assessment["stakeholder_functional_closure"],
+            stakeholder_e2e_flow_coverage_view_model=assessment["stakeholder_e2e_flow_coverage"],
+            release_readiness_index_view_model=assessment["release_readiness_index"],
         )
         readiness_html = (pages.output_dir / "readiness.html").read_text(encoding="utf-8")
 
@@ -1794,6 +1838,9 @@ def test_readiness_view_renders_failure_drill_scenarios_with_expected_no_go_sign
         if scenario_id == "stakeholder_focus_cluster_open_injected":
             assert "Covered IDs: 18 / 19 | Open IDs: 1" in readiness_html
             assert "StR-DRILL-001" in readiness_html
+        if scenario_id == "stakeholder_e2e_flow_gap_injected":
+            assert "Covered Flows: <strong>5/6</strong>" in readiness_html
+            assert "stakeholder_e2e_flows_covered" in readiness_html
 
 
 def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bundle(tmp_path: Path) -> None:
