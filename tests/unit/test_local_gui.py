@@ -786,6 +786,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "replay-attention-level-filter" in validation_html
     assert "replay-attention-owner-filter" in validation_html
     assert "replay-attention-reason-filter" in validation_html
+    assert "replay-attention-text-filter" in validation_html
+    assert "country, case, action..." in validation_html
     assert "replay-attention-sort" in validation_html
     assert "replay-attention-reset" in validation_html
     assert "replay-attention-export-csv" in validation_html
@@ -805,6 +807,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "applyReplayAttentionStateFromHash" in validation_html
     assert "persistReplayAttentionStateToHash" in validation_html
     assert "ra_level" in validation_html
+    assert "ra_text" in validation_html
+    assert "rowText=(row.textContent||'').toLowerCase();" in validation_html
     assert "Copied CSV" in validation_html
     assert "Copied link" in validation_html
     assert "Clipboard API unavailable" in validation_html
