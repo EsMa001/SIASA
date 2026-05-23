@@ -17,6 +17,7 @@ from .stakeholder_e2e_flow_coverage import (
     build_stakeholder_e2e_flow_coverage_report,
     render_stakeholder_e2e_flow_coverage_markdown,
 )
+from .stakeholder_e2e_ui_smoke import build_stakeholder_e2e_ui_smoke_report
 from .stakeholder_requirement_quality import (
     build_stakeholder_requirement_quality_report,
     render_stakeholder_requirement_quality_markdown,
@@ -46,6 +47,7 @@ __all__ = [
     "build_stakeholder_functional_closure_report",
     "build_stakeholder_e2e_flow_coverage_report",
     "render_stakeholder_e2e_flow_coverage_markdown",
+    "build_stakeholder_e2e_ui_smoke_report",
     "build_stakeholder_requirement_quality_report",
     "render_stakeholder_requirement_quality_markdown",
     "build_stakeholder_system_traceability_report",

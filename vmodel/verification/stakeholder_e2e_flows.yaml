@@ -57,6 +57,8 @@ flows:
     path: scripts/build_release_failure_drill_gui_samples.py
   - type: script
     path: scripts/build_release_evidence_pack.py
+  - type: script
+    path: scripts/ci_stakeholder_e2e_ui_smoke_check.py
 - id: FLOW-AN-COUNTRY-DOMAIN-001
   role: analyst
   intent: Start from global overview, drill into a country, and inspect domain-level drivers, coverage, baseline comparison, and uncertainty.
