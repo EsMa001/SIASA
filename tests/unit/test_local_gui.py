@@ -614,6 +614,17 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Time Window" in index_html
     assert "Status Filter" in index_html
     assert "country-search" in index_html
+    assert "overview-save-state" in index_html
+    assert "overview-restore-state" in index_html
+    assert "overview-copy-link" in index_html
+    assert "overview-link-status" in index_html
+    assert "persistOverviewStateToHash" in index_html
+    assert "applyOverviewStateFromHash" in index_html
+    assert "saveOverviewStateLocally" in index_html
+    assert "restoreOverviewStateLocally" in index_html
+    assert "copyOverviewFilterLink" in index_html
+    assert "ov_priority" in index_html
+    assert "ov_view" in index_html
     assert "overview-visible-count" in index_html
     assert "Visible countries:" in index_html
     assert "Status Filter: " in index_html
