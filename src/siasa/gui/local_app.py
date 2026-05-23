@@ -1361,6 +1361,10 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
     release_gate_view_path = readmodels_dir / 'release_gate.json'
     if release_gate_view_path.exists():
         release_gate_view_model = _load_json(release_gate_view_path)
+    stakeholder_functional_closure_view_model = None
+    stakeholder_functional_closure_view_path = readmodels_dir / 'stakeholder_functional_closure.json'
+    if stakeholder_functional_closure_view_path.exists():
+        stakeholder_functional_closure_view_model = _load_json(stakeholder_functional_closure_view_path)
 
     return {
         'world_map_read_model': world_map_read_model,
@@ -1375,6 +1379,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
         'annotations_view_model': annotations_view_model,
         'readiness_view_model': readiness_view_model,
         'release_gate_view_model': release_gate_view_model,
+        'stakeholder_functional_closure_view_model': stakeholder_functional_closure_view_model,
     }
 
 
@@ -2121,7 +2126,14 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     return _page("System Status / Runs", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
-def _render_readiness(readiness_view_model: dict[str, Any], release_gate_view_model: dict[str, Any] | None = None, *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
+def _render_readiness(
+    readiness_view_model: dict[str, Any],
+    release_gate_view_model: dict[str, Any] | None = None,
+    stakeholder_functional_closure_view_model: dict[str, Any] | None = None,
+    *,
+    nav_prefix: str = '',
+    available_pages: set[str] | None = None,
+) -> str:
     def _artifact_status_text(check: dict[str, Any]) -> str:
         status = str(check.get('status', 'unknown'))
         reason = check.get('reason')
@@ -2163,6 +2175,14 @@ def _render_readiness(readiness_view_model: dict[str, Any], release_gate_view_mo
     _gate_color = '#4edea3' if _gate_ok else '#ffb4ab'
     _gate_blockers = [str(item) for item in (release_gate_view_model or {}).get('blockers', [])]
     _gate_blocker_items = ''.join(f"<li>{html.escape(item)}</li>" for item in _gate_blockers) or "<li>none</li>"
+    _stakeholder_focus = (stakeholder_functional_closure_view_model or {}).get('focus_gap_cluster', {})
+    _stakeholder_covered = int(_stakeholder_focus.get('covered_count', 0)) if _stakeholder_focus else 0
+    _stakeholder_open = int(_stakeholder_focus.get('not_implemented_count', 0)) if _stakeholder_focus else 0
+    _stakeholder_closed = max(0, _stakeholder_covered - _stakeholder_open)
+    _stakeholder_status = 'closed' if (_stakeholder_covered == 19 and _stakeholder_open == 0) else 'at_risk'
+    _stakeholder_color = '#4edea3' if _stakeholder_status == 'closed' else '#ffb4ab'
+    _stakeholder_open_ids = [str(item) for item in _stakeholder_focus.get('not_implemented_ids', [])] if _stakeholder_focus else []
+    _stakeholder_open_items = ''.join(f"<li>{html.escape(item)}</li>" for item in _stakeholder_open_ids) or "<li>none</li>"
 
     body = (
         # === KPI Header ===
@@ -2170,6 +2190,7 @@ def _render_readiness(readiness_view_model: dict[str, Any], release_gate_view_mo
         f"<div class='kpi-card'><span class='kpi-label'>Demo Verdict</span><div class='kpi-value' style='color:{_demo_color}'>{html.escape(_demo_v)}</div></div>"
         f"<div class='kpi-card'><span class='kpi-label'>Release Verdict</span><div class='kpi-value' style='color:{_rel_color}'>{html.escape(_rel_v)}</div></div>"
         f"<div class='kpi-card'><span class='kpi-label'>Gate Verdict</span><div class='kpi-value' style='color:{_gate_color}'>{html.escape(_gate_v)}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Stakeholder Focus Closure</span><div class='kpi-value' style='color:{_stakeholder_color}'>{html.escape(_stakeholder_status)} ({html.escape(str(_stakeholder_closed))}/{html.escape(str(_stakeholder_covered))})</div></div>"
         f"<div class='kpi-card'><span class='kpi-label'>Country Profiles</span><div class='kpi-value'>{html.escape(str(readiness_view_model.get('country_profile_count', 0)))}</div></div>"
         f"<div class='kpi-card'><span class='kpi-label'>Domain Details</span><div class='kpi-value'>{html.escape(str(readiness_view_model.get('domain_detail_count', 0)))}</div></div>"
         f"<div class='kpi-card'><span class='kpi-label'>Reports</span><div class='kpi-value'>{html.escape(str(readiness_view_model.get('report_count', 0)))}</div></div>"
@@ -2190,6 +2211,9 @@ def _render_readiness(readiness_view_model: dict[str, Any], release_gate_view_mo
         f"<ul>{known_gap_items}</ul></div>"
         "<div class='panel'><div class='panel-header'>Release Gate Blockers</div>"
         f"<ul>{_gate_blocker_items}</ul></div>"
+        "<div class='panel'><div class='panel-header'>Stakeholder Functional Closure Focus Cluster</div>"
+        f"<p>Covered IDs: {html.escape(str(_stakeholder_covered))} / 19 | Open IDs: {html.escape(str(_stakeholder_open))}</p>"
+        f"<ul>{_stakeholder_open_items}</ul></div>"
     )
     return _page("Demo / Release Readiness", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
@@ -3217,6 +3241,7 @@ def build_local_mvp_site(
     annotations_view_model: dict[str, Any] | None = None,
     readiness_view_model: dict[str, Any] | None = None,
     release_gate_view_model: dict[str, Any] | None = None,
+    stakeholder_functional_closure_view_model: dict[str, Any] | None = None,
     ui_role: str = 'analyst',
 ) -> SiteBuildResult:
     normalized_role = _normalize_ui_role(ui_role)
@@ -3365,7 +3390,16 @@ def build_local_mvp_site(
             traceability_integrity_report=build_traceability_integrity_report(repo_root=Path(__file__).resolve().parents[3]),
         )
     readiness_file = output_dir / 'readiness.html'
-    readiness_file.write_text(_render_readiness(readiness_view_model, release_gate_view_model, nav_prefix='', available_pages=available_pages), encoding='utf-8')
+    readiness_file.write_text(
+        _render_readiness(
+            readiness_view_model,
+            release_gate_view_model,
+            stakeholder_functional_closure_view_model,
+            nav_prefix='',
+            available_pages=available_pages,
+        ),
+        encoding='utf-8',
+    )
     generated_files.append(readiness_file)
     readiness_json_file = output_dir / 'readiness.json'
     readiness_json_file.write_text(json.dumps(readiness_view_model, indent=2, sort_keys=True), encoding='utf-8')
@@ -3373,6 +3407,13 @@ def build_local_mvp_site(
     release_gate_json_file = output_dir / 'release_gate.json'
     release_gate_json_file.write_text(json.dumps(release_gate_view_model, indent=2, sort_keys=True), encoding='utf-8')
     generated_files.append(release_gate_json_file)
+    if stakeholder_functional_closure_view_model is not None:
+        stakeholder_closure_json_file = output_dir / 'stakeholder_functional_closure.json'
+        stakeholder_closure_json_file.write_text(
+            json.dumps(stakeholder_functional_closure_view_model, indent=2, sort_keys=True),
+            encoding='utf-8',
+        )
+        generated_files.append(stakeholder_closure_json_file)
 
     return SiteBuildResult(output_dir=output_dir, generated_files=generated_files)
 

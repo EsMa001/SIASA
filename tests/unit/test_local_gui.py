@@ -574,6 +574,19 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             {"slice_id": "reporting-and-export", "summary": {"closed": 4, "at_risk": 0}},
         ],
     }
+    stakeholder_functional_closure_view = {
+        "focus_gap_cluster": {
+            "stakeholder_ids": [
+                "StR-001", "StR-002", "StR-004", "StR-007", "StR-024", "StR-025",
+                "StR-135", "StR-136", "StR-137", "StR-138", "StR-139", "StR-140", "StR-141", "StR-142",
+                "StR-226", "StR-227", "StR-228", "StR-229", "StR-230",
+            ],
+            "covered_count": 19,
+            "implemented_count": 19,
+            "not_implemented_count": 0,
+            "not_implemented_ids": [],
+        }
+    }
 
     pages = build_local_mvp_site(
         output_dir=Path("/tmp/siasa-gui-test"),
@@ -587,6 +600,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
         traceability_view_model=traceability_view,
         repo_closure_view_model=repo_closure_view,
         annotations_view_model=annotations_view,
+        stakeholder_functional_closure_view_model=stakeholder_functional_closure_view,
     )
 
     assert (pages.output_dir / "index.html").exists()
@@ -603,6 +617,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert (pages.output_dir / "annotations.html").exists()
     assert (pages.output_dir / "readiness.html").exists()
     assert (pages.output_dir / "release_gate.json").exists()
+    assert (pages.output_dir / "stakeholder_functional_closure.json").exists()
 
     index_html = (pages.output_dir / "index.html").read_text()
     assert "World Anomaly Map" in index_html
@@ -871,6 +886,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Demo Verdict" in readiness_html
     assert "Release Verdict" in readiness_html
     assert "Gate Verdict" in readiness_html
+    assert "Stakeholder Focus Closure" in readiness_html
+    assert "Stakeholder Functional Closure Focus Cluster" in readiness_html
     assert "Release Gate Blockers" in readiness_html
     assert "Artifact Readiness" in readiness_html
     assert "validation_backtest" in readiness_html
@@ -1701,6 +1718,23 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
             }
         )
     )
+    (artifacts_dir / "readmodels" / "stakeholder_functional_closure.json").write_text(
+        json.dumps(
+            {
+                "focus_gap_cluster": {
+                    "stakeholder_ids": [
+                        "StR-001", "StR-002", "StR-004", "StR-007", "StR-024", "StR-025",
+                        "StR-135", "StR-136", "StR-137", "StR-138", "StR-139", "StR-140", "StR-141", "StR-142",
+                        "StR-226", "StR-227", "StR-228", "StR-229", "StR-230",
+                    ],
+                    "covered_count": 19,
+                    "implemented_count": 19,
+                    "not_implemented_count": 0,
+                    "not_implemented_ids": [],
+                }
+            }
+        )
+    )
     (artifacts_dir / "reports" / "daily_snapshot.json").write_text(
         json.dumps({"report_id": "REP-DAILY-SNAP-RUN-321-v1", "report_type": "daily_snapshot", "format": "json", "payload": {"snapshot_id": "SNAP-RUN-321-v1", "status": "success"}})
     )
@@ -1709,6 +1743,7 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
 
     assert payload["readiness_view_model"]["demo_checks"] == [{"label": "Persisted Demo Check", "ready": True}]
     assert payload["release_gate_view_model"]["gate_verdict"] == "go"
+    assert payload["stakeholder_functional_closure_view_model"]["focus_gap_cluster"]["covered_count"] == 19
 
     pages = build_local_mvp_site(output_dir=tmp_path / "site-with-readiness", **payload)
     readiness_html = (pages.output_dir / "readiness.html").read_text()
@@ -1717,6 +1752,8 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert "Persisted Demo Check" in readiness_html
     assert "Persisted Evidence Check" in readiness_html
     assert "Gate Verdict" in readiness_html
+    assert "Stakeholder Focus Closure" in readiness_html
+    assert "Covered IDs: 19 / 19 | Open IDs: 0" in readiness_html
     assert "go" in readiness_html
     assert readiness_json["demo_checks"] == [{"label": "Persisted Demo Check", "ready": True}]
 
