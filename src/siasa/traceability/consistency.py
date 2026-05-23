@@ -223,3 +223,77 @@ def build_repo_closure_report(*, repo_root: Path) -> dict[str, Any]:
         "slice_ids": slice_ids,
         "slices": slice_reports,
     }
+
+
+def build_traceability_integrity_report(*, repo_root: Path) -> dict[str, Any]:
+    requirements_payload = _load_yaml(repo_root / "vmodel" / "requirements" / "software_requirements.yaml")
+    software_requirements = requirements_payload.get("software_requirements", [])
+    requirement_ids = sorted(
+        {
+            str(item.get("id"))
+            for item in software_requirements
+            if isinstance(item, dict) and str(item.get("id", "")).startswith("SwR-")
+        }
+    )
+
+    slices = _load_traceability_slices(repo_root)
+    mapped_requirement_ids = sorted(
+        {
+            str(requirement_id)
+            for slice_definition in slices.values()
+            for requirement_id in slice_definition.get("requirement_ids", [])
+        }
+    )
+
+    missing_requirement_mappings = sorted(set(requirement_ids) - set(mapped_requirement_ids))
+    orphan_mapped_requirements = sorted(set(mapped_requirement_ids) - set(requirement_ids))
+
+    slice_validation: dict[str, dict[str, Any]] = {}
+    for slice_id in sorted(slices):
+        slice_definition = slices[slice_id]
+        validation = validate_traceability_slice(
+            repo_root=repo_root,
+            requirement_ids=slice_definition["requirement_ids"],
+            implementation_map=slice_definition["implementation_map"],
+            known_code_paths=slice_definition.get("known_code_paths"),
+            known_test_paths=slice_definition.get("known_test_paths"),
+        )
+        slice_validation[slice_id] = {
+            "missing_requirements": validation["missing_requirements"],
+            "missing_trace_links": validation["missing_trace_links"],
+            "missing_code_paths": validation["missing_code_paths"],
+            "missing_test_paths": validation["missing_test_paths"],
+            "missing_files": validation["missing_files"],
+            "unmapped_code_paths": validation["unmapped_code_paths"],
+            "unmapped_test_paths": validation["unmapped_test_paths"],
+        }
+
+    unhealthy_slices = sorted(
+        slice_id
+        for slice_id, result in slice_validation.items()
+        if result["missing_requirements"]
+        or result["missing_trace_links"]
+        or result["missing_code_paths"]
+        or result["missing_test_paths"]
+        or result["missing_files"]
+        or result["unmapped_code_paths"]
+        or result["unmapped_test_paths"]
+    )
+
+    repo_closure = build_repo_closure_report(repo_root=repo_root)
+    return {
+        "summary": {
+            "requirement_count": len(requirement_ids),
+            "mapped_requirement_count": len(mapped_requirement_ids),
+            "missing_requirement_mapping_count": len(missing_requirement_mappings),
+            "orphan_mapped_requirement_count": len(orphan_mapped_requirements),
+            "slice_count": len(slices),
+            "unhealthy_slice_count": len(unhealthy_slices),
+            "closure_at_risk": int(repo_closure["summary"]["at_risk"]),
+        },
+        "missing_requirement_mappings": missing_requirement_mappings,
+        "orphan_mapped_requirements": orphan_mapped_requirements,
+        "unhealthy_slices": unhealthy_slices,
+        "slice_validation": slice_validation,
+        "repo_closure": repo_closure,
+    }

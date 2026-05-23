@@ -3,6 +3,7 @@ from pathlib import Path
 from siasa.traceability.consistency import (
     build_repo_closure_report,
     build_requirement_closure_report,
+    build_traceability_integrity_report,
     load_traceability_slice_definition,
     validate_traceability_slice,
 )
@@ -474,3 +475,28 @@ def test_build_repo_closure_report_aggregates_all_governed_slices() -> None:
     assert report["slices"][7]["summary"] == {"closed": 3, "at_risk": 0}
     assert report["slices"][8]["slice_id"] == "validation-and-backtest"
     assert report["slices"][8]["summary"] == {"closed": 2, "at_risk": 0}
+
+
+def test_build_traceability_integrity_report_is_globally_clean() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+
+    report = build_traceability_integrity_report(repo_root=repo_root)
+
+    assert report["summary"] == {
+        "requirement_count": 45,
+        "mapped_requirement_count": 45,
+        "missing_requirement_mapping_count": 0,
+        "orphan_mapped_requirement_count": 0,
+        "slice_count": 9,
+        "unhealthy_slice_count": 0,
+        "closure_at_risk": 0,
+    }
+    assert report["missing_requirement_mappings"] == []
+    assert report["orphan_mapped_requirements"] == []
+    assert report["unhealthy_slices"] == []
+    assert report["repo_closure"]["summary"] == {
+        "slice_count": 9,
+        "requirement_count": 45,
+        "closed": 45,
+        "at_risk": 0,
+    }

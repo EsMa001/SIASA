@@ -3,6 +3,7 @@
 from .consistency import (
     build_repo_closure_report,
     build_requirement_closure_report,
+    build_traceability_integrity_report,
     load_traceability_slice_definition,
     validate_traceability_slice,
 )
@@ -13,6 +14,7 @@ __all__ = [
     "build_lineage_record",
     "build_repo_closure_report",
     "build_requirement_closure_report",
+    "build_traceability_integrity_report",
     "load_traceability_slice_definition",
     "validate_traceability_slice",
 ]
