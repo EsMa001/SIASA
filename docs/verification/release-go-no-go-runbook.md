@@ -7,6 +7,8 @@ Ziel: Ein reproduzierbares, evidenzbasiertes Go/No-Go-Protokoll vor Demo/Release
 - `readiness`-Bewertung (Demo- und Release-Verdikt)
 - `release_gate`-Bewertung (explizites Go/No-Go + Blocker)
 - `traceability_integrity`-Bewertung (globaler Integritätszustand)
+- `stakeholder_functional_closure`-Bewertung (19-ID-Focus-Cluster)
+- `stakeholder_e2e_flow_coverage`-Bewertung (AP-04 Rollen-/Flow-Abdeckung)
 
 Diese Artefakte werden maschinenlesbar erzeugt und im Evidence Pack dokumentiert.
 
@@ -14,10 +16,14 @@ Diese Artefakte werden maschinenlesbar erzeugt und im Evidence Pack dokumentiert
 
 CI führt aus:
 - `PYTHONPATH=src python scripts/ci_release_gate_check.py`
+- `PYTHONPATH=src python scripts/ci_stakeholder_closure_check.py`
+- `PYTHONPATH=src python scripts/ci_stakeholder_e2e_flow_coverage_check.py`
 
 Regel:
-- `gate_verdict == "go"` -> CI-Schritt erfolgreich
-- sonst -> CI-Schritt fehlschlagen (`no_go` blockiert Merge/Release)
+- `gate_verdict == "go"` -> Release-Gate-Schritt erfolgreich
+- Stakeholder-Closure-Focus-Cluster vollständig (`covered_count=19`, `not_implemented_count=0`)
+- AP-04 E2E-Flow-Gate vollständig (`flow_gap_count=0`, keine fehlenden Evidence-/Requirement-Refs, alle Stop-Kriterien pass)
+- sonst -> CI-Schritt fehlschlagen (`no_go` oder Flow-/Closure-Gap blockiert Merge/Release)
 
 ## 3) Evidence Pack erzeugen
 
@@ -37,6 +43,8 @@ Entscheidungsregel:
   - `readiness.release_verdict == "ready"`
   - `traceability_integrity.summary.unhealthy_slice_count == 0`
   - `traceability_integrity.summary.closure_at_risk == 0`
+  - `stakeholder_functional_closure.focus_gap_cluster.not_implemented_count == 0`
+  - `stakeholder_e2e_flow_coverage.summary.flow_gap_count == 0`
 
 Sonst:
 - No-Go mit expliziten Blockern aus `release_gate.blockers`.
@@ -53,6 +61,8 @@ Sonst:
 - Demo Verdict:
 - Traceability unhealthy slices:
 - Traceability closure at risk:
+- Stakeholder functional focus open IDs:
+- Stakeholder E2E flow gaps:
 - Entscheidung: Go / No-Go
 - Nächste Maßnahme:
 
@@ -71,6 +81,7 @@ Geprüfte Negativ-Szenarien:
 - synthetischer Known-Gap (`known_gaps_clear` muss als Blocker erscheinen, Gate = `no_go`)
 - traceability closure risk (`traceability_integrity_clean` muss als Blocker erscheinen, Gate = `no_go`)
 - geöffneter Stakeholder-Focus-Cluster (Readiness-Index-Gate `stakeholder_functional_focus_cluster_closed` muss fehlschlagen)
+- geöffnete Stakeholder-E2E-Flow-Abdeckung (Readiness-Index-Gate `stakeholder_e2e_flows_covered` muss fehlschlagen)
 
 Regel:
 - Script-Exitcode `0` nur wenn alle Drill-Checks wie erwartet greifen.

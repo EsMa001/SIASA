@@ -45,6 +45,10 @@ def main() -> int:
             json.dumps(assessment.get("stakeholder_functional_closure", {}), indent=2, sort_keys=True),
             encoding="utf-8",
         )
+        (scenario_dir / "stakeholder_e2e_flow_coverage.json").write_text(
+            json.dumps(assessment.get("stakeholder_e2e_flow_coverage", {}), indent=2, sort_keys=True),
+            encoding="utf-8",
+        )
         (scenario_dir / "release_readiness_index.json").write_text(
             json.dumps(assessment.get("release_readiness_index", {}), indent=2, sort_keys=True),
             encoding="utf-8",

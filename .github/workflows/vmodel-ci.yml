@@ -22,6 +22,8 @@ jobs:
         run: PYTHONPATH=src python scripts/ci_release_gate_check.py
       - name: Enforce stakeholder functional closure focus cluster
         run: PYTHONPATH=src python scripts/ci_stakeholder_closure_check.py
+      - name: Enforce stakeholder E2E flow coverage
+        run: PYTHONPATH=src python scripts/ci_stakeholder_e2e_flow_coverage_check.py
       - name: Build release evidence pack
         run: PYTHONPATH=src python scripts/build_release_evidence_pack.py --output-dir build/release_evidence/latest
       - name: Run release failure drill (negative scenarios must fail gates)
