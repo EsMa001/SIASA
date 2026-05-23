@@ -17,6 +17,7 @@ from siasa.readmodels.domain_detail import build_domain_detail_read_model
 from siasa.readmodels.readiness import build_readiness_view_model
 from siasa.readmodels.release_gate import build_release_gate_view_model
 from siasa.readmodels.source_coverage import build_source_coverage_read_model
+from siasa.readmodels.stakeholder_functional_closure import build_stakeholder_functional_closure_report
 from siasa.readmodels.system_status import build_system_status_read_model
 from siasa.readmodels.world_map import build_world_map_read_model
 from siasa.reporting.country_report import GeneratedReport
@@ -449,6 +450,16 @@ def write_run_artifacts(
         )
     )
     readmodel_paths.append(traceability_integrity_path)
+
+    stakeholder_functional_closure_path = readmodels_dir / "stakeholder_functional_closure.json"
+    stakeholder_functional_closure_path.write_text(
+        json.dumps(
+            build_stakeholder_functional_closure_report(repo_root=Path(__file__).resolve().parents[3]),
+            indent=2,
+            sort_keys=True,
+        )
+    )
+    readmodel_paths.append(stakeholder_functional_closure_path)
 
     release_gate_path = readmodels_dir / "release_gate.json"
     release_gate_path.write_text(

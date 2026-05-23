@@ -158,6 +158,7 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert (tmp_path / "bundle" / "readmodels" / "system_status.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "readiness.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "traceability_integrity.json").exists()
+    assert (tmp_path / "bundle" / "readmodels" / "stakeholder_functional_closure.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "release_gate.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "traceability_lineage.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "repo_closure.json").exists()
@@ -186,6 +187,7 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     system_status = json.loads((tmp_path / "bundle" / "readmodels" / "system_status.json").read_text())
     readiness = json.loads((tmp_path / "bundle" / "readmodels" / "readiness.json").read_text())
     traceability_integrity = json.loads((tmp_path / "bundle" / "readmodels" / "traceability_integrity.json").read_text())
+    stakeholder_functional_closure = json.loads((tmp_path / "bundle" / "readmodels" / "stakeholder_functional_closure.json").read_text())
     release_gate = json.loads((tmp_path / "bundle" / "readmodels" / "release_gate.json").read_text())
     traceability = json.loads((tmp_path / "bundle" / "readmodels" / "traceability_lineage.json").read_text())
     repo_closure = json.loads((tmp_path / "bundle" / "readmodels" / "repo_closure.json").read_text())
@@ -217,6 +219,17 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert readiness["release_verdict"] == "blocked_by_known_gaps"
     assert readiness["known_gaps"] == ["validation_backtest_absent:not_configured"]
     assert traceability_integrity["summary"]["requirement_count"] == 51
+    assert stakeholder_functional_closure["focus_gap_cluster"] == {
+        "stakeholder_ids": [
+            "StR-001", "StR-002", "StR-004", "StR-007", "StR-024", "StR-025",
+            "StR-135", "StR-136", "StR-137", "StR-138", "StR-139", "StR-140", "StR-141", "StR-142",
+            "StR-226", "StR-227", "StR-228", "StR-229", "StR-230",
+        ],
+        "covered_count": 19,
+        "implemented_count": 19,
+        "not_implemented_count": 0,
+        "not_implemented_ids": [],
+    }
     assert release_gate["gate_verdict"] == "no_go"
     assert "release_verdict_ready" in release_gate["blockers"]
     assert "known_gaps_clear" in release_gate["blockers"]
