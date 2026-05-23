@@ -1,0 +1,90 @@
+metadata:
+  project: SIASA
+  artifact_type: stakeholder_verification_coverage_policy
+  work_package: AP-03
+  purpose: >-
+    Define acceptable verification routes for AP-03 after AP-01 quality normalization
+    and AP-02 stakeholder-to-system traceability closure.
+  decision_model: 5.5-class high-level review per docs/verification/siasa-model-routing-matrix.md
+  execution_model: Codex 5.3 for repository artifact updates
+verification_route_types:
+  software_route:
+    description: >-
+      System requirement requires software-level realization. AP-03 expects at least one
+      derived SwR and at least one verifying TC for every derived SwR, plus a system-level TC.
+    applies_to: SyR-001..030
+  governance_system_route:
+    description: >-
+      System requirement is a governance, boundary, role, risk, ethics, quality, or
+      acceptance-control requirement. It is verified at system level by TC-SyR and does
+      not require a new SwR unless AP-04/AP-05 implementation flow design identifies
+      concrete missing product behavior.
+    applies_to: SyR-031..050
+route_assignments:
+  software_route:
+  - SyR-001
+  - SyR-002
+  - SyR-003
+  - SyR-004
+  - SyR-005
+  - SyR-006
+  - SyR-007
+  - SyR-008
+  - SyR-009
+  - SyR-010
+  - SyR-011
+  - SyR-012
+  - SyR-013
+  - SyR-014
+  - SyR-015
+  - SyR-016
+  - SyR-017
+  - SyR-018
+  - SyR-019
+  - SyR-020
+  - SyR-021
+  - SyR-022
+  - SyR-023
+  - SyR-024
+  - SyR-025
+  - SyR-026
+  - SyR-027
+  - SyR-028
+  - SyR-029
+  - SyR-030
+  governance_system_route:
+  - SyR-031
+  - SyR-032
+  - SyR-033
+  - SyR-034
+  - SyR-035
+  - SyR-036
+  - SyR-037
+  - SyR-038
+  - SyR-039
+  - SyR-040
+  - SyR-041
+  - SyR-042
+  - SyR-043
+  - SyR-044
+  - SyR-045
+  - SyR-046
+  - SyR-047
+  - SyR-048
+  - SyR-049
+  - SyR-050
+ap03_stop_criteria:
+  - id: AP03-VC-001
+    accepted_when: every active StR has at least one SyR and at least one system-level TC through that SyR
+  - id: AP03-VC-002
+    accepted_when: every SyR is assigned exactly one verification route type
+  - id: AP03-VC-003
+    accepted_when: every software_route SyR has at least one derived SwR
+  - id: AP03-VC-004
+    accepted_when: every accepted SwR has at least one verifying TC-SwR
+  - id: AP03-VC-005
+    accepted_when: every governance_system_route SyR has at least one verifying TC-SyR and is explicitly marked as not requiring new SwR in AP-03
+closure_boundary: >-
+  AP-03 closes verification specification coverage. It proves every stakeholder requirement
+  has a governed verification route. It does not claim every stakeholder-facing end-to-end
+  flow has been executed; AP-04 covers flow-level E2E execution evidence.
