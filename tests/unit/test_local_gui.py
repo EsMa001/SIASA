@@ -795,9 +795,18 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "exportVisibleReplayAttentionCsv" in validation_html
     assert "replay-attention-copy-csv" in validation_html
     assert "Copy visible CSV" in validation_html
+    assert "replay-attention-copy-link" in validation_html
+    assert "Copy filter link" in validation_html
     assert "replay-attention-copy-status" in validation_html
+    assert "replay-attention-link-status" in validation_html
     assert "copyVisibleReplayAttentionCsv" in validation_html
+    assert "copyReplayAttentionFilterLink" in validation_html
+    assert "buildReplayAttentionShareUrl" in validation_html
+    assert "applyReplayAttentionStateFromHash" in validation_html
+    assert "persistReplayAttentionStateToHash" in validation_html
+    assert "ra_level" in validation_html
     assert "Copied CSV" in validation_html
+    assert "Copied link" in validation_html
     assert "Clipboard API unavailable" in validation_html
     assert "replay-attention-preset" in validation_html
     assert "Quick preset:" in validation_html
