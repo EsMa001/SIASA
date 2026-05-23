@@ -17,6 +17,10 @@ from .stakeholder_requirement_quality import (
     build_stakeholder_requirement_quality_report,
     render_stakeholder_requirement_quality_markdown,
 )
+from .stakeholder_system_traceability import (
+    build_stakeholder_system_traceability_report,
+    render_stakeholder_system_traceability_markdown,
+)
 from .system_status import build_system_status_read_model
 from .world_map import build_world_map_read_model
 
@@ -34,6 +38,8 @@ __all__ = [
     "build_stakeholder_functional_closure_report",
     "build_stakeholder_requirement_quality_report",
     "render_stakeholder_requirement_quality_markdown",
+    "build_stakeholder_system_traceability_report",
+    "render_stakeholder_system_traceability_markdown",
     "build_system_status_read_model",
     "build_world_map_read_model",
 ]

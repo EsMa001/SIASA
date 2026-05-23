@@ -527,3 +527,607 @@ system_requirements:
   - AC-013
   - AC-016
   verification_method: configuration_review_and_reprocessing_demo
+- id: SyR-031
+  title: Stakeholder mission scope use-case and glossary governance
+  category: Mission and scope
+  statement: The system shall preserve the stakeholder-defined mission, scope, use-case boundaries, and glossary semantics as governed system context for all downstream requirements and product decisions.
+  status: accepted
+  derives_from:
+  - StR-003
+  - StR-005
+  - StR-006
+  - StR-067
+  - StR-068
+  - StR-069
+  - StR-070
+  - StR-351
+  - StR-352
+  - StR-353
+  - StR-354
+  - StR-355
+  - StR-356
+  - StR-357
+  - StR-661
+  - StR-662
+  - StR-663
+  - StR-664
+  - StR-665
+  - StR-666
+  - StR-667
+  - StR-668
+  acceptance_criteria_refs: []
+  verification_method: system_context_review
+- id: SyR-032
+  title: Governed source-family selection and source-management constraints
+  category: Source management
+  statement: The system shall govern supported source families, fixed data-source choices, and source-management constraints including explicit handling of unavailable or deferred source classes.
+  status: accepted
+  derives_from:
+  - StR-211
+  - StR-212
+  - StR-213
+  - StR-214
+  - StR-215
+  - StR-216
+  - StR-217
+  - StR-218
+  - StR-219
+  - StR-220
+  - StR-221
+  - StR-222
+  - StR-223
+  - StR-224
+  - StR-225
+  acceptance_criteria_refs: []
+  verification_method: source_catalog_and_constraint_review
+- id: SyR-033
+  title: MVP analysis-function framework coverage
+  category: Analysis function framework
+  statement: The system shall maintain an explicit MVP feature and analysis-function framework across domains A-E that separates implemented, prepared, deferred, and excluded analysis functions.
+  status: accepted
+  derives_from:
+  - StR-319
+  - StR-320
+  - StR-321
+  - StR-322
+  - StR-323
+  - StR-324
+  - StR-325
+  - StR-326
+  - StR-327
+  - StR-328
+  - StR-329
+  - StR-330
+  - StR-331
+  - StR-332
+  - StR-333
+  - StR-334
+  - StR-335
+  - StR-336
+  - StR-337
+  - StR-338
+  - StR-339
+  - StR-340
+  acceptance_criteria_refs: []
+  verification_method: analysis_function_review
+- id: SyR-034
+  title: Information dependency lineage and propagation transparency
+  category: Traceability and reproducibility
+  statement: The system shall represent source dependencies, lineage, source-cluster candidates, and information-propagation transparency as first-class system-level context without overclaiming causal origin certainty.
+  status: accepted
+  derives_from:
+  - StR-029
+  - StR-030
+  - StR-031
+  - StR-032
+  - StR-033
+  - StR-034
+  - StR-035
+  - StR-036
+  - StR-037
+  - StR-038
+  - StR-039
+  - StR-040
+  - StR-041
+  - StR-042
+  - StR-043
+  - StR-044
+  acceptance_criteria_refs: []
+  verification_method: traceability_and_lineage_review
+- id: SyR-035
+  title: Evidence fusion uncertainty and explainability governance
+  category: Analytics pipeline
+  statement: The system shall combine evidence only through explainable domain-aware logic that preserves uncertainty, confidence, counter-indicators, and probabilistic interpretation boundaries.
+  status: accepted
+  derives_from:
+  - StR-045
+  - StR-046
+  - StR-047
+  - StR-048
+  - StR-049
+  - StR-050
+  - StR-051
+  - StR-052
+  - StR-053
+  - StR-054
+  - StR-055
+  - StR-056
+  - StR-057
+  - StR-058
+  - StR-059
+  - StR-060
+  - StR-061
+  acceptance_criteria_refs: []
+  verification_method: analytics_governance_review
+- id: SyR-036
+  title: Baseline window and data sufficiency governance
+  category: Analytics pipeline
+  statement: The system shall govern historical baselines, comparison windows, data freshness, and data-sufficiency thresholds so anomaly interpretation remains relative, reproducible, and transparent.
+  status: accepted
+  derives_from:
+  - StR-026
+  - StR-027
+  - StR-028
+  - StR-111
+  - StR-112
+  - StR-113
+  - StR-114
+  - StR-115
+  - StR-116
+  - StR-117
+  - StR-118
+  - StR-119
+  - StR-120
+  - StR-121
+  - StR-122
+  - StR-123
+  - StR-124
+  - StR-125
+  - StR-126
+  - StR-127
+  - StR-128
+  - StR-129
+  - StR-130
+  - StR-131
+  - StR-132
+  - StR-133
+  - StR-134
+  - StR-155
+  - StR-156
+  - StR-157
+  - StR-158
+  - StR-159
+  - StR-160
+  - StR-161
+  acceptance_criteria_refs: []
+  verification_method: baseline_and_sufficiency_review
+- id: SyR-037
+  title: GUI navigation modes pages and map interaction contract
+  category: User-facing analysis system
+  statement: The system shall provide a governed GUI interaction contract covering pages, usage modes, map behavior, navigation, drill-downs, and user-facing status/coverage explanations.
+  status: accepted
+  derives_from:
+  - StR-071
+  - StR-072
+  - StR-073
+  - StR-074
+  - StR-075
+  - StR-076
+  - StR-077
+  - StR-078
+  - StR-079
+  - StR-080
+  - StR-081
+  - StR-082
+  - StR-083
+  - StR-084
+  - StR-085
+  - StR-086
+  - StR-087
+  - StR-088
+  - StR-097
+  - StR-098
+  - StR-099
+  - StR-100
+  - StR-101
+  - StR-102
+  - StR-103
+  - StR-104
+  - StR-105
+  - StR-106
+  - StR-107
+  - StR-108
+  - StR-109
+  - StR-110
+  acceptance_criteria_refs: []
+  verification_method: gui_system_review
+- id: SyR-038
+  title: MVP scope prioritization country and domain governance
+  category: Scope configuration
+  statement: The system shall maintain governed MVP priority rules for countries, domains, acceptance scope, and staged expansion beyond the minimum release baseline.
+  status: accepted
+  derives_from:
+  - StR-182
+  - StR-190
+  - StR-191
+  - StR-192
+  - StR-193
+  - StR-194
+  - StR-619
+  - StR-620
+  - StR-621
+  - StR-622
+  acceptance_criteria_refs: []
+  verification_method: scope_configuration_review
+- id: SyR-039
+  title: Rule-based assessment and annotation governance
+  category: Status logic
+  statement: The system shall keep rule-based status assessment separate from analyst annotations and shall make annotation effects visible without overwriting computed status.
+  status: accepted
+  derives_from:
+  - StR-266
+  - StR-267
+  - StR-268
+  - StR-269
+  - StR-278
+  - StR-279
+  - StR-280
+  - StR-281
+  - StR-282
+  - StR-283
+  - StR-284
+  - StR-285
+  - StR-286
+  - StR-287
+  - StR-288
+  - StR-289
+  - StR-290
+  acceptance_criteria_refs: []
+  verification_method: rule_and_annotation_review
+- id: SyR-040
+  title: Validation backtesting and reference-case governance
+  category: Validation and governance
+  statement: The system shall manage validation, backtesting, replay, and reference-case governance including expectations, evidence basis, and known validation limitations.
+  status: accepted
+  derives_from:
+  - StR-062
+  - StR-063
+  - StR-064
+  - StR-065
+  - StR-066
+  - StR-366
+  - StR-367
+  - StR-368
+  - StR-369
+  - StR-370
+  - StR-371
+  - StR-372
+  - StR-373
+  - StR-374
+  - StR-375
+  - StR-376
+  - StR-377
+  - StR-378
+  - StR-379
+  - StR-380
+  - StR-381
+  acceptance_criteria_refs: []
+  verification_method: validation_governance_review
+- id: SyR-041
+  title: System boundary and external-system governance
+  category: Validation and governance
+  statement: The system shall explicitly govern system boundaries, external dependencies, external interfaces, and out-of-scope capabilities.
+  status: accepted
+  derives_from:
+  - StR-623
+  - StR-624
+  - StR-625
+  - StR-626
+  - StR-627
+  - StR-628
+  - StR-629
+  - StR-630
+  - StR-631
+  - StR-632
+  - StR-633
+  - StR-634
+  - StR-635
+  - StR-636
+  - StR-637
+  - StR-638
+  - StR-639
+  - StR-640
+  - StR-641
+  - StR-642
+  - StR-643
+  - StR-644
+  - StR-645
+  - StR-646
+  acceptance_criteria_refs: []
+  verification_method: boundary_review
+- id: SyR-042
+  title: System quality attribute governance
+  category: Quality attributes
+  statement: The system shall define and enforce quality attributes including robustness, reproducibility, transparency, maintainability, explainability, auditability, and controlled degradation.
+  status: accepted
+  derives_from:
+  - StR-397
+  - StR-398
+  - StR-399
+  - StR-400
+  - StR-401
+  - StR-402
+  - StR-403
+  - StR-404
+  - StR-405
+  - StR-406
+  - StR-407
+  - StR-408
+  - StR-409
+  - StR-410
+  - StR-411
+  - StR-412
+  - StR-413
+  - StR-414
+  - StR-415
+  - StR-416
+  acceptance_criteria_refs: []
+  verification_method: quality_attribute_review
+- id: SyR-043
+  title: Operational automation and run-control governance
+  category: Operations and lifecycle
+  statement: The system shall govern operational automation, scheduled/incremental processing, run control, logging, monitoring, recovery behavior, and operator handoff expectations.
+  status: accepted
+  derives_from:
+  - StR-474
+  - StR-475
+  - StR-476
+  - StR-477
+  - StR-478
+  - StR-479
+  - StR-480
+  - StR-484
+  - StR-485
+  - StR-486
+  - StR-487
+  - StR-488
+  - StR-489
+  - StR-490
+  - StR-491
+  - StR-492
+  - StR-493
+  - StR-494
+  - StR-495
+  - StR-496
+  - StR-500
+  - StR-501
+  - StR-502
+  - StR-503
+  - StR-504
+  - StR-505
+  - StR-506
+  - StR-507
+  - StR-508
+  - StR-509
+  - StR-510
+  - StR-511
+  - StR-512
+  - StR-513
+  - StR-514
+  - StR-515
+  - StR-516
+  - StR-517
+  - StR-518
+  - StR-519
+  - StR-520
+  acceptance_criteria_refs: []
+  verification_method: operations_review
+- id: SyR-044
+  title: Traceability versioning and configuration-management governance
+  category: Traceability and reproducibility
+  statement: The system shall govern requirement, artifact, run, rule, configuration, and report versioning so changes remain traceable across the V-model chain.
+  status: accepted
+  derives_from:
+  - StR-521
+  - StR-522
+  - StR-523
+  - StR-524
+  - StR-525
+  - StR-526
+  - StR-527
+  - StR-528
+  - StR-529
+  - StR-530
+  - StR-531
+  - StR-532
+  - StR-533
+  - StR-534
+  - StR-535
+  - StR-536
+  - StR-537
+  - StR-538
+  - StR-539
+  - StR-540
+  - StR-541
+  - StR-542
+  - StR-543
+  - StR-544
+  - StR-545
+  - StR-546
+  - StR-547
+  - StR-548
+  - StR-549
+  - StR-550
+  - StR-551
+  - StR-552
+  - StR-553
+  - StR-554
+  - StR-555
+  - StR-556
+  - StR-557
+  - StR-558
+  - StR-559
+  - StR-560
+  - StR-561
+  acceptance_criteria_refs: []
+  verification_method: configuration_and_traceability_review
+- id: SyR-045
+  title: Data-governance license privacy and public-actor constraints
+  category: Validation and governance
+  statement: The system shall govern licenses, usage constraints, privacy boundaries, public/institutional actor constraints, and permitted data-use purposes across sources and outputs.
+  status: accepted
+  derives_from:
+  - StR-425
+  - StR-426
+  - StR-427
+  - StR-428
+  - StR-429
+  - StR-430
+  - StR-431
+  - StR-432
+  - StR-433
+  - StR-434
+  - StR-435
+  - StR-436
+  - StR-437
+  - StR-438
+  - StR-439
+  - StR-440
+  - StR-441
+  - StR-442
+  - StR-443
+  - StR-444
+  - StR-445
+  - StR-446
+  - StR-447
+  - StR-448
+  - StR-449
+  - StR-450
+  - StR-451
+  acceptance_criteria_refs: []
+  verification_method: data_governance_review
+- id: SyR-046
+  title: Ethics misuse and non-goal enforcement
+  category: Validation and governance
+  statement: The system shall enforce ethics, misuse-limitation, and non-goal boundaries including no targeting support, no operational recommendation, and no disinformation optimization.
+  status: accepted
+  derives_from:
+  - StR-460
+  - StR-461
+  - StR-462
+  - StR-463
+  - StR-464
+  - StR-465
+  - StR-466
+  - StR-467
+  - StR-468
+  - StR-469
+  - StR-470
+  - StR-471
+  - StR-472
+  - StR-473
+  acceptance_criteria_refs: []
+  verification_method: ethics_and_misuse_review
+- id: SyR-047
+  title: Risk assumption and limitation governance
+  category: Validation and governance
+  statement: The system shall document and expose governing assumptions, risks, limitations, and residual uncertainty that can affect interpretation or release decisions.
+  status: accepted
+  derives_from:
+  - StR-647
+  - StR-648
+  - StR-649
+  - StR-650
+  - StR-651
+  - StR-652
+  - StR-653
+  - StR-654
+  - StR-655
+  - StR-656
+  - StR-657
+  - StR-658
+  - StR-659
+  - StR-660
+  acceptance_criteria_refs: []
+  verification_method: risk_assumption_review
+- id: SyR-048
+  title: MVP definition-of-done and acceptance governance
+  category: Validation and governance
+  statement: The system shall define MVP acceptance and definition-of-done criteria as release-governance inputs that can be checked against evidence artifacts and tests.
+  status: accepted
+  derives_from:
+  - StR-562
+  - StR-563
+  - StR-564
+  - StR-565
+  - StR-566
+  - StR-567
+  - StR-568
+  - StR-569
+  - StR-570
+  - StR-571
+  - StR-572
+  - StR-573
+  - StR-574
+  - StR-575
+  - StR-576
+  - StR-577
+  - StR-578
+  - StR-579
+  - StR-580
+  - StR-581
+  - StR-582
+  - StR-585
+  - StR-586
+  - StR-587
+  - StR-588
+  - StR-589
+  - StR-590
+  - StR-591
+  - StR-592
+  - StR-593
+  - StR-594
+  - StR-595
+  - StR-596
+  - StR-597
+  - StR-598
+  - StR-599
+  - StR-600
+  - StR-601
+  - StR-602
+  - StR-603
+  - StR-604
+  - StR-605
+  acceptance_criteria_refs: []
+  verification_method: acceptance_governance_review
+- id: SyR-049
+  title: Role permission and responsibility governance
+  category: Validation and governance
+  statement: The system shall govern user roles, permissions, responsibilities, and access expectations for analyst, admin/developer, viewer, and stakeholder-review contexts.
+  status: accepted
+  derives_from:
+  - StR-341
+  - StR-342
+  - StR-343
+  - StR-344
+  - StR-345
+  - StR-346
+  - StR-347
+  - StR-348
+  - StR-349
+  - StR-350
+  acceptance_criteria_refs: []
+  verification_method: role_permission_review
+- id: SyR-050
+  title: Multi-domain status function boundary governance
+  category: Status logic
+  statement: The system shall preserve multi-domain status function boundaries, including no generalized additive fusion score and explicit domain contribution semantics.
+  status: accepted
+  derives_from:
+  - StR-231
+  - StR-232
+  - StR-233
+  - StR-234
+  - StR-235
+  acceptance_criteria_refs: []
+  verification_method: status_function_review

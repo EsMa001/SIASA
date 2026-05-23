@@ -380,6 +380,226 @@ test_specifications:
   preconditions:
   - Derived system architecture and imported stakeholder baseline are available.
   expected_result: The system shall maintain versioned rules and configuration tables and shall support reprocessing readiness so that algorithm, rule, and taxonomy changes can be compared against earlier runs.
+- id: TC-SyR-031-001
+  requirement_ids:
+  - SyR-031
+  title: Verify Stakeholder mission scope use-case and glossary governance
+  level: system
+  method: system_context_review
+  status: specified
+  acceptance_criteria_refs: []
+  preconditions:
+  - Derived system requirements and AP-01 stakeholder quality baseline are available.
+  expected_result: The system shall preserve the stakeholder-defined mission, scope, use-case boundaries, and glossary semantics as governed system context for all downstream requirements and product decisions.
+- id: TC-SyR-032-001
+  requirement_ids:
+  - SyR-032
+  title: Verify Governed source-family selection and source-management constraints
+  level: system
+  method: source_catalog_and_constraint_review
+  status: specified
+  acceptance_criteria_refs: []
+  preconditions:
+  - Derived system requirements and AP-01 stakeholder quality baseline are available.
+  expected_result: The system shall govern supported source families, fixed data-source choices, and source-management constraints including explicit handling of unavailable or deferred source classes.
+- id: TC-SyR-033-001
+  requirement_ids:
+  - SyR-033
+  title: Verify MVP analysis-function framework coverage
+  level: system
+  method: analysis_function_review
+  status: specified
+  acceptance_criteria_refs: []
+  preconditions:
+  - Derived system requirements and AP-01 stakeholder quality baseline are available.
+  expected_result: The system shall maintain an explicit MVP feature and analysis-function framework across domains A-E that separates implemented, prepared, deferred, and excluded analysis functions.
+- id: TC-SyR-034-001
+  requirement_ids:
+  - SyR-034
+  title: Verify Information dependency lineage and propagation transparency
+  level: system
+  method: traceability_and_lineage_review
+  status: specified
+  acceptance_criteria_refs: []
+  preconditions:
+  - Derived system requirements and AP-01 stakeholder quality baseline are available.
+  expected_result: The system shall represent source dependencies, lineage, source-cluster candidates, and information-propagation transparency as first-class system-level context without overclaiming causal origin certainty.
+- id: TC-SyR-035-001
+  requirement_ids:
+  - SyR-035
+  title: Verify Evidence fusion uncertainty and explainability governance
+  level: system
+  method: analytics_governance_review
+  status: specified
+  acceptance_criteria_refs: []
+  preconditions:
+  - Derived system requirements and AP-01 stakeholder quality baseline are available.
+  expected_result: The system shall combine evidence only through explainable domain-aware logic that preserves uncertainty, confidence, counter-indicators, and probabilistic interpretation boundaries.
+- id: TC-SyR-036-001
+  requirement_ids:
+  - SyR-036
+  title: Verify Baseline window and data sufficiency governance
+  level: system
+  method: baseline_and_sufficiency_review
+  status: specified
+  acceptance_criteria_refs: []
+  preconditions:
+  - Derived system requirements and AP-01 stakeholder quality baseline are available.
+  expected_result: The system shall govern historical baselines, comparison windows, data freshness, and data-sufficiency thresholds so anomaly interpretation remains relative, reproducible, and transparent.
+- id: TC-SyR-037-001
+  requirement_ids:
+  - SyR-037
+  title: Verify GUI navigation modes pages and map interaction contract
+  level: system
+  method: gui_system_review
+  status: specified
+  acceptance_criteria_refs: []
+  preconditions:
+  - Derived system requirements and AP-01 stakeholder quality baseline are available.
+  expected_result: The system shall provide a governed GUI interaction contract covering pages, usage modes, map behavior, navigation, drill-downs, and user-facing status/coverage explanations.
+- id: TC-SyR-038-001
+  requirement_ids:
+  - SyR-038
+  title: Verify MVP scope prioritization country and domain governance
+  level: system
+  method: scope_configuration_review
+  status: specified
+  acceptance_criteria_refs: []
+  preconditions:
+  - Derived system requirements and AP-01 stakeholder quality baseline are available.
+  expected_result: The system shall maintain governed MVP priority rules for countries, domains, acceptance scope, and staged expansion beyond the minimum release baseline.
+- id: TC-SyR-039-001
+  requirement_ids:
+  - SyR-039
+  title: Verify Rule-based assessment and annotation governance
+  level: system
+  method: rule_and_annotation_review
+  status: specified
+  acceptance_criteria_refs: []
+  preconditions:
+  - Derived system requirements and AP-01 stakeholder quality baseline are available.
+  expected_result: The system shall keep rule-based status assessment separate from analyst annotations and shall make annotation effects visible without overwriting computed status.
+- id: TC-SyR-040-001
+  requirement_ids:
+  - SyR-040
+  title: Verify Validation backtesting and reference-case governance
+  level: system
+  method: validation_governance_review
+  status: specified
+  acceptance_criteria_refs: []
+  preconditions:
+  - Derived system requirements and AP-01 stakeholder quality baseline are available.
+  expected_result: The system shall manage validation, backtesting, replay, and reference-case governance including expectations, evidence basis, and known validation limitations.
+- id: TC-SyR-041-001
+  requirement_ids:
+  - SyR-041
+  title: Verify System boundary and external-system governance
+  level: system
+  method: boundary_review
+  status: specified
+  acceptance_criteria_refs: []
+  preconditions:
+  - Derived system requirements and AP-01 stakeholder quality baseline are available.
+  expected_result: The system shall explicitly govern system boundaries, external dependencies, external interfaces, and out-of-scope capabilities.
+- id: TC-SyR-042-001
+  requirement_ids:
+  - SyR-042
+  title: Verify System quality attribute governance
+  level: system
+  method: quality_attribute_review
+  status: specified
+  acceptance_criteria_refs: []
+  preconditions:
+  - Derived system requirements and AP-01 stakeholder quality baseline are available.
+  expected_result: The system shall define and enforce quality attributes including robustness, reproducibility, transparency, maintainability, explainability, auditability, and controlled degradation.
+- id: TC-SyR-043-001
+  requirement_ids:
+  - SyR-043
+  title: Verify Operational automation and run-control governance
+  level: system
+  method: operations_review
+  status: specified
+  acceptance_criteria_refs: []
+  preconditions:
+  - Derived system requirements and AP-01 stakeholder quality baseline are available.
+  expected_result: The system shall govern operational automation, scheduled/incremental processing, run control, logging, monitoring, recovery behavior, and operator handoff expectations.
+- id: TC-SyR-044-001
+  requirement_ids:
+  - SyR-044
+  title: Verify Traceability versioning and configuration-management governance
+  level: system
+  method: configuration_and_traceability_review
+  status: specified
+  acceptance_criteria_refs: []
+  preconditions:
+  - Derived system requirements and AP-01 stakeholder quality baseline are available.
+  expected_result: The system shall govern requirement, artifact, run, rule, configuration, and report versioning so changes remain traceable across the V-model chain.
+- id: TC-SyR-045-001
+  requirement_ids:
+  - SyR-045
+  title: Verify Data-governance license privacy and public-actor constraints
+  level: system
+  method: data_governance_review
+  status: specified
+  acceptance_criteria_refs: []
+  preconditions:
+  - Derived system requirements and AP-01 stakeholder quality baseline are available.
+  expected_result: The system shall govern licenses, usage constraints, privacy boundaries, public/institutional actor constraints, and permitted data-use purposes across sources and outputs.
+- id: TC-SyR-046-001
+  requirement_ids:
+  - SyR-046
+  title: Verify Ethics misuse and non-goal enforcement
+  level: system
+  method: ethics_and_misuse_review
+  status: specified
+  acceptance_criteria_refs: []
+  preconditions:
+  - Derived system requirements and AP-01 stakeholder quality baseline are available.
+  expected_result: The system shall enforce ethics, misuse-limitation, and non-goal boundaries including no targeting support, no operational recommendation, and no disinformation optimization.
+- id: TC-SyR-047-001
+  requirement_ids:
+  - SyR-047
+  title: Verify Risk assumption and limitation governance
+  level: system
+  method: risk_assumption_review
+  status: specified
+  acceptance_criteria_refs: []
+  preconditions:
+  - Derived system requirements and AP-01 stakeholder quality baseline are available.
+  expected_result: The system shall document and expose governing assumptions, risks, limitations, and residual uncertainty that can affect interpretation or release decisions.
+- id: TC-SyR-048-001
+  requirement_ids:
+  - SyR-048
+  title: Verify MVP definition-of-done and acceptance governance
+  level: system
+  method: acceptance_governance_review
+  status: specified
+  acceptance_criteria_refs: []
+  preconditions:
+  - Derived system requirements and AP-01 stakeholder quality baseline are available.
+  expected_result: The system shall define MVP acceptance and definition-of-done criteria as release-governance inputs that can be checked against evidence artifacts and tests.
+- id: TC-SyR-049-001
+  requirement_ids:
+  - SyR-049
+  title: Verify Role permission and responsibility governance
+  level: system
+  method: role_permission_review
+  status: specified
+  acceptance_criteria_refs: []
+  preconditions:
+  - Derived system requirements and AP-01 stakeholder quality baseline are available.
+  expected_result: The system shall govern user roles, permissions, responsibilities, and access expectations for analyst, admin/developer, viewer, and stakeholder-review contexts.
+- id: TC-SyR-050-001
+  requirement_ids:
+  - SyR-050
+  title: Verify Multi-domain status function boundary governance
+  level: system
+  method: status_function_review
+  status: specified
+  acceptance_criteria_refs: []
+  preconditions:
+  - Derived system requirements and AP-01 stakeholder quality baseline are available.
+  expected_result: The system shall preserve multi-domain status function boundaries, including no generalized additive fusion score and explicit domain contribution semantics.
 - id: TC-SwR-001-001
   requirement_ids:
   - SwR-001
