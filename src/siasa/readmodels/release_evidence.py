@@ -7,6 +7,7 @@ from typing import Any
 from siasa.readmodels.readiness import build_readiness_view_model
 from siasa.readmodels.release_gate import build_release_gate_view_model
 from siasa.readmodels.stakeholder_e2e_flow_coverage import build_stakeholder_e2e_flow_coverage_report
+from siasa.readmodels.stakeholder_e2e_ui_smoke import build_stakeholder_e2e_ui_smoke_report
 from siasa.readmodels.stakeholder_functional_closure import build_stakeholder_functional_closure_report
 from siasa.traceability.consistency import build_traceability_integrity_report
 
@@ -18,6 +19,7 @@ def build_repo_release_gate_assessment(
     traceability_integrity_override: dict[str, Any] | None = None,
     stakeholder_functional_closure_override: dict[str, Any] | None = None,
     stakeholder_e2e_flow_coverage_override: dict[str, Any] | None = None,
+    stakeholder_e2e_ui_smoke_override: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     readiness_view_model = readiness_view_model_override or build_readiness_view_model(
         country_profile_read_models={"UKR": {"country_id": "UKR"}},
@@ -42,6 +44,7 @@ def build_repo_release_gate_assessment(
     traceability_integrity = traceability_integrity_override or build_traceability_integrity_report(repo_root=repo_root)
     stakeholder_functional_closure = stakeholder_functional_closure_override or build_stakeholder_functional_closure_report(repo_root=repo_root)
     stakeholder_e2e_flow_coverage = stakeholder_e2e_flow_coverage_override or build_stakeholder_e2e_flow_coverage_report(repo_root=repo_root)
+    stakeholder_e2e_ui_smoke = stakeholder_e2e_ui_smoke_override or build_stakeholder_e2e_ui_smoke_report(repo_root=repo_root)
     release_gate = build_release_gate_view_model(
         readiness_view_model=readiness_view_model,
         traceability_integrity_report=traceability_integrity,
@@ -51,6 +54,7 @@ def build_repo_release_gate_assessment(
         release_gate_view_model=release_gate,
         stakeholder_functional_closure_report=stakeholder_functional_closure,
         stakeholder_e2e_flow_coverage_report=stakeholder_e2e_flow_coverage,
+        stakeholder_e2e_ui_smoke_report=stakeholder_e2e_ui_smoke,
     )
     return {
         "generated_at_utc": datetime.now(UTC).isoformat(),
@@ -60,6 +64,7 @@ def build_repo_release_gate_assessment(
         "traceability_integrity": traceability_integrity,
         "stakeholder_functional_closure": stakeholder_functional_closure,
         "stakeholder_e2e_flow_coverage": stakeholder_e2e_flow_coverage,
+        "stakeholder_e2e_ui_smoke": stakeholder_e2e_ui_smoke,
     }
 
 
@@ -69,18 +74,21 @@ def build_release_readiness_index(
     release_gate_view_model: dict[str, Any],
     stakeholder_functional_closure_report: dict[str, Any],
     stakeholder_e2e_flow_coverage_report: dict[str, Any],
+    stakeholder_e2e_ui_smoke_report: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     workflow_path = repo_root / ".github" / "workflows" / "vmodel-ci.yml"
     runbook_path = repo_root / "docs" / "verification" / "release-go-no-go-runbook.md"
     evidence_script = repo_root / "scripts" / "build_release_evidence_pack.py"
     gate_script = repo_root / "scripts" / "ci_release_gate_check.py"
     e2e_flow_gate_script = repo_root / "scripts" / "ci_stakeholder_e2e_flow_coverage_check.py"
+    e2e_ui_smoke_gate_script = repo_root / "scripts" / "ci_stakeholder_e2e_ui_smoke_check.py"
 
     workflow_text = workflow_path.read_text(encoding="utf-8") if workflow_path.exists() else ""
     ci_gate_enforced = (
         "scripts/ci_release_gate_check.py" in workflow_text
         and "scripts/build_release_evidence_pack.py" in workflow_text
         and "scripts/ci_stakeholder_e2e_flow_coverage_check.py" in workflow_text
+        and "scripts/ci_stakeholder_e2e_ui_smoke_check.py" in workflow_text
     )
     e2e_summary = stakeholder_e2e_flow_coverage_report.get("summary", {}) or {}
     e2e_stop_criteria = stakeholder_e2e_flow_coverage_report.get("stop_criteria", {}) or {}
@@ -89,6 +97,16 @@ def build_release_readiness_index(
         and int(e2e_summary.get("flow_gap_count", 1)) == 0
         and int(e2e_summary.get("missing_evidence_ref_count", 1)) == 0
         and all(bool(value) for value in e2e_stop_criteria.values())
+    )
+    stakeholder_e2e_ui_smoke = stakeholder_e2e_ui_smoke_report or {
+        "flow_count": 0,
+        "flow_gap_count": 1,
+        "stop_criteria": {"not_evaluated": False},
+    }
+    stakeholder_e2e_ui_smoke_covered = (
+        int(stakeholder_e2e_ui_smoke.get("flow_count", 0)) >= 6
+        and int(stakeholder_e2e_ui_smoke.get("flow_gap_count", 1)) == 0
+        and all(bool(value) for value in (stakeholder_e2e_ui_smoke.get("stop_criteria") or {}).values())
     )
 
     gates = [
@@ -119,14 +137,19 @@ def build_release_readiness_index(
             "detail": "flow_count>=minimum_flow_count, flow_gap_count==0, missing_evidence_ref_count==0, and all stop criteria pass",
         },
         {
+            "gate_id": "stakeholder_e2e_ui_smoke_covered",
+            "passed": stakeholder_e2e_ui_smoke_covered,
+            "detail": "ui smoke report has >=6 flows, zero gaps, and all stop criteria pass",
+        },
+        {
             "gate_id": "ci_gate_enforced",
             "passed": ci_gate_enforced,
             "detail": str(workflow_path.relative_to(repo_root)),
         },
         {
             "gate_id": "evidence_pack_tooling_present",
-            "passed": evidence_script.exists() and gate_script.exists() and e2e_flow_gate_script.exists(),
-            "detail": "scripts/build_release_evidence_pack.py + scripts/ci_release_gate_check.py + scripts/ci_stakeholder_e2e_flow_coverage_check.py",
+            "passed": evidence_script.exists() and gate_script.exists() and e2e_flow_gate_script.exists() and e2e_ui_smoke_gate_script.exists(),
+            "detail": "scripts/build_release_evidence_pack.py + scripts/ci_release_gate_check.py + scripts/ci_stakeholder_e2e_flow_coverage_check.py + scripts/ci_stakeholder_e2e_ui_smoke_check.py",
         },
         {
             "gate_id": "go_no_go_runbook_present",
@@ -192,12 +215,23 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
         stakeholder_e2e_flow_coverage_override=e2e_flow_gap,
     )
 
+    e2e_ui_smoke_gap = dict(baseline["stakeholder_e2e_ui_smoke"])
+    e2e_ui_smoke_gap["flow_gap_count"] = 1
+    e2e_ui_smoke_gap["covered_flow_count"] = max(0, int(e2e_ui_smoke_gap.get("covered_flow_count", 1)) - 1)
+    e2e_ui_smoke_gap["stop_criteria"] = dict(e2e_ui_smoke_gap.get("stop_criteria") or {})
+    e2e_ui_smoke_gap["stop_criteria"]["all_flows_covered"] = False
+    scenario_e2e_ui_smoke_gap = build_repo_release_gate_assessment(
+        repo_root=repo_root,
+        stakeholder_e2e_ui_smoke_override=e2e_ui_smoke_gap,
+    )
+
     scenarios = {
         "baseline": baseline,
         "known_gap_injected": scenario_known_gaps,
         "traceability_closure_at_risk_injected": scenario_traceability_dirty,
         "stakeholder_focus_cluster_open_injected": scenario_stakeholder_open,
         "stakeholder_e2e_flow_gap_injected": scenario_e2e_flow_gap,
+        "stakeholder_e2e_ui_smoke_gap_injected": scenario_e2e_ui_smoke_gap,
     }
 
     checks = {
@@ -213,6 +247,10 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
         "stakeholder_e2e_flow_gate_fails": any(
             (not bool(gate.get("passed"))) and gate.get("gate_id") == "stakeholder_e2e_flows_covered"
             for gate in scenario_e2e_flow_gap["release_readiness_index"].get("gates", [])
+        ),
+        "stakeholder_e2e_ui_smoke_gate_fails": any(
+            (not bool(gate.get("passed"))) and gate.get("gate_id") == "stakeholder_e2e_ui_smoke_covered"
+            for gate in scenario_e2e_ui_smoke_gap["release_readiness_index"].get("gates", [])
         ),
     }
 

@@ -16,6 +16,7 @@ def test_release_failure_drill_report_detects_expected_failure_modes() -> None:
     assert checks["traceability_blocker_present"] is True
     assert checks["stakeholder_gate_fails"] is True
     assert checks["stakeholder_e2e_flow_gate_fails"] is True
+    assert checks["stakeholder_e2e_ui_smoke_gate_fails"] is True
 
     scenarios = report["scenarios"]
     assert set(scenarios.keys()) == {
@@ -24,6 +25,7 @@ def test_release_failure_drill_report_detects_expected_failure_modes() -> None:
         "traceability_closure_at_risk_injected",
         "stakeholder_focus_cluster_open_injected",
         "stakeholder_e2e_flow_gap_injected",
+        "stakeholder_e2e_ui_smoke_gap_injected",
     }
     assert scenarios["baseline"]["release_gate"]["gate_verdict"] == "go"
     assert scenarios["known_gap_injected"]["release_gate"]["gate_verdict"] == "no_go"
@@ -39,3 +41,7 @@ def test_release_failure_drill_report_detects_expected_failure_modes() -> None:
     e2e_scenario = scenarios["stakeholder_e2e_flow_gap_injected"]
     e2e_gate = {item["gate_id"]: item["passed"] for item in e2e_scenario["release_readiness_index"]["gates"]}
     assert e2e_gate["stakeholder_e2e_flows_covered"] is False
+
+    e2e_ui_smoke_scenario = scenarios["stakeholder_e2e_ui_smoke_gap_injected"]
+    e2e_ui_smoke_gate = {item["gate_id"]: item["passed"] for item in e2e_ui_smoke_scenario["release_readiness_index"]["gates"]}
+    assert e2e_ui_smoke_gate["stakeholder_e2e_ui_smoke_covered"] is False
