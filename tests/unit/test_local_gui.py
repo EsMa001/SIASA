@@ -790,7 +790,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "replay-attention-reset" in validation_html
     assert "replay-attention-export-csv" in validation_html
     assert "Export visible as CSV" in validation_html
-    assert "replay_attention_watchlist.csv" in validation_html
+    assert "replay_attention_watchlist_" in validation_html
+    assert "const sortKey=(sortSelect&&sortSelect.value)?sortSelect.value:'default';" in validation_html
     assert "exportVisibleReplayAttentionCsv" in validation_html
     assert "replay-attention-preset" in validation_html
     assert "Quick preset:" in validation_html
