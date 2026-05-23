@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import yaml
+
 from siasa.traceability.consistency import (
     build_repo_closure_report,
     build_requirement_closure_report,
@@ -500,3 +502,51 @@ def test_build_traceability_integrity_report_is_globally_clean() -> None:
         "closed": 51,
         "at_risk": 0,
     }
+
+
+def test_functional_stakeholder_gap_cluster_has_explicit_stakeholder_to_software_closure_paths() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    payload = yaml.safe_load((repo_root / "vmodel" / "traceability" / "trace_links.yaml").read_text(encoding="utf-8"))
+    links = payload["traceability"]["links"]
+
+    syr_to_stakeholders: dict[str, set[str]] = {}
+    swr_to_syrs: dict[str, set[str]] = {}
+    for link in links:
+        source_id = str(link.get("source_id", ""))
+        relation = str(link.get("relation", ""))
+        target_ids = {str(item) for item in link.get("target_ids", [])}
+        if relation == "derives_from" and source_id.startswith("SyR-"):
+            syr_to_stakeholders[source_id] = target_ids
+        if relation == "derives_from" and source_id.startswith("SwR-"):
+            swr_to_syrs[source_id] = target_ids
+
+    stakeholder_gap_ids = {
+        "StR-001",
+        "StR-002",
+        "StR-004",
+        "StR-007",
+        "StR-024",
+        "StR-025",
+        "StR-135",
+        "StR-136",
+        "StR-137",
+        "StR-138",
+        "StR-139",
+        "StR-140",
+        "StR-141",
+        "StR-142",
+        "StR-226",
+        "StR-227",
+        "StR-228",
+        "StR-229",
+        "StR-230",
+    }
+    closure_swr_ids = {"SwR-046", "SwR-047", "SwR-048", "SwR-049", "SwR-050", "SwR-051"}
+
+    covered_stakeholders: set[str] = set()
+    for swr_id in closure_swr_ids:
+        derived_syrs = swr_to_syrs[swr_id]
+        for syr_id in derived_syrs:
+            covered_stakeholders.update(stakeholder_gap_ids.intersection(syr_to_stakeholders.get(syr_id, set())))
+
+    assert covered_stakeholders == stakeholder_gap_ids
