@@ -1,0 +1,89 @@
+metadata:
+  project: SIASA
+  artifact_type: stakeholder_requirement_quality_policy
+  work_package: AP-01
+  purpose: >-
+    Normalize imported stakeholder requirements without mutating the raw workbook-derived
+    baseline. This policy defines when an active StR is considered quality-closed for
+    requirements-governance purposes before downstream traceability/verification closure.
+  decision_model: 5.5-class high-level review per docs/verification/siasa-model-routing-matrix.md
+  execution_model: Codex 5.3 for repository artifact updates
+  applies_to: all active stakeholder requirements in vmodel/requirements/stakeholder_requirements.yaml
+quality_dimensions:
+  required_core_fields:
+    - id
+    - title
+    - category
+    - statement
+    - status
+    - source_status
+    - priority
+    - phase
+  accepted_status_values:
+    - accepted
+  active_source_status_values:
+    - aktiv
+  source_priority_normalization:
+    TBD / aus v0.3: Backlog-Triage
+    MVP-Must: MVP-Must
+    MVP-Should: MVP-Should
+    Post-MVP: Post-MVP
+  source_phase_normalization:
+    MVP/Post-MVP prüfen: Backlog-Triage
+    MVP v1: MVP v1
+quality_acceptance_rules:
+  - id: AP01-SRQ-001
+    name: Core fields complete
+    measurable_rule: >-
+      Every active StR must contain all required_core_fields and no empty statement.
+    accepted_when: missing_core_field_count == 0
+  - id: AP01-SRQ-002
+    name: Acceptance criterion source assigned
+    measurable_rule: >-
+      Every active StR must either reference a canonical AC-* criterion directly or via
+      vmodel/verification/acceptance_criteria.yaml, or be explicitly covered by this
+      AP-01 quality policy as a normalized stakeholder-intent contract that must be
+      resolved through AP-02/AP-03 downstream SyR/SwR/TC evidence.
+    accepted_when: acceptance_source_missing_count == 0
+  - id: AP01-SRQ-003
+    name: Ambiguity bounded before implementation claim
+    measurable_rule: >-
+      Broad stakeholder-language terms are allowed only as stakeholder-intent input.
+      They are not allowed to justify implementation closure unless downstream SyR/SwR/TC
+      evidence exists. The report must therefore mark broad-language requirements as
+      policy-bounded, not product-closed.
+    accepted_when: unbounded_vague_requirement_count == 0
+  - id: AP01-SRQ-004
+    name: Priority and phase normalized for planning
+    measurable_rule: >-
+      Legacy source priorities/phases such as 'TBD / aus v0.3' and 'MVP/Post-MVP prüfen'
+      must be normalized to an effective governance class so steering can separate
+      MVP-relevant, should-have, post-MVP, and backlog-triage requirements.
+    accepted_when: effective_priority_missing_count == 0
+  - id: AP01-SRQ-005
+    name: Source baseline preserved
+    measurable_rule: >-
+      The workbook-derived stakeholder_requirements.yaml remains the imported baseline;
+      quality normalization is reported as a separate derived artifact to avoid silently
+      rewriting stakeholder source input.
+    accepted_when: report_contains_source_baseline_sha == true
+broad_language_terms:
+  - strukturiert
+  - relevant
+  - belastbar
+  - transparent
+  - nachvollziehbar
+  - vergleichbar
+  - robust
+  - angemessen
+  - ausreichend
+  - möglich
+  - unterstützen
+closure_semantics:
+  quality_closed: >-
+    StR has complete source fields, an assigned acceptance source (canonical AC or AP-01
+    policy coverage), bounded broad-language semantics, and normalized priority/phase.
+  product_closed: >-
+    Requires AP-02/AP-03 evidence: StR->SyR->SwR->TC path and executable verification.
+  important_boundary: >-
+    AP-01 quality closure does not claim product implementation closure.
