@@ -495,6 +495,12 @@ def write_run_artifacts(
     )
     readmodel_paths.append(stakeholder_browser_e2e_acceptance_path)
 
+    stakeholder_browser_interaction_depth_path = readmodels_dir / "stakeholder_browser_interaction_depth.json"
+    stakeholder_browser_interaction_depth_path.write_text(
+        json.dumps(release_assessment.get("stakeholder_browser_interaction_depth", {}), indent=2, sort_keys=True)
+    )
+    readmodel_paths.append(stakeholder_browser_interaction_depth_path)
+
     release_readiness_index_path = readmodels_dir / "release_readiness_index.json"
     release_readiness_index_path.write_text(
         json.dumps(release_assessment.get("release_readiness_index", {}), indent=2, sort_keys=True)

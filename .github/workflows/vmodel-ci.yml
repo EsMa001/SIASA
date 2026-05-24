@@ -28,6 +28,8 @@ jobs:
         run: PYTHONPATH=src python scripts/ci_stakeholder_e2e_ui_smoke_check.py
       - name: Enforce stakeholder browser E2E acceptance
         run: PYTHONPATH=src python scripts/ci_stakeholder_browser_e2e_acceptance_check.py
+      - name: Enforce stakeholder browser interaction depth
+        run: PYTHONPATH=src python scripts/ci_stakeholder_browser_interaction_depth_check.py
       - name: Enforce stale-remediation actionability
         run: PYTHONPATH=src python scripts/ci_stale_remediation_actionability_check.py
       - name: Build release evidence pack

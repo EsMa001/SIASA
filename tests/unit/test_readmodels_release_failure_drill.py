@@ -18,6 +18,7 @@ def test_release_failure_drill_report_detects_expected_failure_modes() -> None:
     assert checks["stakeholder_e2e_flow_gate_fails"] is True
     assert checks["stakeholder_e2e_ui_smoke_gate_fails"] is True
     assert checks["stakeholder_browser_e2e_gate_fails"] is True
+    assert checks["stakeholder_browser_interaction_depth_gate_fails"] is True
     assert checks["stale_remediation_gate_fails"] is True
 
     scenarios = report["scenarios"]
@@ -29,6 +30,7 @@ def test_release_failure_drill_report_detects_expected_failure_modes() -> None:
         "stakeholder_e2e_flow_gap_injected",
         "stakeholder_e2e_ui_smoke_gap_injected",
         "stakeholder_browser_e2e_gap_injected",
+        "stakeholder_browser_interaction_depth_gap_injected",
         "stale_remediation_gap_injected",
     }
     assert scenarios["baseline"]["release_gate"]["gate_verdict"] == "go"
@@ -53,6 +55,10 @@ def test_release_failure_drill_report_detects_expected_failure_modes() -> None:
     browser_e2e_scenario = scenarios["stakeholder_browser_e2e_gap_injected"]
     browser_e2e_gate = {item["gate_id"]: item["passed"] for item in browser_e2e_scenario["release_readiness_index"]["gates"]}
     assert browser_e2e_gate["stakeholder_browser_e2e_acceptance_covered"] is False
+
+    browser_interaction_depth_scenario = scenarios["stakeholder_browser_interaction_depth_gap_injected"]
+    browser_interaction_depth_gate = {item["gate_id"]: item["passed"] for item in browser_interaction_depth_scenario["release_readiness_index"]["gates"]}
+    assert browser_interaction_depth_gate["stakeholder_browser_interaction_depth_covered"] is False
 
     stale_scenario = scenarios["stale_remediation_gap_injected"]
     stale_gate = {item["gate_id"]: item["passed"] for item in stale_scenario["release_readiness_index"]["gates"]}
