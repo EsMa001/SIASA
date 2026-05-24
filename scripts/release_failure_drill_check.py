@@ -12,6 +12,7 @@ def main() -> int:
     summary = {
         "drill_verdict": report.get("drill_verdict"),
         "checks": report.get("checks", {}),
+        "failure_localization": report.get("failure_localization", {}),
     }
     print(json.dumps(summary, indent=2, sort_keys=True))
     return 0 if str(report.get("drill_verdict")) == "pass" else 1

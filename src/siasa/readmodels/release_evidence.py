@@ -441,10 +441,64 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
         ),
     }
 
+    gate_labels = {
+        "stakeholder_functional_focus_cluster_closed": "Stakeholder functional focus cluster closure",
+        "stakeholder_e2e_flows_covered": "Stakeholder E2E flow coverage",
+        "stakeholder_e2e_ui_smoke_covered": "Stakeholder E2E UI smoke coverage",
+        "stakeholder_browser_e2e_acceptance_covered": "Stakeholder browser E2E acceptance",
+        "stakeholder_browser_interaction_depth_covered": "Stakeholder browser interaction depth",
+        "stakeholder_browser_failure_resilience_covered": "Stakeholder browser failure resilience",
+        "stale_remediation_actionable": "Stale-remediation actionability",
+        "known_gaps_clear": "Known-gaps clearance",
+        "traceability_integrity_clean": "Traceability integrity",
+    }
+    remediation_hints = {
+        "stakeholder_functional_focus_cluster_closed": "Close missing focus-cluster stakeholder mappings and rerun stakeholder closure checks.",
+        "stakeholder_e2e_flows_covered": "Update stakeholder E2E flow definitions/evidence refs and ensure all required flow tests resolve.",
+        "stakeholder_e2e_ui_smoke_covered": "Regenerate local GUI bundle and fix missing role-flow smoke paths.",
+        "stakeholder_browser_e2e_acceptance_covered": "Fix broken internal links or role-bundle navigation regressions in generated GUI pages.",
+        "stakeholder_browser_interaction_depth_covered": "Repair deterministic click-path transitions between overview/readiness/coverage/country/domain/validation/reports.",
+        "stakeholder_browser_failure_resilience_covered": "Fix role-misrouting, required navigation targets, and core internal-link integrity on browser paths.",
+        "stale_remediation_actionable": "Populate stale-country watchlist with actionable remediation entries and positive priority scores.",
+        "known_gaps_clear": "Resolve readiness known gaps or explicitly scope/mitigate them before release decision.",
+        "traceability_integrity_clean": "Close traceability integrity risks (unhealthy slices/closure-at-risk) before release.",
+    }
+
+    scenario_localization: dict[str, list[dict[str, str]]] = {}
+    for scenario_id, scenario_assessment in scenarios.items():
+        failures: list[dict[str, str]] = []
+        if scenario_assessment.get("release_gate", {}).get("gate_verdict") == "no_go":
+            for blocker in scenario_assessment.get("release_gate", {}).get("blockers", []):
+                blocker_id = str(blocker)
+                failures.append(
+                    {
+                        "gate_id": blocker_id,
+                        "gate_label": gate_labels.get(blocker_id, blocker_id),
+                        "remediation_hint": remediation_hints.get(blocker_id, "Inspect scenario evidence and close the blocker condition."),
+                    }
+                )
+        for gate in scenario_assessment.get("release_readiness_index", {}).get("gates", []):
+            if not bool(gate.get("passed")):
+                gate_id = str(gate.get("gate_id", "unknown"))
+                failures.append(
+                    {
+                        "gate_id": gate_id,
+                        "gate_label": gate_labels.get(gate_id, gate_id),
+                        "remediation_hint": remediation_hints.get(gate_id, "Inspect scenario evidence and repair failing gate conditions."),
+                    }
+                )
+        dedup: dict[str, dict[str, str]] = {item["gate_id"]: item for item in failures}
+        scenario_localization[scenario_id] = list(dedup.values())
+
+    checks["failure_localization_nonempty_for_injected_scenarios"] = all(
+        len(entries) > 0 for key, entries in scenario_localization.items() if key != "baseline"
+    )
+
     return {
         "drill_verdict": "pass" if all(checks.values()) else "fail",
         "checks": checks,
         "scenarios": scenarios,
+        "failure_localization": scenario_localization,
     }
 
 

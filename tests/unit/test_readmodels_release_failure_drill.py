@@ -21,6 +21,7 @@ def test_release_failure_drill_report_detects_expected_failure_modes() -> None:
     assert checks["stakeholder_browser_interaction_depth_gate_fails"] is True
     assert checks["stakeholder_browser_failure_resilience_gate_fails"] is True
     assert checks["stale_remediation_gate_fails"] is True
+    assert checks["failure_localization_nonempty_for_injected_scenarios"] is True
 
     scenarios = report["scenarios"]
     assert set(scenarios.keys()) == {
@@ -69,3 +70,13 @@ def test_release_failure_drill_report_detects_expected_failure_modes() -> None:
     stale_scenario = scenarios["stale_remediation_gap_injected"]
     stale_gate = {item["gate_id"]: item["passed"] for item in stale_scenario["release_readiness_index"]["gates"]}
     assert stale_gate["stale_remediation_actionable"] is False
+
+    failure_localization = report["failure_localization"]
+    assert set(failure_localization.keys()) == set(scenarios.keys())
+    assert failure_localization["baseline"] == []
+    assert any(item["gate_id"] == "known_gaps_clear" for item in failure_localization["known_gap_injected"])
+    assert any(item["gate_id"] == "traceability_integrity_clean" for item in failure_localization["traceability_closure_at_risk_injected"])
+    assert any(
+        item["gate_id"] == "stakeholder_browser_failure_resilience_covered" and "role-misrouting" in item["remediation_hint"]
+        for item in failure_localization["stakeholder_browser_failure_resilience_gap_injected"]
+    )
