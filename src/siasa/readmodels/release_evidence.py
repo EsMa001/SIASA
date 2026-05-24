@@ -7,6 +7,7 @@ from typing import Any
 from siasa.readmodels.readiness import build_readiness_view_model
 from siasa.readmodels.release_gate import build_release_gate_view_model
 from siasa.readmodels.stakeholder_browser_e2e_acceptance import build_stakeholder_browser_e2e_acceptance_report
+from siasa.readmodels.stakeholder_browser_failure_resilience import build_stakeholder_browser_failure_resilience_report
 from siasa.readmodels.stakeholder_browser_interaction_depth import build_stakeholder_browser_interaction_depth_report
 from siasa.readmodels.stakeholder_e2e_flow_coverage import build_stakeholder_e2e_flow_coverage_report
 from siasa.readmodels.stakeholder_e2e_ui_smoke import build_stakeholder_e2e_ui_smoke_report
@@ -24,6 +25,7 @@ def build_repo_release_gate_assessment(
     stakeholder_e2e_ui_smoke_override: dict[str, Any] | None = None,
     stakeholder_browser_e2e_acceptance_override: dict[str, Any] | None = None,
     stakeholder_browser_interaction_depth_override: dict[str, Any] | None = None,
+    stakeholder_browser_failure_resilience_override: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     readiness_view_model = readiness_view_model_override or build_readiness_view_model(
         country_profile_read_models={"UKR": {"country_id": "UKR"}},
@@ -51,6 +53,7 @@ def build_repo_release_gate_assessment(
     stakeholder_e2e_ui_smoke = stakeholder_e2e_ui_smoke_override or build_stakeholder_e2e_ui_smoke_report(repo_root=repo_root)
     stakeholder_browser_e2e_acceptance = stakeholder_browser_e2e_acceptance_override or build_stakeholder_browser_e2e_acceptance_report(repo_root=repo_root)
     stakeholder_browser_interaction_depth = stakeholder_browser_interaction_depth_override or build_stakeholder_browser_interaction_depth_report(repo_root=repo_root)
+    stakeholder_browser_failure_resilience = stakeholder_browser_failure_resilience_override or build_stakeholder_browser_failure_resilience_report(repo_root=repo_root)
     release_gate = build_release_gate_view_model(
         readiness_view_model=readiness_view_model,
         traceability_integrity_report=traceability_integrity,
@@ -63,6 +66,7 @@ def build_repo_release_gate_assessment(
         stakeholder_e2e_ui_smoke_report=stakeholder_e2e_ui_smoke,
         stakeholder_browser_e2e_acceptance_report=stakeholder_browser_e2e_acceptance,
         stakeholder_browser_interaction_depth_report=stakeholder_browser_interaction_depth,
+        stakeholder_browser_failure_resilience_report=stakeholder_browser_failure_resilience,
     )
     return {
         "generated_at_utc": datetime.now(UTC).isoformat(),
@@ -75,6 +79,7 @@ def build_repo_release_gate_assessment(
         "stakeholder_e2e_ui_smoke": stakeholder_e2e_ui_smoke,
         "stakeholder_browser_e2e_acceptance": stakeholder_browser_e2e_acceptance,
         "stakeholder_browser_interaction_depth": stakeholder_browser_interaction_depth,
+        "stakeholder_browser_failure_resilience": stakeholder_browser_failure_resilience,
     }
 
 
@@ -87,6 +92,7 @@ def build_release_readiness_index(
     stakeholder_e2e_ui_smoke_report: dict[str, Any] | None = None,
     stakeholder_browser_e2e_acceptance_report: dict[str, Any] | None = None,
     stakeholder_browser_interaction_depth_report: dict[str, Any] | None = None,
+    stakeholder_browser_failure_resilience_report: dict[str, Any] | None = None,
     coverage_visibility_override: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     workflow_path = repo_root / ".github" / "workflows" / "vmodel-ci.yml"
@@ -97,6 +103,7 @@ def build_release_readiness_index(
     e2e_ui_smoke_gate_script = repo_root / "scripts" / "ci_stakeholder_e2e_ui_smoke_check.py"
     browser_e2e_gate_script = repo_root / "scripts" / "ci_stakeholder_browser_e2e_acceptance_check.py"
     browser_interaction_depth_gate_script = repo_root / "scripts" / "ci_stakeholder_browser_interaction_depth_check.py"
+    browser_failure_resilience_gate_script = repo_root / "scripts" / "ci_stakeholder_browser_failure_resilience_check.py"
     stale_remediation_gate_script = repo_root / "scripts" / "ci_stale_remediation_actionability_check.py"
 
     workflow_text = workflow_path.read_text(encoding="utf-8") if workflow_path.exists() else ""
@@ -107,6 +114,7 @@ def build_release_readiness_index(
         and "scripts/ci_stakeholder_e2e_ui_smoke_check.py" in workflow_text
         and "scripts/ci_stakeholder_browser_e2e_acceptance_check.py" in workflow_text
         and "scripts/ci_stakeholder_browser_interaction_depth_check.py" in workflow_text
+        and "scripts/ci_stakeholder_browser_failure_resilience_check.py" in workflow_text
         and "scripts/ci_stale_remediation_actionability_check.py" in workflow_text
     )
     e2e_summary = stakeholder_e2e_flow_coverage_report.get("summary", {}) or {}
@@ -145,6 +153,15 @@ def build_release_readiness_index(
         and int((stakeholder_browser_interaction_depth.get("summary") or {}).get("passed_transition_count", 0))
         == int((stakeholder_browser_interaction_depth.get("summary") or {}).get("transition_count", 0))
         and all(bool(value) for value in (stakeholder_browser_interaction_depth.get("stop_criteria") or {}).values())
+    )
+    stakeholder_browser_failure_resilience = stakeholder_browser_failure_resilience_report or {
+        "summary": {"broken_internal_link_count": 1, "missing_required_target_count": 1},
+        "stop_criteria": {"not_evaluated": False},
+    }
+    stakeholder_browser_failure_resilience_covered = (
+        int((stakeholder_browser_failure_resilience.get("summary") or {}).get("broken_internal_link_count", 1)) == 0
+        and int((stakeholder_browser_failure_resilience.get("summary") or {}).get("missing_required_target_count", 1)) == 0
+        and all(bool(value) for value in (stakeholder_browser_failure_resilience.get("stop_criteria") or {}).values())
     )
     coverage_visibility = coverage_visibility_override or {}
     if not coverage_visibility:
@@ -216,6 +233,11 @@ def build_release_readiness_index(
             "detail": "browser interaction-depth report has all configured click-path transitions passing",
         },
         {
+            "gate_id": "stakeholder_browser_failure_resilience_covered",
+            "passed": stakeholder_browser_failure_resilience_covered,
+            "detail": "browser failure-resilience report has zero required-target misses, zero broken internal links, and all stop criteria pass",
+        },
+        {
             "gate_id": "stale_remediation_actionable",
             "passed": stale_remediation_actionable,
             "detail": "if stale_country_count>0 then stale watchlist and remediation actions with positive priority scores must be present",
@@ -234,9 +256,10 @@ def build_release_readiness_index(
                 and e2e_ui_smoke_gate_script.exists()
                 and browser_e2e_gate_script.exists()
                 and browser_interaction_depth_gate_script.exists()
+                and browser_failure_resilience_gate_script.exists()
                 and stale_remediation_gate_script.exists()
             ),
-            "detail": "scripts/build_release_evidence_pack.py + scripts/ci_release_gate_check.py + scripts/ci_stakeholder_e2e_flow_coverage_check.py + scripts/ci_stakeholder_e2e_ui_smoke_check.py + scripts/ci_stakeholder_browser_e2e_acceptance_check.py + scripts/ci_stakeholder_browser_interaction_depth_check.py + scripts/ci_stale_remediation_actionability_check.py",
+            "detail": "scripts/build_release_evidence_pack.py + scripts/ci_release_gate_check.py + scripts/ci_stakeholder_e2e_flow_coverage_check.py + scripts/ci_stakeholder_e2e_ui_smoke_check.py + scripts/ci_stakeholder_browser_e2e_acceptance_check.py + scripts/ci_stakeholder_browser_interaction_depth_check.py + scripts/ci_stakeholder_browser_failure_resilience_check.py + scripts/ci_stale_remediation_actionability_check.py",
         },
         {
             "gate_id": "go_no_go_runbook_present",
@@ -335,6 +358,17 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
         stakeholder_browser_interaction_depth_override=browser_interaction_depth_gap,
     )
 
+    browser_failure_resilience_gap = dict(baseline["stakeholder_browser_failure_resilience"])
+    browser_failure_resilience_gap["summary"] = dict(browser_failure_resilience_gap.get("summary") or {})
+    browser_failure_resilience_gap["summary"]["broken_internal_link_count"] = 1
+    browser_failure_resilience_gap["summary"]["missing_required_target_count"] = 1
+    browser_failure_resilience_gap["stop_criteria"] = dict(browser_failure_resilience_gap.get("stop_criteria") or {})
+    browser_failure_resilience_gap["stop_criteria"]["no_broken_internal_links_on_core_paths"] = False
+    scenario_browser_failure_resilience_gap = build_repo_release_gate_assessment(
+        repo_root=repo_root,
+        stakeholder_browser_failure_resilience_override=browser_failure_resilience_gap,
+    )
+
     stale_remediation_visibility = {
         "stale_priority_summary": {
             "stale_country_count": 1,
@@ -354,6 +388,7 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
         stakeholder_e2e_ui_smoke_report=baseline["stakeholder_e2e_ui_smoke"],
         stakeholder_browser_e2e_acceptance_report=baseline["stakeholder_browser_e2e_acceptance"],
         stakeholder_browser_interaction_depth_report=baseline["stakeholder_browser_interaction_depth"],
+        stakeholder_browser_failure_resilience_report=baseline["stakeholder_browser_failure_resilience"],
         coverage_visibility_override=stale_remediation_visibility,
     )
 
@@ -366,6 +401,7 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
         "stakeholder_e2e_ui_smoke_gap_injected": scenario_e2e_ui_smoke_gap,
         "stakeholder_browser_e2e_gap_injected": scenario_browser_e2e_gap,
         "stakeholder_browser_interaction_depth_gap_injected": scenario_browser_interaction_depth_gap,
+        "stakeholder_browser_failure_resilience_gap_injected": scenario_browser_failure_resilience_gap,
         "stale_remediation_gap_injected": scenario_stale_remediation_gap,
     }
 
@@ -394,6 +430,10 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
         "stakeholder_browser_interaction_depth_gate_fails": any(
             (not bool(gate.get("passed"))) and gate.get("gate_id") == "stakeholder_browser_interaction_depth_covered"
             for gate in scenario_browser_interaction_depth_gap["release_readiness_index"].get("gates", [])
+        ),
+        "stakeholder_browser_failure_resilience_gate_fails": any(
+            (not bool(gate.get("passed"))) and gate.get("gate_id") == "stakeholder_browser_failure_resilience_covered"
+            for gate in scenario_browser_failure_resilience_gap["release_readiness_index"].get("gates", [])
         ),
         "stale_remediation_gate_fails": any(
             (not bool(gate.get("passed"))) and gate.get("gate_id") == "stale_remediation_actionable"

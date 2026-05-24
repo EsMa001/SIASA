@@ -164,6 +164,7 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert (tmp_path / "bundle" / "readmodels" / "stakeholder_e2e_ui_smoke.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "stakeholder_browser_e2e_acceptance.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "stakeholder_browser_interaction_depth.json").exists()
+    assert (tmp_path / "bundle" / "readmodels" / "stakeholder_browser_failure_resilience.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "release_readiness_index.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "traceability_lineage.json").exists()
     assert (tmp_path / "bundle" / "readmodels" / "repo_closure.json").exists()
