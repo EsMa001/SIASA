@@ -26,6 +26,8 @@ jobs:
         run: PYTHONPATH=src python scripts/ci_stakeholder_e2e_flow_coverage_check.py
       - name: Enforce stakeholder E2E UI smoke coverage
         run: PYTHONPATH=src python scripts/ci_stakeholder_e2e_ui_smoke_check.py
+      - name: Enforce stale-remediation actionability
+        run: PYTHONPATH=src python scripts/ci_stale_remediation_actionability_check.py
       - name: Build release evidence pack
         run: PYTHONPATH=src python scripts/build_release_evidence_pack.py --output-dir build/release_evidence/latest
       - name: Run release failure drill (negative scenarios must fail gates)

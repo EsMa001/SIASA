@@ -75,6 +75,7 @@ def build_release_readiness_index(
     stakeholder_functional_closure_report: dict[str, Any],
     stakeholder_e2e_flow_coverage_report: dict[str, Any],
     stakeholder_e2e_ui_smoke_report: dict[str, Any] | None = None,
+    coverage_visibility_override: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     workflow_path = repo_root / ".github" / "workflows" / "vmodel-ci.yml"
     runbook_path = repo_root / "docs" / "verification" / "release-go-no-go-runbook.md"
@@ -82,6 +83,7 @@ def build_release_readiness_index(
     gate_script = repo_root / "scripts" / "ci_release_gate_check.py"
     e2e_flow_gate_script = repo_root / "scripts" / "ci_stakeholder_e2e_flow_coverage_check.py"
     e2e_ui_smoke_gate_script = repo_root / "scripts" / "ci_stakeholder_e2e_ui_smoke_check.py"
+    stale_remediation_gate_script = repo_root / "scripts" / "ci_stale_remediation_actionability_check.py"
 
     workflow_text = workflow_path.read_text(encoding="utf-8") if workflow_path.exists() else ""
     ci_gate_enforced = (
@@ -89,6 +91,7 @@ def build_release_readiness_index(
         and "scripts/build_release_evidence_pack.py" in workflow_text
         and "scripts/ci_stakeholder_e2e_flow_coverage_check.py" in workflow_text
         and "scripts/ci_stakeholder_e2e_ui_smoke_check.py" in workflow_text
+        and "scripts/ci_stale_remediation_actionability_check.py" in workflow_text
     )
     e2e_summary = stakeholder_e2e_flow_coverage_report.get("summary", {}) or {}
     e2e_stop_criteria = stakeholder_e2e_flow_coverage_report.get("stop_criteria", {}) or {}
@@ -107,6 +110,32 @@ def build_release_readiness_index(
         int(stakeholder_e2e_ui_smoke.get("flow_count", 0)) >= 6
         and int(stakeholder_e2e_ui_smoke.get("flow_gap_count", 1)) == 0
         and all(bool(value) for value in (stakeholder_e2e_ui_smoke.get("stop_criteria") or {}).values())
+    )
+    coverage_visibility = coverage_visibility_override or {}
+    if not coverage_visibility:
+        readiness_vm = release_gate_view_model.get("readiness")
+        if isinstance(readiness_vm, dict):
+            maybe_visibility = readiness_vm.get("country_coverage_visibility")
+            if isinstance(maybe_visibility, dict):
+                coverage_visibility = maybe_visibility
+    stale_summary = coverage_visibility.get("stale_priority_summary") if isinstance(coverage_visibility.get("stale_priority_summary"), dict) else {}
+    stale_watchlist = coverage_visibility.get("stale_priority_watchlist") if isinstance(coverage_visibility.get("stale_priority_watchlist"), list) else []
+    remediation_watchlist = coverage_visibility.get("remediation_watchlist") if isinstance(coverage_visibility.get("remediation_watchlist"), list) else []
+    stale_country_count = int(stale_summary.get("stale_country_count", 0)) if stale_summary else 0
+    stale_remediation_actionable = (
+        stale_country_count == 0
+        or (
+            len(stale_watchlist) > 0
+            and all(bool(str(item.get("country_id", "")).strip()) for item in stale_watchlist if isinstance(item, dict))
+            and len(remediation_watchlist) > 0
+            and all(
+                isinstance(item, dict)
+                and bool(str(item.get("remediation_action", "")).strip())
+                and isinstance(item.get("priority_score"), (int, float))
+                and float(item.get("priority_score", 0)) > 0
+                for item in remediation_watchlist
+            )
+        )
     )
 
     gates = [
@@ -142,14 +171,25 @@ def build_release_readiness_index(
             "detail": "ui smoke report has >=6 flows, zero gaps, and all stop criteria pass",
         },
         {
+            "gate_id": "stale_remediation_actionable",
+            "passed": stale_remediation_actionable,
+            "detail": "if stale_country_count>0 then stale watchlist and remediation actions with positive priority scores must be present",
+        },
+        {
             "gate_id": "ci_gate_enforced",
             "passed": ci_gate_enforced,
             "detail": str(workflow_path.relative_to(repo_root)),
         },
         {
             "gate_id": "evidence_pack_tooling_present",
-            "passed": evidence_script.exists() and gate_script.exists() and e2e_flow_gate_script.exists() and e2e_ui_smoke_gate_script.exists(),
-            "detail": "scripts/build_release_evidence_pack.py + scripts/ci_release_gate_check.py + scripts/ci_stakeholder_e2e_flow_coverage_check.py + scripts/ci_stakeholder_e2e_ui_smoke_check.py",
+            "passed": (
+                evidence_script.exists()
+                and gate_script.exists()
+                and e2e_flow_gate_script.exists()
+                and e2e_ui_smoke_gate_script.exists()
+                and stale_remediation_gate_script.exists()
+            ),
+            "detail": "scripts/build_release_evidence_pack.py + scripts/ci_release_gate_check.py + scripts/ci_stakeholder_e2e_flow_coverage_check.py + scripts/ci_stakeholder_e2e_ui_smoke_check.py + scripts/ci_stale_remediation_actionability_check.py",
         },
         {
             "gate_id": "go_no_go_runbook_present",
@@ -225,6 +265,26 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
         stakeholder_e2e_ui_smoke_override=e2e_ui_smoke_gap,
     )
 
+    stale_remediation_visibility = {
+        "stale_priority_summary": {
+            "stale_country_count": 1,
+            "p1_stale_count": 1,
+            "p2_stale_count": 0,
+            "p3_stale_count": 0,
+        },
+        "stale_priority_watchlist": [{"country_id": "UKR", "priority": "P1", "freshness_hours": 720.0}],
+        "remediation_watchlist": [{"severity": "high", "reason": "stale_source_window", "priority_score": 0}],
+    }
+    scenario_stale_remediation_gap = dict(baseline)
+    scenario_stale_remediation_gap["release_readiness_index"] = build_release_readiness_index(
+        repo_root=repo_root,
+        release_gate_view_model=baseline["release_gate"],
+        stakeholder_functional_closure_report=baseline["stakeholder_functional_closure"],
+        stakeholder_e2e_flow_coverage_report=baseline["stakeholder_e2e_flow_coverage"],
+        stakeholder_e2e_ui_smoke_report=baseline["stakeholder_e2e_ui_smoke"],
+        coverage_visibility_override=stale_remediation_visibility,
+    )
+
     scenarios = {
         "baseline": baseline,
         "known_gap_injected": scenario_known_gaps,
@@ -232,6 +292,7 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
         "stakeholder_focus_cluster_open_injected": scenario_stakeholder_open,
         "stakeholder_e2e_flow_gap_injected": scenario_e2e_flow_gap,
         "stakeholder_e2e_ui_smoke_gap_injected": scenario_e2e_ui_smoke_gap,
+        "stale_remediation_gap_injected": scenario_stale_remediation_gap,
     }
 
     checks = {
@@ -251,6 +312,10 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
         "stakeholder_e2e_ui_smoke_gate_fails": any(
             (not bool(gate.get("passed"))) and gate.get("gate_id") == "stakeholder_e2e_ui_smoke_covered"
             for gate in scenario_e2e_ui_smoke_gap["release_readiness_index"].get("gates", [])
+        ),
+        "stale_remediation_gate_fails": any(
+            (not bool(gate.get("passed"))) and gate.get("gate_id") == "stale_remediation_actionable"
+            for gate in scenario_stale_remediation_gap["release_readiness_index"].get("gates", [])
         ),
     }
 

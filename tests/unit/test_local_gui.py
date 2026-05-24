@@ -621,6 +621,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert (pages.output_dir / "stakeholder_functional_closure.json").exists()
     assert (pages.output_dir / "stakeholder_e2e_flow_coverage.json").exists()
     assert (pages.output_dir / "release_readiness_index.json").exists()
+    assert (pages.output_dir / "stakeholder_e2e_ui_smoke.json").exists()
 
     index_html = (pages.output_dir / "index.html").read_text()
     assert "World Anomaly Map" in index_html
@@ -893,6 +894,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Release Readiness Index" in readiness_html
     assert "stakeholder_e2e_flows_covered" in readiness_html
     assert "Stakeholder E2E Flow Coverage (AP-04/AP-05)" in readiness_html
+    assert "Stakeholder E2E UI Smoke Coverage (AP-07/AP-08)" in readiness_html
     assert "Stakeholder Functional Closure Focus Cluster" in readiness_html
     assert "Release Gate Blockers" in readiness_html
 
@@ -1760,14 +1762,28 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
             }
         )
     )
+    (artifacts_dir / "readmodels" / "stakeholder_e2e_ui_smoke.json").write_text(
+        json.dumps(
+            {
+                "flow_count": 6,
+                "covered_flow_count": 6,
+                "flow_gap_count": 0,
+                "stop_criteria": {
+                    "all_flows_present_in_rendered_ui": True,
+                    "all_role_boundaries_hold": True,
+                },
+            }
+        )
+    )
     (artifacts_dir / "readmodels" / "release_readiness_index.json").write_text(
         json.dumps(
             {
-                "passed_gates": 7,
-                "total_gates": 7,
+                "passed_gates": 8,
+                "total_gates": 8,
                 "percent": 100.0,
                 "gates": [
                     {"gate_id": "stakeholder_e2e_flows_covered", "passed": True, "detail": "ok"},
+                    {"gate_id": "stakeholder_e2e_ui_smoke_covered", "passed": True, "detail": "ok"},
                 ],
             }
         )
@@ -1782,7 +1798,8 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert payload["release_gate_view_model"]["gate_verdict"] == "go"
     assert payload["stakeholder_functional_closure_view_model"]["focus_gap_cluster"]["covered_count"] == 19
     assert payload["stakeholder_e2e_flow_coverage_view_model"]["summary"]["flow_count"] == 6
-    assert payload["release_readiness_index_view_model"]["passed_gates"] == 7
+    assert payload["stakeholder_e2e_ui_smoke_view_model"]["flow_count"] == 6
+    assert payload["release_readiness_index_view_model"]["passed_gates"] == 8
 
     pages = build_local_mvp_site(output_dir=tmp_path / "site-with-readiness", **payload)
     readiness_html = (pages.output_dir / "readiness.html").read_text()
@@ -1794,6 +1811,7 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert "Release Readiness Index" in readiness_html
     assert "stakeholder_e2e_flows_covered" in readiness_html
     assert "Stakeholder E2E Flow Coverage (AP-04/AP-05)" in readiness_html
+    assert "Stakeholder E2E UI Smoke Coverage (AP-07/AP-08)" in readiness_html
     assert "Covered Flows: <strong>6/6</strong>" in readiness_html
     assert "Stakeholder Focus Closure" in readiness_html
     assert "Covered IDs: 19 / 19 | Open IDs: 0" in readiness_html

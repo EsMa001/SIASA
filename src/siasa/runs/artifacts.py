@@ -15,6 +15,7 @@ from siasa.readmodels.annotations import build_annotations_view_model
 from siasa.readmodels.country_profile import build_country_profile_read_model
 from siasa.readmodels.domain_detail import build_domain_detail_read_model
 from siasa.readmodels.readiness import build_readiness_view_model
+from siasa.readmodels.release_evidence import build_repo_release_gate_assessment
 from siasa.readmodels.release_gate import build_release_gate_view_model
 from siasa.readmodels.source_coverage import build_source_coverage_read_model
 from siasa.readmodels.stakeholder_functional_closure import build_stakeholder_functional_closure_report
@@ -473,6 +474,26 @@ def write_run_artifacts(
         )
     )
     readmodel_paths.append(release_gate_path)
+
+    release_assessment = build_repo_release_gate_assessment(repo_root=Path(__file__).resolve().parents[3])
+
+    stakeholder_e2e_flow_coverage_path = readmodels_dir / "stakeholder_e2e_flow_coverage.json"
+    stakeholder_e2e_flow_coverage_path.write_text(
+        json.dumps(release_assessment.get("stakeholder_e2e_flow_coverage", {}), indent=2, sort_keys=True)
+    )
+    readmodel_paths.append(stakeholder_e2e_flow_coverage_path)
+
+    stakeholder_e2e_ui_smoke_path = readmodels_dir / "stakeholder_e2e_ui_smoke.json"
+    stakeholder_e2e_ui_smoke_path.write_text(
+        json.dumps(release_assessment.get("stakeholder_e2e_ui_smoke", {}), indent=2, sort_keys=True)
+    )
+    readmodel_paths.append(stakeholder_e2e_ui_smoke_path)
+
+    release_readiness_index_path = readmodels_dir / "release_readiness_index.json"
+    release_readiness_index_path.write_text(
+        json.dumps(release_assessment.get("release_readiness_index", {}), indent=2, sort_keys=True)
+    )
+    readmodel_paths.append(release_readiness_index_path)
 
     report_paths = []
     daily_report_path = reports_dir / "daily_snapshot.json"
