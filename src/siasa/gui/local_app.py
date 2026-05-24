@@ -16,6 +16,7 @@ from siasa.readmodels.readiness import build_readiness_view_model
 from siasa.readmodels.release_evidence import build_release_readiness_index
 from siasa.readmodels.release_gate import build_release_gate_view_model
 from siasa.readmodels.stakeholder_e2e_flow_coverage import build_stakeholder_e2e_flow_coverage_report
+from siasa.readmodels.stakeholder_e2e_ui_smoke import build_stakeholder_e2e_ui_smoke_report
 from siasa.readmodels.validation_backtest import build_historical_replay_summary
 from siasa.traceability.consistency import build_repo_closure_report, build_traceability_integrity_report
 
@@ -1376,6 +1377,11 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
     if release_readiness_index_view_path.exists():
         release_readiness_index_view_model = _load_json(release_readiness_index_view_path)
 
+    stakeholder_e2e_ui_smoke_view_model = None
+    stakeholder_e2e_ui_smoke_view_path = readmodels_dir / 'stakeholder_e2e_ui_smoke.json'
+    if stakeholder_e2e_ui_smoke_view_path.exists():
+        stakeholder_e2e_ui_smoke_view_model = _load_json(stakeholder_e2e_ui_smoke_view_path)
+
     return {
         'world_map_read_model': world_map_read_model,
         'country_profile_read_models': country_profile_read_models,
@@ -1392,6 +1398,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
         'stakeholder_functional_closure_view_model': stakeholder_functional_closure_view_model,
         'stakeholder_e2e_flow_coverage_view_model': stakeholder_e2e_flow_coverage_view_model,
         'release_readiness_index_view_model': release_readiness_index_view_model,
+        'stakeholder_e2e_ui_smoke_view_model': stakeholder_e2e_ui_smoke_view_model,
     }
 
 
@@ -2144,6 +2151,7 @@ def _render_readiness(
     stakeholder_functional_closure_view_model: dict[str, Any] | None = None,
     stakeholder_e2e_flow_coverage_view_model: dict[str, Any] | None = None,
     release_readiness_index_view_model: dict[str, Any] | None = None,
+    stakeholder_e2e_ui_smoke_view_model: dict[str, Any] | None = None,
     *,
     nav_prefix: str = '',
     available_pages: set[str] | None = None,
@@ -2224,6 +2232,18 @@ def _render_readiness(
         "</tr>"
         for key, value in sorted(_e2e_stop_criteria.items())
     ) or "<tr><td colspan='2'>No AP-04 stop-criteria data available.</td></tr>"
+    _e2e_ui_smoke = stakeholder_e2e_ui_smoke_view_model or {}
+    _e2e_ui_smoke_flow_count = int(_e2e_ui_smoke.get('flow_count', 0)) if _e2e_ui_smoke else 0
+    _e2e_ui_smoke_covered = int(_e2e_ui_smoke.get('covered_flow_count', 0)) if _e2e_ui_smoke else 0
+    _e2e_ui_smoke_gaps = int(_e2e_ui_smoke.get('flow_gap_count', 0)) if _e2e_ui_smoke else 0
+    _e2e_ui_smoke_stop = _e2e_ui_smoke.get('stop_criteria') if isinstance(_e2e_ui_smoke.get('stop_criteria'), dict) else {}
+    _e2e_ui_smoke_stop_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(key))}</td>"
+        f"<td>{'pass' if bool(value) else 'fail'}</td>"
+        "</tr>"
+        for key, value in sorted(_e2e_ui_smoke_stop.items())
+    ) or "<tr><td colspan='2'>No AP-07 UI-smoke stop-criteria data available.</td></tr>"
 
     body = (
         # === KPI Header ===
@@ -2255,6 +2275,10 @@ def _render_readiness(
         f"<p>Covered Flows: <strong>{html.escape(str(_e2e_covered_flow_count))}/{html.escape(str(_e2e_flow_count))}</strong> | Flow Gaps: {html.escape(str(_e2e_flow_gap_count))} | Missing Evidence Refs: {html.escape(str(_e2e_missing_evidence_refs))} | Missing Requirement Refs: {html.escape(str(_e2e_missing_requirement_refs))}</p>"
         "<table><thead><tr><th>Stop Criterion</th><th>Status</th></tr></thead>"
         f"<tbody>{_e2e_stop_rows}</tbody></table></div>"
+        "<div class='panel'><div class='panel-header'>Stakeholder E2E UI Smoke Coverage (AP-07/AP-08)</div>"
+        f"<p>Covered Flows: <strong>{html.escape(str(_e2e_ui_smoke_covered))}/{html.escape(str(_e2e_ui_smoke_flow_count))}</strong> | Flow Gaps: {html.escape(str(_e2e_ui_smoke_gaps))}</p>"
+        "<table><thead><tr><th>UI Smoke Stop Criterion</th><th>Status</th></tr></thead>"
+        f"<tbody>{_e2e_ui_smoke_stop_rows}</tbody></table></div>"
         # === Known Gaps ===
         "<div class='panel'><div class='panel-header'>Known Gaps Before Release</div>"
         f"<ul>{known_gap_items}</ul></div>"
@@ -3276,26 +3300,34 @@ def _normalize_ui_role(ui_role: str) -> str:
 
 
 def build_local_mvp_site(
-    output_dir: Path,
     *,
-    world_map_read_model: dict[str, Any],
-    country_profile_read_models: dict[str, dict[str, Any]],
-    domain_detail_read_models: dict[tuple[str, str], dict[str, Any]],
-    source_coverage_read_model: dict[str, Any],
-    report_catalog: dict[str, dict[str, Any]],
-    system_status_read_model: dict[str, Any],
-    validation_view_model: dict[str, Any] | None = None,
+    output_dir: Path,
+    world_map_read_model: dict[str, Any] | None = None,
+    country_profile_read_models: dict[str, dict[str, Any]] | None = None,
+    domain_detail_read_models: dict[tuple[str, str], dict[str, Any]] | None = None,
+    source_coverage_read_model: dict[str, Any] | None = None,
+    system_status_read_model: dict[str, Any] | None = None,
+    report_catalog: dict[str, Any] | None = None,
     traceability_view_model: dict[str, Any] | None = None,
-    repo_closure_view_model: dict[str, Any] | None = None,
     annotations_view_model: dict[str, Any] | None = None,
+    repo_closure_view_model: dict[str, Any] | None = None,
+    validation_view_model: dict[str, Any] | None = None,
     readiness_view_model: dict[str, Any] | None = None,
     release_gate_view_model: dict[str, Any] | None = None,
     stakeholder_functional_closure_view_model: dict[str, Any] | None = None,
     stakeholder_e2e_flow_coverage_view_model: dict[str, Any] | None = None,
     release_readiness_index_view_model: dict[str, Any] | None = None,
+    stakeholder_e2e_ui_smoke_view_model: dict[str, Any] | None = None,
     ui_role: str = 'analyst',
 ) -> SiteBuildResult:
     normalized_role = _normalize_ui_role(ui_role)
+
+    world_map_read_model = world_map_read_model or {}
+    country_profile_read_models = country_profile_read_models or {}
+    domain_detail_read_models = domain_detail_read_models or {}
+    source_coverage_read_model = source_coverage_read_model or {}
+    system_status_read_model = system_status_read_model or {}
+    report_catalog = report_catalog or {}
 
     output_dir.mkdir(parents=True, exist_ok=True)
     countries_dir = output_dir / 'countries'
@@ -3444,13 +3476,17 @@ def build_local_mvp_site(
         stakeholder_e2e_flow_coverage_view_model = build_stakeholder_e2e_flow_coverage_report(
             repo_root=Path(__file__).resolve().parents[3]
         )
+    if stakeholder_e2e_ui_smoke_view_model is None:
+        stakeholder_e2e_ui_smoke_view_model = build_stakeholder_e2e_ui_smoke_report(repo_root=Path(__file__).resolve().parents[3])
     if release_readiness_index_view_model is None:
         release_readiness_index_view_model = build_release_readiness_index(
             repo_root=Path(__file__).resolve().parents[3],
             release_gate_view_model=release_gate_view_model,
             stakeholder_functional_closure_report=stakeholder_functional_closure_view_model or {},
             stakeholder_e2e_flow_coverage_report=stakeholder_e2e_flow_coverage_view_model,
+            stakeholder_e2e_ui_smoke_report=stakeholder_e2e_ui_smoke_view_model,
         )
+
     readiness_file = output_dir / 'readiness.html'
     readiness_file.write_text(
         _render_readiness(
@@ -3459,6 +3495,7 @@ def build_local_mvp_site(
             stakeholder_functional_closure_view_model,
             stakeholder_e2e_flow_coverage_view_model,
             release_readiness_index_view_model,
+            stakeholder_e2e_ui_smoke_view_model,
             nav_prefix='',
             available_pages=available_pages,
         ),
@@ -3486,12 +3523,20 @@ def build_local_mvp_site(
         )
         generated_files.append(stakeholder_e2e_flow_json_file)
     if release_readiness_index_view_model is not None:
-        release_readiness_index_json_file = output_dir / 'release_readiness_index.json'
-        release_readiness_index_json_file.write_text(
+        release_readiness_index_json = output_dir / "release_readiness_index.json"
+        release_readiness_index_json.write_text(
             json.dumps(release_readiness_index_view_model, indent=2, sort_keys=True),
             encoding='utf-8',
         )
-        generated_files.append(release_readiness_index_json_file)
+        generated_files.append(release_readiness_index_json)
+
+    if stakeholder_e2e_ui_smoke_view_model is not None:
+        stakeholder_e2e_ui_smoke_json = output_dir / "stakeholder_e2e_ui_smoke.json"
+        stakeholder_e2e_ui_smoke_json.write_text(
+            json.dumps(stakeholder_e2e_ui_smoke_view_model, indent=2, sort_keys=True),
+            encoding='utf-8',
+        )
+        generated_files.append(stakeholder_e2e_ui_smoke_json)
 
     return SiteBuildResult(output_dir=output_dir, generated_files=generated_files)
 
@@ -3623,12 +3668,27 @@ def main(argv: list[str] | None = None) -> int:
         choices=sorted(_UI_ROLES),
         help='Role-based GUI profile to apply when generating pages.',
     )
+    parser.add_argument(
+        '--skip-stakeholder-e2e-ui-smoke-report',
+        action='store_true',
+        help='Skip recursive UI smoke report generation (used internally by UI smoke builder subprocesses).',
+    )
     args = parser.parse_args(argv)
 
     if args.artifacts_dir:
         payload = load_site_payload_from_artifacts(Path(args.artifacts_dir))
     else:
         payload = _demo_payload()
+
+    if args.skip_stakeholder_e2e_ui_smoke_report:
+        payload['stakeholder_e2e_ui_smoke_view_model'] = {
+            'flow_count': 0,
+            'covered_flow_count': 0,
+            'flow_gap_count': 0,
+            'flow_results': {},
+            'stop_criteria': {},
+        }
+
     result = build_local_mvp_site(output_dir=Path(args.output_dir), ui_role=args.ui_role, **payload)
     print(f'Generated SIASA local GUI at {result.output_dir / "index.html"}')
     return 0

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 import tempfile
@@ -26,10 +27,15 @@ def _build_gui_bundle(repo_root: Path, output_dir: Path, *, ui_role: str, artifa
         str(output_dir),
         "--ui-role",
         ui_role,
+        "--skip-stakeholder-e2e-ui-smoke-report",
     ]
     if artifacts_dir is not None:
         command.extend(["--artifacts-dir", str(artifacts_dir)])
-    result = subprocess.run(command, cwd=repo_root, check=False, capture_output=True, text=True)
+    env = dict(os.environ)
+    src_path = str((repo_root / "src").resolve())
+    existing_pythonpath = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = src_path if not existing_pythonpath else f"{src_path}:{existing_pythonpath}"
+    result = subprocess.run(command, cwd=repo_root, env=env, check=False, capture_output=True, text=True)
     if result.returncode != 0:
         raise RuntimeError(
             "local_app build failed"
