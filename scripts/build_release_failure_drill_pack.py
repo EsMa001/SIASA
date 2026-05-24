@@ -24,12 +24,29 @@ def main() -> int:
 
     report = build_release_failure_drill_report(repo_root=repo_root)
     (output_dir / "release_failure_drill_summary.json").write_text(
-        json.dumps({"drill_verdict": report.get("drill_verdict"), "checks": report.get("checks", {})}, indent=2, sort_keys=True),
+        json.dumps(
+            {
+                "drill_verdict": report.get("drill_verdict"),
+                "checks": report.get("checks", {}),
+                "failure_localization": report.get("failure_localization", {}),
+                "gate_diagnostics_export": report.get("gate_diagnostics_export", {}),
+            },
+            indent=2,
+            sort_keys=True,
+        ),
         encoding="utf-8",
     )
 
     scenarios_dir = output_dir / "scenarios"
     scenarios_dir.mkdir(parents=True, exist_ok=True)
+
+    diagnostics_dir = output_dir / "gate_diagnostics"
+    diagnostics_dir.mkdir(parents=True, exist_ok=True)
+    for gate_id, gate_slice in (report.get("gate_diagnostics_export") or {}).items():
+        (diagnostics_dir / f"{gate_id}.json").write_text(
+            json.dumps(gate_slice, indent=2, sort_keys=True),
+            encoding="utf-8",
+        )
     for scenario_id, assessment in (report.get("scenarios") or {}).items():
         scenario_dir = scenarios_dir / scenario_id
         scenario_dir.mkdir(parents=True, exist_ok=True)

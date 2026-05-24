@@ -494,11 +494,59 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
         len(entries) > 0 for key, entries in scenario_localization.items() if key != "baseline"
     )
 
+    gate_diagnostics_export: dict[str, dict[str, Any]] = {}
+    for scenario_id, scenario_assessment in scenarios.items():
+        release_readiness_gates = {
+            str(gate.get("gate_id", "unknown")): gate
+            for gate in (scenario_assessment.get("release_readiness_index", {}).get("gates", []) or [])
+        }
+        release_gate_blockers = [
+            str(blocker)
+            for blocker in (scenario_assessment.get("release_gate", {}).get("blockers", []) or [])
+        ]
+
+        for failure in scenario_localization.get(scenario_id, []):
+            gate_id = str(failure.get("gate_id", "unknown"))
+            gate_slice = gate_diagnostics_export.setdefault(
+                gate_id,
+                {
+                    "gate_id": gate_id,
+                    "gate_label": failure.get("gate_label", gate_id),
+                    "remediation_hint": failure.get("remediation_hint", "Inspect scenario evidence and repair failing gate conditions."),
+                    "failed_in_scenarios": [],
+                },
+            )
+            if scenario_id in [item.get("scenario_id") for item in gate_slice["failed_in_scenarios"]]:
+                continue
+
+            gate_entry = release_readiness_gates.get(gate_id, {})
+            gate_slice["failed_in_scenarios"].append(
+                {
+                    "scenario_id": scenario_id,
+                    "source": "release_gate_blocker" if gate_id in release_gate_blockers else "release_readiness_gate",
+                    "detail": str(gate_entry.get("detail", "derived_from_release_gate_blockers")),
+                    "passed": bool(gate_entry.get("passed", False)) if gate_entry else False,
+                    "release_gate_verdict": str(scenario_assessment.get("release_gate", {}).get("gate_verdict", "unknown")),
+                }
+            )
+
+    for gate_slice in gate_diagnostics_export.values():
+        gate_slice["failed_in_scenarios"] = sorted(
+            gate_slice["failed_in_scenarios"],
+            key=lambda item: str(item.get("scenario_id", "")),
+        )
+
+    checks["gate_diagnostics_export_nonempty_for_failed_gates"] = all(
+        bool(gate_slice.get("failed_in_scenarios"))
+        for gate_slice in gate_diagnostics_export.values()
+    )
+
     return {
         "drill_verdict": "pass" if all(checks.values()) else "fail",
         "checks": checks,
         "scenarios": scenarios,
         "failure_localization": scenario_localization,
+        "gate_diagnostics_export": gate_diagnostics_export,
     }
 
 
