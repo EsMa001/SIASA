@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-from urllib.parse import quote
+from urllib.parse import quote, quote_plus
 
 from siasa.catalog import load_country_set
 from siasa.readmodels.readiness import build_readiness_view_model
@@ -2608,10 +2608,11 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         f"<td>{html.escape(str(item.get('replay_evidence_tier', 'n/a')))}</td>"
         f"<td>{html.escape('missing=' + (', '.join(str(domain) for domain in item.get('missing_expected_domains', [])) or 'none') + '; unexpected=' + (', '.join(str(domain) for domain in item.get('unexpected_observed_domains', [])) or 'none'))}</td>"
         f"<td>{html.escape(str(item.get('suggested_next_action', 'n/a')))}</td>"
+        f"<td><a class='replay-attention-create-annotation' href='annotations.html?scope=country&annotation_type=review_note&country_id={quote_plus(str(item.get('country_id', '')))}&case_id={quote_plus(str(item.get('case_id', '')))}&attention_reason={quote_plus(str(item.get('attention_reason', '')))}&owner_hint={quote_plus(str(item.get('owner_hint', '')))}&suggested_next_action={quote_plus(str(item.get('suggested_next_action', '')))}&attention_level={quote_plus(str(item.get('attention_level', '')))}&linked_item={quote_plus(str(item.get('case_id', '')))}'>Create Annotation Draft</a></td>"
         "</tr>"
         for item in historical_replay_summary.get('attention_cases', [])
         if isinstance(item, dict)
-    ) or "<tr><td colspan='9'>No replay attention cases recorded.</td></tr>"
+    ) or "<tr><td colspan='10'>No replay attention cases recorded.</td></tr>"
     historical_replay_rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(review.get('country_id', 'n/a')))}</td>"
@@ -2736,7 +2737,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         "<span id='replay-attention-visible-count'></span> "
         "<span id='replay-attention-visible-breakdown'></span> "
         "<span id='replay-attention-active-state'></span></div>"
-        "<table><thead><tr><th>Country</th><th>Case ID</th><th>Attention Level</th><th>Reason</th><th>Follow-up Owner</th><th>Replay Verdict</th><th>Replay Evidence Tier</th><th>Gap Signals</th><th>Suggested Next Action</th></tr></thead>"
+        "<table><thead><tr><th>Country</th><th>Case ID</th><th>Attention Level</th><th>Reason</th><th>Follow-up Owner</th><th>Replay Verdict</th><th>Replay Evidence Tier</th><th>Gap Signals</th><th>Suggested Next Action</th><th>Action</th></tr></thead>"
         f"<tbody>{replay_attention_rows}</tbody></table>"
         "<script>"
         "(function(){"
@@ -3167,11 +3168,40 @@ function prefillAnnotationFromQuery(){
   const linkedItem = params.get('linked_item') || '';
   const scope = params.get('scope') || '';
   const annotationType = params.get('annotation_type') || '';
+  const countryId = (params.get('country_id') || '').trim();
+  const caseId = (params.get('case_id') || '').trim();
+  const attentionReason = (params.get('attention_reason') || '').trim();
+  const ownerHint = (params.get('owner_hint') || '').trim();
+  const suggestedNextAction = (params.get('suggested_next_action') || '').trim();
+  const attentionLevel = (params.get('attention_level') || '').trim().toLowerCase();
   if (scope) { document.getElementById('annotation-scope-input').value = scope; }
   if (annotationType) { document.getElementById('annotation-type-input').value = annotationType; }
-  if (linkedItem) {
-    document.getElementById('annotation-linked-items-input').value = linkedItem;
-    setWorkflowStatus(`Prefilled workflow for ${linkedItem}.`);
+  const linkedItems = [];
+  if (linkedItem) { linkedItems.push(linkedItem); }
+  if (countryId) { linkedItems.push(countryId); }
+  if (caseId && !linkedItems.includes(caseId)) { linkedItems.push(caseId); }
+  if (linkedItems.length) {
+    document.getElementById('annotation-linked-items-input').value = linkedItems.join(', ');
+  }
+  const severityByAttentionLevel = { high: 'relevant', medium: 'uncertain', low: 'not_security_relevant' };
+  if (attentionLevel && severityByAttentionLevel[attentionLevel]) {
+    document.getElementById('annotation-severity-input').value = severityByAttentionLevel[attentionLevel];
+  }
+  const tagParts = ['replay_attention'];
+  if (attentionReason) { tagParts.push(attentionReason); }
+  if (ownerHint) { tagParts.push(ownerHint.replace(/\\s+/g, '_').toLowerCase()); }
+  document.getElementById('annotation-tags-input').value = tagParts.join(', ');
+  if (countryId || caseId || attentionReason || ownerHint || suggestedNextAction) {
+    const summary = [
+      `Replay attention follow-up for ${caseId || 'case n/a'} (${countryId || 'country n/a'}).`,
+      `Reason: ${attentionReason || 'n/a'}.`,
+      `Owner: ${ownerHint || 'n/a'}.`,
+      `Suggested next action: ${suggestedNextAction || 'n/a'}.`,
+    ].join(' ');
+    document.getElementById('annotation-text-input').value = summary;
+  }
+  if (linkedItems.length) {
+    setWorkflowStatus(`Prefilled workflow for ${linkedItems.join(', ')}.`);
   }
 }
 function renderAnnotationWorkflow(){

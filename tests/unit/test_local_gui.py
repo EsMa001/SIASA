@@ -867,6 +867,13 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Active: default" in validation_html
     assert "high='+visibleHigh" in validation_html
     assert "replay-attention-row" in validation_html
+    assert "replay-attention-create-annotation" in validation_html
+    assert "Create Annotation Draft" in validation_html
+    assert "annotations.html?scope=country&annotation_type=review_note" in validation_html
+    assert "attention_reason=" in validation_html
+    assert "owner_hint=" in validation_html
+    assert "suggested_next_action=" in validation_html
+    assert "attention_level=" in validation_html
     assert "Attention Level" in validation_html
     assert "Follow-up Owner" in validation_html
     assert "validation governance" in validation_html
@@ -941,6 +948,15 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Draft History" in annotations_html
     assert "siasa_annotation_workflow_v1" in annotations_html
     assert "prefillAnnotationFromQuery" in annotations_html
+    assert "const countryId = (params.get('country_id') || '').trim();" in annotations_html
+    assert "const caseId = (params.get('case_id') || '').trim();" in annotations_html
+    assert "const attentionReason = (params.get('attention_reason') || '').trim();" in annotations_html
+    assert "const ownerHint = (params.get('owner_hint') || '').trim();" in annotations_html
+    assert "const suggestedNextAction = (params.get('suggested_next_action') || '').trim();" in annotations_html
+    assert "const attentionLevel = (params.get('attention_level') || '').trim().toLowerCase();" in annotations_html
+    assert "severityByAttentionLevel" in annotations_html
+    assert "Replay attention follow-up for" in annotations_html
+    assert "setWorkflowStatus(`Prefilled workflow for ${linkedItems.join(', ')}.`);" in annotations_html
     assert "loadAnnotationIntoEditor" in annotations_html
     assert "function mergedAnnotationsById()" in annotations_html
     assert "const all = Array.from(mergedAnnotationsById().values());" in annotations_html
