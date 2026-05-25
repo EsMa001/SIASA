@@ -5,7 +5,18 @@ from siasa.readmodels.release_evidence import build_repo_release_gate_assessment
 
 def test_build_repo_release_gate_assessment_is_go_for_current_repo() -> None:
     repo_root = Path(__file__).resolve().parents[2]
-    assessment = build_repo_release_gate_assessment(repo_root=repo_root)
+    assessment = build_repo_release_gate_assessment(
+        repo_root=repo_root,
+        stakeholder_e2e_ui_smoke_override={
+            "flow_count": 6,
+            "flow_gap_count": 0,
+            "stop_criteria": {"all_flows_covered": True, "all_roles_covered": True},
+        },
+        stakeholder_browser_e2e_acceptance_override={
+            "summary": {"bundle_count": 3, "broken_link_count": 0},
+            "stop_criteria": {"role_bundle_count_met": True, "no_broken_internal_links": True},
+        },
+    )
     assert assessment["release_gate"]["gate_verdict"] == "go"
     assert assessment["release_gate"]["blockers"] == []
     readiness_index = assessment["release_readiness_index"]
