@@ -878,6 +878,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "review_verdict=" in validation_html
     assert "replay_evidence_score=" in validation_html
     assert "domain_match_ratio=" in validation_html
+    assert "missing_expected_domains=" in validation_html
+    assert "unexpected_observed_domains=" in validation_html
     assert "Attention Level" in validation_html
     assert "Follow-up Owner" in validation_html
     assert "validation governance" in validation_html
@@ -964,6 +966,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "reviewVerdict: (params.get('review_verdict') || '').trim().toLowerCase()" in annotations_html
     assert "replayEvidenceScore: (params.get('replay_evidence_score') || '').trim()" in annotations_html
     assert "domainMatchRatio: (params.get('domain_match_ratio') || '').trim()" in annotations_html
+    assert "missingExpectedDomains: (params.get('missing_expected_domains') || '').trim()" in annotations_html
+    assert "unexpectedObservedDomains: (params.get('unexpected_observed_domains') || '').trim()" in annotations_html
     assert "Replay-attention prefill missing fields:" in annotations_html
     assert "Prefilled replay-attention workflow for" in annotations_html
     assert "severityByAttentionLevel" in annotations_html
@@ -975,6 +979,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "weak_replay_evidence" in annotations_html
     assert "Replay evidence:" in annotations_html
     assert "domain_match_ratio=" in annotations_html
+    assert "missing_expected_domains=" in annotations_html
+    assert "unexpected_observed_domains=" in annotations_html
+    assert "missingExpectedDomains.split(',')" in annotations_html
+    assert "unexpectedObservedDomains.split(',')" in annotations_html
     assert "Replay attention follow-up for" in annotations_html
     assert "setWorkflowStatus(`Prefilled workflow for ${linkedItems.join(', ')}.`);" in annotations_html
     assert "loadAnnotationIntoEditor" in annotations_html
