@@ -1,0 +1,15 @@
+{
+  "countries": [
+    {"country_id": "UKR"},
+    {"country_id": "RUS"},
+    {"country_id": "CHN"},
+    {"country_id": "TWN"},
+    {"country_id": "IRN"},
+    {"country_id": "ISR"},
+    {"country_id": "TUR"},
+    {"country_id": "IND"},
+    {"country_id": "PAK"},
+    {"country_id": "GEO"},
+    {"country_id": "POL"}
+  ]
+}

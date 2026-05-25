@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-PROBE_ROOT = REPO_ROOT / "build" / "run_artifacts" / "_core_focus_complete_probe_1" / "readmodels"
+PROBE_ROOT = REPO_ROOT / "tests" / "fixtures" / "core_focus_complete_probe_readmodels"
 
 
 def test_core_focus_complete_probe_readiness_is_ready_without_known_gaps() -> None:
