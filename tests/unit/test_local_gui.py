@@ -964,6 +964,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Prefilled replay-attention workflow for" in annotations_html
     assert "severityByAttentionLevel" in annotations_html
     assert "confidenceByReplayTier" in annotations_html
+    assert "reviewStatusByVerdict" in annotations_html
+    assert "document.getElementById('annotation-review-status-input').value = reviewStatusByVerdict[reviewVerdict];" in annotations_html
     assert "verified_replay_evidence" in annotations_html
     assert "strong_replay_evidence" in annotations_html
     assert "weak_replay_evidence" in annotations_html

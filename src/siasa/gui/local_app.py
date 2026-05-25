@@ -3216,6 +3216,15 @@ function prefillAnnotationFromQuery(){
   if (replayEvidenceTier && confidenceByReplayTier[replayEvidenceTier]) {
     document.getElementById('annotation-confidence-input').value = confidenceByReplayTier[replayEvidenceTier];
   }
+  const reviewStatusByVerdict = {
+    pass: 'reviewed',
+    warning: 'draft',
+    fail: 'rejected',
+    insufficient_data: 'unreviewed',
+  };
+  if (reviewVerdict && reviewStatusByVerdict[reviewVerdict]) {
+    document.getElementById('annotation-review-status-input').value = reviewStatusByVerdict[reviewVerdict];
+  }
   const tagParts = ['replay_attention'];
   if (attentionReason) { tagParts.push(attentionReason); }
   if (replayEvidenceTier) { tagParts.push(replayEvidenceTier); }
