@@ -845,6 +845,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "buildReplayAttentionShareUrl" in validation_html
     assert "applyReplayAttentionStateFromHash" in validation_html
     assert "persistReplayAttentionStateToHash" in validation_html
+    assert "function clearReplayAttentionCopyStatuses()" in validation_html
+    assert "clearReplayAttentionCopyStatuses();" in validation_html
     assert "ra_level" in validation_html
     assert "ra_text" in validation_html
     assert "rowText=(row.textContent||'').toLowerCase();" in validation_html
