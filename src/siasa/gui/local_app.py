@@ -2608,7 +2608,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         f"<td>{html.escape(str(item.get('replay_evidence_tier', 'n/a')))}</td>"
         f"<td>{html.escape('missing=' + (', '.join(str(domain) for domain in item.get('missing_expected_domains', [])) or 'none') + '; unexpected=' + (', '.join(str(domain) for domain in item.get('unexpected_observed_domains', [])) or 'none'))}</td>"
         f"<td>{html.escape(str(item.get('suggested_next_action', 'n/a')))}</td>"
-        f"<td><a class='replay-attention-create-annotation' href='annotations.html?scope=country&annotation_type=review_note&country_id={quote_plus(str(item.get('country_id', '')))}&case_id={quote_plus(str(item.get('case_id', '')))}&attention_reason={quote_plus(str(item.get('attention_reason', '')))}&owner_hint={quote_plus(str(item.get('owner_hint', '')))}&suggested_next_action={quote_plus(str(item.get('suggested_next_action', '')))}&attention_level={quote_plus(str(item.get('attention_level', '')))}&replay_evidence_tier={quote_plus(str(item.get('replay_evidence_tier', '')))}&review_verdict={quote_plus(str(item.get('review_verdict', '')))}&linked_item={quote_plus(str(item.get('case_id', '')))}'>Create Annotation Draft</a></td>"
+        f"<td><a class='replay-attention-create-annotation' href='annotations.html?scope=country&annotation_type=review_note&country_id={quote_plus(str(item.get('country_id', '')))}&case_id={quote_plus(str(item.get('case_id', '')))}&attention_reason={quote_plus(str(item.get('attention_reason', '')))}&owner_hint={quote_plus(str(item.get('owner_hint', '')))}&suggested_next_action={quote_plus(str(item.get('suggested_next_action', '')))}&attention_level={quote_plus(str(item.get('attention_level', '')))}&replay_evidence_tier={quote_plus(str(item.get('replay_evidence_tier', '')))}&review_verdict={quote_plus(str(item.get('review_verdict', '')))}&replay_evidence_score={quote_plus(str(item.get('replay_evidence_score', '')))}&domain_match_ratio={quote_plus(str(item.get('domain_match_ratio', '')))}&linked_item={quote_plus(str(item.get('case_id', '')))}'>Create Annotation Draft</a></td>"
         "</tr>"
         for item in historical_replay_summary.get('attention_cases', [])
         if isinstance(item, dict)
@@ -3177,6 +3177,8 @@ function collectReplayAttentionPrefillContextFromQuery(){
     attentionLevel: (params.get('attention_level') || '').trim().toLowerCase(),
     replayEvidenceTier: (params.get('replay_evidence_tier') || '').trim().toLowerCase(),
     reviewVerdict: (params.get('review_verdict') || '').trim().toLowerCase(),
+    replayEvidenceScore: (params.get('replay_evidence_score') || '').trim(),
+    domainMatchRatio: (params.get('domain_match_ratio') || '').trim(),
   };
 }
 function validateReplayAttentionPrefillContext(context){
@@ -3199,6 +3201,8 @@ function prefillAnnotationFromQuery(){
   const attentionLevel = context.attentionLevel;
   const replayEvidenceTier = context.replayEvidenceTier;
   const reviewVerdict = context.reviewVerdict;
+  const replayEvidenceScore = context.replayEvidenceScore;
+  const domainMatchRatio = context.domainMatchRatio;
   if (scope) { document.getElementById('annotation-scope-input').value = scope; }
   if (annotationType) { document.getElementById('annotation-type-input').value = annotationType; }
   const linkedItems = [];
@@ -3232,12 +3236,17 @@ function prefillAnnotationFromQuery(){
   if (ownerHint) { tagParts.push(ownerHint.replace(/\\s+/g, '_').toLowerCase()); }
   document.getElementById('annotation-tags-input').value = tagParts.join(', ');
   if (countryId || caseId || attentionReason || ownerHint || suggestedNextAction) {
+    const evidenceParts = [];
+    if (replayEvidenceTier) { evidenceParts.push(`tier=${replayEvidenceTier}`); }
+    if (replayEvidenceScore) { evidenceParts.push(`score=${replayEvidenceScore}`); }
+    if (domainMatchRatio) { evidenceParts.push(`domain_match_ratio=${domainMatchRatio}`); }
+    const evidenceSummary = evidenceParts.length ? ` Replay evidence: ${evidenceParts.join(', ')}.` : '';
     const summary = [
       `Replay attention follow-up for ${caseId || 'case n/a'} (${countryId || 'country n/a'}).`,
       `Reason: ${attentionReason || 'n/a'}.`,
       `Owner: ${ownerHint || 'n/a'}.`,
       `Suggested next action: ${suggestedNextAction || 'n/a'}.`,
-    ].join(' ');
+    ].join(' ') + evidenceSummary;
     document.getElementById('annotation-text-input').value = summary;
   }
   const replayContextValidation = validateReplayAttentionPrefillContext(context);
