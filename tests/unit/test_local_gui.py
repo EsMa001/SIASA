@@ -825,6 +825,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "replay-attention-level-filter" in validation_html
     assert "replay-attention-owner-filter" in validation_html
     assert "replay-attention-reason-filter" in validation_html
+    assert "replay-attention-verdict-filter" in validation_html
+    assert "replay-attention-tier-filter" in validation_html
     assert "replay-attention-text-filter" in validation_html
     assert "country, case, action..." in validation_html
     assert "replay-attention-sort" in validation_html
@@ -852,8 +854,12 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "function clearReplayAttentionCopyStatuses()" in validation_html
     assert "clearReplayAttentionCopyStatuses();" in validation_html
     assert "ra_level" in validation_html
+    assert "ra_verdict" in validation_html
+    assert "ra_tier" in validation_html
     assert "ra_text" in validation_html
     assert "rowText=(row.textContent||'').toLowerCase();" in validation_html
+    assert "const rowVerdict=rowCellValue(row,5);" in validation_html
+    assert "const rowTier=rowCellValue(row,6);" in validation_html
     assert "Copied CSV" in validation_html
     assert "Copied link" in validation_html
     assert "Clipboard API unavailable" in validation_html
