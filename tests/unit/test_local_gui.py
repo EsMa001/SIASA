@@ -862,6 +862,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "const rowTier=rowCellValue(row,6);" in validation_html
     assert "if(preset==='warning-weak-evidence')" in validation_html
     assert "if(preset==='mismatch-only')" in validation_html
+    assert "const verdictCounts={};" in validation_html
+    assert "verdictBreakdownEl" in validation_html
     assert "Copied CSV" in validation_html
     assert "Copied link" in validation_html
     assert "Clipboard API unavailable" in validation_html
@@ -876,6 +878,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Level (high→low)" in validation_html
     assert "Visible attention rows:" in validation_html
     assert "replay-attention-visible-breakdown" in validation_html
+    assert "replay-attention-visible-verdict-breakdown" in validation_html
     assert "replay-attention-active-state" in validation_html
     assert "renderReplayAttentionActiveState" in validation_html
     assert "Active: default" in validation_html
