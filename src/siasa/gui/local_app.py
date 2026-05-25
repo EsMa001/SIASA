@@ -2608,7 +2608,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         f"<td>{html.escape(str(item.get('replay_evidence_tier', 'n/a')))}</td>"
         f"<td>{html.escape('missing=' + (', '.join(str(domain) for domain in item.get('missing_expected_domains', [])) or 'none') + '; unexpected=' + (', '.join(str(domain) for domain in item.get('unexpected_observed_domains', [])) or 'none'))}</td>"
         f"<td>{html.escape(str(item.get('suggested_next_action', 'n/a')))}</td>"
-        f"<td><a class='replay-attention-create-annotation' href='annotations.html?scope=country&annotation_type=review_note&country_id={quote_plus(str(item.get('country_id', '')))}&case_id={quote_plus(str(item.get('case_id', '')))}&attention_reason={quote_plus(str(item.get('attention_reason', '')))}&owner_hint={quote_plus(str(item.get('owner_hint', '')))}&suggested_next_action={quote_plus(str(item.get('suggested_next_action', '')))}&attention_level={quote_plus(str(item.get('attention_level', '')))}&linked_item={quote_plus(str(item.get('case_id', '')))}'>Create Annotation Draft</a></td>"
+        f"<td><a class='replay-attention-create-annotation' href='annotations.html?scope=country&annotation_type=review_note&country_id={quote_plus(str(item.get('country_id', '')))}&case_id={quote_plus(str(item.get('case_id', '')))}&attention_reason={quote_plus(str(item.get('attention_reason', '')))}&owner_hint={quote_plus(str(item.get('owner_hint', '')))}&suggested_next_action={quote_plus(str(item.get('suggested_next_action', '')))}&attention_level={quote_plus(str(item.get('attention_level', '')))}&replay_evidence_tier={quote_plus(str(item.get('replay_evidence_tier', '')))}&review_verdict={quote_plus(str(item.get('review_verdict', '')))}&linked_item={quote_plus(str(item.get('case_id', '')))}'>Create Annotation Draft</a></td>"
         "</tr>"
         for item in historical_replay_summary.get('attention_cases', [])
         if isinstance(item, dict)
@@ -3174,6 +3174,8 @@ function prefillAnnotationFromQuery(){
   const ownerHint = (params.get('owner_hint') || '').trim();
   const suggestedNextAction = (params.get('suggested_next_action') || '').trim();
   const attentionLevel = (params.get('attention_level') || '').trim().toLowerCase();
+  const replayEvidenceTier = (params.get('replay_evidence_tier') || '').trim().toLowerCase();
+  const reviewVerdict = (params.get('review_verdict') || '').trim().toLowerCase();
   if (scope) { document.getElementById('annotation-scope-input').value = scope; }
   if (annotationType) { document.getElementById('annotation-type-input').value = annotationType; }
   const linkedItems = [];
@@ -3187,8 +3189,14 @@ function prefillAnnotationFromQuery(){
   if (attentionLevel && severityByAttentionLevel[attentionLevel]) {
     document.getElementById('annotation-severity-input').value = severityByAttentionLevel[attentionLevel];
   }
+  const confidenceByReplayTier = { verified_replay_evidence: 'high', strong_replay_evidence: 'medium', weak_replay_evidence: 'low' };
+  if (replayEvidenceTier && confidenceByReplayTier[replayEvidenceTier]) {
+    document.getElementById('annotation-confidence-input').value = confidenceByReplayTier[replayEvidenceTier];
+  }
   const tagParts = ['replay_attention'];
   if (attentionReason) { tagParts.push(attentionReason); }
+  if (replayEvidenceTier) { tagParts.push(replayEvidenceTier); }
+  if (reviewVerdict) { tagParts.push(reviewVerdict); }
   if (ownerHint) { tagParts.push(ownerHint.replace(/\\s+/g, '_').toLowerCase()); }
   document.getElementById('annotation-tags-input').value = tagParts.join(', ');
   if (countryId || caseId || attentionReason || ownerHint || suggestedNextAction) {

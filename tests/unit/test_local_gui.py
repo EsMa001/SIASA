@@ -874,6 +874,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "owner_hint=" in validation_html
     assert "suggested_next_action=" in validation_html
     assert "attention_level=" in validation_html
+    assert "replay_evidence_tier=" in validation_html
+    assert "review_verdict=" in validation_html
     assert "Attention Level" in validation_html
     assert "Follow-up Owner" in validation_html
     assert "validation governance" in validation_html
@@ -954,7 +956,13 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "const ownerHint = (params.get('owner_hint') || '').trim();" in annotations_html
     assert "const suggestedNextAction = (params.get('suggested_next_action') || '').trim();" in annotations_html
     assert "const attentionLevel = (params.get('attention_level') || '').trim().toLowerCase();" in annotations_html
+    assert "const replayEvidenceTier = (params.get('replay_evidence_tier') || '').trim().toLowerCase();" in annotations_html
+    assert "const reviewVerdict = (params.get('review_verdict') || '').trim().toLowerCase();" in annotations_html
     assert "severityByAttentionLevel" in annotations_html
+    assert "confidenceByReplayTier" in annotations_html
+    assert "verified_replay_evidence" in annotations_html
+    assert "strong_replay_evidence" in annotations_html
+    assert "weak_replay_evidence" in annotations_html
     assert "Replay attention follow-up for" in annotations_html
     assert "setWorkflowStatus(`Prefilled workflow for ${linkedItems.join(', ')}.`);" in annotations_html
     assert "loadAnnotationIntoEditor" in annotations_html
