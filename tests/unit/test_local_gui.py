@@ -860,6 +860,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "rowText=(row.textContent||'').toLowerCase();" in validation_html
     assert "const rowVerdict=rowCellValue(row,5);" in validation_html
     assert "const rowTier=rowCellValue(row,6);" in validation_html
+    assert "if(preset==='warning-weak-evidence')" in validation_html
+    assert "if(preset==='mismatch-only')" in validation_html
     assert "Copied CSV" in validation_html
     assert "Copied link" in validation_html
     assert "Clipboard API unavailable" in validation_html
@@ -868,6 +870,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "high-only" in validation_html
     assert "governance-only" in validation_html
     assert "domain-gap-only" in validation_html
+    assert "warning-weak-evidence" in validation_html
+    assert "mismatch-only" in validation_html
     assert "suggested_next_action" in validation_html
     assert "Level (high→low)" in validation_html
     assert "Visible attention rows:" in validation_html
