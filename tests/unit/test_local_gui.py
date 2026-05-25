@@ -834,6 +834,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "replay_attention_watchlist_" in validation_html
     assert "const sortKey=(sortSelect&&sortSelect.value)?sortSelect.value:'default';" in validation_html
     assert "exportVisibleReplayAttentionCsv" in validation_html
+    assert "replayAttentionCsvColumnsFromRow" in validation_html
+    assert "replay_evidence_score','domain_match_ratio','missing_expected_domains','unexpected_observed_domains'" in validation_html
+    assert "params.get('replay_evidence_score')" in validation_html
+    assert "params.get('missing_expected_domains')" in validation_html
     assert "replay-attention-copy-csv" in validation_html
     assert "Copy visible CSV" in validation_html
     assert "replay-attention-copy-link" in validation_html
