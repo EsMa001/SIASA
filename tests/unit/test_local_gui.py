@@ -950,14 +950,18 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Draft History" in annotations_html
     assert "siasa_annotation_workflow_v1" in annotations_html
     assert "prefillAnnotationFromQuery" in annotations_html
-    assert "const countryId = (params.get('country_id') || '').trim();" in annotations_html
-    assert "const caseId = (params.get('case_id') || '').trim();" in annotations_html
-    assert "const attentionReason = (params.get('attention_reason') || '').trim();" in annotations_html
-    assert "const ownerHint = (params.get('owner_hint') || '').trim();" in annotations_html
-    assert "const suggestedNextAction = (params.get('suggested_next_action') || '').trim();" in annotations_html
-    assert "const attentionLevel = (params.get('attention_level') || '').trim().toLowerCase();" in annotations_html
-    assert "const replayEvidenceTier = (params.get('replay_evidence_tier') || '').trim().toLowerCase();" in annotations_html
-    assert "const reviewVerdict = (params.get('review_verdict') || '').trim().toLowerCase();" in annotations_html
+    assert "collectReplayAttentionPrefillContextFromQuery" in annotations_html
+    assert "countryId: (params.get('country_id') || '').trim()" in annotations_html
+    assert "caseId: (params.get('case_id') || '').trim()" in annotations_html
+    assert "attentionReason: (params.get('attention_reason') || '').trim()" in annotations_html
+    assert "ownerHint: (params.get('owner_hint') || '').trim()" in annotations_html
+    assert "suggestedNextAction: (params.get('suggested_next_action') || '').trim()" in annotations_html
+    assert "attentionLevel: (params.get('attention_level') || '').trim().toLowerCase()" in annotations_html
+    assert "validateReplayAttentionPrefillContext" in annotations_html
+    assert "replayEvidenceTier: (params.get('replay_evidence_tier') || '').trim().toLowerCase()" in annotations_html
+    assert "reviewVerdict: (params.get('review_verdict') || '').trim().toLowerCase()" in annotations_html
+    assert "Replay-attention prefill missing fields:" in annotations_html
+    assert "Prefilled replay-attention workflow for" in annotations_html
     assert "severityByAttentionLevel" in annotations_html
     assert "confidenceByReplayTier" in annotations_html
     assert "verified_replay_evidence" in annotations_html

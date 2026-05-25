@@ -3163,19 +3163,42 @@ function loadAnnotationIntoEditor(annotationId){
   document.getElementById('annotation-text-input').value = selected.text || '';
   setWorkflowStatus(`Loaded annotation ${selected.annotation_id} into editor.`);
 }
-function prefillAnnotationFromQuery(){
+function collectReplayAttentionPrefillContextFromQuery(){
   const params = new URLSearchParams(window.location.search);
-  const linkedItem = params.get('linked_item') || '';
-  const scope = params.get('scope') || '';
-  const annotationType = params.get('annotation_type') || '';
-  const countryId = (params.get('country_id') || '').trim();
-  const caseId = (params.get('case_id') || '').trim();
-  const attentionReason = (params.get('attention_reason') || '').trim();
-  const ownerHint = (params.get('owner_hint') || '').trim();
-  const suggestedNextAction = (params.get('suggested_next_action') || '').trim();
-  const attentionLevel = (params.get('attention_level') || '').trim().toLowerCase();
-  const replayEvidenceTier = (params.get('replay_evidence_tier') || '').trim().toLowerCase();
-  const reviewVerdict = (params.get('review_verdict') || '').trim().toLowerCase();
+  return {
+    linkedItem: params.get('linked_item') || '',
+    scope: params.get('scope') || '',
+    annotationType: params.get('annotation_type') || '',
+    countryId: (params.get('country_id') || '').trim(),
+    caseId: (params.get('case_id') || '').trim(),
+    attentionReason: (params.get('attention_reason') || '').trim(),
+    ownerHint: (params.get('owner_hint') || '').trim(),
+    suggestedNextAction: (params.get('suggested_next_action') || '').trim(),
+    attentionLevel: (params.get('attention_level') || '').trim().toLowerCase(),
+    replayEvidenceTier: (params.get('replay_evidence_tier') || '').trim().toLowerCase(),
+    reviewVerdict: (params.get('review_verdict') || '').trim().toLowerCase(),
+  };
+}
+function validateReplayAttentionPrefillContext(context){
+  const hasReplayContext = Boolean(context.caseId || context.countryId || context.attentionReason || context.ownerHint || context.suggestedNextAction || context.attentionLevel || context.replayEvidenceTier || context.reviewVerdict);
+  if (!hasReplayContext) { return { hasReplayContext: false, missing: [] }; }
+  const required = ['countryId', 'caseId', 'attentionReason', 'ownerHint', 'suggestedNextAction', 'attentionLevel', 'replayEvidenceTier', 'reviewVerdict'];
+  const missing = required.filter((key) => !String(context[key] || '').trim());
+  return { hasReplayContext: true, missing: missing };
+}
+function prefillAnnotationFromQuery(){
+  const context = collectReplayAttentionPrefillContextFromQuery();
+  const linkedItem = context.linkedItem;
+  const scope = context.scope;
+  const annotationType = context.annotationType;
+  const countryId = context.countryId;
+  const caseId = context.caseId;
+  const attentionReason = context.attentionReason;
+  const ownerHint = context.ownerHint;
+  const suggestedNextAction = context.suggestedNextAction;
+  const attentionLevel = context.attentionLevel;
+  const replayEvidenceTier = context.replayEvidenceTier;
+  const reviewVerdict = context.reviewVerdict;
   if (scope) { document.getElementById('annotation-scope-input').value = scope; }
   if (annotationType) { document.getElementById('annotation-type-input').value = annotationType; }
   const linkedItems = [];
@@ -3208,8 +3231,15 @@ function prefillAnnotationFromQuery(){
     ].join(' ');
     document.getElementById('annotation-text-input').value = summary;
   }
+  const replayContextValidation = validateReplayAttentionPrefillContext(context);
+  if (replayContextValidation.hasReplayContext && replayContextValidation.missing.length) {
+    setWorkflowStatus(`Replay-attention prefill missing fields: ${replayContextValidation.missing.join(', ')}.`);
+  }
   if (linkedItems.length) {
     setWorkflowStatus(`Prefilled workflow for ${linkedItems.join(', ')}.`);
+    if (replayContextValidation.hasReplayContext && replayContextValidation.missing.length === 0) {
+      setWorkflowStatus(`Prefilled replay-attention workflow for ${caseId || 'case n/a'} (${countryId || 'country n/a'}).`);
+    }
   }
 }
 function renderAnnotationWorkflow(){
