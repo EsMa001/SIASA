@@ -1881,6 +1881,32 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
                             "remediation_hint": "Resolve known gaps in readiness inputs.",
                         }
                     ],
+                },
+                "operator_failure_drill_trend_baseline": {
+                    "snapshot_count": 1,
+                    "top_recurring_gate_id": "release_gate_go",
+                    "operator_focus": "Establish follow-up snapshots and monitor drift for release_gate_go.",
+                    "trend_rows": [
+                        {
+                            "gate_id": "release_gate_go",
+                            "scenario_count": 2,
+                            "trend_status": "baseline_established",
+                            "trajectory": "steady",
+                            "recurrence_ratio": 1.0,
+                        }
+                    ],
+                },
+                "operator_stale_remediation_closure_drill": {
+                    "stale_remediation_gap_injected": {
+                        "requires_closure": True,
+                        "closure_guarded": False,
+                        "actionability_sla_hours": 72.0,
+                        "breach_count": 2,
+                        "breaches": [
+                            {"reason": "non_actionable_priority", "item": {"priority_score": 0, "unresolved_age_hours": 24.0}},
+                            {"reason": "sla_breach", "item": {"priority_score": 10, "unresolved_age_hours": 120.0}},
+                        ],
+                    }
                 }
             }
         )
@@ -1899,6 +1925,8 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert payload["release_readiness_index_view_model"]["passed_gates"] == 8
     assert payload["operator_release_summary_view_model"]["failed_gate_count"] == 0
     assert payload["operator_failure_drill_digest_view_model"]["cluster_count"] == 1
+    assert payload["operator_failure_drill_trend_baseline_view_model"]["snapshot_count"] == 1
+    assert payload["operator_stale_remediation_closure_drill_view_model"]["stale_remediation_gap_injected"]["breach_count"] == 2
 
     pages = build_local_mvp_site(output_dir=tmp_path / "site-with-readiness", **payload)
     readiness_html = (pages.output_dir / "readiness.html").read_text()
@@ -1914,9 +1942,14 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert "Covered Flows: <strong>6/6</strong>" in readiness_html
     assert "Stakeholder Focus Closure" in readiness_html
     assert "Covered IDs: 19 / 19 | Open IDs: 0" in readiness_html
-    assert "Operator Release Steering (AP-16/AP-17)" in readiness_html
+    assert "Operator Release Steering (AP-16/AP-17/AP-19/AP-20)" in readiness_html
     assert "AP-16 failed gates: <strong>0</strong>" in readiness_html
     assert "AP-17 cluster count: <strong>1</strong>" in readiness_html
+    assert "AP-19 trend snapshots: <strong>1</strong>" in readiness_html
+    assert "baseline_established" in readiness_html
+    assert "AP-20 requires closure: <strong>yes</strong> | closure guarded: <strong>no</strong>" in readiness_html
+    assert "non_actionable_priority" in readiness_html
+    assert "sla_breach" in readiness_html
     assert "release_gate_go" in readiness_html
     assert "go" in readiness_html
     assert readiness_json["demo_checks"] == [{"label": "Persisted Demo Check", "ready": True}]
