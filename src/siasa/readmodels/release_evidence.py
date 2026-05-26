@@ -4,6 +4,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from siasa.readmodels.functional_fulfillment import (
+    estimate_functional_fulfillment_from_statuses,
+    extract_capability_statuses_from_matrix_markdown,
+)
 from siasa.readmodels.readiness import build_readiness_view_model
 from siasa.readmodels.release_gate import build_release_gate_view_model
 from siasa.readmodels.stakeholder_browser_e2e_acceptance import build_stakeholder_browser_e2e_acceptance_report
@@ -26,6 +30,7 @@ def build_repo_release_gate_assessment(
     stakeholder_browser_e2e_acceptance_override: dict[str, Any] | None = None,
     stakeholder_browser_interaction_depth_override: dict[str, Any] | None = None,
     stakeholder_browser_failure_resilience_override: dict[str, Any] | None = None,
+    capability_fulfillment_percent_override: float | None = None,
 ) -> dict[str, Any]:
     readiness_view_model = readiness_view_model_override or build_readiness_view_model(
         country_profile_read_models={"UKR": {"country_id": "UKR"}},
@@ -68,10 +73,46 @@ def build_repo_release_gate_assessment(
         stakeholder_browser_interaction_depth_report=stakeholder_browser_interaction_depth,
         stakeholder_browser_failure_resilience_report=stakeholder_browser_failure_resilience,
     )
+
+    capability_fulfillment_percent = capability_fulfillment_percent_override
+    capability_fulfillment_source = "override"
+    if capability_fulfillment_percent is None:
+        matrix_path = repo_root / "docs" / "plans" / "siasa-project-lead-capability-matrix.md"
+        if matrix_path.exists():
+            matrix_text = matrix_path.read_text(encoding="utf-8")
+            statuses = extract_capability_statuses_from_matrix_markdown(matrix_text)
+            if statuses:
+                capability_fulfillment_percent = estimate_functional_fulfillment_from_statuses(statuses).weighted_percent
+                capability_fulfillment_source = str(matrix_path.relative_to(repo_root))
+    if capability_fulfillment_percent is None:
+        capability_fulfillment_percent = 0.0
+        capability_fulfillment_source = "unavailable"
+
+    release_readiness_index_percent = float(release_readiness_index.get("percent", 0.0))
+    metric_gap_percent = round(capability_fulfillment_percent - release_readiness_index_percent, 1)
+    metrics_diverged = metric_gap_percent != 0.0
+    operator_metric_warning = (
+        "capability_fulfillment_percent exceeds release_readiness_index_percent; do not interpret capability closure as release-go"
+        if metric_gap_percent > 0
+        else (
+            "release_readiness_index_percent exceeds capability_fulfillment_percent; verify capability matrix freshness"
+            if metric_gap_percent < 0
+            else ""
+        )
+    )
+
     return {
         "generated_at_utc": datetime.now(UTC).isoformat(),
         "release_gate": release_gate,
         "release_readiness_index": release_readiness_index,
+        "capability_fulfillment_percent": capability_fulfillment_percent,
+        "release_readiness_index_percent": release_readiness_index_percent,
+        "capability_vs_readiness": {
+            "metrics_diverged": metrics_diverged,
+            "metric_gap_percent": metric_gap_percent,
+            "operator_warning": operator_metric_warning,
+            "capability_fulfillment_source": capability_fulfillment_source,
+        },
         "readiness": readiness_view_model,
         "traceability_integrity": traceability_integrity,
         "stakeholder_functional_closure": stakeholder_functional_closure,
@@ -557,6 +598,7 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
 def render_release_evidence_markdown(assessment: dict[str, Any]) -> str:
     gate = assessment.get("release_gate", {})
     readiness_index = assessment.get("release_readiness_index", {})
+    capability_vs_readiness = assessment.get("capability_vs_readiness", {}) or {}
     summary = ((assessment.get("traceability_integrity") or {}).get("summary") or {})
     e2e_summary = ((assessment.get("stakeholder_e2e_flow_coverage") or {}).get("summary") or {})
     blockers = [str(item) for item in gate.get("blockers", [])]
@@ -572,6 +614,11 @@ def render_release_evidence_markdown(assessment: dict[str, Any]) -> str:
         f"- blocker_count: {gate.get('blocker_count', 'n/a')}\n"
         f"- release_readiness_gates: {readiness_index.get('passed_gates', 'n/a')}/{readiness_index.get('total_gates', 'n/a')}\n"
         f"- release_readiness_percent: {readiness_index.get('percent', 'n/a')}\n"
+        f"- capability_fulfillment_percent: {assessment.get('capability_fulfillment_percent', 'n/a')}\n"
+        f"- release_readiness_index_percent: {assessment.get('release_readiness_index_percent', 'n/a')}\n"
+        f"- capability_vs_readiness_diverged: {capability_vs_readiness.get('metrics_diverged', 'n/a')}\n"
+        f"- capability_vs_readiness_gap_percent: {capability_vs_readiness.get('metric_gap_percent', 'n/a')}\n"
+        f"- capability_vs_readiness_warning: {capability_vs_readiness.get('operator_warning', '')}\n"
         f"- release_verdict: {(assessment.get('readiness') or {}).get('release_verdict', 'n/a')}\n"
         f"- demo_verdict: {(assessment.get('readiness') or {}).get('demo_verdict', 'n/a')}\n"
         f"- traceability_unhealthy_slice_count: {summary.get('unhealthy_slice_count', 'n/a')}\n"

@@ -23,6 +23,10 @@ def test_build_repo_release_gate_assessment_is_go_for_current_repo() -> None:
     assert readiness_index["total_gates"] == 12
     assert readiness_index["passed_gates"] == 12
     assert readiness_index["percent"] == 100.0
+    assert assessment["capability_fulfillment_percent"] == 100.0
+    assert assessment["release_readiness_index_percent"] == 100.0
+    assert assessment["capability_vs_readiness"]["metrics_diverged"] is False
+    assert assessment["capability_vs_readiness"]["metric_gap_percent"] == 0.0
     gate_ids = [item["gate_id"] for item in readiness_index["gates"]]
     assert "stakeholder_functional_focus_cluster_closed" in gate_ids
     assert "stakeholder_e2e_flows_covered" in gate_ids
@@ -56,6 +60,13 @@ def test_render_release_evidence_markdown_contains_gate_summary() -> None:
                     {"gate_id": "go_no_go_runbook_present", "passed": True},
                 ],
             },
+            "capability_fulfillment_percent": 100.0,
+            "release_readiness_index_percent": 42.9,
+            "capability_vs_readiness": {
+                "metrics_diverged": True,
+                "metric_gap_percent": 57.1,
+                "operator_warning": "capability_fulfillment_percent exceeds release_readiness_index_percent; do not interpret capability closure as release-go",
+            },
             "readiness": {"release_verdict": "blocked_by_known_gaps", "demo_verdict": "ready"},
             "traceability_integrity": {"summary": {"unhealthy_slice_count": 0, "closure_at_risk": 0}},
             "stakeholder_e2e_flow_coverage": {"summary": {"flow_count": 6, "covered_flow_count": 5, "flow_gap_count": 1}},
@@ -64,6 +75,10 @@ def test_render_release_evidence_markdown_contains_gate_summary() -> None:
     assert "SIASA Release Evidence Pack" in markdown
     assert "gate_verdict: no_go" in markdown
     assert "release_readiness_gates: 3/12" in markdown
+    assert "capability_fulfillment_percent: 100.0" in markdown
+    assert "release_readiness_index_percent: 42.9" in markdown
+    assert "capability_vs_readiness_diverged: True" in markdown
+    assert "capability_vs_readiness_gap_percent: 57.1" in markdown
     assert "release_gate_go: fail" in markdown
     assert "stakeholder_functional_focus_cluster_closed: fail" in markdown
     assert "stakeholder_e2e_flows_covered: fail" in markdown
