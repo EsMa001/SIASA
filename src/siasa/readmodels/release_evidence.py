@@ -72,6 +72,34 @@ def _build_operator_release_summary(*, release_gate: dict[str, Any], release_rea
     }
 
 
+def _build_failure_drill_operator_digest(*, gate_diagnostics_export: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    clusters: list[dict[str, Any]] = []
+    for gate_id, gate_slice in gate_diagnostics_export.items():
+        failed_in_scenarios = gate_slice.get("failed_in_scenarios") or []
+        scenario_ids = sorted({str(item.get("scenario_id", "")) for item in failed_in_scenarios if str(item.get("scenario_id", ""))})
+        if not scenario_ids:
+            continue
+        clusters.append(
+            {
+                "gate_id": gate_id,
+                "gate_label": str(gate_slice.get("gate_label", gate_id)),
+                "scenario_count": len(scenario_ids),
+                "scenario_ids": scenario_ids,
+                "remediation_hint": str(gate_slice.get("remediation_hint", "Inspect scenario evidence and repair failing gate conditions.")),
+            }
+        )
+
+    clusters.sort(key=lambda item: (-int(item.get("scenario_count", 0)), str(item.get("gate_id", ""))))
+    return {
+        "cluster_count": len(clusters),
+        "clusters": clusters,
+        "top_cluster_gate_id": (clusters[0]["gate_id"] if clusters else None),
+        "operator_next_action": (
+            clusters[0]["remediation_hint"] if clusters else "No failure-drill action required; no failing scenarios localized."
+        ),
+    }
+
+
 def build_repo_release_gate_assessment(
     *,
     repo_root: Path,
@@ -644,12 +672,17 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
         for gate_slice in gate_diagnostics_export.values()
     )
 
+    operator_failure_drill_digest = _build_failure_drill_operator_digest(
+        gate_diagnostics_export=gate_diagnostics_export,
+    )
+
     return {
         "drill_verdict": "pass" if all(checks.values()) else "fail",
         "checks": checks,
         "scenarios": scenarios,
         "failure_localization": scenario_localization,
         "gate_diagnostics_export": gate_diagnostics_export,
+        "operator_failure_drill_digest": operator_failure_drill_digest,
     }
 
 

@@ -96,3 +96,12 @@ def test_release_failure_drill_report_detects_expected_failure_modes() -> None:
         and row["source"] == "release_readiness_gate"
         for row in resilience_slice["failed_in_scenarios"]
     )
+
+    operator_digest = report["operator_failure_drill_digest"]
+    assert operator_digest["cluster_count"] >= 1
+    assert operator_digest["top_cluster_gate_id"] == "release_gate_go"
+    assert any(
+        cluster["gate_id"] == "stakeholder_browser_failure_resilience_covered"
+        and "stakeholder_browser_failure_resilience_gap_injected" in cluster["scenario_ids"]
+        for cluster in operator_digest["clusters"]
+    )
