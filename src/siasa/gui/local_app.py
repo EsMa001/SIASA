@@ -1382,6 +1382,24 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
     if stakeholder_e2e_ui_smoke_view_path.exists():
         stakeholder_e2e_ui_smoke_view_model = _load_json(stakeholder_e2e_ui_smoke_view_path)
 
+    operator_release_summary_view_model = None
+    release_evidence_assessment_path = readmodels_dir / 'release_evidence_assessment.json'
+    if release_evidence_assessment_path.exists():
+        release_evidence_assessment = _load_json(release_evidence_assessment_path)
+        if isinstance(release_evidence_assessment, dict):
+            maybe_operator_summary = release_evidence_assessment.get('operator_release_summary')
+            if isinstance(maybe_operator_summary, dict):
+                operator_release_summary_view_model = maybe_operator_summary
+
+    operator_failure_drill_digest_view_model = None
+    release_failure_drill_report_path = readmodels_dir / 'release_failure_drill_report.json'
+    if release_failure_drill_report_path.exists():
+        release_failure_drill_report = _load_json(release_failure_drill_report_path)
+        if isinstance(release_failure_drill_report, dict):
+            maybe_operator_digest = release_failure_drill_report.get('operator_failure_drill_digest')
+            if isinstance(maybe_operator_digest, dict):
+                operator_failure_drill_digest_view_model = maybe_operator_digest
+
     return {
         'world_map_read_model': world_map_read_model,
         'country_profile_read_models': country_profile_read_models,
@@ -1399,6 +1417,8 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
         'stakeholder_e2e_flow_coverage_view_model': stakeholder_e2e_flow_coverage_view_model,
         'release_readiness_index_view_model': release_readiness_index_view_model,
         'stakeholder_e2e_ui_smoke_view_model': stakeholder_e2e_ui_smoke_view_model,
+        'operator_release_summary_view_model': operator_release_summary_view_model,
+        'operator_failure_drill_digest_view_model': operator_failure_drill_digest_view_model,
     }
 
 
@@ -2152,6 +2172,8 @@ def _render_readiness(
     stakeholder_e2e_flow_coverage_view_model: dict[str, Any] | None = None,
     release_readiness_index_view_model: dict[str, Any] | None = None,
     stakeholder_e2e_ui_smoke_view_model: dict[str, Any] | None = None,
+    operator_release_summary_view_model: dict[str, Any] | None = None,
+    operator_failure_drill_digest_view_model: dict[str, Any] | None = None,
     *,
     nav_prefix: str = '',
     available_pages: set[str] | None = None,
@@ -2245,6 +2267,34 @@ def _render_readiness(
         for key, value in sorted(_e2e_ui_smoke_stop.items())
     ) or "<tr><td colspan='2'>No AP-07 UI-smoke stop-criteria data available.</td></tr>"
 
+    _operator_summary = operator_release_summary_view_model or {}
+    _operator_failed_gate_count = int(_operator_summary.get('failed_gate_count', 0)) if _operator_summary else 0
+    _operator_next_action = str(_operator_summary.get('operator_next_action', 'n/a')) if _operator_summary else 'n/a'
+    _operator_failed_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(item.get('gate_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('detail', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('remediation_hint', 'n/a')))}</td>"
+        "</tr>"
+        for item in _operator_summary.get('failed_gates', [])
+        if isinstance(item, dict)
+    ) or "<tr><td colspan='3'>No AP-16 failed-gate entries available.</td></tr>"
+
+    _operator_digest = operator_failure_drill_digest_view_model or {}
+    _operator_digest_cluster_count = int(_operator_digest.get('cluster_count', 0)) if _operator_digest else 0
+    _operator_digest_top_gate = str(_operator_digest.get('top_cluster_gate_id', 'n/a')) if _operator_digest else 'n/a'
+    _operator_digest_next_action = str(_operator_digest.get('operator_next_action', 'n/a')) if _operator_digest else 'n/a'
+    _operator_digest_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(item.get('gate_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('scenario_count', 0)))}</td>"
+        f"<td>{html.escape(', '.join(str(s) for s in item.get('scenario_ids', [])))}</td>"
+        f"<td>{html.escape(str(item.get('remediation_hint', 'n/a')))}</td>"
+        "</tr>"
+        for item in _operator_digest.get('clusters', [])
+        if isinstance(item, dict)
+    ) or "<tr><td colspan='4'>No AP-17 drill digest clusters available.</td></tr>"
+
     body = (
         # === KPI Header ===
         "<div class='kpi-grid'>"
@@ -2279,6 +2329,13 @@ def _render_readiness(
         f"<p>Covered Flows: <strong>{html.escape(str(_e2e_ui_smoke_covered))}/{html.escape(str(_e2e_ui_smoke_flow_count))}</strong> | Flow Gaps: {html.escape(str(_e2e_ui_smoke_gaps))}</p>"
         "<table><thead><tr><th>UI Smoke Stop Criterion</th><th>Status</th></tr></thead>"
         f"<tbody>{_e2e_ui_smoke_stop_rows}</tbody></table></div>"
+        "<div class='panel'><div class='panel-header'>Operator Release Steering (AP-16/AP-17)</div>"
+        f"<p>AP-16 failed gates: <strong>{html.escape(str(_operator_failed_gate_count))}</strong> | AP-16 next action: {html.escape(_operator_next_action)}</p>"
+        "<table><thead><tr><th>AP-16 Gate</th><th>Detail</th><th>Remediation</th></tr></thead>"
+        f"<tbody>{_operator_failed_rows}</tbody></table>"
+        f"<p>AP-17 cluster count: <strong>{html.escape(str(_operator_digest_cluster_count))}</strong> | Top cluster gate: {html.escape(_operator_digest_top_gate)} | AP-17 next action: {html.escape(_operator_digest_next_action)}</p>"
+        "<table><thead><tr><th>AP-17 Gate</th><th>Scenario Count</th><th>Scenario IDs</th><th>Remediation</th></tr></thead>"
+        f"<tbody>{_operator_digest_rows}</tbody></table></div>"
         # === Known Gaps ===
         "<div class='panel'><div class='panel-header'>Known Gaps Before Release</div>"
         f"<ul>{known_gap_items}</ul></div>"
@@ -3471,6 +3528,8 @@ def build_local_mvp_site(
     stakeholder_e2e_flow_coverage_view_model: dict[str, Any] | None = None,
     release_readiness_index_view_model: dict[str, Any] | None = None,
     stakeholder_e2e_ui_smoke_view_model: dict[str, Any] | None = None,
+    operator_release_summary_view_model: dict[str, Any] | None = None,
+    operator_failure_drill_digest_view_model: dict[str, Any] | None = None,
     ui_role: str = 'analyst',
 ) -> SiteBuildResult:
     normalized_role = _normalize_ui_role(ui_role)
@@ -3649,6 +3708,8 @@ def build_local_mvp_site(
             stakeholder_e2e_flow_coverage_view_model,
             release_readiness_index_view_model,
             stakeholder_e2e_ui_smoke_view_model,
+            operator_release_summary_view_model,
+            operator_failure_drill_digest_view_model,
             nav_prefix='',
             available_pages=available_pages,
         ),
@@ -3690,6 +3751,22 @@ def build_local_mvp_site(
             encoding='utf-8',
         )
         generated_files.append(stakeholder_e2e_ui_smoke_json)
+
+    if operator_release_summary_view_model is not None:
+        operator_release_summary_json = output_dir / "operator_release_summary.json"
+        operator_release_summary_json.write_text(
+            json.dumps(operator_release_summary_view_model, indent=2, sort_keys=True),
+            encoding='utf-8',
+        )
+        generated_files.append(operator_release_summary_json)
+
+    if operator_failure_drill_digest_view_model is not None:
+        operator_failure_drill_digest_json = output_dir / "operator_failure_drill_digest.json"
+        operator_failure_drill_digest_json.write_text(
+            json.dumps(operator_failure_drill_digest_view_model, indent=2, sort_keys=True),
+            encoding='utf-8',
+        )
+        generated_files.append(operator_failure_drill_digest_json)
 
     return SiteBuildResult(output_dir=output_dir, generated_files=generated_files)
 

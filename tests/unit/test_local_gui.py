@@ -1854,6 +1854,37 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
             }
         )
     )
+    (artifacts_dir / "readmodels" / "release_evidence_assessment.json").write_text(
+        json.dumps(
+            {
+                "operator_release_summary": {
+                    "release_gate_verdict": "go",
+                    "failed_gate_count": 0,
+                    "failed_gates": [],
+                    "operator_next_action": "No action required; release gates are green.",
+                }
+            }
+        )
+    )
+    (artifacts_dir / "readmodels" / "release_failure_drill_report.json").write_text(
+        json.dumps(
+            {
+                "operator_failure_drill_digest": {
+                    "cluster_count": 1,
+                    "top_cluster_gate_id": "release_gate_go",
+                    "operator_next_action": "Resolve known gaps in readiness inputs.",
+                    "clusters": [
+                        {
+                            "gate_id": "release_gate_go",
+                            "scenario_count": 2,
+                            "scenario_ids": ["known_gap_injected", "traceability_closure_at_risk_injected"],
+                            "remediation_hint": "Resolve known gaps in readiness inputs.",
+                        }
+                    ],
+                }
+            }
+        )
+    )
     (artifacts_dir / "reports" / "daily_snapshot.json").write_text(
         json.dumps({"report_id": "REP-DAILY-SNAP-RUN-321-v1", "report_type": "daily_snapshot", "format": "json", "payload": {"snapshot_id": "SNAP-RUN-321-v1", "status": "success"}})
     )
@@ -1866,6 +1897,8 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert payload["stakeholder_e2e_flow_coverage_view_model"]["summary"]["flow_count"] == 6
     assert payload["stakeholder_e2e_ui_smoke_view_model"]["flow_count"] == 6
     assert payload["release_readiness_index_view_model"]["passed_gates"] == 8
+    assert payload["operator_release_summary_view_model"]["failed_gate_count"] == 0
+    assert payload["operator_failure_drill_digest_view_model"]["cluster_count"] == 1
 
     pages = build_local_mvp_site(output_dir=tmp_path / "site-with-readiness", **payload)
     readiness_html = (pages.output_dir / "readiness.html").read_text()
@@ -1881,6 +1914,10 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert "Covered Flows: <strong>6/6</strong>" in readiness_html
     assert "Stakeholder Focus Closure" in readiness_html
     assert "Covered IDs: 19 / 19 | Open IDs: 0" in readiness_html
+    assert "Operator Release Steering (AP-16/AP-17)" in readiness_html
+    assert "AP-16 failed gates: <strong>0</strong>" in readiness_html
+    assert "AP-17 cluster count: <strong>1</strong>" in readiness_html
+    assert "release_gate_go" in readiness_html
     assert "go" in readiness_html
     assert readiness_json["demo_checks"] == [{"label": "Persisted Demo Check", "ready": True}]
 

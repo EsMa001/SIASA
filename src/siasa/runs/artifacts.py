@@ -476,6 +476,11 @@ def write_run_artifacts(
     readmodel_paths.append(release_gate_path)
 
     release_assessment = build_repo_release_gate_assessment(repo_root=Path(__file__).resolve().parents[3])
+    release_evidence_assessment_path = readmodels_dir / "release_evidence_assessment.json"
+    release_evidence_assessment_path.write_text(
+        json.dumps(release_assessment, indent=2, sort_keys=True)
+    )
+    readmodel_paths.append(release_evidence_assessment_path)
 
     stakeholder_e2e_flow_coverage_path = readmodels_dir / "stakeholder_e2e_flow_coverage.json"
     stakeholder_e2e_flow_coverage_path.write_text(
