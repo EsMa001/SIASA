@@ -121,7 +121,9 @@ Current repo-evidenced status on branch `hermes/repo-scaffold`:
 Interpretation:
 - the old roadmap order was correct as a program scaffold
 - however, execution has now overtaken parts of the document
-- the critical remaining gap is no longer missing artifact completeness inside the current governed pilot, but how far runtime breadth and the validation/reference-case depth should be expanded next
+- capability closure and release readiness must be steered as two distinct signals: capability matrix completion answers "implemented scope", while release-readiness gates/failure drills answer "operationally safe to release"
+- with matrix fulfillment now at `100.0%` (`Done=16/16`), the immediate risk is metric conflation rather than missing top-level capability rows
+- therefore the next serial planning focus is to keep the capability-vs-readiness split explicit in operator-facing release evidence before adding further convenience layers
 - the current validation view is now richer than a single-country runtime-support check because the artifact carries a multi-case portfolio summary, a curated repo-backed reference-case library now broadened from 4 to 21 countries / 23 cases (`UKR`, `RUS`, `CHN`, `IND`, `IRN`, `ISR`, `TUR`, `USA`, `DEU`, `EST`, `FIN`, `SAU`, `QAT`, `EGY`, `NGA`, `SDN`, `MMR`, `POL`, `PAK`, `GEO`, `TWN`), historical reference-review / evidence-scoring outputs, a governed provider-backed archival replay layer across that broadened library, explicit archival provenance/accountability metadata, replay evidence score/tier interpretation, first governed challenge cases with partial and mismatch replay outcomes, and now also a replay attention layer that summarizes non-perfect cases by level/reason/owner/country concentration instead of leaving only raw review rows
 
 ## 3b. Updated planning horizon

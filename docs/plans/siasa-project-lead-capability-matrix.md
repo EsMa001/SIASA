@@ -196,14 +196,14 @@ That is a useful sign of progress, but it also means prioritization must focus o
 ## 5. Immediate steering recommendation
 
 Current serial recommendation:
-- next work package: AP-15 release evidence operator summary page (compact "what failed / why / what to do" section)
-- follow-up package: AP-16 operator-facing drill trend snapshot (scenario recurrence + gate hot-spot concentration)
+- next work package: AP-15 capability-vs-readiness operator split in release evidence output (explicit dual KPI: `capability_fulfillment_percent` vs `release_readiness_index_percent` plus warning when they diverge)
+- follow-up package: AP-16 release evidence operator summary page (compact "what failed / why / what to do" section) consuming AP-14b gate diagnostics
 
 Why this is next:
 
-- AP-01..AP-14b are now closed with green governance/tests and a stable 12-gate release-readiness baseline.
-- AP-14 + AP-14b already provide deterministic failure localization and per-gate diagnostics export slices.
-- Highest remaining value now shifts to compressing those diagnostics into an operator-first summary view for faster release decisions.
+- Capability matrix is currently 100.0% (`Done=16/16`) and must remain a stable capability-closure signal.
+- Release readiness remains a separate operational truth signal (gate-index + no-go blockers + failure drills), and conflating both metrics creates steering risk.
+- AP-15 therefore prioritizes metric-clarity hardening before additional UI convenience, so project-lead decisions stay evidence-causal under future regressions.
 - This keeps serial hardening aligned with level-1/level-4 intent without reopening already-closed traceability fundamentals.
 
 That prioritization should continue to be governed by matrix evidence, not by raw code churn.
