@@ -27,6 +27,10 @@ def test_build_repo_release_gate_assessment_is_go_for_current_repo() -> None:
     assert assessment["release_readiness_index_percent"] == 100.0
     assert assessment["capability_vs_readiness"]["metrics_diverged"] is False
     assert assessment["capability_vs_readiness"]["metric_gap_percent"] == 0.0
+    operator_summary = assessment["operator_release_summary"]
+    assert operator_summary["release_gate_verdict"] == "go"
+    assert operator_summary["failed_gate_count"] == 0
+    assert operator_summary["operator_next_action"] == "No action required; release gates are green."
     gate_ids = [item["gate_id"] for item in readiness_index["gates"]]
     assert "stakeholder_functional_focus_cluster_closed" in gate_ids
     assert "stakeholder_e2e_flows_covered" in gate_ids
@@ -67,6 +71,20 @@ def test_render_release_evidence_markdown_contains_gate_summary() -> None:
                 "metric_gap_percent": 57.1,
                 "operator_warning": "capability_fulfillment_percent exceeds release_readiness_index_percent; do not interpret capability closure as release-go",
             },
+            "operator_release_summary": {
+                "failed_gate_count": 2,
+                "operator_next_action": "Regenerate local GUI bundle and fix missing role-flow smoke paths.",
+                "failed_gates": [
+                    {
+                        "gate_id": "stakeholder_e2e_ui_smoke_covered",
+                        "remediation_hint": "Regenerate local GUI bundle and fix missing role-flow smoke paths.",
+                    },
+                    {
+                        "gate_id": "stakeholder_browser_e2e_acceptance_covered",
+                        "remediation_hint": "Fix broken internal links or role-bundle navigation regressions in generated GUI pages.",
+                    },
+                ],
+            },
             "readiness": {"release_verdict": "blocked_by_known_gaps", "demo_verdict": "ready"},
             "traceability_integrity": {"summary": {"unhealthy_slice_count": 0, "closure_at_risk": 0}},
             "stakeholder_e2e_flow_coverage": {"summary": {"flow_count": 6, "covered_flow_count": 5, "flow_gap_count": 1}},
@@ -79,6 +97,9 @@ def test_render_release_evidence_markdown_contains_gate_summary() -> None:
     assert "release_readiness_index_percent: 42.9" in markdown
     assert "capability_vs_readiness_diverged: True" in markdown
     assert "capability_vs_readiness_gap_percent: 57.1" in markdown
+    assert "## Operator Release Summary" in markdown
+    assert "failed_gate_count: 2" in markdown
+    assert "operator_next_action: Regenerate local GUI bundle and fix missing role-flow smoke paths." in markdown
     assert "release_gate_go: fail" in markdown
     assert "stakeholder_functional_focus_cluster_closed: fail" in markdown
     assert "stakeholder_e2e_flows_covered: fail" in markdown

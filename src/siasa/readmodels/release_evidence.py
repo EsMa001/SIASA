@@ -19,6 +19,59 @@ from siasa.readmodels.stakeholder_functional_closure import build_stakeholder_fu
 from siasa.traceability.consistency import build_traceability_integrity_report
 
 
+_REMEDIATION_HINTS_BY_GATE_ID: dict[str, str] = {
+    "known_gaps_clear": "Resolve known gaps in readiness inputs or mark explicitly deferred with governance evidence.",
+    "traceability_integrity_clean": "Run traceability consistency checks and close unhealthy slices before release.",
+    "stakeholder_functional_focus_cluster_closed": "Close remaining stakeholder focus-cluster implementation gaps.",
+    "stakeholder_e2e_flows_covered": "Add or repair missing stakeholder E2E flow evidence until flow-gap count is zero.",
+    "stakeholder_e2e_ui_smoke_covered": "Regenerate local GUI bundle and fix missing role-flow smoke paths.",
+    "stakeholder_browser_e2e_acceptance_covered": "Fix broken internal links or role-bundle navigation regressions in generated GUI pages.",
+    "stakeholder_browser_interaction_depth_covered": "Repair broken click-path transitions and re-run interaction-depth checks.",
+    "stakeholder_browser_failure_resilience_covered": "Add missing required targets and eliminate broken internal links in generated pages.",
+    "stale_remediation_actionable": "Populate stale-country remediation actions with explicit action text and positive priority score.",
+    "ci_gate_enforced": "Wire all release gate scripts into CI workflow execution path.",
+    "evidence_pack_tooling_present": "Restore missing release gate/evidence scripts used by CI and release runbook.",
+    "go_no_go_runbook_present": "Restore or create release go/no-go runbook documentation.",
+}
+
+
+def _build_operator_release_summary(*, release_gate: dict[str, Any], release_readiness_index: dict[str, Any]) -> dict[str, Any]:
+    blocker_ids = [str(item) for item in (release_gate.get("blockers") or [])]
+    readiness_gates = release_readiness_index.get("gates") or []
+    gate_details = {
+        str(item.get("gate_id")): str(item.get("detail", ""))
+        for item in readiness_gates
+        if isinstance(item, dict)
+    }
+
+    failed_readiness_gate_ids = [
+        str(item.get("gate_id"))
+        for item in readiness_gates
+        if isinstance(item, dict) and not bool(item.get("passed", False))
+    ]
+
+    ordered_unique_failed_ids: list[str] = []
+    for gate_id in blocker_ids + failed_readiness_gate_ids:
+        if gate_id not in ordered_unique_failed_ids:
+            ordered_unique_failed_ids.append(gate_id)
+
+    failed_items = [
+        {
+            "gate_id": gate_id,
+            "detail": gate_details.get(gate_id, "derived_from_release_gate_blockers"),
+            "remediation_hint": _REMEDIATION_HINTS_BY_GATE_ID.get(gate_id, "Inspect release evidence and close failing gate condition."),
+        }
+        for gate_id in ordered_unique_failed_ids
+    ]
+
+    return {
+        "release_gate_verdict": str(release_gate.get("gate_verdict", "unknown")),
+        "failed_gate_count": len(failed_items),
+        "failed_gates": failed_items,
+        "operator_next_action": failed_items[0]["remediation_hint"] if failed_items else "No action required; release gates are green.",
+    }
+
+
 def build_repo_release_gate_assessment(
     *,
     repo_root: Path,
@@ -100,6 +153,10 @@ def build_repo_release_gate_assessment(
             else ""
         )
     )
+    operator_release_summary = _build_operator_release_summary(
+        release_gate=release_gate,
+        release_readiness_index=release_readiness_index,
+    )
 
     return {
         "generated_at_utc": datetime.now(UTC).isoformat(),
@@ -113,6 +170,7 @@ def build_repo_release_gate_assessment(
             "operator_warning": operator_metric_warning,
             "capability_fulfillment_source": capability_fulfillment_source,
         },
+        "operator_release_summary": operator_release_summary,
         "readiness": readiness_view_model,
         "traceability_integrity": traceability_integrity,
         "stakeholder_functional_closure": stakeholder_functional_closure,
@@ -599,6 +657,7 @@ def render_release_evidence_markdown(assessment: dict[str, Any]) -> str:
     gate = assessment.get("release_gate", {})
     readiness_index = assessment.get("release_readiness_index", {})
     capability_vs_readiness = assessment.get("capability_vs_readiness", {}) or {}
+    operator_release_summary = assessment.get("operator_release_summary", {}) or {}
     summary = ((assessment.get("traceability_integrity") or {}).get("summary") or {})
     e2e_summary = ((assessment.get("stakeholder_e2e_flow_coverage") or {}).get("summary") or {})
     blockers = [str(item) for item in gate.get("blockers", [])]
@@ -606,6 +665,10 @@ def render_release_evidence_markdown(assessment: dict[str, Any]) -> str:
     index_lines = "\n".join(
         f"- {item.get('gate_id', 'unknown')}: {'pass' if item.get('passed') else 'fail'}"
         for item in readiness_index.get("gates", [])
+    ) or "- none"
+    operator_failed_lines = "\n".join(
+        f"- {item.get('gate_id', 'unknown')}: {item.get('remediation_hint', 'n/a')}"
+        for item in operator_release_summary.get("failed_gates", [])
     ) or "- none"
     return (
         "# SIASA Release Evidence Pack\n\n"
@@ -625,6 +688,10 @@ def render_release_evidence_markdown(assessment: dict[str, Any]) -> str:
         f"- traceability_closure_at_risk: {summary.get('closure_at_risk', 'n/a')}\n"
         f"- stakeholder_e2e_flow_coverage: {e2e_summary.get('covered_flow_count', 'n/a')}/{e2e_summary.get('flow_count', 'n/a')}\n"
         f"- stakeholder_e2e_flow_gap_count: {e2e_summary.get('flow_gap_count', 'n/a')}\n\n"
+        "## Operator Release Summary\n"
+        f"- failed_gate_count: {operator_release_summary.get('failed_gate_count', 'n/a')}\n"
+        f"- operator_next_action: {operator_release_summary.get('operator_next_action', 'n/a')}\n"
+        f"{operator_failed_lines}\n\n"
         "## Release Readiness Gates\n"
         f"{index_lines}\n\n"
         "## Blockers\n"

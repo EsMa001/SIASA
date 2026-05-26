@@ -197,13 +197,14 @@ That is a useful sign of progress, but it also means prioritization must focus o
 ## 5. Immediate steering recommendation
 
 Current serial recommendation:
-- next work package: AP-16 release evidence operator summary page (compact "what failed / why / what to do" section) consuming AP-14b gate diagnostics
-- follow-up package: AP-17 operator-focused readiness drill dashboard slice (scenario-by-scenario blocker localization digest)
+- next work package: AP-17 operator-focused readiness drill dashboard slice (scenario-by-scenario blocker localization digest)
+- follow-up package: AP-18 readiness/operator UX integration in local GUI (compact release steering card consuming AP-16/AP-17 outputs)
 
 Why this is next:
 
 - AP-15 is now closed: dual KPI steering (`capability_fulfillment_percent` vs `release_readiness_index_percent`) and divergence signaling are directly available in release evidence.
-- The next highest leverage is operator actionability: faster interpretation of failed gates/scenarios without reading full raw evidence payloads.
-- AP-16 therefore prioritizes concise remediation context on top of already-available AP-14b diagnostics, before adding additional breadth work.
+- AP-16 is now closed: operator-facing summary fields (`failed_gate_count`, `failed_gates`, `operator_next_action`) are emitted in release evidence payload/markdown for compact remediation steering.
+- The next highest leverage is cross-scenario localization compression (AP-17) so repeated drill failures map instantly to stable operator action clusters.
+- AP-17 therefore prioritizes scenario-level blocker digesting before additional breadth work.
 
 That prioritization should continue to be governed by matrix evidence, not by raw code churn.
