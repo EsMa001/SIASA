@@ -116,7 +116,7 @@ Current repo-evidenced status on branch `hermes/repo-scaffold`:
   - source-dependency cluster candidates and explicit source-origin groundwork are now visible in the traceability view
 - project-lead fulfillment steering is now explicit and reproducible:
   - new functional stakeholder-fulfillment estimator is available in code (`src/siasa/readmodels/functional_fulfillment.py`) with unit tests
-  - default weighted steering estimate from the current capability matrix is now `87.5%` (`Done=11`, `Partial=5`, `Weak=0`, `N=16`)
+  - default weighted steering estimate from the current capability matrix is now `100.0%` (`Done=16`, `Partial=0`, `Weak=0`, `N=16`)
 
 Interpretation:
 - the old roadmap order was correct as a program scaffold
