@@ -21,6 +21,7 @@ def test_release_failure_drill_report_detects_expected_failure_modes() -> None:
     assert checks["stakeholder_browser_interaction_depth_gate_fails"] is True
     assert checks["stakeholder_browser_failure_resilience_gate_fails"] is True
     assert checks["stale_remediation_gate_fails"] is True
+    assert checks["stale_remediation_closure_guardrails_triggered"] is True
     assert checks["failure_localization_nonempty_for_injected_scenarios"] is True
     assert checks["gate_diagnostics_export_nonempty_for_failed_gates"] is True
 
@@ -114,3 +115,12 @@ def test_release_failure_drill_report_detects_expected_failure_modes() -> None:
     assert all(row["trend_status"] == "baseline_established" for row in trend_baseline["trend_rows"])
     assert all(row["trajectory"] == "steady" for row in trend_baseline["trend_rows"])
     assert all(row["recurrence_ratio"] == 1.0 for row in trend_baseline["trend_rows"])
+
+    stale_closure_drill = report["operator_stale_remediation_closure_drill"]
+    assert stale_closure_drill["baseline"]["closure_guarded"] is True
+    assert stale_closure_drill["stale_remediation_gap_injected"]["closure_guarded"] is False
+    assert stale_closure_drill["stale_remediation_gap_injected"]["breach_count"] >= 1
+    assert any(
+        item["reason"] in {"non_actionable_priority", "sla_breach"}
+        for item in stale_closure_drill["stale_remediation_gap_injected"]["breaches"]
+    )

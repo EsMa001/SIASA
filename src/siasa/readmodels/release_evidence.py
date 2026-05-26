@@ -134,6 +134,34 @@ def _build_failure_drill_trend_baseline(*, operator_failure_drill_digest: dict[s
     }
 
 
+def _build_stale_remediation_closure_guardrails(*, coverage_visibility: dict[str, Any], actionability_sla_hours: float = 72.0) -> dict[str, Any]:
+    stale_summary = coverage_visibility.get("stale_priority_summary") if isinstance(coverage_visibility.get("stale_priority_summary"), dict) else {}
+    stale_country_count = int(stale_summary.get("stale_country_count", 0)) if stale_summary else 0
+    remediation_watchlist = coverage_visibility.get("remediation_watchlist") if isinstance(coverage_visibility.get("remediation_watchlist"), list) else []
+
+    breaches: list[dict[str, Any]] = []
+    for item in remediation_watchlist:
+        if not isinstance(item, dict):
+            continue
+        priority_score = item.get("priority_score")
+        unresolved_age_hours = item.get("unresolved_age_hours")
+        if not isinstance(priority_score, (int, float)) or float(priority_score) <= 0:
+            breaches.append({"reason": "non_actionable_priority", "item": item})
+            continue
+        if isinstance(unresolved_age_hours, (int, float)) and float(unresolved_age_hours) > actionability_sla_hours:
+            breaches.append({"reason": "sla_breach", "item": item})
+
+    requires_closure = stale_country_count > 0
+    closure_guarded = (not requires_closure) or (len(remediation_watchlist) > 0 and len(breaches) == 0)
+    return {
+        "requires_closure": requires_closure,
+        "actionability_sla_hours": actionability_sla_hours,
+        "closure_guarded": closure_guarded,
+        "breach_count": len(breaches),
+        "breaches": breaches,
+    }
+
+
 def build_repo_release_gate_assessment(
     *,
     repo_root: Path,
@@ -538,7 +566,22 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
             "p3_stale_count": 0,
         },
         "stale_priority_watchlist": [{"country_id": "UKR", "priority": "P1", "freshness_hours": 720.0}],
-        "remediation_watchlist": [{"severity": "high", "reason": "stale_source_window", "priority_score": 0}],
+        "remediation_watchlist": [
+            {
+                "severity": "high",
+                "reason": "stale_source_window",
+                "priority_score": 0,
+                "remediation_action": "Escalate source refresh and rerun governed collection",
+                "unresolved_age_hours": 24.0,
+            },
+            {
+                "severity": "high",
+                "reason": "stale_source_window",
+                "priority_score": 10,
+                "remediation_action": "Coordinate source-owner recovery window",
+                "unresolved_age_hours": 120.0,
+            }
+        ],
     }
     scenario_stale_remediation_gap = dict(baseline)
     scenario_stale_remediation_gap["release_readiness_index"] = build_release_readiness_index(
@@ -551,6 +594,13 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
         stakeholder_browser_interaction_depth_report=baseline["stakeholder_browser_interaction_depth"],
         stakeholder_browser_failure_resilience_report=baseline["stakeholder_browser_failure_resilience"],
         coverage_visibility_override=stale_remediation_visibility,
+    )
+
+    baseline_stale_guardrails = _build_stale_remediation_closure_guardrails(
+        coverage_visibility=(baseline.get("readiness", {}).get("country_coverage_visibility", {}) if isinstance(baseline.get("readiness"), dict) else {}),
+    )
+    stale_remediation_closure_gap_guardrails = _build_stale_remediation_closure_guardrails(
+        coverage_visibility=stale_remediation_visibility,
     )
 
     scenarios = {
@@ -599,6 +649,11 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
         "stale_remediation_gate_fails": any(
             (not bool(gate.get("passed"))) and gate.get("gate_id") == "stale_remediation_actionable"
             for gate in scenario_stale_remediation_gap["release_readiness_index"].get("gates", [])
+        ),
+        "stale_remediation_closure_guardrails_triggered": (
+            baseline_stale_guardrails.get("closure_guarded") is True
+            and stale_remediation_closure_gap_guardrails.get("closure_guarded") is False
+            and int(stale_remediation_closure_gap_guardrails.get("breach_count", 0)) > 0
         ),
     }
 
@@ -721,6 +776,10 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
         "gate_diagnostics_export": gate_diagnostics_export,
         "operator_failure_drill_digest": operator_failure_drill_digest,
         "operator_failure_drill_trend_baseline": operator_failure_drill_trend_baseline,
+        "operator_stale_remediation_closure_drill": {
+            "baseline": baseline_stale_guardrails,
+            "stale_remediation_gap_injected": stale_remediation_closure_gap_guardrails,
+        },
     }
 
 
