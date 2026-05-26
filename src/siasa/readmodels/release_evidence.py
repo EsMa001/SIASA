@@ -466,6 +466,10 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
 
     scenario_localization: dict[str, list[dict[str, str]]] = {}
     for scenario_id, scenario_assessment in scenarios.items():
+        if scenario_id == "baseline":
+            scenario_localization[scenario_id] = []
+            continue
+
         failures: list[dict[str, str]] = []
         if scenario_assessment.get("release_gate", {}).get("gate_verdict") == "no_go":
             for blocker in scenario_assessment.get("release_gate", {}).get("blockers", []):
