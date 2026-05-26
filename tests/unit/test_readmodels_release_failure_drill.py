@@ -105,3 +105,12 @@ def test_release_failure_drill_report_detects_expected_failure_modes() -> None:
         and "stakeholder_browser_failure_resilience_gap_injected" in cluster["scenario_ids"]
         for cluster in operator_digest["clusters"]
     )
+
+    trend_baseline = report["operator_failure_drill_trend_baseline"]
+    assert trend_baseline["snapshot_count"] == 1
+    assert trend_baseline["time_window"] == "single_snapshot_baseline"
+    assert trend_baseline["top_recurring_gate_id"] == operator_digest["top_cluster_gate_id"]
+    assert "monitor drift" in trend_baseline["operator_focus"]
+    assert all(row["trend_status"] == "baseline_established" for row in trend_baseline["trend_rows"])
+    assert all(row["trajectory"] == "steady" for row in trend_baseline["trend_rows"])
+    assert all(row["recurrence_ratio"] == 1.0 for row in trend_baseline["trend_rows"])

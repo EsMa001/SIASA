@@ -100,6 +100,40 @@ def _build_failure_drill_operator_digest(*, gate_diagnostics_export: dict[str, d
     }
 
 
+def _build_failure_drill_trend_baseline(*, operator_failure_drill_digest: dict[str, Any]) -> dict[str, Any]:
+    clusters = operator_failure_drill_digest.get("clusters") or []
+    trend_rows: list[dict[str, Any]] = []
+    for cluster in clusters:
+        gate_id = str(cluster.get("gate_id", "unknown"))
+        scenario_count = int(cluster.get("scenario_count", 0))
+        trend_rows.append(
+            {
+                "gate_id": gate_id,
+                "gate_label": str(cluster.get("gate_label", gate_id)),
+                "scenario_count": scenario_count,
+                "baseline_scenario_count": scenario_count,
+                "trend_status": "baseline_established",
+                "trajectory": "steady",
+                "recurrence_ratio": 1.0,
+                "scenario_ids": list(cluster.get("scenario_ids") or []),
+                "remediation_hint": str(cluster.get("remediation_hint", "Inspect scenario evidence and repair failing gate conditions.")),
+            }
+        )
+
+    trend_rows.sort(key=lambda item: (-int(item.get("scenario_count", 0)), str(item.get("gate_id", ""))))
+    top_recurring_gate_id = trend_rows[0]["gate_id"] if trend_rows else None
+    return {
+        "snapshot_count": 1,
+        "time_window": "single_snapshot_baseline",
+        "trend_rows": trend_rows,
+        "top_recurring_gate_id": top_recurring_gate_id,
+        "operator_focus": (
+            f"Establish follow-up snapshots and monitor drift for {top_recurring_gate_id}." if top_recurring_gate_id
+            else "No recurring failed clusters in baseline snapshot."
+        ),
+    }
+
+
 def build_repo_release_gate_assessment(
     *,
     repo_root: Path,
@@ -675,6 +709,9 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
     operator_failure_drill_digest = _build_failure_drill_operator_digest(
         gate_diagnostics_export=gate_diagnostics_export,
     )
+    operator_failure_drill_trend_baseline = _build_failure_drill_trend_baseline(
+        operator_failure_drill_digest=operator_failure_drill_digest,
+    )
 
     return {
         "drill_verdict": "pass" if all(checks.values()) else "fail",
@@ -683,6 +720,7 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
         "failure_localization": scenario_localization,
         "gate_diagnostics_export": gate_diagnostics_export,
         "operator_failure_drill_digest": operator_failure_drill_digest,
+        "operator_failure_drill_trend_baseline": operator_failure_drill_trend_baseline,
     }
 
 
