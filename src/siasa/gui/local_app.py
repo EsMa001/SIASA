@@ -1393,6 +1393,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
 
     operator_failure_drill_digest_view_model = None
     operator_failure_drill_trend_baseline_view_model = None
+    operator_recurrence_aware_remediation_prioritization_view_model = None
     operator_stale_remediation_closure_drill_view_model = None
     release_failure_drill_report_path = readmodels_dir / 'release_failure_drill_report.json'
     if release_failure_drill_report_path.exists():
@@ -1404,6 +1405,9 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
             maybe_operator_trend_baseline = release_failure_drill_report.get('operator_failure_drill_trend_baseline')
             if isinstance(maybe_operator_trend_baseline, dict):
                 operator_failure_drill_trend_baseline_view_model = maybe_operator_trend_baseline
+            maybe_operator_prioritization = release_failure_drill_report.get('operator_recurrence_aware_remediation_prioritization')
+            if isinstance(maybe_operator_prioritization, dict):
+                operator_recurrence_aware_remediation_prioritization_view_model = maybe_operator_prioritization
             maybe_operator_stale_closure = release_failure_drill_report.get('operator_stale_remediation_closure_drill')
             if isinstance(maybe_operator_stale_closure, dict):
                 operator_stale_remediation_closure_drill_view_model = maybe_operator_stale_closure
@@ -1428,6 +1432,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
         'operator_release_summary_view_model': operator_release_summary_view_model,
         'operator_failure_drill_digest_view_model': operator_failure_drill_digest_view_model,
         'operator_failure_drill_trend_baseline_view_model': operator_failure_drill_trend_baseline_view_model,
+        'operator_recurrence_aware_remediation_prioritization_view_model': operator_recurrence_aware_remediation_prioritization_view_model,
         'operator_stale_remediation_closure_drill_view_model': operator_stale_remediation_closure_drill_view_model,
     }
 
@@ -2185,6 +2190,7 @@ def _render_readiness(
     operator_release_summary_view_model: dict[str, Any] | None = None,
     operator_failure_drill_digest_view_model: dict[str, Any] | None = None,
     operator_failure_drill_trend_baseline_view_model: dict[str, Any] | None = None,
+    operator_recurrence_aware_remediation_prioritization_view_model: dict[str, Any] | None = None,
     operator_stale_remediation_closure_drill_view_model: dict[str, Any] | None = None,
     *,
     nav_prefix: str = '',
@@ -2323,6 +2329,22 @@ def _render_readiness(
         if isinstance(item, dict)
     ) or "<tr><td colspan='5'>No AP-19 trend baseline rows available.</td></tr>"
 
+    _operator_prioritization = operator_recurrence_aware_remediation_prioritization_view_model or {}
+    _operator_priority_count = int(_operator_prioritization.get('priority_count', 0)) if _operator_prioritization else 0
+    _operator_priority_top_gate = str(_operator_prioritization.get('top_priority_gate_id', 'n/a')) if _operator_prioritization else 'n/a'
+    _operator_priority_next_action = str(_operator_prioritization.get('operator_next_action', 'n/a')) if _operator_prioritization else 'n/a'
+    _operator_priority_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(item.get('rank', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('gate_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('priority_score', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('urgency_boost', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('recommended_action', 'n/a')))}</td>"
+        "</tr>"
+        for item in _operator_prioritization.get('priorities', [])
+        if isinstance(item, dict)
+    ) or "<tr><td colspan='5'>No AP-22 remediation priorities available.</td></tr>"
+
     _operator_stale_closure = operator_stale_remediation_closure_drill_view_model or {}
     _operator_stale_closure_injected = _operator_stale_closure.get('stale_remediation_gap_injected') if isinstance(_operator_stale_closure.get('stale_remediation_gap_injected'), dict) else {}
     _operator_stale_closure_requires = bool(_operator_stale_closure_injected.get('requires_closure', False)) if _operator_stale_closure_injected else False
@@ -2373,7 +2395,7 @@ def _render_readiness(
         f"<p>Covered Flows: <strong>{html.escape(str(_e2e_ui_smoke_covered))}/{html.escape(str(_e2e_ui_smoke_flow_count))}</strong> | Flow Gaps: {html.escape(str(_e2e_ui_smoke_gaps))}</p>"
         "<table><thead><tr><th>UI Smoke Stop Criterion</th><th>Status</th></tr></thead>"
         f"<tbody>{_e2e_ui_smoke_stop_rows}</tbody></table></div>"
-        "<div class='panel'><div class='panel-header'>Operator Release Steering (AP-16/AP-17/AP-19/AP-20)</div>"
+        "<div class='panel'><div class='panel-header'>Operator Release Steering (AP-16/AP-17/AP-19/AP-20/AP-22)</div>"
         f"<p>AP-16 failed gates: <strong>{html.escape(str(_operator_failed_gate_count))}</strong> | AP-16 next action: {html.escape(_operator_next_action)}</p>"
         "<table><thead><tr><th>AP-16 Gate</th><th>Detail</th><th>Remediation</th></tr></thead>"
         f"<tbody>{_operator_failed_rows}</tbody></table>"
@@ -2383,6 +2405,9 @@ def _render_readiness(
         f"<p>AP-19 trend snapshots: <strong>{html.escape(str(_operator_trend_snapshot_count))}</strong> | Top recurring gate: {html.escape(_operator_trend_top_gate)} | AP-19 focus: {html.escape(_operator_trend_focus)}</p>"
         "<table><thead><tr><th>AP-19 Gate</th><th>Scenario Count</th><th>Trend Status</th><th>Trajectory</th><th>Recurrence Ratio</th></tr></thead>"
         f"<tbody>{_operator_trend_rows}</tbody></table>"
+        f"<p>AP-22 priority rows: <strong>{html.escape(str(_operator_priority_count))}</strong> | Top priority gate: {html.escape(_operator_priority_top_gate)} | AP-22 next action: {html.escape(_operator_priority_next_action)}</p>"
+        "<table><thead><tr><th>AP-22 Rank</th><th>Gate</th><th>Priority Score</th><th>Urgency Boost</th><th>Recommended Action</th></tr></thead>"
+        f"<tbody>{_operator_priority_rows}</tbody></table>"
         f"<p>AP-20 requires closure: <strong>{'yes' if _operator_stale_closure_requires else 'no'}</strong> | closure guarded: <strong>{'yes' if _operator_stale_closure_guarded else 'no'}</strong> | SLA hours: {html.escape(str(_operator_stale_closure_sla))} | breach count: {html.escape(str(_operator_stale_closure_breach_count))}</p>"
         "<table><thead><tr><th>AP-20 Breach Reason</th><th>Priority Score</th><th>Unresolved Age Hours</th></tr></thead>"
         f"<tbody>{_operator_stale_closure_rows}</tbody></table></div>"
@@ -3581,6 +3606,7 @@ def build_local_mvp_site(
     operator_release_summary_view_model: dict[str, Any] | None = None,
     operator_failure_drill_digest_view_model: dict[str, Any] | None = None,
     operator_failure_drill_trend_baseline_view_model: dict[str, Any] | None = None,
+    operator_recurrence_aware_remediation_prioritization_view_model: dict[str, Any] | None = None,
     operator_stale_remediation_closure_drill_view_model: dict[str, Any] | None = None,
     ui_role: str = 'analyst',
 ) -> SiteBuildResult:
@@ -3763,6 +3789,7 @@ def build_local_mvp_site(
             operator_release_summary_view_model,
             operator_failure_drill_digest_view_model,
             operator_failure_drill_trend_baseline_view_model,
+            operator_recurrence_aware_remediation_prioritization_view_model,
             operator_stale_remediation_closure_drill_view_model,
             nav_prefix='',
             available_pages=available_pages,
@@ -3829,6 +3856,14 @@ def build_local_mvp_site(
             encoding='utf-8',
         )
         generated_files.append(operator_failure_drill_trend_baseline_json)
+
+    if operator_recurrence_aware_remediation_prioritization_view_model is not None:
+        operator_recurrence_aware_remediation_prioritization_json = output_dir / "operator_recurrence_aware_remediation_prioritization.json"
+        operator_recurrence_aware_remediation_prioritization_json.write_text(
+            json.dumps(operator_recurrence_aware_remediation_prioritization_view_model, indent=2, sort_keys=True),
+            encoding='utf-8',
+        )
+        generated_files.append(operator_recurrence_aware_remediation_prioritization_json)
 
     if operator_stale_remediation_closure_drill_view_model is not None:
         operator_stale_remediation_closure_drill_json = output_dir / "operator_stale_remediation_closure_drill.json"

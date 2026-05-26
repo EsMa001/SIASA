@@ -24,6 +24,7 @@ def test_release_failure_drill_report_detects_expected_failure_modes() -> None:
     assert checks["stale_remediation_closure_guardrails_triggered"] is True
     assert checks["failure_localization_nonempty_for_injected_scenarios"] is True
     assert checks["gate_diagnostics_export_nonempty_for_failed_gates"] is True
+    assert checks["recurrence_aware_prioritization_nonempty"] is True
 
     scenarios = report["scenarios"]
     assert set(scenarios.keys()) == {
@@ -115,6 +116,13 @@ def test_release_failure_drill_report_detects_expected_failure_modes() -> None:
     assert all(row["trend_status"] == "baseline_established" for row in trend_baseline["trend_rows"])
     assert all(row["trajectory"] == "steady" for row in trend_baseline["trend_rows"])
     assert all(row["recurrence_ratio"] == 1.0 for row in trend_baseline["trend_rows"])
+
+    recurrence_prioritization = report["operator_recurrence_aware_remediation_prioritization"]
+    assert recurrence_prioritization["model"] == "recurrence_x_urgency"
+    assert recurrence_prioritization["priority_count"] >= 1
+    assert recurrence_prioritization["top_priority_gate_id"] == "stale_remediation_actionable"
+    assert recurrence_prioritization["top_priority_score"] >= 2.0
+    assert recurrence_prioritization["priorities"][0]["rank"] == 1
 
     stale_closure_drill = report["operator_stale_remediation_closure_drill"]
     assert stale_closure_drill["baseline"]["closure_guarded"] is True

@@ -202,14 +202,14 @@ That is a useful sign of progress, but it also means prioritization must focus o
 ## 5. Immediate steering recommendation
 
 Current serial recommendation:
-- next work package: AP-22 recurrence-aware remediation prioritization (trend-weighted stale closure ranking)
-- follow-up package: AP-23 release drill delta ledger (snapshot-to-snapshot gate movement + operator impact narrative)
+- next work package: AP-23 release drill delta ledger (snapshot-to-snapshot gate movement + operator impact narrative)
+- follow-up package: AP-24 operator remediation execution loop hooks (priority-to-action trace closure)
 
 Why this is next:
 
-- AP-21 is now closed: readiness UX surfaces AP-19 trend baseline and AP-20 closure guardrail breaches directly in operator-facing steering panel.
-- AP-22 should now convert these visible signals into explicit prioritization order (recurrence trajectory x remediation urgency) to reduce queue thrash.
-- AP-23 should then add deterministic snapshot deltas so improvement/regression is auditable between runs.
-- This sequence keeps steering evidence-first: UX visibility (AP-21) -> prioritization intelligence (AP-22) -> auditable movement tracking (AP-23).
+- AP-22 is now closed: release-failure drill report emits recurrence-aware remediation prioritization (`operator_recurrence_aware_remediation_prioritization`) combining AP-19 recurrence signal with AP-20 stale-closure urgency breaches, and readiness UI now surfaces AP-22 ranked action rows.
+- AP-23 should now add deterministic snapshot deltas so improvement/regression is auditable between runs.
+- AP-24 should then connect ranked priorities to explicit execution-loop tracking so operator action closure is measurable.
+- This sequence keeps steering evidence-first: prioritization intelligence (AP-22) -> auditable movement tracking (AP-23) -> execution-loop trace closure (AP-24).
 
 That prioritization should continue to be governed by matrix evidence, not by raw code churn.

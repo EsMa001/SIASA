@@ -1896,6 +1896,21 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
                         }
                     ],
                 },
+                "operator_recurrence_aware_remediation_prioritization": {
+                    "model": "recurrence_x_urgency",
+                    "priority_count": 1,
+                    "top_priority_gate_id": "release_gate_go",
+                    "operator_next_action": "Resolve known gaps in readiness inputs.",
+                    "priorities": [
+                        {
+                            "rank": 1,
+                            "gate_id": "release_gate_go",
+                            "priority_score": 3.0,
+                            "urgency_boost": 0,
+                            "recommended_action": "Resolve known gaps in readiness inputs.",
+                        }
+                    ],
+                },
                 "operator_stale_remediation_closure_drill": {
                     "stale_remediation_gap_injected": {
                         "requires_closure": True,
@@ -1926,6 +1941,7 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert payload["operator_release_summary_view_model"]["failed_gate_count"] == 0
     assert payload["operator_failure_drill_digest_view_model"]["cluster_count"] == 1
     assert payload["operator_failure_drill_trend_baseline_view_model"]["snapshot_count"] == 1
+    assert payload["operator_recurrence_aware_remediation_prioritization_view_model"]["priority_count"] == 1
     assert payload["operator_stale_remediation_closure_drill_view_model"]["stale_remediation_gap_injected"]["breach_count"] == 2
 
     pages = build_local_mvp_site(output_dir=tmp_path / "site-with-readiness", **payload)
@@ -1942,10 +1958,12 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert "Covered Flows: <strong>6/6</strong>" in readiness_html
     assert "Stakeholder Focus Closure" in readiness_html
     assert "Covered IDs: 19 / 19 | Open IDs: 0" in readiness_html
-    assert "Operator Release Steering (AP-16/AP-17/AP-19/AP-20)" in readiness_html
+    assert "Operator Release Steering (AP-16/AP-17/AP-19/AP-20/AP-22)" in readiness_html
     assert "AP-16 failed gates: <strong>0</strong>" in readiness_html
     assert "AP-17 cluster count: <strong>1</strong>" in readiness_html
     assert "AP-19 trend snapshots: <strong>1</strong>" in readiness_html
+    assert "AP-22 priority rows: <strong>1</strong>" in readiness_html
+    assert "AP-22 Rank" in readiness_html
     assert "baseline_established" in readiness_html
     assert "AP-20 requires closure: <strong>yes</strong> | closure guarded: <strong>no</strong>" in readiness_html
     assert "non_actionable_priority" in readiness_html

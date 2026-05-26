@@ -162,6 +162,68 @@ def _build_stale_remediation_closure_guardrails(*, coverage_visibility: dict[str
     }
 
 
+def _build_recurrence_aware_remediation_prioritization(
+    *,
+    trend_baseline: dict[str, Any],
+    stale_closure_guardrails: dict[str, Any],
+) -> dict[str, Any]:
+    trend_rows = trend_baseline.get("trend_rows") if isinstance(trend_baseline.get("trend_rows"), list) else []
+    breaches = stale_closure_guardrails.get("breaches") if isinstance(stale_closure_guardrails.get("breaches"), list) else []
+
+    breach_by_reason: dict[str, int] = {}
+    for breach in breaches:
+        if not isinstance(breach, dict):
+            continue
+        reason = str(breach.get("reason", "unknown"))
+        breach_by_reason[reason] = breach_by_reason.get(reason, 0) + 1
+
+    priorities: list[dict[str, Any]] = []
+    for idx, row in enumerate(trend_rows, start=1):
+        if not isinstance(row, dict):
+            continue
+        gate_id = str(row.get("gate_id", "unknown"))
+        scenario_count = int(row.get("scenario_count", 0))
+        recurrence_ratio = float(row.get("recurrence_ratio", 0.0)) if isinstance(row.get("recurrence_ratio"), (int, float)) else 0.0
+
+        urgency_boost = 0
+        if gate_id == "stale_remediation_actionable":
+            urgency_boost += breach_by_reason.get("sla_breach", 0) * 2
+            urgency_boost += breach_by_reason.get("non_actionable_priority", 0)
+
+        priority_score = scenario_count + recurrence_ratio + urgency_boost
+        priorities.append(
+            {
+                "rank": idx,
+                "gate_id": gate_id,
+                "gate_label": str(row.get("gate_label", gate_id)),
+                "scenario_count": scenario_count,
+                "recurrence_ratio": recurrence_ratio,
+                "trajectory": str(row.get("trajectory", "steady")),
+                "urgency_boost": urgency_boost,
+                "priority_score": round(priority_score, 2),
+                "recommended_action": str(row.get("remediation_hint", "Inspect scenario evidence and close failing condition.")),
+            }
+        )
+
+    priorities.sort(key=lambda item: (-float(item.get("priority_score", 0.0)), str(item.get("gate_id", ""))))
+    for new_rank, item in enumerate(priorities, start=1):
+        item["rank"] = new_rank
+
+    top_priority = priorities[0] if priorities else None
+    return {
+        "model": "recurrence_x_urgency",
+        "priority_count": len(priorities),
+        "priorities": priorities,
+        "top_priority_gate_id": (top_priority or {}).get("gate_id"),
+        "top_priority_score": (top_priority or {}).get("priority_score"),
+        "operator_next_action": (
+            str((top_priority or {}).get("recommended_action"))
+            if top_priority
+            else "No prioritized remediation actions; no recurring failures detected."
+        ),
+    }
+
+
 def build_repo_release_gate_assessment(
     *,
     repo_root: Path,
@@ -767,6 +829,13 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
     operator_failure_drill_trend_baseline = _build_failure_drill_trend_baseline(
         operator_failure_drill_digest=operator_failure_drill_digest,
     )
+    operator_recurrence_aware_remediation_prioritization = _build_recurrence_aware_remediation_prioritization(
+        trend_baseline=operator_failure_drill_trend_baseline,
+        stale_closure_guardrails=stale_remediation_closure_gap_guardrails,
+    )
+    checks["recurrence_aware_prioritization_nonempty"] = (
+        int(operator_recurrence_aware_remediation_prioritization.get("priority_count", 0)) > 0
+    )
 
     return {
         "drill_verdict": "pass" if all(checks.values()) else "fail",
@@ -776,6 +845,7 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
         "gate_diagnostics_export": gate_diagnostics_export,
         "operator_failure_drill_digest": operator_failure_drill_digest,
         "operator_failure_drill_trend_baseline": operator_failure_drill_trend_baseline,
+        "operator_recurrence_aware_remediation_prioritization": operator_recurrence_aware_remediation_prioritization,
         "operator_stale_remediation_closure_drill": {
             "baseline": baseline_stale_guardrails,
             "stale_remediation_gap_injected": stale_remediation_closure_gap_guardrails,
