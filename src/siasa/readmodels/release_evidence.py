@@ -224,6 +224,144 @@ def _build_recurrence_aware_remediation_prioritization(
     }
 
 
+def _build_failure_drill_delta_ledger(
+    *,
+    current_trend_baseline: dict[str, Any],
+    previous_report: dict[str, Any] | None,
+) -> dict[str, Any]:
+    current_rows_raw = current_trend_baseline.get("trend_rows") if isinstance(current_trend_baseline.get("trend_rows"), list) else []
+    current_rows = [row for row in current_rows_raw if isinstance(row, dict)]
+
+    previous_trend_baseline = {}
+    if isinstance(previous_report, dict):
+        maybe_previous_trend_baseline = previous_report.get("operator_failure_drill_trend_baseline")
+        if isinstance(maybe_previous_trend_baseline, dict):
+            previous_trend_baseline = maybe_previous_trend_baseline
+    previous_rows_raw = previous_trend_baseline.get("trend_rows") if isinstance(previous_trend_baseline.get("trend_rows"), list) else []
+    previous_rows = [row for row in previous_rows_raw if isinstance(row, dict)]
+
+    current_by_gate = {str(row.get("gate_id", "unknown")): row for row in current_rows}
+    previous_by_gate = {str(row.get("gate_id", "unknown")): row for row in previous_rows}
+
+    has_prior_snapshot = len(previous_by_gate) > 0
+    movement_summary = {
+        "steady": 0,
+        "regressed": 0,
+        "improved": 0,
+        "new_issue": 0,
+        "resolved": 0,
+    }
+    delta_rows: list[dict[str, Any]] = []
+    for gate_id in sorted(set(previous_by_gate) | set(current_by_gate)):
+        current_row = current_by_gate.get(gate_id, {})
+        previous_row = previous_by_gate.get(gate_id, {})
+
+        current_scenario_count = int(current_row.get("scenario_count", 0)) if current_row else 0
+        previous_scenario_count = int(previous_row.get("scenario_count", 0)) if previous_row else 0
+        if not has_prior_snapshot:
+            previous_scenario_count = current_scenario_count
+
+        scenario_delta = current_scenario_count - previous_scenario_count
+        if not has_prior_snapshot:
+            movement_status = "steady"
+        elif previous_scenario_count == 0 and current_scenario_count > 0:
+            movement_status = "new_issue"
+        elif previous_scenario_count > 0 and current_scenario_count == 0:
+            movement_status = "resolved"
+        elif scenario_delta > 0:
+            movement_status = "regressed"
+        elif scenario_delta < 0:
+            movement_status = "improved"
+        else:
+            movement_status = "steady"
+
+        movement_summary[movement_status] += 1
+        gate_label = str(current_row.get("gate_label") or previous_row.get("gate_label") or gate_id)
+        remediation_hint = str(
+            current_row.get("remediation_hint")
+            or previous_row.get("remediation_hint")
+            or "Inspect scenario evidence and close failing gate condition."
+        )
+        current_recurrence_ratio = float(current_row.get("recurrence_ratio", 0.0)) if isinstance(current_row.get("recurrence_ratio"), (int, float)) else 0.0
+        previous_recurrence_ratio = float(previous_row.get("recurrence_ratio", 0.0)) if isinstance(previous_row.get("recurrence_ratio"), (int, float)) else 0.0
+        delta_rows.append(
+            {
+                "gate_id": gate_id,
+                "gate_label": gate_label,
+                "movement_status": movement_status,
+                "current_scenario_count": current_scenario_count,
+                "previous_scenario_count": previous_scenario_count,
+                "scenario_delta": scenario_delta,
+                "current_recurrence_ratio": round(current_recurrence_ratio, 3),
+                "previous_recurrence_ratio": round(previous_recurrence_ratio, 3),
+                "trajectory": str(current_row.get("trajectory") or previous_row.get("trajectory") or "steady"),
+                "recommended_action": remediation_hint,
+            }
+        )
+
+    movement_priority = {
+        "new_issue": 0,
+        "regressed": 1,
+        "resolved": 2,
+        "improved": 3,
+        "steady": 4,
+    }
+    delta_rows.sort(
+        key=lambda item: (
+            movement_priority.get(str(item.get("movement_status", "steady")), 99),
+            -abs(int(item.get("scenario_delta", 0))),
+            str(item.get("gate_id", "")),
+        )
+    )
+
+    regression_rows = [row for row in delta_rows if row.get("movement_status") in {"new_issue", "regressed"}]
+    improvement_rows = [row for row in delta_rows if row.get("movement_status") in {"resolved", "improved"}]
+    top_regression_gate_id = regression_rows[0]["gate_id"] if regression_rows else None
+    top_improvement_gate_id = improvement_rows[0]["gate_id"] if improvement_rows else None
+
+    if not has_prior_snapshot:
+        operator_impact_narrative = "No prior AP-23 snapshot available; current release drill establishes the first delta baseline."
+        comparison_mode = "no_prior_snapshot"
+        snapshot_count = 1
+    else:
+        comparison_mode = "previous_report"
+        prior_delta_ledger = previous_report.get("operator_failure_drill_delta_ledger") if isinstance(previous_report, dict) else {}
+        prior_snapshot_count = 0
+        if isinstance(prior_delta_ledger, dict):
+            prior_snapshot_count = int(prior_delta_ledger.get("snapshot_count", 0))
+        if prior_snapshot_count <= 0:
+            prior_snapshot_count = max(1, int(previous_trend_baseline.get("snapshot_count", 1)))
+        snapshot_count = prior_snapshot_count + 1
+        if regression_rows:
+            top_regression = regression_rows[0]
+            operator_impact_narrative = (
+                f"AP-23 snapshot delta shows strongest operator regression on {top_regression['gate_id']} "
+                f"(Δscenarios={top_regression['scenario_delta']:+d}); prioritize {top_regression['recommended_action']}"
+            )
+            if top_improvement_gate_id:
+                operator_impact_narrative += f" while preserving improvement on {top_improvement_gate_id}."
+            else:
+                operator_impact_narrative += "."
+        elif improvement_rows:
+            top_improvement = improvement_rows[0]
+            operator_impact_narrative = (
+                f"AP-23 snapshot delta shows net improvement on {top_improvement['gate_id']} "
+                f"(Δscenarios={top_improvement['scenario_delta']:+d}); keep {top_improvement['recommended_action']} stable."
+            )
+        else:
+            operator_impact_narrative = "AP-23 snapshot delta shows no gate movement; maintain current operator release controls."
+
+    return {
+        "comparison_mode": comparison_mode,
+        "snapshot_count": snapshot_count,
+        "movement_summary": movement_summary,
+        "delta_rows": delta_rows,
+        "top_regression_gate_id": top_regression_gate_id,
+        "top_improvement_gate_id": top_improvement_gate_id,
+        "operator_impact_narrative": operator_impact_narrative,
+    }
+
+
 def build_repo_release_gate_assessment(
     *,
     repo_root: Path,
@@ -531,7 +669,11 @@ def build_release_readiness_index(
     }
 
 
-def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
+def build_release_failure_drill_report(
+    *,
+    repo_root: Path,
+    previous_report_override: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     baseline = build_repo_release_gate_assessment(repo_root=repo_root)
 
     readiness_with_known_gap = dict(baseline["readiness"])
@@ -833,9 +975,16 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
         trend_baseline=operator_failure_drill_trend_baseline,
         stale_closure_guardrails=stale_remediation_closure_gap_guardrails,
     )
+    operator_failure_drill_delta_ledger = _build_failure_drill_delta_ledger(
+        current_trend_baseline=operator_failure_drill_trend_baseline,
+        previous_report=previous_report_override,
+    )
     checks["recurrence_aware_prioritization_nonempty"] = (
         int(operator_recurrence_aware_remediation_prioritization.get("priority_count", 0)) > 0
     )
+    checks["delta_ledger_nonempty"] = int(operator_failure_drill_delta_ledger.get("snapshot_count", 0)) >= 1 and len(
+        operator_failure_drill_delta_ledger.get("delta_rows", [])
+    ) > 0
 
     return {
         "drill_verdict": "pass" if all(checks.values()) else "fail",
@@ -846,6 +995,7 @@ def build_release_failure_drill_report(*, repo_root: Path) -> dict[str, Any]:
         "operator_failure_drill_digest": operator_failure_drill_digest,
         "operator_failure_drill_trend_baseline": operator_failure_drill_trend_baseline,
         "operator_recurrence_aware_remediation_prioritization": operator_recurrence_aware_remediation_prioritization,
+        "operator_failure_drill_delta_ledger": operator_failure_drill_delta_ledger,
         "operator_stale_remediation_closure_drill": {
             "baseline": baseline_stale_guardrails,
             "stale_remediation_gap_injected": stale_remediation_closure_gap_guardrails,

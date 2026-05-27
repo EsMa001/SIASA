@@ -22,7 +22,15 @@ def main() -> int:
         output_dir = repo_root / output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    report = build_release_failure_drill_report(repo_root=repo_root)
+    previous_summary_path = output_dir / "release_failure_drill_summary.json"
+    previous_summary = None
+    if previous_summary_path.exists():
+        previous_summary = json.loads(previous_summary_path.read_text(encoding="utf-8"))
+
+    report = build_release_failure_drill_report(
+        repo_root=repo_root,
+        previous_report_override=previous_summary,
+    )
     (output_dir / "release_failure_drill_summary.json").write_text(
         json.dumps(
             {
@@ -30,6 +38,8 @@ def main() -> int:
                 "checks": report.get("checks", {}),
                 "failure_localization": report.get("failure_localization", {}),
                 "gate_diagnostics_export": report.get("gate_diagnostics_export", {}),
+                "operator_failure_drill_trend_baseline": report.get("operator_failure_drill_trend_baseline", {}),
+                "operator_failure_drill_delta_ledger": report.get("operator_failure_drill_delta_ledger", {}),
             },
             indent=2,
             sort_keys=True,

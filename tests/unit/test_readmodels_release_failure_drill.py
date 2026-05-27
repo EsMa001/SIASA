@@ -3,6 +3,71 @@ from pathlib import Path
 from siasa.readmodels.release_evidence import build_release_failure_drill_report
 
 
+def test_release_failure_drill_report_builds_ap23_delta_ledger_against_prior_snapshot() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    previous_report = {
+        "operator_failure_drill_trend_baseline": {
+            "snapshot_count": 1,
+            "trend_rows": [
+                {
+                    "gate_id": "release_gate_go",
+                    "gate_label": "Release gate go",
+                    "scenario_count": 4,
+                    "baseline_scenario_count": 4,
+                    "trend_status": "regressed",
+                    "trajectory": "worsening",
+                    "recurrence_ratio": 1.0,
+                    "scenario_ids": [
+                        "known_gap_injected",
+                        "traceability_closure_at_risk_injected",
+                        "stakeholder_focus_cluster_open_injected",
+                        "stakeholder_browser_failure_resilience_gap_injected",
+                    ],
+                    "remediation_hint": "Resolve release gate blockers.",
+                },
+                {
+                    "gate_id": "stale_remediation_actionable",
+                    "gate_label": "Stale-remediation actionability",
+                    "scenario_count": 0,
+                    "baseline_scenario_count": 0,
+                    "trend_status": "improved",
+                    "trajectory": "improving",
+                    "recurrence_ratio": 0.0,
+                    "scenario_ids": [],
+                    "remediation_hint": "Populate stale-country remediation actions.",
+                },
+            ],
+        },
+        "operator_failure_drill_delta_ledger": {
+            "snapshot_count": 3,
+        },
+    }
+
+    report = build_release_failure_drill_report(
+        repo_root=repo_root,
+        previous_report_override=previous_report,
+    )
+
+    delta_ledger = report["operator_failure_drill_delta_ledger"]
+    assert delta_ledger["comparison_mode"] == "previous_report"
+    assert delta_ledger["snapshot_count"] == 4
+    assert delta_ledger["movement_summary"]["improved"] >= 1
+    assert delta_ledger["movement_summary"]["new_issue"] >= 1
+    assert delta_ledger["top_regression_gate_id"] in {
+        "stale_remediation_actionable",
+        "known_gaps_clear",
+        "traceability_integrity_clean",
+    }
+    assert "AP-23 snapshot delta" in delta_ledger["operator_impact_narrative"]
+
+    delta_rows = {row["gate_id"]: row for row in delta_ledger["delta_rows"]}
+    assert delta_rows["release_gate_go"]["movement_status"] == "improved"
+    assert delta_rows["release_gate_go"]["scenario_delta"] < 0
+    assert delta_rows["stale_remediation_actionable"]["movement_status"] == "new_issue"
+    assert delta_rows["stale_remediation_actionable"]["scenario_delta"] > 0
+
+
+
 def test_release_failure_drill_report_detects_expected_failure_modes() -> None:
     repo_root = Path(__file__).resolve().parents[2]
     report = build_release_failure_drill_report(repo_root=repo_root)
@@ -123,6 +188,18 @@ def test_release_failure_drill_report_detects_expected_failure_modes() -> None:
     assert recurrence_prioritization["top_priority_gate_id"] == "stale_remediation_actionable"
     assert recurrence_prioritization["top_priority_score"] >= 2.0
     assert recurrence_prioritization["priorities"][0]["rank"] == 1
+
+    delta_ledger = report["operator_failure_drill_delta_ledger"]
+    assert delta_ledger["comparison_mode"] == "no_prior_snapshot"
+    assert delta_ledger["snapshot_count"] == 1
+    assert delta_ledger["movement_summary"]["steady"] >= 1
+    assert delta_ledger["movement_summary"]["regressed"] == 0
+    assert delta_ledger["movement_summary"]["improved"] == 0
+    assert delta_ledger["movement_summary"]["new_issue"] == 0
+    assert delta_ledger["movement_summary"]["resolved"] == 0
+    assert delta_ledger["top_regression_gate_id"] is None
+    assert "No prior AP-23 snapshot available" in delta_ledger["operator_impact_narrative"]
+    assert all(row["movement_status"] == "steady" for row in delta_ledger["delta_rows"])
 
     stale_closure_drill = report["operator_stale_remediation_closure_drill"]
     assert stale_closure_drill["baseline"]["closure_guarded"] is True

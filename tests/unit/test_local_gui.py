@@ -1911,6 +1911,28 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
                         }
                     ],
                 },
+                "operator_failure_drill_delta_ledger": {
+                    "comparison_mode": "no_prior_snapshot",
+                    "snapshot_count": 1,
+                    "movement_summary": {
+                        "steady": 1,
+                        "regressed": 0,
+                        "improved": 0,
+                        "new_issue": 0,
+                        "resolved": 0,
+                    },
+                    "top_regression_gate_id": None,
+                    "operator_impact_narrative": "No prior AP-23 snapshot available; current release drill establishes the first delta baseline.",
+                    "delta_rows": [
+                        {
+                            "gate_id": "release_gate_go",
+                            "movement_status": "steady",
+                            "current_scenario_count": 2,
+                            "previous_scenario_count": 2,
+                            "scenario_delta": 0,
+                        }
+                    ],
+                },
                 "operator_stale_remediation_closure_drill": {
                     "stale_remediation_gap_injected": {
                         "requires_closure": True,
@@ -1942,6 +1964,7 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert payload["operator_failure_drill_digest_view_model"]["cluster_count"] == 1
     assert payload["operator_failure_drill_trend_baseline_view_model"]["snapshot_count"] == 1
     assert payload["operator_recurrence_aware_remediation_prioritization_view_model"]["priority_count"] == 1
+    assert payload["operator_failure_drill_delta_ledger_view_model"]["snapshot_count"] == 1
     assert payload["operator_stale_remediation_closure_drill_view_model"]["stale_remediation_gap_injected"]["breach_count"] == 2
 
     pages = build_local_mvp_site(output_dir=tmp_path / "site-with-readiness", **payload)
@@ -1958,11 +1981,14 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert "Covered Flows: <strong>6/6</strong>" in readiness_html
     assert "Stakeholder Focus Closure" in readiness_html
     assert "Covered IDs: 19 / 19 | Open IDs: 0" in readiness_html
-    assert "Operator Release Steering (AP-16/AP-17/AP-19/AP-20/AP-22)" in readiness_html
+    assert "Operator Release Steering (AP-16/AP-17/AP-19/AP-20/AP-22/AP-23)" in readiness_html
     assert "AP-16 failed gates: <strong>0</strong>" in readiness_html
     assert "AP-17 cluster count: <strong>1</strong>" in readiness_html
     assert "AP-19 trend snapshots: <strong>1</strong>" in readiness_html
     assert "AP-22 priority rows: <strong>1</strong>" in readiness_html
+    assert "AP-23 delta snapshot count: <strong>1</strong>" in readiness_html
+    assert "No prior AP-23 snapshot available" in readiness_html
+    assert "steady" in readiness_html
     assert "AP-22 Rank" in readiness_html
     assert "baseline_established" in readiness_html
     assert "AP-20 requires closure: <strong>yes</strong> | closure guarded: <strong>no</strong>" in readiness_html
