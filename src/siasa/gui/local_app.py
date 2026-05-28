@@ -1384,6 +1384,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
 
     operator_release_summary_view_model = None
     operator_blocker_causality_view_model = None
+    operator_operability_cluster_view_model = None
     release_evidence_assessment_path = readmodels_dir / 'release_evidence_assessment.json'
     if release_evidence_assessment_path.exists():
         release_evidence_assessment = _load_json(release_evidence_assessment_path)
@@ -1394,6 +1395,9 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
             maybe_operator_blocker_causality = release_evidence_assessment.get('operator_blocker_causality')
             if isinstance(maybe_operator_blocker_causality, dict):
                 operator_blocker_causality_view_model = maybe_operator_blocker_causality
+            maybe_operator_operability_cluster = release_evidence_assessment.get('operator_operability_cluster')
+            if isinstance(maybe_operator_operability_cluster, dict):
+                operator_operability_cluster_view_model = maybe_operator_operability_cluster
 
     operator_failure_drill_digest_view_model = None
     operator_failure_drill_trend_baseline_view_model = None
@@ -1447,6 +1451,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
         'stakeholder_e2e_ui_smoke_view_model': stakeholder_e2e_ui_smoke_view_model,
         'operator_release_summary_view_model': operator_release_summary_view_model,
         'operator_blocker_causality_view_model': operator_blocker_causality_view_model,
+        'operator_operability_cluster_view_model': operator_operability_cluster_view_model,
         'operator_failure_drill_digest_view_model': operator_failure_drill_digest_view_model,
         'operator_failure_drill_trend_baseline_view_model': operator_failure_drill_trend_baseline_view_model,
         'operator_recurrence_aware_remediation_prioritization_view_model': operator_recurrence_aware_remediation_prioritization_view_model,
@@ -2209,6 +2214,7 @@ def _render_readiness(
     stakeholder_e2e_ui_smoke_view_model: dict[str, Any] | None = None,
     operator_release_summary_view_model: dict[str, Any] | None = None,
     operator_blocker_causality_view_model: dict[str, Any] | None = None,
+    operator_operability_cluster_view_model: dict[str, Any] | None = None,
     operator_failure_drill_digest_view_model: dict[str, Any] | None = None,
     operator_failure_drill_trend_baseline_view_model: dict[str, Any] | None = None,
     operator_recurrence_aware_remediation_prioritization_view_model: dict[str, Any] | None = None,
@@ -2336,6 +2342,22 @@ def _render_readiness(
         for item in _operator_blocker_causality.get('causal_chain_rows', [])
         if isinstance(item, dict)
     ) or "<tr><td colspan='3'>No AP-26 blocker-chain rows available.</td></tr>"
+
+    _operator_operability_cluster = operator_operability_cluster_view_model or {}
+    _operator_operability_status = str(_operator_operability_cluster.get('cluster_status', 'n/a')) if _operator_operability_cluster else 'n/a'
+    _operator_operability_covered = int(_operator_operability_cluster.get('covered_gate_count', 0)) if _operator_operability_cluster else 0
+    _operator_operability_failed = int(_operator_operability_cluster.get('failed_gate_count', 0)) if _operator_operability_cluster else 0
+    _operator_operability_next_action = str(_operator_operability_cluster.get('operator_next_action', 'n/a')) if _operator_operability_cluster else 'n/a'
+    _operator_operability_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(item.get('gate_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('gate_group', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('cluster_role', 'n/a')))}</td>"
+        f"<td>{'pass' if bool(item.get('passed')) else 'fail'}</td>"
+        "</tr>"
+        for item in _operator_operability_cluster.get('cluster_rows', [])
+        if isinstance(item, dict)
+    ) or "<tr><td colspan='4'>No AP-27 operability-cluster rows available.</td></tr>"
 
     _operator_digest = operator_failure_drill_digest_view_model or {}
     _operator_digest_cluster_count = int(_operator_digest.get('cluster_count', 0)) if _operator_digest else 0
@@ -2491,6 +2513,9 @@ def _render_readiness(
         f"<p>AP-26 primary root cause: <strong>{html.escape(_operator_primary_root_cause)}</strong> | AP-26 root causes: {html.escape(_operator_root_causes)} | derived effects: {html.escape(_operator_derived_effects)} | AP-26 next action: {html.escape(_operator_blocker_next_action)}</p>"
         "<table><thead><tr><th>AP-26 Gate</th><th>Role</th><th>Causal Detail</th></tr></thead>"
         f"<tbody>{_operator_blocker_rows}</tbody></table>"
+        f"<p>AP-27 cluster status: <strong>{html.escape(_operator_operability_status)}</strong> | AP-27 covered gates: <strong>{html.escape(str(_operator_operability_covered))}</strong> | failed gates: {html.escape(str(_operator_operability_failed))} | AP-27 next action: {html.escape(_operator_operability_next_action)}</p>"
+        "<table><thead><tr><th>AP-27 Gate</th><th>Group</th><th>Cluster Role</th><th>Status</th></tr></thead>"
+        f"<tbody>{_operator_operability_rows}</tbody></table>"
         f"<p>AP-17 cluster count: <strong>{html.escape(str(_operator_digest_cluster_count))}</strong> | Top cluster gate: {html.escape(_operator_digest_top_gate)} | AP-17 next action: {html.escape(_operator_digest_next_action)}</p>"
         "<table><thead><tr><th>AP-17 Gate</th><th>Scenario Count</th><th>Scenario IDs</th><th>Remediation</th></tr></thead>"
         f"<tbody>{_operator_digest_rows}</tbody></table>"
@@ -3706,6 +3731,7 @@ def build_local_mvp_site(
     stakeholder_e2e_ui_smoke_view_model: dict[str, Any] | None = None,
     operator_release_summary_view_model: dict[str, Any] | None = None,
     operator_blocker_causality_view_model: dict[str, Any] | None = None,
+    operator_operability_cluster_view_model: dict[str, Any] | None = None,
     operator_failure_drill_digest_view_model: dict[str, Any] | None = None,
     operator_failure_drill_trend_baseline_view_model: dict[str, Any] | None = None,
     operator_recurrence_aware_remediation_prioritization_view_model: dict[str, Any] | None = None,
@@ -3893,6 +3919,7 @@ def build_local_mvp_site(
             stakeholder_e2e_ui_smoke_view_model,
             operator_release_summary_view_model,
             operator_blocker_causality_view_model,
+            operator_operability_cluster_view_model,
             operator_failure_drill_digest_view_model,
             operator_failure_drill_trend_baseline_view_model,
             operator_recurrence_aware_remediation_prioritization_view_model,
@@ -4005,6 +4032,14 @@ def build_local_mvp_site(
             encoding='utf-8',
         )
         generated_files.append(operator_stale_remediation_action_plan_json)
+
+    if operator_operability_cluster_view_model is not None:
+        operator_operability_cluster_json = output_dir / "operator_operability_cluster.json"
+        operator_operability_cluster_json.write_text(
+            json.dumps(operator_operability_cluster_view_model, indent=2, sort_keys=True),
+            encoding='utf-8',
+        )
+        generated_files.append(operator_operability_cluster_json)
 
     return SiteBuildResult(output_dir=output_dir, generated_files=generated_files)
 

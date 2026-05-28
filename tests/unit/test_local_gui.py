@@ -1870,6 +1870,18 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
                     "operator_next_action": "No blocker-chain action required; release gates are green.",
                     "causal_chain_rows": [],
                 },
+                "operator_operability_cluster": {
+                    "cluster_status": "healthy",
+                    "covered_gate_count": 5,
+                    "failed_gate_count": 0,
+                    "failed_gate_ids": [],
+                    "operator_next_action": "No operability-cluster action required; stakeholder flows and browser gates are green.",
+                    "cluster_rows": [
+                        {"gate_id": "stakeholder_e2e_flows_covered", "gate_group": "flow_definition", "passed": True, "cluster_role": "upstream_flow_spec"},
+                        {"gate_id": "stakeholder_e2e_ui_smoke_covered", "gate_group": "flow_rendering", "passed": True, "cluster_role": "rendered_flow_presence"},
+                        {"gate_id": "stakeholder_browser_e2e_acceptance_covered", "gate_group": "browser_acceptance", "passed": True, "cluster_role": "bundle_navigation_acceptance"},
+                    ],
+                },
             }
         )
     )
@@ -2009,6 +2021,7 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert payload["release_readiness_index_view_model"]["passed_gates"] == 8
     assert payload["operator_release_summary_view_model"]["failed_gate_count"] == 0
     assert payload["operator_blocker_causality_view_model"]["primary_root_cause_gate_id"] is None
+    assert payload["operator_operability_cluster_view_model"]["cluster_status"] == "healthy"
     assert payload["operator_failure_drill_digest_view_model"]["cluster_count"] == 1
     assert payload["operator_failure_drill_trend_baseline_view_model"]["snapshot_count"] == 1
     assert payload["operator_recurrence_aware_remediation_prioritization_view_model"]["priority_count"] == 1
@@ -2036,6 +2049,11 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert "AP-26 primary root cause: <strong>none</strong>" in readiness_html
     assert "AP-26 root causes: none | derived effects: none" in readiness_html
     assert "No blocker-chain action required" in readiness_html
+    assert "AP-27 cluster status: <strong>healthy</strong>" in readiness_html
+    assert "AP-27 covered gates: <strong>5</strong> | failed gates: 0" in readiness_html
+    assert "No operability-cluster action required" in readiness_html
+    assert "upstream_flow_spec" in readiness_html
+    assert "bundle_navigation_acceptance" in readiness_html
     assert "AP-17 cluster count: <strong>1</strong>" in readiness_html
     assert "AP-19 trend snapshots: <strong>1</strong>" in readiness_html
     assert "AP-22 priority rows: <strong>1</strong>" in readiness_html

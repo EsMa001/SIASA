@@ -36,6 +36,11 @@ def test_build_repo_release_gate_assessment_is_go_for_current_repo() -> None:
     assert blocker_causality["root_cause_gate_ids"] == []
     assert blocker_causality["derived_gate_ids"] == []
     assert blocker_causality["operator_next_action"] == "No blocker-chain action required; release gates are green."
+    operability_cluster = assessment["operator_operability_cluster"]
+    assert operability_cluster["cluster_status"] == "healthy"
+    assert operability_cluster["covered_gate_count"] == 5
+    assert operability_cluster["failed_gate_count"] == 0
+    assert operability_cluster["operator_next_action"] == "No operability-cluster action required; stakeholder flows and browser gates are green."
     gate_ids = [item["gate_id"] for item in readiness_index["gates"]]
     assert "stakeholder_functional_focus_cluster_closed" in gate_ids
     assert "stakeholder_e2e_flows_covered" in gate_ids
@@ -100,6 +105,18 @@ def test_render_release_evidence_markdown_contains_gate_summary() -> None:
                     {"gate_id": "release_gate_go", "gate_role": "derived_effect", "causal_detail": "overall go/no-go remains blocked until root causes clear"},
                 ],
             },
+            "operator_operability_cluster": {
+                "cluster_status": "degraded",
+                "covered_gate_count": 5,
+                "failed_gate_count": 2,
+                "failed_gate_ids": ["stakeholder_e2e_ui_smoke_covered", "stakeholder_browser_e2e_acceptance_covered"],
+                "operator_next_action": "Regenerate local GUI bundle and fix missing role-flow smoke paths.",
+                "cluster_rows": [
+                    {"gate_id": "stakeholder_e2e_flows_covered", "gate_group": "flow_definition", "passed": True, "cluster_role": "upstream_flow_spec"},
+                    {"gate_id": "stakeholder_e2e_ui_smoke_covered", "gate_group": "flow_rendering", "passed": False, "cluster_role": "rendered_flow_presence"},
+                    {"gate_id": "stakeholder_browser_e2e_acceptance_covered", "gate_group": "browser_acceptance", "passed": False, "cluster_role": "bundle_navigation_acceptance"},
+                ],
+            },
             "readiness": {"release_verdict": "blocked_by_known_gaps", "demo_verdict": "ready"},
             "traceability_integrity": {"summary": {"unhealthy_slice_count": 0, "closure_at_risk": 0}},
             "stakeholder_e2e_flow_coverage": {"summary": {"flow_count": 6, "covered_flow_count": 5, "flow_gap_count": 1}},
@@ -121,6 +138,12 @@ def test_render_release_evidence_markdown_contains_gate_summary() -> None:
     assert "derived_effects: release_gate_go" in markdown
     assert "known_gaps_clear [root_cause]: direct blocker in readiness evidence" in markdown
     assert "release_gate_go [derived_effect]: overall go/no-go remains blocked until root causes clear" in markdown
+    assert "## Operability Cluster" in markdown
+    assert "cluster_status: degraded" in markdown
+    assert "failed_gate_count: 2" in markdown
+    assert "failed_gate_ids: stakeholder_e2e_ui_smoke_covered, stakeholder_browser_e2e_acceptance_covered" in markdown
+    assert "stakeholder_e2e_ui_smoke_covered [flow_rendering/rendered_flow_presence]: fail" in markdown
+    assert "stakeholder_browser_e2e_acceptance_covered [browser_acceptance/bundle_navigation_acceptance]: fail" in markdown
     assert "release_gate_go: fail" in markdown
     assert "stakeholder_functional_focus_cluster_closed: fail" in markdown
     assert "stakeholder_e2e_flows_covered: fail" in markdown

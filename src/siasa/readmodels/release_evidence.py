@@ -88,6 +88,66 @@ def _build_operator_blocker_causality(*, release_gate: dict[str, Any], release_r
     }
 
 
+def _build_operator_operability_cluster(*, release_readiness_index: dict[str, Any]) -> dict[str, Any]:
+    operability_gate_ids = [
+        "stakeholder_e2e_flows_covered",
+        "stakeholder_e2e_ui_smoke_covered",
+        "stakeholder_browser_e2e_acceptance_covered",
+        "stakeholder_browser_interaction_depth_covered",
+        "stakeholder_browser_failure_resilience_covered",
+    ]
+    gate_group_by_id = {
+        "stakeholder_e2e_flows_covered": "flow_definition",
+        "stakeholder_e2e_ui_smoke_covered": "flow_rendering",
+        "stakeholder_browser_e2e_acceptance_covered": "browser_acceptance",
+        "stakeholder_browser_interaction_depth_covered": "interaction_depth",
+        "stakeholder_browser_failure_resilience_covered": "failure_resilience",
+    }
+    cluster_role_by_id = {
+        "stakeholder_e2e_flows_covered": "upstream_flow_spec",
+        "stakeholder_e2e_ui_smoke_covered": "rendered_flow_presence",
+        "stakeholder_browser_e2e_acceptance_covered": "bundle_navigation_acceptance",
+        "stakeholder_browser_interaction_depth_covered": "deterministic_click_path",
+        "stakeholder_browser_failure_resilience_covered": "negative_path_resilience",
+    }
+
+    readiness_gates = {
+        str(item.get("gate_id", "unknown")): item
+        for item in (release_readiness_index.get("gates") or [])
+        if isinstance(item, dict)
+    }
+    cluster_rows: list[dict[str, Any]] = []
+    failed_gate_ids: list[str] = []
+    for gate_id in operability_gate_ids:
+        gate = readiness_gates.get(gate_id, {})
+        passed = bool(gate.get("passed", False))
+        if not passed:
+            failed_gate_ids.append(gate_id)
+        cluster_rows.append(
+            {
+                "gate_id": gate_id,
+                "gate_group": gate_group_by_id[gate_id],
+                "cluster_role": cluster_role_by_id[gate_id],
+                "passed": passed,
+                "detail": str(gate.get("detail", "not_evaluated")),
+                "remediation_hint": _REMEDIATION_HINTS_BY_GATE_ID.get(gate_id, "Inspect operability gate and repair failing condition."),
+            }
+        )
+
+    return {
+        "cluster_status": "healthy" if not failed_gate_ids else "degraded",
+        "covered_gate_count": len(cluster_rows),
+        "failed_gate_count": len(failed_gate_ids),
+        "failed_gate_ids": failed_gate_ids,
+        "operator_next_action": (
+            _REMEDIATION_HINTS_BY_GATE_ID.get(failed_gate_ids[0], "Inspect operability gate and repair failing condition.")
+            if failed_gate_ids
+            else "No operability-cluster action required; stakeholder flows and browser gates are green."
+        ),
+        "cluster_rows": cluster_rows,
+    }
+
+
 def _build_operator_release_summary(*, release_gate: dict[str, Any], release_readiness_index: dict[str, Any]) -> dict[str, Any]:
     blocker_ids = [str(item) for item in (release_gate.get("blockers") or [])]
     readiness_gates = release_readiness_index.get("gates") or []
@@ -645,6 +705,9 @@ def build_repo_release_gate_assessment(
         release_gate=release_gate,
         release_readiness_index=release_readiness_index,
     )
+    operator_operability_cluster = _build_operator_operability_cluster(
+        release_readiness_index=release_readiness_index,
+    )
 
     return {
         "generated_at_utc": datetime.now(UTC).isoformat(),
@@ -660,6 +723,7 @@ def build_repo_release_gate_assessment(
         },
         "operator_release_summary": operator_release_summary,
         "operator_blocker_causality": operator_blocker_causality,
+        "operator_operability_cluster": operator_operability_cluster,
         "readiness": readiness_view_model,
         "traceability_integrity": traceability_integrity,
         "stakeholder_functional_closure": stakeholder_functional_closure,
@@ -1220,6 +1284,7 @@ def render_release_evidence_markdown(assessment: dict[str, Any]) -> str:
     capability_vs_readiness = assessment.get("capability_vs_readiness", {}) or {}
     operator_release_summary = assessment.get("operator_release_summary", {}) or {}
     operator_blocker_causality = assessment.get("operator_blocker_causality", {}) or {}
+    operator_operability_cluster = assessment.get("operator_operability_cluster", {}) or {}
     summary = ((assessment.get("traceability_integrity") or {}).get("summary") or {})
     e2e_summary = ((assessment.get("stakeholder_e2e_flow_coverage") or {}).get("summary") or {})
     blockers = [str(item) for item in gate.get("blockers", [])]
@@ -1235,6 +1300,10 @@ def render_release_evidence_markdown(assessment: dict[str, Any]) -> str:
     blocker_causality_rows = "\n".join(
         f"- {item.get('gate_id', 'unknown')} [{item.get('gate_role', 'n/a')}]: {item.get('causal_detail', 'n/a')}"
         for item in operator_blocker_causality.get("causal_chain_rows", [])
+    ) or "- none"
+    operability_cluster_rows = "\n".join(
+        f"- {item.get('gate_id', 'unknown')} [{item.get('gate_group', 'n/a')}/{item.get('cluster_role', 'n/a')}]: {'pass' if item.get('passed') else 'fail'}"
+        for item in operator_operability_cluster.get("cluster_rows", [])
     ) or "- none"
     return (
         "# SIASA Release Evidence Pack\n\n"
@@ -1264,6 +1333,13 @@ def render_release_evidence_markdown(assessment: dict[str, Any]) -> str:
         f"- derived_effects: {', '.join(operator_blocker_causality.get('derived_gate_ids', [])) or 'none'}\n"
         f"- operator_next_action: {operator_blocker_causality.get('operator_next_action', 'n/a')}\n"
         f"{blocker_causality_rows}\n\n"
+        "## Operability Cluster\n"
+        f"- cluster_status: {operator_operability_cluster.get('cluster_status', 'n/a')}\n"
+        f"- covered_gate_count: {operator_operability_cluster.get('covered_gate_count', 'n/a')}\n"
+        f"- failed_gate_count: {operator_operability_cluster.get('failed_gate_count', 'n/a')}\n"
+        f"- failed_gate_ids: {', '.join(operator_operability_cluster.get('failed_gate_ids', [])) or 'none'}\n"
+        f"- operator_next_action: {operator_operability_cluster.get('operator_next_action', 'n/a')}\n"
+        f"{operability_cluster_rows}\n\n"
         "## Release Readiness Gates\n"
         f"{index_lines}\n\n"
         "## Blockers\n"
