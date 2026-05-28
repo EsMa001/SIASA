@@ -134,19 +134,81 @@ Interpretation:
 
 ## 3b. Updated planning horizon
 
-For time planning, the remaining work should be treated in three bands rather than as one flat backlog:
+This roadmap should remain the central planning document for the next program steps.
+The capability matrix stays the operational companion for evidence/status tracking, but the roadmap should hold the main forward plan and its rationale.
 
-- Near-term closure band:
-  - reassess the next serial priority between broader MVP/P2 live-runtime breadth beyond the current core-focus subsets and deeper governed validation interpretation now that the obvious extended-focus validation-breadth tranches are closed
-- Mid-term breadth/depth band:
-  - expand from the current representative / `core-focus-initial` / `core-focus-expanded` / `core-focus-broader` / `core-focus-complete` governed subsets toward wider MVP coverage and/or deeper governed validation evidence
-- Later analyst-depth band:
-  - add operational annotation workflows and the first advanced source-intelligence features
+For time planning, the remaining work should now be organized as an explicit A -> B -> C sequence rather than as a flat backlog.
 
-Practical recommendation for serial pacing:
-- small cleanup package now closed: latest-bundle output hygiene
-- next: 2 to 4 medium runtime/breadth packages
-- then 2 larger analyst-workflow/content packages
+### Step A: Runtime- and source-breadth expansion
+
+Objective: increase real operational breadth so SIASA is not only governance-strong on the current representative/core subsets, but demonstrably useful across a broader live country/source scope.
+
+What this step should contain:
+- expand beyond the current representative and already-closed governed subsets toward the next meaningful MVP/P2 country clusters
+- strengthen real-source robustness where broader runs still depend on transient provider behavior or narrow country slices
+- keep every expansion package evidence-driven: tests, real live run, generated GUI, and updated planning evidence
+
+Why Step A comes first:
+- it increases actual product reach, not only internal governance clarity
+- it reduces the remaining risk that the system is strong mainly on known/curated subsets
+- it creates the broader artifact basis on which later analyst-depth work will have more practical value
+
+Expected outcome of Step A:
+- wider real multi-country runtime evidence
+- clearer statement of practical supported scope
+- stronger confidence that the current product scales beyond the already-proven subsets
+
+### Step B: Analyst interpretation and actionability depth
+
+Objective: turn the now governance-strong and broader runtime/artifact base into a more directly useful analyst tool with clearer interpretation, prioritization, and next-action guidance.
+
+What this step should contain:
+- strengthen analyst-facing synthesis from readiness, validation, replay, traceability, and operability signals
+- reduce the number of separate pages/signals an analyst must mentally combine
+- add compact decision-oriented views that explain what matters now, why it matters, and what should be reviewed next
+
+Why Step B follows Step A:
+- analyst-depth becomes more valuable when it summarizes a broader real runtime scope rather than only a narrow slice
+- it converts breadth and evidence into practical human decision support
+- it is a higher-value next move than continuing to add more low-level governance layers
+
+Expected outcome of Step B:
+- stronger analyst workflow usability
+- faster interpretation of system state and validation findings
+- clearer project-lead and analyst handoff between evidence and action
+
+### Step C: Demo/release productization
+
+Objective: turn the technically and analytically stronger baseline into a cleanly reviewable, reproducible, stakeholder-facing demo/release package.
+
+What this step should contain:
+- define and harden a curated demo/review path across the most important product flows
+- package the most important readiness/evidence/operability signals into a presentation- and decision-ready form
+- ensure the resulting release/demo bundle is reproducible, reviewable, and understandable for non-developer stakeholders
+
+Why Step C follows Step B:
+- productization has the highest value once real breadth and analyst usefulness are both stronger
+- it avoids polishing a package whose practical reach or interpretation depth is still too thin
+- it makes the later release/demonstration step much more credible
+
+Expected outcome of Step C:
+- decision-ready demo/release package
+- clearer stakeholder communication of current product value and limitations
+- stronger management/review readiness
+
+### Recommended serial execution rule
+
+Use the following priority order unless new external steering changes it:
+- first: Step A (Runtime- and source-breadth expansion)
+- second: Step B (Analyst interpretation and actionability depth)
+- third: Step C (Demo/release productization)
+
+Interpretation:
+- Step A increases real product reach
+- Step B increases practical analyst value
+- Step C increases presentation/release readiness
+
+This preserves one central planning logic while still allowing the capability matrix to track concrete evidence package by package.
 
 ---
 

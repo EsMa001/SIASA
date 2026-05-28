@@ -207,14 +207,17 @@ That is a useful sign of progress, but it also means prioritization must focus o
 ## 5. Immediate steering recommendation
 
 Current serial recommendation:
-- next work package: to be decided after AP-27 closure review
-- follow-up package: choose the next tranche based on highest stakeholder value among runtime/source breadth, analyst interpretation depth, or release/demo productization
+- central planning document: `docs/plans/siasa-stakeholder-fulfillment-roadmap.md`
+- next work package direction: Step A = Runtime- and source-breadth expansion
+- planned follow-on directions after Step A: Step B = Analyst interpretation and actionability depth, then Step C = Demo/release productization
 
 Why this is next:
 
+- the roadmap is already the strategic planning document and should remain the single central forward-planning source; the capability matrix should continue as the evidence/status companion
 - AP-25 is closed: stale-remediation now has an explicit operator work queue with deterministic closure checks.
 - AP-26 is closed: release evidence now separates primary root causes from derived release effects, so blocker triage is causally clearer.
 - AP-27 is closed: the stakeholder-flow and browser gates are now also visible as one coherent operability package instead of several isolated low-level gate names.
-- Therefore the immediate next step is no longer another readability hardening slice, but a deliberate decision on the next highest-value product/program direction.
+- therefore the most useful next move is no longer another readability hardening slice, but a deliberate A -> B -> C execution sequence documented in the central roadmap
+- Step A comes first because it increases real product reach; Step B comes second because it turns broader evidence into stronger analyst decision support; Step C comes third because demo/release productization has the most value once breadth and analyst usefulness are stronger
 
 That prioritization should continue to be governed by matrix evidence, not by raw code churn.
