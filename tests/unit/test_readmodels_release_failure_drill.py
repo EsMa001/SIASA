@@ -220,3 +220,15 @@ def test_release_failure_drill_report_detects_expected_failure_modes() -> None:
         item["reason"] in {"non_actionable_priority", "sla_breach"}
         for item in stale_closure_drill["stale_remediation_gap_injected"]["breaches"]
     )
+
+    stale_action_plan = report["operator_stale_remediation_action_plan"]
+    assert stale_action_plan["action_count"] == 2
+    assert stale_action_plan["next_action_id"] == "AP25-STALE-01"
+    assert stale_action_plan["status_counts"]["next_up"] == 1
+    assert stale_action_plan["status_counts"]["queued"] == 1
+    assert stale_action_plan["actions"][0]["breach_reason"] == "non_actionable_priority"
+    assert stale_action_plan["actions"][0]["action_category"] == "make_actionable"
+    assert stale_action_plan["actions"][0]["closure_check"] == "priority_score > 0"
+    assert stale_action_plan["actions"][1]["breach_reason"] == "sla_breach"
+    assert stale_action_plan["actions"][1]["action_category"] == "close_overdue_action"
+    assert stale_action_plan["actions"][1]["closure_check"] == "unresolved_age_hours <= 72.0"

@@ -1397,6 +1397,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
     operator_failure_drill_delta_ledger_view_model = None
     operator_remediation_execution_loop_view_model = None
     operator_stale_remediation_closure_drill_view_model = None
+    operator_stale_remediation_action_plan_view_model = None
     release_failure_drill_report_path = readmodels_dir / 'release_failure_drill_report.json'
     if release_failure_drill_report_path.exists():
         release_failure_drill_report = _load_json(release_failure_drill_report_path)
@@ -1419,6 +1420,9 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
             maybe_operator_stale_closure = release_failure_drill_report.get('operator_stale_remediation_closure_drill')
             if isinstance(maybe_operator_stale_closure, dict):
                 operator_stale_remediation_closure_drill_view_model = maybe_operator_stale_closure
+            maybe_operator_stale_action_plan = release_failure_drill_report.get('operator_stale_remediation_action_plan')
+            if isinstance(maybe_operator_stale_action_plan, dict):
+                operator_stale_remediation_action_plan_view_model = maybe_operator_stale_action_plan
 
     return {
         'world_map_read_model': world_map_read_model,
@@ -1444,6 +1448,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
         'operator_failure_drill_delta_ledger_view_model': operator_failure_drill_delta_ledger_view_model,
         'operator_remediation_execution_loop_view_model': operator_remediation_execution_loop_view_model,
         'operator_stale_remediation_closure_drill_view_model': operator_stale_remediation_closure_drill_view_model,
+        'operator_stale_remediation_action_plan_view_model': operator_stale_remediation_action_plan_view_model,
     }
 
 
@@ -2204,6 +2209,7 @@ def _render_readiness(
     operator_failure_drill_delta_ledger_view_model: dict[str, Any] | None = None,
     operator_remediation_execution_loop_view_model: dict[str, Any] | None = None,
     operator_stale_remediation_closure_drill_view_model: dict[str, Any] | None = None,
+    operator_stale_remediation_action_plan_view_model: dict[str, Any] | None = None,
     *,
     nav_prefix: str = '',
     available_pages: set[str] | None = None,
@@ -2407,6 +2413,22 @@ def _render_readiness(
         if isinstance(item, dict)
     ) or "<tr><td colspan='3'>No AP-20 stale-remediation breaches available.</td></tr>"
 
+    _operator_stale_action_plan = operator_stale_remediation_action_plan_view_model or {}
+    _operator_stale_action_count = int(_operator_stale_action_plan.get('action_count', 0)) if _operator_stale_action_plan else 0
+    _operator_stale_next_action_id = str(_operator_stale_action_plan.get('next_action_id', 'n/a')) if _operator_stale_action_plan else 'n/a'
+    _operator_stale_next_action = str(_operator_stale_action_plan.get('operator_next_action', 'n/a')) if _operator_stale_action_plan else 'n/a'
+    _operator_stale_action_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(item.get('action_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('breach_reason', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('action_category', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('execution_status', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('closure_check', 'n/a')))}</td>"
+        "</tr>"
+        for item in _operator_stale_action_plan.get('actions', [])
+        if isinstance(item, dict)
+    ) or "<tr><td colspan='5'>No AP-25 stale-remediation action plan available.</td></tr>"
+
     body = (
         # === KPI Header ===
         "<div class='kpi-grid'>"
@@ -2460,6 +2482,9 @@ def _render_readiness(
         f"<p>AP-24 open actions: <strong>{html.escape(str(_operator_execution_open_action_count))}</strong> / {html.escape(str(_operator_execution_action_count))} | Next action ID: {html.escape(_operator_execution_next_action_id)} | AP-24 next action: {html.escape(_operator_execution_next_action)}</p>"
         "<table><thead><tr><th>AP-24 Action ID</th><th>Gate</th><th>Priority Rank</th><th>Movement</th><th>Status</th><th>Closure Target</th></tr></thead>"
         f"<tbody>{_operator_execution_rows}</tbody></table>"
+        f"<p>AP-25 stale actions: <strong>{html.escape(str(_operator_stale_action_count))}</strong> | Next action ID: {html.escape(_operator_stale_next_action_id)} | AP-25 next action: {html.escape(_operator_stale_next_action)}</p>"
+        "<table><thead><tr><th>AP-25 Action ID</th><th>Breach Reason</th><th>Action Category</th><th>Status</th><th>Closure Check</th></tr></thead>"
+        f"<tbody>{_operator_stale_action_rows}</tbody></table>"
         f"<p>AP-20 requires closure: <strong>{'yes' if _operator_stale_closure_requires else 'no'}</strong> | closure guarded: <strong>{'yes' if _operator_stale_closure_guarded else 'no'}</strong> | SLA hours: {html.escape(str(_operator_stale_closure_sla))} | breach count: {html.escape(str(_operator_stale_closure_breach_count))}</p>"
         "<table><thead><tr><th>AP-20 Breach Reason</th><th>Priority Score</th><th>Unresolved Age Hours</th></tr></thead>"
         f"<tbody>{_operator_stale_closure_rows}</tbody></table></div>"
@@ -3662,6 +3687,7 @@ def build_local_mvp_site(
     operator_failure_drill_delta_ledger_view_model: dict[str, Any] | None = None,
     operator_remediation_execution_loop_view_model: dict[str, Any] | None = None,
     operator_stale_remediation_closure_drill_view_model: dict[str, Any] | None = None,
+    operator_stale_remediation_action_plan_view_model: dict[str, Any] | None = None,
     ui_role: str = 'analyst',
 ) -> SiteBuildResult:
     normalized_role = _normalize_ui_role(ui_role)
@@ -3847,6 +3873,7 @@ def build_local_mvp_site(
             operator_failure_drill_delta_ledger_view_model,
             operator_remediation_execution_loop_view_model,
             operator_stale_remediation_closure_drill_view_model,
+            operator_stale_remediation_action_plan_view_model,
             nav_prefix='',
             available_pages=available_pages,
         ),
@@ -3944,6 +3971,14 @@ def build_local_mvp_site(
             encoding='utf-8',
         )
         generated_files.append(operator_stale_remediation_closure_drill_json)
+
+    if operator_stale_remediation_action_plan_view_model is not None:
+        operator_stale_remediation_action_plan_json = output_dir / "operator_stale_remediation_action_plan.json"
+        operator_stale_remediation_action_plan_json.write_text(
+            json.dumps(operator_stale_remediation_action_plan_view_model, indent=2, sort_keys=True),
+            encoding='utf-8',
+        )
+        generated_files.append(operator_stale_remediation_action_plan_json)
 
     return SiteBuildResult(output_dir=output_dir, generated_files=generated_files)
 

@@ -162,6 +162,68 @@ def _build_stale_remediation_closure_guardrails(*, coverage_visibility: dict[str
     }
 
 
+def _build_operator_stale_remediation_action_plan(*, stale_closure_guardrails: dict[str, Any]) -> dict[str, Any]:
+    breaches = stale_closure_guardrails.get("breaches") if isinstance(stale_closure_guardrails.get("breaches"), list) else []
+    sla_hours = float(stale_closure_guardrails.get("actionability_sla_hours", 72.0))
+    action_templates = {
+        "non_actionable_priority": {
+            "action_category": "make_actionable",
+            "recommended_action": "Raise stale-remediation priority above zero so the item becomes actionable.",
+            "closure_check": "priority_score > 0",
+        },
+        "sla_breach": {
+            "action_category": "close_overdue_action",
+            "recommended_action": "Close or re-baseline the overdue stale-remediation action inside the SLA window.",
+            "closure_check": f"unresolved_age_hours <= {sla_hours}",
+        },
+    }
+
+    actions: list[dict[str, Any]] = []
+    for index, breach in enumerate(breaches, start=1):
+        if not isinstance(breach, dict):
+            continue
+        breach_reason = str(breach.get("reason", "unknown"))
+        item = breach.get("item") if isinstance(breach.get("item"), dict) else {}
+        template = action_templates.get(
+            breach_reason,
+            {
+                "action_category": "triage",
+                "recommended_action": "Inspect stale-remediation breach and restore a closure-safe action state.",
+                "closure_check": "breach_resolved == true",
+            },
+        )
+        actions.append(
+            {
+                "action_id": f"AP25-STALE-{index:02d}",
+                "breach_reason": breach_reason,
+                "action_category": template["action_category"],
+                "recommended_action": template["recommended_action"],
+                "execution_status": "next_up" if index == 1 else "queued",
+                "closure_check": template["closure_check"],
+                "priority_score": item.get("priority_score"),
+                "unresolved_age_hours": item.get("unresolved_age_hours"),
+            }
+        )
+
+    status_counts: dict[str, int] = {}
+    for action in actions:
+        status = str(action.get("execution_status", "unknown"))
+        status_counts[status] = status_counts.get(status, 0) + 1
+
+    next_action = actions[0] if actions else None
+    return {
+        "action_count": len(actions),
+        "next_action_id": (next_action or {}).get("action_id"),
+        "operator_next_action": (
+            str((next_action or {}).get("recommended_action"))
+            if next_action
+            else "No stale-remediation action plan required."
+        ),
+        "status_counts": status_counts,
+        "actions": actions,
+    }
+
+
 def _build_recurrence_aware_remediation_prioritization(
     *,
     trend_baseline: dict[str, Any],
@@ -1063,6 +1125,9 @@ def build_release_failure_drill_report(
         delta_ledger=operator_failure_drill_delta_ledger,
         gate_diagnostics_export=gate_diagnostics_export,
     )
+    operator_stale_remediation_action_plan = _build_operator_stale_remediation_action_plan(
+        stale_closure_guardrails=stale_remediation_closure_gap_guardrails,
+    )
     checks["recurrence_aware_prioritization_nonempty"] = (
         int(operator_recurrence_aware_remediation_prioritization.get("priority_count", 0)) > 0
     )
@@ -1070,6 +1135,7 @@ def build_release_failure_drill_report(
         operator_failure_drill_delta_ledger.get("delta_rows", [])
     ) > 0
     checks["execution_loop_nonempty"] = int(operator_remediation_execution_loop.get("action_count", 0)) > 0
+    checks["stale_action_plan_nonempty"] = int(operator_stale_remediation_action_plan.get("action_count", 0)) > 0
 
     return {
         "drill_verdict": "pass" if all(checks.values()) else "fail",
@@ -1082,6 +1148,7 @@ def build_release_failure_drill_report(
         "operator_recurrence_aware_remediation_prioritization": operator_recurrence_aware_remediation_prioritization,
         "operator_failure_drill_delta_ledger": operator_failure_drill_delta_ledger,
         "operator_remediation_execution_loop": operator_remediation_execution_loop,
+        "operator_stale_remediation_action_plan": operator_stale_remediation_action_plan,
         "operator_stale_remediation_closure_drill": {
             "baseline": baseline_stale_guardrails,
             "stale_remediation_gap_injected": stale_remediation_closure_gap_guardrails,

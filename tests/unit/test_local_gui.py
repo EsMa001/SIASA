@@ -1962,6 +1962,28 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
                             {"reason": "sla_breach", "item": {"priority_score": 10, "unresolved_age_hours": 120.0}},
                         ],
                     }
+                },
+                "operator_stale_remediation_action_plan": {
+                    "action_count": 2,
+                    "next_action_id": "AP25-STALE-01",
+                    "operator_next_action": "Raise stale-remediation priority above zero so the item becomes actionable.",
+                    "status_counts": {"next_up": 1, "queued": 1},
+                    "actions": [
+                        {
+                            "action_id": "AP25-STALE-01",
+                            "breach_reason": "non_actionable_priority",
+                            "action_category": "make_actionable",
+                            "execution_status": "next_up",
+                            "closure_check": "priority_score > 0",
+                        },
+                        {
+                            "action_id": "AP25-STALE-02",
+                            "breach_reason": "sla_breach",
+                            "action_category": "close_overdue_action",
+                            "execution_status": "queued",
+                            "closure_check": "unresolved_age_hours <= 72.0",
+                        }
+                    ],
                 }
             }
         )
@@ -1985,6 +2007,7 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert payload["operator_failure_drill_delta_ledger_view_model"]["snapshot_count"] == 1
     assert payload["operator_remediation_execution_loop_view_model"]["action_count"] == 1
     assert payload["operator_stale_remediation_closure_drill_view_model"]["stale_remediation_gap_injected"]["breach_count"] == 2
+    assert payload["operator_stale_remediation_action_plan_view_model"]["action_count"] == 2
 
     pages = build_local_mvp_site(output_dir=tmp_path / "site-with-readiness", **payload)
     readiness_html = (pages.output_dir / "readiness.html").read_text()
@@ -2007,6 +2030,10 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert "AP-22 priority rows: <strong>1</strong>" in readiness_html
     assert "AP-23 delta snapshot count: <strong>1</strong>" in readiness_html
     assert "AP-24 open actions: <strong>1</strong>" in readiness_html
+    assert "AP-25 stale actions: <strong>2</strong>" in readiness_html
+    assert "AP25-STALE-01" in readiness_html
+    assert "make_actionable" in readiness_html
+    assert "priority_score &gt; 0" in readiness_html
     assert "AP24-ACT-01-RELEASE-GATE-GO" in readiness_html
     assert "next_up" in readiness_html
     assert "No prior AP-23 snapshot available" in readiness_html
