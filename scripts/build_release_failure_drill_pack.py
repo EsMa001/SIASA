@@ -40,6 +40,7 @@ def main() -> int:
                 "gate_diagnostics_export": report.get("gate_diagnostics_export", {}),
                 "operator_failure_drill_trend_baseline": report.get("operator_failure_drill_trend_baseline", {}),
                 "operator_failure_drill_delta_ledger": report.get("operator_failure_drill_delta_ledger", {}),
+                "operator_remediation_execution_loop": report.get("operator_remediation_execution_loop", {}),
             },
             indent=2,
             sort_keys=True,

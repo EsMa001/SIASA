@@ -1395,6 +1395,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
     operator_failure_drill_trend_baseline_view_model = None
     operator_recurrence_aware_remediation_prioritization_view_model = None
     operator_failure_drill_delta_ledger_view_model = None
+    operator_remediation_execution_loop_view_model = None
     operator_stale_remediation_closure_drill_view_model = None
     release_failure_drill_report_path = readmodels_dir / 'release_failure_drill_report.json'
     if release_failure_drill_report_path.exists():
@@ -1412,6 +1413,9 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
             maybe_operator_delta_ledger = release_failure_drill_report.get('operator_failure_drill_delta_ledger')
             if isinstance(maybe_operator_delta_ledger, dict):
                 operator_failure_drill_delta_ledger_view_model = maybe_operator_delta_ledger
+            maybe_operator_execution_loop = release_failure_drill_report.get('operator_remediation_execution_loop')
+            if isinstance(maybe_operator_execution_loop, dict):
+                operator_remediation_execution_loop_view_model = maybe_operator_execution_loop
             maybe_operator_stale_closure = release_failure_drill_report.get('operator_stale_remediation_closure_drill')
             if isinstance(maybe_operator_stale_closure, dict):
                 operator_stale_remediation_closure_drill_view_model = maybe_operator_stale_closure
@@ -1438,6 +1442,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
         'operator_failure_drill_trend_baseline_view_model': operator_failure_drill_trend_baseline_view_model,
         'operator_recurrence_aware_remediation_prioritization_view_model': operator_recurrence_aware_remediation_prioritization_view_model,
         'operator_failure_drill_delta_ledger_view_model': operator_failure_drill_delta_ledger_view_model,
+        'operator_remediation_execution_loop_view_model': operator_remediation_execution_loop_view_model,
         'operator_stale_remediation_closure_drill_view_model': operator_stale_remediation_closure_drill_view_model,
     }
 
@@ -2197,6 +2202,7 @@ def _render_readiness(
     operator_failure_drill_trend_baseline_view_model: dict[str, Any] | None = None,
     operator_recurrence_aware_remediation_prioritization_view_model: dict[str, Any] | None = None,
     operator_failure_drill_delta_ledger_view_model: dict[str, Any] | None = None,
+    operator_remediation_execution_loop_view_model: dict[str, Any] | None = None,
     operator_stale_remediation_closure_drill_view_model: dict[str, Any] | None = None,
     *,
     nav_prefix: str = '',
@@ -2367,6 +2373,24 @@ def _render_readiness(
         if isinstance(item, dict)
     ) or "<tr><td colspan='5'>No AP-23 delta rows available.</td></tr>"
 
+    _operator_execution_loop = operator_remediation_execution_loop_view_model or {}
+    _operator_execution_action_count = int(_operator_execution_loop.get('action_count', 0)) if _operator_execution_loop else 0
+    _operator_execution_open_action_count = int(_operator_execution_loop.get('open_action_count', 0)) if _operator_execution_loop else 0
+    _operator_execution_next_action_id = str(_operator_execution_loop.get('next_action_id', 'n/a')) if _operator_execution_loop else 'n/a'
+    _operator_execution_next_action = str(_operator_execution_loop.get('operator_next_action', 'n/a')) if _operator_execution_loop else 'n/a'
+    _operator_execution_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(item.get('action_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('gate_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('priority_rank', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('current_movement_status', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('execution_status', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('closure_target', 'n/a')))}</td>"
+        "</tr>"
+        for item in _operator_execution_loop.get('actions', [])
+        if isinstance(item, dict)
+    ) or "<tr><td colspan='6'>No AP-24 execution-loop actions available.</td></tr>"
+
     _operator_stale_closure = operator_stale_remediation_closure_drill_view_model or {}
     _operator_stale_closure_injected = _operator_stale_closure.get('stale_remediation_gap_injected') if isinstance(_operator_stale_closure.get('stale_remediation_gap_injected'), dict) else {}
     _operator_stale_closure_requires = bool(_operator_stale_closure_injected.get('requires_closure', False)) if _operator_stale_closure_injected else False
@@ -2417,7 +2441,7 @@ def _render_readiness(
         f"<p>Covered Flows: <strong>{html.escape(str(_e2e_ui_smoke_covered))}/{html.escape(str(_e2e_ui_smoke_flow_count))}</strong> | Flow Gaps: {html.escape(str(_e2e_ui_smoke_gaps))}</p>"
         "<table><thead><tr><th>UI Smoke Stop Criterion</th><th>Status</th></tr></thead>"
         f"<tbody>{_e2e_ui_smoke_stop_rows}</tbody></table></div>"
-        "<div class='panel'><div class='panel-header'>Operator Release Steering (AP-16/AP-17/AP-19/AP-20/AP-22/AP-23)</div>"
+        "<div class='panel'><div class='panel-header'>Operator Release Steering (AP-16/AP-17/AP-19/AP-20/AP-22/AP-23/AP-24)</div>"
         f"<p>AP-16 failed gates: <strong>{html.escape(str(_operator_failed_gate_count))}</strong> | AP-16 next action: {html.escape(_operator_next_action)}</p>"
         "<table><thead><tr><th>AP-16 Gate</th><th>Detail</th><th>Remediation</th></tr></thead>"
         f"<tbody>{_operator_failed_rows}</tbody></table>"
@@ -2433,6 +2457,9 @@ def _render_readiness(
         f"<p>AP-23 delta snapshot count: <strong>{html.escape(str(_operator_delta_snapshot_count))}</strong> | Top regression gate: {html.escape(_operator_delta_top_regression_gate)} | AP-23 impact: {html.escape(_operator_delta_narrative)}</p>"
         "<table><thead><tr><th>AP-23 Gate</th><th>Movement</th><th>Previous Count</th><th>Current Count</th><th>Delta</th></tr></thead>"
         f"<tbody>{_operator_delta_rows}</tbody></table>"
+        f"<p>AP-24 open actions: <strong>{html.escape(str(_operator_execution_open_action_count))}</strong> / {html.escape(str(_operator_execution_action_count))} | Next action ID: {html.escape(_operator_execution_next_action_id)} | AP-24 next action: {html.escape(_operator_execution_next_action)}</p>"
+        "<table><thead><tr><th>AP-24 Action ID</th><th>Gate</th><th>Priority Rank</th><th>Movement</th><th>Status</th><th>Closure Target</th></tr></thead>"
+        f"<tbody>{_operator_execution_rows}</tbody></table>"
         f"<p>AP-20 requires closure: <strong>{'yes' if _operator_stale_closure_requires else 'no'}</strong> | closure guarded: <strong>{'yes' if _operator_stale_closure_guarded else 'no'}</strong> | SLA hours: {html.escape(str(_operator_stale_closure_sla))} | breach count: {html.escape(str(_operator_stale_closure_breach_count))}</p>"
         "<table><thead><tr><th>AP-20 Breach Reason</th><th>Priority Score</th><th>Unresolved Age Hours</th></tr></thead>"
         f"<tbody>{_operator_stale_closure_rows}</tbody></table></div>"
@@ -3633,6 +3660,7 @@ def build_local_mvp_site(
     operator_failure_drill_trend_baseline_view_model: dict[str, Any] | None = None,
     operator_recurrence_aware_remediation_prioritization_view_model: dict[str, Any] | None = None,
     operator_failure_drill_delta_ledger_view_model: dict[str, Any] | None = None,
+    operator_remediation_execution_loop_view_model: dict[str, Any] | None = None,
     operator_stale_remediation_closure_drill_view_model: dict[str, Any] | None = None,
     ui_role: str = 'analyst',
 ) -> SiteBuildResult:
@@ -3817,6 +3845,7 @@ def build_local_mvp_site(
             operator_failure_drill_trend_baseline_view_model,
             operator_recurrence_aware_remediation_prioritization_view_model,
             operator_failure_drill_delta_ledger_view_model,
+            operator_remediation_execution_loop_view_model,
             operator_stale_remediation_closure_drill_view_model,
             nav_prefix='',
             available_pages=available_pages,
@@ -3899,6 +3928,14 @@ def build_local_mvp_site(
             encoding='utf-8',
         )
         generated_files.append(operator_failure_drill_delta_ledger_json)
+
+    if operator_remediation_execution_loop_view_model is not None:
+        operator_remediation_execution_loop_json = output_dir / "operator_remediation_execution_loop.json"
+        operator_remediation_execution_loop_json.write_text(
+            json.dumps(operator_remediation_execution_loop_view_model, indent=2, sort_keys=True),
+            encoding='utf-8',
+        )
+        generated_files.append(operator_remediation_execution_loop_json)
 
     if operator_stale_remediation_closure_drill_view_model is not None:
         operator_stale_remediation_closure_drill_json = output_dir / "operator_stale_remediation_closure_drill.json"

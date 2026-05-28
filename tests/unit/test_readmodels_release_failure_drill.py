@@ -201,6 +201,17 @@ def test_release_failure_drill_report_detects_expected_failure_modes() -> None:
     assert "No prior AP-23 snapshot available" in delta_ledger["operator_impact_narrative"]
     assert all(row["movement_status"] == "steady" for row in delta_ledger["delta_rows"])
 
+    execution_loop = report["operator_remediation_execution_loop"]
+    assert execution_loop["model"] == "priority_to_action_trace_closure"
+    assert execution_loop["action_count"] == recurrence_prioritization["priority_count"]
+    assert execution_loop["open_action_count"] == execution_loop["action_count"]
+    assert execution_loop["next_action_id"].startswith("AP24-ACT-01-")
+    first_action = execution_loop["actions"][0]
+    assert first_action["priority_rank"] == 1
+    assert first_action["gate_id"] == recurrence_prioritization["top_priority_gate_id"]
+    assert first_action["execution_status"] == "next_up"
+    assert "operator_failure_drill_delta_ledger" in first_action["closure_evidence_sources"]
+
     stale_closure_drill = report["operator_stale_remediation_closure_drill"]
     assert stale_closure_drill["baseline"]["closure_guarded"] is True
     assert stale_closure_drill["stale_remediation_gap_injected"]["closure_guarded"] is False

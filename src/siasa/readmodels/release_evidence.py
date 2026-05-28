@@ -362,6 +362,85 @@ def _build_failure_drill_delta_ledger(
     }
 
 
+def _build_operator_remediation_execution_loop(
+    *,
+    prioritization: dict[str, Any],
+    delta_ledger: dict[str, Any],
+    gate_diagnostics_export: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    priorities = prioritization.get("priorities") if isinstance(prioritization.get("priorities"), list) else []
+    delta_rows = delta_ledger.get("delta_rows") if isinstance(delta_ledger.get("delta_rows"), list) else []
+    delta_by_gate = {
+        str(item.get("gate_id", "unknown")): item
+        for item in delta_rows
+        if isinstance(item, dict)
+    }
+
+    closure_target_by_movement = {
+        "new_issue": "Reduce the new issue in the next AP-23 delta snapshot or resolve the gate entirely.",
+        "regressed": "Reverse the regression in the next AP-23 delta snapshot by lowering scenario count.",
+        "steady": "Clear the gate from the next AP-23 delta snapshot or reduce scenario count.",
+        "improved": "Preserve the improvement and continue toward full gate clearance in the next AP-23 delta snapshot.",
+        "resolved": "Keep the gate absent in the next AP-23 delta snapshot.",
+    }
+
+    actions: list[dict[str, Any]] = []
+    for item in priorities:
+        if not isinstance(item, dict):
+            continue
+        rank = int(item.get("rank", len(actions) + 1))
+        gate_id = str(item.get("gate_id", "unknown"))
+        delta_row = delta_by_gate.get(gate_id, {})
+        movement_status = str(delta_row.get("movement_status", "steady"))
+        action_token = "".join(char if char.isalnum() else "-" for char in gate_id.upper()).strip("-") or "UNKNOWN"
+        failed_in_scenarios = []
+        gate_slice = gate_diagnostics_export.get(gate_id)
+        if isinstance(gate_slice, dict):
+            maybe_failed_in_scenarios = gate_slice.get("failed_in_scenarios")
+            if isinstance(maybe_failed_in_scenarios, list):
+                failed_in_scenarios = [row for row in maybe_failed_in_scenarios if isinstance(row, dict)]
+        actions.append(
+            {
+                "action_id": f"AP24-ACT-{rank:02d}-{action_token}",
+                "priority_rank": rank,
+                "gate_id": gate_id,
+                "gate_label": str(item.get("gate_label", gate_id)),
+                "priority_score": float(item.get("priority_score", 0.0)) if isinstance(item.get("priority_score"), (int, float)) else 0.0,
+                "recommended_action": str(item.get("recommended_action", "Inspect scenario evidence and close failing condition.")),
+                "current_movement_status": movement_status,
+                "current_scenario_count": int(delta_row.get("current_scenario_count", item.get("scenario_count", 0))) if delta_row or item else 0,
+                "execution_status": "next_up" if rank == 1 else "queued",
+                "closure_target": closure_target_by_movement.get(movement_status, "Close the failing gate in the next AP-23 delta snapshot."),
+                "closure_evidence_sources": [
+                    "operator_failure_drill_delta_ledger",
+                    "gate_diagnostics_export",
+                ],
+                "failed_scenario_count": len(failed_in_scenarios),
+                "scenario_ids": sorted({str(row.get("scenario_id", "")) for row in failed_in_scenarios if str(row.get("scenario_id", ""))}),
+            }
+        )
+
+    next_action = actions[0] if actions else None
+    status_counts: dict[str, int] = {}
+    for action in actions:
+        status = str(action.get("execution_status", "unknown"))
+        status_counts[status] = status_counts.get(status, 0) + 1
+
+    return {
+        "model": "priority_to_action_trace_closure",
+        "action_count": len(actions),
+        "open_action_count": len(actions),
+        "next_action_id": (next_action or {}).get("action_id"),
+        "operator_next_action": (
+            str((next_action or {}).get("recommended_action"))
+            if next_action
+            else "No AP-24 execution-loop actions required."
+        ),
+        "status_counts": status_counts,
+        "actions": actions,
+    }
+
+
 def build_repo_release_gate_assessment(
     *,
     repo_root: Path,
@@ -979,12 +1058,18 @@ def build_release_failure_drill_report(
         current_trend_baseline=operator_failure_drill_trend_baseline,
         previous_report=previous_report_override,
     )
+    operator_remediation_execution_loop = _build_operator_remediation_execution_loop(
+        prioritization=operator_recurrence_aware_remediation_prioritization,
+        delta_ledger=operator_failure_drill_delta_ledger,
+        gate_diagnostics_export=gate_diagnostics_export,
+    )
     checks["recurrence_aware_prioritization_nonempty"] = (
         int(operator_recurrence_aware_remediation_prioritization.get("priority_count", 0)) > 0
     )
     checks["delta_ledger_nonempty"] = int(operator_failure_drill_delta_ledger.get("snapshot_count", 0)) >= 1 and len(
         operator_failure_drill_delta_ledger.get("delta_rows", [])
     ) > 0
+    checks["execution_loop_nonempty"] = int(operator_remediation_execution_loop.get("action_count", 0)) > 0
 
     return {
         "drill_verdict": "pass" if all(checks.values()) else "fail",
@@ -996,6 +1081,7 @@ def build_release_failure_drill_report(
         "operator_failure_drill_trend_baseline": operator_failure_drill_trend_baseline,
         "operator_recurrence_aware_remediation_prioritization": operator_recurrence_aware_remediation_prioritization,
         "operator_failure_drill_delta_ledger": operator_failure_drill_delta_ledger,
+        "operator_remediation_execution_loop": operator_remediation_execution_loop,
         "operator_stale_remediation_closure_drill": {
             "baseline": baseline_stale_guardrails,
             "stale_remediation_gap_injected": stale_remediation_closure_gap_guardrails,
