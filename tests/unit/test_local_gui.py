@@ -2318,6 +2318,10 @@ def test_build_local_mvp_site_viewer_role_hides_annotation_and_ops_pages(tmp_pat
     country_html = (pages.output_dir / "countries" / "UKR.html").read_text()
     assert "Open Annotation Workflow for this Country" not in country_html
 
+    validation_html = (pages.output_dir / "validation.html").read_text()
+    assert "Create Annotation Draft" not in validation_html
+    assert "annotations.html?scope=country&annotation_type=review_note" not in validation_html
+
 
 def test_build_local_mvp_site_rejects_unknown_role(tmp_path: Path) -> None:
     payload = local_app._demo_payload()

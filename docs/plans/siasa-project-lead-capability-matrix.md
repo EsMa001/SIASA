@@ -208,16 +208,17 @@ That is a useful sign of progress, but it also means prioritization must focus o
 
 Current serial recommendation:
 - central planning document: `docs/plans/siasa-stakeholder-fulfillment-roadmap.md`
-- next work package direction: Step A = Runtime- and source-breadth expansion
-- planned follow-on directions after Step A: Step B = Analyst interpretation and actionability depth, then Step C = Demo/release productization
+- Step A first package is now closed: operational `latest` breadth uplift to governed `extended-focus-complete` (11 countries) with live evidence `RUN-LIVE-EXT-FOCUS-LATEST-005`
+- next work package direction: Step B = Analyst interpretation and actionability depth
+- planned follow-on direction after Step B: Step C = Demo/release productization
 
 Why this is next:
 
-- the roadmap is already the strategic planning document and should remain the single central forward-planning source; the capability matrix should continue as the evidence/status companion
 - AP-25 is closed: stale-remediation now has an explicit operator work queue with deterministic closure checks.
 - AP-26 is closed: release evidence now separates primary root causes from derived release effects, so blocker triage is causally clearer.
 - AP-27 is closed: the stakeholder-flow and browser gates are now also visible as one coherent operability package instead of several isolated low-level gate names.
-- therefore the most useful next move is no longer another readability hardening slice, but a deliberate A -> B -> C execution sequence documented in the central roadmap
-- Step A comes first because it increases real product reach; Step B comes second because it turns broader evidence into stronger analyst decision support; Step C comes third because demo/release productization has the most value once breadth and analyst usefulness are stronger
+- AP-A1 is now closed: the operational `latest` standard path has been lifted from the earlier narrow baseline to the governed `extended-focus-complete` 11-country set and validated by automated tests, a successful real live run, and the generated `latest` GUI artifact.
+- therefore the next useful serial move is no longer more breadth hardening for this path, but Step B so the broader runtime evidence is turned into stronger analyst decision support.
+- Step C should still follow Step B, because demo/release productization has the most value once the broader runtime evidence is already operational and better interpreted.
 
 That prioritization should continue to be governed by matrix evidence, not by raw code churn.

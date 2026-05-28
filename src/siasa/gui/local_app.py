@@ -2718,6 +2718,7 @@ def _render_comparison(country_profile_read_models: dict[str, dict[str, Any]], *
 
 def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
     time_range = validation_view_model.get('time_range', {})
+    can_create_annotation_drafts = available_pages is not None and 'annotations.html' in available_pages
     reprocessing = validation_view_model.get('reprocessing_comparison', {})
     expected_domains = [str(item) for item in validation_view_model.get('expected_domains', [])]
     observed_domains = [str(item) for item in validation_view_model.get('observed_domains', [])]
@@ -2866,8 +2867,12 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         f"<td>{html.escape(str(item.get('replay_evidence_tier', 'n/a')))}</td>"
         f"<td>{html.escape('missing=' + (', '.join(str(domain) for domain in item.get('missing_expected_domains', [])) or 'none') + '; unexpected=' + (', '.join(str(domain) for domain in item.get('unexpected_observed_domains', [])) or 'none'))}</td>"
         f"<td>{html.escape(str(item.get('suggested_next_action', 'n/a')))}</td>"
-        f"<td><a class='replay-attention-create-annotation' href='annotations.html?scope=country&annotation_type=review_note&country_id={quote_plus(str(item.get('country_id', '')))}&case_id={quote_plus(str(item.get('case_id', '')))}&attention_reason={quote_plus(str(item.get('attention_reason', '')))}&owner_hint={quote_plus(str(item.get('owner_hint', '')))}&suggested_next_action={quote_plus(str(item.get('suggested_next_action', '')))}&attention_level={quote_plus(str(item.get('attention_level', '')))}&replay_evidence_tier={quote_plus(str(item.get('replay_evidence_tier', '')))}&review_verdict={quote_plus(str(item.get('review_verdict', '')))}&replay_evidence_score={quote_plus(str(item.get('replay_evidence_score', '')))}&domain_match_ratio={quote_plus(str(item.get('domain_match_ratio', '')))}&missing_expected_domains={quote_plus(','.join(str(domain) for domain in item.get('missing_expected_domains', [])))}&unexpected_observed_domains={quote_plus(','.join(str(domain) for domain in item.get('unexpected_observed_domains', [])))}&linked_item={quote_plus(str(item.get('case_id', '')))}'>Create Annotation Draft</a></td>"
-        "</tr>"
+        + (
+            f"<td><a class='replay-attention-create-annotation' href='annotations.html?scope=country&annotation_type=review_note&country_id={quote_plus(str(item.get('country_id', '')))}&case_id={quote_plus(str(item.get('case_id', '')))}&attention_reason={quote_plus(str(item.get('attention_reason', '')))}&owner_hint={quote_plus(str(item.get('owner_hint', '')))}&suggested_next_action={quote_plus(str(item.get('suggested_next_action', '')))}&attention_level={quote_plus(str(item.get('attention_level', '')))}&replay_evidence_tier={quote_plus(str(item.get('replay_evidence_tier', '')))}&review_verdict={quote_plus(str(item.get('review_verdict', '')))}&replay_evidence_score={quote_plus(str(item.get('replay_evidence_score', '')))}&domain_match_ratio={quote_plus(str(item.get('domain_match_ratio', '')))}&missing_expected_domains={quote_plus(','.join(str(domain) for domain in item.get('missing_expected_domains', [])))}&unexpected_observed_domains={quote_plus(','.join(str(domain) for domain in item.get('unexpected_observed_domains', [])))}&linked_item={quote_plus(str(item.get('case_id', '')))}'>Create Annotation Draft</a></td>"
+            if can_create_annotation_drafts
+            else "<td>Annotation workflow unavailable for this role</td>"
+        )
+        + "</tr>"
         for item in historical_replay_summary.get('attention_cases', [])
         if isinstance(item, dict)
     ) or "<tr><td colspan='10'>No replay attention cases recorded.</td></tr>"

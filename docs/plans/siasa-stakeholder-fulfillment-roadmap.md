@@ -158,6 +158,13 @@ Expected outcome of Step A:
 - clearer statement of practical supported scope
 - stronger confidence that the current product scales beyond the already-proven subsets
 
+Current Step-A closure status:
+- AP-A1 completed: operational `latest` is now built from the broader governed `extended-focus-complete` 11-country set
+- live closure evidence: `RUN-LIVE-EXT-FOCUS-LATEST-005`
+- artifact evidence: `build/run_artifacts/latest/readmodels/readiness.json` reports `release_verdict=ready`, `known_gaps=[]`
+- GUI evidence: `build/local_gui/latest/index.html`
+- implementation hardening added broader-run GDELT DOC recovery budget (`max_retry_delay_seconds=180`, full-batch retry cooldown `120s`) plus broader-run request timeout (`90s`) so the 11-country `latest` path is operationally stable
+
 ### Step B: Analyst interpretation and actionability depth
 
 Objective: turn the now governance-strong and broader runtime/artifact base into a more directly useful analyst tool with clearer interpretation, prioritization, and next-action guidance.

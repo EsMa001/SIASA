@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import io
 from datetime import UTC, datetime
 
 from siasa.adapters.base import FetchResult
@@ -294,3 +295,34 @@ def test_gdelt_doc_adapter_caps_retry_after_backoff_to_max_retry_delay_seconds()
 
     assert result.is_success is True
     assert sleep_calls == [12.0]
+
+
+def test_gdelt_doc_adapter_uses_configured_request_timeout_for_default_fetcher(monkeypatch) -> None:
+    captured: dict[str, float | str] = {}
+
+    class FakeResponse(io.BytesIO):
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    def fake_urlopen(url: str, timeout: float):
+        captured["url"] = url
+        captured["timeout"] = timeout
+        return FakeResponse(b'{"articles": []}')
+
+    monkeypatch.setattr("siasa.adapters.gdelt_doc.urlopen", fake_urlopen)
+    adapter = GDELTDocAdapter(
+        country_queries={"UKR": "ukraine"},
+        request_timeout_seconds=90.0,
+        retry_sleep=lambda _seconds: None,
+    )
+
+    result = adapter.fetch()
+
+    assert result.is_success is True
+    assert captured == {
+        "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=ukraine&mode=ArtList&maxrecords=50&format=json",
+        "timeout": 90.0,
+    }

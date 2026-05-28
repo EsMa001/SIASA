@@ -298,10 +298,8 @@ def _gdelt_doc_max_records_for_country_count(country_count: int) -> int:
 def _gdelt_doc_inter_request_delay_seconds_for_country_count(country_count: int) -> float:
     if country_count <= 1:
         return 0.0
-    if country_count >= 24:
-        return 3.0
     if country_count >= 11:
-        return 2.0
+        return 3.0
     return 1.0
 
 
@@ -313,13 +311,29 @@ def _gdelt_doc_max_full_fetch_retries_for_country_count(country_count: int) -> i
     return 0
 
 
+
+def _gdelt_doc_max_retry_delay_seconds_for_country_count(country_count: int) -> float:
+    if country_count >= 11:
+        return 180.0
+    return 60.0
+
+
+
+def _gdelt_doc_request_timeout_seconds_for_country_count(country_count: int) -> float:
+    if country_count >= 11:
+        return 90.0
+    return 30.0
+
+
+
 def _gdelt_doc_full_fetch_retry_cooldown_seconds_for_country_count(country_count: int) -> float:
     if country_count >= 24:
         return 0.0
+    if country_count >= 11:
+        return 120.0
     if country_count > 1:
         return 40.0
     return 0.0
-
 
 
 def _resolve_requested_country_ids(
@@ -644,6 +658,8 @@ def build_governed_live_orchestrator(
                 country_queries=country_queries,
                 max_records=_gdelt_doc_max_records_for_country_count(len(resolved_country_ids)),
                 inter_request_delay_seconds=_gdelt_doc_inter_request_delay_seconds_for_country_count(len(resolved_country_ids)),
+                max_retry_delay_seconds=_gdelt_doc_max_retry_delay_seconds_for_country_count(len(resolved_country_ids)),
+                request_timeout_seconds=_gdelt_doc_request_timeout_seconds_for_country_count(len(resolved_country_ids)),
                 max_full_fetch_retries=_gdelt_doc_max_full_fetch_retries_for_country_count(len(resolved_country_ids)),
                 full_fetch_retry_cooldown_seconds=_gdelt_doc_full_fetch_retry_cooldown_seconds_for_country_count(len(resolved_country_ids)),
             ),

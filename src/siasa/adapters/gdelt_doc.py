@@ -17,8 +17,8 @@ NowProvider = Callable[[], datetime]
 SleepFn = Callable[[float], None]
 
 
-def _default_fetch_json(url: str) -> object:
-    with urlopen(url, timeout=30) as response:
+def _default_fetch_json(url: str, timeout_seconds: float) -> object:
+    with urlopen(url, timeout=timeout_seconds) as response:
         return json.load(response)
 
 
@@ -65,10 +65,11 @@ class GDELTDocAdapter(SourceAdapter):
     max_retries: int = 3
     retry_backoff_seconds: float = 1.0
     max_retry_delay_seconds: float = 60.0
+    request_timeout_seconds: float = 30.0
     inter_request_delay_seconds: float = 0.0
     max_full_fetch_retries: int = 0
     full_fetch_retry_cooldown_seconds: float = 0.0
-    fetch_json: FetchJson = _default_fetch_json
+    fetch_json: FetchJson | None = None
     now_provider: NowProvider = _utc_now
     retry_sleep: SleepFn = sleep
 
@@ -106,11 +107,16 @@ class GDELTDocAdapter(SourceAdapter):
             f"&maxrecords={self.max_records}&format={self.output_format}"
         )
 
+    def _fetch_json_with_runtime_timeout(self, url: str) -> object:
+        if self.fetch_json is not None:
+            return self.fetch_json(url)
+        return _default_fetch_json(url, self.request_timeout_seconds)
+
     def _fetch_with_retry(self, url: str) -> object:
         last_error: Exception | None = None
         for attempt in range(self.max_retries + 1):
             try:
-                return self.fetch_json(url)
+                return self._fetch_json_with_runtime_timeout(url)
             except Exception as exc:  # noqa: BLE001 - adapter should return failed FetchResult, not crash caller
                 last_error = exc
                 if attempt == self.max_retries:
