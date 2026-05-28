@@ -208,8 +208,9 @@ That is a useful sign of progress, but it also means prioritization must focus o
 
 Current serial recommendation:
 - central planning document: `docs/plans/siasa-stakeholder-fulfillment-roadmap.md`
-- Step A first package is now closed: operational `latest` breadth uplift to governed `extended-focus-complete` (11 countries) with live evidence `RUN-LIVE-EXT-FOCUS-LATEST-005`
-- next work package direction: Step B = Analyst interpretation and actionability depth
+- Step A first package is closed: operational `latest` breadth uplift to governed `extended-focus-complete` (11 countries) with live evidence `RUN-LIVE-EXT-FOCUS-LATEST-005`
+- Step B first package is now closed: analyst briefing "What matters now?" is available in `build/local_gui/latest/readiness.html` and exported as `build/local_gui/latest/analyst_briefing.json`
+- next work package direction: continue Step B = Analyst interpretation and actionability depth
 - planned follow-on direction after Step B: Step C = Demo/release productization
 
 Why this is next:
@@ -218,7 +219,8 @@ Why this is next:
 - AP-26 is closed: release evidence now separates primary root causes from derived release effects, so blocker triage is causally clearer.
 - AP-27 is closed: the stakeholder-flow and browser gates are now also visible as one coherent operability package instead of several isolated low-level gate names.
 - AP-A1 is now closed: the operational `latest` standard path has been lifted from the earlier narrow baseline to the governed `extended-focus-complete` 11-country set and validated by automated tests, a successful real live run, and the generated `latest` GUI artifact.
-- therefore the next useful serial move is no longer more breadth hardening for this path, but Step B so the broader runtime evidence is turned into stronger analyst decision support.
-- Step C should still follow Step B, because demo/release productization has the most value once the broader runtime evidence is already operational and better interpreted.
+- B-1 is now closed: the readiness GUI now contains an analyst briefing "What matters now?" that condenses existing evidence into a compact action-oriented summary with recommended next checks.
+- therefore the next useful serial move stays inside Step B: continue deepening analyst interpretation and actionability on top of the already-broadened runtime evidence.
+- Step C should still follow after the next Step-B slices, because demo/release productization has the most value once the broader runtime evidence is already operational and better interpreted.
 
 That prioritization should continue to be governed by matrix evidence, not by raw code churn.

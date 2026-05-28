@@ -184,6 +184,13 @@ Expected outcome of Step B:
 - faster interpretation of system state and validation findings
 - clearer project-lead and analyst handoff between evidence and action
 
+Current Step-B progress:
+- B-1 completed: Analyst briefing "What matters now?" now condenses existing runtime evidence into one readiness-facing summary
+- current GUI evidence: `build/local_gui/latest/readiness.html`
+- current exported briefing artifact: `build/local_gui/latest/analyst_briefing.json`
+- current live evidence basis: `RUN-LIVE-EXT-FOCUS-LATEST-005`
+- current summary fields explicitly separate release blockers, country gaps, validation-attention cases, and stale-priority countries, each with recommended next check and target page
+
 ### Step C: Demo/release productization
 
 Objective: turn the technically and analytically stronger baseline into a cleanly reviewable, reproducible, stakeholder-facing demo/release package.

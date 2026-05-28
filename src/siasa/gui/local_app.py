@@ -701,6 +701,101 @@ def _country_coverage_visibility_rows(system_status_read_model: dict[str, Any]) 
 
 
 
+def _build_analyst_briefing_view_model(
+    *,
+    readiness_view_model: dict[str, Any],
+    release_gate_view_model: dict[str, Any] | None = None,
+    operator_release_summary_view_model: dict[str, Any] | None = None,
+    operator_blocker_causality_view_model: dict[str, Any] | None = None,
+    system_status_read_model: dict[str, Any] | None = None,
+    validation_view_model: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    items: list[dict[str, Any]] = []
+    release_gate_view_model = release_gate_view_model or {}
+    operator_release_summary_view_model = operator_release_summary_view_model or {}
+    operator_blocker_causality_view_model = operator_blocker_causality_view_model or {}
+    system_status_read_model = system_status_read_model or {}
+    validation_view_model = validation_view_model or {}
+    visibility = _country_coverage_visibility_rows(system_status_read_model)
+
+    primary_root_cause_gate_id = operator_blocker_causality_view_model.get('primary_root_cause_gate_id')
+    release_verdict = str(readiness_view_model.get('release_verdict', 'unknown')).lower()
+    gate_verdict = str(release_gate_view_model.get('gate_verdict', 'unknown')).lower()
+    release_not_green = release_verdict not in {'ready', 'pass', 'ok', 'green'} or gate_verdict not in {'go', 'ready', 'pass', 'ok', 'green'}
+    if release_not_green and (primary_root_cause_gate_id or int(operator_release_summary_view_model.get('failed_gate_count', 0) or 0) > 0):
+        root_cause_text = str(primary_root_cause_gate_id or 'release_gate_go')
+        items.append(
+            {
+                'category': 'release_blocker',
+                'title': f'Release blocker: {root_cause_text}',
+                'why_it_matters': f"Release verdict is {readiness_view_model.get('release_verdict', 'unknown')} and gate verdict is {release_gate_view_model.get('gate_verdict', 'unknown')}.",
+                'recommended_next_check': str(operator_blocker_causality_view_model.get('operator_next_action') or operator_release_summary_view_model.get('operator_next_action') or 'Inspect release blockers.'),
+                'evidence_source': 'release_evidence_assessment.json',
+                'target_page': 'readiness.html',
+            }
+        )
+
+    country_gap_rows = [row for row in visibility.get('country_gap_rows', []) if isinstance(row, dict)]
+    if country_gap_rows:
+        top_gap = country_gap_rows[0]
+        gap_country = str(top_gap.get('country_id', 'UNKNOWN'))
+        missing_domains = [str(domain) for domain in top_gap.get('missing_domains', [])]
+        items.append(
+            {
+                'category': 'country_gap',
+                'title': f"Country gap: {gap_country} missing {', '.join(missing_domains) or 'unknown domains'}",
+                'why_it_matters': f"Country coverage is incomplete for {gap_country}.",
+                'recommended_next_check': 'Inspect country/domain gap details and source diagnostics in Coverage.',
+                'evidence_source': 'system_status.json country_coverage_visibility.country_gap_rows',
+                'target_page': 'coverage.html',
+            }
+        )
+
+    historical_replay_summary = validation_view_model.get('historical_replay_summary', {})
+    attention_cases = [item for item in historical_replay_summary.get('attention_cases', []) if isinstance(item, dict)] if isinstance(historical_replay_summary, dict) else []
+    if attention_cases:
+        top_case = attention_cases[0]
+        items.append(
+            {
+                'category': 'validation_attention',
+                'title': f"Validation attention: {top_case.get('case_id', 'unknown')}",
+                'why_it_matters': f"{top_case.get('country_id', 'unknown')} needs review because {top_case.get('attention_reason', 'validation_attention')}.",
+                'recommended_next_check': str(top_case.get('suggested_next_action', 'Review validation evidence.')),
+                'evidence_source': 'validation_backtest.json historical_replay_summary.attention_cases',
+                'target_page': 'validation.html',
+            }
+        )
+
+    stale_priority_watchlist = [row for row in visibility.get('stale_priority_watchlist', []) if isinstance(row, dict)]
+    if stale_priority_watchlist:
+        top_stale = stale_priority_watchlist[0]
+        items.append(
+            {
+                'category': 'stale_priority',
+                'title': f"Stale priority: {top_stale.get('country_id', 'UNKNOWN')}",
+                'why_it_matters': f"Priority {top_stale.get('priority', 'n/a')} country has {top_stale.get('freshness_hours', 'n/a')} stale hours.",
+                'recommended_next_check': 'Inspect stale coverage priority queue and remediation watchlist.',
+                'evidence_source': 'system_status.json country_coverage_visibility.stale_priority_watchlist',
+                'target_page': 'coverage.html',
+            }
+        )
+
+    for rank, item in enumerate(items, start=1):
+        item['rank'] = rank
+
+    return {
+        'run_id': readiness_view_model.get('run_id'),
+        'release_verdict': readiness_view_model.get('release_verdict'),
+        'item_count': len(items),
+        'release_blocker_count': sum(1 for item in items if item.get('category') == 'release_blocker'),
+        'country_gap_count': sum(1 for item in items if item.get('category') == 'country_gap'),
+        'validation_attention_count': sum(1 for item in items if item.get('category') == 'validation_attention'),
+        'stale_priority_count': sum(1 for item in items if item.get('category') == 'stale_priority'),
+        'items': items,
+    }
+
+
+
 def _render_remediation_watchlist(visibility: dict[str, Any]) -> str:
     rows = ''.join(
         "<tr>"
@@ -2222,6 +2317,7 @@ def _render_readiness(
     operator_remediation_execution_loop_view_model: dict[str, Any] | None = None,
     operator_stale_remediation_closure_drill_view_model: dict[str, Any] | None = None,
     operator_stale_remediation_action_plan_view_model: dict[str, Any] | None = None,
+    analyst_briefing_view_model: dict[str, Any] | None = None,
     *,
     nav_prefix: str = '',
     available_pages: set[str] | None = None,
@@ -2472,6 +2568,20 @@ def _render_readiness(
         if isinstance(item, dict)
     ) or "<tr><td colspan='5'>No AP-25 stale-remediation action plan available.</td></tr>"
 
+    _analyst_briefing = analyst_briefing_view_model or {}
+    _analyst_briefing_items = [item for item in _analyst_briefing.get('items', []) if isinstance(item, dict)]
+    _analyst_briefing_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(item.get('rank', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('category', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('title', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('why_it_matters', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('recommended_next_check', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('target_page', 'n/a')))}</td>"
+        "</tr>"
+        for item in _analyst_briefing_items
+    ) or "<tr><td colspan='6'>No analyst briefing items currently prioritized.</td></tr>"
+
     body = (
         # === KPI Header ===
         "<div class='kpi-grid'>"
@@ -2537,6 +2647,10 @@ def _render_readiness(
         f"<p>AP-20 requires closure: <strong>{'yes' if _operator_stale_closure_requires else 'no'}</strong> | closure guarded: <strong>{'yes' if _operator_stale_closure_guarded else 'no'}</strong> | SLA hours: {html.escape(str(_operator_stale_closure_sla))} | breach count: {html.escape(str(_operator_stale_closure_breach_count))}</p>"
         "<table><thead><tr><th>AP-20 Breach Reason</th><th>Priority Score</th><th>Unresolved Age Hours</th></tr></thead>"
         f"<tbody>{_operator_stale_closure_rows}</tbody></table></div>"
+        "<div class='panel'><div class='panel-header'>Analyst Briefing — What matters now?</div>"
+        f"<p>Prioritized items: <strong>{html.escape(str(_analyst_briefing.get('item_count', 0)))}</strong> | release blockers: {html.escape(str(_analyst_briefing.get('release_blocker_count', 0)))} | country gaps: {html.escape(str(_analyst_briefing.get('country_gap_count', 0)))} | validation attention: {html.escape(str(_analyst_briefing.get('validation_attention_count', 0)))} | stale priorities: {html.escape(str(_analyst_briefing.get('stale_priority_count', 0)))}</p>"
+        "<table><thead><tr><th>Rank</th><th>Category</th><th>Title</th><th>Why it matters</th><th>Recommended next check</th><th>Target page</th></tr></thead>"
+        f"<tbody>{_analyst_briefing_rows}</tbody></table></div>"
         # === Known Gaps ===
         "<div class='panel'><div class='panel-header'>Known Gaps Before Release</div>"
         f"<ul>{known_gap_items}</ul></div>"
@@ -3744,6 +3858,7 @@ def build_local_mvp_site(
     operator_remediation_execution_loop_view_model: dict[str, Any] | None = None,
     operator_stale_remediation_closure_drill_view_model: dict[str, Any] | None = None,
     operator_stale_remediation_action_plan_view_model: dict[str, Any] | None = None,
+    analyst_briefing_view_model: dict[str, Any] | None = None,
     ui_role: str = 'analyst',
 ) -> SiteBuildResult:
     normalized_role = _normalize_ui_role(ui_role)
@@ -3912,6 +4027,15 @@ def build_local_mvp_site(
             stakeholder_e2e_flow_coverage_report=stakeholder_e2e_flow_coverage_view_model,
             stakeholder_e2e_ui_smoke_report=stakeholder_e2e_ui_smoke_view_model,
         )
+    if analyst_briefing_view_model is None:
+        analyst_briefing_view_model = _build_analyst_briefing_view_model(
+            readiness_view_model=readiness_view_model,
+            release_gate_view_model=release_gate_view_model,
+            operator_release_summary_view_model=operator_release_summary_view_model,
+            operator_blocker_causality_view_model=operator_blocker_causality_view_model,
+            system_status_read_model=system_status_read_model,
+            validation_view_model=validation_view_model,
+        )
 
     readiness_file = output_dir / 'readiness.html'
     readiness_file.write_text(
@@ -3932,6 +4056,7 @@ def build_local_mvp_site(
             operator_remediation_execution_loop_view_model,
             operator_stale_remediation_closure_drill_view_model,
             operator_stale_remediation_action_plan_view_model,
+            analyst_briefing_view_model,
             nav_prefix='',
             available_pages=available_pages,
         ),
@@ -4045,6 +4170,14 @@ def build_local_mvp_site(
             encoding='utf-8',
         )
         generated_files.append(operator_operability_cluster_json)
+
+    if analyst_briefing_view_model is not None:
+        analyst_briefing_json = output_dir / "analyst_briefing.json"
+        analyst_briefing_json.write_text(
+            json.dumps(analyst_briefing_view_model, indent=2, sort_keys=True),
+            encoding='utf-8',
+        )
+        generated_files.append(analyst_briefing_json)
 
     return SiteBuildResult(output_dir=output_dir, generated_files=generated_files)
 

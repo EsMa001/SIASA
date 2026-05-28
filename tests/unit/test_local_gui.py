@@ -72,6 +72,71 @@ def test_render_stale_priority_watchlist_shows_summary_and_rows() -> None:
 
 
 
+def test_build_analyst_briefing_view_model_prioritizes_existing_evidence_sources() -> None:
+    briefing = local_app._build_analyst_briefing_view_model(
+        readiness_view_model={"release_verdict": "blocked_by_known_gaps", "run_id": "RUN-TEST-001"},
+        release_gate_view_model={"gate_verdict": "no_go"},
+        operator_release_summary_view_model={
+            "failed_gate_count": 1,
+            "operator_next_action": "Fix readiness blocker.",
+        },
+        operator_blocker_causality_view_model={
+            "primary_root_cause_gate_id": "known_gaps_clear",
+            "operator_next_action": "Resolve known gaps before release.",
+        },
+        system_status_read_model={
+            "country_coverage_visibility": {
+                "country_gap_rows": [
+                    {
+                        "country_id": "POL",
+                        "missing_domains": ["B"],
+                        "gap_details": [{"domain": "B", "reason": "no_usable_input_data"}],
+                    }
+                ],
+                "stale_priority_watchlist": [
+                    {
+                        "priority_rank": 1,
+                        "country_id": "UKR",
+                        "priority": "P1",
+                        "freshness_hours": 8760.0,
+                        "source_depth_band": "moderate",
+                    }
+                ],
+            }
+        },
+        validation_view_model={
+            "historical_replay_summary": {
+                "attention_cases": [
+                    {
+                        "country_id": "ISR",
+                        "case_id": "VAL-ISR-2024-002",
+                        "attention_level": "high",
+                        "attention_reason": "status_mismatch_and_domain_gap",
+                        "suggested_next_action": "Review reference-case alignment.",
+                    }
+                ]
+            }
+        },
+    )
+
+    assert briefing["item_count"] == 4
+    assert briefing["release_blocker_count"] == 1
+    assert briefing["country_gap_count"] == 1
+    assert briefing["validation_attention_count"] == 1
+    assert briefing["stale_priority_count"] == 1
+    assert [item["category"] for item in briefing["items"]] == [
+        "release_blocker",
+        "country_gap",
+        "validation_attention",
+        "stale_priority",
+    ]
+    assert briefing["items"][0]["title"] == "Release blocker: known_gaps_clear"
+    assert briefing["items"][1]["title"] == "Country gap: POL missing B"
+    assert briefing["items"][2]["title"] == "Validation attention: VAL-ISR-2024-002"
+    assert briefing["items"][3]["title"] == "Stale priority: UKR"
+
+
+
 def test_source_depth_band_matches_artifact_thresholds() -> None:
     assert local_app._source_depth_band(1) == "minimal"
     assert local_app._source_depth_band(2) == "moderate"
@@ -622,6 +687,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert (pages.output_dir / "stakeholder_e2e_flow_coverage.json").exists()
     assert (pages.output_dir / "release_readiness_index.json").exists()
     assert (pages.output_dir / "stakeholder_e2e_ui_smoke.json").exists()
+    assert (pages.output_dir / "analyst_briefing.json").exists()
 
     index_html = (pages.output_dir / "index.html").read_text()
     assert "World Anomaly Map" in index_html
@@ -2044,6 +2110,8 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert "Covered Flows: <strong>6/6</strong>" in readiness_html
     assert "Stakeholder Focus Closure" in readiness_html
     assert "Covered IDs: 19 / 19 | Open IDs: 0" in readiness_html
+    assert "Analyst Briefing — What matters now?" in readiness_html
+    assert "Prioritized items: <strong>0</strong>" in readiness_html
     assert "Operator Release Steering (AP-16/AP-17/AP-19/AP-20/AP-22/AP-23/AP-24)" in readiness_html
     assert "AP-16 failed gates: <strong>0</strong>" in readiness_html
     assert "AP-26 primary root cause: <strong>none</strong>" in readiness_html
