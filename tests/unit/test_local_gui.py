@@ -1862,7 +1862,14 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
                     "failed_gate_count": 0,
                     "failed_gates": [],
                     "operator_next_action": "No action required; release gates are green.",
-                }
+                },
+                "operator_blocker_causality": {
+                    "primary_root_cause_gate_id": None,
+                    "root_cause_gate_ids": [],
+                    "derived_gate_ids": [],
+                    "operator_next_action": "No blocker-chain action required; release gates are green.",
+                    "causal_chain_rows": [],
+                },
             }
         )
     )
@@ -2001,6 +2008,7 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert payload["stakeholder_e2e_ui_smoke_view_model"]["flow_count"] == 6
     assert payload["release_readiness_index_view_model"]["passed_gates"] == 8
     assert payload["operator_release_summary_view_model"]["failed_gate_count"] == 0
+    assert payload["operator_blocker_causality_view_model"]["primary_root_cause_gate_id"] is None
     assert payload["operator_failure_drill_digest_view_model"]["cluster_count"] == 1
     assert payload["operator_failure_drill_trend_baseline_view_model"]["snapshot_count"] == 1
     assert payload["operator_recurrence_aware_remediation_prioritization_view_model"]["priority_count"] == 1
@@ -2025,6 +2033,9 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert "Covered IDs: 19 / 19 | Open IDs: 0" in readiness_html
     assert "Operator Release Steering (AP-16/AP-17/AP-19/AP-20/AP-22/AP-23/AP-24)" in readiness_html
     assert "AP-16 failed gates: <strong>0</strong>" in readiness_html
+    assert "AP-26 primary root cause: <strong>none</strong>" in readiness_html
+    assert "AP-26 root causes: none | derived effects: none" in readiness_html
+    assert "No blocker-chain action required" in readiness_html
     assert "AP-17 cluster count: <strong>1</strong>" in readiness_html
     assert "AP-19 trend snapshots: <strong>1</strong>" in readiness_html
     assert "AP-22 priority rows: <strong>1</strong>" in readiness_html

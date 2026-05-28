@@ -31,6 +31,11 @@ def test_build_repo_release_gate_assessment_is_go_for_current_repo() -> None:
     assert operator_summary["release_gate_verdict"] == "go"
     assert operator_summary["failed_gate_count"] == 0
     assert operator_summary["operator_next_action"] == "No action required; release gates are green."
+    blocker_causality = assessment["operator_blocker_causality"]
+    assert blocker_causality["primary_root_cause_gate_id"] is None
+    assert blocker_causality["root_cause_gate_ids"] == []
+    assert blocker_causality["derived_gate_ids"] == []
+    assert blocker_causality["operator_next_action"] == "No blocker-chain action required; release gates are green."
     gate_ids = [item["gate_id"] for item in readiness_index["gates"]]
     assert "stakeholder_functional_focus_cluster_closed" in gate_ids
     assert "stakeholder_e2e_flows_covered" in gate_ids
@@ -85,6 +90,16 @@ def test_render_release_evidence_markdown_contains_gate_summary() -> None:
                     },
                 ],
             },
+            "operator_blocker_causality": {
+                "primary_root_cause_gate_id": "known_gaps_clear",
+                "root_cause_gate_ids": ["known_gaps_clear", "stakeholder_e2e_ui_smoke_covered"],
+                "derived_gate_ids": ["release_gate_go"],
+                "operator_next_action": "Resolve readiness known gaps or explicitly scope/mitigate them before release decision.",
+                "causal_chain_rows": [
+                    {"gate_id": "known_gaps_clear", "gate_role": "root_cause", "causal_detail": "direct blocker in readiness evidence"},
+                    {"gate_id": "release_gate_go", "gate_role": "derived_effect", "causal_detail": "overall go/no-go remains blocked until root causes clear"},
+                ],
+            },
             "readiness": {"release_verdict": "blocked_by_known_gaps", "demo_verdict": "ready"},
             "traceability_integrity": {"summary": {"unhealthy_slice_count": 0, "closure_at_risk": 0}},
             "stakeholder_e2e_flow_coverage": {"summary": {"flow_count": 6, "covered_flow_count": 5, "flow_gap_count": 1}},
@@ -100,6 +115,12 @@ def test_render_release_evidence_markdown_contains_gate_summary() -> None:
     assert "## Operator Release Summary" in markdown
     assert "failed_gate_count: 2" in markdown
     assert "operator_next_action: Regenerate local GUI bundle and fix missing role-flow smoke paths." in markdown
+    assert "## Blocker Causality" in markdown
+    assert "primary_root_cause_gate_id: known_gaps_clear" in markdown
+    assert "root_causes: known_gaps_clear, stakeholder_e2e_ui_smoke_covered" in markdown
+    assert "derived_effects: release_gate_go" in markdown
+    assert "known_gaps_clear [root_cause]: direct blocker in readiness evidence" in markdown
+    assert "release_gate_go [derived_effect]: overall go/no-go remains blocked until root causes clear" in markdown
     assert "release_gate_go: fail" in markdown
     assert "stakeholder_functional_focus_cluster_closed: fail" in markdown
     assert "stakeholder_e2e_flows_covered: fail" in markdown

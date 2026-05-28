@@ -1383,6 +1383,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
         stakeholder_e2e_ui_smoke_view_model = _load_json(stakeholder_e2e_ui_smoke_view_path)
 
     operator_release_summary_view_model = None
+    operator_blocker_causality_view_model = None
     release_evidence_assessment_path = readmodels_dir / 'release_evidence_assessment.json'
     if release_evidence_assessment_path.exists():
         release_evidence_assessment = _load_json(release_evidence_assessment_path)
@@ -1390,6 +1391,9 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
             maybe_operator_summary = release_evidence_assessment.get('operator_release_summary')
             if isinstance(maybe_operator_summary, dict):
                 operator_release_summary_view_model = maybe_operator_summary
+            maybe_operator_blocker_causality = release_evidence_assessment.get('operator_blocker_causality')
+            if isinstance(maybe_operator_blocker_causality, dict):
+                operator_blocker_causality_view_model = maybe_operator_blocker_causality
 
     operator_failure_drill_digest_view_model = None
     operator_failure_drill_trend_baseline_view_model = None
@@ -1442,6 +1446,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
         'release_readiness_index_view_model': release_readiness_index_view_model,
         'stakeholder_e2e_ui_smoke_view_model': stakeholder_e2e_ui_smoke_view_model,
         'operator_release_summary_view_model': operator_release_summary_view_model,
+        'operator_blocker_causality_view_model': operator_blocker_causality_view_model,
         'operator_failure_drill_digest_view_model': operator_failure_drill_digest_view_model,
         'operator_failure_drill_trend_baseline_view_model': operator_failure_drill_trend_baseline_view_model,
         'operator_recurrence_aware_remediation_prioritization_view_model': operator_recurrence_aware_remediation_prioritization_view_model,
@@ -2203,6 +2208,7 @@ def _render_readiness(
     release_readiness_index_view_model: dict[str, Any] | None = None,
     stakeholder_e2e_ui_smoke_view_model: dict[str, Any] | None = None,
     operator_release_summary_view_model: dict[str, Any] | None = None,
+    operator_blocker_causality_view_model: dict[str, Any] | None = None,
     operator_failure_drill_digest_view_model: dict[str, Any] | None = None,
     operator_failure_drill_trend_baseline_view_model: dict[str, Any] | None = None,
     operator_recurrence_aware_remediation_prioritization_view_model: dict[str, Any] | None = None,
@@ -2315,6 +2321,21 @@ def _render_readiness(
         for item in _operator_summary.get('failed_gates', [])
         if isinstance(item, dict)
     ) or "<tr><td colspan='3'>No AP-16 failed-gate entries available.</td></tr>"
+
+    _operator_blocker_causality = operator_blocker_causality_view_model or {}
+    _operator_primary_root_cause = str(_operator_blocker_causality.get('primary_root_cause_gate_id', 'none')) if _operator_blocker_causality.get('primary_root_cause_gate_id') is not None else 'none'
+    _operator_root_causes = ', '.join(str(item) for item in _operator_blocker_causality.get('root_cause_gate_ids', [])) or 'none'
+    _operator_derived_effects = ', '.join(str(item) for item in _operator_blocker_causality.get('derived_gate_ids', [])) or 'none'
+    _operator_blocker_next_action = str(_operator_blocker_causality.get('operator_next_action', 'n/a')) if _operator_blocker_causality else 'n/a'
+    _operator_blocker_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(item.get('gate_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('gate_role', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('causal_detail', 'n/a')))}</td>"
+        "</tr>"
+        for item in _operator_blocker_causality.get('causal_chain_rows', [])
+        if isinstance(item, dict)
+    ) or "<tr><td colspan='3'>No AP-26 blocker-chain rows available.</td></tr>"
 
     _operator_digest = operator_failure_drill_digest_view_model or {}
     _operator_digest_cluster_count = int(_operator_digest.get('cluster_count', 0)) if _operator_digest else 0
@@ -2467,6 +2488,9 @@ def _render_readiness(
         f"<p>AP-16 failed gates: <strong>{html.escape(str(_operator_failed_gate_count))}</strong> | AP-16 next action: {html.escape(_operator_next_action)}</p>"
         "<table><thead><tr><th>AP-16 Gate</th><th>Detail</th><th>Remediation</th></tr></thead>"
         f"<tbody>{_operator_failed_rows}</tbody></table>"
+        f"<p>AP-26 primary root cause: <strong>{html.escape(_operator_primary_root_cause)}</strong> | AP-26 root causes: {html.escape(_operator_root_causes)} | derived effects: {html.escape(_operator_derived_effects)} | AP-26 next action: {html.escape(_operator_blocker_next_action)}</p>"
+        "<table><thead><tr><th>AP-26 Gate</th><th>Role</th><th>Causal Detail</th></tr></thead>"
+        f"<tbody>{_operator_blocker_rows}</tbody></table>"
         f"<p>AP-17 cluster count: <strong>{html.escape(str(_operator_digest_cluster_count))}</strong> | Top cluster gate: {html.escape(_operator_digest_top_gate)} | AP-17 next action: {html.escape(_operator_digest_next_action)}</p>"
         "<table><thead><tr><th>AP-17 Gate</th><th>Scenario Count</th><th>Scenario IDs</th><th>Remediation</th></tr></thead>"
         f"<tbody>{_operator_digest_rows}</tbody></table>"
@@ -3681,6 +3705,7 @@ def build_local_mvp_site(
     release_readiness_index_view_model: dict[str, Any] | None = None,
     stakeholder_e2e_ui_smoke_view_model: dict[str, Any] | None = None,
     operator_release_summary_view_model: dict[str, Any] | None = None,
+    operator_blocker_causality_view_model: dict[str, Any] | None = None,
     operator_failure_drill_digest_view_model: dict[str, Any] | None = None,
     operator_failure_drill_trend_baseline_view_model: dict[str, Any] | None = None,
     operator_recurrence_aware_remediation_prioritization_view_model: dict[str, Any] | None = None,
@@ -3867,6 +3892,7 @@ def build_local_mvp_site(
             release_readiness_index_view_model,
             stakeholder_e2e_ui_smoke_view_model,
             operator_release_summary_view_model,
+            operator_blocker_causality_view_model,
             operator_failure_drill_digest_view_model,
             operator_failure_drill_trend_baseline_view_model,
             operator_recurrence_aware_remediation_prioritization_view_model,

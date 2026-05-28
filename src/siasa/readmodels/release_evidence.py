@@ -35,6 +35,59 @@ _REMEDIATION_HINTS_BY_GATE_ID: dict[str, str] = {
 }
 
 
+def _build_operator_blocker_causality(*, release_gate: dict[str, Any], release_readiness_index: dict[str, Any]) -> dict[str, Any]:
+    remediation_hints = _REMEDIATION_HINTS_BY_GATE_ID
+    blocker_ids = [str(item) for item in (release_gate.get("blockers") or [])]
+    readiness_gates = [item for item in (release_readiness_index.get("gates") or []) if isinstance(item, dict)]
+    failed_gate_ids = [str(item.get("gate_id", "unknown")) for item in readiness_gates if not bool(item.get("passed", False))]
+    gate_details = {str(item.get("gate_id", "unknown")): str(item.get("detail", "")) for item in readiness_gates}
+
+    derived_gate_ids: list[str] = []
+    for gate_id in blocker_ids + failed_gate_ids:
+        if gate_id in {"release_gate_go", "release_verdict_ready"} and gate_id not in derived_gate_ids:
+            derived_gate_ids.append(gate_id)
+
+    root_cause_gate_ids: list[str] = []
+    for gate_id in blocker_ids + failed_gate_ids:
+        if gate_id in derived_gate_ids:
+            continue
+        if gate_id not in root_cause_gate_ids:
+            root_cause_gate_ids.append(gate_id)
+
+    causal_chain_rows: list[dict[str, str]] = []
+    for gate_id in root_cause_gate_ids:
+        causal_chain_rows.append(
+            {
+                "gate_id": gate_id,
+                "gate_role": "root_cause",
+                "causal_detail": gate_details.get(gate_id) or "direct blocker in readiness evidence",
+                "remediation_hint": remediation_hints.get(gate_id, "Inspect release evidence and close failing gate condition."),
+            }
+        )
+    for gate_id in derived_gate_ids:
+        causal_chain_rows.append(
+            {
+                "gate_id": gate_id,
+                "gate_role": "derived_effect",
+                "causal_detail": "overall go/no-go remains blocked until root causes clear",
+                "remediation_hint": remediation_hints.get(gate_id, "Inspect release evidence and close failing gate condition."),
+            }
+        )
+
+    primary_root_cause_gate_id = root_cause_gate_ids[0] if root_cause_gate_ids else None
+    return {
+        "primary_root_cause_gate_id": primary_root_cause_gate_id,
+        "root_cause_gate_ids": root_cause_gate_ids,
+        "derived_gate_ids": derived_gate_ids,
+        "operator_next_action": (
+            remediation_hints.get(primary_root_cause_gate_id, "Inspect release evidence and close failing gate condition.")
+            if primary_root_cause_gate_id
+            else "No blocker-chain action required; release gates are green."
+        ),
+        "causal_chain_rows": causal_chain_rows,
+    }
+
+
 def _build_operator_release_summary(*, release_gate: dict[str, Any], release_readiness_index: dict[str, Any]) -> dict[str, Any]:
     blocker_ids = [str(item) for item in (release_gate.get("blockers") or [])]
     readiness_gates = release_readiness_index.get("gates") or []
@@ -588,6 +641,10 @@ def build_repo_release_gate_assessment(
         release_gate=release_gate,
         release_readiness_index=release_readiness_index,
     )
+    operator_blocker_causality = _build_operator_blocker_causality(
+        release_gate=release_gate,
+        release_readiness_index=release_readiness_index,
+    )
 
     return {
         "generated_at_utc": datetime.now(UTC).isoformat(),
@@ -602,6 +659,7 @@ def build_repo_release_gate_assessment(
             "capability_fulfillment_source": capability_fulfillment_source,
         },
         "operator_release_summary": operator_release_summary,
+        "operator_blocker_causality": operator_blocker_causality,
         "readiness": readiness_view_model,
         "traceability_integrity": traceability_integrity,
         "stakeholder_functional_closure": stakeholder_functional_closure,
@@ -1161,6 +1219,7 @@ def render_release_evidence_markdown(assessment: dict[str, Any]) -> str:
     readiness_index = assessment.get("release_readiness_index", {})
     capability_vs_readiness = assessment.get("capability_vs_readiness", {}) or {}
     operator_release_summary = assessment.get("operator_release_summary", {}) or {}
+    operator_blocker_causality = assessment.get("operator_blocker_causality", {}) or {}
     summary = ((assessment.get("traceability_integrity") or {}).get("summary") or {})
     e2e_summary = ((assessment.get("stakeholder_e2e_flow_coverage") or {}).get("summary") or {})
     blockers = [str(item) for item in gate.get("blockers", [])]
@@ -1172,6 +1231,10 @@ def render_release_evidence_markdown(assessment: dict[str, Any]) -> str:
     operator_failed_lines = "\n".join(
         f"- {item.get('gate_id', 'unknown')}: {item.get('remediation_hint', 'n/a')}"
         for item in operator_release_summary.get("failed_gates", [])
+    ) or "- none"
+    blocker_causality_rows = "\n".join(
+        f"- {item.get('gate_id', 'unknown')} [{item.get('gate_role', 'n/a')}]: {item.get('causal_detail', 'n/a')}"
+        for item in operator_blocker_causality.get("causal_chain_rows", [])
     ) or "- none"
     return (
         "# SIASA Release Evidence Pack\n\n"
@@ -1195,6 +1258,12 @@ def render_release_evidence_markdown(assessment: dict[str, Any]) -> str:
         f"- failed_gate_count: {operator_release_summary.get('failed_gate_count', 'n/a')}\n"
         f"- operator_next_action: {operator_release_summary.get('operator_next_action', 'n/a')}\n"
         f"{operator_failed_lines}\n\n"
+        "## Blocker Causality\n"
+        f"- primary_root_cause_gate_id: {operator_blocker_causality.get('primary_root_cause_gate_id', 'n/a')}\n"
+        f"- root_causes: {', '.join(operator_blocker_causality.get('root_cause_gate_ids', [])) or 'none'}\n"
+        f"- derived_effects: {', '.join(operator_blocker_causality.get('derived_gate_ids', [])) or 'none'}\n"
+        f"- operator_next_action: {operator_blocker_causality.get('operator_next_action', 'n/a')}\n"
+        f"{blocker_causality_rows}\n\n"
         "## Release Readiness Gates\n"
         f"{index_lines}\n\n"
         "## Blockers\n"
