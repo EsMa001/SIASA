@@ -1035,10 +1035,12 @@ def _render_world_map_visualization(
     available_country_ids: set[str],
     coverage_visibility: dict[str, Any] | None = None,
 ) -> str:
+    from siasa.gui.world_map_paths import COUNTRY_PATHS  # type: ignore[import]
+
     metadata_lookup = _country_metadata_lookup()
     coverage_by_country = {
         str(row.get('country_id', 'UNKNOWN')): row
-        for row in (coverage_visibility or {}).get('country_freshness_rows', [])\
+        for row in (coverage_visibility or {}).get('country_freshness_rows', [])
     }
 
     # Build status/freshness/href lookup per country from readmodel
@@ -1077,108 +1079,37 @@ def _render_world_map_visualization(
             "</tr>"
         )
 
-    # Equirectangular projection helper
-    def pt(lon: float, lat: float) -> str:
-        x = (lon + 180) * (960 / 360)
-        y = (90 - lat) * (500 / 180)
-        return f"{x:.1f},{y:.1f}"
-
-    def poly(coords: list[tuple[float, float]]) -> str:
-        return "M " + " L ".join(pt(lon, lat) for lon, lat in coords) + " Z"
-
-    def mpoly(polygons: list[list[tuple[float, float]]]) -> str:
-        return " ".join(poly(p) for p in polygons)
-
-    # MVP country path definitions (Equirectangular, viewBox 0 0 960 500)
-    mvp_paths: dict[str, tuple[str, str]] = {
-        "UKR": ("Ukraine", poly([(22.1,52.3),(24.0,52.7),(27.5,51.6),(30.2,51.5),(33.8,52.3),(35.5,52.0),(38.2,50.0),(37.4,47.0),(35.0,45.3),(33.5,44.0),(31.2,45.5),(28.0,45.5),(24.9,45.8),(23.2,48.0),(22.1,48.4),(22.6,50.4)])),
-        "RUS": ("Russia", mpoly([[(28,72),(40,74),(55,73),(70,73),(85,74),(100,76),(120,74),(140,74),(160,72),(175,68),(180,65),(175,60),(170,58),(165,55),(155,52),(145,48),(140,45),(135,43),(130,42),(125,48),(120,50),(115,53),(105,51),(95,52),(85,55),(80,60),(75,63),(68,65),(60,60),(55,57),(50,54),(45,50),(42,47),(40,43),(38,47),(33,55),(30,60),(27,65),(28,72)],[(19.6,54.4),(22.8,54.4),(22.8,54.8),(19.6,54.8)]])),
-        "CHN": ("China", poly([(73,39),(80,45),(87,49),(92,48),(97,50),(103,48),(110,44),(120,47),(125,48),(130,43),(131,42),(128,38),(122,32),(120,26),(117,22),(108,18),(104,21),(100,22),(97,25),(92,28),(86,28),(80,32),(75,35),(73,39)])),
-        "TWN": ("Taiwan", poly([(120.0,25.3),(121.9,25.0),(122.0,23.5),(120.8,21.9),(120.0,22.5),(120.0,25.3)])),
-        "IRN": ("Iran", poly([(44,39),(47,40),(50,39),(54,37),(60,36),(63,35),(60,31),(58,26),(55,25),(52,27),(48,30),(45,32),(44,34),(44,39)])),
-        "ISR": ("Israel", poly([(34.3,33.1),(35.9,33.2),(35.9,32.5),(35.2,31.2),(34.9,29.5),(34.3,30.0),(34.3,33.1)])),
-        "TUR": ("Turkey", poly([(26,42),(29,43),(33,42),(36,42),(40,41),(44,40),(44,37),(40,35),(36,36),(33,36),(29,37),(26,38),(26,40),(26,42)])),
-        "IND": ("India", poly([(68,23),(72,22),(74,21),(78,19),(80,14),(80,10),(77,8),(76,10),(72,15),(68,22),(67,25),(70,28),(74,31),(76,35),(78,35),(80,33),(84,28),(87,26),(92,23),(90,22),(87,24),(86,20),(82,16),(78,10),(76,8),(72,10),(68,20),(68,23)])),
-        "PAK": ("Pakistan", poly([(61,37),(65,37),(68,35),(72,35),(74,32),(73,28),(68,23),(64,25),(60,25),(58,28),(60,30),(60,34),(61,37)])),
-        "GEO": ("Georgia", poly([(40.0,43.6),(41.7,43.5),(44.0,43.0),(46.5,41.2),(45.7,41.0),(42.5,41.5),(41.0,41.8),(40.0,42.5),(40.0,43.6)])),
-        "USA": ("United States", mpoly([[(-124,49),(-105,49),(-97,49),(-85,47),(-75,45),(-71,45),(-70,43),(-67,45),(-70,47),(-67,44),(-69,41),(-74,40),(-75,36),(-77,35),(-80,32),(-85,30),(-88,30),(-90,29),(-95,29),(-97,26),(-100,28),(-104,29),(-108,31),(-112,31),(-117,33),(-118,34),(-122,37),(-124,40),(-124,46),(-124,49)],[(-170,71),(-160,72),(-155,60),(-150,58),(-145,60),(-135,60),(-140,58),(-155,55),(-165,55),(-170,60),(-170,71)]])),
-        "DEU": ("Germany", poly([(6.1,51.0),(7.0,52.8),(8.5,53.5),(10.0,55.0),(12.0,54.5),(14.5,54.0),(14.5,51.0),(13.0,50.5),(12.5,48.0),(13.8,48.0),(12.0,47.5),(10.0,47.5),(7.5,47.5),(6.8,49.5),(6.1,51.0)])),
-        "POL": ("Poland", poly([(14.1,54.0),(18.5,54.5),(22.0,54.5),(24.0,54.3),(23.5,52.0),(24.0,50.5),(22.5,49.0),(18.5,50.0),(15.5,50.8),(14.1,51.5),(14.1,54.0)])),
-        "EST": ("Estonia", poly([(21.8,57.5),(24.0,57.7),(27.0,57.5),(28.0,59.0),(26.0,59.7),(22.5,59.5),(21.8,58.5),(21.8,57.5)])),
-        "FIN": ("Finland", poly([(20.0,60.0),(22.0,60.5),(25.0,60.3),(28.0,65.0),(29.5,70.0),(27.0,70.0),(25.0,68.5),(24.0,65.0),(22.0,63.0),(20.0,63.5),(20.0,60.0)])),
-        "SAU": ("Saudi Arabia", poly([(36.5,29.0),(38.0,26.0),(42.0,22.0),(45.0,19.0),(49.0,18.5),(52.0,19.0),(55.0,22.0),(55.5,24.5),(53.0,25.0),(51.0,25.5),(48.0,28.0),(45.5,29.0),(42.5,31.0),(38.5,32.0),(36.5,29.0)])),
-        "QAT": ("Qatar", poly([(50.7,24.5),(51.7,24.7),(51.7,25.4),(51.2,26.2),(50.8,25.8),(50.7,24.5)])),
-        "NGA": ("Nigeria", poly([(3.0,6.5),(5.0,4.3),(8.5,4.5),(9.0,4.0),(10.0,4.5),(13.5,5.5),(14.5,11.0),(14.0,13.5),(12.5,13.0),(11.0,13.5),(10.0,13.0),(8.0,12.5),(4.0,10.0),(2.7,6.5),(3.0,6.5)])),
-        "EGY": ("Egypt", poly([(25.0,22.0),(35.0,22.0),(36.9,22.0),(36.9,24.0),(34.0,29.5),(32.5,31.5),(31.0,31.5),(28.0,31.0),(25.0,31.5),(25.0,22.0)])),
-        "SDN": ("Sudan", poly([(23.5,22.0),(36.5,22.0),(37.5,20.0),(38.5,15.5),(36.5,12.0),(35.0,11.5),(34.0,10.5),(33.0,9.5),(28.0,9.5),(24.0,10.0),(23.5,15.0),(23.5,20.0),(23.5,22.0)])),
-        "MMR": ("Myanmar", poly([(92.5,28.0),(97.0,28.0),(98.5,26.0),(99.5,22.0),(100.0,20.0),(100.5,19.0),(99.0,18.0),(97.5,16.0),(97.5,14.0),(98.5,10.5),(98.0,10.0),(97.0,14.0),(96.0,16.0),(94.0,19.0),(92.5,22.0),(92.5,28.0)])),
-        "CHE": ("Switzerland", poly([(6.0,47.5),(7.0,47.6),(8.2,48.0),(10.5,47.4),(10.5,46.8),(9.5,46.5),(8.0,46.0),(6.5,46.4),(6.0,47.5)])),
-        "NLD": ("Netherlands", poly([(3.3,51.4),(4.5,51.5),(5.5,52.0),(7.0,53.2),(6.5,53.5),(5.0,53.5),(4.5,53.0),(3.5,52.5),(3.3,51.9),(3.3,51.4)])),
-        "SWE": ("Sweden", poly([(11.0,56.0),(12.5,56.5),(14.0,57.5),(15.0,60.0),(16.0,62.0),(17.5,64.0),(18.0,68.5),(20.0,69.0),(22.0,68.0),(22.0,65.0),(18.0,62.0),(16.0,58.5),(14.5,56.5),(12.0,55.5),(11.0,55.5),(11.0,56.0)])),
-        "NOR": ("Norway", poly([(4.5,58.0),(5.5,59.0),(7.0,60.0),(8.0,63.0),(13.0,65.5),(16.0,69.0),(20.0,71.0),(28.0,71.5),(30.0,70.5),(28.0,69.5),(25.0,68.5),(22.0,68.0),(20.0,69.0),(18.0,68.5),(17.5,64.0),(16.0,62.0),(15.0,60.0),(12.0,58.5),(8.0,58.0),(4.5,58.0)])),
-        "CAN": ("Canada", mpoly([[(-140,60),(-115,60),(-100,60),(-85,62),(-75,62),(-65,60),(-60,47),(-65,45),(-70,46),(-75,45),(-80,43),(-83,42),(-83,45),(-88,48),(-92,48),(-100,49),(-110,49),(-120,49),(-124,49),(-130,55),(-135,58),(-140,60)]])),
-        "AUS": ("Australia", poly([(114,-22),(117,-21),(122,-18),(128,-14),(135,-12),(137,-13),(140,-15),(143,-13),(145,-18),(147,-19),(150,-22),(152,-25),(153,-28),(150,-33),(147,-38),(143,-39),(140,-36),(136,-35),(130,-33),(126,-34),(122,-34),(115,-34),(113,-30),(114,-25),(114,-22)])),
-        "NZL": ("New Zealand", mpoly([[(172,-34),(175,-37),(178,-38),(177,-40),(175,-41),(173,-40),(172,-38),(172,-34)],[(166,-46),(168,-47),(170,-46),(172,-44),(172,-42),(171,-41),(169,-43),(166,-45),(166,-46)]])),
-        "PRT": ("Portugal", poly([(-9.5,41.8),(-7.5,42.0),(-7.0,40.0),(-7.5,38.0),(-8.0,37.0),(-9.5,37.0),(-9.5,38.5),(-9.2,41.0),(-9.5,41.8)])),
-        "IRL": ("Ireland", poly([(-10.0,51.5),(-8.0,51.5),(-6.0,52.0),(-6.2,53.5),(-7.5,55.2),(-8.5,55.5),(-10.0,54.0),(-10.5,52.5),(-10.0,51.5)])),
-    }
-
-    # Build country path elements with dynamic status colors
+    # Build SVG path elements — all countries from Natural Earth
+    # MVP (active) countries get status color; all others get neutral background fill
     path_elements: list[str] = []
-    for iso3, (cname, path_d) in mvp_paths.items():
+    for iso3, (cname, path_d) in sorted(COUNTRY_PATHS.items()):
         data = country_data.get(iso3, {})
-        status_color = html.escape(data.get('color', '#1c2740'))
-        freshness_color = html.escape(data.get('freshness_color', '#2d3a52'))
-        href = html.escape(data.get('href', 'none'))
-        status = html.escape(data.get('status', 'n/a'))
-        freshness = html.escape(data.get('freshness_label', 'n/a'))
         has_data = iso3 in country_data
-        fill = status_color if has_data else '#1c2740'
-        stroke = freshness_color if has_data else '#2d3a52'
+        fill = html.escape(data['color']) if has_data else '#1a2540'
+        stroke = html.escape(data.get('freshness_color', '#263050')) if has_data else '#263050'
+        stroke_w = '0.5' if not has_data else '0.7'
+        href = html.escape(data.get('href', 'none'))
+        status = html.escape(data.get('status', ''))
+        freshness = html.escape(data.get('freshness_label', ''))
+        css_class = 'country-mvp' if has_data else 'country-bg'
+        cursor = 'pointer' if has_data else 'default'
         path_elements.append(
-            f"<path id='country-{iso3}' class='country-mvp' "
+            f"<path id='country-{iso3}' class='{css_class}' "
             f"data-iso3='{iso3}' data-name='{html.escape(cname)}' "
             f"data-href='{href}' data-status='{status}' data-freshness='{freshness}' "
-            f"d='{path_d}' fill='{fill}' stroke='{stroke}' stroke-width='0.7' "
-            f"style='cursor:pointer;transition:fill .15s,stroke .15s,stroke-width .15s;'>"
-            f"<title>{html.escape(iso3)} — {html.escape(cname)} — {status}</title></path>"
+            f"d='{path_d}' fill='{fill}' stroke='{stroke}' stroke-width='{stroke_w}' "
+            f"style='cursor:{cursor};transition:fill .15s,stroke .15s,stroke-width .15s;'>"
+            f"<title>{html.escape(iso3)} — {html.escape(cname)}"
+            + (f" — {status}" if status else "") +
+            "</title></path>"
         )
 
-    # World background continents (non-MVP, very rough)
-    other_bg = (
-        # South America
-        "M100,175 L130,175 L145,195 L140,240 L130,280 L120,300 L100,290 L90,260 L85,230 L90,200 Z "
-        # Africa (excluding MVP overlap)
-        "M200,165 L245,155 L265,175 L268,215 L255,255 L235,285 L210,280 L192,240 L188,200 Z "
-        # Central/South/Southeast Asia background
-        "M450,120 L480,115 L510,120 L520,145 L500,160 L470,155 L450,140 Z "
-        # Japan
-        "M783,120 L790,130 L787,148 L781,138 Z M780,148 L788,153 L783,168 L775,157 Z "
-        # Korea
-        "M765,128 L775,123 L778,138 L770,143 Z "
-        # Southeast Asia background
-        "M680,175 L710,170 L715,195 L705,215 L700,228 L695,215 L686,198 Z "
-        "M700,228 L707,238 L705,252 L698,245 Z "
-        # Indonesia
-        "M718,248 L742,245 L748,255 L730,260 Z M746,253 L772,248 L775,258 L755,263 Z "
-        # Central Asia
-        "M510,108 L572,97 L602,112 L612,133 L582,143 L538,138 L510,128 Z "
-        # Afghanistan
-        "M588,143 L622,138 L637,153 L627,168 L598,168 L578,158 Z "
-        # East Africa
-        "M288,212 L312,202 L327,213 L322,238 L305,253 L288,243 Z "
-        # West Africa
-        "M182,208 L218,202 L232,213 L227,233 L198,238 L178,228 Z "
-    )
-
-    map_js = """
+    map_js = """\
 <script>
 (function(){
   var sel = null;
-  var DEF_F = null; // will be set per country from data
   var HOV_F = 'rgba(78,222,163,0.35)';
   var SEL_F = '#4edea3';
-  var DEF_S = null;
   var HOV_S = '#4edea3';
   var SEL_S = '#6ffbbe';
 
@@ -1191,14 +1122,15 @@ def _render_world_map_visualization(
   var panelLink = document.getElementById('map-panel-link');
 
   function resetEl(el){
-    el.style.fill = el.dataset.defFill || '#1c2740';
-    el.style.stroke = el.dataset.defStroke || '#2d3a52';
-    el.style.strokeWidth = '0.7';
+    el.style.fill = el.dataset.defFill || '#1a2540';
+    el.style.stroke = el.dataset.defStroke || '#263050';
+    el.style.strokeWidth = el.dataset.defSw || '0.5';
   }
 
   document.querySelectorAll('.country-mvp').forEach(function(el){
     el.dataset.defFill = el.getAttribute('fill');
     el.dataset.defStroke = el.getAttribute('stroke');
+    el.dataset.defSw = el.getAttribute('stroke-width');
 
     el.addEventListener('mouseenter', function(){
       if(el !== sel){
@@ -1206,7 +1138,7 @@ def _render_world_map_visualization(
         el.style.stroke = HOV_S;
         el.style.strokeWidth = '1.5';
       }
-      if(infoEl){ infoEl.textContent = el.dataset.name + ' (' + el.dataset.iso3 + ') — ' + el.dataset.status; }
+      if(infoEl){ infoEl.textContent = el.dataset.name + ' (' + el.dataset.iso3 + ')' + (el.dataset.status ? ' — ' + el.dataset.status : ''); }
     });
     el.addEventListener('mouseleave', function(){
       if(el !== sel){ resetEl(el); }
@@ -1221,13 +1153,13 @@ def _render_world_map_visualization(
       } else {
         el.style.fill = SEL_F;
         el.style.stroke = SEL_S;
-        el.style.strokeWidth = '2.5';
+        el.style.strokeWidth = '2';
         sel = el;
         if(panelEl){ panelEl.style.display='flex'; }
         if(panelName){ panelName.textContent = el.dataset.name; }
         if(panelIso){ panelIso.textContent = el.dataset.iso3; }
-        if(panelStatus){ panelStatus.textContent = el.dataset.status; }
-        if(panelFresh){ panelFresh.textContent = el.dataset.freshness; }
+        if(panelStatus){ panelStatus.textContent = el.dataset.status || '—'; }
+        if(panelFresh){ panelFresh.textContent = el.dataset.freshness || '—'; }
         if(panelLink){
           var h = el.dataset.href;
           if(h && h !== 'none'){
@@ -1236,7 +1168,6 @@ def _render_world_map_visualization(
             panelLink.innerHTML = '<span style="color:#6b7d99;">No profile available</span>';
           }
         }
-        // Sync overview table: highlight matching row
         document.querySelectorAll('.overview-row').forEach(function(row){
           if(row.dataset.countryId === el.dataset.iso3){
             row.style.background = 'rgba(78,222,163,0.08)';
@@ -1248,7 +1179,6 @@ def _render_world_map_visualization(
       }
     });
   });
-  // Click background → deselect
   var svg = document.getElementById('world-map-svg');
   if(svg){ svg.addEventListener('click', function(){
     if(sel){ resetEl(sel); sel=null; }
@@ -1286,6 +1216,42 @@ def _render_world_map_visualization(
         "</div>"
     )
 
+    # Graticule lines (subtle grid every 30°)
+    graticule_lines = []
+    for lon in range(-180, 181, 30):
+        x = (lon + 180) * (960 / 360)
+        graticule_lines.append(
+            f"<line x1='{x:.0f}' y1='0' x2='{x:.0f}' y2='500' "
+            f"stroke='rgba(78,222,163,.04)' stroke-width='0.5'/>"
+        )
+    for lat in range(-90, 91, 30):
+        y = (90 - lat) * (500 / 180)
+        graticule_lines.append(
+            f"<line x1='0' y1='{y:.0f}' x2='960' y2='{y:.0f}' "
+            f"stroke='rgba(78,222,163,.04)' stroke-width='0.5'/>"
+        )
+    # Equator highlight
+    graticule_lines.append(
+        "<line x1='0' y1='250' x2='960' y2='250' "
+        "stroke='rgba(78,222,163,.1)' stroke-width='0.5'/>"
+    )
+
+    # Region labels (repositioned for proper equirectangular)
+    region_labels = [
+        (85, 460, "N.AMERICA"),
+        (330, 115, "EUROPE"),
+        (610, 145, "ASIA"),
+        (295, 310, "AFRICA"),
+        (740, 415, "OCEANIA"),
+        (145, 330, "S.AMERICA"),
+    ]
+    label_els = "".join(
+        f"<text x='{x}' y='{y}' font-size='8' fill='rgba(78,222,163,.25)' "
+        f"font-family='Space Grotesk,monospace' font-weight='700' "
+        f"letter-spacing='.12em'>{lbl}</text>"
+        for x, y, lbl in region_labels
+    )
+
     svg_html = (
         f"<svg id='world-map-svg' viewBox='0 0 960 500' "
         f"style='width:100%;max-width:960px;height:auto;display:block;"
@@ -1293,26 +1259,11 @@ def _render_world_map_visualization(
         f"border-radius:2px;cursor:default;' "
         f"role='img' aria-label='SIASA World Anomaly Map'>"
         f"<rect width='960' height='500' fill='#0b1326'/>"
-        # Ocean grid lines (subtle)
-        f"<line x1='0' y1='250' x2='960' y2='250' stroke='rgba(78,222,163,.06)' stroke-width='0.5'/>"
-        f"<line x1='480' y1='0' x2='480' y2='500' stroke='rgba(78,222,163,.06)' stroke-width='0.5'/>"
-        # Non-MVP continents
-        f"<path d='{other_bg}' fill='#131b2e' stroke='#0f1828' stroke-width='0.5'/>"
-        # MVP country paths
-        + "".join(path_elements) +
-        # Region labels
-        f"<text x='50' y='175' font-size='8' fill='rgba(78,222,163,.35)' "
-        f"font-family='Space Grotesk,monospace' font-weight='700' letter-spacing='.12em'>N.AMERICA</text>"
-        f"<text x='290' y='115' font-size='8' fill='rgba(78,222,163,.35)' "
-        f"font-family='Space Grotesk,monospace' font-weight='700' letter-spacing='.12em'>EUROPE</text>"
-        f"<text x='590' y='135' font-size='8' fill='rgba(78,222,163,.35)' "
-        f"font-family='Space Grotesk,monospace' font-weight='700' letter-spacing='.12em'>ASIA</text>"
-        f"<text x='290' y='255' font-size='8' fill='rgba(78,222,163,.35)' "
-        f"font-family='Space Grotesk,monospace' font-weight='700' letter-spacing='.1em'>AFRICA</text>"
-        f"<text x='700' y='380' font-size='8' fill='rgba(78,222,163,.35)' "
-        f"font-family='Space Grotesk,monospace' font-weight='700' letter-spacing='.1em'>OCEANIA</text>"
-        f"</svg>"
-        f"{map_js}"
+        + "".join(graticule_lines)
+        + "".join(path_elements)
+        + label_els
+        + f"</svg>"
+        + map_js
     )
 
     return (
@@ -1325,9 +1276,6 @@ def _render_world_map_visualization(
         + "<th>Priority</th><th>Freshness</th><th>Status</th></tr></thead>"
         + f"<tbody>{''.join(legend_rows)}</tbody></table>"
     )
-
-
-
 
 def _annotation_index(annotations_view_model: dict[str, Any] | None) -> dict[str, dict[str, Any]]:
     if annotations_view_model is None:
