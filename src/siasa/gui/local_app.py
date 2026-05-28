@@ -2830,6 +2830,189 @@ def _render_comparison(country_profile_read_models: dict[str, dict[str, Any]], *
     return _page("Cross-Country Comparison", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
+def _verdict_badge(verdict: str) -> str:
+    """Return a styled badge for a validation/replay verdict string."""
+    v = str(verdict).lower()
+    if v in ('match', 'full_match', 'confirmed', 'pass'):
+        css = 'badge-green'
+        icon = '✓'
+    elif v in ('match_with_gaps', 'partial', 'partial_match', 'support_check'):
+        css = 'badge-blue'
+        icon = '~'
+    elif v in ('mismatch', 'fail', 'failed', 'no_match'):
+        css = 'badge-red'
+        icon = '✗'
+    elif v in ('pending', 'open', 'review', 'n/a', 'none', ''):
+        css = 'badge-gray'
+        icon = '?'
+    else:
+        css = 'badge-amber'
+        icon = '!'
+    label = html.escape(str(verdict))
+    return f"<span class='badge {css}'>{icon} {label}</span>"
+
+
+def _attention_level_badge(level: str) -> str:
+    """Return a styled badge for an attention level."""
+    l = str(level).lower()
+    if 'high' in l or 'critical' in l:
+        css = 'badge-red'
+    elif 'medium' in l or 'moderate' in l:
+        css = 'badge-amber'
+    elif 'low' in l:
+        css = 'badge-green'
+    else:
+        css = 'badge-gray'
+    return f"<span class='badge {css}'>{html.escape(str(level))}</span>"
+
+
+def _evidence_tier_badge(tier: str) -> str:
+    """Return a styled badge for an evidence tier."""
+    t = str(tier).lower()
+    if t in ('high', 'tier_1', 'tier1', 'strong'):
+        css = 'badge-green'
+    elif t in ('medium', 'tier_2', 'tier2', 'moderate'):
+        css = 'badge-blue'
+    elif t in ('low', 'tier_3', 'tier3', 'weak'):
+        css = 'badge-amber'
+    elif t in ('insufficient', 'none', 'n/a', ''):
+        css = 'badge-gray'
+    else:
+        css = 'badge-gray'
+    return f"<span class='badge {css}'>{html.escape(str(tier))}</span>"
+
+
+def _render_validation_kpi_grid(
+    portfolio_summary: dict[str, Any],
+    historical_replay_summary: dict[str, Any],
+    historical_reference_review_summary: dict[str, Any],
+    review_verdict: str,
+) -> str:
+    case_count = portfolio_summary.get('case_count', 0)
+    countries = portfolio_summary.get('countries_covered', [])
+    replay_score = historical_replay_summary.get('average_replay_evidence_score', 'n/a')
+    status_match = historical_replay_summary.get('status_match_count', 'n/a')
+    attention_count = historical_replay_summary.get('attention_case_count', 0)
+    avg_domain_match = historical_replay_summary.get('average_domain_match_ratio', 'n/a')
+    ref_score = historical_reference_review_summary.get('average_evidence_score', 'n/a')
+
+    verdict_badge = _verdict_badge(review_verdict)
+
+    def _fmt_ratio(v: Any) -> str:
+        try:
+            return f"{float(v):.0%}"
+        except (TypeError, ValueError):
+            return str(v)
+
+    attention_color = '#ffb4ab' if attention_count and int(attention_count) > 0 else '#4edea3'
+    attention_style = f"style='color:{attention_color}'"
+
+    return (
+        "<div class='kpi-grid'>"
+        f"<div class='kpi-card'><span class='kpi-label'>Verdict</span>"
+        f"<div class='kpi-value' style='font-size:1rem;padding-top:4px'>{verdict_badge}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Cases</span>"
+        f"<div class='kpi-value'>{html.escape(str(case_count))}</div>"
+        f"<div class='kpi-sub'>{html.escape(', '.join(str(c) for c in countries))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Avg Domain Match</span>"
+        f"<div class='kpi-value'>{html.escape(_fmt_ratio(avg_domain_match))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Status Matches</span>"
+        f"<div class='kpi-value'>{html.escape(str(status_match))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Replay Evidence Score</span>"
+        f"<div class='kpi-value'>{html.escape(str(replay_score))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Ref. Evidence Score</span>"
+        f"<div class='kpi-value'>{html.escape(str(ref_score))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Attention Cases</span>"
+        f"<div class='kpi-value' {attention_style}>{html.escape(str(attention_count))}</div></div>"
+        "</div>"
+    )
+
+
+def _render_attention_case_cards(attention_cases: list[dict[str, Any]]) -> str:
+    """Render replay attention cases as structured cards instead of a raw table row."""
+    if not attention_cases:
+        return "<p style='color:#6b7d99;font-size:12px;'>No attention cases flagged.</p>"
+    cards = []
+    for case in attention_cases:
+        if not isinstance(case, dict):
+            continue
+        country = html.escape(str(case.get('country_id', 'n/a')))
+        case_id = html.escape(str(case.get('case_id', 'n/a')))
+        att_level = str(case.get('attention_level', 'n/a'))
+        reason = html.escape(str(case.get('attention_reason', 'n/a')))
+        owner = html.escape(str(case.get('owner_hint', 'n/a')))
+        verdict = str(case.get('review_verdict', 'n/a'))
+        tier = str(case.get('replay_evidence_tier', 'n/a'))
+        missing = [str(d) for d in case.get('missing_expected_domains', [])]
+        unexpected = [str(d) for d in case.get('unexpected_observed_domains', [])]
+        next_action = html.escape(str(case.get('suggested_next_action', 'n/a')))
+        src_coverage = case.get('replay_source_coverage_ratio', None)
+
+        missing_html = (
+            "".join(f"<span class='badge badge-orange'>{html.escape(d)}</span> " for d in missing)
+            if missing else "<span style='color:#6b7d99;font-size:11px;'>none</span>"
+        )
+        unexpected_html = (
+            "".join(f"<span class='badge badge-amber'>{html.escape(d)}</span> " for d in unexpected)
+            if unexpected else "<span style='color:#6b7d99;font-size:11px;'>none</span>"
+        )
+
+        src_cov_html = ""
+        if src_coverage is not None:
+            try:
+                pct = f"{float(src_coverage):.0%}"
+                src_cov_html = f"<span class='kpi-sub'>Source coverage: {html.escape(pct)}</span>"
+            except (TypeError, ValueError):
+                src_cov_html = f"<span class='kpi-sub'>Source coverage: {html.escape(str(src_coverage))}</span>"
+
+        cards.append(
+            "<div class='panel' style='border-left:3px solid rgba(255,180,171,.5);'>"
+            "<div style='display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:10px;'>"
+            f"<div><span class='mono' style='font-size:0.75rem;color:#4edea3;'>{country}</span>"
+            f"<span style='color:#4b5778;margin:0 6px;'>·</span>"
+            f"<span class='mono' style='font-size:0.75rem;color:#8b9ab8;'>{case_id}</span></div>"
+            f"<div style='display:flex;gap:6px;flex-wrap:wrap;'>{_attention_level_badge(att_level)}"
+            f"{_verdict_badge(verdict)}{_evidence_tier_badge(tier)}</div>"
+            "</div>"
+            f"<p style='margin:0 0 8px;color:#b9c7e0;'><strong>Reason:</strong> {reason}</p>"
+            f"<p style='margin:0 0 6px;color:#b9c7e0;'><strong>Follow-up owner:</strong> {owner}</p>"
+            f"<div style='margin:8px 0;'>"
+            f"<span class='kpi-label' style='display:inline;margin-right:8px;'>Missing domains:</span>{missing_html}"
+            f"</div>"
+            f"<div style='margin:8px 0;'>"
+            f"<span class='kpi-label' style='display:inline;margin-right:8px;'>Unexpected domains:</span>{unexpected_html}"
+            f"</div>"
+            f"<div style='margin-top:10px;padding-top:8px;border-top:1px solid rgba(78,222,163,.06);'>"
+            f"<span class='kpi-label'>Suggested action:</span> "
+            f"<span style='color:#dae2fd;font-size:12px;'>{next_action}</span>"
+            f"{src_cov_html}"
+            "</div>"
+            "</div>"
+        )
+    return "".join(cards)
+
+
+def _render_verdict_distribution_bars(verdict_counts: dict[str, int]) -> str:
+    """Render a simple inline bar chart for verdict distributions."""
+    if not verdict_counts:
+        return "<p style='color:#6b7d99;font-size:12px;'>No data.</p>"
+    total = sum(verdict_counts.values()) or 1
+    rows = []
+    for verdict, count in sorted(verdict_counts.items()):
+        pct = count / total
+        width = max(4, int(pct * 200))
+        badge = _verdict_badge(verdict)
+        bar_color = '#4edea3' if 'match' in verdict.lower() else '#ffb4ab' if 'mismatch' in verdict.lower() else '#8b9ab8'
+        rows.append(
+            "<div style='display:flex;align-items:center;gap:10px;margin:6px 0;'>"
+            f"<div style='min-width:170px;'>{badge}</div>"
+            f"<div style='background:{bar_color};height:6px;border-radius:1px;width:{width}px;opacity:.7;'></div>"
+            f"<span style='color:#8b9ab8;font-size:11px;font-family:\"Space Grotesk\",monospace;'>{count}</span>"
+            "</div>"
+        )
+    return "".join(rows)
+
+
 def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
     time_range = validation_view_model.get('time_range', {})
     can_create_annotation_drafts = available_pages is not None and 'annotations.html' in available_pages
@@ -3019,342 +3202,252 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         f"<li>{html.escape(str(item))}</li>"
         for item in unexpected_observed_domain_values
     ) or "<li>none</li>"
-    body = (
-        "<h2>Validation / Backtest View</h2>"
-        f"<p>Case ID: <strong>{html.escape(str(validation_view_model.get('case_id', 'n/a')))}</strong></p>"
-        f"<p>Country: <strong>{html.escape(str(validation_view_model.get('country_id', 'n/a')))}</strong></p>"
-        f"<p>Case: {html.escape(str(validation_view_model.get('case_name', 'n/a')))}</p>"
-        f"<p>Time Range: {html.escape(str(time_range.get('start', 'n/a')))} to {html.escape(str(time_range.get('end', 'n/a')))}</p>"
-        "<h3>Review Summary</h3>"
-        f"<p>Review verdict: <strong>{html.escape(str(review_verdict))}</strong></p>"
-        f"<p>Expected Domains: {html.escape(', '.join(expected_domains))}</p>"
-        f"<p>Observed Domains: {html.escape(', '.join(observed_domains))}</p>"
-        f"<p>Domain Match Ratio: {html.escape(str(validation_view_model.get('domain_match_ratio', 'n/a')))}</p>"
-        f"<p>Status Match: {html.escape(str(validation_view_model.get('status_match', 'n/a')))}</p>"
-        f"<h4>Missing Expected Domains</h4><ul>{missing_expected_domains}</ul>"
-        f"<h4>Unexpected Observed Domains</h4><ul>{unexpected_observed_domains}</ul>"
-        f"<h3>Expected Pattern</h3><p>{html.escape(str(validation_view_model.get('expected_pattern', 'n/a')))}</p>"
-        f"<h3>Validation Goal</h3><p>{html.escape(str(validation_view_model.get('validation_goal', 'n/a')))}</p>"
-        f"<h3>Reference Sources</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in validation_view_model.get('reference_sources', []))}</ul>"
-        f"<h3>Validation Metrics</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in validation_view_model.get('validation_metrics', []))}</ul>"
-        f"<h3>Known Limitations</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in validation_view_model.get('known_limitations', []))}</ul>"
-        "<h3>Reference Case Portfolio Summary</h3>"
-        f"<p>Validation Cases: <strong>{html.escape(str(portfolio_summary.get('case_count', len(validation_cases))))}</strong></p>"
-        f"<p>Countries Covered: {html.escape(', '.join(str(item) for item in portfolio_summary.get('countries_covered', [])))}</p>"
-        "<table><thead><tr><th>Review Verdict</th><th>Count</th></tr></thead>"
-        f"<tbody>{verdict_count_rows}</tbody></table>"
-        "<h3>Validation Case Portfolio</h3>"
-        "<table><thead><tr><th>Country</th><th>Case ID</th><th>Review Verdict</th><th>Expected Domains</th><th>Observed Domains</th></tr></thead>"
-        f"<tbody>{portfolio_case_rows}</tbody></table>"
-        "<h3>Curated Reference Case Library</h3>"
-        f"<p>Library Cases: <strong>{html.escape(str(reference_case_library_summary.get('case_count', len(reference_case_library))))}</strong></p>"
-        f"<p>Countries Covered: {html.escape(', '.join(str(item) for item in reference_case_library_summary.get('countries_covered', [])))}</p>"
-        f"<p>Library Time Range: {html.escape(str((reference_case_library_summary.get('time_range') or {}).get('start', 'n/a')))} to {html.escape(str((reference_case_library_summary.get('time_range') or {}).get('end', 'n/a')))}</p>"
-        "<table><thead><tr><th>Case Type</th><th>Count</th></tr></thead>"
-        f"<tbody>{reference_case_type_rows}</tbody></table>"
-        "<table><thead><tr><th>Country</th><th>Case ID</th><th>Case Type</th><th>Case</th><th>Time Range</th><th>Expected Domains</th></tr></thead>"
-        f"<tbody>{reference_case_rows}</tbody></table>"
-        "<h3>Historical Reference Review Summary</h3>"
-        f"<p>Average Evidence Score: <strong>{html.escape(str(historical_reference_review_summary.get('average_evidence_score', 'n/a')))}</strong></p>"
-        "<table><thead><tr><th>Review Verdict</th><th>Count</th></tr></thead>"
-        f"<tbody>{historical_reference_verdict_rows}</tbody></table>"
-        "<table><thead><tr><th>Evidence Tier</th><th>Count</th></tr></thead>"
-        f"<tbody>{historical_reference_tier_rows}</tbody></table>"
-        "<h3>Historical Reference Reviews</h3>"
-        "<table><thead><tr><th>Country</th><th>Case ID</th><th>Review Verdict</th><th>Evidence Tier</th><th>Evidence Score</th><th>Expected Status</th><th>Historical Observed Status</th></tr></thead>"
-        f"<tbody>{historical_reference_rows}</tbody></table>"
-        "<h3>Historical Replay Summary</h3>"
-        f"<p>Average Domain Match Ratio: <strong>{html.escape(str(historical_replay_summary.get('average_domain_match_ratio', 'n/a')))}</strong></p>"
-        f"<p>Status Match Count: <strong>{html.escape(str(historical_replay_summary.get('status_match_count', 'n/a')))}</strong></p>"
-        f"<p>Average Replay Evidence Score: <strong>{html.escape(str(historical_replay_summary.get('average_replay_evidence_score', 'n/a')))}</strong></p>"
-        f"<p>Average Replay Source Coverage Ratio: <strong>{html.escape(str(historical_replay_summary.get('average_replay_source_coverage_ratio', 'n/a')))}</strong></p>"
-        f"<p>Average Replay Provenance Completeness Ratio: <strong>{html.escape(str(historical_replay_summary.get('average_replay_provenance_completeness_ratio', 'n/a')))}</strong></p>"
-        f"<p>Replay Input Record Total: <strong>{html.escape(str(historical_replay_summary.get('replay_input_record_total', 'n/a')))}</strong></p>"
-        f"<p>Archival Data Files: <strong>{html.escape(str(historical_replay_summary.get('archival_data_file_count', 'n/a')))}</strong></p>"
-        "<table><thead><tr><th>Replay Verdict</th><th>Count</th></tr></thead>"
-        f"<tbody>{historical_replay_verdict_rows}</tbody></table>"
-        "<table><thead><tr><th>Replay Basis</th><th>Count</th></tr></thead>"
-        f"<tbody>{historical_replay_basis_rows}</tbody></table>"
-        "<h4>Replay Evidence Tiers</h4>"
-        "<table><thead><tr><th>Evidence Tier</th><th>Count</th></tr></thead>"
-        f"<tbody>{historical_replay_evidence_tier_rows}</tbody></table>"
-        "<h4>Replay Source Coverage</h4>"
-        "<table><thead><tr><th>Source</th><th>Case Count</th></tr></thead>"
-        f"<tbody>{historical_replay_source_coverage_rows}</tbody></table>"
-        "<h4>Replay Attention Summary</h4>"
-        "<table><thead><tr><th>Attention Level</th><th>Count</th></tr></thead>"
-        f"<tbody>{replay_attention_level_rows}</tbody></table>"
-        "<table><thead><tr><th>Reason</th><th>Count</th></tr></thead>"
-        f"<tbody>{replay_attention_reason_rows}</tbody></table>"
-        "<table><thead><tr><th>Follow-up Owner</th><th>Count</th></tr></thead>"
-        f"<tbody>{replay_attention_owner_rows}</tbody></table>"
-        "<h5>Attention by Country</h5>"
-        "<table><thead><tr><th>Country</th><th>Attention Cases</th><th>Highest Attention Level</th><th>Case IDs</th></tr></thead>"
-        f"<tbody>{replay_attention_country_rows}</tbody></table>"
-        "<h4>Replay Attention Watchlist</h4>"
-        f"<p>Attention Cases: <strong>{html.escape(str(historical_replay_summary.get('attention_case_count', 0)))}</strong></p>"
-        "<div><label for='replay-attention-level-filter'>Attention level:</label> "
-        "<input id='replay-attention-level-filter' type='text' placeholder='e.g. high'/> "
-        "<label for='replay-attention-owner-filter'>Owner:</label> "
-        "<input id='replay-attention-owner-filter' type='text' placeholder='e.g. validation governance'/> "
-        "<label for='replay-attention-reason-filter'>Reason:</label> "
-        "<input id='replay-attention-reason-filter' type='text' placeholder='e.g. domain_coverage_gap'/> "
-        "<label for='replay-attention-verdict-filter'>Replay verdict:</label> "
-        "<input id='replay-attention-verdict-filter' type='text' placeholder='e.g. warning'/> "
-        "<label for='replay-attention-tier-filter'>Evidence tier:</label> "
-        "<input id='replay-attention-tier-filter' type='text' placeholder='e.g. strong_replay_evidence'/> "
-        "<label for='replay-attention-text-filter'>Search:</label> "
-        "<input id='replay-attention-text-filter' type='text' placeholder='country, case, action...'/> "
-        "<label for='replay-attention-sort'>Sort:</label> "
-        "<select id='replay-attention-sort'><option value='default'>Default</option><option value='level-desc'>Level (high→low)</option><option value='level-asc'>Level (low→high)</option><option value='country-asc'>Country (A→Z)</option><option value='case-asc'>Case ID (A→Z)</option></select> "
-        "<button id='replay-attention-reset' type='button'>Reset filters</button> "
-        "<button id='replay-attention-export-csv' type='button'>Export visible as CSV</button> "
-        "<button id='replay-attention-copy-csv' type='button'>Copy visible CSV</button> "
-        "<button id='replay-attention-copy-link' type='button'>Copy filter link</button> "
-        "<span id='replay-attention-copy-status'></span> "
-        "<span id='replay-attention-link-status'></span> "
-        "<label for='replay-attention-preset'>Quick preset:</label> "
-        "<select id='replay-attention-preset'><option value='none'>None</option><option value='high-only'>High only</option><option value='governance-only'>Governance only</option><option value='domain-gap-only'>Domain gap only</option><option value='warning-weak-evidence'>Warning + weak evidence</option><option value='mismatch-only'>Mismatch only</option></select> "
-        "<span id='replay-attention-visible-count'></span> "
-        "<span id='replay-attention-visible-breakdown'></span> "
-        "<span id='replay-attention-visible-verdict-breakdown'></span> "
-        "<span id='replay-attention-active-state'></span></div>"
-        "<table><thead><tr><th>Country</th><th>Case ID</th><th>Attention Level</th><th>Reason</th><th>Follow-up Owner</th><th>Replay Verdict</th><th>Replay Evidence Tier</th><th>Gap Signals</th><th>Suggested Next Action</th><th>Action</th></tr></thead>"
-        f"<tbody>{replay_attention_rows}</tbody></table>"
-        "<script>"
-        "(function(){"
-        "const levelInput=document.getElementById('replay-attention-level-filter');"
-        "const ownerInput=document.getElementById('replay-attention-owner-filter');"
-        "const reasonInput=document.getElementById('replay-attention-reason-filter');"
-        "const textInput=document.getElementById('replay-attention-text-filter');"
-        "const verdictInput=document.getElementById('replay-attention-verdict-filter');"
-        "const tierInput=document.getElementById('replay-attention-tier-filter');"
-        "const sortSelect=document.getElementById('replay-attention-sort');"
-        "const resetButton=document.getElementById('replay-attention-reset');"
-        "const exportCsvButton=document.getElementById('replay-attention-export-csv');"
-        "const copyCsvButton=document.getElementById('replay-attention-copy-csv');"
-        "const copyLinkButton=document.getElementById('replay-attention-copy-link');"
-        "const copyStatus=document.getElementById('replay-attention-copy-status');"
-        "const linkStatus=document.getElementById('replay-attention-link-status');"
-        "const presetSelect=document.getElementById('replay-attention-preset');"
-        "const countEl=document.getElementById('replay-attention-visible-count');"
-        "const breakdownEl=document.getElementById('replay-attention-visible-breakdown');"
-        "const verdictBreakdownEl=document.getElementById('replay-attention-visible-verdict-breakdown');"
-        "const activeStateEl=document.getElementById('replay-attention-active-state');"
-        "const rows=Array.from(document.querySelectorAll('tr.replay-attention-row'));"
-        "const levelRank={high:3,medium:2,low:1};"
-        "function clearReplayAttentionCopyStatuses(){if(copyStatus){copyStatus.textContent='';}if(linkStatus){linkStatus.textContent='';}}"
-        "function renderReplayAttentionActiveState(level,owner,reason,verdict,tier,text,sortKey,preset){if(!activeStateEl){return;}const parts=[];if(preset&&preset!=='none'){parts.push('preset='+preset);}if(level){parts.push('level='+level);}if(owner){parts.push('owner='+owner);}if(reason){parts.push('reason='+reason);}if(verdict){parts.push('verdict='+verdict);}if(tier){parts.push('tier='+tier);}if(text){parts.push('search='+text);}if(sortKey&&sortKey!=='default'){parts.push('sort='+sortKey);}activeStateEl.textContent=parts.length?('Active: '+parts.join(' | ')):'Active: default';}"
-        "const defaultOrder=rows.slice();"
-        "const tbody=(rows[0]&&rows[0].parentElement)||null;"
-        "function rowCellValue(row,index){const cell=row.cells[index];return (cell&&cell.textContent||'').trim().toLowerCase();}"
-        "function csvEscape(value){const text=String(value||'');if(/[\",\n]/.test(text)){return '"'+text.replace(/"/g,'""')+'"';}return text;}"
-        "function replayAttentionCsvColumnsFromRow(row){"
-        "const cols=Array.from(row.cells).map(function(cell){return (cell&&cell.textContent||'').trim();});"
-        "const link=(row.querySelector('a.replay-attention-create-annotation')||{}).getAttribute?row.querySelector('a.replay-attention-create-annotation').getAttribute('href'):'';"
-        "const query=(link&&link.indexOf('?')>=0)?link.split('?')[1]:'';"
-        "const params=new URLSearchParams(query||'');"
-        "return ["
-        "cols[0]||'',"
-        "cols[1]||'',"
-        "cols[2]||'',"
-        "cols[3]||'',"
-        "cols[4]||'',"
-        "cols[5]||'',"
-        "cols[6]||'',"
-        "params.get('replay_evidence_score')||'',"
-        "params.get('domain_match_ratio')||'',"
-        "params.get('missing_expected_domains')||'',"
-        "params.get('unexpected_observed_domains')||'',"
-        "cols[7]||'',"
-        "cols[8]||''"
-        "];"
-        "}"
-        "function exportVisibleReplayAttentionCsv(){"
-        "const visibleRows=rows.filter(function(row){return row.style.display!=='none';});"
-        "const header=['country_id','case_id','attention_level','attention_reason','owner_hint','review_verdict','replay_evidence_tier','replay_evidence_score','domain_match_ratio','missing_expected_domains','unexpected_observed_domains','gap_signals','suggested_next_action'];"
-        "const lines=[header.join(',')];"
-        "visibleRows.forEach(function(row){"
-        "lines.push(replayAttentionCsvColumnsFromRow(row).map(csvEscape).join(','));"
-        "});"
-        "const csvContent=lines.join('\\n');"
-        "const blob=new Blob([csvContent],{type:'text/csv;charset=utf-8;'});"
-        "const url=URL.createObjectURL(blob);"
-        "const link=document.createElement('a');"
-        "const preset=(presetSelect&&presetSelect.value&&presetSelect.value!=='none')?presetSelect.value:'all';"
-        "const sortKey=(sortSelect&&sortSelect.value)?sortSelect.value:'default';"
-        "const filename='replay_attention_watchlist_'+preset+'_'+sortKey+'.csv';"
-        "link.href=url;"
-        "link.download=filename;"
-        "document.body.appendChild(link);"
-        "link.click();"
-        "document.body.removeChild(link);"
-        "URL.revokeObjectURL(url);"
-        "}"
-        "function buildVisibleReplayAttentionCsvText(){"
-        "const visibleRows=rows.filter(function(row){return row.style.display!=='none';});"
-        "const header=['country_id','case_id','attention_level','attention_reason','owner_hint','review_verdict','replay_evidence_tier','replay_evidence_score','domain_match_ratio','missing_expected_domains','unexpected_observed_domains','gap_signals','suggested_next_action'];"
-        "const lines=[header.join(',')];"
-        "visibleRows.forEach(function(row){"
-        "lines.push(replayAttentionCsvColumnsFromRow(row).map(csvEscape).join(','));"
-        "});"
-        "return lines.join('\\n');"
-        "}"
-        "function copyVisibleReplayAttentionCsv(){"
-        "const csvText=buildVisibleReplayAttentionCsvText();"
-        "if(navigator.clipboard&&navigator.clipboard.writeText){"
-        "navigator.clipboard.writeText(csvText).then(function(){if(copyStatus){copyStatus.textContent='Copied CSV';}}).catch(function(){if(copyStatus){copyStatus.textContent='Copy failed';}});"
-        "}else{"
-        "if(copyStatus){copyStatus.textContent='Clipboard API unavailable';}"
-        "}"
-        "}"
-        "function buildReplayAttentionShareUrl(){"
-        "const current=new URL(window.location.href);"
-        "const params=new URLSearchParams();"
-        "const level=(levelInput&&levelInput.value||'').trim();"
-        "const owner=(ownerInput&&ownerInput.value||'').trim();"
-        "const reason=(reasonInput&&reasonInput.value||'').trim();"
-        "const verdict=(verdictInput&&verdictInput.value||'').trim();"
-        "const tier=(tierInput&&tierInput.value||'').trim();"
-        "const text=(textInput&&textInput.value||'').trim();"
-        "const sort=(sortSelect&&sortSelect.value||'default').trim();"
-        "const preset=(presetSelect&&presetSelect.value||'none').trim();"
-        "if(level){params.set('ra_level',level);}"
-        "if(owner){params.set('ra_owner',owner);}"
-        "if(reason){params.set('ra_reason',reason);}"
-        "if(verdict){params.set('ra_verdict',verdict);}"
-        "if(tier){params.set('ra_tier',tier);}"
-        "if(text){params.set('ra_text',text);}"
-        "if(sort&&sort!=='default'){params.set('ra_sort',sort);}"
-        "if(preset&&preset!=='none'){params.set('ra_preset',preset);}"
-        "const query=params.toString();"
-        "current.hash=query?('ra='+encodeURIComponent(query)):'';"
-        "return current.toString();"
-        "}"
-        "function persistReplayAttentionStateToHash(){"
-        "const current=new URL(window.location.href);"
-        "const params=new URLSearchParams();"
-        "const level=(levelInput&&levelInput.value||'').trim();"
-        "const owner=(ownerInput&&ownerInput.value||'').trim();"
-        "const reason=(reasonInput&&reasonInput.value||'').trim();"
-        "const verdict=(verdictInput&&verdictInput.value||'').trim();"
-        "const tier=(tierInput&&tierInput.value||'').trim();"
-        "const text=(textInput&&textInput.value||'').trim();"
-        "const sort=(sortSelect&&sortSelect.value||'default').trim();"
-        "const preset=(presetSelect&&presetSelect.value||'none').trim();"
-        "if(level){params.set('ra_level',level);}"
-        "if(owner){params.set('ra_owner',owner);}"
-        "if(reason){params.set('ra_reason',reason);}"
-        "if(verdict){params.set('ra_verdict',verdict);}"
-        "if(tier){params.set('ra_tier',tier);}"
-        "if(text){params.set('ra_text',text);}"
-        "if(sort&&sort!=='default'){params.set('ra_sort',sort);}"
-        "if(preset&&preset!=='none'){params.set('ra_preset',preset);}"
-        "const query=params.toString();"
-        "const newHash=query?('#ra='+encodeURIComponent(query)):'';"
-        "if(window.location.hash!==newHash){history.replaceState(null,'',current.pathname+current.search+newHash);}"
-        "}"
-        "function applyReplayAttentionStateFromHash(){"
-        "const hash=(window.location.hash||'').replace(/^#/,'');"
-        "if(hash.indexOf('ra=')!==0){return;}"
-        "let decoded='';"
-        "try{decoded=decodeURIComponent(hash.slice(3));}catch(_err){decoded='';}"
-        "if(!decoded){return;}"
-        "const params=new URLSearchParams(decoded);"
-        "const setIfPresent=function(el,key){if(el&&params.get(key)!==null){el.value=params.get(key)||'';}};"
-        "setIfPresent(levelInput,'ra_level');"
-        "setIfPresent(ownerInput,'ra_owner');"
-        "setIfPresent(reasonInput,'ra_reason');"
-        "setIfPresent(textInput,'ra_text');"
-        "setIfPresent(verdictInput,'ra_verdict');"
-        "setIfPresent(tierInput,'ra_tier');"
-        "setIfPresent(sortSelect,'ra_sort');"
-        "setIfPresent(presetSelect,'ra_preset');"
-        "}"
-        "function copyReplayAttentionFilterLink(){"
-        "const shareUrl=buildReplayAttentionShareUrl();"
-        "if(navigator.clipboard&&navigator.clipboard.writeText){"
-        "navigator.clipboard.writeText(shareUrl).then(function(){if(linkStatus){linkStatus.textContent='Copied link';}}).catch(function(){if(linkStatus){linkStatus.textContent='Copy link failed';}});"
-        "}else{"
-        "if(linkStatus){linkStatus.textContent='Clipboard API unavailable';}"
-        "}"
-        "}"
-        "function applyReplayAttentionFilters(){"
-        "clearReplayAttentionCopyStatuses();"
-        "const level=(levelInput&&levelInput.value||'').trim().toLowerCase();"
-        "const owner=(ownerInput&&ownerInput.value||'').trim().toLowerCase();"
-        "const reason=(reasonInput&&reasonInput.value||'').trim().toLowerCase();"
-        "const verdict=(verdictInput&&verdictInput.value||'').trim().toLowerCase();"
-        "const tier=(tierInput&&tierInput.value||'').trim().toLowerCase();"
-        "const text=(textInput&&textInput.value||'').trim().toLowerCase();"
-        "const sortKey=(sortSelect&&sortSelect.value)?sortSelect.value:'default';"
-        "const preset=(presetSelect&&presetSelect.value)?presetSelect.value:'none';"
-        "let visible=0;"
-        "let visibleHigh=0;"
-        "let visibleMedium=0;"
-        "let visibleLow=0;"
-        "const verdictCounts={};"
-        "rows.forEach(function(row){"
-        "const rowLevel=(row.getAttribute('data-attention-level')||'').toLowerCase();"
-        "const rowOwner=(row.getAttribute('data-attention-owner')||'').toLowerCase();"
-        "const rowReason=(row.getAttribute('data-attention-reason')||'').toLowerCase();"
-        "const rowVerdict=rowCellValue(row,5);"
-        "const rowTier=rowCellValue(row,6);"
-        "const verdictKey=rowVerdict||'unknown';"
-        "const rowText=(row.textContent||'').toLowerCase();"
-        "const matches=(!level||rowLevel.indexOf(level)!==-1)&&(!owner||rowOwner.indexOf(owner)!==-1)&&(!reason||rowReason.indexOf(reason)!==-1)&&(!verdict||rowVerdict.indexOf(verdict)!==-1)&&(!tier||rowTier.indexOf(tier)!==-1)&&(!text||rowText.indexOf(text)!==-1);"
-        "row.style.display=matches?'':'none';"
-        "if(matches){visible+=1;if(rowLevel==='high'){visibleHigh+=1;}else if(rowLevel==='medium'){visibleMedium+=1;}else if(rowLevel==='low'){visibleLow+=1;}verdictCounts[verdictKey]=(verdictCounts[verdictKey]||0)+1;}"
-        "});"
-        "if(tbody){"
-        "const sorted=rows.slice().sort(function(a,b){"
-        "if(sortKey==='level-desc'){return (levelRank[rowCellValue(b,2)]||0)-(levelRank[rowCellValue(a,2)]||0);}"
-        "if(sortKey==='level-asc'){return (levelRank[rowCellValue(a,2)]||0)-(levelRank[rowCellValue(b,2)]||0);}"
-        "if(sortKey==='country-asc'){return rowCellValue(a,0).localeCompare(rowCellValue(b,0));}"
-        "if(sortKey==='case-asc'){return rowCellValue(a,1).localeCompare(rowCellValue(b,1));}"
-        "return defaultOrder.indexOf(a)-defaultOrder.indexOf(b);"
-        "});"
-        "sorted.forEach(function(row){tbody.appendChild(row);});"
-        "}"
-        "if(countEl){countEl.textContent='Visible attention rows: '+visible;}"
-        "if(breakdownEl){breakdownEl.textContent='(high='+visibleHigh+', medium='+visibleMedium+', low='+visibleLow+')';}"
-        "if(verdictBreakdownEl){const verdictSummary=Object.keys(verdictCounts).sort().map(function(key){return key+'='+verdictCounts[key];}).join(', ');verdictBreakdownEl.textContent=verdictSummary?(' | verdicts: '+verdictSummary):' | verdicts: none';}"
-        "renderReplayAttentionActiveState(level,owner,reason,verdict,tier,text,sortKey,preset);"
-        "persistReplayAttentionStateToHash();"
-        "}"
-        "if(levelInput){levelInput.addEventListener('input',function(){if(presetSelect){presetSelect.value='none';}applyReplayAttentionFilters();});}"
-        "if(ownerInput){ownerInput.addEventListener('input',function(){if(presetSelect){presetSelect.value='none';}applyReplayAttentionFilters();});}"
-        "if(reasonInput){reasonInput.addEventListener('input',function(){if(presetSelect){presetSelect.value='none';}applyReplayAttentionFilters();});}"
-        "if(textInput){textInput.addEventListener('input',function(){if(presetSelect){presetSelect.value='none';}applyReplayAttentionFilters();});}"
-        "if(verdictInput){verdictInput.addEventListener('input',function(){if(presetSelect){presetSelect.value='none';}applyReplayAttentionFilters();});}"
-        "if(tierInput){tierInput.addEventListener('input',function(){if(presetSelect){presetSelect.value='none';}applyReplayAttentionFilters();});}"
-        "if(sortSelect){sortSelect.addEventListener('change',applyReplayAttentionFilters);}"
-        "if(presetSelect){presetSelect.addEventListener('change',function(){"
-        "const preset=presetSelect.value||'none';"
-        "if(preset==='high-only'){if(levelInput){levelInput.value='high';}if(ownerInput){ownerInput.value='';}if(reasonInput){reasonInput.value='';}if(verdictInput){verdictInput.value='';}if(tierInput){tierInput.value='';}if(textInput){textInput.value='';}}"
-        "else if(preset==='governance-only'){if(levelInput){levelInput.value='';}if(ownerInput){ownerInput.value='validation governance';}if(reasonInput){reasonInput.value='';}if(verdictInput){verdictInput.value='';}if(tierInput){tierInput.value='';}if(textInput){textInput.value='';}}"
-        "else if(preset==='domain-gap-only'){if(levelInput){levelInput.value='';}if(ownerInput){ownerInput.value='';}if(reasonInput){reasonInput.value='domain_coverage_gap';}if(verdictInput){verdictInput.value='';}if(tierInput){tierInput.value='';}if(textInput){textInput.value='';}}"
-        "else if(preset==='warning-weak-evidence'){if(levelInput){levelInput.value='';}if(ownerInput){ownerInput.value='';}if(reasonInput){reasonInput.value='';}if(verdictInput){verdictInput.value='warning';}if(tierInput){tierInput.value='weak_replay_evidence';}if(textInput){textInput.value='';}}"
-        "else if(preset==='mismatch-only'){if(levelInput){levelInput.value='';}if(ownerInput){ownerInput.value='';}if(reasonInput){reasonInput.value='status_mismatch_and_domain_gap';}if(verdictInput){verdictInput.value='replay_mismatch';}if(tierInput){tierInput.value='';}if(textInput){textInput.value='';}}"
-        "else {if(levelInput){levelInput.value='';}if(ownerInput){ownerInput.value='';}if(reasonInput){reasonInput.value='';}if(verdictInput){verdictInput.value='';}if(tierInput){tierInput.value='';}if(textInput){textInput.value='';}}"
-        "applyReplayAttentionFilters();"
-        "});}"
-        "if(resetButton){resetButton.addEventListener('click',function(){if(levelInput){levelInput.value='';}if(ownerInput){ownerInput.value='';}if(reasonInput){reasonInput.value='';}if(verdictInput){verdictInput.value='';}if(tierInput){tierInput.value='';}if(textInput){textInput.value='';}if(sortSelect){sortSelect.value='default';}if(presetSelect){presetSelect.value='none';}applyReplayAttentionFilters();});}"
-        "if(exportCsvButton){exportCsvButton.addEventListener('click',exportVisibleReplayAttentionCsv);}"
-        "if(copyCsvButton){copyCsvButton.addEventListener('click',copyVisibleReplayAttentionCsv);}"
-        "if(copyLinkButton){copyLinkButton.addEventListener('click',copyReplayAttentionFilterLink);}"
-        "applyReplayAttentionStateFromHash();"
-        "applyReplayAttentionFilters();"
-        "})();"
-        "</script>"
-        "<h3>Historical Replay Reviews</h3>"
-        "<table><thead><tr><th>Country</th><th>Case ID</th><th>Replay Verdict</th><th>Replay Basis</th><th>Replay Evidence Tier</th><th>Replay Evidence Score</th><th>Replay Sources</th><th>Archival Data Files</th><th>Expected Status</th><th>Replayed Status</th><th>Domain Match Ratio</th><th>Replay Input Records</th></tr></thead>"
-        f"<tbody>{historical_replay_rows}</tbody></table>"
-        "<h3>Changed Versions</h3>"
-        f"<ul>{changed_versions}</ul>"
-        f"<h3>Reprocessing Comparison</h3>{_json_block(reprocessing)}"
+    # --- KPI header ---
+    kpi_grid = _render_validation_kpi_grid(
+        portfolio_summary, historical_replay_summary, historical_reference_review_summary, review_verdict
     )
-    return _page("Validation / Backtest View", body, nav_prefix=nav_prefix, available_pages=available_pages)
+
+    # --- Case meta panel ---
+    case_meta = (
+        "<div class='panel'><div class='panel-header'>Active Case</div>"
+        "<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 24px;'>"
+        f"<div><span class='kpi-label'>Case ID</span><div class='mono' style='color:#4edea3;font-size:0.75rem;'>{html.escape(str(validation_view_model.get('case_id', 'n/a')))}</div></div>"
+        f"<div><span class='kpi-label'>Country</span><div style='font-size:1rem;font-weight:600;color:#dae2fd;'>{html.escape(str(validation_view_model.get('country_id', 'n/a')))}</div></div>"
+        f"<div><span class='kpi-label'>Case Name</span><div style='color:#b9c7e0;font-size:12px;'>{html.escape(str(validation_view_model.get('case_name', 'n/a')))}</div></div>"
+        f"<div><span class='kpi-label'>Time Range</span><div class='mono' style='color:#8b9ab8;font-size:0.75rem;'>{html.escape(str(time_range.get('start', 'n/a')))} → {html.escape(str(time_range.get('end', 'n/a')))}</div></div>"
+        f"<div><span class='kpi-label'>Verdict</span><div style='padding-top:4px;'>{_verdict_badge(review_verdict)}</div></div>"
+        "</div></div>"
+    )
+
+    # --- Domain signal panel ---
+    exp_badges = "".join(f"<span class='badge badge-blue'>{html.escape(d)}</span> " for d in expected_domains) or "<span style='color:#6b7d99;font-size:11px;'>none</span>"
+    obs_badges = "".join(f"<span class='badge badge-green'>{html.escape(d)}</span> " for d in observed_domains) or "<span style='color:#6b7d99;font-size:11px;'>none</span>"
+    missing_badges = (
+        "".join(f"<span class='badge badge-orange'>{html.escape(str(item))}</span> " for item in missing_expected_domain_values)
+        or "<span style='color:#6b7d99;font-size:11px;'>none</span>"
+    )
+    unexpected_badges = (
+        "".join(f"<span class='badge badge-amber'>{html.escape(str(item))}</span> " for item in unexpected_observed_domain_values)
+        or "<span style='color:#6b7d99;font-size:11px;'>none</span>"
+    )
+    domain_panel = (
+        "<div class='panel'><div class='panel-header'>Domain Signal</div>"
+        "<div style='display:grid;grid-template-columns:1fr 1fr;gap:16px;'>"
+        f"<div><span class='kpi-label'>Expected</span><div style='margin-top:6px;'>{exp_badges}</div></div>"
+        f"<div><span class='kpi-label'>Observed</span><div style='margin-top:6px;'>{obs_badges}</div></div>"
+        "</div>"
+        f"<div style='margin-top:12px;'><span class='kpi-label' style='margin-right:8px;'>Missing:</span>{missing_badges}</div>"
+        f"<div style='margin-top:6px;'><span class='kpi-label' style='margin-right:8px;'>Unexpected:</span>{unexpected_badges}</div>"
+        f"<div style='margin-top:12px;display:flex;gap:20px;'>"
+        f"<span><span class='kpi-label'>Domain Match Ratio:</span> <strong style='color:#dae2fd;'>{html.escape(str(validation_view_model.get('domain_match_ratio', 'n/a')))}</strong></span>"
+        f"<span><span class='kpi-label'>Status Match:</span> <strong style='color:#dae2fd;'>{html.escape(str(validation_view_model.get('status_match', 'n/a')))}</strong></span>"
+        "</div>"
+        "</div>"
+    )
+
+    # --- Goal & Context panel ---
+    sources_list = "".join(f"<li>{html.escape(str(item))}</li>" for item in validation_view_model.get('reference_sources', []))
+    metrics_list = "".join(f"<li>{html.escape(str(item))}</li>" for item in validation_view_model.get('validation_metrics', []))
+    limitations_list = "".join(f"<li>{html.escape(str(item))}</li>" for item in validation_view_model.get('known_limitations', []))
+    goal_panel = (
+        "<details><summary>Validation Goal &amp; Context</summary>"
+        "<div style='padding:12px 0;'>"
+        f"<p><strong>Expected Pattern:</strong> {html.escape(str(validation_view_model.get('expected_pattern', 'n/a')))}</p>"
+        f"<p><strong>Goal:</strong> {html.escape(str(validation_view_model.get('validation_goal', 'n/a')))}</p>"
+        f"<h4>Reference Sources</h4><ul>{sources_list or '<li>none</li>'}</ul>"
+        f"<h4>Validation Metrics</h4><ul>{metrics_list or '<li>none</li>'}</ul>"
+        f"<h4>Known Limitations</h4><ul>{limitations_list or '<li>none</li>'}</ul>"
+        "</div></details>"
+    )
+
+    # --- Portfolio panel ---
+    portfolio_verdicts_html = _render_verdict_distribution_bars(portfolio_summary.get('review_verdict_counts') or {})
+
+    def _domain_badges_blue(domains: list) -> str:
+        return "".join(f"<span class='badge badge-blue' style='margin:1px;'>{html.escape(str(d))}</span>" for d in domains)
+
+    def _domain_badges_green(domains: list) -> str:
+        return "".join(f"<span class='badge badge-green' style='margin:1px;'>{html.escape(str(d))}</span>" for d in domains)
+
+    portfolio_case_rows_enhanced = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(case.get('country_id', 'n/a')))}</td>"
+        f"<td class='mono' style='font-size:11px;color:#4edea3;'>{html.escape(str(case.get('case_id', 'n/a')))}</td>"
+        f"<td>{_verdict_badge(str(case.get('review_verdict', 'n/a')))}</td>"
+        f"<td>{_domain_badges_blue(case.get('expected_domains', []))}</td>"
+        f"<td>{_domain_badges_green(case.get('observed_domains', []))}</td>"
+        "</tr>"
+        for case in validation_cases
+    ) or "<tr><td colspan='5' style='color:#6b7d99;'>No portfolio cases available.</td></tr>"
+    portfolio_panel = (
+        "<div class='panel'><div class='panel-header'>Reference Case Portfolio</div>"
+        f"<div style='display:flex;gap:24px;flex-wrap:wrap;margin-bottom:14px;'>"
+        f"<div><span class='kpi-label'>Cases</span><strong style='color:#dae2fd;'> {html.escape(str(portfolio_summary.get('case_count', len(validation_cases))))}</strong></div>"
+        f"<div><span class='kpi-label'>Countries</span><strong style='color:#dae2fd;'> {html.escape(', '.join(str(c) for c in portfolio_summary.get('countries_covered', [])))}</strong></div>"
+        "</div>"
+        f"<div style='margin-bottom:14px;'>{portfolio_verdicts_html}</div>"
+        "<div class='table-container'><table><thead><tr><th>Country</th><th>Case ID</th><th>Verdict</th><th>Expected Domains</th><th>Observed Domains</th></tr></thead>"
+        f"<tbody>{portfolio_case_rows_enhanced}</tbody></table></div>"
+        "</div>"
+    )
+
+    # --- Reference Case Library ---
+    ref_lib_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(case.get('country_id', 'n/a')))}</td>"
+        f"<td class='mono' style='font-size:11px;'>{html.escape(str(case.get('case_id', 'n/a')))}</td>"
+        f"<td><span class='badge badge-gray'>{html.escape(str(case.get('case_type', 'n/a')))}</span></td>"
+        f"<td style='color:#b9c7e0;'>{html.escape(str(case.get('case_name', 'n/a')))}</td>"
+        f"<td class='mono' style='font-size:11px;color:#6b7d99;'>{html.escape(str((case.get('time_range') or {}).get('start', 'n/a')))} → {html.escape(str((case.get('time_range') or {}).get('end', 'n/a')))}</td>"
+        f"<td>{_domain_badges_blue(case.get('expected_domains', []))}</td>"
+        "</tr>"
+        for case in reference_case_library
+    ) or "<tr><td colspan='6' style='color:#6b7d99;'>No curated reference cases recorded.</td></tr>"
+    ref_lib_time = reference_case_library_summary.get('time_range') or {}
+    ref_lib_panel = (
+        "<details><summary>Curated Reference Case Library "
+        f"<span class='badge badge-gray' style='margin-left:8px;'>{html.escape(str(reference_case_library_summary.get('case_count', len(reference_case_library))))}</span></summary>"
+        "<div style='padding:12px 0;'>"
+        f"<p style='color:#6b7d99;font-size:11px;margin-bottom:10px;'>Time range: {html.escape(str(ref_lib_time.get('start', 'n/a')))} → {html.escape(str(ref_lib_time.get('end', 'n/a')))}</p>"
+        "<div class='table-container'><table><thead><tr><th>Country</th><th>Case ID</th><th>Type</th><th>Case</th><th>Time Range</th><th>Expected Domains</th></tr></thead>"
+        f"<tbody>{ref_lib_rows}</tbody></table></div>"
+        "</div></details>"
+    )
+
+    # --- Historical Reference Reviews ---
+    ref_verdict_bars = _render_verdict_distribution_bars(historical_reference_review_summary.get('review_verdict_counts') or {})
+    hist_ref_rows_enhanced = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(review.get('country_id', 'n/a')))}</td>"
+        f"<td class='mono' style='font-size:11px;'>{html.escape(str(review.get('case_id', 'n/a')))}</td>"
+        f"<td>{_verdict_badge(str(review.get('review_verdict', 'n/a')))}</td>"
+        f"<td>{_evidence_tier_badge(str(review.get('evidence_tier', 'n/a')))}</td>"
+        f"<td style='color:#dae2fd;'>{html.escape(str(review.get('evidence_score', 'n/a')))}</td>"
+        f"<td><span class='badge badge-gray'>{html.escape(str(review.get('expected_status', 'n/a')))}</span></td>"
+        f"<td><span class='badge badge-blue'>{html.escape(str(review.get('historical_observed_status', 'n/a')))}</span></td>"
+        "</tr>"
+        for review in historical_reference_reviews
+    ) or "<tr><td colspan='7' style='color:#6b7d99;'>No historical reference reviews recorded.</td></tr>"
+    hist_ref_panel = (
+        "<details><summary>Historical Reference Reviews "
+        f"<span class='badge badge-gray' style='margin-left:8px;'>{len(historical_reference_reviews)}</span></summary>"
+        "<div style='padding:12px 0;'>"
+        f"<div style='margin-bottom:12px;'>{ref_verdict_bars}</div>"
+        "<div class='table-container'><table><thead><tr><th>Country</th><th>Case ID</th><th>Verdict</th><th>Evidence Tier</th><th>Evidence Score</th><th>Expected Status</th><th>Historical Observed</th></tr></thead>"
+        f"<tbody>{hist_ref_rows_enhanced}</tbody></table></div>"
+        "</div></details>"
+    )
+
+    # --- Historical Replay Summary ---
+    replay_verdict_bars = _render_verdict_distribution_bars(historical_replay_summary.get('review_verdict_counts') or {})
+    replay_country_rows = ''.join(
+        "<tr>"
+        f"<td><strong>{html.escape(str(item.get('country_id', 'n/a')))}</strong></td>"
+        f"<td>{html.escape(str(item.get('attention_case_count', 'n/a')))}</td>"
+        f"<td>{_attention_level_badge(str(item.get('highest_attention_level', 'n/a')))}</td>"
+        f"<td class='mono' style='font-size:11px;color:#8b9ab8;'>{html.escape(', '.join(str(cid) for cid in item.get('case_ids', [])) or 'none')}</td>"
+        "</tr>"
+        for item in historical_replay_summary.get('attention_country_summary', [])
+        if isinstance(item, dict)
+    ) or "<tr><td colspan='4' style='color:#6b7d99;'>No country attention summary recorded.</td></tr>"
+
+    prov_ratio = historical_replay_summary.get('average_replay_provenance_completeness_ratio', 'n/a')
+    src_ratio = historical_replay_summary.get('average_replay_source_coverage_ratio', 'n/a')
+    try:
+        prov_ratio_fmt = f"{float(prov_ratio):.0%}"
+    except (TypeError, ValueError):
+        prov_ratio_fmt = str(prov_ratio)
+    try:
+        src_ratio_fmt = f"{float(src_ratio):.0%}"
+    except (TypeError, ValueError):
+        src_ratio_fmt = str(src_ratio)
+
+    replay_meta_grid = (
+        "<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:14px;'>"
+        f"<div><span class='kpi-label'>Cases</span><strong style='color:#dae2fd;'> {html.escape(str(historical_replay_summary.get('case_count', 'n/a')))}</strong></div>"
+        f"<div><span class='kpi-label'>Input Records</span><strong style='color:#dae2fd;'> {html.escape(str(historical_replay_summary.get('replay_input_record_total', 'n/a')))}</strong></div>"
+        f"<div><span class='kpi-label'>Archival Files</span><strong style='color:#dae2fd;'> {html.escape(str(historical_replay_summary.get('archival_data_file_count', 'n/a')))}</strong></div>"
+        f"<div><span class='kpi-label'>Source Coverage</span><strong style='color:#dae2fd;'> {html.escape(src_ratio_fmt)}</strong></div>"
+        f"<div><span class='kpi-label'>Provenance</span><strong style='color:#dae2fd;'> {html.escape(prov_ratio_fmt)}</strong></div>"
+        "</div>"
+    )
+
+    replay_summary_panel = (
+        "<div class='panel'><div class='panel-header'>Historical Replay Summary</div>"
+        f"{replay_meta_grid}"
+        f"<div style='margin-bottom:12px;'>{replay_verdict_bars}</div>"
+        "<div class='table-container'><table><thead><tr><th>Country</th><th>Attention Cases</th><th>Highest Level</th><th>Case IDs</th></tr></thead>"
+        f"<tbody>{replay_country_rows}</tbody></table></div>"
+        "</div>"
+    )
+
+    # --- Replay Attention Watchlist (cards) ---
+    attention_cards = _render_attention_case_cards(historical_replay_summary.get('attention_cases', []))
+    attention_count_val = historical_replay_summary.get('attention_case_count', 0)
+    attention_badge = (
+        f"<span class='badge badge-red' style='margin-left:8px;'>{html.escape(str(attention_count_val))} flagged</span>"
+        if attention_count_val and int(attention_count_val) > 0
+        else f"<span class='badge badge-green' style='margin-left:8px;'>0 flagged</span>"
+    )
+    attention_panel = (
+        f"<div class='panel'><div class='panel-header'>Replay Attention Watchlist {attention_badge}</div>"
+        f"{attention_cards}"
+        "</div>"
+    )
+
+    # --- Historical Replay Reviews (detail table, collapsible) ---
+    hist_replay_rows_enhanced = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(review.get('country_id', 'n/a')))}</td>"
+        f"<td class='mono' style='font-size:11px;'>{html.escape(str(review.get('case_id', 'n/a')))}</td>"
+        f"<td>{_verdict_badge(str(review.get('review_verdict', 'n/a')))}</td>"
+        f"<td><span class='badge badge-gray'>{html.escape(str(review.get('review_basis', 'n/a')))}</span></td>"
+        f"<td>{_evidence_tier_badge(str(review.get('replay_evidence_tier', 'n/a')))}</td>"
+        f"<td style='color:#dae2fd;'>{html.escape(str(review.get('replay_evidence_score', 'n/a')))}</td>"
+        f"<td><span class='badge badge-gray'>{html.escape(str(review.get('expected_status', 'n/a')))}</span></td>"
+        f"<td><span class='badge badge-blue'>{html.escape(str(review.get('replayed_status', 'n/a')))}</span></td>"
+        f"<td style='color:#8b9ab8;'>{html.escape(str(review.get('domain_match_ratio', 'n/a')))}</td>"
+        f"<td style='color:#6b7d99;font-size:11px;'>{html.escape(str(review.get('replay_input_record_count', 'n/a')))}</td>"
+        f"<td class='mono' style='font-size:10px;color:#4b5778;'>{html.escape(', '.join(str(f) for f in review.get('archival_data_files', [])))}</td>"
+        "</tr>"
+        for review in historical_replay_reviews
+    ) or "<tr><td colspan='11' style='color:#6b7d99;'>No historical replay reviews recorded.</td></tr>"
+    replay_detail_panel = (
+        "<details><summary>Historical Replay Reviews (Detail) "
+        f"<span class='badge badge-gray' style='margin-left:8px;'>{len(historical_replay_reviews)}</span></summary>"
+        "<div style='padding:12px 0;'>"
+        "<div class='table-container'><table><thead><tr>"
+        "<th>Country</th><th>Case ID</th><th>Verdict</th><th>Basis</th><th>Evidence Tier</th>"
+        "<th>Score</th><th>Expected Status</th><th>Replayed Status</th><th>Domain Match</th><th>Records</th><th>Archival Files</th>"
+        "</tr></thead>"
+        f"<tbody>{hist_replay_rows_enhanced}</tbody></table></div>"
+        "</div></details>"
+    )
+
+    # --- Reprocessing (collapsible) ---
+    changed_versions_html = ''.join(f"<li>{html.escape(str(item))}</li>" for item in reprocessing.get('changed_versions', [])) or "<li>none</li>"
+    reprocessing_panel = (
+        "<details><summary>Reprocessing Comparison</summary>"
+        "<div style='padding:12px 0;'>"
+        f"<h4>Changed Versions</h4><ul>{changed_versions_html}</ul>"
+        f"{_json_block(reprocessing)}"
+        "</div></details>"
+    )
+
+    body = (
+        kpi_grid
+        + case_meta
+        + domain_panel
+        + goal_panel
+        + portfolio_panel
+        + ref_lib_panel
+        + hist_ref_panel
+        + replay_summary_panel
+        + attention_panel
+        + replay_detail_panel
+        + reprocessing_panel
+    )
+    return _page("Validation / Backtest", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
 def _parse_traceability_timestamp(value: str) -> datetime | None:
@@ -3485,35 +3578,100 @@ def _traceability_origin_rows(lineage_records: list[dict[str, Any]]) -> str:
 
 def _render_traceability(traceability_view_model: dict[str, Any], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
     lineage_records = [record for record in traceability_view_model.get('lineage_records', []) if isinstance(record, dict)]
-    rows = ''.join(
-        "<tr>"
-        f"<td>{html.escape(str(record.get('source_id', '')))}</td>"
-        f"<td>{html.escape(str(record.get('raw_record_id', '')))}</td>"
-        f"<td>{html.escape(str(record.get('normalized_id', '')))}</td>"
-        f"<td>{html.escape(str(record.get('feature_id', '')))}</td>"
-        f"<td>{html.escape(str(record.get('domain_status_id', '')))}</td>"
-        f"<td>{html.escape(str(record.get('multi_domain_status_id', '')))}</td>"
-        f"<td>{html.escape(str(record.get('snapshot_id', '')))}</td>"
-        f"<td>{html.escape(str(record.get('report_id', '')))}</td>"
-        "</tr>"
-        for record in lineage_records
-    )
     dependency_rows = _traceability_dependency_rows(lineage_records)
     origin_rows = _traceability_origin_rows(lineage_records)
-    body = (
-        "<div class='panel'><div class='panel-header'>Lineage Records</div>"
-        "<div class='table-container'><table><thead><tr><th>Source</th><th>Raw</th><th>Normalized</th><th>Feature</th><th>Domain Status</th><th>Multi-Domain Status</th><th>Snapshot</th><th>Report</th></tr></thead>"
-        f"<tbody>{rows}</tbody></table></div></div>"
-        "<div class='panel'><div class='panel-header'>Source Dependency Groundwork — Cluster Candidates</div>"
-        "<p>Features and domain statuses produced by multiple sources simultaneously — potential replication/shared-dependency signals with timing-lag context where observed timestamps exist.</p>"
-        "<div class='table-container'><table><thead><tr><th>Feature</th><th>Domain Status</th><th>Snapshot</th><th>Sources</th><th>Reports</th><th>Coupling Signal</th><th>Observed Lag (min)</th></tr></thead>"
-        f"<tbody>{dependency_rows}</tbody></table></div></div>"
-        "<div class='panel'><div class='panel-header'>Source-Origin Groundwork</div>"
-        "<p>Origin inference from current artifact-window observed timestamps (`observed_at`) with explicit uncertainty labels.</p>"
-        "<div class='table-container'><table><thead><tr><th>Source</th><th>Raw Records</th><th>Features</th><th>Reports</th><th>First Observed (window)</th><th>Origin Inference Status</th><th>Origin Uncertainty</th></tr></thead>"
-        f"<tbody>{origin_rows}</tbody></table></div></div>"
+
+    # --- KPI summary ---
+    total_records = len(lineage_records)
+    unique_sources = len(set(str(r.get('source_id', '')) for r in lineage_records if r.get('source_id')))
+    unique_features = len(set(str(r.get('feature_id', '')) for r in lineage_records if r.get('feature_id')))
+    unique_snapshots = len(set(str(r.get('snapshot_id', '')) for r in lineage_records if r.get('snapshot_id')))
+    reports_count = len(set(str(r.get('report_id', '')) for r in lineage_records if r.get('report_id')))
+
+    kpi_grid = (
+        "<div class='kpi-grid'>"
+        f"<div class='kpi-card'><span class='kpi-label'>Lineage Records</span><div class='kpi-value'>{total_records}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Sources</span><div class='kpi-value'>{unique_sources}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Features</span><div class='kpi-value'>{unique_features}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Snapshots</span><div class='kpi-value'>{unique_snapshots}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Reports</span><div class='kpi-value'>{reports_count}</div></div>"
+        "</div>"
     )
-    return _page("Traceability / Lineage View", body, nav_prefix=nav_prefix, available_pages=available_pages)
+
+    # --- Lineage pipeline visualization ---
+    pipeline_html = (
+        "<div class='panel'><div class='panel-header'>Data Pipeline Flow</div>"
+        "<div style='display:flex;align-items:center;gap:0;flex-wrap:wrap;padding:12px 0;'>"
+        "<div style='padding:8px 16px;background:#0f1828;border:1px solid rgba(78,222,163,.25);border-radius:2px;font-family:\"Space Grotesk\",monospace;font-size:0.75rem;color:#4edea3;'>Source</div>"
+        "<div style='padding:0 8px;color:#4b5778;font-size:1.2rem;'>→</div>"
+        "<div style='padding:8px 16px;background:#0f1828;border:1px solid rgba(142,208,255,.2);border-radius:2px;font-family:\"Space Grotesk\",monospace;font-size:0.75rem;color:#8ed0ff;'>Raw Record</div>"
+        "<div style='padding:0 8px;color:#4b5778;font-size:1.2rem;'>→</div>"
+        "<div style='padding:8px 16px;background:#0f1828;border:1px solid rgba(142,208,255,.2);border-radius:2px;font-family:\"Space Grotesk\",monospace;font-size:0.75rem;color:#8ed0ff;'>Normalized</div>"
+        "<div style='padding:0 8px;color:#4b5778;font-size:1.2rem;'>→</div>"
+        "<div style='padding:8px 16px;background:#0f1828;border:1px solid rgba(227,179,65,.2);border-radius:2px;font-family:\"Space Grotesk\",monospace;font-size:0.75rem;color:#e3b341;'>Feature</div>"
+        "<div style='padding:0 8px;color:#4b5778;font-size:1.2rem;'>→</div>"
+        "<div style='padding:8px 16px;background:#0f1828;border:1px solid rgba(227,179,65,.2);border-radius:2px;font-family:\"Space Grotesk\",monospace;font-size:0.75rem;color:#e3b341;'>Domain Status</div>"
+        "<div style='padding:0 8px;color:#4b5778;font-size:1.2rem;'>→</div>"
+        "<div style='padding:8px 16px;background:#0f1828;border:1px solid rgba(78,222,163,.15);border-radius:2px;font-family:\"Space Grotesk\",monospace;font-size:0.75rem;color:#6b9b7a;'>Multi-Domain</div>"
+        "<div style='padding:0 8px;color:#4b5778;font-size:1.2rem;'>→</div>"
+        "<div style='padding:8px 16px;background:#0f1828;border:1px solid rgba(107,125,153,.25);border-radius:2px;font-family:\"Space Grotesk\",monospace;font-size:0.75rem;color:#8b9ab8;'>Snapshot</div>"
+        "<div style='padding:0 8px;color:#4b5778;font-size:1.2rem;'>→</div>"
+        "<div style='padding:8px 16px;background:#0f1828;border:1px solid rgba(107,125,153,.2);border-radius:2px;font-family:\"Space Grotesk\",monospace;font-size:0.75rem;color:#6b7d99;'>Report</div>"
+        "</div></div>"
+    )
+
+    # --- Source-Origin panel — use origin_rows data enriched with observed_at ---
+    # Build origin table directly (uses _traceability_origin_rows which has First Observed)
+    origin_panel = (
+        "<div class='panel'><div class='panel-header'>Source-Origin Groundwork</div>"
+        "<p style='color:#6b7d99;font-size:11px;margin-bottom:12px;'>What the current lineage artifact can support. "
+        "Origin inference from artifact-window observed timestamps with explicit uncertainty labels.</p>"
+        "<div class='table-container'><table><thead><tr>"
+        "<th>Source</th><th>Raw Records</th><th>Features</th><th>Reports</th>"
+        "<th>First Observed (window)</th><th>Origin Inference Status</th><th>Origin Uncertainty</th>"
+        "</tr></thead>"
+        f"<tbody>{origin_rows}</tbody></table></div>"
+        "</div>"
+    )
+
+    # --- Dependency cluster panel ---
+    dependency_panel = (
+        "<div class='panel'><div class='panel-header'>Source Dependency — Cluster Candidates</div>"
+        "<p style='color:#6b7d99;font-size:11px;margin-bottom:12px;'>"
+        "Features and domain statuses produced by multiple sources simultaneously — potential replication or shared dependency candidates.</p>"
+        "<div class='table-container'><table><thead><tr>"
+        "<th>Feature</th><th>Domain Status</th><th>Snapshot</th><th>Sources</th><th>Reports</th><th>Coupling Signal</th><th>Observed Lag (min)</th>"
+        "</tr></thead>"
+        f"<tbody>{dependency_rows}</tbody></table></div>"
+        "</div>"
+    )
+
+    # --- Full lineage table (collapsible) ---
+    lineage_rows = ''.join(
+        "<tr>"
+        f"<td class='mono' style='font-size:11px;color:#4edea3;'>{html.escape(str(record.get('source_id', '')))}</td>"
+        f"<td class='mono' style='font-size:10px;color:#8ed0ff;'>{html.escape(str(record.get('raw_record_id', '')))}</td>"
+        f"<td class='mono' style='font-size:10px;color:#8b9ab8;'>{html.escape(str(record.get('normalized_id', '')))}</td>"
+        f"<td class='mono' style='font-size:10px;color:#e3b341;'>{html.escape(str(record.get('feature_id', '')))}</td>"
+        f"<td class='mono' style='font-size:10px;color:#e3b341;'>{html.escape(str(record.get('domain_status_id', '')))}</td>"
+        f"<td class='mono' style='font-size:10px;color:#6b9b7a;'>{html.escape(str(record.get('multi_domain_status_id', '')))}</td>"
+        f"<td class='mono' style='font-size:10px;color:#8b9ab8;'>{html.escape(str(record.get('snapshot_id', '')))}</td>"
+        f"<td class='mono' style='font-size:10px;color:#6b7d99;'>{html.escape(str(record.get('report_id', '')))}</td>"
+        "</tr>"
+        for record in lineage_records
+    ) or "<tr><td colspan='8' style='color:#6b7d99;'>No lineage records.</td></tr>"
+    lineage_detail_panel = (
+        f"<details><summary>Full Lineage Records <span class='badge badge-gray' style='margin-left:8px;'>{total_records}</span></summary>"
+        "<div style='padding:12px 0;'>"
+        "<div class='table-container'><table><thead><tr>"
+        "<th>Source</th><th>Raw</th><th>Normalized</th><th>Feature</th><th>Domain Status</th><th>Multi-Domain</th><th>Snapshot</th><th>Report</th>"
+        "</tr></thead>"
+        f"<tbody>{lineage_rows}</tbody></table></div>"
+        "</div></details>"
+    )
+
+    body = kpi_grid + pipeline_html + origin_panel + dependency_panel + lineage_detail_panel
+    return _page("Traceability / Lineage", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
 def _render_annotations(annotations_view_model: dict[str, Any], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
