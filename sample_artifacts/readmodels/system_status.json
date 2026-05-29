@@ -23,10 +23,36 @@
     }
   },
   "available_reports": [
+    "REP-COUNTRY-AUS",
+    "REP-COUNTRY-CAN",
+    "REP-COUNTRY-CHE",
+    "REP-COUNTRY-CHN",
+    "REP-COUNTRY-DEU",
+    "REP-COUNTRY-EGY",
+    "REP-COUNTRY-EST",
+    "REP-COUNTRY-FIN",
+    "REP-COUNTRY-GEO",
+    "REP-COUNTRY-IND",
+    "REP-COUNTRY-IRL",
+    "REP-COUNTRY-IRN",
     "REP-COUNTRY-ISR",
+    "REP-COUNTRY-MMR",
+    "REP-COUNTRY-NGA",
+    "REP-COUNTRY-NLD",
+    "REP-COUNTRY-NOR",
+    "REP-COUNTRY-NZL",
+    "REP-COUNTRY-PAK",
     "REP-COUNTRY-POL",
+    "REP-COUNTRY-PRT",
+    "REP-COUNTRY-QAT",
+    "REP-COUNTRY-RUS",
+    "REP-COUNTRY-SAU",
+    "REP-COUNTRY-SDN",
+    "REP-COUNTRY-SWE",
+    "REP-COUNTRY-TUR",
     "REP-COUNTRY-TWN",
     "REP-COUNTRY-UKR",
+    "REP-COUNTRY-USA",
     "REP-COVERAGE-RUN-LIVE-20260520-2021",
     "REP-DAILY-SNAP-RUN-LIVE-20260520-2021-v1",
     "REP-DOMAIN-ISR-A",
@@ -48,10 +74,87 @@
   "country_coverage_visibility": {
     "country_freshness_rows": [
       {
+        "country_id": "UKR",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P1",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "RUS",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P1",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "CHN",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P1",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "TWN",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P1",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "IRN",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P1",
+        "source_depth_band": "moderate"
+      },
+      {
         "country_id": "ISR",
         "freshness_band": "stale",
         "freshness_hours": 8760.0,
         "priority": "P1",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "TUR",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P1",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "IND",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P1",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "PAK",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P1",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "GEO",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P1",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "USA",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P2",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "DEU",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P2",
         "source_depth_band": "moderate"
       },
       {
@@ -62,17 +165,122 @@
         "source_depth_band": "moderate"
       },
       {
-        "country_id": "TWN",
+        "country_id": "EST",
         "freshness_band": "stale",
-        "freshness_hours": 2010.0,
-        "priority": "P1",
+        "freshness_hours": 8760.0,
+        "priority": "P2",
         "source_depth_band": "moderate"
       },
       {
-        "country_id": "UKR",
+        "country_id": "FIN",
         "freshness_band": "stale",
         "freshness_hours": 8760.0,
-        "priority": "P1",
+        "priority": "P2",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "SAU",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P2",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "QAT",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P2",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "NGA",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P2",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "EGY",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P2",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "SDN",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P2",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "MMR",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P2",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "CHE",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P3",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "NLD",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P3",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "SWE",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P3",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "NOR",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P3",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "CAN",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P3",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "AUS",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P3",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "NZL",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P3",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "PRT",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P3",
+        "source_depth_band": "moderate"
+      },
+      {
+        "country_id": "IRL",
+        "freshness_band": "stale",
+        "freshness_hours": 8760.0,
+        "priority": "P3",
         "source_depth_band": "moderate"
       }
     ],
@@ -91,12 +299,38 @@
       {
         "band": "stale",
         "countries": [
-          "ISR",
-          "POL",
+          "UKR",
+          "RUS",
+          "CHN",
           "TWN",
-          "UKR"
+          "IRN",
+          "ISR",
+          "TUR",
+          "IND",
+          "PAK",
+          "GEO",
+          "USA",
+          "DEU",
+          "POL",
+          "EST",
+          "FIN",
+          "SAU",
+          "QAT",
+          "NGA",
+          "EGY",
+          "SDN",
+          "MMR",
+          "CHE",
+          "NLD",
+          "SWE",
+          "NOR",
+          "CAN",
+          "AUS",
+          "NZL",
+          "PRT",
+          "IRL"
         ],
-        "country_count": 4
+        "country_count": 30
       },
       {
         "band": "unknown",
@@ -108,19 +342,51 @@
     "priority_summary": [
       {
         "countries": [
-          "ISR",
+          "UKR",
+          "RUS",
+          "CHN",
           "TWN",
-          "UKR"
+          "IRN",
+          "ISR",
+          "TUR",
+          "IND",
+          "PAK",
+          "GEO"
         ],
-        "country_count": 3,
+        "country_count": 10,
         "priority": "P1"
       },
       {
         "countries": [
-          "POL"
+          "USA",
+          "DEU",
+          "POL",
+          "EST",
+          "FIN",
+          "SAU",
+          "QAT",
+          "NGA",
+          "EGY",
+          "SDN",
+          "MMR"
         ],
-        "country_count": 1,
+        "country_count": 11,
         "priority": "P2"
+      },
+      {
+        "countries": [
+          "CHE",
+          "NLD",
+          "SWE",
+          "NOR",
+          "CAN",
+          "AUS",
+          "NZL",
+          "PRT",
+          "IRL"
+        ],
+        "country_count": 9,
+        "priority": "P3"
       }
     ],
     "remediation_watchlist": [],
@@ -133,12 +399,38 @@
       {
         "band": "moderate",
         "countries": [
-          "ISR",
-          "POL",
+          "UKR",
+          "RUS",
+          "CHN",
           "TWN",
-          "UKR"
+          "IRN",
+          "ISR",
+          "TUR",
+          "IND",
+          "PAK",
+          "GEO",
+          "USA",
+          "DEU",
+          "POL",
+          "EST",
+          "FIN",
+          "SAU",
+          "QAT",
+          "NGA",
+          "EGY",
+          "SDN",
+          "MMR",
+          "CHE",
+          "NLD",
+          "SWE",
+          "NOR",
+          "CAN",
+          "AUS",
+          "NZL",
+          "PRT",
+          "IRL"
         ],
-        "country_count": 4
+        "country_count": 30
       },
       {
         "band": "deep",
@@ -148,8 +440,8 @@
     ]
   },
   "coverage": {
-    "countries_total": 4,
-    "countries_with_updates": 4,
+    "countries_total": 30,
+    "countries_with_updates": 30,
     "countries_without_updates": []
   },
   "data_gaps": [],

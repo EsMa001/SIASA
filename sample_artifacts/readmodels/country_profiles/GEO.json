@@ -1,0 +1,70 @@
+{
+  "annotations": [],
+  "confidence": 1.0,
+  "configured_domains": [
+    "A",
+    "D"
+  ],
+  "counter_indicators": [],
+  "country_context": {
+    "country_name": "Georgia",
+    "priority": "P1",
+    "rationale": "Proteste, russischer Einfluss, EU-Annäherung, geopolitische Lage",
+    "region": "Caucasus",
+    "selection_type": "Core Focus"
+  },
+  "country_id": "GEO",
+  "coverage": 1.0,
+  "domain_gap_summary": {
+    "expected_domains": [
+      "A",
+      "D"
+    ],
+    "missing_domains": [],
+    "observed_domains": [
+      "A",
+      "D"
+    ]
+  },
+  "domain_states": {
+    "A": "D2",
+    "D": "D1"
+  },
+  "drivers": [
+    "A_news_volume",
+    "A_source_count",
+    "A_source_diversity_index",
+    "D_gdp_growth",
+    "D_macro_data_freshness",
+    "D_trade_volume_change"
+  ],
+  "explanation_summary": null,
+  "linked_events": [
+    "EVT-GEO-RUN-LIVE-20260520-2021"
+  ],
+  "multi_domain_status": "S2",
+  "source_depth": {
+    "source_count": 2,
+    "source_ids": [
+      "SRC-GDELT-DOC",
+      "WB-INDICATORS"
+    ]
+  },
+  "trends": {
+    "yearly": [
+      {
+        "label": "2024",
+        "value": 2.8
+      },
+      {
+        "label": "2026-04",
+        "value": 1.8
+      },
+      {
+        "label": "2026-05",
+        "value": 6.5
+      }
+    ]
+  },
+  "uncertainty": []
+}

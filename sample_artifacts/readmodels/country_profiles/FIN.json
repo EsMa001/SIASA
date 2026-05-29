@@ -1,0 +1,70 @@
+{
+  "annotations": [],
+  "confidence": 1.0,
+  "configured_domains": [
+    "A",
+    "D"
+  ],
+  "counter_indicators": [],
+  "country_context": {
+    "country_name": "Finland",
+    "priority": "P2",
+    "rationale": "Neue NATO-Mitglied, Grenze zu Russland, Sicherheitsrelevanz",
+    "region": "Nordic / NATO",
+    "selection_type": "Extended Focus"
+  },
+  "country_id": "FIN",
+  "coverage": 1.0,
+  "domain_gap_summary": {
+    "expected_domains": [
+      "A",
+      "D"
+    ],
+    "missing_domains": [],
+    "observed_domains": [
+      "A",
+      "D"
+    ]
+  },
+  "domain_states": {
+    "A": "D0",
+    "D": "D0"
+  },
+  "drivers": [
+    "A_news_volume",
+    "A_source_count",
+    "A_source_diversity_index",
+    "D_gdp_growth",
+    "D_macro_data_freshness",
+    "D_trade_volume_change"
+  ],
+  "explanation_summary": null,
+  "linked_events": [
+    "EVT-FIN-RUN-LIVE-20260520-2021"
+  ],
+  "multi_domain_status": "S1",
+  "source_depth": {
+    "source_count": 2,
+    "source_ids": [
+      "SRC-GDELT-DOC",
+      "WB-INDICATORS"
+    ]
+  },
+  "trends": {
+    "yearly": [
+      {
+        "label": "2024",
+        "value": 1.2
+      },
+      {
+        "label": "2026-04",
+        "value": 0.9
+      },
+      {
+        "label": "2026-05",
+        "value": 3.5
+      }
+    ]
+  },
+  "uncertainty": []
+}

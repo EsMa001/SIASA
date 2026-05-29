@@ -1,0 +1,24 @@
+{
+  "capability": "analysis",
+  "contains_personal_data": false,
+  "counter_indicators": [],
+  "country_id": "MMR",
+  "coverage": 1.0,
+  "domain_states": {
+    "A": "D3",
+    "D": "D3"
+  },
+  "drivers": [
+    "A_news_volume",
+    "A_source_count",
+    "A_source_diversity_index",
+    "D_gdp_growth",
+    "D_macro_data_freshness",
+    "D_trade_volume_change"
+  ],
+  "linked_events": [
+    "EVT-MMR-RUN-LIVE-20260520-2021"
+  ],
+  "multi_domain_status": "S4",
+  "uncertainty": []
+}

@@ -12,8 +12,8 @@
         "B",
         "D"
       ],
-      "country_id": "ISR",
-      "drill_down_target": "/countries/ISR",
+      "country_id": "UKR",
+      "drill_down_target": "/countries/UKR",
       "status": "S1"
     },
     {
@@ -22,9 +22,19 @@
         "B",
         "D"
       ],
-      "country_id": "POL",
-      "drill_down_target": "/countries/POL",
-      "status": "S1"
+      "country_id": "RUS",
+      "drill_down_target": "/countries/RUS",
+      "status": "S4"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "CHN",
+      "drill_down_target": "/countries/CHN",
+      "status": "S3"
     },
     {
       "active_domains": [
@@ -41,9 +51,253 @@
         "B",
         "D"
       ],
-      "country_id": "UKR",
-      "drill_down_target": "/countries/UKR",
+      "country_id": "IRN",
+      "drill_down_target": "/countries/IRN",
+      "status": "S3"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "ISR",
+      "drill_down_target": "/countries/ISR",
       "status": "S1"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "TUR",
+      "drill_down_target": "/countries/TUR",
+      "status": "S2"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "IND",
+      "drill_down_target": "/countries/IND",
+      "status": "S2"
+    },
+    {
+      "active_domains": [
+        "A",
+        "D"
+      ],
+      "country_id": "PAK",
+      "drill_down_target": "/countries/PAK",
+      "status": "S3"
+    },
+    {
+      "active_domains": [
+        "A",
+        "D"
+      ],
+      "country_id": "GEO",
+      "drill_down_target": "/countries/GEO",
+      "status": "S2"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "USA",
+      "drill_down_target": "/countries/USA",
+      "status": "S1"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "DEU",
+      "drill_down_target": "/countries/DEU",
+      "status": "S1"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "POL",
+      "drill_down_target": "/countries/POL",
+      "status": "S1"
+    },
+    {
+      "active_domains": [
+        "A",
+        "D"
+      ],
+      "country_id": "EST",
+      "drill_down_target": "/countries/EST",
+      "status": "S1"
+    },
+    {
+      "active_domains": [
+        "A",
+        "D"
+      ],
+      "country_id": "FIN",
+      "drill_down_target": "/countries/FIN",
+      "status": "S1"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "SAU",
+      "drill_down_target": "/countries/SAU",
+      "status": "S1"
+    },
+    {
+      "active_domains": [
+        "A",
+        "D"
+      ],
+      "country_id": "QAT",
+      "drill_down_target": "/countries/QAT",
+      "status": "S1"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "NGA",
+      "drill_down_target": "/countries/NGA",
+      "status": "S2"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "EGY",
+      "drill_down_target": "/countries/EGY",
+      "status": "S2"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "SDN",
+      "drill_down_target": "/countries/SDN",
+      "status": "S4"
+    },
+    {
+      "active_domains": [
+        "A",
+        "D"
+      ],
+      "country_id": "MMR",
+      "drill_down_target": "/countries/MMR",
+      "status": "S4"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "CHE",
+      "drill_down_target": "/countries/CHE",
+      "status": "S0"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "NLD",
+      "drill_down_target": "/countries/NLD",
+      "status": "S0"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "SWE",
+      "drill_down_target": "/countries/SWE",
+      "status": "S0"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "NOR",
+      "drill_down_target": "/countries/NOR",
+      "status": "S0"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "CAN",
+      "drill_down_target": "/countries/CAN",
+      "status": "S0"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "AUS",
+      "drill_down_target": "/countries/AUS",
+      "status": "S0"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "NZL",
+      "drill_down_target": "/countries/NZL",
+      "status": "S0"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "PRT",
+      "drill_down_target": "/countries/PRT",
+      "status": "S0"
+    },
+    {
+      "active_domains": [
+        "A",
+        "B",
+        "D"
+      ],
+      "country_id": "IRL",
+      "drill_down_target": "/countries/IRL",
+      "status": "S0"
     }
   ]
 }

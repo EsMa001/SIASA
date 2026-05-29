@@ -1,0 +1,49 @@
+{
+  "annotations": [],
+  "anomaly_state": "D3",
+  "baseline_comparison": {
+    "current_window": -7.5,
+    "delta_to_baseline": 0.1
+  },
+  "country_id": "SDN",
+  "domain": "D",
+  "feature_values": [
+    {
+      "coverage": 1.0,
+      "feature_id": "D_trade_volume_change",
+      "value": -35.0
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "D_gdp_growth",
+      "value": -7.5
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "D_macro_data_freshness",
+      "value": 8760
+    }
+  ],
+  "source_context": [
+    {
+      "confidence": null,
+      "freshness_hours": null,
+      "history_horizon": "n/a",
+      "source_id": "WB-INDICATORS",
+      "status": "success"
+    }
+  ],
+  "time_series": [
+    {
+      "signal_key": "gdp_growth",
+      "timestamp": "2024",
+      "value": -7.5
+    },
+    {
+      "signal_key": "trade_volume_change",
+      "timestamp": "2024",
+      "value": -35.0
+    }
+  ],
+  "uncertainty": []
+}

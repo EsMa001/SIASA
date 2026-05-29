@@ -205,6 +205,35 @@ def _page(title: str, body: str, *, nav_prefix: str = '', available_pages: set[s
         "background:rgba(78,222,163,.18);border-color:rgba(78,222,163,.6);}"
         # === Controls bar ===
         ".controls-bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:12px 0 4px;}"
+        # === Download button ===
+        ".btn-download{display:inline-block;background:rgba(56,139,253,.12);color:#8ed0ff;"
+        "border:1px solid rgba(56,139,253,.3);border-radius:2px;padding:3px 10px;"
+        "font-size:11px;font-weight:700;font-family:'Space Grotesk',monospace;"
+        "text-transform:uppercase;letter-spacing:.05em;text-decoration:none;"
+        "cursor:pointer;transition:background .15s,border-color .15s;}"
+        ".btn-download:hover{background:rgba(56,139,253,.22);border-color:rgba(56,139,253,.6);color:#b0d8ff;text-decoration:none;}"
+        # === Skip nav ===
+        ".skip-nav{position:absolute;left:-9999px;top:0;z-index:9999;"
+        "background:#388bfd;color:#fff;padding:4px 8px;border-radius:0 0 4px 0;font-size:13px;}"
+        # === Accessibility & Responsive ===
+        "*:focus-visible{outline:2px solid #388bfd;outline-offset:2px;}"
+        "a:focus-visible{outline:2px solid #388bfd;}"
+        "button:focus-visible{outline:2px solid #388bfd;}"
+        "select:focus-visible{outline:2px solid #388bfd;}"
+        "input:focus-visible{outline:2px solid #388bfd;}"
+        # === Responsive tables ===
+        ".table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}"
+        "@media(max-width:900px){"
+        "nav ul{flex-wrap:wrap;gap:4px;}"
+        ".kpi-grid{grid-template-columns:repeat(2,1fr);}"
+        ".kpi-card{padding:8px 10px;}"
+        "table{font-size:11px;}"
+        ".panel{padding:10px;}}"
+        "@media(max-width:600px){"
+        "body{padding:8px;}"
+        ".kpi-grid{grid-template-columns:1fr;}"
+        "nav ul{gap:2px;}"
+        "nav a{font-size:10px;padding:3px 6px;}}"
     )
     return (
         "<!DOCTYPE html>"
@@ -214,10 +243,13 @@ def _page(title: str, body: str, *, nav_prefix: str = '', available_pages: set[s
         f"{font_link}"
         f"<style>{css}</style>"
         "</head><body>"
-        f"<nav>{nav_html}</nav>"
+        "<a href='#main-content' class='skip-nav' onfocus=\"this.style.left='0'\" onblur=\"this.style.left='-9999px'\">Zum Inhalt springen</a>"
+        f"<nav aria-label='Main navigation'>{nav_html}</nav>"
         "<div class='page-content'>"
+        f"<main id='main-content'>"
         f"<h1>{html.escape(title)}</h1>"
         f"{body}"
+        "</main>"
         "</div>"
         "</body></html>"
     )
@@ -2078,10 +2110,10 @@ def _render_source_coverage(
         f"{_render_country_coverage_matrix(coverage_visibility)}"
         "<h3>Coverage / Confidence Matrix</h3>"
         "<p>Confidence Band highlights source trust at a glance while keeping freshness visible.</p>"
-        "<table><thead><tr><th>Source</th><th>Confidence Band</th><th>Confidence Meter</th><th>Freshness (h)</th><th>Status</th></tr></thead>"
-        f"<tbody>{matrix_rows}</tbody></table>"
-        "<table><thead><tr><th>Source</th><th>Status</th><th>History Horizon</th><th>Freshness (h)</th><th>Confidence</th><th>Record Count</th><th>Diagnostics</th></tr></thead>"
-        f"<tbody>{rows}</tbody></table>"
+        "<div class='table-wrap'><table><thead><tr><th scope='col'>Source</th><th scope='col'>Confidence Band</th><th scope='col'>Confidence Meter</th><th scope='col'>Freshness (h)</th><th scope='col'>Status</th></tr></thead>"
+        f"<tbody>{matrix_rows}</tbody></table></div>"
+        "<div class='table-wrap'><table><thead><tr><th scope='col'>Source</th><th scope='col'>Status</th><th scope='col'>History Horizon</th><th scope='col'>Freshness (h)</th><th scope='col'>Confidence</th><th scope='col'>Record Count</th><th scope='col'>Diagnostics</th></tr></thead>"
+        f"<tbody>{rows}</tbody></table></div>"
         f"<h3>Failed Sources</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in source_coverage_read_model.get('failed_sources', []))}</ul>"
         f"<h3>Missing Sources</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in source_coverage_read_model.get('missing_sources', []))}</ul>"
     )
@@ -2111,15 +2143,38 @@ def _prepare_report_catalog(report_catalog: dict[str, Any], output_dir: Path) ->
 
 
 def _render_reports(report_catalog: dict[str, Any], *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
+    def _fmt_size(size_bytes: Any) -> str:
+        try:
+            n = int(size_bytes)
+        except (TypeError, ValueError):
+            return ''
+        if n < 1024:
+            return f'{n} B'
+        if n < 1024 * 1024:
+            return f'{n // 1024} KB'
+        return f'{n // (1024 * 1024)} MB'
+
     def _render_export_links(report_info: dict[str, Any]) -> str:
         export_links = ''.join(
             (
-                f"<div><a href=\"{html.escape(str(export_file.get('href', export_file.get('relative_path', ''))))}\">"
-                f"{html.escape(str(export_file.get('label', export_file.get('format', 'download'))))}</a></div>"
+                f"<div><a href=\"{html.escape(str(export_file.get('href', export_file.get('relative_path', ''))))}\" download class='btn-download'>"
+                f"&#9660; {html.escape(str(export_file.get('label', export_file.get('format', 'Download'))))}"
+                + (f" <small>({html.escape(_fmt_size(export_file.get('size_bytes')))})</small>" if export_file.get('size_bytes') else '')
+                + "</a></div>"
             )
             for export_file in report_info.get('export_files', [])
         )
         return export_links or '-'
+
+    # Category mapping
+    _CATEGORY_MAP = {
+        'country_profile': 'Country Profiles',
+        'domain_report': 'Domain Reports',
+        'coverage': 'Coverage Reports',
+        'coverage_report': 'Coverage Reports',
+        'daily_snapshot': 'Daily Snapshots',
+    }
+    _CATEGORY_ORDER = ['Country Profiles', 'Domain Reports', 'Coverage Reports', 'Daily Snapshots', 'Other']
 
     report_types = sorted(report_catalog.keys())
     type_options = ''.join(
@@ -2127,10 +2182,22 @@ def _render_reports(report_catalog: dict[str, Any], *, nav_prefix: str = '', ava
         for report_type in report_types
     )
 
-    rows = ''.join(
+    # Group by category
+    categories: dict[str, list[tuple[str, Any]]] = {}
+    for cat in _CATEGORY_ORDER:
+        categories[cat] = []
+    for report_type, report_info in sorted(report_catalog.items()):
+        cat = _CATEGORY_MAP.get(report_type, 'Other')
+        if cat not in categories:
+            cat = 'Other'
+        categories[cat].append((report_type, report_info))
+
+    # Build all rows (flat list for filter script to work across groups)
+    all_rows = ''.join(
         "<tr class='report-row' "
         f"data-report-type='{html.escape(report_type)}' "
         f"data-report-id='{html.escape(str(report_info.get('report_id', '')))}' "
+        f"data-report-name='{html.escape(str(report_info.get('report_id', report_type)).lower())}' "
         f"data-format='{html.escape(str(report_info.get('format', '')))}'>"
         f"<td>{html.escape(report_type)}</td>"
         f"<td>{html.escape(str(report_info.get('report_id', '')))}</td>"
@@ -2140,6 +2207,7 @@ def _render_reports(report_catalog: dict[str, Any], *, nav_prefix: str = '', ava
         "</tr>"
         for report_type, report_info in sorted(report_catalog.items())
     )
+
     export_count = sum(len(report_info.get('export_files', [])) for report_info in report_catalog.values())
     evidence_items = ''.join(
         "<li>"
@@ -2150,25 +2218,74 @@ def _render_reports(report_catalog: dict[str, Any], *, nav_prefix: str = '', ava
         "</li>"
         for report_type, report_info in sorted(report_catalog.items())
     ) or "<li>none</li>"
+
+    # KPI bar
+    _last_generated = ''
+    for _ri in report_catalog.values():
+        _ts = str(_ri.get('generated_at', _ri.get('snapshot_id', '')))
+        if _ts and _ts > _last_generated:
+            _last_generated = _ts
+    kpi_bar = (
+        "<div class='kpi-grid'>"
+        f"<div class='kpi-card'><span class='kpi-label'>Total Reports</span><div class='kpi-value'>{html.escape(str(len(report_catalog)))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Country Profiles</span><div class='kpi-value'>{html.escape(str(len(categories.get('Country Profiles', []))))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Domain Reports</span><div class='kpi-value'>{html.escape(str(len(categories.get('Domain Reports', []))))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Coverage Reports</span><div class='kpi-value'>{html.escape(str(len(categories.get('Coverage Reports', []))))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Daily Snapshots</span><div class='kpi-value'>{html.escape(str(len(categories.get('Daily Snapshots', []))))}</div></div>"
+        + (f"<div class='kpi-card'><span class='kpi-label'>Last Generated</span><div class='kpi-value' style='font-size:0.75rem;color:#6b7d99;'>{html.escape(_last_generated)}</div></div>" if _last_generated else '')
+        + "</div>"
+    )
+
+    # Build grouped sections (hidden table rows are still in the DOM for the flat filter)
+    grouped_sections = ''
+    table_header = "<thead><tr><th scope='col'>Type</th><th scope='col'>Report ID</th><th scope='col'>Format</th><th scope='col'>Downloads</th><th scope='col'>Metadata</th></tr></thead>"
+    for cat in _CATEGORY_ORDER:
+        cat_items = categories.get(cat, [])
+        if not cat_items:
+            continue
+        cat_rows = ''.join(
+            "<tr class='report-row' "
+            f"data-report-type='{html.escape(report_type)}' "
+            f"data-report-id='{html.escape(str(report_info.get('report_id', '')))}' "
+            f"data-report-name='{html.escape(str(report_info.get('report_id', report_type)).lower())}' "
+            f"data-format='{html.escape(str(report_info.get('format', '')))}'>"
+            f"<td>{html.escape(report_type)}</td>"
+            f"<td>{html.escape(str(report_info.get('report_id', '')))}</td>"
+            f"<td>{html.escape(str(report_info.get('format', '')))}</td>"
+            f"<td>{_render_export_links(report_info)}</td>"
+            f"<td>{html.escape(json.dumps({k: v for k, v in report_info.items() if k != 'export_files'}, sort_keys=True))}</td>"
+            "</tr>"
+            for report_type, report_info in cat_items
+        )
+        grouped_sections += (
+            f"<details open><summary class='panel-header'>{html.escape(cat)} ({len(cat_items)})</summary>"
+            f"<div class='table-wrap'><table>{table_header}<tbody>{cat_rows}</tbody></table></div>"
+            "</details>"
+        )
+
     filter_script = """
 <script>
 (function() {
   const typeFilter = document.getElementById('report-type-filter');
   const idFilter = document.getElementById('report-id-filter');
+  const nameFilter = document.getElementById('report-name-search');
   const rows = Array.from(document.querySelectorAll('.report-row'));
   const visibleCount = document.getElementById('report-visible-count');
 
   function applyReportFilters() {
-    const typeValue = (typeFilter?.value || '').trim().toLowerCase();
-    const idValue = (idFilter?.value || '').trim().toLowerCase();
+    const typeValue = (typeFilter ? typeFilter.value : '').trim().toLowerCase();
+    const idValue = (idFilter ? idFilter.value : '').trim().toLowerCase();
+    const nameValue = (nameFilter ? nameFilter.value : '').trim().toLowerCase();
     let count = 0;
 
     rows.forEach((row) => {
       const rowType = (row.getAttribute('data-report-type') || '').toLowerCase();
       const rowId = (row.getAttribute('data-report-id') || '').toLowerCase();
+      const rowName = (row.getAttribute('data-report-name') || '').toLowerCase();
       const typeOk = !typeValue || rowType === typeValue;
       const idOk = !idValue || rowId.includes(idValue);
-      const show = typeOk && idOk;
+      const nameOk = !nameValue || rowName.includes(nameValue) || rowId.includes(nameValue) || rowType.includes(nameValue);
+      const show = typeOk && idOk && nameOk;
       row.style.display = show ? '' : 'none';
       if (show) count += 1;
     });
@@ -2180,28 +2297,37 @@ def _render_reports(report_catalog: dict[str, Any], *, nav_prefix: str = '', ava
 
   if (typeFilter) typeFilter.addEventListener('change', applyReportFilters);
   if (idFilter) idFilter.addEventListener('input', applyReportFilters);
+  if (nameFilter) nameFilter.addEventListener('input', applyReportFilters);
   applyReportFilters();
 })();
 </script>
 """
     body = (
-        "<h2>Report / Export View</h2>"
+        kpi_bar
+        + "<h2>Report / Export View</h2>"
         "<h3>Evidence Summary</h3>"
         f"<p>Reports available: <strong>{html.escape(str(len(report_catalog)))}</strong></p>"
         f"<p>Download-ready artifacts: <strong>{html.escape(str(export_count))}</strong></p>"
         f"<ul>{evidence_items}</ul>"
         "<h3>Report Scope Controls</h3>"
         "<p>Filter reports by type and report ID to focus export review scope.</p>"
+        "<div class='controls-bar'>"
+        "<label for='report-name-search'>Search:</label> "
+        "<input id='report-name-search' type='text' placeholder='Search reports...' aria-label='Search reports by name'/> "
         "<label for='report-type-filter'>Type:</label> "
-        f"<select id='report-type-filter'><option value=''>All</option>{type_options}</select> "
+        f"<select id='report-type-filter' aria-label='Filter by report type'><option value=''>All</option>{type_options}</select> "
         "<label for='report-id-filter'>Report ID contains:</label> "
-        "<input id='report-id-filter' type='text' placeholder='e.g. REP-COVERAGE'/>"
+        "<input id='report-id-filter' type='text' placeholder='e.g. REP-COVERAGE' aria-label='Filter by report ID'/>"
+        "</div>"
         f"<p>Visible reports: <strong id='report-visible-count'>{html.escape(str(len(report_catalog)))}</strong></p>"
-        "<table><thead><tr><th>Type</th><th>Report ID</th><th>Format</th><th>Downloads</th><th>Metadata</th></tr></thead>"
-        f"<tbody>{rows}</tbody></table>"
-        f"{filter_script}"
+        + grouped_sections
+        + "<details><summary class='panel-header'>All Reports (flat view)</summary>"
+        f"<div class='table-wrap'><table><thead><tr><th scope='col'>Type</th><th scope='col'>Report ID</th><th scope='col'>Format</th><th scope='col'>Downloads</th><th scope='col'>Metadata</th></tr></thead>"
+        f"<tbody>{all_rows}</tbody></table></div></details>"
+        + filter_script
     )
     return _page("Report / Export View", body, nav_prefix=nav_prefix, available_pages=available_pages)
+
 
 
 def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_model: dict[str, Any] | None = None, *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
@@ -3881,10 +4007,159 @@ prefillAnnotationFromQuery();
 renderAnnotationWorkflow();
 </script>
 """
+    modal_html = """<div id="annotation-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#161b22;border:1px solid rgba(78,222,163,.2);border-radius:6px;padding:24px;max-width:560px;width:90%;max-height:80vh;overflow-y:auto;">
+    <h3 id="modal-title" style="color:#e6edf3;margin:0 0 16px;">Annotation</h3>
+    <form id="annotation-form" onsubmit="saveAnnotation(event)">
+      <input type="hidden" id="annotation-id" />
+      <div style="margin-bottom:12px;">
+        <label style="color:#8b949e;font-size:11px;display:block;margin-bottom:4px;">Country ID</label>
+        <input id="ann-country" type="text" placeholder="e.g. UKR" maxlength="3"
+          style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid rgba(78,222,163,.2);border-radius:4px;padding:6px 8px;font-size:13px;box-sizing:border-box;"
+          aria-label="Country ID" />
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="color:#8b949e;font-size:11px;display:block;margin-bottom:4px;">Domain (optional)</label>
+        <select id="ann-domain"
+          style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid rgba(78,222,163,.2);border-radius:4px;padding:6px 8px;font-size:13px;">
+          <option value="">&#8212; All Domains &#8212;</option>
+          <option value="A">Domain A (Information Space)</option>
+          <option value="B">Domain B (Activity / Events)</option>
+          <option value="C">Domain C (Networks)</option>
+          <option value="D">Domain D (Economic)</option>
+          <option value="E">Domain E (Governance)</option>
+        </select>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="color:#8b949e;font-size:11px;display:block;margin-bottom:4px;">Run ID (optional)</label>
+        <input id="ann-run-id" type="text" placeholder="e.g. RUN-LIVE-20260520-2021"
+          style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid rgba(78,222,163,.2);border-radius:4px;padding:6px 8px;font-size:13px;box-sizing:border-box;"
+          aria-label="Run ID" />
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="color:#8b949e;font-size:11px;display:block;margin-bottom:4px;">Note *</label>
+        <textarea id="ann-note" rows="4" required placeholder="Enter analyst note..."
+          style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid rgba(78,222,163,.2);border-radius:4px;padding:6px 8px;font-size:13px;resize:vertical;box-sizing:border-box;"
+          aria-label="Note" ></textarea>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="color:#8b949e;font-size:11px;display:block;margin-bottom:4px;">Author</label>
+        <input id="ann-author" type="text" placeholder="Analyst name"
+          style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid rgba(78,222,163,.2);border-radius:4px;padding:6px 8px;font-size:13px;box-sizing:border-box;"
+          aria-label="Author" />
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button type="button" onclick="closeAnnotationModal()"
+          style="background:transparent;color:#8b949e;border:1px solid rgba(139,148,158,.3);border-radius:4px;padding:6px 14px;cursor:pointer;font-size:12px;"
+          aria-label="Cancel">Cancel</button>
+        <button type="submit" class="btn-primary" aria-label="Save annotation">Save</button>
+      </div>
+    </form>
+    <div id="modal-delete-zone" style="margin-top:12px;display:none;border-top:1px solid rgba(255,0,0,.2);padding-top:12px;">
+      <button type="button" onclick="deleteAnnotation()"
+        style="background:rgba(255,0,0,.1);color:#f85149;border:1px solid rgba(248,81,73,.3);border-radius:4px;padding:6px 14px;cursor:pointer;font-size:12px;"
+        aria-label="Delete annotation">Delete Annotation</button>
+    </div>
+  </div>
+</div>"""
+    new_annotation_script = """
+var SIASA_ANN_KEY = 'siasa_annotations';
+function _getAnnotations() {
+  try { return JSON.parse(localStorage.getItem(SIASA_ANN_KEY) || '[]'); } catch(e) { return []; }
+}
+function _saveAnnotations(arr) {
+  localStorage.setItem(SIASA_ANN_KEY, JSON.stringify(arr));
+}
+function openAnnotationModal(id) {
+  var modal = document.getElementById('annotation-modal');
+  modal.style.display = 'flex';
+  document.getElementById('modal-delete-zone').style.display = 'none';
+  if (id) {
+    var anns = _getAnnotations();
+    var ann = anns.filter(function(a){ return a.id === id; })[0];
+    if (ann) {
+      document.getElementById('annotation-id').value = ann.id || '';
+      document.getElementById('ann-country').value = ann.country_id || '';
+      document.getElementById('ann-domain').value = ann.domain || '';
+      document.getElementById('ann-run-id').value = ann.run_id || '';
+      document.getElementById('ann-note').value = ann.note || '';
+      document.getElementById('ann-author').value = ann.author || '';
+      document.getElementById('modal-delete-zone').style.display = 'block';
+      document.getElementById('modal-title').textContent = 'Edit Annotation';
+    }
+  } else {
+    document.getElementById('annotation-form').reset();
+    document.getElementById('annotation-id').value = '';
+    document.getElementById('modal-title').textContent = 'New Annotation';
+  }
+  document.getElementById('ann-country').focus();
+}
+function closeAnnotationModal() {
+  document.getElementById('annotation-modal').style.display = 'none';
+}
+function saveAnnotation(e) {
+  e.preventDefault();
+  var id = document.getElementById('annotation-id').value || ('ANN-' + Date.now());
+  var anns = _getAnnotations();
+  var existing = anns.findIndex(function(a){ return a.id === id; });
+  var ann = {
+    id: id,
+    country_id: document.getElementById('ann-country').value.trim().toUpperCase(),
+    domain: document.getElementById('ann-domain').value || null,
+    run_id: document.getElementById('ann-run-id').value.trim() || null,
+    note: document.getElementById('ann-note').value.trim(),
+    author: document.getElementById('ann-author').value.trim() || 'Analyst',
+    created_at: existing >= 0 ? anns[existing].created_at : new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+  if (existing >= 0) { anns[existing] = ann; } else { anns.unshift(ann); }
+  _saveAnnotations(anns);
+  closeAnnotationModal();
+  renderAnnotationList();
+}
+function deleteAnnotation() {
+  var id = document.getElementById('annotation-id').value;
+  if (!id) return;
+  if (!confirm('Delete this annotation?')) return;
+  var anns = _getAnnotations().filter(function(a){ return a.id !== id; });
+  _saveAnnotations(anns);
+  closeAnnotationModal();
+  renderAnnotationList();
+}
+function renderAnnotationList() {
+  var anns = _getAnnotations();
+  var container = document.getElementById('annotation-list-container');
+  if (!container) return;
+  if (anns.length === 0) {
+    container.innerHTML = '<p style="color:#8b949e;">No annotations yet. Click &quot;+ New Annotation&quot; to add one.</p>';
+    return;
+  }
+  var html = '';
+  anns.forEach(function(a) {
+    html += '<div class="panel" style="margin-bottom:8px;border-left:3px solid #388bfd;">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+    html += '<span style="color:#388bfd;font-size:11px;font-weight:600;">' + (a.country_id || '\\u2014') + (a.domain ? ' / Domain ' + a.domain : '') + '</span>';
+    html += '<button onclick="openAnnotationModal(\\'' + a.id + '\\')" style="background:transparent;color:#8b949e;border:1px solid rgba(139,148,158,.2);border-radius:3px;padding:2px 8px;cursor:pointer;font-size:11px;">Edit</button>';
+    html += '</div>';
+    html += '<p style="color:#e6edf3;margin:0 0 6px;font-size:13px;">' + (a.note || '') + '</p>';
+    html += '<div style="color:#8b949e;font-size:10px;">' + (a.author || '') + ' \\u00b7 ' + (a.updated_at || '') + (a.run_id ? ' \\u00b7 ' + a.run_id : '') + '</div>';
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+document.addEventListener('DOMContentLoaded', renderAnnotationList);
+document.getElementById('annotation-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeAnnotationModal();
+});
+"""
     body = ''.join(
         [
             "<h2>Analyst Annotations View</h2>",
+            "<button onclick=\"openAnnotationModal()\" class=\"btn-primary\" aria-label=\"New annotation\">+ New Annotation</button>",
             f"<p>Total annotations: <strong>{html.escape(str(len(annotations_view_model.get('annotations', []))))}</strong></p>",
+            "<h3>&#8212;&#8212; localStorage Annotations (live) &#8212;&#8212;</h3>",
+            "<div id='annotation-list-container'><p style='color:#8b949e;'>Loading localStorage annotations...</p></div>",
             "<h3>Create / Edit Annotation Workflow</h3>",
             "<p>This static GUI keeps analyst draft annotations in the browser for create/edit/filter/history workflow support. Export the draft JSON for governed persistence into repo-backed artifacts.</p>",
             "<div id='annotation-workflow-status'></div>",
@@ -3915,6 +4190,7 @@ renderAnnotationWorkflow();
             "<h4>Draft Export</h4><pre id='annotation-draft-export'>[]</pre>",
             "<h4>Draft History</h4>",
             "<table id='annotation-history-table'><thead><tr><th>Saved At</th><th>Annotation ID</th><th>Action</th><th>Linked Items</th></tr></thead><tbody id='annotation-history-table-body'></tbody></table>",
+            "<h3>&#8212;&#8212; Artifact Annotations (from last run) &#8212;&#8212;</h3>",
             f"<h3>Annotation Details</h3>{_annotation_details_html([str(item.get('annotation_id')) for item in annotations_view_model.get('annotations', [])], annotations_view_model)}",
             "<h3>By Scope</h3>",
             "<table><thead><tr><th>Scope</th><th>Annotation IDs</th></tr></thead>",
@@ -3922,8 +4198,10 @@ renderAnnotationWorkflow();
             "<h3>By Linked Item</h3>",
             "<table><thead><tr><th>Linked Item</th><th>Annotation IDs</th></tr></thead>",
             f"<tbody>{linked_item_rows}</tbody></table>",
+            modal_html,
             f"<script id='annotation-seed-data' type='application/json'>{workflow_seed}</script>",
             workflow_script,
+            f"<script>{new_annotation_script}</script>",
         ]
     )
     return _page("Analyst Annotations View", body, nav_prefix=nav_prefix, available_pages=available_pages)

@@ -1,0 +1,61 @@
+{
+  "annotations": [],
+  "anomaly_state": "D0",
+  "baseline_comparison": {
+    "current_window": 5.5,
+    "delta_to_baseline": 0.5
+  },
+  "country_id": "SAU",
+  "domain": "A",
+  "feature_values": [
+    {
+      "coverage": 1.0,
+      "feature_id": "A_news_volume",
+      "value": 5.5
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "A_source_count",
+      "value": 3.0
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "A_source_diversity_index",
+      "value": 0.45
+    }
+  ],
+  "source_context": [
+    {
+      "confidence": null,
+      "freshness_hours": null,
+      "history_horizon": "n/a",
+      "source_id": "SRC-GDELT-DOC",
+      "status": "success"
+    }
+  ],
+  "time_series": [
+    {
+      "signal_key": "article_count",
+      "timestamp": "2026-04-23T11:45:00Z",
+      "value": 1.4
+    },
+    {
+      "signal_key": "article_count",
+      "timestamp": "2026-04-22T10:15:00Z",
+      "value": 1.3
+    },
+    {
+      "signal_key": "article_count",
+      "timestamp": "2026-04-20T09:00:00Z",
+      "value": 1.5
+    },
+    {
+      "signal_key": "article_count",
+      "timestamp": "2026-04-18T14:30:00Z",
+      "value": 1.2
+    }
+  ],
+  "uncertainty": [
+    "freshness beyond threshold"
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "annotations": [],
+  "confidence": 1.0,
+  "configured_domains": [
+    "A",
+    "B",
+    "D"
+  ],
+  "counter_indicators": [],
+  "country_context": {
+    "country_name": "Netherlands",
+    "priority": "P3",
+    "rationale": "Stabiles EU-Land, hohe Pressefreiheit, Referenzrahmen",
+    "region": "Western Europe",
+    "selection_type": "Control/Reference"
+  },
+  "country_id": "NLD",
+  "coverage": 1.0,
+  "domain_gap_summary": {
+    "expected_domains": [
+      "A",
+      "B",
+      "D"
+    ],
+    "missing_domains": [],
+    "observed_domains": [
+      "A",
+      "B",
+      "D"
+    ]
+  },
+  "domain_states": {
+    "A": "D0",
+    "B": "D0",
+    "D": "D0"
+  },
+  "drivers": [
+    "A_news_volume",
+    "A_source_count",
+    "A_source_diversity_index",
+    "B_disaster_alert_level",
+    "B_event_count",
+    "B_event_type_distribution",
+    "B_protest_event_count",
+    "B_violent_event_count",
+    "B_violent_event_share",
+    "D_gdp_growth",
+    "D_macro_data_freshness",
+    "D_trade_volume_change"
+  ],
+  "explanation_summary": null,
+  "linked_events": [],
+  "multi_domain_status": "S0",
+  "source_depth": {
+    "source_count": 3,
+    "source_ids": [
+      "SRC-GDELT-DOC",
+      "SRC-GDELT-EVENTS",
+      "WB-INDICATORS"
+    ]
+  },
+  "trends": {
+    "yearly": [
+      {
+        "label": "2024",
+        "value": 0.6
+      },
+      {
+        "label": "2026-04",
+        "value": 0.7
+      },
+      {
+        "label": "2026-05",
+        "value": 2.8
+      }
+    ]
+  },
+  "uncertainty": []
+}

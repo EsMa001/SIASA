@@ -1,0 +1,73 @@
+{
+  "annotations": [],
+  "anomaly_state": "D2",
+  "baseline_comparison": {
+    "current_window": 24.0,
+    "delta_to_baseline": 0.3
+  },
+  "country_id": "TUR",
+  "domain": "B",
+  "feature_values": [
+    {
+      "coverage": 1.0,
+      "feature_id": "B_event_count",
+      "value": 24.0
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "B_violent_event_count",
+      "value": 9.0
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "B_protest_event_count",
+      "value": 7.0
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "B_violent_event_share",
+      "value": 0.375
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "B_disaster_alert_level",
+      "value": 0.0
+    },
+    {
+      "coverage": 1.0,
+      "feature_id": "B_event_type_distribution",
+      "value": {
+        "conflict": 0.375,
+        "violent": 0.375,
+        "protest": 0.292
+      }
+    }
+  ],
+  "source_context": [
+    {
+      "confidence": null,
+      "freshness_hours": null,
+      "history_horizon": "n/a",
+      "source_id": "SRC-GDELT-EVENTS",
+      "status": "success"
+    }
+  ],
+  "time_series": [
+    {
+      "signal_key": "conflict_event_count",
+      "timestamp": "2026-05-20T20:30:00Z",
+      "value": 9.0
+    },
+    {
+      "signal_key": "violent_event_count",
+      "timestamp": "2026-05-20T20:30:00Z",
+      "value": 9.0
+    },
+    {
+      "signal_key": "protest_event_count",
+      "timestamp": "2026-05-20T20:30:00Z",
+      "value": 7.0
+    }
+  ],
+  "uncertainty": []
+}

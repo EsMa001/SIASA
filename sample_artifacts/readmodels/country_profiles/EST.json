@@ -1,0 +1,70 @@
+{
+  "annotations": [],
+  "confidence": 1.0,
+  "configured_domains": [
+    "A",
+    "D"
+  ],
+  "counter_indicators": [],
+  "country_context": {
+    "country_name": "Estonia",
+    "priority": "P2",
+    "rationale": "Cyber-Bedrohungen, NATO-Ostflanke, russischer Einfluss",
+    "region": "Baltic / NATO",
+    "selection_type": "Extended Focus"
+  },
+  "country_id": "EST",
+  "coverage": 1.0,
+  "domain_gap_summary": {
+    "expected_domains": [
+      "A",
+      "D"
+    ],
+    "missing_domains": [],
+    "observed_domains": [
+      "A",
+      "D"
+    ]
+  },
+  "domain_states": {
+    "A": "D1",
+    "D": "D0"
+  },
+  "drivers": [
+    "A_news_volume",
+    "A_source_count",
+    "A_source_diversity_index",
+    "D_gdp_growth",
+    "D_macro_data_freshness",
+    "D_trade_volume_change"
+  ],
+  "explanation_summary": null,
+  "linked_events": [
+    "EVT-EST-RUN-LIVE-20260520-2021"
+  ],
+  "multi_domain_status": "S1",
+  "source_depth": {
+    "source_count": 2,
+    "source_ids": [
+      "SRC-GDELT-DOC",
+      "WB-INDICATORS"
+    ]
+  },
+  "trends": {
+    "yearly": [
+      {
+        "label": "2024",
+        "value": 1.5
+      },
+      {
+        "label": "2026-04",
+        "value": 1.2
+      },
+      {
+        "label": "2026-05",
+        "value": 4.5
+      }
+    ]
+  },
+  "uncertainty": []
+}
