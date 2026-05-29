@@ -2,165 +2,119 @@
 
 ## Analyse der aktuellen generatorbasierten GUI
 
-### Ist-Zustand (Stand: 2026-05-20)
+### Ist-Zustand (Stand: 2026-05-29)
 
-**Generator:** `src/siasa/gui/local_app.py` (2.436 Zeilen, reines Python, f-Strings)
+**Generator:** `src/siasa/gui/local_app.py` (~4.500 Zeilen, reines Python, f-Strings)
 
 **Generierte Seiten (13 gesamt):**
 
 | Seite | Datei | Reife (UX) |
 |---|---|---|
-| World Overview / Anomaly Map | `index.html` | 🟡 Funktional, visuell schwach |
-| Country Profile | `countries/{ID}.html` | 🟡 Funktional, informationsreich aber unstrukturiert |
-| Domain Detail | `domains/{ID}-{Domain}.html` | 🟡 Funktional, tabellarisch |
-| Source / Coverage | `coverage.html` | 🟡 Funktional, SVG-Charts vorhanden |
-| Reports / Exports | `reports.html` | 🟢 Einfach, funktioniert gut |
-| System Status / Runs | `runs.html` | 🟡 Funktional |
-| Yearly Trends | `trends.html` | 🟡 SVG-Charts, JS-Filter vorhanden |
-| Current Events | `events.html` | 🟡 JS-Filter vorhanden |
-| Cross-Country Comparison | `comparison.html` | 🟡 Tabelle, JS-Filter |
-| Validation / Backtest | `validation.html` | 🔴 Daten vorhanden, visuell sehr roh |
-| Traceability / Lineage | `traceability.html` | 🔴 Tabellen-basiert, keine visuelle Hierarchie |
-| Analyst Annotations | `annotations.html` | 🟡 localStorage-CRUD vorhanden, aber unpoliert |
-| Demo / Release Readiness | `readiness.html` | 🟡 Funktional |
-
-**Kritische UX-Schwäche heute:**
-- **Helles Design** (weißer Hintergrund, schwarzer Text) — kein Dark Dashboard
-- **Keine Design-Systematik** — CSS-Regeln verstreut, inkonsistente Abstände
-- **Inline-Style-Fragmente** — Farben direkt in f-Strings, kein CSS-Klassen-System
-- **Keine visuelle Hierarchie** zwischen Panels, Abschnitten, KPIs
-- **Navigation funktional aber ungestylt**
-- Trotzdem: Semantik, Funktionalität und Datenfluss sind korrekt implementiert
+| World Overview / Anomaly Map | `index.html` | 🟢 Interaktive SVG-Karte, Natural Earth 110m, 29 Länder |
+| Country Profile | `countries/{ID}.html` | 🟢 Dark panels, KPI-Header, strukturiert |
+| Domain Detail | `domains/{ID}-{Domain}.html` | 🟢 Charts, Panel-Struktur |
+| Source / Coverage | `coverage.html` | 🟢 Trust-Visualisierung, table-wrap, responsive |
+| Reports / Exports | `reports.html` | 🟢 Kategorisiert, Download-Buttons, Suchfilter |
+| System Status / Runs | `runs.html` | 🟢 KPI-Header, Panel-Struktur |
+| Yearly Trends | `trends.html` | 🟢 SVG-Charts mit Y-Achse, Area-Fill, Grid |
+| Current Events | `events.html` | 🟢 KPI-Header, Smart-Filter-Counter, Panel-Items |
+| Cross-Country Comparison | `comparison.html` | 🟢 Tabelle, JS-Filter |
+| Validation / Backtest | `validation.html` | 🟢 KPI-Grid, Verdict-Bars, Replay Attention Layer |
+| Traceability / Lineage | `traceability.html` | 🟢 Collapsible-Sektionen, Cluster-Karten |
+| Analyst Annotations | `annotations.html` | 🟢 localStorage Create/Edit/Delete-Modal |
+| Demo / Release Readiness | `readiness.html` | 🟢 Dual-KPI, Failure-Drill, Operator-Digest |
 
 **Was bereits stark ist:**
-- Inline-SVG-Charts (Liniendiagramme, Meter, World-Map-Visualisierung) — bauen darauf auf
-- Vanilla-JS-Filterlogik — gut strukturiert, behalten
-- Semantische Statusfarben (`_status_color()`, `_band_color()`) — Logik stimmt, Farben anpassen
-- `html.escape()` konsequent eingesetzt — beibehalten
-- Self-contained (keine externen Assets) — beibehalten
+- Vollständiges Dark-Dashboard-Design (AEGIS Tactical Design System)
+- Interaktive SVG-Weltkarte (Natural Earth 110m GeoJSON, 177 Länder-Outline)
+- 29 Länder in sample_artifacts (alle P1/P2/P3 MVP-Länder)
+- Inline-SVG-Charts mit Y-Achse, Grid, Area-Fill, responsiv
+- Vanilla-JS-Filterlogik, Accessibility (focus-visible, aria-label, skip-nav)
+- Responsive CSS (900px / 600px Breakpoints)
+- Role-based UI (viewer / analyst / admin über `--ui-role`)
+- Self-contained (keine externen Assets)
 
 ---
 
 ## UX-Iterationsplan
 
-### Iteration 1 — Dark Dashboard Foundation `[AKTUELL]`
-
-**Ziel:** Globales Dark-Dashboard-Styling durch Modernisierung der `_page()` CSS-Funktion.  
-Keine strukturellen HTML-Änderungen — nur CSS und Typografie.
-
-**Scope:**
-- `_page()` CSS-Block vollständig ersetzen durch Dark-Dashboard-System (siehe `design-system.md`)
-- Navigation: dunkel, sticky, strukturiert
-- Body: dunkler Hintergrund, helle Schrift
-- Tabellen: Dark-Styling (Header, Zeilen, Hover)
-- `<pre>`/`<code>`: technische Code-Darstellung
-- Statusfarben in `_status_color()` und `_band_color()` auf neue Palette anpassen
-- Badge-Komponente (`.uncertainty-badge`) modernisieren
-
-**Risiken:**
-- Test-Assertions auf CSS-Klassen oder Farbwerte könnten brechen → prüfen und anpassen
-- Kontrastverhältnisse müssen für alle Statusfarben WCAG AA (4.5:1) erfüllen
-
-**Erwartetes Ergebnis:** Alle 13 Seiten sehen einheitlich dunkel und professionell aus — ohne HTML-Struktur-Änderung.
+### ✅ Iteration 1 — Dark Dashboard Foundation `[ABGESCHLOSSEN]`
+**Commit:** `d4bc589`  
+Globales Dark-Dashboard-Styling in `_page()` — Navy-Black Theme, neue Statusfarbenpalette.
 
 ---
 
-### Iteration 2 — Panel- und Layout-System
-
-**Ziel:** Konsistente Panel-/Card-Struktur einführen. Alle Abschnitte in `_page()` und Render-Funktionen nutzen das Panel-System.
-
-**Scope:**
-- `.panel` / `.panel-header` CSS-Klassen einführen
-- Section-Wrapper in relevanten Render-Funktionen (`_render_index`, `_render_country`, etc.)
-- KPI-Card-Komponente für Kennzahlen-Blöcke
-- Navigation: aktiver Link hervorheben
-
-**Risiken:**
-- HTML-Struktur-Änderungen können mehr Tests brechen als Iteration 1
-- Readmodel-gebundene Inhalte nicht strukturell verändern
+### ✅ Iteration 2 — AEGIS Tactical Design System `[ABGESCHLOSSEN]`
+**Commit:** `746ec25`  
+Vollständiges AEGIS-Designsystem: Space Grotesk / IBM Plex Mono, Panel-System, KPI-Cards, Badge-Komponenten.
 
 ---
 
-### Iteration 3 — KPI-Header und Status-Zones
-
-**Ziel:** Jede Seite erhält eine strukturierte Header-Zone mit KPIs, Status-Badges und Meta-Informationen.
-
-**Scope:**
-- `index.html`: KPI-Leiste (Länderanzahl, kritische Anomalien, Coverage-Rate)
-- `countries/{ID}.html`: Country-KPI-Block (Gesamtstatus, Domains, letzte Aktualisierung)
-- `runs.html`: System-Status-Header
-- `readiness.html`: Readiness-Score-KPIs
-
-**Risiken:**
-- KPI-Inhalte aus Readmodels müssen korrekt extrahiert werden — Contract-Risiko niedrig (read-only)
+### ✅ Iterationen 3–9 — Strukturelle GUI-Uplifts `[ABGESCHLOSSEN]`
+**Commit:** `650a581`  
+Panel-/Layout-System, KPI-Header-Zones, Tabellen-Modernisierung, Chart-Systematisierung, alle Seiten strukturell aufgewertet.
 
 ---
 
-### Iteration 4 — Tabellen- und Listen-Modernisierung
-
-**Ziel:** Alle Tabellen erhalten einheitliches Dark-Styling, Hover-States, kompakte Typografie.  
-Event-Listen werden als strukturierte Items gerendert.
-
-**Scope:**
-- Tabellen-CSS komplett systematisieren
-- Event-Listen auf `events.html` und `index.html` als Panel-Items
-- Annotation-Workflow (`annotations.html`) visuell aufwerten
-
-**Risiken:**
-- Event-Listen haben JS-Filter — CSS-Änderungen dürfen JS-Selektoren nicht brechen
+### ✅ Events-Seite — KPI + Panel `[ABGESCHLOSSEN]`
+**Commit:** `5a70ac9`  
+Events-Seite mit KPI-Header, Panel-Struktur, Smart-Filter-Counter.
 
 ---
 
-### Iteration 5 — Chart- und SVG-Systematisierung
-
-**Ziel:** Alle SVG-Charts nutzen das Farb- und Stilsystem aus dem Design System.
-
-**Scope:**
-- `_render_line_chart()`: dunklere Hintergründe, neue Linienfarben, Grid-Linien
-- `_render_metric_meter()`: Farbgebung nach Band-System
-- `_render_world_map_visualization()`: Marker-Styling konsistenter
-
-**Risiken:**
-- SVG ist inline und hardcoded — Änderungen müssen in Python-Strings erfolgen
-- Kein externe Rendering-Library einführen
+### ✅ Chart & Meter Uplift `[ABGESCHLOSSEN]`
+**Commit:** `7530c86`  
+Y-Achse, Grid-Linien, Area-Fill, responsive SVG-Charts, neues Meter-Layout.
 
 ---
 
-### Iteration 6 — Validation / Traceability / Coverage Uplift
-
-**Ziel:** Die daten-intensiven analytischen Seiten bekommen bessere visuelle Struktur.
-
-**Scope:**
-- `validation.html`: Pass/Fail-Badge-System, Score-KPI
-- `traceability.html`: Cluster-Karten statt flache Tabelle, faltbare Sektionen
-- `coverage.html`: Trust-Visualisierung verbessern
-
-**Risiken:**
-- Diese Seiten sind besonders nah an Readmodel-Verträgen — keine Datenstruktur ändern
+### ✅ World Map — Interaktive SVG `[ABGESCHLOSSEN]`
+**Commit:** `efcd914` → `f2caac9`  
+Interaktive SVG-Weltkarte, dann Natural Earth 110m GeoJSON (177 Länderkonturen, 29 MVP-Länder farbkodiert nach Status).
 
 ---
 
-### Iteration 7 — Accessibility und Responsive-Grundlage
-
-**Ziel:** Mindest-Accessibility und mobile Nutzbarkeit sicherstellen.
-
-**Scope:**
-- `aria-label` auf interaktive Elemente
-- Tabellen horizontal scrollbar auf kleinen Viewports
-- Kontrastverhältnisse WCAG AA prüfen und korrigieren
-- `focus`-States für Tastaturnavigation
-
-**Risiken:** Gering — reine CSS- und HTML-Attribute-Ergänzungen
+### ✅ Iteration 6 — Validation & Traceability UX Uplift `[ABGESCHLOSSEN]`
+**Commit:** `6d27681`  
+Validation-Seite: KPI-Grid, Active Case Panel, Domain-Signal-Panel, Curated Library, Replay Attention Watchlist. Traceability: Cluster-Karten, collapsible Sektionen.
 
 ---
 
-### Spätere Iterationen (Post-MVP)
+### ✅ Iteration 7 — Accessibility & Responsive `[ABGESCHLOSSEN]`
+**Commit:** `ab520fc`  
+- `*:focus-visible` Outline-System (WCAG-konform, blau `#388bfd`)
+- Skip-Nav-Link (`#main-content`)
+- `<nav aria-label='Main navigation'>`, `<main id='main-content'>`
+- `scope='col'` auf alle `<th>` Tabellenköpfe
+- `.table-wrap` — horizontaler Scroll auf kleinen Viewports
+- Media Queries: 900px (2-Spalten-KPI) und 600px (1-Spalte, kompakte Nav)
 
-- **Rolle-basiertes UI-Verhalten** (strukturelle Hooks vorhanden, GUI-Verhalten noch schwach)
-- **Source Lineage / Epidemiology Visualisierung** (aktuell nur Traceability-Tabelle)
-- **Erweiterte Annotation-Features** (persistente Speicherung statt localStorage)
-- **Interaktive Karten-Overlay** (World Map mit echten Geo-Koordinaten)
-- **Export / Print-Styles**
+---
+
+### ✅ Reports/Exports UX `[ABGESCHLOSSEN]`
+**Commit:** `ab520fc`  
+- `.btn-download` Styling für alle Download-Links
+- Berichte nach Kategorie gruppiert (`<details>`/`<summary>`)
+- Suchfilter auf Reports-Seite
+- Dateigröße im Download-Link (falls `size_bytes` vorhanden)
+
+---
+
+### ✅ Annotation Create/Edit/Delete `[ABGESCHLOSSEN]`
+**Commit:** `ab520fc`  
+- Modal-Dialog mit Formular (Country, Domain, Run-ID, Note, Author)
+- Create / Edit / Delete via localStorage
+- Dynamisches Re-Render der Annotation-Liste
+- Backdrop-Click zum Schließen
+
+---
+
+### ✅ Länder-Coverage — Alle 29 MVP-Länder `[ABGESCHLOSSEN]`
+**Commit:** `ab520fc`  
+- `sample_artifacts/readmodels/country_profiles/`: 30 JSON-Profile
+- `sample_artifacts/readmodels/domain_details/`: Alle aktiven Domänen pro Land
+- `world_map.json`: Alle 29 Länder mit realistischen S0–S4-Statuswerten
+- Export-Dateien für alle neuen Länder
 
 ---
 
@@ -168,14 +122,29 @@ Event-Listen werden als strukturierte Items gerendert.
 
 | Iteration | Status | Priorität |
 |---|---|---|
-| 1 — Dark Dashboard Foundation | 🔵 Bereit | Hoch |
-| 2 — Panel- und Layout-System | ⚪ Geplant | Hoch |
-| 3 — KPI-Header und Status-Zones | ⚪ Geplant | Mittel |
-| 4 — Tabellen- und Listen-Modernisierung | ⚪ Geplant | Mittel |
-| 5 — Chart- und SVG-Systematisierung | ⚪ Geplant | Mittel |
-| 6 — Validation / Traceability / Coverage Uplift | ⚪ Geplant | Niedrig |
-| 7 — Accessibility und Responsive-Grundlage | ⚪ Geplant | Niedrig |
+| 1 — Dark Dashboard Foundation | ✅ Abgeschlossen | — |
+| 2 — AEGIS Tactical Design System | ✅ Abgeschlossen | — |
+| 3–9 — Strukturelle GUI-Uplifts | ✅ Abgeschlossen | — |
+| Events / Chart / World Map | ✅ Abgeschlossen | — |
+| 6 — Validation & Traceability UX | ✅ Abgeschlossen | — |
+| 7 — Accessibility & Responsive | ✅ Abgeschlossen | — |
+| Reports/Exports UX | ✅ Abgeschlossen | — |
+| Annotations Create/Edit | ✅ Abgeschlossen | — |
+| Länder-Coverage (29 Länder) | ✅ Abgeschlossen | — |
 
 ---
 
-*Erstellt: 2026-05-20 | Version: 1.0.0*
+## Offene Post-MVP Iterationen
+
+| Feature | Priorität | Beschreibung |
+|---|---|---|
+| Erweiterte Annotation-Persistenz | Mittel | Persistente Speicherung statt localStorage (Server-side) |
+| Source Lineage Graph-Visualisierung | Mittel | Epidemiology-Graph statt Tabelle (aktuell nur Traceability-Tabelle) |
+| Interaktive Karten-Overlay | Niedrig | World Map mit Geo-Koordinaten-Pins und Drill-Down-Zoom |
+| Export / Print-Styles | Niedrig | CSS `@media print` für Reports-Seite |
+| Server-seitige Rollen-/Permissions-Governance | Post-MVP | Identity/Permission-Layer für Produktivbetrieb |
+| WCAG AA Kontrast-Vollaudit | Niedrig | Systematische Überprüfung aller Statusfarben S0–S6 |
+
+---
+
+*Erstellt: 2026-05-20 | Letzte Aktualisierung: 2026-05-29 | Version: 2.0.0*
