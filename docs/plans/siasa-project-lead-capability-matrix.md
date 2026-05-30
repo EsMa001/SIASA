@@ -233,16 +233,16 @@ Full gap analysis: `docs/plans/siasa-stakeholder-gap-sweep-and-development-seque
 
 | Priority | Work Package | Scope | Complexity | Blocks |
 | --- | --- | --- | --- | --- |
-| 1 | AP-N01: Domain C Feature Extraction | `domain_c.py` using GDACS data | M | AP-N03 |
-| 2 | AP-N02: Domain E Feature Extraction | `domain_e.py` using GDELT Doc/Events (cyber/tech themes) | M | AP-N03 |
-| 3 | AP-N03: C/E Multi-Domain Integration | Wire C/E into orchestrator + GUI domain indicators | M | AP-N04 |
-| 4 | AP-N04: Persistent Latest Run Cycle | Populate `build/run_artifacts/latest/` reproducibly | S | — |
-| 5 | AP-N05: Lightweight Data Persistence | SQLite for run history + time-series queries | L | AP-N06 |
-| 6 | AP-N06: Automated Daily Run Scheduler | Scheduled runs + failure alerting | L | — |
-| 7 | AP-N07: Additional Source Adapters | ACLED or alternative security/social sources | M | — |
-| 8+ | AP-N09..N14: GUI Interactivity + Advanced Analytics | Interactive map, charts, fusion, probabilistic models | L | AP-N05 |
+| 1 | AP-F01: Domain C Feature Extraction | `domain_c.py` using GDACS data | M | AP-N03 | DONE (d51af56) |
+| 2 | AP-F02: Domain E Feature Extraction | `domain_e.py` using GDELT Doc/Events (cyber/tech themes) | M | AP-N03 | DONE (d51af56) |
+| 3 | AP-F03: C/E Multi-Domain Integration | Wire C/E into orchestrator + GUI domain indicators | M | AP-N04 | DONE (57b9ccb) |
+| 4 | AP-F04: Baseline Extension C/E | Already domain-agnostic, no change needed | S | — | DONE |
+| 5 | AP-N05: Lightweight Data Persistence | SQLite for run history + time-series queries | L | AP-N06 | Open |
+| 6 | AP-N06: Automated Daily Run Scheduler | Scheduled runs + failure alerting | L | — | Open |
+| 7 | AP-N07: Additional Source Adapters | ACLED or alternative security/social sources | M | — | Open |
+| 8+ | AP-N09..N14: GUI Interactivity + Advanced Analytics | Interactive map, charts, fusion, probabilistic models | L | AP-N05 | Open |
 
-**Immediate next step: AP-N01 (Domain C Feature Extraction)**
+**Immediate next step: AP-F05 (Persistent Latest Run Cycle) — validates 5-domain pipeline end-to-end**
 
 Rationale:
 - Closes the single largest content gap (2/5 domains missing)
