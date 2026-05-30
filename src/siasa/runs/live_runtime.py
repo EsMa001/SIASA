@@ -415,6 +415,18 @@ def _build_normalization_mappings() -> list[NormalizationMappingVersion]:
             version="v1",
             is_active=True,
         ),
+        NormalizationMappingVersion(
+            mapping_id="MAP-SRC-GDACS-C-v1",
+            source_id="SRC-GDACS-C",
+            version="v1",
+            is_active=True,
+        ),
+        NormalizationMappingVersion(
+            mapping_id="MAP-SRC-GDELT-DOC-E-v1",
+            source_id="SRC-GDELT-DOC-E",
+            version="v1",
+            is_active=True,
+        ),
     ]
 
 
@@ -674,6 +686,20 @@ def build_governed_live_orchestrator(
                 ),
             ),
             GDACSAdapter(country_ids=set(resolved_country_ids)),
+            # Domain C: GDACS data re-ingested as physical activity/disaster domain
+            GDACSAdapter(country_ids=set(resolved_country_ids), source_id="SRC-GDACS-C", domain="C"),
+            # Domain E: GDELT Doc data re-ingested filtered for cyber/tech/info-ops themes
+            GDELTDocAdapter(
+                country_queries=country_queries,
+                source_id="SRC-GDELT-DOC-E",
+                domain="E",
+                max_records=_gdelt_doc_max_records_for_country_count(len(resolved_country_ids)),
+                inter_request_delay_seconds=_gdelt_doc_inter_request_delay_seconds_for_country_count(len(resolved_country_ids)),
+                max_retry_delay_seconds=_gdelt_doc_max_retry_delay_seconds_for_country_count(len(resolved_country_ids)),
+                request_timeout_seconds=_gdelt_doc_request_timeout_seconds_for_country_count(len(resolved_country_ids)),
+                max_full_fetch_retries=_gdelt_doc_max_full_fetch_retries_for_country_count(len(resolved_country_ids)),
+                full_fetch_retry_cooldown_seconds=_gdelt_doc_full_fetch_retry_cooldown_seconds_for_country_count(len(resolved_country_ids)),
+            ),
         ]
     )
     runtime_profile = "live-multi-country-v1" if len(resolved_country_ids) > 1 else "live-single-country-v1"
