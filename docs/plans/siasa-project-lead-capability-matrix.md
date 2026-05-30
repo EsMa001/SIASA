@@ -204,23 +204,49 @@ That is a useful sign of progress, but it also means prioritization must focus o
 
 ---
 
-## 5. Immediate steering recommendation
+## 5. Re-Assessment: Governance-Done vs Substantive Fulfillment (2026-05-30)
 
-Current serial recommendation:
-- central planning document: `docs/plans/siasa-stakeholder-fulfillment-roadmap.md`
-- Step A first package is closed: operational `latest` breadth uplift to governed `extended-focus-complete` (11 countries) with live evidence `RUN-LIVE-EXT-FOCUS-LATEST-005`
-- Step B first package is now closed: analyst briefing "What matters now?" is available in `build/local_gui/latest/readiness.html` and exported as `build/local_gui/latest/analyst_briefing.json`
-- next work package direction: continue Step B = Analyst interpretation and actionability depth
-- planned follow-on direction after Step B: Step C = Demo/release productization
+> This section was added during a full stakeholder gap re-assessment.
+> All 16 capabilities above are marked `Done` on the governance/structure level.
+> The re-assessment below evaluates **substantive stakeholder fulfillment** — what a stakeholder would actually experience.
 
-Why this is next:
+### 5a. Critical substantive gaps despite governance closure
 
-- AP-25 is closed: stale-remediation now has an explicit operator work queue with deterministic closure checks.
-- AP-26 is closed: release evidence now separates primary root causes from derived release effects, so blocker triage is causally clearer.
-- AP-27 is closed: the stakeholder-flow and browser gates are now also visible as one coherent operability package instead of several isolated low-level gate names.
-- AP-A1 is now closed: the operational `latest` standard path has been lifted from the earlier narrow baseline to the governed `extended-focus-complete` 11-country set and validated by automated tests, a successful real live run, and the generated `latest` GUI artifact.
-- B-1 is now closed: the readiness GUI now contains an analyst briefing "What matters now?" that condenses existing evidence into a compact action-oriented summary with recommended next checks.
-- therefore the next useful serial move stays inside Step B: continue deepening analyst interpretation and actionability on top of the already-broadened runtime evidence.
-- Step C should still follow after the next Step-B slices, because demo/release productization has the most value once the broader runtime evidence is already operational and better interpreted.
+| Gap area | Affected StR | Severity | Root cause | Impact on stakeholder experience |
+| --- | --- | --- | --- | --- |
+| Domain C (Physical Activity) feature extraction missing | StR-188..196, StR-245..254, StR-311..327 | HIGH | No `domain_c.py` exists | Multi-domain assessment runs on 3/5 domains only; holistic country Lageverständnis incomplete |
+| Domain E (Cyber/InfoOps) feature extraction missing | StR-188..196, StR-245..254, StR-311..327 | HIGH | No `domain_e.py` exists | Cyber/tech dimension completely absent from analysis |
+| C/E integration inert | StR-245..254 | HIGH | Gating code exists in `multi_domain_status.py` (line 23) but can never activate without domain_c/e features | C/E always filtered out; GUI cannot show active/inactive domain indicators truthfully |
+| No persistent `latest` runtime artifacts | StR-135..147 | HIGH | `build/run_artifacts/latest/` is empty | No current situational picture available; all probes were temporary |
+| No operations/automation (47 StR) | StR-474..520 | HIGH | No scheduler, no database, no monitoring | System cannot run unattended; fully manual |
+| Evidence fusion / cross-domain contrasting missing | StR-045..050 | MEDIUM | No implementation | Multi-domain status is simple aggregation only |
+| Probabilistic state modeling missing | StR-057..061 | MEDIUM | Only threshold-based D0-D5 | No uncertainty quantification, no transition probabilities |
+| Information epidemiology only groundwork | StR-040..044 | MEDIUM | Only first-observed coupling candidates | No spread-path modeling or amplification detection |
+| Source coverage limited (4 of many specified) | StR-205..225 | MEDIUM | Only World Bank, GDELT Doc/Events, GDACS | Many stakeholder-specified sources not integrated |
+| No database / historical data accumulation | StR-148..161 | MEDIUM | File-based only | No time-series queries, no historical trend analysis |
 
-That prioritization should continue to be governed by matrix evidence, not by raw code churn.
+### 5b. Updated steering recommendation (2026-05-30)
+
+Full gap analysis: `docs/plans/siasa-stakeholder-gap-sweep-and-development-sequence.md`
+
+**Recommended next serial development sequence:**
+
+| Priority | Work Package | Scope | Complexity | Blocks |
+| --- | --- | --- | --- | --- |
+| 1 | AP-N01: Domain C Feature Extraction | `domain_c.py` using GDACS data | M | AP-N03 |
+| 2 | AP-N02: Domain E Feature Extraction | `domain_e.py` using GDELT Doc/Events (cyber/tech themes) | M | AP-N03 |
+| 3 | AP-N03: C/E Multi-Domain Integration | Wire C/E into orchestrator + GUI domain indicators | M | AP-N04 |
+| 4 | AP-N04: Persistent Latest Run Cycle | Populate `build/run_artifacts/latest/` reproducibly | S | — |
+| 5 | AP-N05: Lightweight Data Persistence | SQLite for run history + time-series queries | L | AP-N06 |
+| 6 | AP-N06: Automated Daily Run Scheduler | Scheduled runs + failure alerting | L | — |
+| 7 | AP-N07: Additional Source Adapters | ACLED or alternative security/social sources | M | — |
+| 8+ | AP-N09..N14: GUI Interactivity + Advanced Analytics | Interactive map, charts, fusion, probabilistic models | L | AP-N05 |
+
+**Immediate next step: AP-N01 (Domain C Feature Extraction)**
+
+Rationale:
+- Closes the single largest content gap (2/5 domains missing)
+- High feasibility — GDACS data already available, feature pattern well-established
+- Unblocks AP-N02, AP-N03, and all 5-domain capability
+- Directly addresses ~50 stakeholder requirements
+- No external dependencies needed
