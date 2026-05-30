@@ -57,6 +57,8 @@ def test_release_failure_drill_report_builds_ap23_delta_ledger_against_prior_sna
         "stale_remediation_actionable",
         "known_gaps_clear",
         "traceability_integrity_clean",
+        "stakeholder_e2e_ui_smoke_covered",
+        "stakeholder_browser_e2e_acceptance_covered",
     }
     assert "AP-23 snapshot delta" in delta_ledger["operator_impact_narrative"]
 
