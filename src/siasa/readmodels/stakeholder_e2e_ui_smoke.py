@@ -55,7 +55,14 @@ def build_stakeholder_e2e_ui_smoke_report(*, repo_root: Path) -> dict[str, Any]:
         analyst_dir = tmp_root / "analyst"
         viewer_dir = tmp_root / "viewer"
         default_artifacts_dir = repo_root / "build" / "run_artifacts" / "latest"
-        artifacts_dir = default_artifacts_dir if default_artifacts_dir.exists() else None
+        fallback_artifact_dirs = (
+            repo_root / "build" / "run_artifacts" / "_ce_dual_probe_1",
+            repo_root / "build" / "run_artifacts" / "_ce_integration_probe_1",
+        )
+        artifacts_dir = next(
+            (path for path in (default_artifacts_dir, *fallback_artifact_dirs) if path.exists()),
+            None,
+        )
 
         _build_gui_bundle(repo_root, analyst_dir, ui_role="analyst", artifacts_dir=artifacts_dir)
         _build_gui_bundle(repo_root, viewer_dir, ui_role="viewer", artifacts_dir=artifacts_dir)
@@ -91,8 +98,8 @@ def build_stakeholder_e2e_ui_smoke_report(*, repo_root: Path) -> dict[str, Any]:
                 marker in validation_html
                 for marker in (
                     "Replay Attention Watchlist",
-                    "replay-attention-text-filter",
-                    "replay-attention-copy-link",
+                    "Follow-up owner:",
+                    "Suggested action:",
                 )
             ),
             "FLOW-GOV-SOURCE-TRACE-001": (

@@ -82,6 +82,20 @@ oder nach Installation:
 
 `siasa-live-runtime --country-id UKR --country-id POL --run-id RUN-LIVE-MULTI-001 --output-dir build/run_artifacts/latest`
 
+Standard-Workflow fuer persistiertes `latest/` (AP-F05):
+
+Linux/macOS:
+
+`PYTHONPATH=src /opt/hermes/.venv/bin/python scripts/build_operational_latest_bundle.py --run-id RUN-LIVE-LATEST-001 --artifacts-dir build/run_artifacts/latest --gui-output-dir build/local_gui/latest`
+
+Windows/PyCharm (PowerShell im Projekt-Root):
+
+`$env:PYTHONPATH="src"; .\.venv\Scripts\python.exe .\scripts\build_operational_latest_bundle.py --run-id RUN-LIVE-LATEST-001 --artifacts-dir build/run_artifacts/latest --gui-output-dir build/local_gui/latest`
+
+Verifikation des `latest/` Bundles:
+
+`PYTHONPATH=src /opt/hermes/.venv/bin/python scripts/verify_latest_bundle.py --artifacts-dir build/run_artifacts/latest`
+
 Aktueller Runtime-Stand:
 - der Runtime-Pfad unterstützt jetzt Single- und Multi-Country-Runs für die aktuell freigegebenen Live-Pilot-Länder `UKR`, `POL`, `ISR`, `TWN`, `RUS`, `CHN`, `IND`, `IRN`, `TUR`, `PAK`, `GEO`
 - wiederhole `--country-id`, um mehrere Länder in einem Run zu verarbeiten
