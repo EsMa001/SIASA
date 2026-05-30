@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 Normalizer = Callable[[str, str, list[dict[str, float]]], list[NormalizedRecord]]
 DomainStatusAnalyzer = Callable[[str, list[FeatureValue]], DomainStatusResult]
-MultiDomainStatusAnalyzer = Callable[[list[DomainStatusResult]], MultiDomainStatusResult]
+MultiDomainStatusAnalyzer = Callable[[list[DomainStatusResult], dict[str, bool] | None], MultiDomainStatusResult]
 ValidationViewModelBuilder = Callable[
     [
         str,
@@ -220,10 +220,17 @@ class DailyRunOrchestrator:
                 artifact_bundle=None,
             )
 
-        country_multi_domain_statuses = {
-            country_id: self.multi_domain_status_analyzer(list(per_country_statuses.values()))
-            for country_id, per_country_statuses in sorted(country_domain_statuses.items())
-        }
+        country_multi_domain_statuses = {}
+        for country_id, per_country_statuses in sorted(country_domain_statuses.items()):
+            # Enable C/E domain gates when features exist for this country (StR-247..250)
+            optional_gates = {
+                "C": "C" in per_country_statuses,
+                "E": "E" in per_country_statuses,
+            }
+            country_multi_domain_statuses[country_id] = self.multi_domain_status_analyzer(
+                list(per_country_statuses.values()),
+                optional_gates,
+            )
         multi_domain_status = country_multi_domain_statuses.get(
             primary_country_id,
             self.multi_domain_status_analyzer(list(domain_statuses.values())),

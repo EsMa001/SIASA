@@ -77,7 +77,7 @@ def test_build_governed_live_orchestrator_uses_real_source_adapters_for_supporte
         "SRC-GDELT-EVENTS",
         "SRC-GDACS",
     ]
-    assert orchestrator.active_domains == ["A", "B", "D"]
+    assert orchestrator.active_domains == ["A", "B", "C", "D", "E"]
     assert orchestrator.country_set_id == "MVP-COUNTRIES-LIVE-UKR-v1"
 
 

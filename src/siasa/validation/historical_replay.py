@@ -8,7 +8,9 @@ import yaml
 from siasa.data.normalized_models import NormalizedRecord
 from siasa.features.domain_a import DomainAFeatureService
 from siasa.features.domain_b import DomainBFeatureService
+from siasa.features.domain_c import DomainCFeatureService
 from siasa.features.domain_d import DomainDFeatureService
+from siasa.features.domain_e import DomainEFeatureService
 from siasa.scoring.data_sufficiency import evaluate_data_sufficiency
 from siasa.scoring.domain_status import derive_domain_status
 from siasa.scoring.multi_domain_status import derive_multi_domain_status
@@ -27,8 +29,8 @@ class HistoricalReplayInput:
     known_limitations: list[str] = field(default_factory=list)
 
 
-_FEATURE_SERVICES = (DomainAFeatureService(), DomainBFeatureService(), DomainDFeatureService())
-_DOMAIN_ANOMALY_SCORES = {"A": 0.7, "B": 0.3, "D": 0.1}
+_FEATURE_SERVICES = (DomainAFeatureService(), DomainBFeatureService(), DomainCFeatureService(), DomainDFeatureService(), DomainEFeatureService())
+_DOMAIN_ANOMALY_SCORES = {"A": 0.7, "B": 0.3, "C": 0.2, "D": 0.1, "E": 0.2}
 
 
 

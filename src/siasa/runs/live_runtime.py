@@ -11,7 +11,9 @@ from siasa.data.normalization_mappings import NormalizationMappingVersion
 from siasa.data.normalization_service import normalize_records
 from siasa.features.domain_a import DomainAFeatureService
 from siasa.features.domain_b import DomainBFeatureService
+from siasa.features.domain_c import DomainCFeatureService
 from siasa.features.domain_d import DomainDFeatureService
+from siasa.features.domain_e import DomainEFeatureService
 from siasa.readmodels.validation_backtest import (
     build_historical_replay_summary,
     build_reference_case_library_summary,
@@ -419,7 +421,7 @@ def _build_normalization_mappings() -> list[NormalizationMappingVersion]:
 
 def _default_domain_status_analyzer(domain: str, features):
     sufficiency = evaluate_data_sufficiency(features)
-    anomaly_score = {"A": 0.7, "B": 0.3, "D": 0.1}.get(domain, 0.1)
+    anomaly_score = {"A": 0.7, "B": 0.3, "C": 0.2, "D": 0.1, "E": 0.2}.get(domain, 0.1)
     return derive_domain_status(domain, anomaly_score=anomaly_score, sufficiency=sufficiency)
 
 
@@ -742,11 +744,11 @@ def build_governed_live_orchestrator(
     return DailyRunOrchestrator(
         adapters=adapters,
         normalizer=_normalizer,
-        feature_services=[DomainAFeatureService(), DomainBFeatureService(), DomainDFeatureService()],
+         feature_services=[DomainAFeatureService(), DomainBFeatureService(), DomainCFeatureService(), DomainDFeatureService(), DomainEFeatureService()],
         domain_status_analyzer=_default_domain_status_analyzer,
         multi_domain_status_analyzer=derive_multi_domain_status,
         country_set_id=country_set_id,
-        active_domains=["A", "B", "D"],
+        active_domains=["A", "B", "C", "D", "E"],
         rule_versions={
             "domain_status": "v1",
             "multi_domain_status": "v1",
