@@ -892,12 +892,16 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "replay-attention-level-filter" in validation_html
     assert "replay-attention-owner-filter" in validation_html
     assert "replay-attention-reason-filter" in validation_html
+    assert "replay-attention-verdict-filter" in validation_html
+    assert "replay-attention-tier-filter" in validation_html
     assert "replay-attention-text-filter" in validation_html
     assert "replay-attention-reset" in validation_html
     assert "replay-attention-visible-count" in validation_html
     assert "replay-attention-active-state" in validation_html
+    assert "replay-attention-visible-verdict-breakdown" in validation_html
     assert "applyReplayAttentionFilters" in validation_html
     assert "renderReplayAttentionActiveState" in validation_html
+    assert "verdictCounts" in validation_html
     assert "resetReplayAttentionFilters" in validation_html
     assert "replay-attention-card" in validation_html
     assert "suggested_next_action" in validation_html or "Suggested action" in validation_html

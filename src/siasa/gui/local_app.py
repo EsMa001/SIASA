@@ -3494,6 +3494,8 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
     attention_levels = sorted({str(item.get('attention_level', '')).strip().lower() for item in attention_cases if str(item.get('attention_level', '')).strip()})
     attention_owners = sorted({str(item.get('owner_hint', '')).strip().lower() for item in attention_cases if str(item.get('owner_hint', '')).strip()})
     attention_reasons = sorted({str(item.get('attention_reason', '')).strip().lower() for item in attention_cases if str(item.get('attention_reason', '')).strip()})
+    attention_verdicts = sorted({str(item.get('review_verdict', '')).strip().lower() for item in attention_cases if str(item.get('review_verdict', '')).strip()})
+    attention_tiers = sorted({str(item.get('replay_evidence_tier', '')).strip().lower() for item in attention_cases if str(item.get('replay_evidence_tier', '')).strip()})
     attention_level_options = ''.join(
         f"<option value='{html.escape(level)}'>{html.escape(level)}</option>"
         for level in attention_levels
@@ -3506,23 +3508,36 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         f"<option value='{html.escape(reason)}'>{html.escape(reason)}</option>"
         for reason in attention_reasons
     )
+    attention_verdict_options = ''.join(
+        f"<option value='{html.escape(verdict)}'>{html.escape(verdict)}</option>"
+        for verdict in attention_verdicts
+    )
+    attention_tier_options = ''.join(
+        f"<option value='{html.escape(tier)}'>{html.escape(tier)}</option>"
+        for tier in attention_tiers
+    )
     attention_filter_script = """
 <script>
 (function(){
   const levelFilter=document.getElementById('replay-attention-level-filter');
   const ownerFilter=document.getElementById('replay-attention-owner-filter');
   const reasonFilter=document.getElementById('replay-attention-reason-filter');
+  const verdictFilter=document.getElementById('replay-attention-verdict-filter');
+  const tierFilter=document.getElementById('replay-attention-tier-filter');
   const textFilter=document.getElementById('replay-attention-text-filter');
   const resetButton=document.getElementById('replay-attention-reset');
   const visibleCountNode=document.getElementById('replay-attention-visible-count');
   const activeStateNode=document.getElementById('replay-attention-active-state');
+  const verdictBreakdownNode=document.getElementById('replay-attention-visible-verdict-breakdown');
   const cards=Array.from(document.querySelectorAll('.replay-attention-card'));
 
-  function renderReplayAttentionActiveState(level, owner, reason, text){
+  function renderReplayAttentionActiveState(level, owner, reason, verdict, tier, text){
     const fragments=[];
     if(level && level!=='all'){fragments.push(`level=${level}`);}
     if(owner && owner!=='all'){fragments.push(`owner=${owner}`);}
     if(reason && reason!=='all'){fragments.push(`reason=${reason}`);}
+    if(verdict && verdict!=='all'){fragments.push(`verdict=${verdict}`);}
+    if(tier && tier!=='all'){fragments.push(`tier=${tier}`);}
     if(text){fragments.push(`text=${text}`);}
     if(!fragments.length){
       return 'Active: default';
@@ -3534,29 +3549,46 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
     const level=((levelFilter&&levelFilter.value)||'all').toLowerCase();
     const owner=((ownerFilter&&ownerFilter.value)||'all').toLowerCase();
     const reason=((reasonFilter&&reasonFilter.value)||'all').toLowerCase();
+    const verdict=((verdictFilter&&verdictFilter.value)||'all').toLowerCase();
+    const tier=((tierFilter&&tierFilter.value)||'all').toLowerCase();
     const text=((textFilter&&textFilter.value)||'').trim().toLowerCase();
     let visibleCount=0;
+    const verdictCounts={};
     cards.forEach((card)=>{
       const cardLevel=(card.dataset.attentionLevel||'').toLowerCase();
       const cardOwner=(card.dataset.attentionOwner||'').toLowerCase();
       const cardReason=(card.dataset.attentionReason||'').toLowerCase();
+      const cardVerdict=(card.dataset.reviewVerdict||'').toLowerCase();
+      const cardTier=(card.dataset.replayTier||'').toLowerCase();
       const cardSearchText=(card.dataset.cardSearchText||'').toLowerCase();
       const levelMatch=(level==='all'||cardLevel===level);
       const ownerMatch=(owner==='all'||cardOwner===owner);
       const reasonMatch=(reason==='all'||cardReason===reason);
+      const verdictMatch=(verdict==='all'||cardVerdict===verdict);
+      const tierMatch=(tier==='all'||cardTier===tier);
       const textMatch=(!text||cardSearchText.includes(text));
-      const show=(levelMatch&&ownerMatch&&reasonMatch&&textMatch);
+      const show=(levelMatch&&ownerMatch&&reasonMatch&&verdictMatch&&tierMatch&&textMatch);
       card.style.display=show?'':'none';
-      if(show){visibleCount+=1;}
+      if(show){
+        visibleCount+=1;
+        const key=cardVerdict||'n/a';
+        verdictCounts[key]=(verdictCounts[key]||0)+1;
+      }
     });
     if(visibleCountNode){visibleCountNode.textContent=String(visibleCount);}
-    if(activeStateNode){activeStateNode.textContent=renderReplayAttentionActiveState(level, owner, reason, text);}
+    if(activeStateNode){activeStateNode.textContent=renderReplayAttentionActiveState(level, owner, reason, verdict, tier, text);}
+    if(verdictBreakdownNode){
+      const breakdown=Object.keys(verdictCounts).sort().map((key)=>`${key}=${verdictCounts[key]}`).join(' | ');
+      verdictBreakdownNode.textContent=breakdown || 'none';
+    }
   }
 
   function resetReplayAttentionFilters(){
     if(levelFilter){levelFilter.value='all';}
     if(ownerFilter){ownerFilter.value='all';}
     if(reasonFilter){reasonFilter.value='all';}
+    if(verdictFilter){verdictFilter.value='all';}
+    if(tierFilter){tierFilter.value='all';}
     if(textFilter){textFilter.value='';}
     applyReplayAttentionFilters();
   }
@@ -3564,6 +3596,8 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
   if(levelFilter){levelFilter.addEventListener('change', applyReplayAttentionFilters);}
   if(ownerFilter){ownerFilter.addEventListener('change', applyReplayAttentionFilters);}
   if(reasonFilter){reasonFilter.addEventListener('change', applyReplayAttentionFilters);}
+  if(verdictFilter){verdictFilter.addEventListener('change', applyReplayAttentionFilters);}
+  if(tierFilter){tierFilter.addEventListener('change', applyReplayAttentionFilters);}
   if(textFilter){textFilter.addEventListener('input', applyReplayAttentionFilters);}
   if(resetButton){resetButton.addEventListener('click', resetReplayAttentionFilters);}
   applyReplayAttentionFilters();
@@ -3579,13 +3613,18 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         f"<select id='replay-attention-owner-filter'><option value='all'>All owners</option>{attention_owner_options}</select>"
         "<label for='replay-attention-reason-filter'>Reason</label>"
         f"<select id='replay-attention-reason-filter'><option value='all'>All reasons</option>{attention_reason_options}</select>"
+        "<label for='replay-attention-verdict-filter'>Verdict</label>"
+        f"<select id='replay-attention-verdict-filter'><option value='all'>All verdicts</option>{attention_verdict_options}</select>"
+        "<label for='replay-attention-tier-filter'>Evidence tier</label>"
+        f"<select id='replay-attention-tier-filter'><option value='all'>All tiers</option>{attention_tier_options}</select>"
         "<label for='replay-attention-text-filter'>Search</label>"
         "<input id='replay-attention-text-filter' type='text' placeholder='country, case, action...'/>"
         "<button id='replay-attention-reset' type='button'>Reset</button>"
         "</div>"
         "<p style='font-size:11px;color:#6b7d99;margin-bottom:10px;font-family:Space Grotesk,monospace;'>"
         "Visible attention cases: <strong id='replay-attention-visible-count'>0</strong> | "
-        "<span id='replay-attention-active-state'>Active: default</span>"
+        "<span id='replay-attention-active-state'>Active: default</span> | "
+        "Visible verdict mix: <span id='replay-attention-visible-verdict-breakdown'>none</span>"
         "</p>"
         f"{attention_cards}"
         f"{attention_filter_script}"
