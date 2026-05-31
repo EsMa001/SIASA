@@ -1,0 +1,22 @@
+# Configurable freshness windows per domain and source.
+# Used by data_sufficiency scoring to determine per-feature staleness thresholds.
+# Values are in hours.
+#
+# Resolution order:
+#   1. Per-source override (if present)
+#   2. Per-domain default
+#   3. Global default (168h = 7 days)
+
+global_default_hours: 168.0
+
+domain_defaults:
+  A: 168.0    # Political/Security — 7 days
+  B: 168.0    # Economic — 7 days
+  C: 336.0    # Social/Physical — 14 days (events less frequent)
+  D: 168.0    # Media/Information — 7 days
+  E: 168.0    # Cyber/Tech — 7 days
+
+source_overrides:
+  # Override for specific sources that have different update frequencies
+  # WB-INDICATORS: 720.0    # World Bank updates monthly -> 30 days
+  # SRC-GDACS: 336.0        # GDACS events can be sparse -> 14 days
