@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Callable
 
+from siasa.data.storage import persist_operational_latest_run, source_results_from_run_state
 from siasa.gui.local_app import build_local_mvp_site, load_site_payload_from_artifacts
 from siasa.runs.live_runtime import run_governed_live_pipeline
 
@@ -22,8 +23,10 @@ def build_operational_latest_bundle(
     artifacts_dir: Path,
     gui_output_dir: Path,
     pilot_set: str = DEFAULT_OPERATIONAL_LATEST_PILOT_SET,
+    history_db_path: Path | None = None,
     pipeline_runner: Callable[..., Any] = run_governed_live_pipeline,
     gui_builder: Callable[..., Path] = _default_gui_builder,
+    run_history_writer: Callable[..., None] = persist_operational_latest_run,
 ) -> dict[str, Any]:
     result = pipeline_runner(
         repo_root=repo_root,
@@ -38,10 +41,22 @@ def build_operational_latest_bundle(
         )
 
     gui_index = gui_builder(artifacts_dir=result.artifact_bundle.output_dir, output_dir=gui_output_dir)
+    resolved_history_db = history_db_path or repo_root / "build/run_history/latest_runs.sqlite"
+    run_history_writer(
+        resolved_history_db,
+        run_id=run_state.run_id,
+        run_status=run_state.status,
+        pilot_set=pilot_set,
+        artifacts_dir=result.artifact_bundle.output_dir,
+        gui_index=gui_index,
+        failed_sources=list(run_state.failed_sources),
+        source_results=source_results_from_run_state(run_state),
+    )
     return {
         "pilot_set": pilot_set,
         "run_id": run_state.run_id,
         "run_status": run_state.status,
         "artifacts_dir": result.artifact_bundle.output_dir,
         "gui_index": gui_index,
+        "history_db": resolved_history_db,
     }

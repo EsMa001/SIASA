@@ -86,15 +86,23 @@ Standard-Workflow fuer persistiertes `latest/` (AP-F05):
 
 Linux/macOS:
 
-`PYTHONPATH=src /opt/hermes/.venv/bin/python scripts/build_operational_latest_bundle.py --run-id RUN-LIVE-LATEST-001 --artifacts-dir build/run_artifacts/latest --gui-output-dir build/local_gui/latest`
+`PYTHONPATH=src /opt/hermes/.venv/bin/python scripts/build_operational_latest_bundle.py --run-id RUN-LIVE-LATEST-001 --artifacts-dir build/run_artifacts/latest --gui-output-dir build/local_gui/latest --history-db build/run_history/latest_runs.sqlite`
 
 Windows/PyCharm (PowerShell im Projekt-Root):
 
-`$env:PYTHONPATH="src"; .\.venv\Scripts\python.exe .\scripts\build_operational_latest_bundle.py --run-id RUN-LIVE-LATEST-001 --artifacts-dir build/run_artifacts/latest --gui-output-dir build/local_gui/latest`
+`$env:PYTHONPATH="src"; .\.venv\Scripts\python.exe .\scripts\build_operational_latest_bundle.py --run-id RUN-LIVE-LATEST-001 --artifacts-dir build/run_artifacts/latest --gui-output-dir build/local_gui/latest --history-db build/run_history/latest_runs.sqlite`
 
 Verifikation des `latest/` Bundles:
 
 `PYTHONPATH=src /opt/hermes/.venv/bin/python scripts/verify_latest_bundle.py --artifacts-dir build/run_artifacts/latest`
+
+Run-History (AP-N05) abfragen:
+
+`PYTHONPATH=src /opt/hermes/.venv/bin/python scripts/query_run_history.py --history-db build/run_history/latest_runs.sqlite --limit 5`
+
+Quellenstatus eines konkreten Runs:
+
+`PYTHONPATH=src /opt/hermes/.venv/bin/python scripts/query_run_history.py --history-db build/run_history/latest_runs.sqlite --run-id RUN-LIVE-LATEST-001`
 
 Aktueller Runtime-Stand:
 - der Runtime-Pfad unterstützt jetzt Single- und Multi-Country-Runs für die aktuell freigegebenen Live-Pilot-Länder `UKR`, `POL`, `ISR`, `TWN`, `RUS`, `CHN`, `IND`, `IRN`, `TUR`, `PAK`, `GEO`

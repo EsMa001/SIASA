@@ -13,6 +13,11 @@ def main() -> int:
     parser.add_argument("--pilot-set", default=DEFAULT_OPERATIONAL_LATEST_PILOT_SET, help="Governed live pilot set to use")
     parser.add_argument("--artifacts-dir", default="build/run_artifacts/latest", help="Artifact output directory")
     parser.add_argument("--gui-output-dir", default="build/local_gui/latest", help="GUI output directory")
+    parser.add_argument(
+        "--history-db",
+        default="build/run_history/latest_runs.sqlite",
+        help="SQLite path for operational latest run history",
+    )
     args = parser.parse_args()
 
     result = build_operational_latest_bundle(
@@ -21,10 +26,11 @@ def main() -> int:
         pilot_set=args.pilot_set,
         artifacts_dir=Path(args.artifacts_dir),
         gui_output_dir=Path(args.gui_output_dir),
+        history_db_path=Path(args.history_db),
     )
     print(
         f"run_status={result['run_status']} pilot_set={result['pilot_set']} "
-        f"artifacts_dir={result['artifacts_dir']} gui_index={result['gui_index']}"
+        f"artifacts_dir={result['artifacts_dir']} gui_index={result['gui_index']} history_db={result['history_db']}"
     )
     return 0
 
