@@ -124,6 +124,14 @@ Optional mit Webhook-Alerting bei Fehlern:
 
 `PYTHONPATH=src /opt/hermes/.venv/bin/python -m siasa.runs.scheduler --repo-root . --interval-hours 24 --alert-webhook https://hooks.example.com/siasa-alert`
 
+Health-Check ausfuehren und Status-File schreiben:
+
+`PYTHONPATH=src /opt/hermes/.venv/bin/python -m siasa.runs.health_monitor --artifacts-dir build/run_artifacts/latest --history-db build/run_history/latest_runs.sqlite --output build/health/health_status.json --max-staleness-hours 48`
+
+Health-Check ohne Netzwerk-Probes (offline):
+
+`PYTHONPATH=src /opt/hermes/.venv/bin/python -m siasa.runs.health_monitor --artifacts-dir build/run_artifacts/latest --history-db build/run_history/latest_runs.sqlite --output build/health/health_status.json --skip-source-probe`
+
 Aktueller Runtime-Stand:
 - der Runtime-Pfad unterstützt jetzt Single- und Multi-Country-Runs für die aktuell freigegebenen Live-Pilot-Länder `UKR`, `POL`, `ISR`, `TWN`, `RUS`, `CHN`, `IND`, `IRN`, `TUR`, `PAK`, `GEO`
 - wiederhole `--country-id`, um mehrere Länder in einem Run zu verarbeiten
