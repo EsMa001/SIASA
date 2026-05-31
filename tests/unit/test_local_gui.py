@@ -888,9 +888,18 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Archival Files" in validation_html  # was: "Archival Data Files"
     assert "Source Coverage" in validation_html  # was: "Replay Source Coverage"
     assert "Replay Attention Watchlist" in validation_html
-    # UX uplift: Interactive JS filters replaced by structured attention cards
     assert "Attention Cases" in validation_html  # was: "Replay Attention Summary"
-    # Note: JS interactive filters (replay-attention-level-filter etc.) moved to future iteration
+    assert "replay-attention-level-filter" in validation_html
+    assert "replay-attention-owner-filter" in validation_html
+    assert "replay-attention-reason-filter" in validation_html
+    assert "replay-attention-text-filter" in validation_html
+    assert "replay-attention-reset" in validation_html
+    assert "replay-attention-visible-count" in validation_html
+    assert "replay-attention-active-state" in validation_html
+    assert "applyReplayAttentionFilters" in validation_html
+    assert "renderReplayAttentionActiveState" in validation_html
+    assert "resetReplayAttentionFilters" in validation_html
+    assert "replay-attention-card" in validation_html
     assert "suggested_next_action" in validation_html or "Suggested action" in validation_html
     assert "attention_level" in validation_html or "Attention" in validation_html  # was: "Attention Level"
     assert "owner_hint" in validation_html or "Follow-up" in validation_html  # was: "Follow-up Owner"

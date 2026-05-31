@@ -3010,16 +3010,25 @@ def _render_attention_case_cards(attention_cases: list[dict[str, Any]]) -> str:
     for case in attention_cases:
         if not isinstance(case, dict):
             continue
-        country = html.escape(str(case.get('country_id', 'n/a')))
-        case_id = html.escape(str(case.get('case_id', 'n/a')))
-        att_level = str(case.get('attention_level', 'n/a'))
-        reason = html.escape(str(case.get('attention_reason', 'n/a')))
-        owner = html.escape(str(case.get('owner_hint', 'n/a')))
-        verdict = str(case.get('review_verdict', 'n/a'))
-        tier = str(case.get('replay_evidence_tier', 'n/a'))
+        country_raw = str(case.get('country_id', 'n/a'))
+        case_id_raw = str(case.get('case_id', 'n/a'))
+        att_level_raw = str(case.get('attention_level', 'n/a'))
+        reason_raw = str(case.get('attention_reason', 'n/a'))
+        owner_raw = str(case.get('owner_hint', 'n/a'))
+        verdict_raw = str(case.get('review_verdict', 'n/a'))
+        tier_raw = str(case.get('replay_evidence_tier', 'n/a'))
+        next_action_raw = str(case.get('suggested_next_action', 'n/a'))
+
+        country = html.escape(country_raw)
+        case_id = html.escape(case_id_raw)
+        att_level = att_level_raw
+        reason = html.escape(reason_raw)
+        owner = html.escape(owner_raw)
+        verdict = verdict_raw
+        tier = tier_raw
         missing = [str(d) for d in case.get('missing_expected_domains', [])]
         unexpected = [str(d) for d in case.get('unexpected_observed_domains', [])]
-        next_action = html.escape(str(case.get('suggested_next_action', 'n/a')))
+        next_action = html.escape(next_action_raw)
         src_coverage = case.get('replay_source_coverage_ratio', None)
 
         missing_html = (
@@ -3039,8 +3048,26 @@ def _render_attention_case_cards(attention_cases: list[dict[str, Any]]) -> str:
             except (TypeError, ValueError):
                 src_cov_html = f"<span class='kpi-sub'>Source coverage: {html.escape(str(src_coverage))}</span>"
 
+        card_search_text = ' '.join(
+            [
+                country_raw,
+                case_id_raw,
+                reason_raw,
+                owner_raw,
+                verdict_raw,
+                tier_raw,
+                next_action_raw,
+            ]
+        ).strip().lower()
         cards.append(
-            "<div class='panel' style='border-left:3px solid rgba(255,180,171,.5);'>"
+            "<div class='panel replay-attention-card'"
+            f" data-attention-level='{html.escape(att_level_raw.lower())}'"
+            f" data-attention-owner='{html.escape(owner_raw.lower())}'"
+            f" data-attention-reason='{html.escape(reason_raw.lower())}'"
+            f" data-review-verdict='{html.escape(verdict_raw.lower())}'"
+            f" data-replay-tier='{html.escape(tier_raw.lower())}'"
+            f" data-card-search-text='{html.escape(card_search_text)}'"
+            " style='border-left:3px solid rgba(255,180,171,.5);'>"
             "<div style='display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:10px;'>"
             f"<div><span class='mono' style='font-size:0.75rem;color:#4edea3;'>{country}</span>"
             f"<span style='color:#4b5778;margin:0 6px;'>·</span>"
@@ -3455,17 +3482,113 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         "</div>"
     )
 
-    # --- Replay Attention Watchlist (cards) ---
-    attention_cards = _render_attention_case_cards(historical_replay_summary.get('attention_cases', []))
+    # --- Replay Attention Watchlist (cards + interactive scoping controls) ---
+    attention_cases = [item for item in historical_replay_summary.get('attention_cases', []) if isinstance(item, dict)]
+    attention_cards = _render_attention_case_cards(attention_cases)
     attention_count_val = historical_replay_summary.get('attention_case_count', 0)
     attention_badge = (
         f"<span class='badge badge-red' style='margin-left:8px;'>{html.escape(str(attention_count_val))} flagged</span>"
         if attention_count_val and int(attention_count_val) > 0
         else f"<span class='badge badge-green' style='margin-left:8px;'>0 flagged</span>"
     )
+    attention_levels = sorted({str(item.get('attention_level', '')).strip().lower() for item in attention_cases if str(item.get('attention_level', '')).strip()})
+    attention_owners = sorted({str(item.get('owner_hint', '')).strip().lower() for item in attention_cases if str(item.get('owner_hint', '')).strip()})
+    attention_reasons = sorted({str(item.get('attention_reason', '')).strip().lower() for item in attention_cases if str(item.get('attention_reason', '')).strip()})
+    attention_level_options = ''.join(
+        f"<option value='{html.escape(level)}'>{html.escape(level)}</option>"
+        for level in attention_levels
+    )
+    attention_owner_options = ''.join(
+        f"<option value='{html.escape(owner)}'>{html.escape(owner)}</option>"
+        for owner in attention_owners
+    )
+    attention_reason_options = ''.join(
+        f"<option value='{html.escape(reason)}'>{html.escape(reason)}</option>"
+        for reason in attention_reasons
+    )
+    attention_filter_script = """
+<script>
+(function(){
+  const levelFilter=document.getElementById('replay-attention-level-filter');
+  const ownerFilter=document.getElementById('replay-attention-owner-filter');
+  const reasonFilter=document.getElementById('replay-attention-reason-filter');
+  const textFilter=document.getElementById('replay-attention-text-filter');
+  const resetButton=document.getElementById('replay-attention-reset');
+  const visibleCountNode=document.getElementById('replay-attention-visible-count');
+  const activeStateNode=document.getElementById('replay-attention-active-state');
+  const cards=Array.from(document.querySelectorAll('.replay-attention-card'));
+
+  function renderReplayAttentionActiveState(level, owner, reason, text){
+    const fragments=[];
+    if(level && level!=='all'){fragments.push(`level=${level}`);}
+    if(owner && owner!=='all'){fragments.push(`owner=${owner}`);}
+    if(reason && reason!=='all'){fragments.push(`reason=${reason}`);}
+    if(text){fragments.push(`text=${text}`);}
+    if(!fragments.length){
+      return 'Active: default';
+    }
+    return `Active: ${fragments.join(' | ')}`;
+  }
+
+  function applyReplayAttentionFilters(){
+    const level=((levelFilter&&levelFilter.value)||'all').toLowerCase();
+    const owner=((ownerFilter&&ownerFilter.value)||'all').toLowerCase();
+    const reason=((reasonFilter&&reasonFilter.value)||'all').toLowerCase();
+    const text=((textFilter&&textFilter.value)||'').trim().toLowerCase();
+    let visibleCount=0;
+    cards.forEach((card)=>{
+      const cardLevel=(card.dataset.attentionLevel||'').toLowerCase();
+      const cardOwner=(card.dataset.attentionOwner||'').toLowerCase();
+      const cardReason=(card.dataset.attentionReason||'').toLowerCase();
+      const cardSearchText=(card.dataset.cardSearchText||'').toLowerCase();
+      const levelMatch=(level==='all'||cardLevel===level);
+      const ownerMatch=(owner==='all'||cardOwner===owner);
+      const reasonMatch=(reason==='all'||cardReason===reason);
+      const textMatch=(!text||cardSearchText.includes(text));
+      const show=(levelMatch&&ownerMatch&&reasonMatch&&textMatch);
+      card.style.display=show?'':'none';
+      if(show){visibleCount+=1;}
+    });
+    if(visibleCountNode){visibleCountNode.textContent=String(visibleCount);}
+    if(activeStateNode){activeStateNode.textContent=renderReplayAttentionActiveState(level, owner, reason, text);}
+  }
+
+  function resetReplayAttentionFilters(){
+    if(levelFilter){levelFilter.value='all';}
+    if(ownerFilter){ownerFilter.value='all';}
+    if(reasonFilter){reasonFilter.value='all';}
+    if(textFilter){textFilter.value='';}
+    applyReplayAttentionFilters();
+  }
+
+  if(levelFilter){levelFilter.addEventListener('change', applyReplayAttentionFilters);}
+  if(ownerFilter){ownerFilter.addEventListener('change', applyReplayAttentionFilters);}
+  if(reasonFilter){reasonFilter.addEventListener('change', applyReplayAttentionFilters);}
+  if(textFilter){textFilter.addEventListener('input', applyReplayAttentionFilters);}
+  if(resetButton){resetButton.addEventListener('click', resetReplayAttentionFilters);}
+  applyReplayAttentionFilters();
+})();
+</script>
+"""
     attention_panel = (
         f"<div class='panel'><div class='panel-header'>Replay Attention Watchlist {attention_badge}</div>"
+        "<div class='controls-bar'>"
+        "<label for='replay-attention-level-filter'>Level</label>"
+        f"<select id='replay-attention-level-filter'><option value='all'>All levels</option>{attention_level_options}</select>"
+        "<label for='replay-attention-owner-filter'>Owner</label>"
+        f"<select id='replay-attention-owner-filter'><option value='all'>All owners</option>{attention_owner_options}</select>"
+        "<label for='replay-attention-reason-filter'>Reason</label>"
+        f"<select id='replay-attention-reason-filter'><option value='all'>All reasons</option>{attention_reason_options}</select>"
+        "<label for='replay-attention-text-filter'>Search</label>"
+        "<input id='replay-attention-text-filter' type='text' placeholder='country, case, action...'/>"
+        "<button id='replay-attention-reset' type='button'>Reset</button>"
+        "</div>"
+        "<p style='font-size:11px;color:#6b7d99;margin-bottom:10px;font-family:Space Grotesk,monospace;'>"
+        "Visible attention cases: <strong id='replay-attention-visible-count'>0</strong> | "
+        "<span id='replay-attention-active-state'>Active: default</span>"
+        "</p>"
         f"{attention_cards}"
+        f"{attention_filter_script}"
         "</div>"
     )
 
