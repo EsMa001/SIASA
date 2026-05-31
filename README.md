@@ -112,6 +112,18 @@ Aktuellste Domain-Scores fuer ein Land:
 
 `PYTHONPATH=src /opt/hermes/.venv/bin/python scripts/query_run_history.py --history-db build/run_history/latest_runs.sqlite --country UKR`
 
+Scheduler fuer taegliche automatische Runs starten (Linux/macOS):
+
+`PYTHONPATH=src /opt/hermes/.venv/bin/python -m siasa.runs.scheduler --repo-root . --interval-hours 24 --pilot-set extended-focus-complete --artifacts-dir build/run_artifacts/latest --gui-output-dir build/local_gui/latest --history-db build/run_history/latest_runs.sqlite --log-file build/scheduler/scheduler.log`
+
+Windows/PyCharm (PowerShell im Projekt-Root):
+
+`$env:PYTHONPATH="src"; .\.venv\Scripts\python.exe -m siasa.runs.scheduler --repo-root . --interval-hours 24`
+
+Optional mit Webhook-Alerting bei Fehlern:
+
+`PYTHONPATH=src /opt/hermes/.venv/bin/python -m siasa.runs.scheduler --repo-root . --interval-hours 24 --alert-webhook https://hooks.example.com/siasa-alert`
+
 Aktueller Runtime-Stand:
 - der Runtime-Pfad unterstützt jetzt Single- und Multi-Country-Runs für die aktuell freigegebenen Live-Pilot-Länder `UKR`, `POL`, `ISR`, `TWN`, `RUS`, `CHN`, `IND`, `IRN`, `TUR`, `PAK`, `GEO`
 - wiederhole `--country-id`, um mehrere Länder in einem Run zu verarbeiten
