@@ -3526,10 +3526,13 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
   const tierFilter=document.getElementById('replay-attention-tier-filter');
   const textFilter=document.getElementById('replay-attention-text-filter');
   const resetButton=document.getElementById('replay-attention-reset');
+  const copyLinkButton=document.getElementById('replay-attention-copy-link');
   const visibleCountNode=document.getElementById('replay-attention-visible-count');
   const activeStateNode=document.getElementById('replay-attention-active-state');
   const verdictBreakdownNode=document.getElementById('replay-attention-visible-verdict-breakdown');
+  const linkStatusNode=document.getElementById('replay-attention-link-status');
   const cards=Array.from(document.querySelectorAll('.replay-attention-card'));
+  const hashPrefix='ra=';
 
   function renderReplayAttentionActiveState(level, owner, reason, verdict, tier, text){
     const fragments=[];
@@ -3545,13 +3548,90 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
     return `Active: ${fragments.join(' | ')}`;
   }
 
-  function applyReplayAttentionFilters(){
-    const level=((levelFilter&&levelFilter.value)||'all').toLowerCase();
-    const owner=((ownerFilter&&ownerFilter.value)||'all').toLowerCase();
-    const reason=((reasonFilter&&reasonFilter.value)||'all').toLowerCase();
-    const verdict=((verdictFilter&&verdictFilter.value)||'all').toLowerCase();
-    const tier=((tierFilter&&tierFilter.value)||'all').toLowerCase();
-    const text=((textFilter&&textFilter.value)||'').trim().toLowerCase();
+  function getReplayAttentionState(){
+    return {
+      level: ((levelFilter&&levelFilter.value)||'all').toLowerCase(),
+      owner: ((ownerFilter&&ownerFilter.value)||'all').toLowerCase(),
+      reason: ((reasonFilter&&reasonFilter.value)||'all').toLowerCase(),
+      verdict: ((verdictFilter&&verdictFilter.value)||'all').toLowerCase(),
+      tier: ((tierFilter&&tierFilter.value)||'all').toLowerCase(),
+      text: ((textFilter&&textFilter.value)||'').trim(),
+    };
+  }
+
+  function serializeReplayAttentionState(state){
+    const params=new URLSearchParams();
+    if(state.level && state.level!=='all'){params.set('ra_level', state.level);}
+    if(state.owner && state.owner!=='all'){params.set('ra_owner', state.owner);}
+    if(state.reason && state.reason!=='all'){params.set('ra_reason', state.reason);}
+    if(state.verdict && state.verdict!=='all'){params.set('ra_verdict', state.verdict);}
+    if(state.tier && state.tier!=='all'){params.set('ra_tier', state.tier);}
+    if(state.text){params.set('ra_text', state.text);}
+    return params.toString();
+  }
+
+  function persistReplayAttentionStateToHash(state){
+    const encoded=serializeReplayAttentionState(state);
+    const base=`${window.location.pathname}${window.location.search}`;
+    if(!encoded){
+      window.history.replaceState(null, '', base);
+      return;
+    }
+    window.history.replaceState(null, '', `${base}#${hashPrefix}${encoded}`);
+  }
+
+  function applyReplayAttentionStateFromHash(){
+    const rawHash=window.location.hash||'';
+    if(!rawHash.startsWith(`#${hashPrefix}`)){
+      return;
+    }
+    const params=new URLSearchParams(rawHash.slice(hashPrefix.length+1));
+    const level=params.get('ra_level');
+    const owner=params.get('ra_owner');
+    const reason=params.get('ra_reason');
+    const verdict=params.get('ra_verdict');
+    const tier=params.get('ra_tier');
+    const text=params.get('ra_text');
+    if(levelFilter && level){levelFilter.value=level;}
+    if(ownerFilter && owner){ownerFilter.value=owner;}
+    if(reasonFilter && reason){reasonFilter.value=reason;}
+    if(verdictFilter && verdict){verdictFilter.value=verdict;}
+    if(tierFilter && tier){tierFilter.value=tier;}
+    if(textFilter && text!==null){textFilter.value=text;}
+  }
+
+  function setReplayAttentionLinkStatus(message){
+    if(linkStatusNode){
+      linkStatusNode.textContent=message;
+    }
+  }
+
+  async function copyReplayAttentionFilterLink(){
+    const state=getReplayAttentionState();
+    const encoded=serializeReplayAttentionState(state);
+    const baseUrl=`${window.location.origin}${window.location.pathname}${window.location.search}`;
+    const shareUrl=encoded ? `${baseUrl}#${hashPrefix}${encoded}` : baseUrl;
+    try {
+      if(!navigator.clipboard||!navigator.clipboard.writeText){
+        throw new Error('clipboard API unavailable');
+      }
+      await navigator.clipboard.writeText(shareUrl);
+      setReplayAttentionLinkStatus('Replay attention link copied.');
+    } catch (error) {
+      setReplayAttentionLinkStatus('Replay attention link copy failed.');
+    }
+  }
+
+  function applyReplayAttentionFilters(options){
+    const settings=options||{};
+    const persistHash=settings.persistHash!==false;
+    const state=getReplayAttentionState();
+    const level=state.level;
+    const owner=state.owner;
+    const reason=state.reason;
+    const verdict=state.verdict;
+    const tier=state.tier;
+    const text=state.text.toLowerCase();
     let visibleCount=0;
     const verdictCounts={};
     cards.forEach((card)=>{
@@ -3581,6 +3661,9 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
       const breakdown=Object.keys(verdictCounts).sort().map((key)=>`${key}=${verdictCounts[key]}`).join(' | ');
       verdictBreakdownNode.textContent=breakdown || 'none';
     }
+    if(persistHash){
+      persistReplayAttentionStateToHash(state);
+    }
   }
 
   function resetReplayAttentionFilters(){
@@ -3600,7 +3683,9 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
   if(tierFilter){tierFilter.addEventListener('change', applyReplayAttentionFilters);}
   if(textFilter){textFilter.addEventListener('input', applyReplayAttentionFilters);}
   if(resetButton){resetButton.addEventListener('click', resetReplayAttentionFilters);}
-  applyReplayAttentionFilters();
+  if(copyLinkButton){copyLinkButton.addEventListener('click', copyReplayAttentionFilterLink);}
+  applyReplayAttentionStateFromHash();
+  applyReplayAttentionFilters({persistHash:false});
 })();
 </script>
 """
@@ -3620,11 +3705,13 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         "<label for='replay-attention-text-filter'>Search</label>"
         "<input id='replay-attention-text-filter' type='text' placeholder='country, case, action...'/>"
         "<button id='replay-attention-reset' type='button'>Reset</button>"
+        "<button id='replay-attention-copy-link' type='button'>Copy Link</button>"
         "</div>"
         "<p style='font-size:11px;color:#6b7d99;margin-bottom:10px;font-family:Space Grotesk,monospace;'>"
         "Visible attention cases: <strong id='replay-attention-visible-count'>0</strong> | "
         "<span id='replay-attention-active-state'>Active: default</span> | "
-        "Visible verdict mix: <span id='replay-attention-visible-verdict-breakdown'>none</span>"
+        "Visible verdict mix: <span id='replay-attention-visible-verdict-breakdown'>none</span> | "
+        "Link status: <span id='replay-attention-link-status'>ready</span>"
         "</p>"
         f"{attention_cards}"
         f"{attention_filter_script}"
