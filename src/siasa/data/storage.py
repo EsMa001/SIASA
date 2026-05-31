@@ -27,6 +27,16 @@ class SourceExecutionEntry:
     diagnostics: str
 
 
+@dataclass(frozen=True)
+class CountryDomainScoreEntry:
+    run_id: str
+    country_id: str
+    domain: str
+    status: str
+    score: float
+    data_sufficiency: str
+
+
 def _ensure_parent(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -66,6 +76,22 @@ def initialize_run_history_schema(db_path: Path) -> None:
             """
         )
         connection.execute("CREATE INDEX IF NOT EXISTS idx_source_results_run_id ON source_results(run_id)")
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS country_domain_scores (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                run_id TEXT NOT NULL,
+                country_id TEXT NOT NULL,
+                domain TEXT NOT NULL,
+                status TEXT NOT NULL,
+                score REAL NOT NULL,
+                data_sufficiency TEXT NOT NULL,
+                FOREIGN KEY(run_id) REFERENCES runs(run_id) ON DELETE CASCADE
+            )
+            """
+        )
+        connection.execute("CREATE INDEX IF NOT EXISTS idx_cds_run_id ON country_domain_scores(run_id)")
+        connection.execute("CREATE INDEX IF NOT EXISTS idx_cds_country_domain ON country_domain_scores(country_id, domain)")
 
 
 def persist_operational_latest_run(
@@ -187,3 +213,108 @@ def source_results_from_run_state(run_state: Any) -> list[dict[str, str]]:
             }
         )
     return entries
+
+
+def persist_country_domain_scores(
+    db_path: Path,
+    *,
+    run_id: str,
+    scores: list[dict[str, Any]],
+) -> None:
+    """Persist per-country per-domain scores for a run.
+
+    Each entry in ``scores`` must have keys:
+    ``country_id``, ``domain``, ``status``, ``score``, ``data_sufficiency``.
+    """
+    initialize_run_history_schema(db_path)
+    with _connect(db_path) as connection:
+        connection.execute("DELETE FROM country_domain_scores WHERE run_id = ?", (run_id,))
+        if scores:
+            connection.executemany(
+                """
+                INSERT INTO country_domain_scores(run_id, country_id, domain, status, score, data_sufficiency)
+                VALUES(?, ?, ?, ?, ?, ?)
+                """,
+                [
+                    (
+                        run_id,
+                        str(entry.get("country_id", "")),
+                        str(entry.get("domain", "")),
+                        str(entry.get("status", "")),
+                        float(entry.get("score", 0.0)),
+                        str(entry.get("data_sufficiency", "unknown")),
+                    )
+                    for entry in scores
+                ],
+            )
+
+
+def load_country_domain_time_series(
+    db_path: Path,
+    *,
+    country_id: str,
+    domain: str,
+    limit: int = 50,
+) -> list[CountryDomainScoreEntry]:
+    """Return score history for one country+domain, most recent first."""
+    initialize_run_history_schema(db_path)
+    with _connect(db_path) as connection:
+        rows = connection.execute(
+            """
+            SELECT cds.run_id, cds.country_id, cds.domain, cds.status, cds.score, cds.data_sufficiency
+            FROM country_domain_scores cds
+            JOIN runs r ON r.run_id = cds.run_id
+            WHERE cds.country_id = ? AND cds.domain = ?
+            ORDER BY r.recorded_at DESC
+            LIMIT ?
+            """,
+            (country_id, domain, limit),
+        ).fetchall()
+    return [
+        CountryDomainScoreEntry(
+            run_id=str(row["run_id"]),
+            country_id=str(row["country_id"]),
+            domain=str(row["domain"]),
+            status=str(row["status"]),
+            score=float(row["score"]),
+            data_sufficiency=str(row["data_sufficiency"]),
+        )
+        for row in rows
+    ]
+
+
+def load_latest_country_scores(
+    db_path: Path,
+    *,
+    country_id: str,
+) -> list[CountryDomainScoreEntry]:
+    """Return the most recent score per domain for a given country."""
+    initialize_run_history_schema(db_path)
+    with _connect(db_path) as connection:
+        rows = connection.execute(
+            """
+            SELECT cds.run_id, cds.country_id, cds.domain, cds.status, cds.score, cds.data_sufficiency
+            FROM country_domain_scores cds
+            JOIN runs r ON r.run_id = cds.run_id
+            WHERE cds.country_id = ?
+              AND r.recorded_at = (
+                  SELECT MAX(r2.recorded_at)
+                  FROM country_domain_scores cds2
+                  JOIN runs r2 ON r2.run_id = cds2.run_id
+                  WHERE cds2.country_id = cds.country_id AND cds2.domain = cds.domain
+              )
+            ORDER BY cds.domain ASC
+            """,
+            (country_id,),
+        ).fetchall()
+    return [
+        CountryDomainScoreEntry(
+            run_id=str(row["run_id"]),
+            country_id=str(row["country_id"]),
+            domain=str(row["domain"]),
+            status=str(row["status"]),
+            score=float(row["score"]),
+            data_sufficiency=str(row["data_sufficiency"]),
+        )
+        for row in rows
+    ]

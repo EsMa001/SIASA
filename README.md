@@ -104,6 +104,14 @@ Quellenstatus eines konkreten Runs:
 
 `PYTHONPATH=src /opt/hermes/.venv/bin/python scripts/query_run_history.py --history-db build/run_history/latest_runs.sqlite --run-id RUN-LIVE-LATEST-001`
 
+Domain-Score-Zeitreihe fuer ein Land:
+
+`PYTHONPATH=src /opt/hermes/.venv/bin/python scripts/query_run_history.py --history-db build/run_history/latest_runs.sqlite --country UKR --domain A`
+
+Aktuellste Domain-Scores fuer ein Land:
+
+`PYTHONPATH=src /opt/hermes/.venv/bin/python scripts/query_run_history.py --history-db build/run_history/latest_runs.sqlite --country UKR`
+
 Aktueller Runtime-Stand:
 - der Runtime-Pfad unterstützt jetzt Single- und Multi-Country-Runs für die aktuell freigegebenen Live-Pilot-Länder `UKR`, `POL`, `ISR`, `TWN`, `RUS`, `CHN`, `IND`, `IRN`, `TUR`, `PAK`, `GEO`
 - wiederhole `--country-id`, um mehrere Länder in einem Run zu verarbeiten

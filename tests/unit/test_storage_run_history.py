@@ -6,6 +6,9 @@ from siasa.data.storage import (
     load_recent_runs,
     load_source_results_for_run,
     persist_operational_latest_run,
+    persist_country_domain_scores,
+    load_country_domain_time_series,
+    load_latest_country_scores,
 )
 
 
@@ -79,3 +82,90 @@ def test_persist_operational_latest_run_upserts_existing_run(tmp_path: Path) -> 
     assert len(source_results) == 1
     assert source_results[0].source_id == "WB-INDICATORS"
     assert source_results[0].status == "success"
+
+
+def test_persist_and_query_country_domain_scores(tmp_path: Path) -> None:
+    db_path = tmp_path / "run_history.sqlite"
+
+    # Create two runs
+    for run_id, status in [("RUN-001", "success"), ("RUN-002", "success")]:
+        persist_operational_latest_run(
+            db_path,
+            run_id=run_id,
+            run_status=status,
+            pilot_set="representative",
+            artifacts_dir=tmp_path / "artifacts",
+            gui_index=tmp_path / "gui/index.html",
+            failed_sources=[],
+        )
+
+    persist_country_domain_scores(
+        db_path,
+        run_id="RUN-001",
+        scores=[
+            {"country_id": "UKR", "domain": "A", "status": "D2", "score": 0.7, "data_sufficiency": "sufficient"},
+            {"country_id": "UKR", "domain": "B", "status": "D1", "score": 0.4, "data_sufficiency": "sufficient"},
+            {"country_id": "POL", "domain": "A", "status": "D0", "score": 0.1, "data_sufficiency": "sufficient"},
+        ],
+    )
+    persist_country_domain_scores(
+        db_path,
+        run_id="RUN-002",
+        scores=[
+            {"country_id": "UKR", "domain": "A", "status": "D3", "score": 0.9, "data_sufficiency": "sufficient"},
+            {"country_id": "UKR", "domain": "B", "status": "D1", "score": 0.45, "data_sufficiency": "marginal"},
+        ],
+    )
+
+    # Time series for UKR domain A
+    ts = load_country_domain_time_series(db_path, country_id="UKR", domain="A")
+    assert len(ts) == 2
+    assert ts[0].run_id == "RUN-002"  # most recent first
+    assert ts[0].score == 0.9
+    assert ts[1].run_id == "RUN-001"
+    assert ts[1].score == 0.7
+
+    # Latest scores for UKR
+    latest = load_latest_country_scores(db_path, country_id="UKR")
+    domains = {entry.domain: entry for entry in latest}
+    assert "A" in domains
+    assert "B" in domains
+    assert domains["A"].run_id == "RUN-002"
+    assert domains["A"].status == "D3"
+    assert domains["B"].data_sufficiency == "marginal"
+
+
+def test_persist_country_domain_scores_upserts(tmp_path: Path) -> None:
+    db_path = tmp_path / "run_history.sqlite"
+
+    persist_operational_latest_run(
+        db_path,
+        run_id="RUN-001",
+        run_status="success",
+        pilot_set="representative",
+        artifacts_dir=tmp_path / "artifacts",
+        gui_index=tmp_path / "gui/index.html",
+        failed_sources=[],
+    )
+
+    persist_country_domain_scores(
+        db_path,
+        run_id="RUN-001",
+        scores=[
+            {"country_id": "UKR", "domain": "A", "status": "D1", "score": 0.3, "data_sufficiency": "sufficient"},
+        ],
+    )
+
+    # Overwrite with new data
+    persist_country_domain_scores(
+        db_path,
+        run_id="RUN-001",
+        scores=[
+            {"country_id": "UKR", "domain": "A", "status": "D2", "score": 0.6, "data_sufficiency": "marginal"},
+        ],
+    )
+
+    ts = load_country_domain_time_series(db_path, country_id="UKR", domain="A")
+    assert len(ts) == 1
+    assert ts[0].score == 0.6
+    assert ts[0].data_sufficiency == "marginal"
