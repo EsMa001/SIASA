@@ -4756,8 +4756,17 @@ def _render_analytics(
                 f"font-size:11px;font-family:Space Grotesk,monospace;'>"
                 f"{html.escape(str(text))}</span>")
 
-    def _section(title: str, content: str, icon: str = '') -> str:
-        return (f"<div style='margin:24px 0;padding:20px;background:#1a2540;"
+    def _section(
+        title: str,
+        content: str,
+        icon: str = '',
+        *,
+        section_id: str = '',
+        role_min: str = 'viewer',
+    ) -> str:
+        sid = html.escape(section_id) if section_id else ''
+        return (f"<div id='{sid}' class='analytics-section' data-role-min='{html.escape(role_min)}' "
+                f"style='margin:24px 0;padding:20px;background:#1a2540;"
                 f"border:1px solid #263050;border-radius:6px;'>"
                 f"<h3 style='margin:0 0 16px 0;color:#4edea3;font-family:Space Grotesk,monospace;"
                 f"font-size:14px;text-transform:uppercase;letter-spacing:.08em;'>"
@@ -4794,7 +4803,7 @@ def _render_analytics(
         f"<th style='padding:4px 10px;text-align:left;'>Contradiction</th>"
         f"<th style='padding:4px 10px;text-align:left;'>Details</th></tr></thead>"
         f"<tbody>{fusion_rows or '<tr><td colspan=5 style=\"color:#6b7d99;padding:8px 10px;\">No fusion data available</td></tr>'}</tbody></table>"
-    ), '🔀') if fusion else _section('Cross-Domain Fusion', '<p style="color:#6b7d99;">No data</p>', '🔀')
+    ), '🔀', section_id='analytics-cross-domain-fusion', role_min='viewer') if fusion else _section('Cross-Domain Fusion', '<p style="color:#6b7d99;">No data</p>', '🔀', section_id='analytics-cross-domain-fusion', role_min='viewer')
 
     # --- Bayesian Estimates ---
     bayes_rows = ''
@@ -4824,7 +4833,7 @@ def _render_analytics(
         f"<th style='padding:4px 10px;text-align:left;'>Confidence</th>"
         f"<th style='padding:4px 10px;text-align:left;'>80% CI</th></tr></thead>"
         f"<tbody>{bayes_rows or '<tr><td colspan=5 style=\"color:#6b7d99;padding:8px 10px;\">No data</td></tr>'}</tbody></table>"
-    ), '📊') if bayesian else _section('Bayesian Status Estimates', '<p style="color:#6b7d99;">No data</p>', '📊')
+    ), '📊', section_id='analytics-bayesian-estimates', role_min='viewer') if bayesian else _section('Bayesian Status Estimates', '<p style="color:#6b7d99;">No data</p>', '📊', section_id='analytics-bayesian-estimates', role_min='viewer')
 
     # --- Uncertainty Budgets ---
     unc_rows = ''
@@ -4848,7 +4857,7 @@ def _render_analytics(
         f"<th style='padding:4px 10px;text-align:left;'>Dominant Stage</th>"
         f"<th style='padding:4px 10px;text-align:left;'>Propagation Factor</th></tr></thead>"
         f"<tbody>{unc_rows or '<tr><td colspan=4 style=\"color:#6b7d99;padding:8px 10px;\">No data</td></tr>'}</tbody></table>"
-    ), '⚖️') if uncertainty else _section('Uncertainty Propagation', '<p style="color:#6b7d99;">No data</p>', '⚖️')
+    ), '⚖️', section_id='analytics-uncertainty-budgets', role_min='viewer') if uncertainty else _section('Uncertainty Propagation', '<p style="color:#6b7d99;">No data</p>', '⚖️', section_id='analytics-uncertainty-budgets', role_min='viewer')
 
     # --- Rule Evaluations ---
     matched_rules = [r for r in rules if isinstance(r, dict) and r.get('matched')]
@@ -4874,7 +4883,7 @@ def _render_analytics(
         f"<th style='padding:4px 10px;text-align:left;'>Severity</th>"
         f"<th style='padding:4px 10px;text-align:left;'>Annotation</th></tr></thead>"
         f"<tbody>{rule_rows or '<tr><td colspan=5 style=\"color:#6b7d99;padding:8px 10px;\">No rules matched</td></tr>'}</tbody></table>"
-    ), '📋')
+    ), '📋', section_id='analytics-rule-evaluations', role_min='analyst')
 
     # --- Dependency Graph ---
     dep_clusters = dep_graph.get('clusters', [])
@@ -4894,7 +4903,7 @@ def _render_analytics(
     dep_section = _section(f'Source Dependency Graph ({dep_sources} sources, {dep_edges} edges)', (
         f"<p style='color:#8899bb;font-size:12px;margin:0 0 12px 0;'>{len(dep_clusters)} clusters detected</p>"
         f"{cluster_html or '<p style=\"color:#6b7d99;font-size:12px;\">No clusters (insufficient source coupling)</p>'}"
-    ), '🕸️')
+    ), '🕸️', section_id='analytics-dependency-graph', role_min='admin')
 
     # --- Provenance Chain ---
     prov_roots = provenance.get('root_sources', [])
@@ -4907,7 +4916,7 @@ def _render_analytics(
         f"<div><h4 style='color:#6b7d99;margin:0 0 8px 0;font-size:11px;text-transform:uppercase;'>Leaf Outputs ({len(prov_leaves)})</h4>"
         f"{''.join(_badge(s, '#60a5fa') for s in prov_leaves[:12]) or '<span style=\"color:#6b7d99;\">none</span>'}</div>"
         f"</div>"
-    ) if provenance else '<p style="color:#6b7d99;">No provenance data</p>', '📍')
+    ) if provenance else '<p style="color:#6b7d99;">No provenance data</p>', '📍', section_id='analytics-provenance-chain', role_min='admin')
 
     # --- Info Epidemiology ---
     spread_paths = epidemiology.get('spread_paths', [])
@@ -4940,7 +4949,69 @@ def _render_analytics(
         f"<div><h4 style='color:#6b7d99;margin:0 0 8px 0;font-size:11px;text-transform:uppercase;'>Amplification Events</h4>"
         f"{amp_html or '<p style=\"color:#6b7d99;font-size:12px;\">None detected</p>'}</div>"
         f"</div>"
-    ), '🦠')
+    ), '🦠', section_id='analytics-info-epidemiology', role_min='analyst')
+
+    analytics_controls = (
+        "<div id='analytics-controls' class='panel' style='margin:0 0 18px 0;'>"
+        "<div class='panel-header'>Analytics Navigation & Filter</div>"
+        "<div class='controls-bar'>"
+        "<a class='btn-download' href='#analytics-cross-domain-fusion'>Fusion</a>"
+        "<a class='btn-download' href='#analytics-bayesian-estimates'>Bayesian</a>"
+        "<a class='btn-download' href='#analytics-uncertainty-budgets'>Uncertainty</a>"
+        "<a class='btn-download' href='#analytics-rule-evaluations'>Rules</a>"
+        "<a class='btn-download' href='#analytics-dependency-graph'>Dependency</a>"
+        "<a class='btn-download' href='#analytics-provenance-chain'>Provenance</a>"
+        "<a class='btn-download' href='#analytics-info-epidemiology'>Epidemiology</a>"
+        "</div>"
+        "<div class='controls-bar'>"
+        "<label for='analytics-section-filter'>Section</label>"
+        "<select id='analytics-section-filter'>"
+        "<option value='all'>All</option>"
+        "<option value='country'>Country-centric</option>"
+        "<option value='rules'>Rule/decision</option>"
+        "<option value='dependency'>Dependency/provenance</option>"
+        "</select>"
+        "<label for='analytics-text-filter'>Search</label>"
+        "<input id='analytics-text-filter' type='text' placeholder='filter section title'>"
+        "<button id='analytics-filter-reset' type='button'>Reset</button>"
+        "</div>"
+        "</div>"
+    )
+    analytics_filter_js = (
+        "<script>"
+        "(function(){"
+        "var sel=document.getElementById('analytics-section-filter');"
+        "var txt=document.getElementById('analytics-text-filter');"
+        "var reset=document.getElementById('analytics-filter-reset');"
+        "var sections=Array.from(document.querySelectorAll('.analytics-section'));"
+        "var tags={"
+        "'analytics-cross-domain-fusion':'country',"
+        "'analytics-bayesian-estimates':'country',"
+        "'analytics-uncertainty-budgets':'country',"
+        "'analytics-rule-evaluations':'rules',"
+        "'analytics-dependency-graph':'dependency',"
+        "'analytics-provenance-chain':'dependency',"
+        "'analytics-info-epidemiology':'rules'"
+        "};"
+        "function applyAnalyticsSectionFilter(){"
+        "var mode=(sel&&sel.value)||'all';"
+        "var q=((txt&&txt.value)||'').toLowerCase().trim();"
+        "sections.forEach(function(sec){"
+        "var id=sec.id||'';"
+        "var tag=tags[id]||'country';"
+        "var title=(sec.querySelector('h3')?.textContent||'').toLowerCase();"
+        "var modeOk=(mode==='all'||mode===tag);"
+        "var textOk=(!q||title.indexOf(q)>=0);"
+        "sec.style.display=(modeOk&&textOk)?'':'none';"
+        "});"
+        "}"
+        "if(sel) sel.addEventListener('change', applyAnalyticsSectionFilter);"
+        "if(txt) txt.addEventListener('input', applyAnalyticsSectionFilter);"
+        "if(reset) reset.addEventListener('click', function(){ if(sel) sel.value='all'; if(txt) txt.value=''; applyAnalyticsSectionFilter(); });"
+        "applyAnalyticsSectionFilter();"
+        "})();"
+        "</script>"
+    )
 
     body = (
         "<h2 style='color:#e2e8f0;margin:0 0 24px 0;font-family:Space Grotesk,monospace;'>Advanced Analytics</h2>"
@@ -4948,6 +5019,7 @@ def _render_analytics(
         "Phase 4-6 analytical module outputs: cross-domain fusion, probabilistic scoring, "
         "uncertainty propagation, rule-based assessment, dependency graph, provenance chain, "
         "and information epidemiology.</p>"
+        + analytics_controls
         + fusion_section
         + bayes_section
         + unc_section
@@ -4955,6 +5027,7 @@ def _render_analytics(
         + dep_section
         + prov_section
         + epi_section
+        + analytics_filter_js
     )
     return _page('Advanced Analytics', body, nav_prefix=nav_prefix, available_pages=available_pages)
 

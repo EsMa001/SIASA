@@ -2434,6 +2434,20 @@ def test_build_local_mvp_site_renders_analytics_page_when_view_model_provided(tm
     assert 'Dependency Graph' in content
     assert 'Provenance Chain' in content
     assert 'Epidemiology' in content
+    # Cross-link/filter controls
+    assert "id='analytics-controls'" in content
+    assert "id='analytics-section-filter'" in content
+    assert "id='analytics-text-filter'" in content
+    assert "id='analytics-filter-reset'" in content
+    assert 'applyAnalyticsSectionFilter' in content
+    assert "href='#analytics-cross-domain-fusion'" in content
+    assert "href='#analytics-provenance-chain'" in content
+    # Role constraints per analytics section
+    assert "id='analytics-rule-evaluations'" in content
+    assert "id='analytics-dependency-graph'" in content
+    assert "id='analytics-provenance-chain'" in content
+    assert "data-role-min='analyst'" in content
+    assert "data-role-min='admin'" in content
     # Country data
     assert 'UKR' in content
     # nav link in index
