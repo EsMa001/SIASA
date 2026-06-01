@@ -39,6 +39,7 @@ def _page(title: str, body: str, *, nav_prefix: str = '', available_pages: set[s
         ('trends.html', '📈 Trends'),
         ('events.html', '⚡ Events'),
         ('comparison.html', '🔀 Comparison'),
+        ('analytics.html', '🔬 Analytics'),
         ('validation.html', '✅ Validation'),
         ('traceability.html', '🔗 Traceability'),
         ('annotations.html', '📝 Annotations'),
@@ -1706,6 +1707,31 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
             if isinstance(maybe_operator_stale_action_plan, dict):
                 operator_stale_remediation_action_plan_view_model = maybe_operator_stale_action_plan
 
+    # Load analytics artifacts (Phase 4-6 module outputs)
+    analytics_view_model: dict[str, Any] | None = None
+    analytics_dir = artifacts_dir / 'analytics'
+    if analytics_dir.exists():
+        def _load_analytics_json(name: str) -> Any:
+            p = analytics_dir / name
+            return _load_json(p) if p.exists() else None
+        fusion = _load_analytics_json('cross_domain_fusion.json')
+        bayesian = _load_analytics_json('bayesian_estimates.json')
+        uncertainty = _load_analytics_json('uncertainty_budgets.json')
+        rule_evals = _load_analytics_json('rule_evaluations.json')
+        dep_graph = _load_analytics_json('dependency_graph.json')
+        prov_chain = _load_analytics_json('provenance_chain.json')
+        epi = _load_analytics_json('info_epidemiology.json')
+        if any(x is not None for x in [fusion, bayesian, uncertainty, rule_evals, dep_graph, prov_chain, epi]):
+            analytics_view_model = {
+                'cross_domain_fusion': fusion or {},
+                'bayesian_estimates': bayesian or {},
+                'uncertainty_budgets': uncertainty or {},
+                'rule_evaluations': rule_evals or [],
+                'dependency_graph': dep_graph or {},
+                'provenance_chain': prov_chain or {},
+                'info_epidemiology': epi or {},
+            }
+
     return {
         'world_map_read_model': world_map_read_model,
         'country_profile_read_models': country_profile_read_models,
@@ -1733,6 +1759,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
         'operator_remediation_execution_loop_view_model': operator_remediation_execution_loop_view_model,
         'operator_stale_remediation_closure_drill_view_model': operator_stale_remediation_closure_drill_view_model,
         'operator_stale_remediation_action_plan_view_model': operator_stale_remediation_action_plan_view_model,
+        'analytics_view_model': analytics_view_model,
     }
 
 
@@ -4702,6 +4729,236 @@ def _normalize_ui_role(ui_role: str) -> str:
     return normalized
 
 
+def _render_analytics(
+    analytics_view_model: dict[str, Any],
+    *,
+    nav_prefix: str = '',
+    available_pages: set[str] | None = None,
+) -> str:
+    """Render the Advanced Analytics page showing Phase 4-6 module outputs.
+
+    Sections: Cross-Domain Fusion | Bayesian Estimates | Uncertainty Budgets |
+    Rule Evaluations | Dependency Graph | Provenance Chain | Info Epidemiology.
+    Requirement trace: AP-F22..F27, AP-INT-01..03.
+    """
+    fusion = analytics_view_model.get('cross_domain_fusion', {})
+    bayesian = analytics_view_model.get('bayesian_estimates', {})
+    uncertainty = analytics_view_model.get('uncertainty_budgets', {})
+    rules = analytics_view_model.get('rule_evaluations', [])
+    dep_graph = analytics_view_model.get('dependency_graph', {})
+    provenance = analytics_view_model.get('provenance_chain', {})
+    epidemiology = analytics_view_model.get('info_epidemiology', {})
+
+    def _badge(text: str, color: str = '#4edea3') -> str:
+        return (f"<span style='display:inline-block;margin:2px 4px;padding:2px 8px;"
+                f"background:rgba(78,222,163,.10);color:{html.escape(color)};"
+                f"border:1px solid rgba(78,222,163,.2);border-radius:3px;"
+                f"font-size:11px;font-family:Space Grotesk,monospace;'>"
+                f"{html.escape(str(text))}</span>")
+
+    def _section(title: str, content: str, icon: str = '') -> str:
+        return (f"<div style='margin:24px 0;padding:20px;background:#1a2540;"
+                f"border:1px solid #263050;border-radius:6px;'>"
+                f"<h3 style='margin:0 0 16px 0;color:#4edea3;font-family:Space Grotesk,monospace;"
+                f"font-size:14px;text-transform:uppercase;letter-spacing:.08em;'>"
+                f"{html.escape(icon)} {html.escape(title)}</h3>"
+                f"{content}</div>")
+
+    # --- Cross-Domain Fusion ---
+    fusion_rows = ''
+    for country_id, fres in sorted(fusion.items()):
+        if not isinstance(fres, dict):
+            continue
+        fused_score = fres.get('fused_score', '')
+        confidence = fres.get('confidence', '')
+        contradiction = fres.get('contradiction_detected', False)
+        contras = fres.get('contradictions', [])
+        contra_text = '; '.join(
+            f"{c.get('domain_a','?')}/{c.get('domain_b','?')} gap={c.get('severity_gap','?')}"
+            for c in contras if isinstance(c, dict)
+        ) or 'none'
+        badge_color = '#f87171' if contradiction else '#4edea3'
+        fusion_rows += (
+            f"<tr><td style='padding:6px 10px;font-weight:600;'>{html.escape(country_id)}</td>"
+            f"<td style='padding:6px 10px;'>{round(float(fused_score), 3) if fused_score != '' else '-'}</td>"
+            f"<td style='padding:6px 10px;'>{round(float(confidence), 3) if confidence != '' else '-'}</td>"
+            f"<td style='padding:6px 10px;'>{_badge('YES' if contradiction else 'no', badge_color)}</td>"
+            f"<td style='padding:6px 10px;font-size:11px;color:#8899bb;'>{html.escape(contra_text)}</td></tr>"
+        )
+    fusion_section = _section('Cross-Domain Fusion', (
+        f"<table style='width:100%;border-collapse:collapse;font-size:12px;'>"
+        f"<thead><tr style='color:#6b7d99;border-bottom:1px solid #263050;'>"
+        f"<th style='padding:4px 10px;text-align:left;'>Country</th>"
+        f"<th style='padding:4px 10px;text-align:left;'>Fused Score</th>"
+        f"<th style='padding:4px 10px;text-align:left;'>Confidence</th>"
+        f"<th style='padding:4px 10px;text-align:left;'>Contradiction</th>"
+        f"<th style='padding:4px 10px;text-align:left;'>Details</th></tr></thead>"
+        f"<tbody>{fusion_rows or '<tr><td colspan=5 style=\"color:#6b7d99;padding:8px 10px;\">No fusion data available</td></tr>'}</tbody></table>"
+    ), '🔀') if fusion else _section('Cross-Domain Fusion', '<p style="color:#6b7d99;">No data</p>', '🔀')
+
+    # --- Bayesian Estimates ---
+    bayes_rows = ''
+    for country_id, domains in sorted(bayesian.items()):
+        if not isinstance(domains, dict):
+            continue
+        for domain, est in sorted(domains.items()):
+            if not isinstance(est, dict):
+                continue
+            map_st = est.get('map_status', '-')
+            conf = est.get('confidence', '')
+            ci = est.get('confidence_interval', ['-', '-'])
+            ci_str = f"{ci[0]}..{ci[1]}" if isinstance(ci, list) and len(ci) == 2 else str(ci)
+            bayes_rows += (
+                f"<tr><td style='padding:5px 10px;'>{html.escape(country_id)}</td>"
+                f"<td style='padding:5px 10px;'>{html.escape(domain)}</td>"
+                f"<td style='padding:5px 10px;font-weight:600;'>{html.escape(str(map_st))}</td>"
+                f"<td style='padding:5px 10px;'>{round(float(conf), 3) if conf != '' else '-'}</td>"
+                f"<td style='padding:5px 10px;font-size:11px;color:#8899bb;'>{html.escape(ci_str)}</td></tr>"
+            )
+    bayes_section = _section('Bayesian Status Estimates', (
+        f"<table style='width:100%;border-collapse:collapse;font-size:12px;'>"
+        f"<thead><tr style='color:#6b7d99;border-bottom:1px solid #263050;'>"
+        f"<th style='padding:4px 10px;text-align:left;'>Country</th>"
+        f"<th style='padding:4px 10px;text-align:left;'>Domain</th>"
+        f"<th style='padding:4px 10px;text-align:left;'>MAP Status</th>"
+        f"<th style='padding:4px 10px;text-align:left;'>Confidence</th>"
+        f"<th style='padding:4px 10px;text-align:left;'>80% CI</th></tr></thead>"
+        f"<tbody>{bayes_rows or '<tr><td colspan=5 style=\"color:#6b7d99;padding:8px 10px;\">No data</td></tr>'}</tbody></table>"
+    ), '📊') if bayesian else _section('Bayesian Status Estimates', '<p style="color:#6b7d99;">No data</p>', '📊')
+
+    # --- Uncertainty Budgets ---
+    unc_rows = ''
+    for country_id, budget in sorted(uncertainty.items()):
+        if not isinstance(budget, dict):
+            continue
+        total_unc = budget.get('total_uncertainty', '')
+        dominant = budget.get('dominant_stage', '-')
+        prop_factor = budget.get('propagation_factor', '')
+        unc_rows += (
+            f"<tr><td style='padding:5px 10px;'>{html.escape(country_id)}</td>"
+            f"<td style='padding:5px 10px;'>{round(float(total_unc), 4) if total_unc != '' else '-'}</td>"
+            f"<td style='padding:5px 10px;'>{html.escape(str(dominant))}</td>"
+            f"<td style='padding:5px 10px;'>{round(float(prop_factor), 3) if prop_factor != '' else '-'}</td></tr>"
+        )
+    unc_section = _section('Uncertainty Propagation', (
+        f"<table style='width:100%;border-collapse:collapse;font-size:12px;'>"
+        f"<thead><tr style='color:#6b7d99;border-bottom:1px solid #263050;'>"
+        f"<th style='padding:4px 10px;text-align:left;'>Country</th>"
+        f"<th style='padding:4px 10px;text-align:left;'>Total Uncertainty</th>"
+        f"<th style='padding:4px 10px;text-align:left;'>Dominant Stage</th>"
+        f"<th style='padding:4px 10px;text-align:left;'>Propagation Factor</th></tr></thead>"
+        f"<tbody>{unc_rows or '<tr><td colspan=4 style=\"color:#6b7d99;padding:8px 10px;\">No data</td></tr>'}</tbody></table>"
+    ), '⚖️') if uncertainty else _section('Uncertainty Propagation', '<p style="color:#6b7d99;">No data</p>', '⚖️')
+
+    # --- Rule Evaluations ---
+    matched_rules = [r for r in rules if isinstance(r, dict) and r.get('matched')]
+    rule_rows = ''
+    for r in sorted(matched_rules, key=lambda x: x.get('severity', '')):
+        sev = r.get('severity', '-')
+        sev_color = '#f87171' if sev == 'critical' else '#fbbf24' if sev == 'high' else '#4edea3'
+        rule_rows += (
+            f"<tr><td style='padding:5px 10px;'>{html.escape(r.get('country_id', '-'))}</td>"
+            f"<td style='padding:5px 10px;'>{html.escape(r.get('domain', '-'))}</td>"
+            f"<td style='padding:5px 10px;'>{html.escape(r.get('rule_id', '-'))}</td>"
+            f"<td style='padding:5px 10px;'>{_badge(sev, sev_color)}</td>"
+            f"<td style='padding:5px 10px;font-size:11px;color:#8899bb;max-width:300px;'>"
+            f"{html.escape(str(r.get('annotation_text', ''))[:120])}</td></tr>"
+        )
+    rule_summary = f"{len(matched_rules)} matched / {len(rules)} evaluated"
+    rule_section = _section(f'Rule Evaluations ({rule_summary})', (
+        f"<table style='width:100%;border-collapse:collapse;font-size:12px;'>"
+        f"<thead><tr style='color:#6b7d99;border-bottom:1px solid #263050;'>"
+        f"<th style='padding:4px 10px;text-align:left;'>Country</th>"
+        f"<th style='padding:4px 10px;text-align:left;'>Domain</th>"
+        f"<th style='padding:4px 10px;text-align:left;'>Rule</th>"
+        f"<th style='padding:4px 10px;text-align:left;'>Severity</th>"
+        f"<th style='padding:4px 10px;text-align:left;'>Annotation</th></tr></thead>"
+        f"<tbody>{rule_rows or '<tr><td colspan=5 style=\"color:#6b7d99;padding:8px 10px;\">No rules matched</td></tr>'}</tbody></table>"
+    ), '📋')
+
+    # --- Dependency Graph ---
+    dep_clusters = dep_graph.get('clusters', [])
+    dep_sources = dep_graph.get('source_count', 0)
+    dep_edges = dep_graph.get('edge_count', 0)
+    cluster_html = ''
+    for cl in dep_clusters[:10]:
+        if not isinstance(cl, dict):
+            continue
+        sources = ', '.join(cl.get('sources', []))
+        cluster_html += (
+            f"<div style='margin:4px 0;padding:6px 10px;background:#10192e;border-radius:3px;font-size:11px;'>"
+            f"<strong style='color:#4edea3;'>{html.escape(cl.get('cluster_id', '?'))}</strong>"
+            f" &nbsp;|&nbsp; sources: {html.escape(sources)}"
+            f" &nbsp;|&nbsp; cohesion: {round(float(cl.get('cohesion', 0)), 3)}</div>"
+        )
+    dep_section = _section(f'Source Dependency Graph ({dep_sources} sources, {dep_edges} edges)', (
+        f"<p style='color:#8899bb;font-size:12px;margin:0 0 12px 0;'>{len(dep_clusters)} clusters detected</p>"
+        f"{cluster_html or '<p style=\"color:#6b7d99;font-size:12px;\">No clusters (insufficient source coupling)</p>'}"
+    ), '🕸️')
+
+    # --- Provenance Chain ---
+    prov_roots = provenance.get('root_sources', [])
+    prov_leaves = provenance.get('leaf_outputs', [])
+    prov_depth = provenance.get('depth', 0)
+    prov_section = _section(f'Provenance Chain (depth={prov_depth})', (
+        f"<div style='display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:12px;'>"
+        f"<div><h4 style='color:#6b7d99;margin:0 0 8px 0;font-size:11px;text-transform:uppercase;'>Root Sources ({len(prov_roots)})</h4>"
+        f"{''.join(_badge(s) for s in prov_roots[:12]) or '<span style=\"color:#6b7d99;\">none</span>'}</div>"
+        f"<div><h4 style='color:#6b7d99;margin:0 0 8px 0;font-size:11px;text-transform:uppercase;'>Leaf Outputs ({len(prov_leaves)})</h4>"
+        f"{''.join(_badge(s, '#60a5fa') for s in prov_leaves[:12]) or '<span style=\"color:#6b7d99;\">none</span>'}</div>"
+        f"</div>"
+    ) if provenance else '<p style="color:#6b7d99;">No provenance data</p>', '📍')
+
+    # --- Info Epidemiology ---
+    spread_paths = epidemiology.get('spread_paths', [])
+    amp_events = epidemiology.get('amplification_events', [])
+    spread_html = ''
+    for sp in spread_paths[:8]:
+        if not isinstance(sp, dict):
+            continue
+        seq = ' → '.join(sp.get('source_sequence', []))
+        spread_html += (
+            f"<div style='margin:4px 0;padding:6px 10px;background:#10192e;border-radius:3px;font-size:11px;'>"
+            f"<strong style='color:#a78bfa;'>{html.escape(sp.get('signal_key', '?'))}</strong>"
+            f" &nbsp;|&nbsp; {html.escape(seq)}"
+            f" &nbsp;|&nbsp; spread={sp.get('total_spread_hours', '?')}h</div>"
+        )
+    amp_html = ''
+    for ae in amp_events[:6]:
+        if not isinstance(ae, dict):
+            continue
+        amp_html += (
+            f"<div style='margin:4px 0;padding:6px 10px;background:#10192e;border-radius:3px;font-size:11px;'>"
+            f"<strong style='color:#fbbf24;'>{html.escape(ae.get('signal_key', '?'))}</strong>"
+            f" via {html.escape(ae.get('source_id', '?'))}"
+            f" &nbsp;×{ae.get('amplification_factor', '?')} @ {ae.get('lag_hours', '?')}h lag</div>"
+        )
+    epi_section = _section(f'Information Epidemiology ({len(spread_paths)} paths, {len(amp_events)} amplifications)', (
+        f"<div style='display:grid;grid-template-columns:1fr 1fr;gap:16px;'>"
+        f"<div><h4 style='color:#6b7d99;margin:0 0 8px 0;font-size:11px;text-transform:uppercase;'>Spread Paths</h4>"
+        f"{spread_html or '<p style=\"color:#6b7d99;font-size:12px;\">None detected</p>'}</div>"
+        f"<div><h4 style='color:#6b7d99;margin:0 0 8px 0;font-size:11px;text-transform:uppercase;'>Amplification Events</h4>"
+        f"{amp_html or '<p style=\"color:#6b7d99;font-size:12px;\">None detected</p>'}</div>"
+        f"</div>"
+    ), '🦠')
+
+    body = (
+        "<h2 style='color:#e2e8f0;margin:0 0 24px 0;font-family:Space Grotesk,monospace;'>Advanced Analytics</h2>"
+        "<p style='color:#8899bb;font-size:13px;margin:0 0 24px 0;'>"
+        "Phase 4-6 analytical module outputs: cross-domain fusion, probabilistic scoring, "
+        "uncertainty propagation, rule-based assessment, dependency graph, provenance chain, "
+        "and information epidemiology.</p>"
+        + fusion_section
+        + bayes_section
+        + unc_section
+        + rule_section
+        + dep_section
+        + prov_section
+        + epi_section
+    )
+    return _page('Advanced Analytics', body, nav_prefix=nav_prefix, available_pages=available_pages)
+
+
 def build_local_mvp_site(
     *,
     output_dir: Path,
@@ -4732,6 +4989,7 @@ def build_local_mvp_site(
     operator_stale_remediation_closure_drill_view_model: dict[str, Any] | None = None,
     operator_stale_remediation_action_plan_view_model: dict[str, Any] | None = None,
     analyst_briefing_view_model: dict[str, Any] | None = None,
+    analytics_view_model: dict[str, Any] | None = None,
     ui_role: str = 'analyst',
 ) -> SiteBuildResult:
     normalized_role = _normalize_ui_role(ui_role)
@@ -4771,6 +5029,8 @@ def build_local_mvp_site(
         available_pages.add('traceability.html')
     if annotations_view_model is not None and normalized_role in {'analyst', 'admin'}:
         available_pages.add('annotations.html')
+    if analytics_view_model is not None:
+        available_pages.add('analytics.html')
 
     index_file = output_dir / 'index.html'
     index_file.write_text(
@@ -4867,6 +5127,10 @@ def build_local_mvp_site(
         annotations_file = output_dir / 'annotations.html'
         annotations_file.write_text(_render_annotations(annotations_view_model, nav_prefix='', available_pages=available_pages), encoding='utf-8')
         generated_files.append(annotations_file)
+    if analytics_view_model is not None:
+        analytics_file = output_dir / 'analytics.html'
+        analytics_file.write_text(_render_analytics(analytics_view_model, nav_prefix='', available_pages=available_pages), encoding='utf-8')
+        generated_files.append(analytics_file)
 
     if readiness_view_model is None:
         readiness_view_model = build_readiness_view_model(

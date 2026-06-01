@@ -2385,3 +2385,58 @@ def test_build_local_mvp_site_rejects_unknown_role(tmp_path: Path) -> None:
         assert "Unsupported ui_role" in str(exc)
     else:
         raise AssertionError("Expected ValueError for unsupported ui_role")
+
+
+def test_build_local_mvp_site_renders_analytics_page_when_view_model_provided(tmp_path: Path) -> None:
+    """analytics.html is generated and contains expected section IDs when analytics_view_model is passed.
+    Requirement trace: AP-INT-04, AP-F22..F27.
+    """
+    payload = local_app._demo_payload()
+    analytics_vm = {
+        'cross_domain_fusion': {
+            'UKR': {
+                'fused_score': 0.72, 'confidence': 0.85, 'contradiction_detected': True,
+                'contradictions': [{'domain_a': 'A', 'domain_b': 'D', 'severity_gap': 3, 'description': 'gap'}],
+                'weights': [], 'contributing_domains': ['A', 'D'], 'fusion_method': 'weighted',
+            }
+        },
+        'bayesian_estimates': {
+            'UKR': {'A': {'map_status': 'D3', 'confidence': 0.68, 'confidence_interval': ['D2', 'D4'], 'posterior': {}}}
+        },
+        'uncertainty_budgets': {
+            'UKR': {'total_uncertainty': 0.19, 'dominant_stage': 'domain_scoring', 'propagation_factor': 2.1, 'levels': []}
+        },
+        'rule_evaluations': [
+            {'rule_id': 'RULE-D4', 'rule_name': 'D4', 'matched': True, 'country_id': 'UKR',
+             'domain': 'A', 'severity': 'critical', 'annotation_text': 'Critical state', 'tags': []}
+        ],
+        'dependency_graph': {'source_count': 2, 'edge_count': 1, 'clusters': [], 'influence_scores': []},
+        'provenance_chain': {'root_sources': ['SRC-A'], 'leaf_outputs': ['MST-UKR'], 'depth': 3, 'nodes': [], 'edges': []},
+        'info_epidemiology': {'spread_paths': [], 'amplification_events': []},
+    }
+    result = build_local_mvp_site(
+        output_dir=tmp_path / 'analytics-site',
+        analytics_view_model=analytics_vm,
+        **payload,
+    )
+    # analytics.html must exist
+    analytics_html = result.output_dir / 'analytics.html'
+    assert analytics_html.exists(), 'analytics.html not generated'
+    content = analytics_html.read_text(encoding='utf-8')
+    # Core page title and nav
+    assert 'Advanced Analytics' in content
+    assert '🔬 Analytics' in content
+    # Section headings
+    assert 'Cross-Domain Fusion' in content
+    assert 'Bayesian' in content
+    assert 'Uncertainty' in content
+    assert 'Rule Evaluations' in content
+    assert 'Dependency Graph' in content
+    assert 'Provenance Chain' in content
+    assert 'Epidemiology' in content
+    # Country data
+    assert 'UKR' in content
+    # nav link in index
+    index_content = (result.output_dir / 'index.html').read_text(encoding='utf-8')
+    assert '🔬 Analytics' in index_content
+    assert 'analytics.html' in index_content
