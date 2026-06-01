@@ -3,9 +3,15 @@ name: vmodel-ci
 on:
   push:
   pull_request:
+  workflow_dispatch:
+    inputs:
+      run_live_probe:
+        description: "Run governed live runtime probe job (network-dependent)"
+        type: boolean
+        default: false
 
 jobs:
-  smoke:
+  hermetic-smoke:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -52,3 +58,46 @@ jobs:
         run: PYTHONPATH=src python scripts/build_release_evidence_pack.py --output-dir build/release_evidence/latest
       - name: Run release failure drill (negative scenarios must fail gates)
         run: PYTHONPATH=src python scripts/release_failure_drill_check.py
+
+  live-probe-governed-runtime:
+    if: github.event_name == 'workflow_dispatch' && inputs.run_live_probe == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+      - name: Run governed live probe bundle build (explicit degraded mode)
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p build
+          PYTHONPATH=src python scripts/build_operational_latest_bundle.py \
+            --run-id RUN-CI-LIVE-PROBE-${{ github.run_number }} \
+            --pilot-set representative \
+            --artifacts-dir build/run_artifacts/latest \
+            --gui-output-dir build/local_gui/latest \
+            --history-db build/run_history/latest_runs.sqlite \
+            --allow-partial-success \
+            --allow-failed-sources 2>&1 | tee build/live-probe.log
+      - name: Verify generated latest bundle in degraded-aware mode
+        run: |
+          PYTHONPATH=src python scripts/verify_latest_bundle.py \
+            --artifacts-dir build/run_artifacts/latest \
+            --allow-partial-success \
+            --allow-failed-sources
+      - name: Upload live probe diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-probe-diagnostics
+          path: |
+            build/live-probe.log
+            build/run_artifacts/latest
+            build/local_gui/latest
+          if-no-files-found: warn
