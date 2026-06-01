@@ -91,6 +91,10 @@ jobs:
             --artifacts-dir build/run_artifacts/latest \
             --allow-partial-success \
             --allow-failed-sources
+      - name: Build live-probe evidence digest readmodel
+        run: |
+          PYTHONPATH=src python scripts/build_live_probe_evidence_digest.py \
+            --artifacts-dir build/run_artifacts/latest
       - name: Upload live probe diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -100,4 +104,5 @@ jobs:
             build/live-probe.log
             build/run_artifacts/latest
             build/local_gui/latest
+            build/run_artifacts/latest/readmodels/live_probe_evidence_digest.json
           if-no-files-found: warn
