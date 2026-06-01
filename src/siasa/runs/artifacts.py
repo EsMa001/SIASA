@@ -77,6 +77,10 @@ def write_run_artifacts(
     source_countries_by_source: dict[str, list[str] | None] | None = None,
     requested_country_ids: list[str] | None = None,
     country_expected_domains: dict[str, list[str]] | None = None,
+    rule_evaluation_results: list[object] | None = None,
+    fusion_results: dict[str, object] | None = None,
+    bayesian_estimates: dict[str, dict[str, object]] | None = None,
+    uncertainty_budgets: dict[str, object] | None = None,
 ) -> RunArtifactBundle:
     _reset_artifact_output_dir(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -537,6 +541,15 @@ def write_run_artifacts(
         )
         report_paths.append(report_path)
 
+    # --- Phase 4-6 analytics artifacts ---
+    _write_analytics_artifacts(
+        output_dir=output_dir,
+        rule_evaluation_results=rule_evaluation_results,
+        fusion_results=fusion_results,
+        bayesian_estimates=bayesian_estimates,
+        uncertainty_budgets=uncertainty_budgets,
+    )
+
     return RunArtifactBundle(
         output_dir=output_dir,
         snapshot_path=snapshot_path,
@@ -579,6 +592,55 @@ def _write_report_exports(report: GeneratedReport, exports_dir: Path) -> list[di
             "relative_path": json_path.relative_to(exports_dir.parent).as_posix(),
         },
     ]
+
+
+def _write_analytics_artifacts(
+    *,
+    output_dir: Path,
+    rule_evaluation_results: list[object] | None = None,
+    fusion_results: dict[str, object] | None = None,
+    bayesian_estimates: dict[str, dict[str, object]] | None = None,
+    uncertainty_budgets: dict[str, object] | None = None,
+) -> None:
+    """Write Phase 4-6 analytical results as JSON files under analytics/."""
+    analytics_dir = output_dir / "analytics"
+    analytics_dir.mkdir(parents=True, exist_ok=True)
+
+    def _safe_asdict(obj: object) -> Any:
+        if hasattr(obj, "__dataclass_fields__"):
+            return asdict(obj)
+        if isinstance(obj, dict):
+            return {k: _safe_asdict(v) for k, v in obj.items()}
+        if isinstance(obj, (list, tuple)):
+            return [_safe_asdict(item) for item in obj]
+        return obj
+
+    # Rule evaluations
+    rule_data = [_safe_asdict(r) for r in (rule_evaluation_results or [])]
+    (analytics_dir / "rule_evaluations.json").write_text(
+        json.dumps(rule_data, indent=2, sort_keys=True)
+    )
+
+    # Cross-domain fusion
+    fusion_data = {k: _safe_asdict(v) for k, v in (fusion_results or {}).items()}
+    (analytics_dir / "cross_domain_fusion.json").write_text(
+        json.dumps(fusion_data, indent=2, sort_keys=True)
+    )
+
+    # Bayesian estimates
+    bayesian_data = {
+        k: {dk: _safe_asdict(dv) for dk, dv in v.items()}
+        for k, v in (bayesian_estimates or {}).items()
+    }
+    (analytics_dir / "bayesian_estimates.json").write_text(
+        json.dumps(bayesian_data, indent=2, sort_keys=True)
+    )
+
+    # Uncertainty budgets
+    uncertainty_data = {k: _safe_asdict(v) for k, v in (uncertainty_budgets or {}).items()}
+    (analytics_dir / "uncertainty_budgets.json").write_text(
+        json.dumps(uncertainty_data, indent=2, sort_keys=True)
+    )
 
 
 def _build_source_context(fetch_metadata_records: list[FetchMetadataRecord]) -> dict[str, dict[str, object]]:

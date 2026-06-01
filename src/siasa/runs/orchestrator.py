@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+import logging
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 from siasa.adapters.base import SourceAdapter
 from siasa.adapters.fetch_metadata import FetchMetadataRecord
@@ -23,6 +24,8 @@ from .run_state import RunState, SourceExecutionResult
 
 if TYPE_CHECKING:
     from .artifacts import RunArtifactBundle
+
+logger = logging.getLogger(__name__)
 
 
 Normalizer = Callable[[str, str, list[dict[str, float]]], list[NormalizedRecord]]
@@ -67,6 +70,10 @@ class DailyRunResult:
     daily_report: GeneratedReport
     country_reports: dict[str, GeneratedReport]
     artifact_bundle: RunArtifactBundle | None = None
+    rule_evaluation_results: list[Any] = field(default_factory=list)
+    fusion_results: dict[str, Any] = field(default_factory=dict)
+    bayesian_estimates: dict[str, dict[str, Any]] = field(default_factory=dict)
+    uncertainty_budgets: dict[str, Any] = field(default_factory=dict)
 
 
 
@@ -241,6 +248,76 @@ class DailyRunOrchestrator:
             },
             "domain_statuses": {domain: status.status for domain, status in domain_statuses.items()},
         }
+
+        # --- Phase 4-6 analytical modules ---
+        rule_evaluation_results: list[Any] = []
+        fusion_results: dict[str, Any] = {}
+        bayesian_estimates: dict[str, dict[str, Any]] = {}
+        uncertainty_budgets: dict[str, Any] = {}
+
+        # (a) Rule engine evaluation
+        try:
+            from siasa.scoring.rule_engine import load_assessment_rules, evaluate_rules, AssessmentContext
+            rules_path = Path(__file__).resolve().parents[3] / "vmodel" / "project" / "assessment_rules.yaml"
+            if rules_path.exists():
+                rules = load_assessment_rules(rules_path)
+                contexts = []
+                for cid, per_country_statuses in country_domain_statuses.items():
+                    mds = country_multi_domain_statuses.get(cid)
+                    mds_status = mds.status if mds else ""
+                    for dom, ds in per_country_statuses.items():
+                        contexts.append(AssessmentContext(
+                            country_id=cid,
+                            domain=dom,
+                            domain_status=ds.status,
+                            anomaly_score=ds.anomaly_score,
+                            multi_domain_status=mds_status,
+                        ))
+                rule_evaluation_results = evaluate_rules(rules, contexts)
+        except ImportError:
+            logger.debug("Rule engine dependencies not available, skipping rule evaluation")
+        except Exception:
+            logger.exception("Rule evaluation failed, continuing with empty results")
+
+        # (b) Cross-domain fusion
+        try:
+            from siasa.scoring.cross_domain_fusion import fuse_domain_evidence
+            for cid, per_country_statuses in country_domain_statuses.items():
+                fusion_results[cid] = fuse_domain_evidence(list(per_country_statuses.values()))
+        except ImportError:
+            logger.debug("Cross-domain fusion module not available, skipping")
+        except Exception:
+            logger.exception("Cross-domain fusion failed, continuing with empty results")
+
+        # (c) Probabilistic (Bayesian) scoring
+        try:
+            from siasa.scoring.probabilistic import compute_bayesian_status
+            for cid, per_country_statuses in country_domain_statuses.items():
+                bayesian_estimates[cid] = {}
+                for dom, ds in per_country_statuses.items():
+                    bayesian_estimates[cid][dom] = compute_bayesian_status(
+                        anomaly_score=ds.anomaly_score,
+                    )
+        except ImportError:
+            logger.debug("Probabilistic scoring module not available, skipping")
+        except Exception:
+            logger.exception("Probabilistic scoring failed, continuing with empty results")
+
+        # (d) Uncertainty propagation
+        try:
+            from siasa.scoring.uncertainty_propagation import propagate_uncertainty
+            for cid in country_domain_statuses:
+                country_features_for_unc = [f for f in features if f.country_id == cid]
+                if country_features_for_unc:
+                    source_uncertainties = [
+                        (f.coverage, 1.0 - f.coverage) for f in country_features_for_unc
+                    ]
+                    uncertainty_budgets[cid] = propagate_uncertainty(source_uncertainties)
+        except ImportError:
+            logger.debug("Uncertainty propagation module not available, skipping")
+        except Exception:
+            logger.exception("Uncertainty propagation failed, continuing with empty results")
+
         snapshot_rule_versions = dict(self.rule_versions)
         for normalized_record in normalized_records:
             mapping_version = normalized_record.quality_context.get("mapping_version")
@@ -325,6 +402,10 @@ class DailyRunOrchestrator:
                 source_countries_by_source={adapter.source_id: _adapter_country_scope(adapter) for adapter in self.adapters},
                 requested_country_ids=list(self.requested_country_ids or []),
                 country_expected_domains=dict(self.country_expected_domains or {}),
+                rule_evaluation_results=rule_evaluation_results,
+                fusion_results=fusion_results,
+                bayesian_estimates=bayesian_estimates,
+                uncertainty_budgets=uncertainty_budgets,
             )
 
         return DailyRunResult(
@@ -343,6 +424,10 @@ class DailyRunOrchestrator:
             daily_report=daily_report,
             country_reports=country_reports,
             artifact_bundle=artifact_bundle,
+            rule_evaluation_results=rule_evaluation_results,
+            fusion_results=fusion_results,
+            bayesian_estimates=bayesian_estimates,
+            uncertainty_budgets=uncertainty_budgets,
         )
 
     def _validate_active_sources(self, run_id: str) -> FailureArtifact | None:

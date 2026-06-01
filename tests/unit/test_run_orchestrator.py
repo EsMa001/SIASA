@@ -611,3 +611,58 @@ def test_daily_run_orchestrator_builds_country_specific_lineage_for_multiple_cou
     assert lineage_by_country["POL"].raw_record_id == "RAW-SRC-A-3"
     assert lineage_by_country["UKR"].normalized_id == "NORM-SRC-A-1"
     assert lineage_by_country["POL"].normalized_id == "NORM-SRC-A-3"
+
+
+def test_daily_run_orchestrator_populates_analytical_module_results() -> None:
+    """Phase 4-6 analytical modules (rule_engine, cross_domain_fusion, probabilistic,
+    uncertainty_propagation) are invoked during run() and results are present in
+    DailyRunResult."""
+    adapter = FakeAdapter(
+        source_id="SRC-A",
+        domain="A",
+        _result=FetchResult(
+            records=[{"signal_key": "conflict_intensity", "value": 0.8, "country_id": "UKR"}],
+            is_success=True,
+            diagnostics="",
+        ),
+    )
+    orchestrator = DailyRunOrchestrator(
+        adapters=[adapter],
+        normalizer=_normalize,
+        feature_services=[DomainAFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="TEST-SET",
+        active_domains=["A"],
+        rule_versions={"domain_status": "v1", "multi_domain_status": "v1"},
+        algorithm_version="v1",
+        data_version="v1",
+    )
+
+    result = orchestrator.run(run_id="RUN-ANALYTICS-001")
+
+    assert result.run_state.status in {"success", "partial_success"}
+
+    # cross-domain fusion: at least one entry per country with domain data
+    assert isinstance(result.fusion_results, dict)
+    # UKR has domain A, so fusion should run
+    assert "UKR" in result.fusion_results
+
+    # bayesian estimates: per country per domain
+    assert isinstance(result.bayesian_estimates, dict)
+    assert "UKR" in result.bayesian_estimates
+    assert "A" in result.bayesian_estimates["UKR"]
+    est = result.bayesian_estimates["UKR"]["A"]
+    assert hasattr(est, "map_status")
+    assert hasattr(est, "confidence")
+    assert hasattr(est, "posterior")
+
+    # uncertainty budgets: per country
+    assert isinstance(result.uncertainty_budgets, dict)
+    assert "UKR" in result.uncertainty_budgets
+    budget = result.uncertainty_budgets["UKR"]
+    assert hasattr(budget, "total_uncertainty")
+    assert hasattr(budget, "dominant_stage")
+
+    # rule evaluation results: list (may be empty if no rules matched or no YAML)
+    assert isinstance(result.rule_evaluation_results, list)
