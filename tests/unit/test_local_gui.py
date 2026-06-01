@@ -875,6 +875,13 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Comparison controls" in comparison_html
     assert "UKR" in comparison_html
     assert "S3" in comparison_html
+    assert "multi-window-controls" in comparison_html
+    assert "mw-country-left" in comparison_html
+    assert "mw-country-right" in comparison_html
+    assert "mw-panel-left" in comparison_html
+    assert "mw-panel-right" in comparison_html
+    assert "multi-window-panels" in comparison_html
+    assert "renderMWPanel" in comparison_html
 
     validation_html = (pages.output_dir / "validation.html").read_text()
     assert "Validation / Backtest" in validation_html
