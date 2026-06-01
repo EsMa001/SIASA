@@ -49,6 +49,12 @@ def _parse_args() -> argparse.Namespace:
         default=None,
         help="Optional override: maximum allowed failed source count",
     )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=None,
+        help="Optional output path to persist gate evaluation JSON",
+    )
     return parser.parse_args()
 
 
@@ -80,6 +86,9 @@ def main() -> int:
             max_failed_sources=int(args.max_failed_sources),
         )
     evaluation = evaluate_live_probe_digest_policy(digest, policy=policy)
+    if args.output is not None:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(json.dumps(evaluation, indent=2, sort_keys=True), encoding="utf-8")
     print(json.dumps(evaluation, indent=2))
     return 0 if evaluation.get("gate_verdict") == "pass" else 1
 

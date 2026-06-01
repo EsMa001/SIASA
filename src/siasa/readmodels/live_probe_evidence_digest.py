@@ -83,6 +83,8 @@ def build_live_probe_evidence_digest(*, artifacts_dir: Path) -> dict[str, Any]:
             "github_ref": os.getenv("GITHUB_REF"),
             "github_workflow": os.getenv("GITHUB_WORKFLOW"),
             "github_actor": os.getenv("GITHUB_ACTOR"),
+            "live_probe_policy_file": os.getenv("LIVE_PROBE_POLICY_FILE"),
+            "live_probe_policy_profile": os.getenv("LIVE_PROBE_POLICY_PROFILE"),
         },
         "run_context": {
             "run_id": str(system_status.get("run_id") or system_status.get("last_run") or "unknown"),
