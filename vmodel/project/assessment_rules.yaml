@@ -1,0 +1,127 @@
+# SIASA Rule-Based Assessment Configuration
+# Governs automatic assessment rules that trigger annotation drafts
+# when domain/multi-domain scoring results match defined conditions.
+#
+# Requirement trace: StR-266..281 (Regelbasierte Bewertung)
+# Architecture: Rules are evaluated after each run; matching rules
+# produce AnnotationRecord drafts with author="rule_engine".
+
+schema_version: "1.0"
+
+# Severity levels used in rule outputs
+severity_levels:
+  - critical
+  - high
+  - medium
+  - low
+  - informational
+
+# Rule definitions
+rules:
+  # Domain-level rules
+  - rule_id: "RULE-D-001"
+    name: "Critical domain status"
+    description: "Fires when any domain reaches D4 (critical anomaly)"
+    scope: "domain"
+    condition:
+      field: "domain_status"
+      operator: "eq"
+      value: "D4"
+    output:
+      severity: "critical"
+      annotation_type: "automatic_assessment"
+      text_template: "Domain {domain} reached critical status D4 (anomaly_score={anomaly_score:.2f}) for {country_id}"
+      tags: ["rule_engine", "critical_domain", "D4"]
+    enabled: true
+
+  - rule_id: "RULE-D-002"
+    name: "Elevated domain status"
+    description: "Fires when any domain reaches D3 (elevated anomaly)"
+    scope: "domain"
+    condition:
+      field: "domain_status"
+      operator: "eq"
+      value: "D3"
+    output:
+      severity: "high"
+      annotation_type: "automatic_assessment"
+      text_template: "Domain {domain} reached elevated status D3 (anomaly_score={anomaly_score:.2f}) for {country_id}"
+      tags: ["rule_engine", "elevated_domain", "D3"]
+    enabled: true
+
+  - rule_id: "RULE-D-003"
+    name: "Insufficient data domain"
+    description: "Fires when a domain has D0 (insufficient data)"
+    scope: "domain"
+    condition:
+      field: "domain_status"
+      operator: "eq"
+      value: "D0"
+    output:
+      severity: "medium"
+      annotation_type: "automatic_assessment"
+      text_template: "Domain {domain} has insufficient data (D0) for {country_id} — data sufficiency check failed"
+      tags: ["rule_engine", "data_gap", "D0"]
+    enabled: true
+
+  - rule_id: "RULE-D-004"
+    name: "Contradictory signals"
+    description: "Fires when a domain has D5 (contradictory signals)"
+    scope: "domain"
+    condition:
+      field: "domain_status"
+      operator: "eq"
+      value: "D5"
+    output:
+      severity: "high"
+      annotation_type: "automatic_assessment"
+      text_template: "Domain {domain} shows contradictory signals (D5) for {country_id} — manual review recommended"
+      tags: ["rule_engine", "contradictory", "D5"]
+    enabled: true
+
+  # Anomaly score threshold rules
+  - rule_id: "RULE-A-001"
+    name: "High anomaly score"
+    description: "Fires when anomaly score exceeds 0.8"
+    scope: "domain"
+    condition:
+      field: "anomaly_score"
+      operator: "gt"
+      value: 0.8
+    output:
+      severity: "high"
+      annotation_type: "automatic_assessment"
+      text_template: "Domain {domain} anomaly score {anomaly_score:.2f} exceeds 0.8 threshold for {country_id}"
+      tags: ["rule_engine", "high_anomaly"]
+    enabled: true
+
+  # Multi-domain rules
+  - rule_id: "RULE-M-001"
+    name: "Critical multi-domain status"
+    description: "Fires when multi-domain status reaches S5 or S6"
+    scope: "multi_domain"
+    condition:
+      field: "multi_domain_status"
+      operator: "in"
+      value: ["S5", "S6"]
+    output:
+      severity: "critical"
+      annotation_type: "automatic_assessment"
+      text_template: "Country {country_id} reached critical multi-domain status {multi_domain_status}"
+      tags: ["rule_engine", "critical_multi_domain"]
+    enabled: true
+
+  - rule_id: "RULE-M-002"
+    name: "Elevated multi-domain status"
+    description: "Fires when multi-domain status reaches S4"
+    scope: "multi_domain"
+    condition:
+      field: "multi_domain_status"
+      operator: "eq"
+      value: "S4"
+    output:
+      severity: "high"
+      annotation_type: "automatic_assessment"
+      text_template: "Country {country_id} reached elevated multi-domain status S4"
+      tags: ["rule_engine", "elevated_multi_domain"]
+    enabled: true
