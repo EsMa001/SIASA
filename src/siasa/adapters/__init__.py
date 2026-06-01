@@ -6,6 +6,7 @@ from .gdacs import GDACSAdapter
 from .gdelt_doc import GDELTDocAdapter
 from .gdelt_events import GDELTEventsAdapter
 from .ucdp import UCDPAdapter
+from .unhcr import UNHCRPopulationAdapter
 from .world_bank import WorldBankIndicatorsAdapter
 
 __all__ = [
@@ -17,4 +18,5 @@ __all__ = [
     "GDELTDocAdapter",
     "GDELTEventsAdapter",
     "UCDPAdapter",
+    "UNHCRPopulationAdapter",
 ]
