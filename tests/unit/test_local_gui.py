@@ -692,6 +692,17 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     index_html = (pages.output_dir / "index.html").read_text()
     assert "World Anomaly Map" in index_html
     assert "world-map-svg" in index_html
+    assert "map-zoom-container" in index_html
+    assert "map-overlay-controls" in index_html
+    assert "map-overlay-btn" in index_html
+    assert "map-tooltip" in index_html
+    assert "map-zoom-reset" in index_html
+    assert "data-overlay='status'" in index_html
+    assert "data-overlay='anomaly'" in index_html
+    assert "data-overlay='freshness'" in index_html
+    assert "applyOverlay" in index_html
+    assert "applyTransform" in index_html
+    assert "data-anomaly-score" in index_html
     assert "Coverage / Confidence Visualization" in index_html
     assert "coverage-visualization-block" in index_html
     assert "Europe / Black Sea" in index_html

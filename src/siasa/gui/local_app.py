@@ -1089,6 +1089,8 @@ def _render_world_map_visualization(
             'status': status,
             'freshness_label': freshness_label,
             'freshness_band': freshness_band,
+            'freshness_hours': str(country_visibility.get('freshness_hours', '')),
+            'anomaly_score': str(country.get('anomaly_score', '')),
             'color': _status_color(status),
             'freshness_color': _freshness_band_color(freshness_band),
             'href': href,
@@ -1123,12 +1125,15 @@ def _render_world_map_visualization(
         href = html.escape(data.get('href', 'none'))
         status = html.escape(data.get('status', ''))
         freshness = html.escape(data.get('freshness_label', ''))
+        anomaly_score = html.escape(data.get('anomaly_score', ''))
+        freshness_hours = html.escape(data.get('freshness_hours', ''))
         css_class = 'country-mvp' if has_data else 'country-bg'
         cursor = 'pointer' if has_data else 'default'
         path_elements.append(
             f"<path id='country-{iso3}' class='{css_class}' "
             f"data-iso3='{iso3}' data-name='{html.escape(cname)}' "
-            f"data-href='{href}' data-status='{status}' data-freshness='{freshness}' "
+            f"data-href='{href}' data-status='{status}' data-freshness='{freshness_hours}' "
+            f"data-anomaly-score='{anomaly_score}' "
             f"d='{path_d}' fill='{fill}' stroke='{stroke}' stroke-width='{stroke_w}' "
             f"style='cursor:{cursor};transition:fill .15s,stroke .15s,stroke-width .15s;'>"
             f"<title>{html.escape(iso3)} — {html.escape(cname)}"
@@ -1298,11 +1303,107 @@ def _render_world_map_visualization(
         + map_js
     )
 
+    overlay_controls = (
+        "<div id='map-overlay-controls' style='display:flex;gap:6px;margin-bottom:8px;'>"
+        "<button class='map-overlay-btn' data-overlay='status' style='background:#1a2540;color:#4edea3;border:1px solid #4edea3;padding:4px 10px;border-radius:2px;cursor:pointer;font-size:11px;font-family:Space Grotesk,monospace;font-weight:700;'>Status</button>"
+        "<button class='map-overlay-btn' data-overlay='anomaly' style='background:#1a2540;color:#6b7d99;border:1px solid #263050;padding:4px 10px;border-radius:2px;cursor:pointer;font-size:11px;font-family:Space Grotesk,monospace;'>Anomaly Score</button>"
+        "<button class='map-overlay-btn' data-overlay='freshness' style='background:#1a2540;color:#6b7d99;border:1px solid #263050;padding:4px 10px;border-radius:2px;cursor:pointer;font-size:11px;font-family:Space Grotesk,monospace;'>Freshness</button>"
+        "<button id='map-zoom-reset' style='background:#1a2540;color:#6b7d99;border:1px solid #263050;padding:4px 10px;border-radius:2px;cursor:pointer;font-size:11px;font-family:Space Grotesk,monospace;margin-left:auto;'>Reset Zoom</button>"
+        "</div>"
+    )
+    tooltip_el = (
+        "<div id='map-tooltip' style='display:none;position:fixed;z-index:9999;pointer-events:none;"
+        "background:rgba(15,24,40,0.95);border:1px solid rgba(78,222,163,0.4);border-radius:3px;"
+        "padding:6px 10px;font-size:11px;color:#dae2fd;font-family:Space Grotesk,monospace;"
+        "max-width:220px;box-shadow:0 2px 8px rgba(0,0,0,0.4);'></div>"
+    )
+    zoom_pan_js = """\
+<script>
+(function(){
+  var container = document.getElementById('map-zoom-container');
+  var svgEl = document.getElementById('world-map-svg');
+  var tooltip = document.getElementById('map-tooltip');
+  if(!container || !svgEl) return;
+  var scale = 1, panX = 0, panY = 0, dragging = false, dragStartX = 0, dragStartY = 0, panStartX = 0, panStartY = 0;
+  function applyTransform(){ svgEl.style.transform = 'translate('+panX+'px,'+panY+'px) scale('+scale+')'; svgEl.style.transformOrigin = '0 0'; }
+  container.addEventListener('wheel', function(e){
+    e.preventDefault();
+    var rect = container.getBoundingClientRect();
+    var mx = e.clientX - rect.left, my = e.clientY - rect.top;
+    var oldScale = scale;
+    scale *= e.deltaY < 0 ? 1.15 : 0.87;
+    scale = Math.max(0.5, Math.min(scale, 8));
+    panX = mx - (mx - panX) * (scale / oldScale);
+    panY = my - (my - panY) * (scale / oldScale);
+    applyTransform();
+  }, {passive:false});
+  container.addEventListener('mousedown', function(e){
+    if(e.button !== 0) return;
+    dragging = true; dragStartX = e.clientX; dragStartY = e.clientY;
+    panStartX = panX; panStartY = panY;
+    container.style.cursor = 'grabbing';
+  });
+  window.addEventListener('mousemove', function(e){
+    if(!dragging) return;
+    panX = panStartX + (e.clientX - dragStartX);
+    panY = panStartY + (e.clientY - dragStartY);
+    applyTransform();
+  });
+  window.addEventListener('mouseup', function(){ dragging = false; container.style.cursor = 'grab'; });
+  var resetBtn = document.getElementById('map-zoom-reset');
+  if(resetBtn){ resetBtn.addEventListener('click', function(){ scale=1; panX=0; panY=0; applyTransform(); }); }
+  // Tooltip on hover
+  document.querySelectorAll('.country-mvp').forEach(function(el){
+    el.addEventListener('mousemove', function(e){
+      if(!tooltip) return;
+      var lines = '<b>' + (el.dataset.name||'') + '</b> (' + (el.dataset.iso3||'') + ')';
+      if(el.dataset.status) lines += '<br>Status: <span style=\"color:#e3b341;\">' + el.dataset.status + '</span>';
+      if(el.dataset.anomalyScore) lines += '<br>Anomaly: ' + el.dataset.anomalyScore;
+      if(el.dataset.freshness) lines += '<br>Freshness: ' + el.dataset.freshness + 'h';
+      tooltip.innerHTML = lines;
+      tooltip.style.display = 'block';
+      tooltip.style.left = (e.clientX + 12) + 'px';
+      tooltip.style.top = (e.clientY - 10) + 'px';
+    });
+    el.addEventListener('mouseleave', function(){ if(tooltip) tooltip.style.display = 'none'; });
+  });
+  // Overlay switcher
+  var STATUS_FILLS = {}; document.querySelectorAll('.country-mvp').forEach(function(el){ STATUS_FILLS[el.dataset.iso3] = el.dataset.defFill || el.getAttribute('fill'); });
+  var ANOMALY_COLORS = {'0':'#1a3a2a','1':'#2a5a3a','2':'#4a7a2a','3':'#8a8a1a','4':'#aa5a1a','5':'#cc2a1a'};
+  var FRESH_COLORS = {'fresh':'#1a5a3a','stale':'#8a5a1a','very_stale':'#aa2a1a','unknown':'#1a2540'};
+  function anomalyBucket(s){ var v=parseFloat(s); if(isNaN(v)) return '0'; if(v<0.2) return '0'; if(v<0.4) return '1'; if(v<0.6) return '2'; if(v<0.8) return '3'; if(v<1.0) return '4'; return '5'; }
+  function freshBucket(s){ var v=parseInt(s); if(isNaN(v)) return 'unknown'; if(v<48) return 'fresh'; if(v<168) return 'stale'; return 'very_stale'; }
+  function applyOverlay(mode){
+    document.querySelectorAll('.map-overlay-btn').forEach(function(b){
+      if(b.dataset.overlay === mode){ b.style.color='#4edea3'; b.style.borderColor='#4edea3'; b.style.fontWeight='700'; }
+      else { b.style.color='#6b7d99'; b.style.borderColor='#263050'; b.style.fontWeight='400'; }
+    });
+    document.querySelectorAll('.country-mvp').forEach(function(el){
+      var newFill;
+      if(mode === 'status'){ newFill = STATUS_FILLS[el.dataset.iso3] || '#1a2540'; }
+      else if(mode === 'anomaly'){ newFill = ANOMALY_COLORS[anomalyBucket(el.dataset.anomalyScore||'0')] || '#1a2540'; }
+      else if(mode === 'freshness'){ newFill = FRESH_COLORS[freshBucket(el.dataset.freshness||'')] || '#1a2540'; }
+      else { newFill = STATUS_FILLS[el.dataset.iso3] || '#1a2540'; }
+      el.style.fill = newFill;
+      el.dataset.defFill = newFill;
+    });
+  }
+  document.querySelectorAll('.map-overlay-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){ applyOverlay(btn.dataset.overlay); });
+  });
+})();
+</script>"""
+
     return (
         "<p style='font-size:11px;color:#6b7d99;margin-bottom:6px;font-family:Space Grotesk,monospace;'>"
-        "Hover to identify · Click to select &amp; highlight country profile · Click background to deselect</p>"
+        "Hover to identify · Click to select · Scroll to zoom · Drag to pan · Use overlay buttons to switch coloring</p>"
+        + overlay_controls
+        + tooltip_el
+        + "<div id='map-zoom-container' style='overflow:hidden;max-width:960px;border-radius:2px;cursor:grab;'>"
         + info_panel
         + svg_html
+        + "</div>"
+        + zoom_pan_js
         + "<h3>Country Status Legend</h3>"
         + "<table><thead><tr><th>ISO3</th><th>Name</th><th>Region</th>"
         + "<th>Priority</th><th>Freshness</th><th>Status</th></tr></thead>"
