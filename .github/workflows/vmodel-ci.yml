@@ -95,6 +95,13 @@ jobs:
         run: |
           PYTHONPATH=src python scripts/build_live_probe_evidence_digest.py \
             --artifacts-dir build/run_artifacts/latest
+      - name: Enforce live-probe digest policy gate
+        run: |
+          PYTHONPATH=src python scripts/ci_live_probe_digest_gate_check.py \
+            --digest-path build/run_artifacts/latest/readmodels/live_probe_evidence_digest.json \
+            --min-combined-ce-ratio 0.50 \
+            --allowed-verdicts green,amber \
+            --max-failed-sources 3
       - name: Upload live probe diagnostics
         if: always()
         uses: actions/upload-artifact@v4

@@ -7,11 +7,22 @@ import yaml
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-PROBE_ROOT = REPO_ROOT / "build" / "run_artifacts" / "_rep_validation_replay_depth_probe_1" / "readmodels"
+_PROBE_CANDIDATES = [
+    REPO_ROOT / "build" / "run_artifacts" / "_rep_validation_replay_depth_probe_1" / "readmodels",
+    REPO_ROOT / "build" / "run_artifacts" / "_rep_ce_probe" / "readmodels",
+    REPO_ROOT / "build" / "run_artifacts" / "latest" / "readmodels",
+]
+
+
+def _resolve_probe_root() -> Path:
+    for candidate in _PROBE_CANDIDATES:
+        if (candidate / "validation_backtest.json").exists():
+            return candidate
+    raise FileNotFoundError("validation_backtest.json not found in known probe readmodel locations")
 
 
 def _load_validation_backtest() -> dict[str, object]:
-    return json.loads((PROBE_ROOT / "validation_backtest.json").read_text(encoding="utf-8"))
+    return json.loads((_resolve_probe_root() / "validation_backtest.json").read_text(encoding="utf-8"))
 
 
 def test_validation_replay_depth_probe_has_multi_case_portfolio_summary() -> None:
