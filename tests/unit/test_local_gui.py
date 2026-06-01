@@ -691,6 +691,14 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
 
     index_html = (pages.output_dir / "index.html").read_text()
     assert "World Anomaly Map" in index_html
+    # AP-F19: Dynamic role switcher
+    assert "role-switcher" in index_html
+    assert "role-select" in index_html
+    assert "applyRole" in index_html
+    assert "value='analyst'" in index_html
+    assert "value='admin'" in index_html
+    assert "value='viewer'" in index_html
+    assert "data-activeRole" in index_html or "activeRole" in index_html
     assert "world-map-svg" in index_html
     assert "map-zoom-container" in index_html
     assert "map-overlay-controls" in index_html

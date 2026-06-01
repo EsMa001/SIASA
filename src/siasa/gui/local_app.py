@@ -51,6 +51,40 @@ def _page(title: str, body: str, *, nav_prefix: str = '', available_pages: set[s
         for href, label in nav_entries
         if href in available_pages
     )
+    role_switcher = (
+        "<div id='role-switcher' style='margin-left:auto;display:flex;align-items:center;gap:6px;'>"
+        "<label for='role-select' style='font-size:10px;color:#6b7d99;font-family:Space Grotesk,monospace;text-transform:uppercase;letter-spacing:.08em;'>Role</label>"
+        "<select id='role-select' style='background:#1a2540;color:#4edea3;border:1px solid #263050;padding:3px 8px;font-size:11px;font-family:Space Grotesk,monospace;border-radius:2px;cursor:pointer;'>"
+        "<option value='analyst'>Analyst</option>"
+        "<option value='admin'>Admin</option>"
+        "<option value='viewer'>Viewer</option>"
+        "</select>"
+        "</div>"
+    )
+    role_js = (
+        "<script>"
+        "(function(){"
+        "var sel=document.getElementById('role-select');"
+        "if(!sel)return;"
+        "function applyRole(role){"
+        "document.body.dataset.activeRole=role;"
+        "document.querySelectorAll('[data-role-min]').forEach(function(el){"
+        "var min=el.dataset.roleMin;"
+        "var show=(min==='viewer')||(min==='analyst'&&(role==='analyst'||role==='admin'))||(min==='admin'&&role==='admin');"
+        "el.style.display=show?'':'none';"
+        "});"
+        "var navLinks=document.querySelectorAll('nav a');"
+        "navLinks.forEach(function(a){"
+        "var href=a.getAttribute('href')||'';"
+        "var isOps=href.indexOf('annotations')>=0||href.indexOf('runs.')>=0||href.indexOf('readiness')>=0;"
+        "a.style.display=(role==='viewer'&&isOps)?'none':'';"
+        "});"
+        "}"
+        "sel.addEventListener('change',function(){applyRole(sel.value);});"
+        "applyRole(sel.value);"
+        "})();"
+        "</script>"
+    )
     # Google Fonts: Inter (narrative) + Space Grotesk (machine-data labels)
     font_link = (
         "<link rel='preconnect' href='https://fonts.googleapis.com'>"
@@ -244,13 +278,14 @@ def _page(title: str, body: str, *, nav_prefix: str = '', available_pages: set[s
         f"<style>{css}</style>"
         "</head><body>"
         "<a href='#main-content' class='skip-nav' onfocus=\"this.style.left='0'\" onblur=\"this.style.left='-9999px'\">Zum Inhalt springen</a>"
-        f"<nav aria-label='Main navigation'>{nav_html}</nav>"
+        f"<nav aria-label='Main navigation' style='display:flex;flex-wrap:wrap;align-items:center;'>{nav_html}{role_switcher}</nav>"
         "<div class='page-content'>"
         f"<main id='main-content'>"
         f"<h1>{html.escape(title)}</h1>"
         f"{body}"
         "</main>"
         "</div>"
+        f"{role_js}"
         "</body></html>"
     )
 
