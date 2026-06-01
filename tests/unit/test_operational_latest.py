@@ -160,9 +160,77 @@ def test_build_operational_latest_bundle_fails_closed_on_non_success_run(tmp_pat
         )
     except ValueError as exc:
         assert "run_status=partial_success" in str(exc)
-        assert "SRC-GDELT-DOC" in str(exc)
+        assert "allowed_statuses=['success']" in str(exc)
     else:
         raise AssertionError("Expected non-success operational latest build to fail closed")
 
     assert gui_builder.calls == []
     assert run_history_writer.calls == []
+
+
+def test_build_operational_latest_bundle_fails_closed_on_failed_sources_even_when_status_success(tmp_path: Path) -> None:
+    artifact_dir = tmp_path / "artifacts"
+    runner = RecordingPipelineRunner(
+        FakePipelineResult(
+            run_state=FakeRunState(
+                run_id="RUN-OP-LATEST-002",
+                status="success",
+                failed_sources=["SRC-GDELT-DOC"],
+                source_results=[
+                    FakeSourceResult(source_id="WB-INDICATORS", status="success"),
+                    FakeSourceResult(source_id="SRC-GDELT-DOC", status="failed", diagnostics="timeout"),
+                ],
+            ),
+            artifact_bundle=FakeArtifactBundle(output_dir=artifact_dir),
+        )
+    )
+
+    try:
+        build_operational_latest_bundle(
+            repo_root=tmp_path,
+            run_id="RUN-OP-LATEST-002",
+            artifacts_dir=artifact_dir,
+            gui_output_dir=tmp_path / "gui",
+            pipeline_runner=runner,
+        )
+    except ValueError as exc:
+        assert "failed_sources=['SRC-GDELT-DOC']" in str(exc)
+    else:
+        raise AssertionError("Expected run with failed_sources to fail closed")
+
+
+def test_build_operational_latest_bundle_allows_degraded_runtime_when_explicitly_enabled(tmp_path: Path) -> None:
+    artifact_dir = tmp_path / "artifacts"
+    gui_dir = tmp_path / "gui"
+    runner = RecordingPipelineRunner(
+        FakePipelineResult(
+            run_state=FakeRunState(
+                run_id="RUN-OP-LATEST-003",
+                status="partial_success",
+                failed_sources=["SRC-GDELT-DOC"],
+                source_results=[
+                    FakeSourceResult(source_id="WB-INDICATORS", status="success"),
+                    FakeSourceResult(source_id="SRC-GDELT-DOC", status="failed", diagnostics="timeout"),
+                ],
+            ),
+            artifact_bundle=FakeArtifactBundle(output_dir=artifact_dir),
+        )
+    )
+    gui_builder = RecordingGuiBuilder()
+    run_history_writer = RecordingRunHistoryWriter()
+
+    result = build_operational_latest_bundle(
+        repo_root=tmp_path,
+        run_id="RUN-OP-LATEST-003",
+        artifacts_dir=artifact_dir,
+        gui_output_dir=gui_dir,
+        allow_partial_success=True,
+        allow_failed_sources=True,
+        pipeline_runner=runner,
+        gui_builder=gui_builder,
+        run_history_writer=run_history_writer,
+    )
+
+    assert result["run_status"] == "partial_success"
+    assert gui_builder.calls == [{"artifacts_dir": artifact_dir, "output_dir": gui_dir}]
+    assert run_history_writer.calls[0]["failed_sources"] == ["SRC-GDELT-DOC"]

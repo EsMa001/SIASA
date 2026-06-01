@@ -24,6 +24,8 @@ def build_operational_latest_bundle(
     gui_output_dir: Path,
     pilot_set: str = DEFAULT_OPERATIONAL_LATEST_PILOT_SET,
     history_db_path: Path | None = None,
+    allow_partial_success: bool = False,
+    allow_failed_sources: bool = False,
     pipeline_runner: Callable[..., Any] = run_governed_live_pipeline,
     gui_builder: Callable[..., Path] = _default_gui_builder,
     run_history_writer: Callable[..., None] = persist_operational_latest_run,
@@ -35,9 +37,16 @@ def build_operational_latest_bundle(
         output_dir=artifacts_dir,
     )
     run_state = result.run_state
-    if run_state.status != "success" or list(run_state.failed_sources):
+    allowed_statuses = {"success", "partial_success"} if allow_partial_success else {"success"}
+    if run_state.status not in allowed_statuses:
         raise ValueError(
-            f"Operational latest build failed closed: run_status={run_state.status}, failed_sources={run_state.failed_sources}"
+            "Operational latest build failed closed: "
+            f"run_status={run_state.status}, allowed_statuses={sorted(allowed_statuses)}"
+        )
+    if list(run_state.failed_sources) and not allow_failed_sources:
+        raise ValueError(
+            "Operational latest build failed closed: "
+            f"failed_sources={run_state.failed_sources}"
         )
 
     gui_index = gui_builder(artifacts_dir=result.artifact_bundle.output_dir, output_dir=gui_output_dir)

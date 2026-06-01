@@ -18,6 +18,16 @@ def main() -> int:
         default="build/run_history/latest_runs.sqlite",
         help="SQLite path for operational latest run history",
     )
+    parser.add_argument(
+        "--allow-partial-success",
+        action="store_true",
+        help="Accept run_status=partial_success for operational bundle generation.",
+    )
+    parser.add_argument(
+        "--allow-failed-sources",
+        action="store_true",
+        help="Allow non-empty failed_sources when run status is accepted.",
+    )
     args = parser.parse_args()
 
     result = build_operational_latest_bundle(
@@ -27,6 +37,8 @@ def main() -> int:
         artifacts_dir=Path(args.artifacts_dir),
         gui_output_dir=Path(args.gui_output_dir),
         history_db_path=Path(args.history_db),
+        allow_partial_success=args.allow_partial_success,
+        allow_failed_sources=args.allow_failed_sources,
     )
     print(
         f"run_status={result['run_status']} pilot_set={result['pilot_set']} "
