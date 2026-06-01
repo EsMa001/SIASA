@@ -83,3 +83,18 @@ def test_domain_e_feature_service_handles_single_source() -> None:
     assert features["E_cyber_mention_volume"].value == 80.0
     assert features["E_source_diversity_cyber"].value == 1.0  # 1 source / 1 record
     assert features["E_data_freshness"].value == 3
+
+
+def test_domain_e_feature_service_supports_live_runtime_fallback_signals() -> None:
+    service = DomainEFeatureService()
+    records = [
+        _record("article_count", 4.0, "SRC-GDELT-DOC-E", expected_source_count=1, freshness_hours=2),
+        _record("tone", -0.8, "SRC-GDELT-DOC-E", expected_source_count=1, freshness_hours=2),
+        _record("cyber_kev_overdue_count", 12.0, "SRC-CISA-KEV", expected_source_count=1, freshness_hours=0),
+    ]
+
+    features = {f.feature_id: f for f in service.compute(records)}
+
+    assert features["E_cyber_mention_volume"].value == 4.0
+    assert features["E_info_ops_tone"].value == -0.8
+    assert features["E_tech_disruption_signals"].value == 12.0

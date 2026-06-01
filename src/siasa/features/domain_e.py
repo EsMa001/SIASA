@@ -36,6 +36,28 @@ class DomainEFeatureService(FeatureService):
                     value = sum_signal(country_records, signal_key)
                 else:
                     value = mean_signal(country_records, signal_key)
+
+                # Live runtime fallback mappings:
+                # - GDELT Doc (Domain E adapter) emits article_count/tone
+                # - CISA KEV emits cyber_kev_* signals
+                if (value is None or value == 0) and feature_id == "E_cyber_mention_volume":
+                    signal_records = [r for r in country_records if r.signal_key in {"article_count", "cyber_kev_total"}]
+                    value = (
+                        sum_signal(country_records, "cyber_mention_count")
+                        or sum_signal(country_records, "article_count")
+                        or sum_signal(country_records, "cyber_kev_total")
+                    )
+                elif value is None and feature_id == "E_info_ops_tone":
+                    signal_records = [r for r in country_records if r.signal_key == "tone"]
+                    value = mean_signal(country_records, "tone")
+                elif (value is None or value == 0) and feature_id == "E_tech_disruption_signals":
+                    signal_records = [r for r in country_records if r.signal_key in {"tech_disruption_count", "cyber_kev_overdue_count", "cyber_kev_recent_count"}]
+                    value = (
+                        sum_signal(country_records, "tech_disruption_count")
+                        or sum_signal(country_records, "cyber_kev_overdue_count")
+                        or sum_signal(country_records, "cyber_kev_recent_count")
+                    )
+
                 if value is not None:
                     features.append(
                         build_feature_value(

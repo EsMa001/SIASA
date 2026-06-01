@@ -6,7 +6,14 @@ from pathlib import Path
 from time import sleep
 from typing import Callable
 
-from siasa.adapters import GDACSAdapter, GDELTDocAdapter, GDELTEventsAdapter, WorldBankIndicatorsAdapter
+from siasa.adapters import (
+    CISAKEVAdapter,
+    GDACSAdapter,
+    GDELTDocAdapter,
+    GDELTEventsAdapter,
+    UNHCRPopulationAdapter,
+    WorldBankIndicatorsAdapter,
+)
 from siasa.data.normalization_mappings import NormalizationMappingVersion
 from siasa.data.normalization_service import normalize_records
 from siasa.features.domain_a import DomainAFeatureService
@@ -427,6 +434,18 @@ def _build_normalization_mappings() -> list[NormalizationMappingVersion]:
             version="v1",
             is_active=True,
         ),
+        NormalizationMappingVersion(
+            mapping_id="MAP-SRC-UNHCR-POP-v1",
+            source_id="SRC-UNHCR-POP",
+            version="v1",
+            is_active=True,
+        ),
+        NormalizationMappingVersion(
+            mapping_id="MAP-SRC-CISA-KEV-v1",
+            source_id="SRC-CISA-KEV",
+            version="v1",
+            is_active=True,
+        ),
     ]
 
 
@@ -688,6 +707,8 @@ def build_governed_live_orchestrator(
             GDACSAdapter(country_ids=set(resolved_country_ids)),
             # Domain C: GDACS data re-ingested as physical activity/disaster domain
             GDACSAdapter(country_ids=set(resolved_country_ids), source_id="SRC-GDACS-C", domain="C"),
+            # Domain C: structured displacement signals
+            UNHCRPopulationAdapter(country_ids=set(resolved_country_ids)),
             # Domain E: GDELT Doc data re-ingested filtered for cyber/tech/info-ops themes
             GDELTDocAdapter(
                 country_queries=country_queries,
@@ -700,6 +721,8 @@ def build_governed_live_orchestrator(
                 max_full_fetch_retries=_gdelt_doc_max_full_fetch_retries_for_country_count(len(resolved_country_ids)),
                 full_fetch_retry_cooldown_seconds=_gdelt_doc_full_fetch_retry_cooldown_seconds_for_country_count(len(resolved_country_ids)),
             ),
+            # Domain E: global structured cyber-threat context
+            CISAKEVAdapter(country_ids=set(resolved_country_ids)),
         ]
     )
     runtime_profile = "live-multi-country-v1" if len(resolved_country_ids) > 1 else "live-single-country-v1"

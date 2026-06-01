@@ -22,10 +22,15 @@ class DomainCFeatureService(FeatureService):
         for country_id in sorted({record.country_id for record in domain_records}):
             country_records = [record for record in domain_records if record.country_id == country_id]
 
-            # C_event_count: total number of physical/disaster events
+            # C_event_count: total number of physical/disaster/displacement signals
             event_count = sum_signal(country_records, "disaster_alert_level")
-            if event_count is None:
-                event_count = float(len(country_records))
+            if not event_count:
+                # Fallback for displacement-oriented Domain C sources (e.g. UNHCR/ReliefWeb)
+                event_count = (
+                    sum_signal(country_records, "displacement_total")
+                    or sum_signal(country_records, "humanitarian_report_count")
+                    or float(len(country_records))
+                )
             alert_records = [r for r in country_records if r.signal_key == "disaster_alert_level"]
             features.append(
                 build_feature_value(
@@ -70,6 +75,20 @@ class DomainCFeatureService(FeatureService):
             features.append(
                 build_feature_value("C_affected_source_count", self.domain, source_count, country_records)
             )
+
+            # C_displacement_total: latest forced-displacement signal when available
+            displacement_total = sum_signal(country_records, "displacement_total")
+            if displacement_total is not None and displacement_total > 0:
+                displacement_records = [r for r in country_records if r.signal_key == "displacement_total"]
+                features.append(
+                    build_feature_value(
+                        "C_displacement_total",
+                        self.domain,
+                        displacement_total,
+                        country_records,
+                        freshness_records=displacement_records or None,
+                    )
+                )
 
             # C_data_freshness: worst freshness across domain C records for this country
             freshness_hours = max(

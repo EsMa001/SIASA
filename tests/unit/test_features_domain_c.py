@@ -86,3 +86,17 @@ def test_domain_c_feature_service_handles_single_record() -> None:
     assert features["C_max_alert_level"].value == 2.0
     assert features["C_affected_source_count"].value == 1.0
     assert features["C_data_freshness"].value == 6
+
+
+def test_domain_c_feature_service_supports_displacement_fallback_signals() -> None:
+    service = DomainCFeatureService()
+    records = [
+        _record("displacement_total", 1250.0, "SRC-UNHCR-POP", expected_source_count=1, freshness_hours=24),
+        _record("humanitarian_report_count", 7.0, "SRC-RELIEFWEB", expected_source_count=1, freshness_hours=12),
+    ]
+
+    features = {f.feature_id: f for f in service.compute(records)}
+
+    assert features["C_event_count"].value == 1250.0
+    assert features["C_displacement_total"].value == 1250.0
+    assert features["C_affected_source_count"].value == 2.0

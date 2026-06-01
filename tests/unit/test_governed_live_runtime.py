@@ -77,7 +77,9 @@ def test_build_governed_live_orchestrator_uses_real_source_adapters_for_supporte
         "SRC-GDELT-EVENTS",
         "SRC-GDACS",
         "SRC-GDACS-C",
+        "SRC-UNHCR-POP",
         "SRC-GDELT-DOC-E",
+        "SRC-CISA-KEV",
     ]
     assert orchestrator.active_domains == ["A", "B", "C", "D", "E"]
     assert orchestrator.country_set_id == "MVP-COUNTRIES-LIVE-UKR-v1"
@@ -91,7 +93,9 @@ def test_build_governed_live_orchestrator_skips_world_bank_for_twn_only_runtime_
         "SRC-GDELT-EVENTS",
         "SRC-GDACS",
         "SRC-GDACS-C",
+        "SRC-UNHCR-POP",
         "SRC-GDELT-DOC-E",
+        "SRC-CISA-KEV",
     ]
     assert orchestrator.country_expected_domains == {"TWN": ["A", "B"]}
 
