@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
+
+import yaml
 
 
 @dataclass(frozen=True)
@@ -9,6 +12,29 @@ class LiveProbePolicy:
     min_combined_ce_ratio: float = 0.5
     allowed_verdicts: tuple[str, ...] = ("green", "amber")
     max_failed_sources: int = 3
+
+
+def load_live_probe_policy_profile(*, policy_file: Path, profile: str) -> LiveProbePolicy:
+    payload = yaml.safe_load(policy_file.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("policy file must contain a top-level mapping")
+    profiles = payload.get("profiles")
+    if not isinstance(profiles, dict):
+        raise ValueError("policy file missing 'profiles' mapping")
+    profile_payload = profiles.get(profile)
+    if not isinstance(profile_payload, dict):
+        raise ValueError(f"unknown live-probe policy profile: {profile}")
+    min_combined_ce_ratio = float(profile_payload.get("min_combined_ce_ratio", 0.5))
+    allowed_verdicts_raw = profile_payload.get("allowed_verdicts")
+    if not isinstance(allowed_verdicts_raw, list) or not allowed_verdicts_raw:
+        raise ValueError(f"profile '{profile}' must define non-empty allowed_verdicts list")
+    allowed_verdicts = tuple(str(item) for item in allowed_verdicts_raw)
+    max_failed_sources = int(profile_payload.get("max_failed_sources", 3))
+    return LiveProbePolicy(
+        min_combined_ce_ratio=min_combined_ce_ratio,
+        allowed_verdicts=allowed_verdicts,
+        max_failed_sources=max_failed_sources,
+    )
 
 
 def evaluate_live_probe_digest_policy(

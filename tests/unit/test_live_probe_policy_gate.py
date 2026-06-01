@@ -1,6 +1,14 @@
 from __future__ import annotations
 
-from siasa.readmodels.live_probe_policy_gate import LiveProbePolicy, evaluate_live_probe_digest_policy
+from pathlib import Path
+
+import pytest
+
+from siasa.readmodels.live_probe_policy_gate import (
+    LiveProbePolicy,
+    evaluate_live_probe_digest_policy,
+    load_live_probe_policy_profile,
+)
 
 
 def _digest(*, verdict: str = "green", ce_ratio: float = 1.0, failed_source_count: int = 0) -> dict:
@@ -46,3 +54,23 @@ def test_policy_gate_fails_when_too_many_failed_sources() -> None:
     )
     assert result["gate_verdict"] == "fail"
     assert "failed_source_count_above_threshold:5>2" in result["blockers"]
+
+
+def test_load_policy_profile_standard_from_repo_file() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    policy = load_live_probe_policy_profile(
+        policy_file=repo_root / "vmodel" / "project" / "live_probe_policy_profiles.yaml",
+        profile="standard",
+    )
+    assert policy.min_combined_ce_ratio == 0.5
+    assert policy.allowed_verdicts == ("green", "amber")
+    assert policy.max_failed_sources == 3
+
+
+def test_load_policy_profile_unknown_raises() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    with pytest.raises(ValueError, match="unknown live-probe policy profile"):
+        load_live_probe_policy_profile(
+            policy_file=repo_root / "vmodel" / "project" / "live_probe_policy_profiles.yaml",
+            profile="does-not-exist",
+        )
