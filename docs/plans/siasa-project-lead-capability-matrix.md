@@ -62,6 +62,7 @@ For project steering, use these work-package states:
 
 | Work package | Purpose | Current state | Evidence of closure / current truth | Capability impact |
 | --- | --- | --- | --- | --- |
+| P2 planning-governance hygiene: capability-matrix historical-gap section re-sync | Remove contradictory stale gap claims in section 5 of the capability matrix and align the historical note with current AP-F01..AP-F27 closure state + next-step framing tracks | Done | Updated `docs/plans/siasa-project-lead-capability-matrix.md` section 5 from obsolete 2026-05-30 open-gap table to a synchronized historical-marker section that explicitly states AP-F01..AP-F27 closure and current expansion tracks; validation evidence: targeted `tests/unit/test_readmodels_functional_fulfillment.py` + focused regressions `tests/unit/test_readmodels_release_evidence.py` and `tests/unit/test_traceability_consistency.py` passed; fulfillment remains `100.0%` (`Done=16/16`) | Prevents project-lead steering confusion caused by stale contradictory narrative and keeps governance document causally aligned with current repository evidence |
 | P1 validation interpretation extension: replay-attention shareable filter-link hash state (card workflow) | Make card-based replay-attention slices reproducible/shareable by persisting filter state to URL hash and providing one-click copy-link handoff in validation view | Done | Updated `src/siasa/gui/local_app.py`: added `replay-attention-copy-link` + `replay-attention-link-status`; introduced `getReplayAttentionState`, `serializeReplayAttentionState`, `persistReplayAttentionStateToHash`, `applyReplayAttentionStateFromHash`, and `copyReplayAttentionFilterLink`; hash now stores deterministic `ra_level`, `ra_owner`, `ra_reason`, `ra_verdict`, `ra_tier`, `ra_text`, restores on page load, and clears when returning to default; updated `tests/unit/test_local_gui.py` assertions for new IDs/functions/hash keys; validation evidence: targeted `tests/unit/test_local_gui.py` (`17 passed`), focused regressions `tests/unit/test_run_artifacts.py` (`19 passed`) + `tests/unit/test_readmodels_stakeholder_e2e_ui_smoke.py` (`1 passed`); fulfillment probe remains `100.0%` (`Done=16/16`) | Restores deterministic async handoff of exact replay-attention triage slices in the current card-based UX without manual filter reconstruction |
 | P1 validation interpretation extension: replay-attention verdict/tier scoping + visible verdict mix | Further sharpen card-based replay-attention triage by adding deterministic verdict/evidence-tier filters and a live verdict composition signal for the currently visible slice | Done | Updated `src/siasa/gui/local_app.py`: validation controls now include `replay-attention-verdict-filter` + `replay-attention-tier-filter`; JS filter chain extended (`applyReplayAttentionFilters`) with `reviewVerdict`/`replayTier` predicates, active-state now tracks verdict+tier, reset flow clears both controls, and visible-slice verdict composition is rendered in `replay-attention-visible-verdict-breakdown` via deterministic sorted `verdictCounts`; updated `tests/unit/test_local_gui.py` with assertions for new IDs and hooks; validation evidence: targeted `tests/unit/test_local_gui.py` (`17 passed`), focused regressions `tests/unit/test_run_artifacts.py` (`19 passed`) + `tests/unit/test_readmodels_stakeholder_e2e_ui_smoke.py` (`1 passed`); fulfillment probe remains `100.0%` (`Done=16/16`) | Improves triage precision and screenshot/handoff clarity by making visible mismatch/weak-evidence composition explicit and reproducible in-card workflow |
 | P1 validation interpretation extension: replay-attention interactive card filters + active-state summary | Restore high-actionability triage on replay-attention watchlists by reintroducing deterministic client-side filters (level/owner/reason/free-text), visible-count feedback, and explicit active-slice summary while keeping card-based UX | Done | Updated `src/siasa/gui/local_app.py`: replay-attention cards now carry stable filter datasets (`replay-attention-card`, `data-attention-*`, `data-card-search-text`) and validation view now renders controls (`replay-attention-level-filter`, `replay-attention-owner-filter`, `replay-attention-reason-filter`, `replay-attention-text-filter`, `replay-attention-reset`) with JS hooks `applyReplayAttentionFilters`, `renderReplayAttentionActiveState`, `resetReplayAttentionFilters`; updated `tests/unit/test_local_gui.py` assertions for new IDs/hooks; validation evidence: targeted `tests/unit/test_local_gui.py` (`17 passed`), focused regressions `tests/unit/test_run_artifacts.py` (`19 passed`) + `tests/unit/test_readmodels_stakeholder_e2e_ui_smoke.py` (`1 passed`); fulfillment probe remains `100.0%` (`Done=16/16`) | Re-establishes reproducible replay-attention slice scoping and handoff clarity (what is currently visible and why) without leaving analysts in manual card scanning mode |
@@ -238,49 +239,31 @@ That is a useful sign of progress, but it also means prioritization must focus o
 
 ---
 
-## 5. Re-Assessment: Governance-Done vs Substantive Fulfillment (2026-05-30)
+## 5. Re-Assessment: historical gap snapshot vs current closure state
 
-> This section was added during a full stakeholder gap re-assessment.
-> All 16 capabilities above are marked `Done` on the governance/structure level.
-> The re-assessment below evaluates **substantive stakeholder fulfillment** — what a stakeholder would actually experience.
+> This section is intentionally kept as a historical marker and was re-synchronized after AP-F01..AP-F27 closure.
+> The former 2026-05-30 "critical gaps" list is now obsolete for current repository truth.
 
-### 5a. Critical substantive gaps despite governance closure
+### 5a. Historical snapshot status
 
-| Gap area | Affected StR | Severity | Root cause | Impact on stakeholder experience |
-| --- | --- | --- | --- | --- |
-| Domain C (Physical Activity) feature extraction missing | StR-188..196, StR-245..254, StR-311..327 | HIGH | No `domain_c.py` exists | Multi-domain assessment runs on 3/5 domains only; holistic country Lageverständnis incomplete |
-| Domain E (Cyber/InfoOps) feature extraction missing | StR-188..196, StR-245..254, StR-311..327 | HIGH | No `domain_e.py` exists | Cyber/tech dimension completely absent from analysis |
-| C/E integration inert | StR-245..254 | HIGH | Gating code exists in `multi_domain_status.py` (line 23) but can never activate without domain_c/e features | C/E always filtered out; GUI cannot show active/inactive domain indicators truthfully |
-| No persistent `latest` runtime artifacts | StR-135..147 | HIGH | `build/run_artifacts/latest/` is empty | No current situational picture available; all probes were temporary |
-| No operations/automation (47 StR) | StR-474..520 | HIGH | No scheduler, no database, no monitoring | System cannot run unattended; fully manual |
-| Evidence fusion / cross-domain contrasting missing | StR-045..050 | MEDIUM | No implementation | Multi-domain status is simple aggregation only |
-| Probabilistic state modeling missing | StR-057..061 | MEDIUM | Only threshold-based D0-D5 | No uncertainty quantification, no transition probabilities |
-| Information epidemiology only groundwork | StR-040..044 | MEDIUM | Only first-observed coupling candidates | No spread-path modeling or amplification detection |
-| Source coverage limited (4 of many specified) | StR-205..225 | MEDIUM | Only World Bank, GDELT Doc/Events, GDACS | Many stakeholder-specified sources not integrated |
-| No database / historical data accumulation | StR-148..161 | MEDIUM | File-based only | No time-series queries, no historical trend analysis |
+The previously listed critical gaps (missing Domain C/E, no persistent latest cycle, no scheduler/monitoring,
+missing fusion/probabilistic/epidemiology modules, and no historical persistence) are now closed by completed
+work packages AP-F01..AP-F27 and corresponding evidence rows in section 3.
 
-### 5b. Updated steering recommendation (2026-05-30)
+Operational note:
+- Keep this section concise and non-contradictory with section 2/3.
+- New substantive gaps should be recorded only when backed by current repo/runtime evidence.
 
-Full gap analysis: `docs/plans/siasa-stakeholder-gap-sweep-and-development-sequence.md`
+### 5b. Current strategic next-step framing
 
-**Recommended next serial development sequence:**
+With AP-F01..AP-F27 completed and capability matrix fulfillment at 100% on the current weighted model,
+the next serial packages should be selected from one of these expansion tracks:
 
-| Priority | Work Package | Scope | Complexity | Blocks |
-| --- | --- | --- | --- | --- |
-| 1 | AP-F01: Domain C Feature Extraction | `domain_c.py` using GDACS data | M | AP-N03 | DONE (d51af56) |
-| 2 | AP-F02: Domain E Feature Extraction | `domain_e.py` using GDELT Doc/Events (cyber/tech themes) | M | AP-N03 | DONE (d51af56) |
-| 3 | AP-F03: C/E Multi-Domain Integration | Wire C/E into orchestrator + GUI domain indicators | M | AP-N04 | DONE (57b9ccb) |
-| 4 | AP-F04: Baseline Extension C/E | Already domain-agnostic, no change needed | S | — | DONE |
-| 5 | AP-N05: Lightweight Data Persistence | SQLite for run history + time-series queries | L | AP-N06 | Open |
-| 6 | AP-N06: Automated Daily Run Scheduler | Scheduled runs + failure alerting | L | — | Open |
-| 7 | AP-N07: Additional Source Adapters | ACLED or alternative security/social sources | M | — | Open |
-| 8+ | AP-N09..N14: GUI Interactivity + Advanced Analytics | Interactive map, charts, fusion, probabilistic models | L | AP-N05 | Open |
+1) Runtime/source breadth expansion (new countries/sources with governed readiness evidence)
+2) Validation realism depth (broader non-perfect historical replay portfolios)
+3) Release/demo operability hardening (operator drill/action closure loops)
+4) Architecture uplift beyond static/local GUI baseline (if explicitly prioritized)
 
-**Immediate next step: AP-F05 (Persistent Latest Run Cycle) — validates 5-domain pipeline end-to-end**
-
-Rationale:
-- Closes the single largest content gap (2/5 domains missing)
-- High feasibility — GDACS data already available, feature pattern well-established
-- Unblocks AP-N02, AP-N03, and all 5-domain capability
-- Directly addresses ~50 stakeholder requirements
-- No external dependencies needed
+Decision rule for next package:
+- Prefer the track with highest stakeholder-value delta per implementation risk,
+  while preserving strict serial package closure (implement + tests + docs + commit + push).
