@@ -71,3 +71,40 @@ def test_verify_latest_bundle_rejects_when_domain_e_absent_in_profiles(tmp_path:
 
     with pytest.raises(ValueError, match="no country profile with Domain E state"):
         verify_latest_bundle(artifacts_dir)
+
+
+def test_verify_latest_bundle_rejects_partial_success_by_default(tmp_path: Path) -> None:
+    artifacts_dir = _build_minimal_latest_bundle(tmp_path)
+    _write_json(
+        artifacts_dir / "readmodels/system_status.json",
+        {
+            "run_id": "RUN-LIVE-001",
+            "run_status": "partial_success",
+            "failed_sources": ["SRC-GDELT-DOC"],
+        },
+    )
+
+    with pytest.raises(ValueError, match="not in allowed statuses"):
+        verify_latest_bundle(artifacts_dir)
+
+
+def test_verify_latest_bundle_accepts_partial_success_and_failed_sources_when_enabled(tmp_path: Path) -> None:
+    artifacts_dir = _build_minimal_latest_bundle(tmp_path)
+    _write_json(
+        artifacts_dir / "readmodels/system_status.json",
+        {
+            "run_id": "RUN-LIVE-001",
+            "run_status": "partial_success",
+            "failed_sources": ["SRC-GDELT-DOC"],
+        },
+    )
+
+    summary = verify_latest_bundle(
+        artifacts_dir,
+        allow_partial_success=True,
+        allow_failed_sources=True,
+    )
+
+    assert summary["status"] == "ok"
+    assert summary["run_status"] == "partial_success"
+    assert summary["failed_sources"] == ["SRC-GDELT-DOC"]

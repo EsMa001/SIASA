@@ -19,16 +19,22 @@ def verify_latest_bundle(
     artifacts_dir: Path,
     *,
     required_domains: tuple[str, ...] = ("A", "B", "D", "E"),
+    allow_partial_success: bool = False,
+    allow_failed_sources: bool = False,
 ) -> dict[str, Any]:
     missing_paths = [relative for relative in REQUIRED_LATEST_ARTIFACTS if not (artifacts_dir / relative).exists()]
     if missing_paths:
         raise ValueError(f"latest bundle missing required artifacts: {', '.join(missing_paths)}")
 
     system_status = _read_json(artifacts_dir / "readmodels/system_status.json")
-    if system_status.get("run_status") != "success":
-        raise ValueError(f"latest bundle run_status is not success: {system_status.get('run_status')}")
+    allowed_statuses = {"success", "partial_success"} if allow_partial_success else {"success"}
+    run_status = str(system_status.get("run_status"))
+    if run_status not in allowed_statuses:
+        raise ValueError(
+            f"latest bundle run_status '{run_status}' not in allowed statuses: {sorted(allowed_statuses)}"
+        )
     failed_sources = list(system_status.get("failed_sources", []))
-    if failed_sources:
+    if failed_sources and not allow_failed_sources:
         raise ValueError(f"latest bundle has failed_sources: {failed_sources}")
 
     world_map = _read_json(artifacts_dir / "readmodels/world_map.json")
@@ -58,6 +64,8 @@ def verify_latest_bundle(
     return {
         "artifacts_dir": str(artifacts_dir),
         "run_id": system_status.get("run_id"),
+        "run_status": run_status,
+        "failed_sources": failed_sources,
         "country_profile_count": len(profile_paths),
         "active_domains": list(active_domains),
         "required_domains": list(required_domains),

@@ -82,7 +82,7 @@ class WorldBankIndicatorsAdapter(SourceAdapter):
                 f"indicators={len(self.indicators)} records={len(records)}"
             )
             return FetchResult(records=records, diagnostics=diagnostics, is_success=True)
-        except (RuntimeError, ValueError, KeyError, TypeError, URLError) as exc:
+        except Exception as exc:  # noqa: BLE001 - adapter must degrade gracefully on any provider/network failure
             return FetchResult(records=[], diagnostics=f"world_bank_fetch_failed: {exc}", is_success=False)
 
     def _fetch_with_retry(self, url: str) -> object:

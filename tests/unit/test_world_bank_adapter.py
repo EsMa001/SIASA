@@ -210,6 +210,15 @@ def test_world_bank_adapter_returns_failed_fetch_result_when_provider_call_fails
     assert "provider down" in result.diagnostics
 
 
+def test_world_bank_adapter_returns_failed_fetch_result_on_timeout_error() -> None:
+    adapter = WorldBankIndicatorsAdapter(country_ids=("UKR",), fetch_json=StubFetcher({}, error=TimeoutError("read timed out")))
+
+    result = adapter.fetch()
+
+    assert result.records == []
+    assert result.is_success is False
+    assert "read timed out" in result.diagnostics
+
 
 def test_world_bank_adapter_honors_numeric_retry_after_for_rate_limit_backoff() -> None:
     sleep_calls: list[float] = []
