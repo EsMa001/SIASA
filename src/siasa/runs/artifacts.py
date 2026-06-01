@@ -81,6 +81,10 @@ def write_run_artifacts(
     fusion_results: dict[str, object] | None = None,
     bayesian_estimates: dict[str, dict[str, object]] | None = None,
     uncertainty_budgets: dict[str, object] | None = None,
+    dependency_graph_result: object | None = None,
+    provenance_chain_result: object | None = None,
+    spread_paths_result: list[object] | None = None,
+    amplification_result: list[object] | None = None,
 ) -> RunArtifactBundle:
     _reset_artifact_output_dir(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -548,6 +552,10 @@ def write_run_artifacts(
         fusion_results=fusion_results,
         bayesian_estimates=bayesian_estimates,
         uncertainty_budgets=uncertainty_budgets,
+        dependency_graph_result=dependency_graph_result,
+        provenance_chain_result=provenance_chain_result,
+        spread_paths_result=spread_paths_result,
+        amplification_result=amplification_result,
     )
 
     return RunArtifactBundle(
@@ -601,6 +609,10 @@ def _write_analytics_artifacts(
     fusion_results: dict[str, object] | None = None,
     bayesian_estimates: dict[str, dict[str, object]] | None = None,
     uncertainty_budgets: dict[str, object] | None = None,
+    dependency_graph_result: object | None = None,
+    provenance_chain_result: object | None = None,
+    spread_paths_result: list[object] | None = None,
+    amplification_result: list[object] | None = None,
 ) -> None:
     """Write Phase 4-6 analytical results as JSON files under analytics/."""
     analytics_dir = output_dir / "analytics"
@@ -640,6 +652,27 @@ def _write_analytics_artifacts(
     uncertainty_data = {k: _safe_asdict(v) for k, v in (uncertainty_budgets or {}).items()}
     (analytics_dir / "uncertainty_budgets.json").write_text(
         json.dumps(uncertainty_data, indent=2, sort_keys=True)
+    )
+
+    # Dependency graph
+    dep_data = _safe_asdict(dependency_graph_result) if dependency_graph_result is not None else {}
+    (analytics_dir / "dependency_graph.json").write_text(
+        json.dumps(dep_data, indent=2, sort_keys=True)
+    )
+
+    # Provenance chain
+    prov_data = _safe_asdict(provenance_chain_result) if provenance_chain_result is not None else {}
+    (analytics_dir / "provenance_chain.json").write_text(
+        json.dumps(prov_data, indent=2, sort_keys=True)
+    )
+
+    # Information epidemiology
+    epi_data = {
+        "spread_paths": [_safe_asdict(p) for p in (spread_paths_result or [])],
+        "amplification_events": [_safe_asdict(a) for a in (amplification_result or [])],
+    }
+    (analytics_dir / "info_epidemiology.json").write_text(
+        json.dumps(epi_data, indent=2, sort_keys=True)
     )
 
 

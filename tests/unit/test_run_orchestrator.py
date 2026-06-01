@@ -666,3 +666,19 @@ def test_daily_run_orchestrator_populates_analytical_module_results() -> None:
 
     # rule evaluation results: list (may be empty if no rules matched or no YAML)
     assert isinstance(result.rule_evaluation_results, list)
+
+    # dependency graph: populated since features have provenance_source_ids with 2+ sources
+    # (or None if all features have only 1 source — graceful)
+    assert hasattr(result, "dependency_graph_result")
+
+    # provenance chain: built from lineage records
+    assert hasattr(result, "provenance_chain_result")
+    if result.provenance_chain_result is not None:
+        chain = result.provenance_chain_result
+        assert hasattr(chain, "root_sources")
+        assert hasattr(chain, "depth")
+        assert chain.depth >= 0
+
+    # info epidemiology
+    assert isinstance(result.spread_paths_result, list)
+    assert isinstance(result.amplification_result, list)

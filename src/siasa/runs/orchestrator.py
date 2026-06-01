@@ -74,6 +74,10 @@ class DailyRunResult:
     fusion_results: dict[str, Any] = field(default_factory=dict)
     bayesian_estimates: dict[str, dict[str, Any]] = field(default_factory=dict)
     uncertainty_budgets: dict[str, Any] = field(default_factory=dict)
+    dependency_graph_result: Any = None
+    provenance_chain_result: Any = None
+    spread_paths_result: list[Any] = field(default_factory=list)
+    amplification_result: list[Any] = field(default_factory=list)
 
 
 
@@ -318,6 +322,66 @@ class DailyRunOrchestrator:
         except Exception:
             logger.exception("Uncertainty propagation failed, continuing with empty results")
 
+        # (e) Dependency graph — source co-occurrence across countries/domains
+        dependency_graph_result: Any = None
+        try:
+            from siasa.analysis.dependency_graph import DependencyEdge, build_dependency_graph
+            dep_edges: list[Any] = []
+            # Build edges from features: sources that both contribute to the same country/domain
+            # are considered dependent (implicit co-occurrence coupling)
+            source_pairs_seen: set[tuple[str, str]] = set()
+            for feat in features:
+                src_ids = list(feat.provenance_source_ids)
+                for i in range(len(src_ids)):
+                    for j in range(i + 1, len(src_ids)):
+                        pair = (src_ids[i], src_ids[j])
+                        if pair not in source_pairs_seen:
+                            source_pairs_seen.add(pair)
+                            dep_edges.append(DependencyEdge(
+                                source_from=src_ids[i],
+                                source_to=src_ids[j],
+                                weight=1.0,
+                            ))
+            if dep_edges:
+                dependency_graph_result = build_dependency_graph(dep_edges)
+        except ImportError:
+            logger.debug("Dependency graph module not available, skipping")
+        except Exception:
+            logger.exception("Dependency graph failed, continuing with empty result")
+
+        # (f) Provenance graph — build from lineage records after they are computed
+        # NOTE: lineage_records are computed later in the pipeline; we store a builder
+        # and call it after lineage is built. Placeholder here — wired after lineage below.
+        provenance_chain_result: Any = None
+
+        # (g) Information epidemiology — signal spread across sources from normalized records
+        spread_paths_result: list[Any] = []
+        amplification_result: list[Any] = []
+        try:
+            from siasa.analysis.info_epidemiology import (
+                SpreadObservation,
+                detect_spread_paths,
+                detect_amplification,
+            )
+            observations: list[Any] = []
+            for rec in normalized_records:
+                # Use freshness_hours as proxy for observed_at_hours (relative age)
+                freshness = rec.quality_context.get("freshness_hours")
+                if isinstance(freshness, (int, float)):
+                    observations.append(SpreadObservation(
+                        source_id=rec.provenance_source_id,
+                        signal_key=rec.signal_key,
+                        observed_at_hours=float(freshness),
+                        value=float(rec.value) if rec.value is not None else 0.0,
+                    ))
+            if len(observations) >= 2:
+                spread_paths_result = detect_spread_paths(observations)
+                amplification_result = detect_amplification(observations)
+        except ImportError:
+            logger.debug("Info epidemiology module not available, skipping")
+        except Exception:
+            logger.exception("Info epidemiology failed, continuing with empty results")
+
         snapshot_rule_versions = dict(self.rule_versions)
         for normalized_record in normalized_records:
             mapping_version = normalized_record.quality_context.get("mapping_version")
@@ -355,6 +419,35 @@ class DailyRunOrchestrator:
             report=daily_report,
             country_reports=country_reports,
         )
+
+        # (f) Provenance graph — built from lineage records now available
+        try:
+            from siasa.analysis.provenance_graph import ProvenanceNode, ProvenanceEdge, build_provenance_chain
+            prov_nodes: list[Any] = []
+            prov_edges: list[Any] = []
+            for lr in lineage_records:
+                prov_nodes.append(ProvenanceNode(node_id=lr.source_id, stage="source", run_id=run_state.run_id))
+                prov_nodes.append(ProvenanceNode(node_id=lr.normalized_id, stage="normalized", run_id=run_state.run_id))
+                prov_nodes.append(ProvenanceNode(node_id=lr.feature_id, stage="feature", run_id=run_state.run_id))
+                prov_nodes.append(ProvenanceNode(node_id=lr.domain_status_id, stage="domain_score", run_id=run_state.run_id))
+                prov_nodes.append(ProvenanceNode(node_id=lr.multi_domain_status_id, stage="multi_domain", run_id=run_state.run_id))
+                prov_edges.append(ProvenanceEdge(from_node=lr.source_id, to_node=lr.normalized_id, transform="fetch"))
+                prov_edges.append(ProvenanceEdge(from_node=lr.normalized_id, to_node=lr.feature_id, transform="extract"))
+                prov_edges.append(ProvenanceEdge(from_node=lr.feature_id, to_node=lr.domain_status_id, transform="score"))
+                prov_edges.append(ProvenanceEdge(from_node=lr.domain_status_id, to_node=lr.multi_domain_status_id, transform="fuse"))
+            # Deduplicate nodes by node_id
+            seen_node_ids: set[str] = set()
+            unique_prov_nodes = []
+            for n in prov_nodes:
+                if n.node_id not in seen_node_ids:
+                    seen_node_ids.add(n.node_id)
+                    unique_prov_nodes.append(n)
+            if unique_prov_nodes:
+                provenance_chain_result = build_provenance_chain(unique_prov_nodes, prov_edges)
+        except ImportError:
+            logger.debug("Provenance graph module not available, skipping")
+        except Exception:
+            logger.exception("Provenance graph failed, continuing with empty result")
         artifact_bundle = None
         validation_view_model = None
         validation_artifact_reason = "not_configured"
@@ -406,6 +499,10 @@ class DailyRunOrchestrator:
                 fusion_results=fusion_results,
                 bayesian_estimates=bayesian_estimates,
                 uncertainty_budgets=uncertainty_budgets,
+                dependency_graph_result=dependency_graph_result,
+                provenance_chain_result=provenance_chain_result,
+                spread_paths_result=spread_paths_result,
+                amplification_result=amplification_result,
             )
 
         return DailyRunResult(
@@ -428,6 +525,10 @@ class DailyRunOrchestrator:
             fusion_results=fusion_results,
             bayesian_estimates=bayesian_estimates,
             uncertainty_budgets=uncertainty_budgets,
+            dependency_graph_result=dependency_graph_result,
+            provenance_chain_result=provenance_chain_result,
+            spread_paths_result=spread_paths_result,
+            amplification_result=amplification_result,
         )
 
     def _validate_active_sources(self, run_id: str) -> FailureArtifact | None:
