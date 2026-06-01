@@ -341,7 +341,7 @@ def _render_line_chart(series: list[Any], *, label_key: str, chart_label: str) -
         x, y = to_xy(i, val)
         coords.append(f"{x:.1f},{y:.1f}")
         circles.append(
-            f"<circle cx='{x:.1f}' cy='{y:.1f}' r='4' fill='#0b1326' stroke='#4edea3' stroke-width='1.5'>"
+            f"<circle cx='{x:.1f}' cy='{y:.1f}' r='4' fill='#0b1326' stroke='#4edea3' stroke-width='1.5' data-idx='{i}'>"
             f"<title>{html.escape(lbl)}: {val:.2f}</title></circle>"
         )
         # x-axis label (every point, rotated if many)
@@ -384,6 +384,69 @@ def _render_line_chart(series: list[Any], *, label_key: str, chart_label: str) -
         + ''.join(x_labels)
         + "</svg></figure>"
     )
+
+
+def _render_enhanced_trend_controls_js() -> str:
+    """Return client-side JS for enhanced trend chart interactions.
+
+    Adds per-chart zoom/pan via wheel+drag, time-range selection buttons,
+    and multi-series toggle controls. Wired into trend page charts.
+    """
+    return """\
+<script>
+(function(){
+  // Enhanced trend chart zoom/pan
+  document.querySelectorAll('.trend-chart-block svg').forEach(function(svg){
+    var scale=1, panX=0, panY=0, dragging=false, dsx=0, dsy=0, psx=0, psy=0;
+    function apply(){ svg.style.transform='translate('+panX+'px,'+panY+'px) scale('+scale+')'; svg.style.transformOrigin='0 0'; }
+    svg.parentElement.style.overflow='hidden';
+    svg.style.cursor='grab';
+    svg.addEventListener('wheel',function(e){
+      e.preventDefault();
+      var r=svg.getBoundingClientRect();
+      var mx=e.clientX-r.left, my=e.clientY-r.top;
+      var os=scale; scale*=e.deltaY<0?1.15:0.87; scale=Math.max(0.5,Math.min(scale,6));
+      panX=mx-(mx-panX)*(scale/os); panY=my-(my-panY)*(scale/os); apply();
+    },{passive:false});
+    svg.addEventListener('mousedown',function(e){
+      if(e.button!==0)return; dragging=true; dsx=e.clientX; dsy=e.clientY; psx=panX; psy=panY; svg.style.cursor='grabbing';
+    });
+    window.addEventListener('mousemove',function(e){ if(!dragging)return; panX=psx+(e.clientX-dsx); panY=psy+(e.clientY-dsy); apply(); });
+    window.addEventListener('mouseup',function(){ dragging=false; if(svg.style.cursor==='grabbing') svg.style.cursor='grab'; });
+  });
+  // Time-range selection
+  document.querySelectorAll('.trend-range-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var parent=btn.closest('.trend-chart-block');
+      if(!parent)return;
+      parent.querySelectorAll('.trend-range-btn').forEach(function(b){
+        b.style.color=b===btn?'#4edea3':'#6b7d99';
+        b.style.borderColor=b===btn?'#4edea3':'#263050';
+      });
+      var range=btn.dataset.range;
+      var dataPoints=parent.querySelectorAll('circle[data-idx]');
+      var total=dataPoints.length;
+      var cutoff=range==='6m'?Math.max(0,total-6):range==='1y'?Math.max(0,total-12):0;
+      dataPoints.forEach(function(c){
+        var idx=parseInt(c.dataset.idx||'0');
+        c.style.opacity=idx>=cutoff?'1':'0.15';
+      });
+    });
+  });
+  // Multi-series toggle
+  document.querySelectorAll('.trend-series-toggle').forEach(function(chk){
+    chk.addEventListener('change',function(){
+      var parent=chk.closest('.trend-chart-block');
+      if(!parent)return;
+      var series=chk.dataset.series;
+      var visible=chk.checked;
+      parent.querySelectorAll('[data-series=\"'+series+'\"]').forEach(function(el){
+        el.style.display=visible?'':'none';
+      });
+    });
+  });
+})();
+</script>"""
 
 
 
@@ -2854,7 +2917,13 @@ def _render_trends(country_profile_read_models: dict[str, dict[str, Any]], *, na
         rows.append(
             f"<tr class='trend-row' data-country-id='{html.escape(country_id)}' data-trend-labels='{html.escape(labels)}' data-event-ids='{html.escape(','.join(event_ids))}'>"
             f"<td>{html.escape(country_id)}</td>"
-            f"<td><div class='trend-chart-block'><h4>Trend Chart</h4>{_render_line_chart(yearly, label_key='label', chart_label=f'{country_id} yearly trend')}{_render_historical_comparison_summary(yearly, label_key='label')}</div><div class='trend-event-overlay' style='display:none'><h4>Event Overlay Summary</h4><ul>{event_overlay}</ul></div></td>"
+            f"<td><div class='trend-chart-block'><h4>Trend Chart</h4>"
+            f"<div class='trend-range-controls' style='display:flex;gap:4px;margin-bottom:4px;'>"
+            f"<button class='trend-range-btn' data-range='6m' style='background:#1a2540;color:#6b7d99;border:1px solid #263050;padding:2px 8px;border-radius:2px;cursor:pointer;font-size:10px;font-family:Space Grotesk,monospace;'>6M</button>"
+            f"<button class='trend-range-btn' data-range='1y' style='background:#1a2540;color:#6b7d99;border:1px solid #263050;padding:2px 8px;border-radius:2px;cursor:pointer;font-size:10px;font-family:Space Grotesk,monospace;'>1Y</button>"
+            f"<button class='trend-range-btn' data-range='all' style='background:#1a2540;color:#4edea3;border:1px solid #4edea3;padding:2px 8px;border-radius:2px;cursor:pointer;font-size:10px;font-family:Space Grotesk,monospace;'>All</button>"
+            f"</div>"
+            f"{_render_line_chart(yearly, label_key='label', chart_label=f'{country_id} yearly trend')}{_render_historical_comparison_summary(yearly, label_key='label')}</div><div class='trend-event-overlay' style='display:none'><h4>Event Overlay Summary</h4><ul>{event_overlay}</ul></div></td>"
             f"<td>{html.escape(str(profile.get('multi_domain_status', 'n/a')))}</td>"
             "</tr>"
         )
@@ -2900,6 +2969,7 @@ def _render_trends(country_profile_read_models: dict[str, dict[str, Any]], *, na
         "document.getElementById('trend-view-mode').addEventListener('change', applyTrendViewMode);"
         "applyTrendFilters();"
         "</script>"
+        + _render_enhanced_trend_controls_js()
     )
     return _page("Yearly Trend Page", body, nav_prefix=nav_prefix, available_pages=available_pages)
 

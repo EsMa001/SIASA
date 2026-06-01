@@ -857,6 +857,13 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Current vs First Label" in trends_html
     assert "2026-01" in trends_html
     assert "<svg" in trends_html
+    assert "trend-range-btn" in trends_html
+    assert "data-range='6m'" in trends_html
+    assert "data-range='1y'" in trends_html
+    assert "data-range='all'" in trends_html
+    assert "trend-range-controls" in trends_html
+    assert "data-idx=" in trends_html
+    assert "_render_enhanced_trend_controls_js" or "Enhanced trend chart zoom" in trends_html
 
     events_html = (pages.output_dir / "events.html").read_text()
     assert "Current Events Page" in events_html
