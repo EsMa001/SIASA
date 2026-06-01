@@ -73,6 +73,45 @@ def test_live_probe_evidence_digest_captures_policy_profile_context(tmp_path: Pa
 
     assert digest["ci_context"]["live_probe_policy_file"] == "vmodel/project/live_probe_policy_profiles.yaml"
     assert digest["ci_context"]["live_probe_policy_profile"] == "standard"
+    assert digest["ci_context"]["live_probe_policy_resolved"] == {
+        "min_combined_ce_ratio": 0.5,
+        "allowed_verdicts": ["green", "amber"],
+        "max_failed_sources": 3,
+    }
+    assert digest["ci_context"]["live_probe_policy_resolution_error"] is None
+
+
+def test_live_probe_evidence_digest_policy_resolution_error_is_exposed(tmp_path: Path) -> None:
+    artifacts_dir = tmp_path / "artifacts"
+    _write(
+        artifacts_dir / "readmodels" / "system_status.json",
+        {"run_id": "RUN-CI-ERR", "run_status": "success", "failed_sources": []},
+    )
+    _write(
+        artifacts_dir / "readmodels" / "world_map.json",
+        {"active_domains": ["A", "B", "C", "D", "E"], "countries": [{"country_id": "UKR", "status": "S1", "active_domains": ["A", "B", "C", "D", "E"]}]},
+    )
+
+    prev_file = os.environ.get("LIVE_PROBE_POLICY_FILE")
+    prev_profile = os.environ.get("LIVE_PROBE_POLICY_PROFILE")
+    os.environ["LIVE_PROBE_POLICY_FILE"] = "vmodel/project/live_probe_policy_profiles.yaml"
+    os.environ["LIVE_PROBE_POLICY_PROFILE"] = "not-a-profile"
+    try:
+        digest = build_live_probe_evidence_digest(artifacts_dir=artifacts_dir)
+    finally:
+        if prev_file is None:
+            os.environ.pop("LIVE_PROBE_POLICY_FILE", None)
+        else:
+            os.environ["LIVE_PROBE_POLICY_FILE"] = prev_file
+        if prev_profile is None:
+            os.environ.pop("LIVE_PROBE_POLICY_PROFILE", None)
+        else:
+            os.environ["LIVE_PROBE_POLICY_PROFILE"] = prev_profile
+
+    assert digest["ci_context"]["live_probe_policy_file"] == "vmodel/project/live_probe_policy_profiles.yaml"
+    assert digest["ci_context"]["live_probe_policy_profile"] == "not-a-profile"
+    assert digest["ci_context"]["live_probe_policy_resolved"] is None
+    assert "unknown live-probe policy profile" in str(digest["ci_context"]["live_probe_policy_resolution_error"])
 
 
 def test_live_probe_evidence_digest_marks_failed_sources_as_amber(tmp_path: Path) -> None:

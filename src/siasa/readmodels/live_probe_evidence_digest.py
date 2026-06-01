@@ -6,6 +6,8 @@ from pathlib import Path
 from typing import Any
 import json
 
+from siasa.readmodels.live_probe_policy_gate import load_live_probe_policy_profile
+
 
 def _load_json(path: Path) -> dict[str, Any]:
     if not path.exists():
@@ -57,6 +59,21 @@ def build_live_probe_evidence_digest(*, artifacts_dir: Path) -> dict[str, Any]:
     failed_sources = [str(item) for item in (system_status.get("failed_sources") or [])]
     run_status = str(system_status.get("run_status", "unknown"))
 
+    policy_file_raw = os.getenv("LIVE_PROBE_POLICY_FILE")
+    policy_profile = os.getenv("LIVE_PROBE_POLICY_PROFILE")
+    resolved_policy: dict[str, Any] | None = None
+    policy_resolution_error: str | None = None
+    if policy_file_raw and policy_profile:
+        try:
+            policy = load_live_probe_policy_profile(policy_file=Path(policy_file_raw), profile=policy_profile)
+            resolved_policy = {
+                "min_combined_ce_ratio": policy.min_combined_ce_ratio,
+                "allowed_verdicts": list(policy.allowed_verdicts),
+                "max_failed_sources": policy.max_failed_sources,
+            }
+        except Exception as exc:
+            policy_resolution_error = str(exc)
+
     governance_verdict = "green"
     governance_reasons: list[str] = []
     if run_status not in {"success", "partial_success"}:
@@ -83,8 +100,10 @@ def build_live_probe_evidence_digest(*, artifacts_dir: Path) -> dict[str, Any]:
             "github_ref": os.getenv("GITHUB_REF"),
             "github_workflow": os.getenv("GITHUB_WORKFLOW"),
             "github_actor": os.getenv("GITHUB_ACTOR"),
-            "live_probe_policy_file": os.getenv("LIVE_PROBE_POLICY_FILE"),
-            "live_probe_policy_profile": os.getenv("LIVE_PROBE_POLICY_PROFILE"),
+            "live_probe_policy_file": policy_file_raw,
+            "live_probe_policy_profile": policy_profile,
+            "live_probe_policy_resolved": resolved_policy,
+            "live_probe_policy_resolution_error": policy_resolution_error,
         },
         "run_context": {
             "run_id": str(system_status.get("run_id") or system_status.get("last_run") or "unknown"),

@@ -9,6 +9,14 @@ on:
         description: "Run governed live runtime probe job (network-dependent)"
         type: boolean
         default: false
+      live_probe_policy_profile:
+        description: "Governance profile for live-probe digest gate"
+        type: choice
+        options:
+          - strict
+          - standard
+          - degraded
+        default: standard
 
 jobs:
   hermetic-smoke:
@@ -94,7 +102,7 @@ jobs:
       - name: Build live-probe evidence digest readmodel
         env:
           LIVE_PROBE_POLICY_FILE: vmodel/project/live_probe_policy_profiles.yaml
-          LIVE_PROBE_POLICY_PROFILE: standard
+          LIVE_PROBE_POLICY_PROFILE: ${{ inputs.live_probe_policy_profile || 'standard' }}
         run: |
           PYTHONPATH=src python scripts/build_live_probe_evidence_digest.py \
             --artifacts-dir build/run_artifacts/latest
@@ -103,7 +111,7 @@ jobs:
           PYTHONPATH=src python scripts/ci_live_probe_digest_gate_check.py \
             --digest-path build/run_artifacts/latest/readmodels/live_probe_evidence_digest.json \
             --policy-file vmodel/project/live_probe_policy_profiles.yaml \
-            --policy-profile standard \
+            --policy-profile "${{ inputs.live_probe_policy_profile || 'standard' }}" \
             --output build/run_artifacts/latest/readmodels/live_probe_policy_gate_result.json
       - name: Upload live probe diagnostics
         if: always()
