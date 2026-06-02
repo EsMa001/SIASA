@@ -14,7 +14,7 @@ from urllib.parse import quote, quote_plus
 from siasa.catalog import load_country_set
 from siasa.readmodels.readiness import build_readiness_view_model
 from siasa.readmodels.release_demo_package import build_release_demo_package_view_model, render_release_demo_package_body
-from siasa.readmodels.release_evidence import build_release_readiness_index
+from siasa.readmodels.release_evidence import build_release_readiness_index, render_release_evidence_markdown
 from siasa.readmodels.release_gate import build_release_gate_view_model
 from siasa.readmodels.stakeholder_e2e_flow_coverage import build_stakeholder_e2e_flow_coverage_report
 from siasa.readmodels.stakeholder_e2e_ui_smoke import build_stakeholder_e2e_ui_smoke_report
@@ -45,6 +45,7 @@ def _page(title: str, body: str, *, nav_prefix: str = '', available_pages: set[s
         ('traceability.html', '🔗 Traceability'),
         ('annotations.html', '📝 Annotations'),
         ('release_package.html', '📦 Release Package'),
+        ('release_failure_drill.html', '🧪 Failure Drill'),
         ('reports.html', '📄 Reports'),
         ('runs.html', '⚙ System'),
         ('readiness.html', '🚦 Readiness'),
@@ -1726,6 +1727,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
     release_demo_package_view_path = readmodels_dir / 'release_demo_package.json'
     if release_demo_package_view_path.exists():
         release_demo_package_view_model = _load_json(release_demo_package_view_path)
+    release_failure_drill_report_view_model = None
     release_gate_view_model = None
     release_gate_view_path = readmodels_dir / 'release_gate.json'
     if release_gate_view_path.exists():
@@ -1776,6 +1778,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
     if release_failure_drill_report_path.exists():
         release_failure_drill_report = _load_json(release_failure_drill_report_path)
         if isinstance(release_failure_drill_report, dict):
+            release_failure_drill_report_view_model = release_failure_drill_report
             maybe_operator_digest = release_failure_drill_report.get('operator_failure_drill_digest')
             if isinstance(maybe_operator_digest, dict):
                 operator_failure_drill_digest_view_model = maybe_operator_digest
@@ -1836,6 +1839,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
         'annotations_view_model': annotations_view_model,
         'readiness_view_model': readiness_view_model,
         'release_demo_package_view_model': release_demo_package_view_model,
+        'release_failure_drill_report_view_model': release_failure_drill_report_view_model,
         'release_gate_view_model': release_gate_view_model,
         'stakeholder_functional_closure_view_model': stakeholder_functional_closure_view_model,
         'stakeholder_e2e_flow_coverage_view_model': stakeholder_e2e_flow_coverage_view_model,
@@ -5125,6 +5129,122 @@ def _render_analytics(
     return _page('Advanced Analytics', body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
+def _render_release_failure_drill_body(release_failure_drill_report_view_model: dict[str, Any] | None) -> str:
+    if not release_failure_drill_report_view_model:
+        return "<p style='color:#6b7d99;'>No release failure drill data available.</p>"
+
+    checks = release_failure_drill_report_view_model.get('checks', {}) or {}
+    scenarios = release_failure_drill_report_view_model.get('scenarios', {}) or {}
+    failure_localization = release_failure_drill_report_view_model.get('failure_localization', {}) or {}
+    operator_failure_drill_digest = release_failure_drill_report_view_model.get('operator_failure_drill_digest', {}) or {}
+    operator_failure_drill_trend_baseline = release_failure_drill_report_view_model.get('operator_failure_drill_trend_baseline', {}) or {}
+    operator_recurrence_aware_remediation_prioritization = release_failure_drill_report_view_model.get('operator_recurrence_aware_remediation_prioritization', {}) or {}
+    operator_failure_drill_delta_ledger = release_failure_drill_report_view_model.get('operator_failure_drill_delta_ledger', {}) or {}
+    operator_remediation_execution_loop = release_failure_drill_report_view_model.get('operator_remediation_execution_loop', {}) or {}
+    operator_stale_remediation_action_plan = release_failure_drill_report_view_model.get('operator_stale_remediation_action_plan', {}) or {}
+    operator_stale_remediation_closure_drill = release_failure_drill_report_view_model.get('operator_stale_remediation_closure_drill', {}) or {}
+
+    check_pass_count = sum(1 for value in checks.values() if bool(value))
+    check_total = len(checks)
+
+    scenario_rows = ''
+    for scenario_id, scenario_assessment in scenarios.items():
+        release_gate = scenario_assessment.get('release_gate', {}) if isinstance(scenario_assessment, dict) else {}
+        gate_verdict = str(release_gate.get('gate_verdict', 'n/a'))
+        blocker_count = len(release_gate.get('blockers', []) or [])
+        localization_count = len(failure_localization.get(scenario_id, []) or [])
+        scenario_rows += (
+            f"<tr>"
+            f"<td style='padding:6px 10px;font-weight:600;'>{html.escape(str(scenario_id))}</td>"
+            f"<td style='padding:6px 10px;'>{_badge(gate_verdict, '#4edea3' if gate_verdict == 'go' else '#f87171')}</td>"
+            f"<td style='padding:6px 10px;'>{blocker_count}</td>"
+            f"<td style='padding:6px 10px;'>{localization_count}</td>"
+            f"</tr>"
+        )
+
+    localization_rows = ''
+    for scenario_id, entries in failure_localization.items():
+        if not entries:
+            continue
+        gate_ids = ', '.join(str(entry.get('gate_id', 'unknown')) for entry in entries)
+        localization_rows += (
+            f"<tr>"
+            f"<td style='padding:6px 10px;font-weight:600;'>{html.escape(str(scenario_id))}</td>"
+            f"<td style='padding:6px 10px;'>{html.escape(gate_ids)}</td>"
+            f"</tr>"
+        )
+
+    digest_cluster_count = int(operator_failure_drill_digest.get('cluster_count', 0) or 0)
+    digest_top_gate = str(operator_failure_drill_digest.get('top_cluster_gate_id', 'n/a'))
+    trend_snapshot_count = int(operator_failure_drill_trend_baseline.get('snapshot_count', 0) or 0)
+    trend_focus = str(operator_failure_drill_trend_baseline.get('operator_focus', 'n/a'))
+    prioritization_count = int(operator_recurrence_aware_remediation_prioritization.get('priority_count', 0) or 0)
+    delta_snapshot_count = int(operator_failure_drill_delta_ledger.get('snapshot_count', 0) or 0)
+    delta_summary = html.escape(str(operator_failure_drill_delta_ledger.get('movement_summary', 'n/a')))
+    execution_action_count = int(operator_remediation_execution_loop.get('action_count', 0) or 0)
+    stale_action_count = int(operator_stale_remediation_action_plan.get('action_count', 0) or 0)
+    stale_breach_count = int(operator_stale_remediation_closure_drill.get('stale_remediation_gap_injected', {}).get('breach_count', 0) or 0)
+
+    release_evidence_markdown = html.escape(render_release_evidence_markdown(release_failure_drill_report_view_model))
+
+    def _mini_section(title: str, content: str, icon: str, *, section_id: str, role_min: str) -> str:
+        return (
+            f"<div id='{html.escape(section_id)}' class='analytics-section' data-role-min='{html.escape(role_min)}' "
+            f"style='margin:24px 0;padding:20px;background:#1a2540;border:1px solid #263050;border-radius:6px;'>"
+            f"<h3 style='margin:0 0 16px 0;color:#4edea3;font-family:Space Grotesk,monospace;font-size:14px;text-transform:uppercase;letter-spacing:.08em;'>"
+            f"{html.escape(icon)} {html.escape(title)}</h3>{content}</div>"
+        )
+
+    summary_html = (
+        f"<div style='display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;font-size:12px;'>"
+        f"<div><strong>drill_verdict</strong><br>{html.escape(str(release_failure_drill_report_view_model.get('drill_verdict', 'n/a')))}</div>"
+        f"<div><strong>checks_passed</strong><br>{check_pass_count}/{check_total}</div>"
+        f"<div><strong>scenarios</strong><br>{len(scenarios)}</div>"
+        f"<div><strong>digest_clusters</strong><br>{digest_cluster_count} (top: {html.escape(digest_top_gate)})</div>"
+        f"<div><strong>trend_snapshots</strong><br>{trend_snapshot_count} | focus: {html.escape(trend_focus)}</div>"
+        f"<div><strong>priorities</strong><br>{prioritization_count} | delta snapshots: {delta_snapshot_count}</div>"
+        f"<div><strong>execution actions</strong><br>{execution_action_count}</div>"
+        f"<div><strong>stale action plan</strong><br>{stale_action_count} | breaches: {stale_breach_count}</div>"
+        f"<div><strong>delta summary</strong><br>{delta_summary}</div>"
+        f"</div>"
+    )
+
+    scenarios_html = (
+        f"<table style='width:100%;border-collapse:collapse;font-size:12px;'>"
+        f"<thead><tr style='color:#6b7d99;border-bottom:1px solid #263050;'>"
+        f"<th style='padding:4px 10px;text-align:left;'>Scenario</th>"
+        f"<th style='padding:4px 10px;text-align:left;'>Gate verdict</th>"
+        f"<th style='padding:4px 10px;text-align:left;'>Blockers</th>"
+        f"<th style='padding:4px 10px;text-align:left;'>Localized failures</th></tr></thead>"
+        f"<tbody>{scenario_rows or '<tr><td colspan=4 style=\"color:#6b7d99;padding:8px 10px;\">No scenarios available</td></tr>'}</tbody></table>"
+    )
+
+    localization_html = (
+        f"<table style='width:100%;border-collapse:collapse;font-size:12px;'>"
+        f"<thead><tr style='color:#6b7d99;border-bottom:1px solid #263050;'>"
+        f"<th style='padding:4px 10px;text-align:left;'>Scenario</th>"
+        f"<th style='padding:4px 10px;text-align:left;'>Localized gate IDs</th></tr></thead>"
+        f"<tbody>{localization_rows or '<tr><td colspan=2 style=\"color:#6b7d99;padding:8px 10px;\">No localized failures available</td></tr>'}</tbody></table>"
+    )
+
+    markdown_html = (
+        "<pre style='white-space:pre-wrap;word-break:break-word;font-size:11px;line-height:1.5;"
+        "background:#10192e;border:1px solid #263050;border-radius:4px;padding:14px;color:#c7d2fe;'>"
+        f"{release_evidence_markdown}"
+        "</pre>"
+    )
+
+    return (
+        "<h2 style='color:#e2e8f0;margin:0 0 24px 0;font-family:Space Grotesk,monospace;'>Release / Failure Drill</h2>"
+        "<p style='color:#8899bb;font-size:13px;margin:0 0 24px 0;'>"
+        "Scenarioized release evidence, failure localization, and operator remediation outputs from the governed release-failure drill report.</p>"
+        + _mini_section('Drill Summary', summary_html, '🧪', section_id='failure-drill-summary', role_min='viewer')
+        + _mini_section('Scenario Matrix', scenarios_html, '🧩', section_id='failure-drill-scenarios', role_min='viewer')
+        + _mini_section('Failure Localization', localization_html, '🎯', section_id='failure-drill-localization', role_min='analyst')
+        + _mini_section('Evidence Pack Markdown', markdown_html, '📝', section_id='failure-drill-markdown', role_min='viewer')
+    )
+
+
 def build_local_mvp_site(
     *,
     output_dir: Path,
@@ -5140,6 +5260,7 @@ def build_local_mvp_site(
     validation_view_model: dict[str, Any] | None = None,
     readiness_view_model: dict[str, Any] | None = None,
     release_demo_package_view_model: dict[str, Any] | None = None,
+    release_failure_drill_report_view_model: dict[str, Any] | None = None,
     release_gate_view_model: dict[str, Any] | None = None,
     stakeholder_functional_closure_view_model: dict[str, Any] | None = None,
     stakeholder_e2e_flow_coverage_view_model: dict[str, Any] | None = None,
@@ -5199,6 +5320,8 @@ def build_local_mvp_site(
         available_pages.add('annotations.html')
     if analytics_view_model is not None:
         available_pages.add('analytics.html')
+    if release_failure_drill_report_view_model is not None:
+        available_pages.add('release_failure_drill.html')
 
     index_file = output_dir / 'index.html'
     index_file.write_text(
@@ -5399,6 +5522,24 @@ def build_local_mvp_site(
     release_demo_package_json_file = output_dir / 'release_demo_package.json'
     release_demo_package_json_file.write_text(json.dumps(release_demo_package_view_model, indent=2, sort_keys=True), encoding='utf-8')
     generated_files.append(release_demo_package_json_file)
+    if release_failure_drill_report_view_model is not None:
+        release_failure_drill_file = output_dir / 'release_failure_drill.html'
+        release_failure_drill_file.write_text(
+            _page(
+                'Release / Failure Drill',
+                _render_release_failure_drill_body(release_failure_drill_report_view_model),
+                nav_prefix='',
+                available_pages=available_pages,
+            ),
+            encoding='utf-8',
+        )
+        generated_files.append(release_failure_drill_file)
+        release_failure_drill_json_file = output_dir / 'release_failure_drill_report.json'
+        release_failure_drill_json_file.write_text(
+            json.dumps(release_failure_drill_report_view_model, indent=2, sort_keys=True),
+            encoding='utf-8',
+        )
+        generated_files.append(release_failure_drill_json_file)
     release_gate_json_file = output_dir / 'release_gate.json'
     release_gate_json_file.write_text(json.dumps(release_gate_view_model, indent=2, sort_keys=True), encoding='utf-8')
     generated_files.append(release_gate_json_file)

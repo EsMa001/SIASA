@@ -1744,6 +1744,7 @@ def test_load_site_payload_from_artifacts_falls_back_for_missing_readiness_suppo
 
 
 def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_when_available(tmp_path: Path) -> None:
+    repo_root = Path(__file__).resolve().parents[2]
     artifacts_dir = tmp_path / "artifacts-with-readiness"
     (artifacts_dir / "readmodels" / "country_profiles").mkdir(parents=True)
     (artifacts_dir / "readmodels" / "domain_details").mkdir(parents=True)
@@ -1825,6 +1826,9 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
                 "blockers": [],
             }
         )
+    )
+    (artifacts_dir / "readmodels" / "release_failure_drill_report.json").write_text(
+        json.dumps(build_release_failure_drill_report(repo_root=repo_root), indent=2, sort_keys=True)
     )
     (artifacts_dir / "readmodels" / "stakeholder_functional_closure.json").write_text(
         json.dumps(
@@ -2049,6 +2053,7 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
 
     assert payload["readiness_view_model"]["demo_checks"] == [{"label": "Persisted Demo Check", "ready": True}]
     assert payload["release_gate_view_model"]["gate_verdict"] == "go"
+    assert payload["release_failure_drill_report_view_model"]["operator_failure_drill_digest"]["cluster_count"] == 1
     assert payload["stakeholder_functional_closure_view_model"]["focus_gap_cluster"]["covered_count"] == 19
     assert payload["stakeholder_e2e_flow_coverage_view_model"]["summary"]["flow_count"] == 6
     assert payload["stakeholder_e2e_ui_smoke_view_model"]["flow_count"] == 6
@@ -2066,6 +2071,7 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
 
     pages = build_local_mvp_site(output_dir=tmp_path / "site-with-readiness", **payload)
     readiness_html = (pages.output_dir / "readiness.html").read_text()
+    failure_drill_html = (pages.output_dir / "release_failure_drill.html").read_text()
     readiness_json = json.loads((pages.output_dir / "readiness.json").read_text())
 
     assert "Prioritized items:" in readiness_html
@@ -2094,6 +2100,10 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert "AP-27 cluster status: <strong>healthy</strong>" in readiness_html
     assert "AP-27 covered gates: <strong>5</strong> | failed gates: 0" in readiness_html
     assert "No operability-cluster action required" in readiness_html
+    assert "Release / Failure Drill" in failure_drill_html
+    assert "Scenario Matrix" in failure_drill_html
+    assert "Evidence Pack Markdown" in failure_drill_html
+    assert "baseline" in failure_drill_html
     assert "upstream_flow_spec" in readiness_html
     assert "bundle_navigation_acceptance" in readiness_html
     assert "AP-17 cluster count: <strong>1</strong>" in readiness_html
