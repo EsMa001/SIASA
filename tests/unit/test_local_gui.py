@@ -1013,6 +1013,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Snapshot review pending source outage assessment." in annotations_html
     assert "UKR:A" in annotations_html
     assert "Create / Edit Annotation Workflow" in annotations_html
+    assert "Replay-attention Prefill Summary" in annotations_html
+    assert "replay-attention-prefill-summary" in annotations_html
     assert "annotation-editor-form" in annotations_html
     assert "annotation-scope-filter" in annotations_html
     assert "annotation-review-filter" in annotations_html
@@ -1022,6 +1024,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Draft History" in annotations_html
     assert "siasa_annotation_workflow_v1" in annotations_html
     assert "prefillAnnotationFromQuery" in annotations_html
+    assert "renderReplayAttentionPrefillSummary" in annotations_html
     assert "collectReplayAttentionPrefillContextFromQuery" in annotations_html
     assert "countryId: (params.get('country_id') || '').trim()" in annotations_html
     assert "caseId: (params.get('case_id') || '').trim()" in annotations_html

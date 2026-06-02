@@ -4532,6 +4532,41 @@ function currentEditorAnnotation(){
 }
 function generatedDraftId(){ return `ANN-DRAFT-${Date.now()}`; }
 function setWorkflowStatus(message){ document.getElementById('annotation-workflow-status').textContent = message; }
+function renderReplayAttentionPrefillSummary(context, validation){
+  const summaryElement = document.getElementById('replay-attention-prefill-summary');
+  if (!summaryElement) { return; }
+  const hasReplayContext = Boolean(context && (context.caseId || context.countryId || context.attentionReason || context.ownerHint || context.suggestedNextAction || context.attentionLevel || context.replayEvidenceTier || context.reviewVerdict));
+  if (!hasReplayContext) {
+    summaryElement.textContent = 'No replay-attention query parameters detected.';
+    return;
+  }
+  const lines = [
+    'Replay-attention prefill summary',
+    `Linked item: ${context.linkedItem || 'n/a'}`,
+    `Scope: ${context.scope || 'n/a'}`,
+    `Annotation type: ${context.annotationType || 'n/a'}`,
+    `Country: ${context.countryId || 'n/a'}`,
+    `Case: ${context.caseId || 'n/a'}`,
+    `Reason: ${context.attentionReason || 'n/a'}`,
+    `Owner hint: ${context.ownerHint || 'n/a'}`,
+    `Suggested next action: ${context.suggestedNextAction || 'n/a'}`,
+    `Attention level: ${context.attentionLevel || 'n/a'}`,
+    `Replay evidence tier: ${context.replayEvidenceTier || 'n/a'}`,
+    `Review verdict: ${context.reviewVerdict || 'n/a'}`,
+    `Replay evidence score: ${context.replayEvidenceScore || 'n/a'}`,
+    `Domain match ratio: ${context.domainMatchRatio || 'n/a'}`,
+    `Missing expected domains: ${context.missingExpectedDomains || 'n/a'}`,
+    `Unexpected observed domains: ${context.unexpectedObservedDomains || 'n/a'}`,
+  ];
+  if (validation && validation.hasReplayContext) {
+    if (validation.missing.length) {
+      lines.push(`Integrity check: missing ${validation.missing.join(', ')}`);
+    } else {
+      lines.push('Integrity check: complete');
+    }
+  }
+  summaryElement.textContent = lines.join('\n');
+}
 function loadAnnotationIntoEditor(annotationId){
   const all = Array.from(mergedAnnotationsById().values());
   const selected = all.find((item) => String(item.annotation_id) === String(annotationId));
@@ -4648,6 +4683,7 @@ function prefillAnnotationFromQuery(){
     document.getElementById('annotation-text-input').value = summary;
   }
   const replayContextValidation = validateReplayAttentionPrefillContext(context);
+  renderReplayAttentionPrefillSummary(context, replayContextValidation);
   if (replayContextValidation.hasReplayContext && replayContextValidation.missing.length) {
     setWorkflowStatus(`Replay-attention prefill missing fields: ${replayContextValidation.missing.join(', ')}.`);
   }
@@ -4892,6 +4928,8 @@ document.getElementById('annotation-modal').addEventListener('click', function(e
             "<h3>Create / Edit Annotation Workflow</h3>",
             "<p>This static GUI keeps analyst draft annotations in the browser for create/edit/filter/history workflow support. Export the draft JSON for governed persistence into repo-backed artifacts.</p>",
             "<div id='annotation-workflow-status'></div>",
+            "<h4>Replay-attention Prefill Summary</h4>",
+            "<pre id='replay-attention-prefill-summary' style='white-space:pre-wrap;background:#0d1117;border:1px solid rgba(78,222,163,.2);border-radius:4px;padding:10px;color:#c9d1d9;'>No replay-attention query parameters detected.</pre>",
             "<h4>Workflow Filters</h4>",
             "<label for='annotation-scope-filter'>Scope Filter</label> ",
             "<select id='annotation-scope-filter'><option value='all'>All scopes</option><option value='country'>country</option><option value='domain'>domain</option><option value='signal'>signal</option><option value='event'>event</option><option value='snapshot'>snapshot</option></select> ",
