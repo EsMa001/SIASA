@@ -167,6 +167,7 @@ Current Step-A closure status:
 - implementation hardening added broader-run GDELT DOC recovery budget (`max_retry_delay_seconds=180`, full-batch retry cooldown `120s`) plus broader-run request timeout (`90s`) so the 11-country `latest` path is operationally stable
 - ReliefWeb runtime breadth is now code-wired but provider-gated: governed live runtime activates `SRC-RELIEFWEB` automatically only when `RELIEFWEB_APPNAME` is configured, so Domain-C breadth can grow without breaking default runs in unregistered environments
 - UCDP runtime breadth is now also credential-gated: governed live runtime activates `SRC-UCDP-GED` only when `UCDP_API_TOKEN` is configured, which removes default false-failures in uncredentialed representative runs; representative probe `RUN-LIVE-REP-UCDP-GATE-001` reduced `failed_sources` to only `SRC-GDELT-DOC-E`
+- representative GDELT-doc stabilization is now operationally bounded: the Domain-E `SRC-GDELT-DOC-E` branch uses a shallower multi-country retry profile (`max_retries=1`, `max_retry_delay_seconds=20.0`) so representative probes now complete deterministically under renewed 429 pressure; closure evidence `RUN-LIVE-REP-DOC-E-STAB-003` finished within the foreground timeout with explicit `failed_sources=SRC-GDELT-DOC,SRC-GDELT-DOC-E` instead of reproducing the earlier no-output stall
 
 ### Step B: Analyst interpretation and actionability depth
 
