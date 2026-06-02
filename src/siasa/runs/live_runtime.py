@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 from time import sleep
 from typing import Callable
@@ -11,6 +12,7 @@ from siasa.adapters import (
     GDACSAdapter,
     GDELTDocAdapter,
     GDELTEventsAdapter,
+    ReliefWebAdapter,
     UCDPAdapter,
     UNHCRPopulationAdapter,
     WorldBankIndicatorsAdapter,
@@ -245,6 +247,29 @@ _UCDP_SUPPORTED_LIVE_COUNTRIES = (
     "SDN",
     "MMR",
 )
+_RELIEFWEB_SUPPORTED_LIVE_COUNTRIES = (
+    "UKR",
+    "RUS",
+    "CHN",
+    "TWN",
+    "ISR",
+    "IND",
+    "IRN",
+    "TUR",
+    "PAK",
+    "GEO",
+    "POL",
+    "USA",
+    "DEU",
+    "EST",
+    "FIN",
+    "SAU",
+    "QAT",
+    "EGY",
+    "NGA",
+    "SDN",
+    "MMR",
+)
 _MULTI_COUNTRY_GDELT_EVENTS_RECENT_EXPORT_COUNT = 8
 
 
@@ -460,6 +485,12 @@ def _build_normalization_mappings() -> list[NormalizationMappingVersion]:
         NormalizationMappingVersion(
             mapping_id="MAP-SRC-UNHCR-POP-v1",
             source_id="SRC-UNHCR-POP",
+            version="v1",
+            is_active=True,
+        ),
+        NormalizationMappingVersion(
+            mapping_id="MAP-SRC-RELIEFWEB-v1",
+            source_id="SRC-RELIEFWEB",
             version="v1",
             is_active=True,
         ),
@@ -703,6 +734,9 @@ def build_governed_live_orchestrator(
     supported_ucdp_country_ids = tuple(
         country_id for country_id in resolved_country_ids if country_id in _UCDP_SUPPORTED_LIVE_COUNTRIES
     )
+    supported_reliefweb_country_ids = tuple(
+        country_id for country_id in resolved_country_ids if country_id in _RELIEFWEB_SUPPORTED_LIVE_COUNTRIES
+    )
     country_expected_domains = {
         country_id: list(_GOVERNED_LIVE_DOMAINS_BY_COUNTRY.get(country_id, ["A", "B", "D"]))
         for country_id in resolved_country_ids
@@ -741,6 +775,12 @@ def build_governed_live_orchestrator(
             GDACSAdapter(country_ids=set(resolved_country_ids), source_id="SRC-GDACS-C", domain="C"),
             # Domain C: structured displacement signals
             UNHCRPopulationAdapter(country_ids=set(resolved_country_ids)),
+        ]
+    )
+    if supported_reliefweb_country_ids and _reliefweb_appname_is_configured():
+        adapters.append(ReliefWebAdapter(country_ids=set(supported_reliefweb_country_ids)))
+    adapters.extend(
+        [
             # Domain E: GDELT Doc data re-ingested filtered for cyber/tech/info-ops themes
             GDELTDocAdapter(
                 country_queries=country_queries,
@@ -855,8 +895,12 @@ def _default_pipeline_retry_budget(requested_country_ids: tuple[str, ...]) -> in
     return 1
 
 
+def _reliefweb_appname_is_configured() -> bool:
+    return bool(os.environ.get("RELIEFWEB_APPNAME", "").strip())
+
 
 def run_governed_live_pipeline(
+
     *,
     repo_root: Path,
     run_id: str,

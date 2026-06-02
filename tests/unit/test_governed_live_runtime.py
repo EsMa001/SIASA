@@ -724,6 +724,35 @@ def test_build_governed_live_orchestrator_supports_control_reference_complete_pi
 
 
 
+def test_build_governed_live_orchestrator_skips_reliefweb_without_appname(monkeypatch) -> None:
+    monkeypatch.delenv("RELIEFWEB_APPNAME", raising=False)
+
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        pilot_set="representative",
+    )
+
+    assert all(getattr(adapter, "source_id", None) != "SRC-RELIEFWEB" for adapter in orchestrator.adapters)
+
+
+
+def test_build_governed_live_orchestrator_includes_reliefweb_when_appname_configured(monkeypatch) -> None:
+    monkeypatch.setenv("RELIEFWEB_APPNAME", "siasa-approved")
+
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        pilot_set="representative",
+    )
+
+    reliefweb = next(
+        adapter for adapter in orchestrator.adapters if getattr(adapter, "source_id", None) == "SRC-RELIEFWEB"
+    )
+
+    assert reliefweb.domain == "C"
+    assert reliefweb.country_ids == {"UKR", "POL", "ISR", "TWN"}
+
+
+
 def test_run_governed_live_pipeline_passes_control_reference_pilot_set_without_explicit_country_ids() -> None:
     factory = SequenceOrchestratorFactory(
         [
