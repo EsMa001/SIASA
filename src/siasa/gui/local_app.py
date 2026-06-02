@@ -838,16 +838,36 @@ def _build_analyst_briefing_view_model(
     release_gate_view_model: dict[str, Any] | None = None,
     operator_release_summary_view_model: dict[str, Any] | None = None,
     operator_blocker_causality_view_model: dict[str, Any] | None = None,
+    operator_operability_cluster_view_model: dict[str, Any] | None = None,
+    operator_stale_remediation_action_plan_view_model: dict[str, Any] | None = None,
     system_status_read_model: dict[str, Any] | None = None,
     validation_view_model: dict[str, Any] | None = None,
+    traceability_view_model: dict[str, Any] | None = None,
+    repo_closure_view_model: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     items: list[dict[str, Any]] = []
     release_gate_view_model = release_gate_view_model or {}
     operator_release_summary_view_model = operator_release_summary_view_model or {}
     operator_blocker_causality_view_model = operator_blocker_causality_view_model or {}
+    operator_operability_cluster_view_model = operator_operability_cluster_view_model or {}
+    operator_stale_remediation_action_plan_view_model = operator_stale_remediation_action_plan_view_model or {}
     system_status_read_model = system_status_read_model or {}
     validation_view_model = validation_view_model or {}
+    traceability_view_model = traceability_view_model or {}
+    repo_closure_view_model = repo_closure_view_model or {}
     visibility = _country_coverage_visibility_rows(system_status_read_model)
+
+    def _append_item(*, category: str, title: str, why_it_matters: str, recommended_next_check: str, evidence_source: str, target_page: str) -> None:
+        items.append(
+            {
+                'category': category,
+                'title': title,
+                'why_it_matters': why_it_matters,
+                'recommended_next_check': recommended_next_check,
+                'evidence_source': evidence_source,
+                'target_page': target_page,
+            }
+        )
 
     primary_root_cause_gate_id = operator_blocker_causality_view_model.get('primary_root_cause_gate_id')
     release_verdict = str(readiness_view_model.get('release_verdict', 'unknown')).lower()
@@ -855,15 +875,13 @@ def _build_analyst_briefing_view_model(
     release_not_green = release_verdict not in {'ready', 'pass', 'ok', 'green'} or gate_verdict not in {'go', 'ready', 'pass', 'ok', 'green'}
     if release_not_green and (primary_root_cause_gate_id or int(operator_release_summary_view_model.get('failed_gate_count', 0) or 0) > 0):
         root_cause_text = str(primary_root_cause_gate_id or 'release_gate_go')
-        items.append(
-            {
-                'category': 'release_blocker',
-                'title': f'Release blocker: {root_cause_text}',
-                'why_it_matters': f"Release verdict is {readiness_view_model.get('release_verdict', 'unknown')} and gate verdict is {release_gate_view_model.get('gate_verdict', 'unknown')}.",
-                'recommended_next_check': str(operator_blocker_causality_view_model.get('operator_next_action') or operator_release_summary_view_model.get('operator_next_action') or 'Inspect release blockers.'),
-                'evidence_source': 'release_evidence_assessment.json',
-                'target_page': 'readiness.html',
-            }
+        _append_item(
+            category='release_blocker',
+            title=f'Release blocker: {root_cause_text}',
+            why_it_matters=f"Release verdict is {readiness_view_model.get('release_verdict', 'unknown')} and gate verdict is {release_gate_view_model.get('gate_verdict', 'unknown')}.",
+            recommended_next_check=str(operator_blocker_causality_view_model.get('operator_next_action') or operator_release_summary_view_model.get('operator_next_action') or 'Inspect release blockers.'),
+            evidence_source='release_evidence_assessment.json',
+            target_page='readiness.html',
         )
 
     country_gap_rows = [row for row in visibility.get('country_gap_rows', []) if isinstance(row, dict)]
@@ -871,48 +889,106 @@ def _build_analyst_briefing_view_model(
         top_gap = country_gap_rows[0]
         gap_country = str(top_gap.get('country_id', 'UNKNOWN'))
         missing_domains = [str(domain) for domain in top_gap.get('missing_domains', [])]
-        items.append(
-            {
-                'category': 'country_gap',
-                'title': f"Country gap: {gap_country} missing {', '.join(missing_domains) or 'unknown domains'}",
-                'why_it_matters': f"Country coverage is incomplete for {gap_country}.",
-                'recommended_next_check': 'Inspect country/domain gap details and source diagnostics in Coverage.',
-                'evidence_source': 'system_status.json country_coverage_visibility.country_gap_rows',
-                'target_page': 'coverage.html',
-            }
+        _append_item(
+            category='country_gap',
+            title=f"Country gap: {gap_country} missing {', '.join(missing_domains) or 'unknown domains'}",
+            why_it_matters=f"Country coverage is incomplete for {gap_country}.",
+            recommended_next_check='Inspect country/domain gap details and source diagnostics in Coverage.',
+            evidence_source='system_status.json country_coverage_visibility.country_gap_rows',
+            target_page='coverage.html',
         )
 
     historical_replay_summary = validation_view_model.get('historical_replay_summary', {})
     attention_cases = [item for item in historical_replay_summary.get('attention_cases', []) if isinstance(item, dict)] if isinstance(historical_replay_summary, dict) else []
     if attention_cases:
         top_case = attention_cases[0]
-        items.append(
-            {
-                'category': 'validation_attention',
-                'title': f"Validation attention: {top_case.get('case_id', 'unknown')}",
-                'why_it_matters': f"{top_case.get('country_id', 'unknown')} needs review because {top_case.get('attention_reason', 'validation_attention')}.",
-                'recommended_next_check': str(top_case.get('suggested_next_action', 'Review validation evidence.')),
-                'evidence_source': 'validation_backtest.json historical_replay_summary.attention_cases',
-                'target_page': 'validation.html',
-            }
+        _append_item(
+            category='validation_attention',
+            title=f"Validation attention: {top_case.get('case_id', 'unknown')}",
+            why_it_matters=f"{top_case.get('country_id', 'unknown')} needs review because {top_case.get('attention_reason', 'validation_attention')}.",
+            recommended_next_check=str(top_case.get('suggested_next_action', 'Review validation evidence.')),
+            evidence_source='validation_backtest.json historical_replay_summary.attention_cases',
+            target_page='validation.html',
+        )
+
+    traceability_summary = traceability_view_model.get('summary', {}) if isinstance(traceability_view_model, dict) else {}
+    traceability_missing_mappings = int(traceability_summary.get('missing_requirement_mapping_count', 0) or 0)
+    traceability_orphans = int(traceability_summary.get('orphan_mapped_requirement_count', 0) or 0)
+    traceability_unhealthy_slices = int(traceability_summary.get('unhealthy_slice_count', 0) or 0)
+    traceability_closure_at_risk = int(traceability_summary.get('closure_at_risk', 0) or 0)
+    if traceability_missing_mappings or traceability_orphans or traceability_unhealthy_slices or traceability_closure_at_risk:
+        traceability_title_parts = []
+        if traceability_missing_mappings:
+            traceability_title_parts.append(f"{traceability_missing_mappings} missing mappings")
+        if traceability_unhealthy_slices:
+            traceability_title_parts.append(f"{traceability_unhealthy_slices} unhealthy slices")
+        if traceability_closure_at_risk:
+            traceability_title_parts.append(f"{traceability_closure_at_risk} at-risk closures")
+        if traceability_orphans:
+            traceability_title_parts.append(f"{traceability_orphans} orphan mappings")
+        _append_item(
+            category='traceability_risk',
+            title=f"Traceability risk: {', '.join(traceability_title_parts) or 'inspect integrity summary'}",
+            why_it_matters=(
+                "Traceability integrity still has "
+                f"{traceability_missing_mappings} missing mappings, {traceability_unhealthy_slices} unhealthy slices, "
+                f"and {traceability_closure_at_risk} closure-at-risk items."
+            ),
+            recommended_next_check='Inspect traceability.html and repo closure slice details.',
+            evidence_source='traceability_lineage.json + repo_closure.json',
+            target_page='traceability.html',
+        )
+
+    operator_operability_status = str(operator_operability_cluster_view_model.get('cluster_status', 'unknown')).lower()
+    operator_operability_failed = int(operator_operability_cluster_view_model.get('failed_gate_count', 0) or 0)
+    if operator_operability_cluster_view_model and (operator_operability_status not in {'healthy', 'green', 'ok', 'pass'} or operator_operability_failed > 0):
+        _append_item(
+            category='operability_cluster',
+            title=f"Operability cluster: {operator_operability_status}",
+            why_it_matters=(
+                f"Stakeholder flows and browser gates are not fully green: {operator_operability_failed} failed gates reported."
+            ),
+            recommended_next_check=str(
+                operator_operability_cluster_view_model.get('operator_next_action')
+                or 'Review readiness and operability cluster details.'
+            ),
+            evidence_source='release_evidence_assessment.json operator_operability_cluster',
+            target_page='readiness.html',
         )
 
     stale_priority_watchlist = [row for row in visibility.get('stale_priority_watchlist', []) if isinstance(row, dict)]
     if stale_priority_watchlist:
         top_stale = stale_priority_watchlist[0]
-        items.append(
-            {
-                'category': 'stale_priority',
-                'title': f"Stale priority: {top_stale.get('country_id', 'UNKNOWN')}",
-                'why_it_matters': f"Priority {top_stale.get('priority', 'n/a')} country has {top_stale.get('freshness_hours', 'n/a')} stale hours.",
-                'recommended_next_check': 'Inspect stale coverage priority queue and remediation watchlist.',
-                'evidence_source': 'system_status.json country_coverage_visibility.stale_priority_watchlist',
-                'target_page': 'coverage.html',
-            }
+        _append_item(
+            category='stale_priority',
+            title=f"Stale priority: {top_stale.get('country_id', 'UNKNOWN')}",
+            why_it_matters=f"Priority {top_stale.get('priority', 'n/a')} country has {top_stale.get('freshness_hours', 'n/a')} stale hours.",
+            recommended_next_check='Inspect stale coverage priority queue and remediation watchlist.',
+            evidence_source='system_status.json country_coverage_visibility.stale_priority_watchlist',
+            target_page='coverage.html',
         )
+
+    if operator_stale_remediation_action_plan_view_model:
+        action_count = int(operator_stale_remediation_action_plan_view_model.get('action_count', 0) or 0)
+        next_action_id = str(operator_stale_remediation_action_plan_view_model.get('next_action_id', 'n/a'))
+        if action_count > 0:
+            _append_item(
+                category='stale_remediation_action_plan',
+                title=f'Stale remediation action plan: {next_action_id}',
+                why_it_matters=f"Stale-remediation planning still has {action_count} actionable steps queued.",
+                recommended_next_check=str(operator_stale_remediation_action_plan_view_model.get('operator_next_action') or 'Review stale remediation action plan.'),
+                evidence_source='release_failure_drill_report.json operator_stale_remediation_action_plan',
+                target_page='readiness.html',
+            )
 
     for rank, item in enumerate(items, start=1):
         item['rank'] = rank
+
+    top_item = items[0] if items else {}
+    target_page_counts: dict[str, int] = {}
+    for item in items:
+        target_page = str(item.get('target_page', 'n/a'))
+        target_page_counts[target_page] = target_page_counts.get(target_page, 0) + 1
 
     return {
         'run_id': readiness_view_model.get('run_id'),
@@ -921,7 +997,16 @@ def _build_analyst_briefing_view_model(
         'release_blocker_count': sum(1 for item in items if item.get('category') == 'release_blocker'),
         'country_gap_count': sum(1 for item in items if item.get('category') == 'country_gap'),
         'validation_attention_count': sum(1 for item in items if item.get('category') == 'validation_attention'),
+        'traceability_risk_count': sum(1 for item in items if item.get('category') == 'traceability_risk'),
+        'operability_cluster_count': sum(1 for item in items if item.get('category') == 'operability_cluster'),
         'stale_priority_count': sum(1 for item in items if item.get('category') == 'stale_priority'),
+        'stale_remediation_action_plan_count': sum(1 for item in items if item.get('category') == 'stale_remediation_action_plan'),
+        'primary_item_title': top_item.get('title', 'n/a'),
+        'primary_item_category': top_item.get('category', 'n/a'),
+        'primary_item_target_page': top_item.get('target_page', 'n/a'),
+        'primary_item_next_check': top_item.get('recommended_next_check', 'n/a'),
+        'primary_item_evidence_source': top_item.get('evidence_source', 'n/a'),
+        'target_page_counts': target_page_counts,
         'items': items,
     }
 
@@ -2948,7 +3033,8 @@ def _render_readiness(
         "<table><thead><tr><th>AP-20 Breach Reason</th><th>Priority Score</th><th>Unresolved Age Hours</th></tr></thead>"
         f"<tbody>{_operator_stale_closure_rows}</tbody></table></div>"
         "<div class='panel'><div class='panel-header'>Analyst Briefing — What matters now?</div>"
-        f"<p>Prioritized items: <strong>{html.escape(str(_analyst_briefing.get('item_count', 0)))}</strong> | release blockers: {html.escape(str(_analyst_briefing.get('release_blocker_count', 0)))} | country gaps: {html.escape(str(_analyst_briefing.get('country_gap_count', 0)))} | validation attention: {html.escape(str(_analyst_briefing.get('validation_attention_count', 0)))} | stale priorities: {html.escape(str(_analyst_briefing.get('stale_priority_count', 0)))}</p>"
+        f"<p>Prioritized items: <strong>{html.escape(str(_analyst_briefing.get('item_count', 0)))}</strong> | release blockers: {html.escape(str(_analyst_briefing.get('release_blocker_count', 0)))} | country gaps: {html.escape(str(_analyst_briefing.get('country_gap_count', 0)))} | validation attention: {html.escape(str(_analyst_briefing.get('validation_attention_count', 0)))} | traceability risk: {html.escape(str(_analyst_briefing.get('traceability_risk_count', 0)))} | operability cluster: {html.escape(str(_analyst_briefing.get('operability_cluster_count', 0)))} | stale priorities: {html.escape(str(_analyst_briefing.get('stale_priority_count', 0)))} | stale remediation actions: {html.escape(str(_analyst_briefing.get('stale_remediation_action_plan_count', 0)))}</p>"
+        f"<p>Primary focus: <strong>{html.escape(str(_analyst_briefing.get('primary_item_title', 'n/a')))}</strong> → {html.escape(str(_analyst_briefing.get('primary_item_target_page', 'n/a')))} | next check: {html.escape(str(_analyst_briefing.get('primary_item_next_check', 'n/a')))} | evidence: {html.escape(str(_analyst_briefing.get('primary_item_evidence_source', 'n/a')))}</p>"
         "<table><thead><tr><th>Rank</th><th>Category</th><th>Title</th><th>Why it matters</th><th>Recommended next check</th><th>Target page</th></tr></thead>"
         f"<tbody>{_analyst_briefing_rows}</tbody></table></div>"
         # === Known Gaps ===
@@ -5243,8 +5329,12 @@ def build_local_mvp_site(
             release_gate_view_model=release_gate_view_model,
             operator_release_summary_view_model=operator_release_summary_view_model,
             operator_blocker_causality_view_model=operator_blocker_causality_view_model,
+            operator_operability_cluster_view_model=operator_operability_cluster_view_model,
+            operator_stale_remediation_action_plan_view_model=operator_stale_remediation_action_plan_view_model,
             system_status_read_model=system_status_read_model,
             validation_view_model=validation_view_model,
+            traceability_view_model=traceability_view_model,
+            repo_closure_view_model=repo_closure_view_model,
         )
 
     readiness_file = output_dir / 'readiness.html'

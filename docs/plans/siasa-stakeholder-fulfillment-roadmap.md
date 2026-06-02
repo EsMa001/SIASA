@@ -186,10 +186,11 @@ Expected outcome of Step B:
 
 Current Step-B progress:
 - B-1 completed: Analyst briefing "What matters now?" now condenses existing runtime evidence into one readiness-facing summary
+- B-2 completed: The briefing now also synthesizes traceability and operability signals, adds a primary-focus line, and surfaces the most actionable next page/check in the readiness view
 - current GUI evidence: `build/local_gui/latest/readiness.html`
 - current exported briefing artifact: `build/local_gui/latest/analyst_briefing.json`
 - current live evidence basis: `RUN-LIVE-EXT-FOCUS-LATEST-005`
-- current summary fields explicitly separate release blockers, country gaps, validation-attention cases, and stale-priority countries, each with recommended next check and target page
+- current summary fields explicitly separate release blockers, country gaps, validation-attention cases, traceability risks, operability-cluster risks, and stale-priority/stale-remediation items, each with recommended next check and target page
 
 ### Step C: Demo/release productization
 

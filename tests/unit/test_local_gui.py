@@ -72,68 +72,44 @@ def test_render_stale_priority_watchlist_shows_summary_and_rows() -> None:
 
 
 
-def test_build_analyst_briefing_view_model_prioritizes_existing_evidence_sources() -> None:
+def test_build_analyst_briefing_view_model_prioritizes_traceability_and_operability_risks() -> None:
     briefing = local_app._build_analyst_briefing_view_model(
-        readiness_view_model={"release_verdict": "blocked_by_known_gaps", "run_id": "RUN-TEST-001"},
-        release_gate_view_model={"gate_verdict": "no_go"},
+        readiness_view_model={"release_verdict": "ready", "run_id": "RUN-TEST-002"},
+        release_gate_view_model={"gate_verdict": "go"},
         operator_release_summary_view_model={
-            "failed_gate_count": 1,
-            "operator_next_action": "Fix readiness blocker.",
+            "failed_gate_count": 0,
+            "operator_next_action": "No action required; release gates are green.",
         },
         operator_blocker_causality_view_model={
-            "primary_root_cause_gate_id": "known_gaps_clear",
-            "operator_next_action": "Resolve known gaps before release.",
+            "primary_root_cause_gate_id": None,
+            "operator_next_action": "No blocker-chain action required; release gates are green.",
         },
-        system_status_read_model={
-            "country_coverage_visibility": {
-                "country_gap_rows": [
-                    {
-                        "country_id": "POL",
-                        "missing_domains": ["B"],
-                        "gap_details": [{"domain": "B", "reason": "no_usable_input_data"}],
-                    }
-                ],
-                "stale_priority_watchlist": [
-                    {
-                        "priority_rank": 1,
-                        "country_id": "UKR",
-                        "priority": "P1",
-                        "freshness_hours": 8760.0,
-                        "source_depth_band": "moderate",
-                    }
-                ],
-            }
+        operator_operability_cluster_view_model={
+            "cluster_status": "degraded",
+            "failed_gate_count": 2,
+            "operator_next_action": "Review operability cluster and browser acceptance coverage.",
         },
-        validation_view_model={
-            "historical_replay_summary": {
-                "attention_cases": [
-                    {
-                        "country_id": "ISR",
-                        "case_id": "VAL-ISR-2024-002",
-                        "attention_level": "high",
-                        "attention_reason": "status_mismatch_and_domain_gap",
-                        "suggested_next_action": "Review reference-case alignment.",
-                    }
-                ]
+        system_status_read_model={"country_coverage_visibility": {"stale_priority_watchlist": []}},
+        validation_view_model={"historical_replay_summary": {"attention_cases": []}},
+        traceability_view_model={
+            "summary": {
+                "missing_requirement_mapping_count": 1,
+                "orphan_mapped_requirement_count": 0,
+                "unhealthy_slice_count": 1,
+                "closure_at_risk": 1,
             }
         },
     )
 
-    assert briefing["item_count"] == 4
-    assert briefing["release_blocker_count"] == 1
-    assert briefing["country_gap_count"] == 1
-    assert briefing["validation_attention_count"] == 1
-    assert briefing["stale_priority_count"] == 1
-    assert [item["category"] for item in briefing["items"]] == [
-        "release_blocker",
-        "country_gap",
-        "validation_attention",
-        "stale_priority",
-    ]
-    assert briefing["items"][0]["title"] == "Release blocker: known_gaps_clear"
-    assert briefing["items"][1]["title"] == "Country gap: POL missing B"
-    assert briefing["items"][2]["title"] == "Validation attention: VAL-ISR-2024-002"
-    assert briefing["items"][3]["title"] == "Stale priority: UKR"
+    assert briefing["item_count"] == 2
+    assert briefing["traceability_risk_count"] == 1
+    assert briefing["operability_cluster_count"] == 1
+    assert briefing["primary_item_category"] == "traceability_risk"
+    assert briefing["primary_item_target_page"] == "traceability.html"
+    assert briefing["primary_item_next_check"] == "Inspect traceability.html and repo closure slice details."
+    assert [item["category"] for item in briefing["items"]] == ["traceability_risk", "operability_cluster"]
+    assert briefing["items"][0]["title"] == "Traceability risk: 1 missing mappings, 1 unhealthy slices, 1 at-risk closures"
+    assert briefing["items"][1]["title"] == "Operability cluster: degraded"
 
 
 
@@ -2086,6 +2062,10 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     readiness_html = (pages.output_dir / "readiness.html").read_text()
     readiness_json = json.loads((pages.output_dir / "readiness.json").read_text())
 
+    assert "Prioritized items:" in readiness_html
+    assert "Primary focus:" in readiness_html
+    assert "traceability risk:" in readiness_html
+    assert "operability cluster:" in readiness_html
     assert "Persisted Demo Check" in readiness_html
     assert "Persisted Evidence Check" in readiness_html
     assert "Gate Verdict" in readiness_html
@@ -2097,7 +2077,9 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert "Stakeholder Focus Closure" in readiness_html
     assert "Covered IDs: 19 / 19 | Open IDs: 0" in readiness_html
     assert "Analyst Briefing — What matters now?" in readiness_html
-    assert "Prioritized items: <strong>0</strong>" in readiness_html
+    assert "Prioritized items: <strong>1</strong>" in readiness_html
+    assert "Primary focus: <strong>Stale remediation action plan: AP25-STALE-01</strong>" in readiness_html
+    assert "stale remediation actions: 1" in readiness_html
     assert "Operator Release Steering (AP-16/AP-17/AP-19/AP-20/AP-22/AP-23/AP-24)" in readiness_html
     assert "AP-16 failed gates: <strong>0</strong>" in readiness_html
     assert "AP-26 primary root cause: <strong>none</strong>" in readiness_html
