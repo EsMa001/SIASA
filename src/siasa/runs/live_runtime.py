@@ -11,6 +11,7 @@ from siasa.adapters import (
     GDACSAdapter,
     GDELTDocAdapter,
     GDELTEventsAdapter,
+    UCDPAdapter,
     UNHCRPopulationAdapter,
     WorldBankIndicatorsAdapter,
 )
@@ -221,6 +222,28 @@ _WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = (
     "NZL",
     "PRT",
     "IRL",
+)
+_UCDP_SUPPORTED_LIVE_COUNTRIES = (
+    "UKR",
+    "POL",
+    "ISR",
+    "RUS",
+    "CHN",
+    "IND",
+    "IRN",
+    "TUR",
+    "PAK",
+    "GEO",
+    "USA",
+    "DEU",
+    "EST",
+    "FIN",
+    "SAU",
+    "QAT",
+    "EGY",
+    "NGA",
+    "SDN",
+    "MMR",
 )
 _MULTI_COUNTRY_GDELT_EVENTS_RECENT_EXPORT_COUNT = 8
 
@@ -677,6 +700,9 @@ def build_governed_live_orchestrator(
     supported_world_bank_country_ids = tuple(
         country_id for country_id in resolved_country_ids if country_id in _WORLD_BANK_SUPPORTED_LIVE_COUNTRIES
     )
+    supported_ucdp_country_ids = tuple(
+        country_id for country_id in resolved_country_ids if country_id in _UCDP_SUPPORTED_LIVE_COUNTRIES
+    )
     country_expected_domains = {
         country_id: list(_GOVERNED_LIVE_DOMAINS_BY_COUNTRY.get(country_id, ["A", "B", "D"]))
         for country_id in resolved_country_ids
@@ -704,7 +730,13 @@ def build_governed_live_orchestrator(
                     else 1
                 ),
             ),
-            GDACSAdapter(country_ids=set(resolved_country_ids)),
+        ]
+    )
+    if supported_ucdp_country_ids:
+        adapters.append(UCDPAdapter(country_ids=set(supported_ucdp_country_ids)))
+    adapters.extend(
+        [
+            GDACSAdapter(country_ids=resolved_country_ids),
             # Domain C: GDACS data re-ingested as physical activity/disaster domain
             GDACSAdapter(country_ids=set(resolved_country_ids), source_id="SRC-GDACS-C", domain="C"),
             # Domain C: structured displacement signals
