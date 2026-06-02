@@ -5015,6 +5015,36 @@ def _render_analytics(
         f"</div>"
     ) if provenance else '<p style="color:#6b7d99;">No provenance data</p>', '📍', section_id='analytics-provenance-chain', role_min='admin')
 
+    spread_paths = epidemiology.get('spread_paths', [])
+    amp_events = epidemiology.get('amplification_events', [])
+    lineage_root_badges = ''.join(_badge(s, '#93c5fd') for s in prov_roots[:8]) or '<span style="color:#6b7d99;">none</span>'
+    lineage_leaf_badges = ''.join(_badge(s, '#a78bfa') for s in prov_leaves[:8]) or '<span style="color:#6b7d99;">none</span>'
+    lineage_spread_rows = ''
+    for sp in spread_paths[:5]:
+        if not isinstance(sp, dict):
+            continue
+        seq = ' → '.join(str(item) for item in sp.get('source_sequence', [])) or 'n/a'
+        lineage_spread_rows += (
+            f"<div style='margin:4px 0;padding:6px 10px;background:#10192e;border-radius:3px;font-size:11px;'>"
+            f"<strong style='color:#93c5fd;'>{html.escape(str(sp.get('signal_key', '?')))}</strong>"
+            f" &nbsp;|&nbsp; {html.escape(seq)}"
+            f" &nbsp;|&nbsp; spread={html.escape(str(sp.get('total_spread_hours', '?')))}h"
+            f"</div>"
+        )
+    lineage_section = _section(f'Source Lineage Visualization ({len(prov_roots)} roots, {len(prov_leaves)} leaves, {len(spread_paths)} spreads)', (
+        f"<div style='display:grid;grid-template-columns:1fr;gap:16px;font-size:12px;'>"
+        f"<div><h4 style='color:#6b7d99;margin:0 0 8px 0;font-size:11px;text-transform:uppercase;'>Provenance Flow</h4>"
+        f"<div style='display:flex;flex-wrap:wrap;gap:6px;align-items:center;'>"
+        f"{lineage_root_badges}"
+        f"<span style='color:#6b7d99;font-size:13px;font-weight:700;'>→</span>"
+        f"{lineage_leaf_badges}"
+        f"</div>"
+        f"<p style='color:#8899bb;font-size:11px;margin:8px 0 0 0;'>Depth: {html.escape(str(prov_depth))} | Roots: {len(prov_roots)} | Leaves: {len(prov_leaves)}</p></div>"
+        f"<div><h4 style='color:#6b7d99;margin:0 0 8px 0;font-size:11px;text-transform:uppercase;'>Spread / Amplification Snapshots</h4>"
+        f"{lineage_spread_rows or '<p style=\"color:#6b7d99;font-size:12px;\">None detected</p>'}</div>"
+        f"</div>"
+    ), '🧭', section_id='analytics-source-lineage-visualization', role_min='analyst') if (provenance or epidemiology) else _section('Source Lineage Visualization', '<p style="color:#6b7d99;">No data</p>', '🧭', section_id='analytics-source-lineage-visualization', role_min='analyst')
+
     # --- Info Epidemiology ---
     spread_paths = epidemiology.get('spread_paths', [])
     amp_events = epidemiology.get('amplification_events', [])
@@ -5058,6 +5088,7 @@ def _render_analytics(
         "<a class='btn-download' href='#analytics-rule-evaluations'>Rules</a>"
         "<a class='btn-download' href='#analytics-dependency-graph'>Dependency</a>"
         "<a class='btn-download' href='#analytics-provenance-chain'>Provenance</a>"
+        "<a class='btn-download' href='#analytics-source-lineage-visualization'>Lineage Visual</a>"
         "<a class='btn-download' href='#analytics-info-epidemiology'>Epidemiology</a>"
         "</div>"
         "<div class='controls-bar'>"
@@ -5088,6 +5119,7 @@ def _render_analytics(
         "'analytics-rule-evaluations':'rules',"
         "'analytics-dependency-graph':'dependency',"
         "'analytics-provenance-chain':'dependency',"
+        "'analytics-source-lineage-visualization':'dependency',"
         "'analytics-info-epidemiology':'rules'"
         "};"
         "function applyAnalyticsSectionFilter(){"
@@ -5115,7 +5147,7 @@ def _render_analytics(
         "<p style='color:#8899bb;font-size:13px;margin:0 0 24px 0;'>"
         "Phase 4-6 analytical module outputs: cross-domain fusion, probabilistic scoring, "
         "uncertainty propagation, rule-based assessment, dependency graph, provenance chain, "
-        "and information epidemiology.</p>"
+        "source-lineage visualization, and information epidemiology.</p>"
         + analytics_controls
         + fusion_section
         + bayes_section
@@ -5123,6 +5155,7 @@ def _render_analytics(
         + rule_section
         + dep_section
         + prov_section
+        + lineage_section
         + epi_section
         + analytics_filter_js
     )

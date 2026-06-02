@@ -2409,8 +2409,15 @@ def test_build_local_mvp_site_renders_analytics_page_when_view_model_provided(tm
              'domain': 'A', 'severity': 'critical', 'annotation_text': 'Critical state', 'tags': []}
         ],
         'dependency_graph': {'source_count': 2, 'edge_count': 1, 'clusters': [], 'influence_scores': []},
-        'provenance_chain': {'root_sources': ['SRC-A'], 'leaf_outputs': ['MST-UKR'], 'depth': 3, 'nodes': [], 'edges': []},
-        'info_epidemiology': {'spread_paths': [], 'amplification_events': []},
+        'provenance_chain': {'root_sources': ['SRC-A', 'SRC-B'], 'leaf_outputs': ['MST-UKR'], 'depth': 3, 'nodes': [], 'edges': []},
+        'info_epidemiology': {
+            'spread_paths': [
+                {'signal_key': 'signal-alpha', 'source_sequence': ['SRC-A', 'SRC-B', 'SRC-C'], 'total_spread_hours': 12},
+            ],
+            'amplification_events': [
+                {'signal_key': 'signal-beta', 'source_id': 'SRC-D', 'amplification_factor': 2.5, 'lag_hours': 6},
+            ],
+        },
     }
     result = build_local_mvp_site(
         output_dir=tmp_path / 'analytics-site',
@@ -2431,6 +2438,7 @@ def test_build_local_mvp_site_renders_analytics_page_when_view_model_provided(tm
     assert 'Rule Evaluations' in content
     assert 'Dependency Graph' in content
     assert 'Provenance Chain' in content
+    assert 'Source Lineage Visualization' in content
     assert 'Epidemiology' in content
     # Cross-link/filter controls
     assert "id='analytics-controls'" in content
@@ -2440,10 +2448,12 @@ def test_build_local_mvp_site_renders_analytics_page_when_view_model_provided(tm
     assert 'applyAnalyticsSectionFilter' in content
     assert "href='#analytics-cross-domain-fusion'" in content
     assert "href='#analytics-provenance-chain'" in content
+    assert "href='#analytics-source-lineage-visualization'" in content
     # Role constraints per analytics section
     assert "id='analytics-rule-evaluations'" in content
     assert "id='analytics-dependency-graph'" in content
     assert "id='analytics-provenance-chain'" in content
+    assert "id='analytics-source-lineage-visualization'" in content
     assert "data-role-min='analyst'" in content
     assert "data-role-min='admin'" in content
     # Country data
