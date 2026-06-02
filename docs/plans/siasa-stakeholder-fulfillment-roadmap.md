@@ -403,10 +403,10 @@ Expected outcome:
 - helps justify multi-country backend breadth once P2 is done
 
 ### P3-WP-005: Annotation workflows beyond read-only visibility
-Objective: add creation/edit/edit-history handling for analyst annotations.
+Objective: add creation/edit/edit-history handling for analyst annotations, including replay-attention prefill summary and integrity feedback.
 
 Expected outcome:
-- analyst role becomes operational in the GUI, not only visible in stored artifacts
+- analyst role becomes operational in the GUI, not only visible in stored artifacts, and can verify the replay-attention handoff context before saving
 
 ---
 
@@ -440,7 +440,7 @@ Recommended serial order from here:
    - reason: hardening remains probe-driven and targeted (no speculative broad retry expansion)
 3. Next validation interpretation/depth package
    - size: medium
-   - reason: validation baseline is already strong (23 cases / 21 countries), so further depth should remain selective and analyst-value-driven
+   - reason: validation baseline is already strong (23 cases / 21 countries), so further depth should remain selective and analyst-value-driven; replay-attention handoff observability now makes the annotation transition more explicit
 4. Later source-origin / epidemiology extension package(s)
    - size: large
    - reason: groundwork exists, but full origin inference and information-spread analysis remain intentionally later
@@ -486,6 +486,7 @@ Next serial work package should now be selected from runtime/source breadth expa
 
 Current rationale:
 - the annotation create/edit workflow gap has been closed with a governed static-site workflow baseline
+- the replay-attention annotation handoff now also includes a visible prefill summary and integrity status before save, reducing hidden context loss in the browser-local workflow
 - the trend/domain baseline-historical interpretation gap has been closed for the current static GUI baseline
 - the first source-dependency / source-origin groundwork slice is now also present in the traceability view without overclaiming full origin inference
 - the readiness-honesty closure slice is now also in place: artifact presence/absence is explicit and `validation_backtest` is visibly present in the current latest bundle
