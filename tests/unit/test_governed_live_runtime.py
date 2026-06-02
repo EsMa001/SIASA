@@ -598,6 +598,132 @@ def test_build_governed_live_orchestrator_supports_control_reference_initial_pil
 
 
 
+def test_build_governed_live_orchestrator_supports_control_reference_broader_pilot_set() -> None:
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        pilot_set="control-reference-broader",
+    )
+
+    world_bank = orchestrator.adapters[0]
+    gdelt_doc = orchestrator.adapters[1]
+    gdelt_events = orchestrator.adapters[2]
+    gdacs = orchestrator.adapters[3]
+
+    assert world_bank.country_ids == ("NOR", "CAN", "AUS")
+    assert orchestrator.country_expected_domains == {
+        "NOR": ["A", "D"],
+        "CAN": ["A", "B", "D"],
+        "AUS": ["A", "B", "D"],
+    }
+    assert gdelt_doc.country_queries == {
+        "NOR": "Norway",
+        "CAN": "Canada",
+        "AUS": "Australia",
+    }
+    assert gdelt_doc.max_records == 6
+    assert gdelt_doc.inter_request_delay_seconds == 1.0
+    assert gdelt_doc.max_full_fetch_retries == 2
+    assert gdelt_doc.full_fetch_retry_cooldown_seconds == 40.0
+    assert gdelt_events.country_codes == {
+        "NOR": "NO",
+        "CAN": "CA",
+        "AUS": "AS",
+    }
+    assert gdelt_events.recent_export_count == 8
+    assert set(gdacs.country_ids) == {"NOR", "CAN", "AUS"}
+
+
+
+def test_build_governed_live_orchestrator_supports_control_reference_third_pilot_set() -> None:
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        pilot_set="control-reference-third",
+    )
+
+    world_bank = orchestrator.adapters[0]
+    gdelt_doc = orchestrator.adapters[1]
+    gdelt_events = orchestrator.adapters[2]
+    gdacs = orchestrator.adapters[3]
+
+    assert world_bank.country_ids == ("NZL", "PRT", "IRL")
+    assert orchestrator.country_expected_domains == {
+        "NZL": ["A", "D"],
+        "PRT": ["A", "D"],
+        "IRL": ["A", "B", "D"],
+    }
+    assert gdelt_doc.country_queries == {
+        "NZL": "New Zealand",
+        "PRT": "Portugal",
+        "IRL": "Ireland",
+    }
+    assert gdelt_doc.max_records == 6
+    assert gdelt_doc.inter_request_delay_seconds == 1.0
+    assert gdelt_doc.max_full_fetch_retries == 2
+    assert gdelt_doc.full_fetch_retry_cooldown_seconds == 40.0
+    assert gdelt_events.country_codes == {
+        "NZL": "NZ",
+        "PRT": "PO",
+        "IRL": "EI",
+    }
+    assert gdelt_events.recent_export_count == 8
+    assert set(gdacs.country_ids) == {"NZL", "PRT", "IRL"}
+
+
+
+def test_build_governed_live_orchestrator_supports_control_reference_complete_pilot_set() -> None:
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        pilot_set="control-reference-complete",
+    )
+
+    world_bank = orchestrator.adapters[0]
+    gdelt_doc = orchestrator.adapters[1]
+    gdelt_events = orchestrator.adapters[2]
+    gdacs = orchestrator.adapters[3]
+
+    assert world_bank.country_ids == ("NOR", "CHE", "SWE", "NLD", "IRL", "PRT", "NZL", "CAN", "AUS")
+    assert orchestrator.country_expected_domains == {
+        "NOR": ["A", "D"],
+        "CHE": ["A", "B", "D"],
+        "SWE": ["A", "D"],
+        "NLD": ["A", "D"],
+        "IRL": ["A", "B", "D"],
+        "PRT": ["A", "D"],
+        "NZL": ["A", "D"],
+        "CAN": ["A", "B", "D"],
+        "AUS": ["A", "B", "D"],
+    }
+    assert gdelt_doc.country_queries == {
+        "NOR": "Norway",
+        "CHE": "Switzerland",
+        "SWE": "Sweden",
+        "NLD": "Netherlands",
+        "IRL": "Ireland",
+        "PRT": "Portugal",
+        "NZL": "New Zealand",
+        "CAN": "Canada",
+        "AUS": "Australia",
+    }
+    assert gdelt_doc.max_records == 5
+    assert gdelt_doc.inter_request_delay_seconds == 1.0
+    assert gdelt_doc.max_full_fetch_retries == 2
+    assert gdelt_doc.full_fetch_retry_cooldown_seconds == 40.0
+    assert gdelt_events.country_codes == {
+        "NOR": "NO",
+        "CHE": "SZ",
+        "SWE": "SW",
+        "NLD": "NL",
+        "IRL": "EI",
+        "PRT": "PO",
+        "NZL": "NZ",
+        "CAN": "CA",
+        "AUS": "AS",
+    }
+    assert gdelt_events.recent_export_count == 8
+    assert set(gdacs.country_ids) == {"NOR", "CHE", "SWE", "NLD", "IRL", "PRT", "NZL", "CAN", "AUS"}
+
+
+
 def test_run_governed_live_pipeline_passes_control_reference_pilot_set_without_explicit_country_ids() -> None:
     factory = SequenceOrchestratorFactory(
         [
