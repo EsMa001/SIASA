@@ -607,7 +607,7 @@ def _should_retry_pipeline_after_gdelt_doc_failure(
     return (
         len(requested_country_ids) > 1
         and result.run_state.status == "partial_success"
-        and result.run_state.failed_sources == ["SRC-GDELT-DOC"]
+        and result.run_state.failed_sources in (["SRC-GDELT-DOC"], ["SRC-GDELT-DOC-E"])
     )
 
 
@@ -766,7 +766,7 @@ def build_governed_live_orchestrator(
             ),
         ]
     )
-    if supported_ucdp_country_ids:
+    if supported_ucdp_country_ids and _ucdp_api_token_is_configured():
         adapters.append(UCDPAdapter(country_ids=set(supported_ucdp_country_ids)))
     adapters.extend(
         [
@@ -897,6 +897,10 @@ def _default_pipeline_retry_budget(requested_country_ids: tuple[str, ...]) -> in
 
 def _reliefweb_appname_is_configured() -> bool:
     return bool(os.environ.get("RELIEFWEB_APPNAME", "").strip())
+
+
+def _ucdp_api_token_is_configured() -> bool:
+    return bool(os.environ.get("UCDP_API_TOKEN", "").strip())
 
 
 def run_governed_live_pipeline(

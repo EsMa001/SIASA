@@ -13,6 +13,7 @@ from siasa.runs.live_runtime import build_governed_live_orchestrator, run_govern
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+os.environ.setdefault("UCDP_API_TOKEN", "test-token")
 _SUBPROCESS_ENV = {**os.environ, "PYTHONPATH": "src"}
 
 
@@ -753,6 +754,35 @@ def test_build_governed_live_orchestrator_includes_reliefweb_when_appname_config
 
 
 
+def test_build_governed_live_orchestrator_skips_ucdp_without_api_token(monkeypatch) -> None:
+    monkeypatch.delenv("UCDP_API_TOKEN", raising=False)
+
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        pilot_set="representative",
+    )
+
+    assert all(getattr(adapter, "source_id", None) != "SRC-UCDP-GED" for adapter in orchestrator.adapters)
+
+
+
+def test_build_governed_live_orchestrator_includes_ucdp_when_api_token_configured(monkeypatch) -> None:
+    monkeypatch.setenv("UCDP_API_TOKEN", "ucdp-token")
+
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        pilot_set="representative",
+    )
+
+    ucdp = next(
+        adapter for adapter in orchestrator.adapters if getattr(adapter, "source_id", None) == "SRC-UCDP-GED"
+    )
+
+    assert ucdp.domain == "B"
+    assert ucdp.country_ids == {"UKR", "POL", "ISR"}
+
+
+
 def test_run_governed_live_pipeline_passes_control_reference_pilot_set_without_explicit_country_ids() -> None:
     factory = SequenceOrchestratorFactory(
         [
@@ -784,6 +814,41 @@ def test_run_governed_live_pipeline_passes_control_reference_pilot_set_without_e
             "output_dir": None,
         }
     ]
+
+
+
+def test_run_governed_live_pipeline_retries_after_isolated_gdelt_doc_e_failure() -> None:
+    factory = SequenceOrchestratorFactory(
+        [
+            FakePipelineResult(
+                run_state=FakePipelineRunState(
+                    run_id="RUN-REP-GDELT-DOC-E-001",
+                    status="partial_success",
+                    failed_sources=["SRC-GDELT-DOC-E"],
+                )
+            ),
+            FakePipelineResult(
+                run_state=FakePipelineRunState(
+                    run_id="RUN-REP-GDELT-DOC-E-001",
+                    status="success",
+                    failed_sources=[],
+                )
+            ),
+        ]
+    )
+
+    result = run_governed_live_pipeline(
+        repo_root=REPO_ROOT,
+        run_id="RUN-REP-GDELT-DOC-E-001",
+        pilot_set="representative",
+        orchestrator_factory=factory,
+        pipeline_retry_sleep=lambda _: None,
+    )
+
+    assert result.run_state.status == "success"
+    assert len(factory.calls) == 2
+    assert factory.calls[0]["pilot_set"] == "representative"
+    assert factory.calls[1]["pilot_set"] == "representative"
 
 
 
