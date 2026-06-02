@@ -188,7 +188,9 @@ Expected outcome of Step B:
 Current Step-B progress:
 - B-1 completed: Analyst briefing "What matters now?" now condenses existing runtime evidence into one readiness-facing summary
 - B-2 completed: The briefing now also synthesizes traceability and operability signals, adds a primary-focus line, and surfaces the most actionable next page/check in the readiness view
+- B-3 completed: The cross-country comparison page now supports a relative-baseline mode so analysts can compare status/coverage/confidence deltas and shared-driver overlap against a chosen reference country
 - current GUI evidence: `build/local_gui/latest/readiness.html`
+- current comparison evidence: `build/local_gui/latest/comparison.html`
 - current exported briefing artifact: `build/local_gui/latest/analyst_briefing.json`
 - current live evidence basis: `RUN-LIVE-EXT-FOCUS-LATEST-005`
 - current summary fields explicitly separate release blockers, country gaps, validation-attention cases, traceability risks, operability-cluster risks, and stale-priority/stale-remediation items, each with recommended next check and target page
@@ -488,6 +490,7 @@ Current rationale:
 - the annotation create/edit workflow gap has been closed with a governed static-site workflow baseline
 - the replay-attention annotation handoff now also includes a visible prefill summary and integrity status before save, reducing hidden context loss in the browser-local workflow
 - the trend/domain baseline-historical interpretation gap has been closed for the current static GUI baseline
+- the comparison workflow now also supports reference-relative interpretation, so analysts can compare countries against an explicit baseline instead of only scanning a flat list
 - the first source-dependency / source-origin groundwork slice is now also present in the traceability view without overclaiming full origin inference
 - the readiness-honesty closure slice is now also in place: artifact presence/absence is explicit and `validation_backtest` is visibly present in the current latest bundle
 - the latest runtime-hardening slice (`d7f6a85`) now also retries isolated `SRC-GDELT-EVENTS` partial-success failures and is backed by representative live evidence (`RUN-LIVE-REP-RETRY-EVT-001`: `run_status=success`, `failed_sources=none`, `countries_with_updates=4/4`, `release_verdict=ready`)
