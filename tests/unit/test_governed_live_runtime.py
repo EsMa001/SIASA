@@ -143,6 +143,7 @@ def test_build_governed_live_orchestrator_supports_representative_pilot_set() ->
     gdelt_events = orchestrator.adapters[2]
     ucdp = orchestrator.adapters[3]
     gdacs = orchestrator.adapters[4]
+    gdelt_doc_e = next(adapter for adapter in orchestrator.adapters if adapter.source_id == "SRC-GDELT-DOC-E")
 
     assert world_bank.country_ids == ("UKR", "POL", "ISR")
     assert orchestrator.country_expected_domains == {
@@ -158,9 +159,13 @@ def test_build_governed_live_orchestrator_supports_representative_pilot_set() ->
         "TWN": "Taiwan",
     }
     assert gdelt_doc.max_records == 5
+    assert gdelt_doc.max_retries == 3
     assert gdelt_doc.inter_request_delay_seconds == 1.0
+    assert gdelt_doc.max_retry_delay_seconds == 60.0
     assert gdelt_doc.max_full_fetch_retries == 2
     assert gdelt_doc.full_fetch_retry_cooldown_seconds == 40.0
+    assert gdelt_doc_e.max_retries == 1
+    assert gdelt_doc_e.max_retry_delay_seconds == 20.0
     assert gdelt_events.country_codes == {
         "UKR": "UP",
         "POL": "PL",

@@ -376,6 +376,21 @@ def _gdelt_doc_max_retry_delay_seconds_for_country_count(country_count: int) -> 
 
 
 
+def _gdelt_doc_max_retries_for_source(source_id: str, country_count: int) -> int:
+    if source_id == "SRC-GDELT-DOC-E" and country_count > 1:
+        return 1
+    return 3
+
+
+
+def _gdelt_doc_effective_max_retry_delay_seconds(source_id: str, country_count: int) -> float:
+    base_delay = _gdelt_doc_max_retry_delay_seconds_for_country_count(country_count)
+    if source_id == "SRC-GDELT-DOC-E" and country_count > 1:
+        return min(base_delay, 20.0)
+    return base_delay
+
+
+
 def _gdelt_doc_request_timeout_seconds_for_country_count(country_count: int) -> float:
     if country_count >= 11:
         return 90.0
@@ -750,8 +765,9 @@ def build_governed_live_orchestrator(
             GDELTDocAdapter(
                 country_queries=country_queries,
                 max_records=_gdelt_doc_max_records_for_country_count(len(resolved_country_ids)),
+                max_retries=_gdelt_doc_max_retries_for_source("SRC-GDELT-DOC", len(resolved_country_ids)),
                 inter_request_delay_seconds=_gdelt_doc_inter_request_delay_seconds_for_country_count(len(resolved_country_ids)),
-                max_retry_delay_seconds=_gdelt_doc_max_retry_delay_seconds_for_country_count(len(resolved_country_ids)),
+                max_retry_delay_seconds=_gdelt_doc_effective_max_retry_delay_seconds("SRC-GDELT-DOC", len(resolved_country_ids)),
                 request_timeout_seconds=_gdelt_doc_request_timeout_seconds_for_country_count(len(resolved_country_ids)),
                 max_full_fetch_retries=_gdelt_doc_max_full_fetch_retries_for_country_count(len(resolved_country_ids)),
                 full_fetch_retry_cooldown_seconds=_gdelt_doc_full_fetch_retry_cooldown_seconds_for_country_count(len(resolved_country_ids)),
@@ -787,8 +803,9 @@ def build_governed_live_orchestrator(
                 source_id="SRC-GDELT-DOC-E",
                 domain="E",
                 max_records=_gdelt_doc_max_records_for_country_count(len(resolved_country_ids)),
+                max_retries=_gdelt_doc_max_retries_for_source("SRC-GDELT-DOC-E", len(resolved_country_ids)),
                 inter_request_delay_seconds=_gdelt_doc_inter_request_delay_seconds_for_country_count(len(resolved_country_ids)),
-                max_retry_delay_seconds=_gdelt_doc_max_retry_delay_seconds_for_country_count(len(resolved_country_ids)),
+                max_retry_delay_seconds=_gdelt_doc_effective_max_retry_delay_seconds("SRC-GDELT-DOC-E", len(resolved_country_ids)),
                 request_timeout_seconds=_gdelt_doc_request_timeout_seconds_for_country_count(len(resolved_country_ids)),
                 max_full_fetch_retries=_gdelt_doc_max_full_fetch_retries_for_country_count(len(resolved_country_ids)),
                 full_fetch_retry_cooldown_seconds=_gdelt_doc_full_fetch_retry_cooldown_seconds_for_country_count(len(resolved_country_ids)),
