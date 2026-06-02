@@ -5245,6 +5245,37 @@ def _render_analytics(
             f" &nbsp;|&nbsp; spread={html.escape(str(sp.get('total_spread_hours', '?')))}h"
             f"</div>"
         )
+    top_dep_cluster = dep_clusters[0] if dep_clusters and isinstance(dep_clusters[0], dict) else {}
+    top_spread_path = spread_paths[0] if spread_paths and isinstance(spread_paths[0], dict) else {}
+    top_amplification = amp_events[0] if amp_events and isinstance(amp_events[0], dict) else {}
+    hotspot_rows = ''
+    if top_dep_cluster:
+        hotspot_rows += (
+            "<tr>"
+            "<td style='padding:6px 10px;'>Dependency cluster</td>"
+            f"<td style='padding:6px 10px;'>{html.escape(str(top_dep_cluster.get('cluster_id', 'n/a')))}</td>"
+            f"<td style='padding:6px 10px;'>{html.escape(', '.join(str(item) for item in top_dep_cluster.get('sources', [])) or 'n/a')}</td>"
+            f"<td style='padding:6px 10px;'>{html.escape(str(round(float(top_dep_cluster.get('cohesion', 0)), 3)))}</td>"
+            "</tr>"
+        )
+    if top_spread_path:
+        hotspot_rows += (
+            "<tr>"
+            "<td style='padding:6px 10px;'>Spread path</td>"
+            f"<td style='padding:6px 10px;'>{html.escape(str(top_spread_path.get('signal_key', 'n/a')))}</td>"
+            f"<td style='padding:6px 10px;'>{html.escape(' → '.join(str(item) for item in top_spread_path.get('source_sequence', [])) or 'n/a')}</td>"
+            f"<td style='padding:6px 10px;'>{html.escape(str(top_spread_path.get('total_spread_hours', 'n/a')))}h</td>"
+            "</tr>"
+        )
+    if top_amplification:
+        hotspot_rows += (
+            "<tr>"
+            "<td style='padding:6px 10px;'>Amplification event</td>"
+            f"<td style='padding:6px 10px;'>{html.escape(str(top_amplification.get('signal_key', 'n/a')))}</td>"
+            f"<td style='padding:6px 10px;'>{html.escape(str(top_amplification.get('source_id', 'n/a')))}</td>"
+            f"<td style='padding:6px 10px;'>×{html.escape(str(top_amplification.get('amplification_factor', 'n/a')))} @ {html.escape(str(top_amplification.get('lag_hours', 'n/a')))}h</td>"
+            "</tr>"
+        )
     lineage_section = _section(f'Source Lineage Visualization ({len(prov_roots)} roots, {len(prov_leaves)} leaves, {len(spread_paths)} spreads)', (
         f"<div style='display:grid;grid-template-columns:1fr;gap:16px;font-size:12px;'>"
         f"<div><h4 style='color:#6b7d99;margin:0 0 8px 0;font-size:11px;text-transform:uppercase;'>Provenance Flow</h4>"
@@ -5256,6 +5287,10 @@ def _render_analytics(
         f"<p style='color:#8899bb;font-size:11px;margin:8px 0 0 0;'>Depth: {html.escape(str(prov_depth))} | Roots: {len(prov_roots)} | Leaves: {len(prov_leaves)}</p></div>"
         f"<div><h4 style='color:#6b7d99;margin:0 0 8px 0;font-size:11px;text-transform:uppercase;'>Spread / Amplification Snapshots</h4>"
         f"{lineage_spread_rows or '<p style=\"color:#6b7d99;font-size:12px;\">None detected</p>'}</div>"
+        f"<div><h4 style='color:#6b7d99;margin:0 0 8px 0;font-size:11px;text-transform:uppercase;'>Source Hotspot Matrix</h4>"
+        f"<table id='analytics-source-hotspot-matrix' style='width:100%;border-collapse:collapse;font-size:11px;'>"
+        f"<thead><tr style='color:#6b7d99;border-bottom:1px solid #263050;'><th style='padding:4px 10px;text-align:left;'>Type</th><th style='padding:4px 10px;text-align:left;'>Focus</th><th style='padding:4px 10px;text-align:left;'>Path / Members</th><th style='padding:4px 10px;text-align:left;'>Intensity</th></tr></thead>"
+        f"<tbody>{hotspot_rows or '<tr><td colspan=4 style=\"color:#6b7d99;padding:8px 10px;\">No source hotspots available</td></tr>'}</tbody></table></div>"
         f"</div>"
     ), '🧭', section_id='analytics-source-lineage-visualization', role_min='analyst') if (provenance or epidemiology) else _section('Source Lineage Visualization', '<p style="color:#6b7d99;">No data</p>', '🧭', section_id='analytics-source-lineage-visualization', role_min='analyst')
 

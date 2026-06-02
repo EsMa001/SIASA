@@ -2469,6 +2469,11 @@ def test_build_local_mvp_site_renders_analytics_page_when_view_model_provided(tm
     assert 'Dependency Graph' in content
     assert 'Provenance Chain' in content
     assert 'Source Lineage Visualization' in content
+    assert 'Source Hotspot Matrix' in content
+    assert "id='analytics-source-hotspot-matrix'" in content
+    assert 'Dependency cluster' in content or 'Spread path' in content
+    assert 'signal-alpha' in content
+    assert 'signal-beta' in content
     assert 'Epidemiology' in content
     # Cross-link/filter controls
     assert "id='analytics-controls'" in content
