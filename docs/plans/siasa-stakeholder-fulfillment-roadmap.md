@@ -211,6 +211,12 @@ Expected outcome of Step C:
 - clearer stakeholder communication of current product value and limitations
 - stronger management/review readiness
 
+Current Step-C progress:
+- C-1 completed: a dedicated Release / Demo Package surface now bundles readiness, gate, traceability, validation, and operability signals into one reviewable package
+- current GUI evidence: `build/local_gui/latest/release_package.html`
+- current machine-readable package artifact: `build/local_gui/latest/release_demo_package.json`
+- current implementation evidence: `src/siasa/readmodels/release_demo_package.py`
+
 ### Recommended serial execution rule
 
 Use the following priority order unless new external steering changes it:
