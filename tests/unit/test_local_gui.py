@@ -948,6 +948,18 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
 
     traceability_html = (pages.output_dir / "traceability.html").read_text()
 
+    assert "historical-replay-country-filter" in validation_html
+    assert "historical-replay-verdict-filter" in validation_html
+    assert "historical-replay-basis-filter" in validation_html
+    assert "historical-replay-text-filter" in validation_html
+    assert "historical-replay-reset" in validation_html
+    assert "historical-replay-visible-count" in validation_html
+    assert "historical-replay-active-state" in validation_html
+    assert "historical-replay-visible-verdict-breakdown" in validation_html
+    assert "applyHistoricalReplayFilters" in validation_html
+    assert "resetHistoricalReplayFilters" in validation_html
+    assert "historical-replay-row" in validation_html
+    assert "data-search-text" in validation_html
     assert "Changed Versions" in validation_html
 
     readiness_html = (pages.output_dir / "readiness.html").read_text()
