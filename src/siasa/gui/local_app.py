@@ -3328,6 +3328,7 @@ def _render_validation_kpi_grid(
 ) -> str:
     case_count = portfolio_summary.get('case_count', 0)
     countries = portfolio_summary.get('countries_covered', [])
+    portfolio_gap_case_count = len([case for case in portfolio_summary.get('cases_with_gaps', []) if isinstance(case, dict)])
     replay_score = historical_replay_summary.get('average_replay_evidence_score', 'n/a')
     status_match = historical_replay_summary.get('status_match_count', 'n/a')
     attention_count = historical_replay_summary.get('attention_case_count', 0)
@@ -3362,6 +3363,8 @@ def _render_validation_kpi_grid(
         f"<div class='kpi-value'>{html.escape(str(ref_score))}</div></div>"
         f"<div class='kpi-card'><span class='kpi-label'>Attention Cases</span>"
         f"<div class='kpi-value' {attention_style}>{html.escape(str(attention_count))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Non-Perfect Cases</span>"
+        f"<div class='kpi-value'>{html.escape(str(portfolio_gap_case_count))}</div></div>"
         "</div>"
     )
 
@@ -3523,6 +3526,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         if isinstance(validation_view_model.get('historical_replay_summary', {}), dict)
         else {}
     )
+    portfolio_gap_case_count = len([case for case in portfolio_summary.get('cases_with_gaps', []) if isinstance(case, dict)])
     if historical_replay_reviews and not historical_replay_summary.get('attention_cases'):
         historical_replay_summary = {
             **historical_replay_summary,
@@ -3744,15 +3748,34 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         "</tr>"
         for case in validation_cases
     ) or "<tr><td colspan='5' style='color:#6b7d99;'>No portfolio cases available.</td></tr>"
+    portfolio_gap_cases = [case for case in portfolio_summary.get('cases_with_gaps', []) if isinstance(case, dict)]
+    portfolio_gap_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(case.get('country_id', 'n/a')))}</td>"
+        f"<td class='mono' style='font-size:11px;color:#4edea3;'>{html.escape(str(case.get('case_id', 'n/a')))}</td>"
+        f"<td>{_verdict_badge(str(case.get('review_verdict', 'n/a')))}</td>"
+        "</tr>"
+        for case in portfolio_gap_cases
+    ) or "<tr><td colspan='3' style='color:#6b7d99;'>No non-perfect portfolio cases recorded.</td></tr>"
     portfolio_panel = (
         "<div class='panel'><div class='panel-header'>Reference Case Portfolio</div>"
         f"<div style='display:flex;gap:24px;flex-wrap:wrap;margin-bottom:14px;'>"
         f"<div><span class='kpi-label'>Cases</span><strong style='color:#dae2fd;'> {html.escape(str(portfolio_summary.get('case_count', len(validation_cases))))}</strong></div>"
         f"<div><span class='kpi-label'>Countries</span><strong style='color:#dae2fd;'> {html.escape(', '.join(str(c) for c in portfolio_summary.get('countries_covered', [])))}</strong></div>"
+        f"<div><span class='kpi-label'>Non-Perfect Cases</span><strong style='color:#ffb4ab;'> {html.escape(str(portfolio_gap_case_count))}</strong></div>"
         "</div>"
         f"<div style='margin-bottom:14px;'>{portfolio_verdicts_html}</div>"
         "<div class='table-container'><table><thead><tr><th>Country</th><th>Case ID</th><th>Verdict</th><th>Expected Domains</th><th>Observed Domains</th></tr></thead>"
         f"<tbody>{portfolio_case_rows_enhanced}</tbody></table></div>"
+        "</div>"
+    )
+    realism_panel = (
+        "<div class='panel'><div class='panel-header'>Validation Realism Snapshot</div>"
+        f"<p style='color:#b9c7e0;font-size:12px;margin-bottom:10px;'>"
+        f"Non-perfect portfolio cases require interpretive review before treating the replay portfolio as fully representative."
+        f"</p>"
+        f"<div class='table-container'><table><thead><tr><th>Country</th><th>Case ID</th><th>Verdict</th></tr></thead>"
+        f"<tbody>{portfolio_gap_rows}</tbody></table></div>"
         "</div>"
     )
 
@@ -4210,6 +4233,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         + domain_panel
         + goal_panel
         + portfolio_panel
+        + realism_panel
         + ref_lib_panel
         + hist_ref_panel
         + replay_summary_panel

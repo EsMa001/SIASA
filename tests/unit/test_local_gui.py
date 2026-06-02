@@ -877,6 +877,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Active Case" in validation_html  # was: "Review Summary"
     assert "Reference Case Portfolio" in validation_html  # was: "Reference Case Portfolio Summary"
     assert "Reference Case Portfolio" in validation_html  # was: "Validation Case Portfolio"
+    assert "Non-Perfect Cases" in validation_html
+    assert "Validation Realism Snapshot" in validation_html
     assert "Curated Reference Case Library" in validation_html
     assert "case_count" in validation_html or "Cases" in validation_html  # was: "Library Cases"
     assert "Historical Reference Reviews" in validation_html  # was: "Historical Reference Review Summary"

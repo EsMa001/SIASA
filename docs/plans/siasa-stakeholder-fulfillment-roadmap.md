@@ -481,7 +481,7 @@ Only then is the program close to the stakeholder intent, not merely the current
 
 ## 7. Immediate recommendation
 
-Next serial work package should be: first control/reference runtime integration tranche (`CHE`, `NLD`, `SWE`) with governed support, tests, and live probe evidence.
+Next serial work package should now be selected from runtime/source breadth expansion, since validation realism depth has just been made explicit in the GUI and the current validation replay scoping is already closed.
 
 Current rationale:
 - the annotation create/edit workflow gap has been closed with a governed static-site workflow baseline
@@ -492,6 +492,7 @@ Current rationale:
 - the first truly new-country extended-focus runtime slice is now ready-state repo-evidenced with `--pilot-set extended-focus-energy-initial` and probe `RUN-LIVE-EXT-ENERGY-INIT-001` (`run_status=success`, `failed_sources=none`, `countries_with_updates=3/3`, `known_gaps=[]`, `release_verdict=ready`) plus generated GUI `build/local_gui/_ext_energy_init_probe_1`
 - the next new-country extended-focus runtime tranche is now also closed in ready-state evidence with `--pilot-set extended-focus-crisis-initial` and probe `RUN-LIVE-EXT-CRISIS-INIT-001` (`run_status=success`, `failed_sources=none`, `countries_with_updates=3/3`, `known_gaps=[]`, `release_verdict=ready`) plus generated GUI `build/local_gui/_ext_crisis_init_probe_1`
 - runtime support now includes `SAU`, `QAT`, `EGY`, `NGA`, `SDN`, and `MMR` with governed mappings, expected domains, pilot-set semantics, and regression coverage
-- with this tranche now closed without known gaps, the next package should move to the first control/reference runtime slice (`CHE`, `NLD`, `SWE`)
+- the validation realism snapshot is now explicit in the GUI: non-perfect portfolio cases are surfaced with a dedicated KPI and snapshot table instead of remaining buried in the detail table
+- with this tranche now closed without known gaps, the next package should move to runtime/source breadth expansion (or the next highest-value governed breadth package called out by the matrix)
 
 After that, proceed with the strongest remaining breadth package indicated by the capability matrix.
