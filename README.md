@@ -88,6 +88,10 @@ Linux/macOS:
 
 `PYTHONPATH=src /opt/hermes/.venv/bin/python scripts/build_operational_latest_bundle.py --run-id RUN-LIVE-LATEST-001 --artifacts-dir build/run_artifacts/latest --gui-output-dir build/local_gui/latest --history-db build/run_history/latest_runs.sqlite`
 
+Für ein explizites breiteres `focus-complete`-Bundle im degradierten Modus (wenn man `partial_success` und Quellfehler akzeptieren will):
+
+`PYTHONPATH=src /opt/hermes/.venv/bin/python scripts/build_operational_latest_bundle.py --run-id RUN-LIVE-FOCUS-LATEST-DEG-001 --pilot-set focus-complete --allow-partial-success --allow-failed-sources --artifacts-dir build/run_artifacts/latest_focus_complete_degraded --gui-output-dir build/local_gui/latest_focus_complete_degraded --history-db build/run_history/latest_runs_focus_complete_degraded.sqlite`
+
 Windows/PyCharm (PowerShell im Projekt-Root):
 
 `$env:PYTHONPATH="src"; .\.venv\Scripts\python.exe .\scripts\build_operational_latest_bundle.py --run-id RUN-LIVE-LATEST-001 --artifacts-dir build/run_artifacts/latest --gui-output-dir build/local_gui/latest --history-db build/run_history/latest_runs.sqlite`

@@ -162,6 +162,7 @@ Current Step-A closure status:
 - AP-A1 completed: operational `latest` is now built from the broader governed `extended-focus-complete` 11-country set
 - live closure evidence: `RUN-LIVE-EXT-FOCUS-LATEST-005`
 - artifact evidence: `build/run_artifacts/latest/readmodels/readiness.json` reports `release_verdict=ready`, `known_gaps=[]`
+- explicit degraded-mode evidence: `RUN-LIVE-FOCUS-LATEST-DEG-001` completed with `run_status=partial_success`, `pilot_set=focus-complete`, and preserved `build/run_artifacts/latest_focus_complete_degraded/` + `build/local_gui/latest_focus_complete_degraded/` outputs when `allow_partial_success` and `allow_failed_sources` were enabled
 - GUI evidence: `build/local_gui/latest/index.html`
 - implementation hardening added broader-run GDELT DOC recovery budget (`max_retry_delay_seconds=180`, full-batch retry cooldown `120s`) plus broader-run request timeout (`90s`) so the 11-country `latest` path is operationally stable
 
