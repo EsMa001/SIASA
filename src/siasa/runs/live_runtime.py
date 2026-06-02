@@ -918,7 +918,7 @@ def main(argv: list[str] | None = None) -> int:
         dest="country_ids",
         help=(
             "Governed live pilot country ISO3. Repeat for multi-country runs; "
-            "supported: UKR, POL, ISR, TWN, RUS, CHN, IND, IRN, TUR, PAK, GEO, USA, DEU, EST, FIN, SAU, QAT, EGY, NGA, SDN, MMR."
+            "supported: UKR, POL, ISR, TWN, RUS, CHN, IND, IRN, TUR, PAK, GEO, USA, DEU, EST, FIN, SAU, QAT, EGY, NGA, SDN, MMR, CHE, NLD, SWE, NOR, CAN, AUS, NZL, PRT, IRL."
         ),
     )
     parser.add_argument(
@@ -934,7 +934,11 @@ def main(argv: list[str] | None = None) -> int:
             "'extended-focus-initial' expands to USA,DEU,EST,FIN; "
             "'extended-focus-broader' expands to USA,DEU,EST,FIN,POL; "
             "'extended-focus-energy-initial' expands to SAU,QAT,EGY; "
-            "'extended-focus-crisis-initial' expands to NGA,SDN,MMR."
+            "'extended-focus-crisis-initial' expands to NGA,SDN,MMR; "
+            "'control-reference-initial' expands to CHE,NLD,SWE; "
+            "'control-reference-broader' expands to NOR,CAN,AUS; "
+            "'control-reference-third' expands to NZL,PRT,IRL; "
+            "'control-reference-complete' expands to NOR,CHE,SWE,NLD,IRL,PRT,NZL,CAN,AUS."
         ),
     )
     parser.add_argument(
