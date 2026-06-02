@@ -165,6 +165,7 @@ Current Step-A closure status:
 - explicit degraded-mode evidence: `RUN-LIVE-FOCUS-LATEST-DEG-001` completed with `run_status=partial_success`, `pilot_set=focus-complete`, and preserved `build/run_artifacts/latest_focus_complete_degraded/` + `build/local_gui/latest_focus_complete_degraded/` outputs when `allow_partial_success` and `allow_failed_sources` were enabled
 - GUI evidence: `build/local_gui/latest/index.html`
 - implementation hardening added broader-run GDELT DOC recovery budget (`max_retry_delay_seconds=180`, full-batch retry cooldown `120s`) plus broader-run request timeout (`90s`) so the 11-country `latest` path is operationally stable
+- ReliefWeb runtime breadth is now code-wired but provider-gated: governed live runtime activates `SRC-RELIEFWEB` automatically only when `RELIEFWEB_APPNAME` is configured, so Domain-C breadth can grow without breaking default runs in unregistered environments
 
 ### Step B: Analyst interpretation and actionability depth
 
@@ -494,6 +495,7 @@ Current rationale:
 - the trend/domain baseline-historical interpretation gap has been closed for the current static GUI baseline
 - the comparison workflow now also supports reference-relative interpretation, so analysts can compare countries against an explicit baseline instead of only scanning a flat list
 - the source-lineage / epidemiology package is now also more scan-oriented because the strongest dependency/spread/amplification hotspots are summarized in one matrix instead of requiring analysts to read multiple separate blocks
+- runtime/source breadth has also advanced one more step on the real-source side: ReliefWeb is no longer only an isolated adapter but a governed live-runtime option once provider registration exists
 - the first source-dependency / source-origin groundwork slice is now also present in the traceability view without overclaiming full origin inference
 - the readiness-honesty closure slice is now also in place: artifact presence/absence is explicit and `validation_backtest` is visibly present in the current latest bundle
 - the latest runtime-hardening slice (`d7f6a85`) now also retries isolated `SRC-GDELT-EVENTS` partial-success failures and is backed by representative live evidence (`RUN-LIVE-REP-RETRY-EVT-001`: `run_status=success`, `failed_sources=none`, `countries_with_updates=4/4`, `release_verdict=ready`)
