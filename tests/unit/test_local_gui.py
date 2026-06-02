@@ -799,6 +799,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     coverage_html = (pages.output_dir / "coverage.html").read_text()
     assert "Source / Coverage View" in coverage_html
     assert "Trust Summary" in coverage_html
+    assert "Source status summary keeps live, failed, degraded, and prepared-adapter access visible at a glance." in coverage_html
+    assert "Source Status" in coverage_html
+    assert "failed" in coverage_html
+    assert "prepared_adapter" in coverage_html
     assert "Coverage / Confidence Matrix" in coverage_html
     assert "Country Coverage / Gap Matrix" in coverage_html
     assert "Gap Cause" in coverage_html
@@ -810,7 +814,6 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "partial_success" in coverage_html
     assert "failed_source:SRC-B" in coverage_html
     assert "ACLED" in coverage_html
-    assert "prepared_adapter" in coverage_html
     assert "Degraded Sources" in coverage_html
 
     reports_html = (pages.output_dir / "reports.html").read_text()

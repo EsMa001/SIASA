@@ -2422,11 +2422,20 @@ def _render_source_coverage(
         f"<li>{html.escape(str(item))}</li>"
         for item in source_coverage_read_model.get('degraded_sources', [])
     ) or "<li>none</li>"
+    source_status_summary_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(status))}</td>"
+        f"<td>{html.escape(str(count))}</td>"
+        "</tr>"
+        for status, count in sorted(source_coverage_read_model.get('source_status_summary', {}).items())
+    ) or "<tr><td colspan='2'>No source status summary available.</td></tr>"
     body = (
         "<h2>Source / Coverage View</h2>"
         "<h3>Trust Summary</h3>"
         f"<p>Run status: <span class='status'>{html.escape(str(system_status_read_model.get('run_status', 'n/a')))}</span></p>"
-        f"<p>Status summary: {html.escape(str(source_coverage_read_model.get('source_status_summary', {})))}</p>"
+        "<p>Source status summary keeps live, failed, degraded, and prepared-adapter access visible at a glance.</p>"
+        "<table><thead><tr><th>Source Status</th><th>Count</th></tr></thead>"
+        f"<tbody>{source_status_summary_rows}</tbody></table>"
         f"<h4>Data Gaps / Trust Limits</h4><ul>{trust_gaps}</ul>"
         f"<h4>Degraded Sources</h4><ul>{degraded_sources}</ul>"
         f"{_render_country_coverage_matrix(coverage_visibility)}"

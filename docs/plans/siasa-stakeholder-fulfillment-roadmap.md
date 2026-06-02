@@ -110,7 +110,7 @@ Current repo-evidenced status on branch `hermes/repo-scaffold`:
   - coverage/confidence/uncertainty visualization exists
   - semantic view projections and trend event overlays exist
 - P4 is now materially advanced:
-  - source-gap transparency is visible through country gap watchlists, remediation watchlists, priority/depth summaries, and freshness overlays in overview/map-facing views
+  - source-gap transparency is visible through country gap watchlists, remediation watchlists, priority/depth summaries, freshness overlays, and the structured source-status summary in overview/map-facing views
   - analyst annotation create/edit workflow now exists as a governed static-site workflow baseline
   - baseline/historical comparison overlays on trends and domain views now exist as analyst-friendly comparison summaries
   - source-dependency cluster candidates and explicit source-origin groundwork are now visible in the traceability view
