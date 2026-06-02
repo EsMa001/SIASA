@@ -871,6 +871,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "mw-panel-right" in comparison_html
     assert "multi-window-panels" in comparison_html
     assert "renderMWPanel" in comparison_html
+    assert "comparison-mode" in comparison_html
+    assert "comparison-baseline" in comparison_html
+    assert "renderComparisonBaseline" in comparison_html
 
     validation_html = (pages.output_dir / "validation.html").read_text()
     assert "Validation / Backtest" in validation_html
@@ -1677,9 +1680,16 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "POL" in comparison_html and "UKR" in comparison_html
     assert "option value='low_coverage'" in comparison_html
     assert "option value='low_confidence'" in comparison_html
+    assert "option value='relative_baseline'" in comparison_html
+    assert "comparison-baseline-controls" in comparison_html
+    assert "comparison-relative-summary" in comparison_html
+    assert "Relative Baseline Summary" in comparison_html
     assert "data-coverage-band='low'" in comparison_html
     assert "data-confidence-band='low'" in comparison_html
+    assert "comparison-baseline-cell" in comparison_html
     assert "function applyComparisonFilters()" in comparison_html
+    assert "function renderComparisonBaseline()" in comparison_html
+    assert "formatSignedDelta" in comparison_html
     assert "Country Coverage / Gap Matrix" in coverage_html
     assert "Freshness Band Summary" in coverage_html
     assert "fresh" in coverage_html
