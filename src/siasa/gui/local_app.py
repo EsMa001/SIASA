@@ -13,6 +13,7 @@ from urllib.parse import quote, quote_plus
 
 from siasa.catalog import load_country_set
 from siasa.readmodels.readiness import build_readiness_view_model
+from siasa.readmodels.release_demo_package import build_release_demo_package_view_model, render_release_demo_package_body
 from siasa.readmodels.release_evidence import build_release_readiness_index
 from siasa.readmodels.release_gate import build_release_gate_view_model
 from siasa.readmodels.stakeholder_e2e_flow_coverage import build_stakeholder_e2e_flow_coverage_report
@@ -43,6 +44,7 @@ def _page(title: str, body: str, *, nav_prefix: str = '', available_pages: set[s
         ('validation.html', '✅ Validation'),
         ('traceability.html', '🔗 Traceability'),
         ('annotations.html', '📝 Annotations'),
+        ('release_package.html', '📦 Release Package'),
         ('reports.html', '📄 Reports'),
         ('runs.html', '⚙ System'),
         ('readiness.html', '🚦 Readiness'),
@@ -1720,6 +1722,10 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
     readiness_view_path = readmodels_dir / 'readiness.json'
     if readiness_view_path.exists():
         readiness_view_model = _load_json(readiness_view_path)
+    release_demo_package_view_model = None
+    release_demo_package_view_path = readmodels_dir / 'release_demo_package.json'
+    if release_demo_package_view_path.exists():
+        release_demo_package_view_model = _load_json(release_demo_package_view_path)
     release_gate_view_model = None
     release_gate_view_path = readmodels_dir / 'release_gate.json'
     if release_gate_view_path.exists():
@@ -1829,6 +1835,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
         'repo_closure_view_model': repo_closure_view_model,
         'annotations_view_model': annotations_view_model,
         'readiness_view_model': readiness_view_model,
+        'release_demo_package_view_model': release_demo_package_view_model,
         'release_gate_view_model': release_gate_view_model,
         'stakeholder_functional_closure_view_model': stakeholder_functional_closure_view_model,
         'stakeholder_e2e_flow_coverage_view_model': stakeholder_e2e_flow_coverage_view_model,
@@ -5132,6 +5139,7 @@ def build_local_mvp_site(
     repo_closure_view_model: dict[str, Any] | None = None,
     validation_view_model: dict[str, Any] | None = None,
     readiness_view_model: dict[str, Any] | None = None,
+    release_demo_package_view_model: dict[str, Any] | None = None,
     release_gate_view_model: dict[str, Any] | None = None,
     stakeholder_functional_closure_view_model: dict[str, Any] | None = None,
     stakeholder_e2e_flow_coverage_view_model: dict[str, Any] | None = None,
@@ -5176,6 +5184,7 @@ def build_local_mvp_site(
         'events.html',
         'comparison.html',
         'readiness.html',
+        'release_package.html',
     }
 
     if normalized_role == 'viewer':
@@ -5336,6 +5345,21 @@ def build_local_mvp_site(
             traceability_view_model=traceability_view_model,
             repo_closure_view_model=repo_closure_view_model,
         )
+    if release_demo_package_view_model is None:
+        release_demo_package_view_model = build_release_demo_package_view_model(
+            readiness_view_model=readiness_view_model,
+            release_gate_view_model=release_gate_view_model,
+            operator_release_summary_view_model=operator_release_summary_view_model,
+            operator_blocker_causality_view_model=operator_blocker_causality_view_model,
+            operator_operability_cluster_view_model=operator_operability_cluster_view_model,
+            operator_stale_remediation_action_plan_view_model=operator_stale_remediation_action_plan_view_model,
+            system_status_read_model=system_status_read_model,
+            validation_view_model=validation_view_model,
+            traceability_view_model=traceability_view_model,
+            repo_closure_view_model=repo_closure_view_model,
+            analyst_briefing_view_model=analyst_briefing_view_model,
+            available_pages=available_pages,
+        )
 
     readiness_file = output_dir / 'readiness.html'
     readiness_file.write_text(
@@ -5366,6 +5390,15 @@ def build_local_mvp_site(
     readiness_json_file = output_dir / 'readiness.json'
     readiness_json_file.write_text(json.dumps(readiness_view_model, indent=2, sort_keys=True), encoding='utf-8')
     generated_files.append(readiness_json_file)
+    release_demo_package_file = output_dir / 'release_package.html'
+    release_demo_package_file.write_text(
+        _page('Release / Demo Package', render_release_demo_package_body(release_demo_package_view_model), nav_prefix='', available_pages=available_pages),
+        encoding='utf-8',
+    )
+    generated_files.append(release_demo_package_file)
+    release_demo_package_json_file = output_dir / 'release_demo_package.json'
+    release_demo_package_json_file.write_text(json.dumps(release_demo_package_view_model, indent=2, sort_keys=True), encoding='utf-8')
+    generated_files.append(release_demo_package_json_file)
     release_gate_json_file = output_dir / 'release_gate.json'
     release_gate_json_file.write_text(json.dumps(release_gate_view_model, indent=2, sort_keys=True), encoding='utf-8')
     generated_files.append(release_gate_json_file)

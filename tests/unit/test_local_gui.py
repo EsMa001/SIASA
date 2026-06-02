@@ -658,6 +658,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert (pages.output_dir / "traceability.html").exists()
     assert (pages.output_dir / "annotations.html").exists()
     assert (pages.output_dir / "readiness.html").exists()
+    assert (pages.output_dir / "release_package.html").exists()
+    assert (pages.output_dir / "release_demo_package.json").exists()
     assert (pages.output_dir / "release_gate.json").exists()
     assert (pages.output_dir / "stakeholder_functional_closure.json").exists()
     assert (pages.output_dir / "stakeholder_e2e_flow_coverage.json").exists()
@@ -955,6 +957,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Gate Verdict" in readiness_html
     assert "Gate Verdict" in readiness_html
     assert "Release Readiness Index" in readiness_html
+    assert "Release / Demo Package" in (pages.output_dir / "release_package.html").read_text()
+    assert "Prioritized items" in (pages.output_dir / "release_package.html").read_text()
+    assert "Demo sequence" in (pages.output_dir / "release_package.html").read_text()
+    assert "Evidence bundle" in (pages.output_dir / "release_package.html").read_text()
     assert "stakeholder_e2e_flows_covered" in readiness_html
     assert "Stakeholder E2E Flow Coverage (AP-04/AP-05)" in readiness_html
     assert "Stakeholder E2E UI Smoke Coverage (AP-07/AP-08)" in readiness_html

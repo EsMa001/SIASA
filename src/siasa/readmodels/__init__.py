@@ -4,6 +4,7 @@ from .annotations import build_annotations_view_model
 from .country_profile import build_country_profile_read_model
 from .domain_detail import build_domain_detail_read_model
 from .readiness import build_readiness_view_model
+from .release_demo_package import build_release_demo_package_view_model, render_release_demo_package_body
 from .release_evidence import (
     build_release_failure_drill_report,
     build_release_readiness_index,
@@ -38,6 +39,8 @@ __all__ = [
     "build_country_profile_read_model",
     "build_domain_detail_read_model",
     "build_readiness_view_model",
+    "build_release_demo_package_view_model",
+    "render_release_demo_package_body",
     "build_release_failure_drill_report",
     "build_release_readiness_index",
     "build_repo_release_gate_assessment",

@@ -15,6 +15,7 @@ from siasa.readmodels.annotations import build_annotations_view_model
 from siasa.readmodels.country_profile import build_country_profile_read_model
 from siasa.readmodels.domain_detail import build_domain_detail_read_model
 from siasa.readmodels.readiness import build_readiness_view_model
+from siasa.readmodels.release_demo_package import build_release_demo_package_view_model
 from siasa.readmodels.release_evidence import build_repo_release_gate_assessment
 from siasa.readmodels.release_gate import build_release_gate_view_model
 from siasa.readmodels.source_coverage import build_source_coverage_read_model
@@ -414,6 +415,7 @@ def write_run_artifacts(
         "events.html",
         "comparison.html",
         "readiness.html",
+        "release_package.html",
         "traceability.html",
         "annotations.html",
     }
@@ -449,6 +451,31 @@ def write_run_artifacts(
         json.dumps(readiness_view_model, indent=2, sort_keys=True)
     )
     readmodel_paths.append(readiness_path)
+
+    release_demo_package_path = readmodels_dir / "release_demo_package.json"
+    release_demo_package_path.write_text(
+        json.dumps(
+            build_release_demo_package_view_model(
+                readiness_view_model=readiness_view_model,
+                release_gate_view_model=build_release_gate_view_model(
+                    readiness_view_model=readiness_view_model,
+                    traceability_integrity_report=build_traceability_integrity_report(repo_root=Path(__file__).resolve().parents[3]),
+                ),
+                operator_release_summary_view_model=None,
+                operator_blocker_causality_view_model=None,
+                operator_operability_cluster_view_model=None,
+                operator_stale_remediation_action_plan_view_model=None,
+                system_status_read_model=json.loads(system_status_path.read_text()),
+                validation_view_model=validation_view_model,
+                traceability_view_model=json.loads(traceability_path.read_text()),
+                repo_closure_view_model=json.loads(repo_closure_path.read_text()),
+                available_pages=readiness_available_pages,
+            ),
+            indent=2,
+            sort_keys=True,
+        )
+    )
+    readmodel_paths.append(release_demo_package_path)
 
     traceability_integrity_path = readmodels_dir / "traceability_integrity.json"
     traceability_integrity_path.write_text(
