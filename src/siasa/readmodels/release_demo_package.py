@@ -357,6 +357,27 @@ def build_release_demo_package_view_model(
         ],
         'signoff_readiness': 'ready_for_review' if package_status in {'ready', 'attention'} else 'blocked_for_signoff',
     }
+    stakeholder_cover_sheet = {
+        'audience': 'management / external stakeholder reviewer',
+        'requested_decision': (
+            'Approve external review handoff and proceed with stakeholder walkthrough.'
+            if package_status in {'ready', 'attention'}
+            else 'Do not distribute externally until the blocking package issue is resolved.'
+        ),
+        'top_3_caveats': (top_blockers + explicit_limitations)[:3] or ['No explicit caveats recorded.'],
+        'start_here': {
+            'page_name': review_sequence[0].get('page_name', 'readiness.html'),
+            'page_label': review_sequence[0].get('page_label', _page_label('readiness.html')),
+            'reason': 'Confirm gate posture before sharing the rest of the package externally.',
+        },
+        'external_share_summary': {
+            'recommendation': executive_decision_summary['recommendation'],
+            'package_status': package_status,
+            'canonical_artifact': reviewer_handoff_summary['canonical_handoff_artifact'],
+            'supporting_artifacts': reviewer_handoff_summary['share_now'],
+            'primary_focus': source_items[0].get('title', 'n/a'),
+        },
+    }
 
     return {
         'generated_at_utc': datetime.now(UTC).isoformat(),
@@ -387,6 +408,7 @@ def build_release_demo_package_view_model(
         'executive_decision_summary': executive_decision_summary,
         'reviewer_handoff_summary': reviewer_handoff_summary,
         'review_signoff_scaffold': review_signoff_scaffold,
+        'stakeholder_cover_sheet': stakeholder_cover_sheet,
         'evidence_items': [{'label': label, 'value': value} for label, value in evidence_items],
         'priority_target_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
         'source_item_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
@@ -468,6 +490,19 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     signoff_readiness = html.escape(str(signoff_scaffold.get('signoff_readiness', 'n/a')))
     signoff_rationale = ''.join(f"<li>{html.escape(str(item))}</li>" for item in signoff_scaffold.get('bounded_rationale', [])) or '<li>none</li>'
     signoff_followups = ''.join(f"<li>{html.escape(str(item))}</li>" for item in signoff_scaffold.get('follow_up_actions', [])) or '<li>none</li>'
+    stakeholder_cover_sheet = dict(view_model.get('stakeholder_cover_sheet', {})) if isinstance(view_model.get('stakeholder_cover_sheet'), dict) else {}
+    cover_sheet_audience = html.escape(str(stakeholder_cover_sheet.get('audience', 'n/a')))
+    cover_sheet_requested_decision = html.escape(str(stakeholder_cover_sheet.get('requested_decision', 'n/a')))
+    cover_sheet_top_caveats = ''.join(f"<li>{html.escape(str(item))}</li>" for item in stakeholder_cover_sheet.get('top_3_caveats', [])) or '<li>none</li>'
+    cover_sheet_start_here = dict(stakeholder_cover_sheet.get('start_here', {})) if isinstance(stakeholder_cover_sheet.get('start_here'), dict) else {}
+    cover_sheet_start_here_label = html.escape(str(cover_sheet_start_here.get('page_label', 'n/a')))
+    cover_sheet_start_here_page = html.escape(str(cover_sheet_start_here.get('page_name', 'n/a')))
+    cover_sheet_start_here_reason = html.escape(str(cover_sheet_start_here.get('reason', 'n/a')))
+    external_share_summary = dict(stakeholder_cover_sheet.get('external_share_summary', {})) if isinstance(stakeholder_cover_sheet.get('external_share_summary'), dict) else {}
+    external_share_summary_html = ''.join(
+        f"<li><strong>{html.escape(str(key).replace('_', ' ').title())}</strong>: {html.escape(str(value))}</li>"
+        for key, value in external_share_summary.items()
+    ) or '<li>none</li>'
     evidence_rows = ''.join(
         '<tr>'
         f"<td>{html.escape(str(item.get('label', '')))}</td>"
@@ -536,6 +571,15 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<p><strong>Sign-off readiness</strong>: {signoff_readiness}</p>"
         f"<div><strong>Bounded rationale</strong><ul>{signoff_rationale}</ul></div>"
         f"<div><strong>Follow-up actions</strong><ul>{signoff_followups}</ul></div>"
+        "</section>"
+        "<section class='panel'>"
+        "<div class='panel-header'>Stakeholder cover sheet</div>"
+        f"<p><strong>Audience</strong>: {cover_sheet_audience}</p>"
+        f"<p><strong>Requested decision</strong>: {cover_sheet_requested_decision}</p>"
+        f"<div><strong>Top 3 caveats</strong><ul>{cover_sheet_top_caveats}</ul></div>"
+        f"<p><strong>Start here</strong>: {cover_sheet_start_here_label} ({cover_sheet_start_here_page})</p>"
+        f"<p>{cover_sheet_start_here_reason}</p>"
+        f"<div><strong>External-share summary</strong><ul>{external_share_summary_html}</ul></div>"
         "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Evidence bundle</div>"

@@ -1112,6 +1112,12 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Decision date" in (pages.output_dir / "release_package.html").read_text()
     assert "Bounded rationale" in (pages.output_dir / "release_package.html").read_text()
     assert "Follow-up actions" in (pages.output_dir / "release_package.html").read_text()
+    assert "Stakeholder cover sheet" in (pages.output_dir / "release_package.html").read_text()
+    assert "Audience" in (pages.output_dir / "release_package.html").read_text()
+    assert "Requested decision" in (pages.output_dir / "release_package.html").read_text()
+    assert "Top 3 caveats" in (pages.output_dir / "release_package.html").read_text()
+    assert "Start here" in (pages.output_dir / "release_package.html").read_text()
+    assert "External-share summary" in (pages.output_dir / "release_package.html").read_text()
     assert "Evidence bundle" in (pages.output_dir / "release_package.html").read_text()
     assert "stakeholder_e2e_flows_covered" in readiness_html
     assert "Stakeholder E2E Flow Coverage (AP-04/AP-05)" in readiness_html
