@@ -4180,6 +4180,10 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         for tier in attention_tiers
     )
     attention_filter_script = """
+<style>
+.replay-attention-focus-active{box-shadow:0 0 0 1px rgba(78,222,163,.45), 0 0 18px rgba(78,222,163,.12);border-left-color:#4edea3 !important;background:rgba(78,222,163,.05);}
+.replay-attention-focus-panel-active{border-color:rgba(78,222,163,.35);}
+</style>
 <script>
 (function(){
   const levelFilter=document.getElementById('replay-attention-level-filter');
@@ -4191,9 +4195,11 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
   const resetButton=document.getElementById('replay-attention-reset');
   const copyLinkButton=document.getElementById('replay-attention-copy-link');
   const visibleCountNode=document.getElementById('replay-attention-visible-count');
+  const focusTargetCountNode=document.getElementById('replay-attention-focus-target-count');
   const activeStateNode=document.getElementById('replay-attention-active-state');
   const verdictBreakdownNode=document.getElementById('replay-attention-visible-verdict-breakdown');
   const linkStatusNode=document.getElementById('replay-attention-link-status');
+  const attentionPanelNode=document.getElementById('replay-attention-panel');
   const cards=Array.from(document.querySelectorAll('.replay-attention-card'));
   const hashPrefix='ra=';
 
@@ -4220,6 +4226,17 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
       tier: ((tierFilter&&tierFilter.value)||'all').toLowerCase(),
       text: ((textFilter&&textFilter.value)||'').trim(),
     };
+  }
+
+  function hasReplayAttentionFocus(state){
+    return Boolean(
+      (state.level && state.level!=='all') ||
+      (state.owner && state.owner!=='all') ||
+      (state.reason && state.reason!=='all') ||
+      (state.verdict && state.verdict!=='all') ||
+      (state.tier && state.tier!=='all') ||
+      state.text
+    );
   }
 
   function serializeReplayAttentionState(state){
@@ -4285,6 +4302,21 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
     }
   }
 
+  function applyReplayAttentionFocusState(state, matchingCards){
+    const focusActive=hasReplayAttentionFocus(state);
+    cards.forEach((card)=>card.classList.remove('replay-attention-focus-active'));
+    if(attentionPanelNode){attentionPanelNode.classList.toggle('replay-attention-focus-panel-active', focusActive);}
+    if(focusTargetCountNode){focusTargetCountNode.textContent=String(focusActive ? matchingCards.length : 0);}
+    if(!focusActive){
+      return;
+    }
+    matchingCards.forEach((card)=>card.classList.add('replay-attention-focus-active'));
+    const firstCard=matchingCards[0];
+    if(firstCard && typeof firstCard.scrollIntoView==='function'){
+      firstCard.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  }
+
   function applyReplayAttentionFilters(options){
     const settings=options||{};
     const persistHash=settings.persistHash!==false;
@@ -4297,6 +4329,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
     const text=state.text.toLowerCase();
     let visibleCount=0;
     const verdictCounts={};
+    const matchingCards=[];
     cards.forEach((card)=>{
       const cardLevel=(card.dataset.attentionLevel||'').toLowerCase();
       const cardOwner=(card.dataset.attentionOwner||'').toLowerCase();
@@ -4314,6 +4347,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
       card.style.display=show?'':'none';
       if(show){
         visibleCount+=1;
+        matchingCards.push(card);
         const key=cardVerdict||'n/a';
         verdictCounts[key]=(verdictCounts[key]||0)+1;
       }
@@ -4324,6 +4358,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
       const breakdown=Object.keys(verdictCounts).sort().map((key)=>`${key}=${verdictCounts[key]}`).join(' | ');
       verdictBreakdownNode.textContent=breakdown || 'none';
     }
+    applyReplayAttentionFocusState(state, matchingCards);
     if(persistHash){
       persistReplayAttentionStateToHash(state);
     }
@@ -4353,7 +4388,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
 </script>
 """
     attention_panel = (
-        f"<div class='panel'><div class='panel-header'>Replay Attention Watchlist {attention_badge}</div>"
+        f"<div class='panel' id='replay-attention-panel'><div class='panel-header'>Replay Attention Watchlist {attention_badge}</div>"
         "<div class='controls-bar'>"
         "<label for='replay-attention-level-filter'>Level</label>"
         f"<select id='replay-attention-level-filter'><option value='all'>All levels</option>{attention_level_options}</select>"
@@ -4372,6 +4407,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         "</div>"
         "<p style='font-size:11px;color:#6b7d99;margin-bottom:10px;font-family:Space Grotesk,monospace;'>"
         "Visible attention cases: <strong id='replay-attention-visible-count'>0</strong> | "
+        "Focus targets: <strong id='replay-attention-focus-target-count'>0</strong> | "
         "<span id='replay-attention-active-state'>Active: default</span> | "
         "Visible verdict mix: <span id='replay-attention-visible-verdict-breakdown'>none</span> | "
         "Link status: <span id='replay-attention-link-status'>ready</span>"

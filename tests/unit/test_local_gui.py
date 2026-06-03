@@ -1021,10 +1021,12 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "replay-attention-reset" in validation_html
     assert "replay-attention-copy-link" in validation_html
     assert "replay-attention-visible-count" in validation_html
+    assert "replay-attention-focus-target-count" in validation_html
     assert "replay-attention-active-state" in validation_html
     assert "replay-attention-visible-verdict-breakdown" in validation_html
     assert "replay-attention-link-status" in validation_html
     assert "applyReplayAttentionFilters" in validation_html
+    assert "applyReplayAttentionFocusState" in validation_html
     assert "renderReplayAttentionActiveState" in validation_html
     assert "persistReplayAttentionStateToHash" in validation_html
     assert "applyReplayAttentionStateFromHash" in validation_html
@@ -1038,6 +1040,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "verdictCounts" in validation_html
     assert "resetReplayAttentionFilters" in validation_html
     assert "replay-attention-card" in validation_html
+    assert "replay-attention-focus-active" in validation_html
+    assert "replay-attention-focus-target-count" in validation_html
+    assert "scrollIntoView({behavior:'smooth', block:'center'})" in validation_html
     assert "id='attention-case-" in validation_html
     assert "hashPrefix='ra='" in validation_html
     assert "suggested_next_action" in validation_html or "Suggested action" in validation_html

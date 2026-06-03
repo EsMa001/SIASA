@@ -211,6 +211,9 @@ Current Step-B progress:
 - B-5 completed: Coverage prefill handoffs now land in a visibly focused state instead of only showing passive query metadata
 - current B-5 artifact fields: row-level `coverage-focus-target` metadata (`data-focus-country`, `data-focus-section`, `data-missing-domains`), focus-section anchors `coverage-focus-section-stale-priority` / `coverage-focus-section-country-gap`, JS hook `applyCoverageFocusState()`, summary field `focus_target_count`, and CSS states `coverage-focus-target-active` / `coverage-focus-target-dim`
 - current B-5 validation evidence: `tests/unit/test_local_gui.py` plus full-suite pass (`467 passed`)
+- B-6 completed: Validation prefill handoffs now land on a visibly emphasized replay-attention slice instead of only applying hidden hash-filter state
+- current B-6 artifact fields: `replay-attention-panel`, focus summary KPI `replay-attention-focus-target-count`, helpers `hasReplayAttentionFocus()` / `applyReplayAttentionFocusState()`, CSS states `replay-attention-focus-active` / `replay-attention-focus-panel-active`, and first-target auto-scroll for hash-prefilled replay-attention focus
+- current B-6 validation evidence: `tests/unit/test_local_gui.py` plus full-suite pass (`467 passed`)
 
 ### Step C: Demo/release productization
 
