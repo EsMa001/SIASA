@@ -237,11 +237,14 @@ Expected outcome of Step C:
 Current Step-C progress:
 - C-1 completed: a dedicated Release / Demo Package surface now bundles readiness, gate, traceability, validation, and operability signals into one reviewable package
 - C-2 completed: a dedicated Release / Failure Drill page now surfaces baseline and no-go drill scenarios as a separate reviewable operator surface
+- C-3 completed: the Release / Demo Package now includes a guided stakeholder review sequence instead of only static summary panels
 - current GUI evidence: `build/local_gui/latest/release_package.html`
 - current drill GUI evidence: `build/local_gui/latest/release_failure_drill.html`
 - current machine-readable package artifact: `build/local_gui/latest/release_demo_package.json`
 - current machine-readable drill artifact: `build/local_gui/latest/readmodels/release_failure_drill_report.json`
+- current C-3 artifact fields: `review_sequence` with steps `C3-01..C3-06`, phase/objective/reviewer-question/expected-signal fields, and rendered `Guided review sequence` panel in `release_package.html`
 - current implementation evidence: `src/siasa/readmodels/release_demo_package.py`, `src/siasa/readmodels/release_evidence.py`, `src/siasa/gui/local_app.py`
+- current C-3 validation evidence: `tests/unit/test_local_gui.py` plus full-suite pass (`467 passed`)
 
 ### Recommended serial execution rule
 

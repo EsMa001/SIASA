@@ -225,6 +225,74 @@ def build_release_demo_package_view_model(
         ('Source pages', ', '.join(sorted(page for page in {item.get('target_page', '') for item in source_items} if page))),
         ('Available pages', str(len(available_pages))),
     ]
+    review_sequence = [
+        {
+            'step_id': 'C3-01',
+            'phase': 'Gate posture',
+            'page_label': _page_label('readiness.html'),
+            'page_name': 'readiness.html',
+            'objective': 'Confirm whether the package is reviewable at all before diving into details.',
+            'reviewer_question': 'Are release verdict, demo verdict, and gate verdict aligned enough to continue the walkthrough?',
+            'expected_signal': f"release={release_verdict}, demo={demo_verdict}, gate={gate_verdict}",
+            'available': 'readiness.html' in available_pages,
+            'href': 'readiness.html' if 'readiness.html' in available_pages else '',
+        },
+        {
+            'step_id': 'C3-02',
+            'phase': 'Primary focus',
+            'page_label': _page_label(source_items[0].get('target_page', 'readiness.html')),
+            'page_name': str(source_items[0].get('target_page', 'readiness.html')),
+            'objective': 'Inspect the highest-priority current review item first.',
+            'reviewer_question': str(source_items[0].get('recommended_next_check', 'Inspect the primary review item.')),
+            'expected_signal': str(source_items[0].get('title', 'n/a')),
+            'available': str(source_items[0].get('target_page', '')) in available_pages,
+            'href': str(source_items[0].get('target_page', '')) if str(source_items[0].get('target_page', '')) in available_pages else '',
+        },
+        {
+            'step_id': 'C3-03',
+            'phase': 'Coverage posture',
+            'page_label': _page_label('coverage.html'),
+            'page_name': 'coverage.html',
+            'objective': 'Check whether geographic/source coverage gaps undermine stakeholder confidence.',
+            'reviewer_question': 'Do coverage gaps or stale-priority queues change the interpretation of the current package?',
+            'expected_signal': 'country gaps and stale-priority cues are explicit and bounded',
+            'available': 'coverage.html' in available_pages,
+            'href': 'coverage.html' if 'coverage.html' in available_pages else '',
+        },
+        {
+            'step_id': 'C3-04',
+            'phase': 'Validation posture',
+            'page_label': _page_label('validation.html'),
+            'page_name': 'validation.html',
+            'objective': 'Verify whether replay-attention evidence supports or weakens the current storyline.',
+            'reviewer_question': 'Which replay-attention slice most directly challenges the current package conclusion?',
+            'expected_signal': 'attention cases, verdict mix, and replay evidence tier stay visible',
+            'available': 'validation.html' in available_pages,
+            'href': 'validation.html' if 'validation.html' in available_pages else '',
+        },
+        {
+            'step_id': 'C3-05',
+            'phase': 'Traceability posture',
+            'page_label': _page_label('traceability.html'),
+            'page_name': 'traceability.html',
+            'objective': 'Confirm that the stakeholder narrative is still anchored in traceable governed evidence.',
+            'reviewer_question': 'Are there traceability or closure-at-risk signals that would block sign-off?',
+            'expected_signal': 'lineage, repo closure, and mapping-health evidence are reviewable',
+            'available': 'traceability.html' in available_pages,
+            'href': 'traceability.html' if 'traceability.html' in available_pages else '',
+        },
+        {
+            'step_id': 'C3-06',
+            'phase': 'Artifact handoff',
+            'page_label': _page_label('reports.html'),
+            'page_name': 'reports.html',
+            'objective': 'Finish with concrete downloadable evidence for follow-up and audit handoff.',
+            'reviewer_question': 'Is the report/export bundle sufficient for offline follow-up and decision logging?',
+            'expected_signal': 'latest report catalog and exports are reachable',
+            'available': 'reports.html' in available_pages,
+            'href': 'reports.html' if 'reports.html' in available_pages else '',
+        },
+    ]
     evidence_rows = ''.join(
         '<tr>'
         f"<td>{html.escape(label)}</td>"
@@ -261,6 +329,7 @@ def build_release_demo_package_view_model(
             }
             for page, description, status in demo_sequence
         ],
+        'review_sequence': review_sequence,
         'evidence_items': [{'label': label, 'value': value} for label, value in evidence_items],
         'priority_target_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
         'source_item_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
@@ -306,6 +375,18 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         '</tr>'
         for item in _as_dict_list(view_model.get('demo_sequence'))
     ) or "<tr><td colspan='5'>No demo sequence available.</td></tr>"
+    review_rows = ''.join(
+        '<tr>'
+        f"<td>{html.escape(str(item.get('step_id', '')))}</td>"
+        f"<td>{html.escape(str(item.get('phase', '')))}</td>"
+        f"<td>{html.escape(str(item.get('page_label', '')))}</td>"
+        f"<td>{html.escape(str(item.get('objective', '')))}</td>"
+        f"<td>{html.escape(str(item.get('reviewer_question', '')))}</td>"
+        f"<td>{html.escape(str(item.get('expected_signal', '')))}</td>"
+        f"<td>{html.escape('yes' if bool(item.get('available')) else 'no')}</td>"
+        '</tr>'
+        for item in _as_dict_list(view_model.get('review_sequence'))
+    ) or "<tr><td colspan='7'>No guided review sequence available.</td></tr>"
     evidence_rows = ''.join(
         '<tr>'
         f"<td>{html.escape(str(item.get('label', '')))}</td>"
@@ -342,6 +423,12 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         "<div class='panel-header'>Demo sequence</div>"
         "<div class='table-wrap'><table><thead><tr><th>Page</th><th>Route</th><th>Description</th><th>Status focus</th><th>Available</th></tr></thead><tbody>"
         f"{demo_rows}"
+        "</tbody></table></div>"
+        "</section>"
+        "<section class='panel'>"
+        "<div class='panel-header'>Guided review sequence</div>"
+        "<div class='table-wrap'><table><thead><tr><th>Step</th><th>Phase</th><th>Page</th><th>Objective</th><th>Reviewer question</th><th>Expected signal</th><th>Available</th></tr></thead><tbody>"
+        f"{review_rows}"
         "</tbody></table></div>"
         "</section>"
         "<section class='panel'>"

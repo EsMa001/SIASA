@@ -1091,6 +1091,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Release / Demo Package" in (pages.output_dir / "release_package.html").read_text()
     assert "Prioritized items" in (pages.output_dir / "release_package.html").read_text()
     assert "Demo sequence" in (pages.output_dir / "release_package.html").read_text()
+    assert "Guided review sequence" in (pages.output_dir / "release_package.html").read_text()
+    assert "Reviewer question" in (pages.output_dir / "release_package.html").read_text()
+    assert "Expected signal" in (pages.output_dir / "release_package.html").read_text()
+    assert "Gate posture" in (pages.output_dir / "release_package.html").read_text()
+    assert "Artifact handoff" in (pages.output_dir / "release_package.html").read_text()
     assert "Evidence bundle" in (pages.output_dir / "release_package.html").read_text()
     assert "stakeholder_e2e_flows_covered" in readiness_html
     assert "Stakeholder E2E Flow Coverage (AP-04/AP-05)" in readiness_html
