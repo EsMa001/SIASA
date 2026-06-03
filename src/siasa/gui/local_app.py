@@ -853,6 +853,27 @@ def _slugify_anchor_token(value: str) -> str:
 
 
 
+def _coverage_prefill_href(*, country_id: str, focus_section: str, missing_domains: list[str] | None = None) -> str:
+    query_parts = [
+        f"focus_country={quote_plus(country_id)}",
+        f"focus_section={quote_plus(focus_section)}",
+    ]
+    if missing_domains:
+        query_parts.append(f"missing_domains={quote_plus(','.join(str(item) for item in missing_domains if str(item)))}")
+    anchor_target = 'stale-priority' if focus_section == 'stale_priority' else 'country-gap'
+    return f"coverage.html?{'&'.join(query_parts)}#{anchor_target}-{_slugify_anchor_token(country_id)}"
+
+
+
+def _validation_prefill_href(*, country_id: str, case_id: str, attention_reason: str) -> str:
+    hash_parts = [
+        f"ra_reason={quote_plus(attention_reason)}",
+        f"ra_text={quote_plus(f'{country_id} {case_id}')}",
+    ]
+    return f"validation.html#ra={'&'.join(hash_parts)}"
+
+
+
 def _build_analyst_country_hotspot_matrix(
     *,
     system_status_read_model: dict[str, Any] | None = None,
@@ -872,6 +893,7 @@ def _build_analyst_country_hotspot_matrix(
                 'freshness_hours': None,
                 'missing_domains': set(),
                 'attention_case_ids': [],
+                'attention_cases': [],
                 'coverage_href': None,
             },
         )
@@ -908,11 +930,14 @@ def _build_analyst_country_hotspot_matrix(
         hotspot = _country_row(country_id)
         hotspot['signals'].add('validation_attention')
         hotspot['attention_case_ids'].append(str(item.get('case_id', 'unknown')))
+        hotspot['attention_cases'].append(dict(item))
 
     rows: list[dict[str, Any]] = []
     for country_id, hotspot in hotspots.items():
         signals = [signal for signal in ('country_gap', 'stale_priority', 'validation_attention') if signal in hotspot['signals']]
         attention_case_ids = sorted(hotspot['attention_case_ids'])
+        top_attention_case = hotspot['attention_cases'][0] if hotspot['attention_cases'] else {}
+        missing_domains = sorted(hotspot['missing_domains'])
         recommended_next_check = 'Coverage review'
         if 'country_gap' in hotspot['signals'] and 'validation_attention' in hotspot['signals']:
             recommended_next_check = 'Coverage + Validation review'
@@ -927,12 +952,25 @@ def _build_analyst_country_hotspot_matrix(
                 'signals': signals,
                 'priority': str(hotspot.get('priority', 'unassigned')),
                 'freshness_hours': hotspot.get('freshness_hours'),
-                'missing_domains': sorted(hotspot['missing_domains']),
+                'missing_domains': missing_domains,
                 'attention_case_count': len(attention_case_ids),
                 'top_attention_case_id': attention_case_ids[0] if attention_case_ids else None,
                 'coverage_href': hotspot.get('coverage_href'),
                 'validation_href': (
                     f"validation.html#attention-case-{_slugify_anchor_token(attention_case_ids[0])}"
+                    if attention_case_ids else None
+                ),
+                'coverage_prefill_href': _coverage_prefill_href(
+                    country_id=country_id,
+                    focus_section='stale_priority' if 'stale_priority' in hotspot['signals'] and 'country_gap' not in hotspot['signals'] else 'country_gap',
+                    missing_domains=missing_domains,
+                ),
+                'validation_prefill_href': (
+                    _validation_prefill_href(
+                        country_id=country_id,
+                        case_id=str(top_attention_case.get('case_id', attention_case_ids[0] if attention_case_ids else 'unknown')),
+                        attention_reason=str(top_attention_case.get('attention_reason', 'validation_attention')),
+                    )
                     if attention_case_ids else None
                 ),
                 'recommended_next_check': recommended_next_check,
@@ -2556,6 +2594,8 @@ def _render_source_coverage(
     ) or "<tr><td colspan='2'>No source status summary available.</td></tr>"
     body = (
         "<h2>Source / Coverage View</h2>"
+        "<pre id='coverage-focus-summary' style='white-space:pre-wrap;background:#0d1117;border:1px solid rgba(78,222,163,.2);border-radius:4px;padding:10px;color:#c9d1d9;'>No coverage focus query parameters detected.</pre>"
+        "<script>(function(){const params=new URLSearchParams(window.location.search);const summary=document.getElementById('coverage-focus-summary');if(!summary){return;}const focusCountry=(params.get('focus_country')||'').trim();const focusSection=(params.get('focus_section')||'').trim();const missingDomains=(params.get('missing_domains')||'').trim();if(!focusCountry&&!focusSection&&!missingDomains){summary.textContent='No coverage focus query parameters detected.';return;}const lines=['Coverage focus summary',`focus_country=${focusCountry||'n/a'}`,`focus_section=${focusSection||'n/a'}`,`missing_domains=${missingDomains||'n/a'}`];summary.textContent=lines.join('\n');})();</script>"
         "<h3>Trust Summary</h3>"
         f"<p>Run status: <span class='status'>{html.escape(str(system_status_read_model.get('run_status', 'n/a')))}</span></p>"
         "<p>Source status summary keeps live, failed, degraded, and prepared-adapter access visible at a glance.</p>"
@@ -3124,8 +3164,8 @@ def _render_readiness(
         f"<td>{html.escape(_format_freshness(row.get('freshness_hours')))}</td>"
         f"<td>{html.escape(str(row.get('recommended_next_check', 'n/a')))}</td>"
         f"<td>{' | '.join(link for link in [
-            (f"<a href=\"{html.escape(str(row.get('coverage_href')))}\">Coverage</a>" if row.get('coverage_href') else ''),
-            (f"<a href=\"{html.escape(str(row.get('validation_href')))}\">Validation</a>" if row.get('validation_href') else ''),
+            (f"<a href=\"{html.escape(str(row.get('coverage_prefill_href') or row.get('coverage_href')))}\">Coverage</a>" if (row.get('coverage_prefill_href') or row.get('coverage_href')) else ''),
+            (f"<a href=\"{html.escape(str(row.get('validation_prefill_href') or row.get('validation_href')))}\">Validation</a>" if (row.get('validation_prefill_href') or row.get('validation_href')) else ''),
         ] if link) or 'n/a'}</td>"
         "</tr>"
         for row in _analyst_hotspot_matrix.get('rows', [])

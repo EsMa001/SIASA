@@ -205,6 +205,9 @@ Current Step-B progress:
 - B-3 completed: hotspot rows now expose direct anchored handoff links into Coverage and Validation so the matrix becomes an executable follow-up surface rather than only a summary table
 - current B-3 artifact fields: `coverage_href`, `validation_href`, readiness `Hotspot Links` column, coverage anchors `country-gap-<ISO3>` / `stale-priority-<ISO3>`, and validation anchors `attention-case-<CASE_ID>`
 - current B-3 validation evidence: `tests/unit/test_local_gui.py` plus full-suite pass (`467 passed`)
+- B-4 completed: hotspot handoff links now also carry prefilled analyst context into the target page instead of only jumping to a static anchor
+- current B-4 artifact fields: `coverage_prefill_href`, `validation_prefill_href`, Coverage `coverage-focus-summary`, and Validation replay-attention hash-prefill reuse via `#ra=...`
+- current B-4 validation evidence: `tests/unit/test_local_gui.py` plus full-suite pass (`467 passed`)
 
 ### Step C: Demo/release productization
 

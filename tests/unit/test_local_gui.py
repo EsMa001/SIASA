@@ -188,12 +188,18 @@ def test_build_analyst_briefing_view_model_adds_country_hotspot_matrix() -> None
     assert hotspot_matrix["rows"][0]["recommended_next_check"] == "Coverage + Validation review"
     assert hotspot_matrix["rows"][0]["coverage_href"] == "coverage.html#country-gap-POL"
     assert hotspot_matrix["rows"][0]["validation_href"] == "validation.html#attention-case-VAL-POL-2024-001"
+    assert hotspot_matrix["rows"][0]["coverage_prefill_href"] == "coverage.html?focus_country=POL&focus_section=country_gap&missing_domains=B%2CD#country-gap-POL"
+    assert hotspot_matrix["rows"][0]["validation_prefill_href"] == "validation.html#ra=ra_reason=status_mismatch&ra_text=POL+VAL-POL-2024-001"
     assert hotspot_matrix["rows"][1]["country_id"] == "UKR"
     assert hotspot_matrix["rows"][1]["coverage_href"] == "coverage.html#stale-priority-UKR"
     assert hotspot_matrix["rows"][1]["validation_href"] == "validation.html#attention-case-VAL-UKR-2024-001"
+    assert hotspot_matrix["rows"][1]["coverage_prefill_href"] == "coverage.html?focus_country=UKR&focus_section=stale_priority#stale-priority-UKR"
+    assert hotspot_matrix["rows"][1]["validation_prefill_href"] == "validation.html#ra=ra_reason=watch&ra_text=UKR+VAL-UKR-2024-001"
     assert hotspot_matrix["rows"][2]["country_id"] == "EST"
     assert hotspot_matrix["rows"][2]["coverage_href"] == "coverage.html#country-gap-EST"
     assert hotspot_matrix["rows"][2]["validation_href"] is None
+    assert hotspot_matrix["rows"][2]["coverage_prefill_href"] == "coverage.html?focus_country=EST&focus_section=country_gap&missing_domains=B#country-gap-EST"
+    assert hotspot_matrix["rows"][2]["validation_prefill_href"] is None
 
 
 
@@ -900,6 +906,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "ACLED" in coverage_html
     assert "Degraded Sources" in coverage_html
     assert "id='country-gap-UKR'" in coverage_html
+    assert "coverage-focus-summary" in coverage_html
+    assert "focus_country" in coverage_html
+    assert "focus_section" in coverage_html
 
     reports_html = (pages.output_dir / "reports.html").read_text()
     assert "Report / Export View" in reports_html
@@ -1020,6 +1029,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "resetReplayAttentionFilters" in validation_html
     assert "replay-attention-card" in validation_html
     assert "id='attention-case-" in validation_html
+    assert "hashPrefix='ra='" in validation_html
     assert "suggested_next_action" in validation_html or "Suggested action" in validation_html
     assert "attention_level" in validation_html or "Attention" in validation_html  # was: "Attention Level"
     assert "owner_hint" in validation_html or "Follow-up" in validation_html  # was: "Follow-up Owner"
@@ -2211,6 +2221,7 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert "Analyst Hotspot Matrix — cross-signal convergence" in readiness_html
     assert "Multi-signal countries: <strong>0</strong> / 0" in readiness_html
     assert "Hotspot Links" in readiness_html
+    assert "Coverage</a>" in readiness_html or "Validation</a>" in readiness_html
     assert "Operator Release Steering (AP-16/AP-17/AP-19/AP-20/AP-22/AP-23/AP-24)" in readiness_html
     assert "AP-16 failed gates: <strong>0</strong>" in readiness_html
     assert "AP-26 primary root cause: <strong>none</strong>" in readiness_html
