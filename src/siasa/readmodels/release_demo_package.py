@@ -293,6 +293,22 @@ def build_release_demo_package_view_model(
             'href': 'reports.html' if 'reports.html' in available_pages else '',
         },
     ]
+    strongest_evidence_points = [
+        f"Release verdict={release_verdict}",
+        f"Gate verdict={gate_verdict}",
+        f"Demo verdict={demo_verdict}",
+        f"Primary focus={source_items[0].get('title', 'n/a')}",
+    ]
+    top_blockers = [str(item.get('title', 'n/a')) for item in source_items if str(item.get('category', '')) == 'release_blocker']
+    if not top_blockers:
+        top_blockers = [str(item.get('title', 'n/a')) for item in source_items[:2]]
+    explicit_limitations = []
+    if system_status_read_model.get('data_gaps'):
+        explicit_limitations.append('data_gaps=' + ', '.join(str(item) for item in system_status_read_model.get('data_gaps', [])))
+    if readiness_view_model.get('known_gaps'):
+        explicit_limitations.append('known_gaps=' + ', '.join(str(item) for item in readiness_view_model.get('known_gaps', [])))
+    if not explicit_limitations:
+        explicit_limitations.append('No explicit known gaps recorded in the current package inputs.')
     evidence_rows = ''.join(
         '<tr>'
         f"<td>{html.escape(label)}</td>"
@@ -303,6 +319,15 @@ def build_release_demo_package_view_model(
     package_status = 'ready' if release_green and not any(item.get('category') == 'release_blocker' for item in source_items) else ('attention' if source_items else 'ready')
     if any(item.get('category') == 'release_blocker' for item in source_items) or not release_green:
         package_status = 'blocked'
+    executive_decision_summary = {
+        'recommendation': 'go' if package_status == 'ready' else ('conditional_go' if package_status == 'attention' else 'no_go'),
+        'decision_confidence': 'bounded' if explicit_limitations else 'high',
+        'decision_basis': 'release/gate/demo verdicts plus prioritized review items',
+        'review_completion_signal': review_sequence[-1].get('phase', 'artifact handoff'),
+        'top_blockers': top_blockers,
+        'strongest_evidence_points': strongest_evidence_points,
+        'explicit_limitations': explicit_limitations,
+    }
 
     return {
         'generated_at_utc': datetime.now(UTC).isoformat(),
@@ -330,6 +355,7 @@ def build_release_demo_package_view_model(
             for page, description, status in demo_sequence
         ],
         'review_sequence': review_sequence,
+        'executive_decision_summary': executive_decision_summary,
         'evidence_items': [{'label': label, 'value': value} for label, value in evidence_items],
         'priority_target_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
         'source_item_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
@@ -387,6 +413,14 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         '</tr>'
         for item in _as_dict_list(view_model.get('review_sequence'))
     ) or "<tr><td colspan='7'>No guided review sequence available.</td></tr>"
+    executive_summary = dict(view_model.get('executive_decision_summary', {})) if isinstance(view_model.get('executive_decision_summary'), dict) else {}
+    executive_recommendation = html.escape(str(executive_summary.get('recommendation', 'n/a')))
+    executive_confidence = html.escape(str(executive_summary.get('decision_confidence', 'n/a')))
+    executive_basis = html.escape(str(executive_summary.get('decision_basis', 'n/a')))
+    executive_completion_signal = html.escape(str(executive_summary.get('review_completion_signal', 'n/a')))
+    executive_blockers = ''.join(f"<li>{html.escape(str(item))}</li>" for item in executive_summary.get('top_blockers', [])) or '<li>none</li>'
+    executive_evidence = ''.join(f"<li>{html.escape(str(item))}</li>" for item in executive_summary.get('strongest_evidence_points', [])) or '<li>none</li>'
+    executive_limitations = ''.join(f"<li>{html.escape(str(item))}</li>" for item in executive_summary.get('explicit_limitations', [])) or '<li>none</li>'
     evidence_rows = ''.join(
         '<tr>'
         f"<td>{html.escape(str(item.get('label', '')))}</td>"
@@ -430,6 +464,15 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         "<div class='table-wrap'><table><thead><tr><th>Step</th><th>Phase</th><th>Page</th><th>Objective</th><th>Reviewer question</th><th>Expected signal</th><th>Available</th></tr></thead><tbody>"
         f"{review_rows}"
         "</tbody></table></div>"
+        "</section>"
+        "<section class='panel'>"
+        "<div class='panel-header'>Executive decision summary</div>"
+        f"<p><strong>Recommendation:</strong> {executive_recommendation} · <strong>Decision confidence:</strong> {executive_confidence}</p>"
+        f"<p><strong>Decision basis:</strong> {executive_basis}</p>"
+        f"<p><strong>Review completion signal:</strong> {executive_completion_signal}</p>"
+        f"<div><strong>Top blockers</strong><ul>{executive_blockers}</ul></div>"
+        f"<div><strong>Strongest supporting evidence</strong><ul>{executive_evidence}</ul></div>"
+        f"<div><strong>Explicit limitations</strong><ul>{executive_limitations}</ul></div>"
         "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Evidence bundle</div>"

@@ -1096,6 +1096,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Expected signal" in (pages.output_dir / "release_package.html").read_text()
     assert "Gate posture" in (pages.output_dir / "release_package.html").read_text()
     assert "Artifact handoff" in (pages.output_dir / "release_package.html").read_text()
+    assert "Executive decision summary" in (pages.output_dir / "release_package.html").read_text()
+    assert "Recommendation:" in (pages.output_dir / "release_package.html").read_text()
+    assert "Decision confidence:" in (pages.output_dir / "release_package.html").read_text()
+    assert "Strongest supporting evidence" in (pages.output_dir / "release_package.html").read_text()
+    assert "Explicit limitations" in (pages.output_dir / "release_package.html").read_text()
     assert "Evidence bundle" in (pages.output_dir / "release_package.html").read_text()
     assert "stakeholder_e2e_flows_covered" in readiness_html
     assert "Stakeholder E2E Flow Coverage (AP-04/AP-05)" in readiness_html
