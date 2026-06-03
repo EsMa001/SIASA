@@ -423,6 +423,28 @@ def build_release_demo_package_view_model(
         ],
         'follow_up_owner': approval_state['reviewer_role'],
     }
+    disposition_action_routing = {
+        'route_trigger': reviewer_disposition_standard['selected_disposition'],
+        'primary_action_bundle': (
+            ['Distribute canonical release package.', 'Record approval decision in decision log.']
+            if reviewer_disposition_standard['selected_disposition'] == 'approve'
+            else (
+                ['Record conditions explicitly.', 'Assign follow-up checks before external distribution.']
+                if reviewer_disposition_standard['selected_disposition'] == 'approve_with_conditions'
+                else ['Hold external distribution.', 'Re-run the highest-priority follow-up check before review resumes.']
+            )
+        ),
+        'escalation_handoff_route': (
+            'management -> stakeholder distribution'
+            if reviewer_disposition_standard['selected_disposition'] == 'approve'
+            else (
+                'management -> operator follow-up -> stakeholder re-review'
+                if reviewer_disposition_standard['selected_disposition'] == 'approve_with_conditions'
+                else 'operator remediation -> management re-review'
+            )
+        ),
+        'action_owner': reviewer_disposition_standard['follow_up_owner'],
+    }
 
     return {
         'generated_at_utc': datetime.now(UTC).isoformat(),
@@ -456,6 +478,7 @@ def build_release_demo_package_view_model(
         'stakeholder_cover_sheet': stakeholder_cover_sheet,
         'decision_log_export_summary': decision_log_export_summary,
         'reviewer_disposition_standard': reviewer_disposition_standard,
+        'disposition_action_routing': disposition_action_routing,
         'evidence_items': [{'label': label, 'value': value} for label, value in evidence_items],
         'priority_target_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
         'source_item_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
@@ -578,6 +601,13 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<li>{html.escape(str(item))}</li>" for item in reviewer_disposition_standard.get('disposition_rationale_bounds', [])
     ) or '<li>none</li>'
     follow_up_owner = html.escape(str(reviewer_disposition_standard.get('follow_up_owner', 'n/a')))
+    disposition_action_routing = dict(view_model.get('disposition_action_routing', {})) if isinstance(view_model.get('disposition_action_routing'), dict) else {}
+    route_trigger = html.escape(str(disposition_action_routing.get('route_trigger', 'n/a')))
+    primary_action_bundle_html = ''.join(
+        f"<li>{html.escape(str(item))}</li>" for item in disposition_action_routing.get('primary_action_bundle', [])
+    ) or '<li>none</li>'
+    escalation_handoff_route = html.escape(str(disposition_action_routing.get('escalation_handoff_route', 'n/a')))
+    action_owner = html.escape(str(disposition_action_routing.get('action_owner', 'n/a')))
     evidence_rows = ''.join(
         '<tr>'
         f"<td>{html.escape(str(item.get('label', '')))}</td>"
@@ -669,6 +699,13 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<p><strong>Selected disposition</strong>: {selected_disposition}</p>"
         f"<div><strong>Disposition rationale bounds</strong><ul>{disposition_rationale_bounds_html}</ul></div>"
         f"<p><strong>Follow-up owner</strong>: {follow_up_owner}</p>"
+        "</section>"
+        "<section class='panel'>"
+        "<div class='panel-header'>Disposition-aware action routing</div>"
+        f"<p><strong>Route trigger</strong>: {route_trigger}</p>"
+        f"<div><strong>Primary action bundle</strong><ul>{primary_action_bundle_html}</ul></div>"
+        f"<p><strong>Escalation / handoff route</strong>: {escalation_handoff_route}</p>"
+        f"<p><strong>Action owner</strong>: {action_owner}</p>"
         "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Evidence bundle</div>"
