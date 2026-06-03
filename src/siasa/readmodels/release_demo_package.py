@@ -342,6 +342,21 @@ def build_release_demo_package_view_model(
             'next_check': source_items[0].get('recommended_next_check', 'n/a'),
         },
     }
+    review_signoff_scaffold = {
+        'reviewer_role': reviewer_handoff_summary['next_reviewer_role'],
+        'decision_status': 'pending_signoff',
+        'decision_date_utc': '',
+        'bounded_rationale': [
+            f"Recommendation={executive_decision_summary['recommendation']}",
+            f"Confidence={executive_decision_summary['decision_confidence']}",
+            f"Primary focus={source_items[0].get('title', 'n/a')}",
+        ],
+        'follow_up_actions': [
+            str(source_items[0].get('recommended_next_check', 'Review the primary package item.')),
+            'Record reviewer decision and date before external distribution.',
+        ],
+        'signoff_readiness': 'ready_for_review' if package_status in {'ready', 'attention'} else 'blocked_for_signoff',
+    }
 
     return {
         'generated_at_utc': datetime.now(UTC).isoformat(),
@@ -371,6 +386,7 @@ def build_release_demo_package_view_model(
         'review_sequence': review_sequence,
         'executive_decision_summary': executive_decision_summary,
         'reviewer_handoff_summary': reviewer_handoff_summary,
+        'review_signoff_scaffold': review_signoff_scaffold,
         'evidence_items': [{'label': label, 'value': value} for label, value in evidence_items],
         'priority_target_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
         'source_item_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
@@ -445,6 +461,13 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<li><strong>{html.escape(str(key))}</strong>: {html.escape(str(value))}</li>"
         for key, value in decision_log_seed.items()
     ) or '<li>none</li>'
+    signoff_scaffold = dict(view_model.get('review_signoff_scaffold', {})) if isinstance(view_model.get('review_signoff_scaffold'), dict) else {}
+    signoff_reviewer_role = html.escape(str(signoff_scaffold.get('reviewer_role', 'n/a')))
+    signoff_decision_status = html.escape(str(signoff_scaffold.get('decision_status', 'n/a')))
+    signoff_decision_date = html.escape(str(signoff_scaffold.get('decision_date_utc', '')) or 'pending')
+    signoff_readiness = html.escape(str(signoff_scaffold.get('signoff_readiness', 'n/a')))
+    signoff_rationale = ''.join(f"<li>{html.escape(str(item))}</li>" for item in signoff_scaffold.get('bounded_rationale', [])) or '<li>none</li>'
+    signoff_followups = ''.join(f"<li>{html.escape(str(item))}</li>" for item in signoff_scaffold.get('follow_up_actions', [])) or '<li>none</li>'
     evidence_rows = ''.join(
         '<tr>'
         f"<td>{html.escape(str(item.get('label', '')))}</td>"
@@ -504,6 +527,15 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<p><strong>Canonical handoff artifact</strong>: {handoff_canonical_artifact}</p>"
         f"<div><strong>Share/export now</strong><ul>{handoff_share_now}</ul></div>"
         f"<div><strong>Decision log seed</strong><ul>{decision_log_seed_html}</ul></div>"
+        "</section>"
+        "<section class='panel'>"
+        "<div class='panel-header'>Review sign-off scaffold</div>"
+        f"<p><strong>Reviewer / approver</strong>: {signoff_reviewer_role}</p>"
+        f"<p><strong>Decision status</strong>: {signoff_decision_status}</p>"
+        f"<p><strong>Decision date</strong>: {signoff_decision_date}</p>"
+        f"<p><strong>Sign-off readiness</strong>: {signoff_readiness}</p>"
+        f"<div><strong>Bounded rationale</strong><ul>{signoff_rationale}</ul></div>"
+        f"<div><strong>Follow-up actions</strong><ul>{signoff_followups}</ul></div>"
         "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Evidence bundle</div>"
