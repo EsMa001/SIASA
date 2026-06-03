@@ -69,6 +69,9 @@ def test_render_stale_priority_watchlist_shows_summary_and_rows() -> None:
     assert "UKR" in html and "POL" in html
     assert "id='stale-priority-UKR'" in html
     assert "id='stale-priority-POL'" in html
+    assert "class='coverage-focus-target'" in html
+    assert "data-focus-country='UKR'" in html
+    assert "data-focus-section='stale_priority'" in html
 
 
 
@@ -906,7 +909,14 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "ACLED" in coverage_html
     assert "Degraded Sources" in coverage_html
     assert "id='country-gap-UKR'" in coverage_html
+    assert "class='coverage-focus-target'" in coverage_html
+    assert "data-focus-country='UKR'" in coverage_html
+    assert "data-focus-section='country_gap'" in coverage_html
+    assert "data-missing-domains='D'" in coverage_html
     assert "coverage-focus-summary" in coverage_html
+    assert "applyCoverageFocusState" in coverage_html
+    assert "coverage-focus-target-active" in coverage_html
+    assert "focus_target_count" in coverage_html
     assert "focus_country" in coverage_html
     assert "focus_section" in coverage_html
 

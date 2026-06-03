@@ -874,6 +874,19 @@ def _validation_prefill_href(*, country_id: str, case_id: str, attention_reason:
 
 
 
+def _coverage_focus_row_attrs(*, country_id: str, focus_section: str, missing_domains: list[str] | None = None) -> str:
+    attrs = [
+        "class='coverage-focus-target'",
+        f"data-focus-country='{html.escape(str(country_id))}'",
+        f"data-focus-section='{html.escape(str(focus_section))}'",
+    ]
+    missing_domain_text = ','.join(str(item) for item in (missing_domains or []) if str(item))
+    if missing_domain_text:
+        attrs.append(f"data-missing-domains='{html.escape(missing_domain_text)}'")
+    return ' '.join(attrs)
+
+
+
 def _build_analyst_country_hotspot_matrix(
     *,
     system_status_read_model: dict[str, Any] | None = None,
@@ -1226,7 +1239,7 @@ def _render_stale_priority_watchlist(visibility: dict[str, Any]) -> str:
     p2_count = int(summary.get('p2_stale_count', 0)) if isinstance(summary, dict) else 0
     p3_count = int(summary.get('p3_stale_count', 0)) if isinstance(summary, dict) else 0
     rows = ''.join(
-        "<tr>"
+        f"<tr {_coverage_focus_row_attrs(country_id=str(row.get('country_id', 'unknown')), focus_section='stale_priority')}>"
         f"<td>{html.escape(str(row.get('priority_rank', 'n/a')))}</td>"
         f"<td><span id='stale-priority-{html.escape(_slugify_anchor_token(str(row.get('country_id', 'unknown'))))}'>{html.escape(str(row.get('country_id', 'unknown')))}</span></td>"
         f"<td>{html.escape(str(row.get('priority', 'unassigned')))}</td>"
@@ -1236,7 +1249,7 @@ def _render_stale_priority_watchlist(visibility: dict[str, Any]) -> str:
         for row in visibility.get('stale_priority_watchlist', [])
     ) or "<tr><td colspan='5'>No stale-country remediation priorities recorded.</td></tr>"
     return (
-        "<h3>Stale Coverage Priority Queue</h3>"
+        "<h3 id='coverage-focus-section-stale-priority'>Stale Coverage Priority Queue</h3>"
         f"<p>Stale countries: {stale_count} | P1={p1_count}, P2={p2_count}, P3={p3_count}. Prioritized by stakeholder priority then staleness.</p>"
         "<table><thead><tr><th>Rank</th><th>Country</th><th>Priority</th><th>Freshness</th><th>Depth Band</th></tr></thead>"
         f"<tbody>{rows}</tbody></table>"
@@ -1270,7 +1283,7 @@ def _render_country_coverage_visibility(visibility: dict[str, Any]) -> str:
         for row in visibility.get('freshness_band_summary', [])
     ) or "<tr><td colspan='3'>No freshness summary available.</td></tr>"
     gap_rows = ''.join(
-        "<tr>"
+        f"<tr {_coverage_focus_row_attrs(country_id=str(row.get('country_id', 'n/a')), focus_section='country_gap', missing_domains=list(row.get('missing_domains', [])))} >"
         f"<td><span id='country-gap-{html.escape(_slugify_anchor_token(str(row.get('country_id', 'n/a'))))}'>{html.escape(str(row.get('country_id', 'n/a')))}</span></td>"
         f"<td>{html.escape(str(row.get('priority', 'n/a')))}</td>"
         f"<td>{html.escape(str(row.get('source_depth_band', 'n/a')))}</td>"
@@ -1315,7 +1328,7 @@ def _render_country_coverage_matrix(visibility: dict[str, Any]) -> str:
         for row in visibility.get('freshness_band_summary', [])
     ) or "<tr><td colspan='3'>No freshness summary available.</td></tr>"
     rows = ''.join(
-        "<tr>"
+        f"<tr {_coverage_focus_row_attrs(country_id=str(row.get('country_id', 'n/a')), focus_section='country_gap', missing_domains=list(row.get('missing_domains', [])))} >"
         f"<td><span id='country-gap-{html.escape(_slugify_anchor_token(str(row.get('country_id', 'n/a'))))}'>{html.escape(str(row.get('country_id', 'n/a')))}</span></td>"
         f"<td>{html.escape(str(row.get('priority', 'n/a')))}</td>"
         f"<td>{html.escape(str(row.get('source_depth_band', 'n/a')))}</td>"
@@ -1333,7 +1346,7 @@ def _render_country_coverage_matrix(visibility: dict[str, Any]) -> str:
         "<h3>Freshness Band Summary</h3>"
         "<table><thead><tr><th>Freshness Band</th><th>Countries</th><th>Country IDs</th></tr></thead>"
         f"<tbody>{freshness_rows}</tbody></table>"
-        "<h3>Country Coverage / Gap Matrix</h3>"
+        "<h3 id='coverage-focus-section-country-gap'>Country Coverage / Gap Matrix</h3>"
         "<p>Priority, source depth, explicit missing-domain badges, and freshness bands stay visible alongside source-level coverage.</p>"
         "<table><thead><tr><th>Country</th><th>Priority</th><th>Depth Band</th><th>Freshness</th><th>Source Count</th><th>Gap Count</th><th>Missing Domains</th><th>Gap Cause</th></tr></thead>"
         f"<tbody>{rows}</tbody></table>"
@@ -2592,11 +2605,15 @@ def _render_source_coverage(
         "</tr>"
         for status, count in sorted(source_coverage_read_model.get('source_status_summary', {}).items())
     ) or "<tr><td colspan='2'>No source status summary available.</td></tr>"
+    coverage_focus_block = """
+<h2>Source / Coverage View</h2>
+<pre id='coverage-focus-summary' style='white-space:pre-wrap;background:#0d1117;border:1px solid rgba(78,222,163,.2);border-radius:4px;padding:10px;color:#c9d1d9;'>No coverage focus query parameters detected.</pre>
+<style>.coverage-focus-target-active{background:rgba(78,222,163,.10);box-shadow:inset 0 0 0 1px rgba(78,222,163,.35);} .coverage-focus-target-dim{opacity:.55;} .coverage-focus-section-active{color:#4edea3;}</style>
+<script>(function(){function applyCoverageFocusState(){const params=new URLSearchParams(window.location.search);const summary=document.getElementById('coverage-focus-summary');const focusCountry=(params.get('focus_country')||'').trim();const focusSection=(params.get('focus_section')||'').trim();const missingDomains=(params.get('missing_domains')||'').trim();const requestedDomains=missingDomains?missingDomains.split(',').map((item)=>item.trim()).filter(Boolean):[];const targets=Array.from(document.querySelectorAll('.coverage-focus-target'));const matchingTargets=targets.filter((row)=>{const rowCountry=(row.dataset.focusCountry||'').trim();const rowSection=(row.dataset.focusSection||'').trim();const rowMissing=(row.dataset.missingDomains||'').split(',').map((item)=>item.trim()).filter(Boolean);if(focusCountry&&rowCountry!==focusCountry){return false;}if(focusSection&&rowSection!==focusSection){return false;}if(requestedDomains.length&&!requestedDomains.every((domain)=>rowMissing.includes(domain))){return false;}return true;});targets.forEach((row)=>{row.classList.remove('coverage-focus-target-active','coverage-focus-target-dim');if(matchingTargets.length){if(matchingTargets.includes(row)){row.classList.add('coverage-focus-target-active');}else{row.classList.add('coverage-focus-target-dim');}}});const activeHeading=focusSection?document.getElementById(`coverage-focus-section-${focusSection.replace(/_/g,'-')}`):null;document.querySelectorAll("[id^='coverage-focus-section-']").forEach((node)=>node.classList.remove('coverage-focus-section-active'));if(activeHeading){activeHeading.classList.add('coverage-focus-section-active');}if(summary){if(!focusCountry&&!focusSection&&!missingDomains){summary.textContent='No coverage focus query parameters detected.';}else{const lines=['Coverage focus summary',`focus_country=${focusCountry||'n/a'}`,`focus_section=${focusSection||'n/a'}`,`missing_domains=${missingDomains||'n/a'}`,`focus_target_count=${matchingTargets.length}`];summary.textContent=lines.join('\n');}}const firstTarget=matchingTargets[0]||activeHeading;if(firstTarget&&typeof firstTarget.scrollIntoView==='function'){firstTarget.scrollIntoView({behavior:'smooth',block:'center'});}}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',applyCoverageFocusState);}else{applyCoverageFocusState();}})();</script>
+"""
     body = (
-        "<h2>Source / Coverage View</h2>"
-        "<pre id='coverage-focus-summary' style='white-space:pre-wrap;background:#0d1117;border:1px solid rgba(78,222,163,.2);border-radius:4px;padding:10px;color:#c9d1d9;'>No coverage focus query parameters detected.</pre>"
-        "<script>(function(){const params=new URLSearchParams(window.location.search);const summary=document.getElementById('coverage-focus-summary');if(!summary){return;}const focusCountry=(params.get('focus_country')||'').trim();const focusSection=(params.get('focus_section')||'').trim();const missingDomains=(params.get('missing_domains')||'').trim();if(!focusCountry&&!focusSection&&!missingDomains){summary.textContent='No coverage focus query parameters detected.';return;}const lines=['Coverage focus summary',`focus_country=${focusCountry||'n/a'}`,`focus_section=${focusSection||'n/a'}`,`missing_domains=${missingDomains||'n/a'}`];summary.textContent=lines.join('\n');})();</script>"
-        "<h3>Trust Summary</h3>"
+        coverage_focus_block
+        + "<h3>Trust Summary</h3>"
         f"<p>Run status: <span class='status'>{html.escape(str(system_status_read_model.get('run_status', 'n/a')))}</span></p>"
         "<p>Source status summary keeps live, failed, degraded, and prepared-adapter access visible at a glance.</p>"
         "<table><thead><tr><th>Source Status</th><th>Count</th></tr></thead>"

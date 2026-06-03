@@ -208,6 +208,9 @@ Current Step-B progress:
 - B-4 completed: hotspot handoff links now also carry prefilled analyst context into the target page instead of only jumping to a static anchor
 - current B-4 artifact fields: `coverage_prefill_href`, `validation_prefill_href`, Coverage `coverage-focus-summary`, and Validation replay-attention hash-prefill reuse via `#ra=...`
 - current B-4 validation evidence: `tests/unit/test_local_gui.py` plus full-suite pass (`467 passed`)
+- B-5 completed: Coverage prefill handoffs now land in a visibly focused state instead of only showing passive query metadata
+- current B-5 artifact fields: row-level `coverage-focus-target` metadata (`data-focus-country`, `data-focus-section`, `data-missing-domains`), focus-section anchors `coverage-focus-section-stale-priority` / `coverage-focus-section-country-gap`, JS hook `applyCoverageFocusState()`, summary field `focus_target_count`, and CSS states `coverage-focus-target-active` / `coverage-focus-target-dim`
+- current B-5 validation evidence: `tests/unit/test_local_gui.py` plus full-suite pass (`467 passed`)
 
 ### Step C: Demo/release productization
 
