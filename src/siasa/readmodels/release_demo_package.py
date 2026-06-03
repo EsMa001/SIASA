@@ -357,6 +357,13 @@ def build_release_demo_package_view_model(
         ],
         'signoff_readiness': 'ready_for_review' if package_status in {'ready', 'attention'} else 'blocked_for_signoff',
     }
+    approval_state = {
+        'package_status': package_status,
+        'recommendation': executive_decision_summary['recommendation'],
+        'decision_status': review_signoff_scaffold['decision_status'],
+        'signoff_readiness': review_signoff_scaffold['signoff_readiness'],
+        'reviewer_role': review_signoff_scaffold['reviewer_role'],
+    }
     stakeholder_cover_sheet = {
         'audience': 'management / external stakeholder reviewer',
         'requested_decision': (
@@ -373,9 +380,35 @@ def build_release_demo_package_view_model(
         'external_share_summary': {
             'recommendation': executive_decision_summary['recommendation'],
             'package_status': package_status,
+            'decision_status': approval_state['decision_status'],
             'canonical_artifact': reviewer_handoff_summary['canonical_handoff_artifact'],
             'supporting_artifacts': reviewer_handoff_summary['share_now'],
             'primary_focus': source_items[0].get('title', 'n/a'),
+        },
+    }
+    reviewer_handoff_summary['decision_log_seed'].update(
+        {
+            'decision_status': approval_state['decision_status'],
+            'signoff_readiness': approval_state['signoff_readiness'],
+            'reviewer_role': approval_state['reviewer_role'],
+            'requested_decision': stakeholder_cover_sheet['requested_decision'],
+        }
+    )
+    decision_log_export_summary = {
+        'approval_state': approval_state,
+        'requested_decision_linkage': {
+            'requested_decision': stakeholder_cover_sheet['requested_decision'],
+            'recommendation': executive_decision_summary['recommendation'],
+            'decision_status': approval_state['decision_status'],
+        },
+        'distribution_bundle': reviewer_handoff_summary['share_now'],
+        'decision_entry_template': {
+            'package_status': approval_state['package_status'],
+            'decision_status': approval_state['decision_status'],
+            'reviewer_role': approval_state['reviewer_role'],
+            'requested_decision': stakeholder_cover_sheet['requested_decision'],
+            'primary_focus': source_items[0].get('title', 'n/a'),
+            'canonical_artifact': reviewer_handoff_summary['canonical_handoff_artifact'],
         },
     }
 
@@ -409,6 +442,7 @@ def build_release_demo_package_view_model(
         'reviewer_handoff_summary': reviewer_handoff_summary,
         'review_signoff_scaffold': review_signoff_scaffold,
         'stakeholder_cover_sheet': stakeholder_cover_sheet,
+        'decision_log_export_summary': decision_log_export_summary,
         'evidence_items': [{'label': label, 'value': value} for label, value in evidence_items],
         'priority_target_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
         'source_item_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
@@ -503,6 +537,25 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<li><strong>{html.escape(str(key).replace('_', ' ').title())}</strong>: {html.escape(str(value))}</li>"
         for key, value in external_share_summary.items()
     ) or '<li>none</li>'
+    decision_log_export_summary = dict(view_model.get('decision_log_export_summary', {})) if isinstance(view_model.get('decision_log_export_summary'), dict) else {}
+    approval_state = dict(decision_log_export_summary.get('approval_state', {})) if isinstance(decision_log_export_summary.get('approval_state'), dict) else {}
+    approval_state_html = ''.join(
+        f"<li><strong>{html.escape(str(key).replace('_', ' ').title())}</strong>: {html.escape(str(value))}</li>"
+        for key, value in approval_state.items()
+    ) or '<li>none</li>'
+    requested_decision_linkage = dict(decision_log_export_summary.get('requested_decision_linkage', {})) if isinstance(decision_log_export_summary.get('requested_decision_linkage'), dict) else {}
+    requested_decision_linkage_html = ''.join(
+        f"<li><strong>{html.escape(str(key).replace('_', ' ').title())}</strong>: {html.escape(str(value))}</li>"
+        for key, value in requested_decision_linkage.items()
+    ) or '<li>none</li>'
+    distribution_bundle_html = ''.join(
+        f"<li>{html.escape(str(item))}</li>" for item in decision_log_export_summary.get('distribution_bundle', [])
+    ) or '<li>none</li>'
+    decision_entry_template = dict(decision_log_export_summary.get('decision_entry_template', {})) if isinstance(decision_log_export_summary.get('decision_entry_template'), dict) else {}
+    decision_entry_template_html = ''.join(
+        f"<li><strong>{html.escape(str(key).replace('_', ' ').title())}</strong>: {html.escape(str(value))}</li>"
+        for key, value in decision_entry_template.items()
+    ) or '<li>none</li>'
     evidence_rows = ''.join(
         '<tr>'
         f"<td>{html.escape(str(item.get('label', '')))}</td>"
@@ -580,6 +633,13 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<p><strong>Start here</strong>: {cover_sheet_start_here_label} ({cover_sheet_start_here_page})</p>"
         f"<p>{cover_sheet_start_here_reason}</p>"
         f"<div><strong>External-share summary</strong><ul>{external_share_summary_html}</ul></div>"
+        "</section>"
+        "<section class='panel'>"
+        "<div class='panel-header'>Decision log export summary</div>"
+        f"<div><strong>Approval state</strong><ul>{approval_state_html}</ul></div>"
+        f"<div><strong>Requested decision linkage</strong><ul>{requested_decision_linkage_html}</ul></div>"
+        f"<div><strong>Distribution bundle</strong><ul>{distribution_bundle_html}</ul></div>"
+        f"<div><strong>Decision entry template</strong><ul>{decision_entry_template_html}</ul></div>"
         "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Evidence bundle</div>"
