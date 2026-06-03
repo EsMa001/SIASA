@@ -847,6 +847,12 @@ def _analyst_priority_sort_key(priority: str) -> int:
 
 
 
+def _slugify_anchor_token(value: str) -> str:
+    cleaned = re.sub(r'[^A-Za-z0-9._-]+', '-', str(value).strip())
+    return cleaned.strip('-') or 'unknown'
+
+
+
 def _build_analyst_country_hotspot_matrix(
     *,
     system_status_read_model: dict[str, Any] | None = None,
@@ -866,6 +872,7 @@ def _build_analyst_country_hotspot_matrix(
                 'freshness_hours': None,
                 'missing_domains': set(),
                 'attention_case_ids': [],
+                'coverage_href': None,
             },
         )
 
@@ -877,6 +884,7 @@ def _build_analyst_country_hotspot_matrix(
         hotspot['signals'].add('country_gap')
         hotspot['priority'] = str(row.get('priority', hotspot.get('priority', 'unassigned')))
         hotspot['missing_domains'].update(str(item) for item in row.get('missing_domains', []) if str(item))
+        hotspot['coverage_href'] = f"coverage.html#country-gap-{_slugify_anchor_token(country_id)}"
         if hotspot.get('freshness_hours') is None and row.get('freshness_hours') is not None:
             hotspot['freshness_hours'] = row.get('freshness_hours')
 
@@ -887,6 +895,8 @@ def _build_analyst_country_hotspot_matrix(
         hotspot = _country_row(country_id)
         hotspot['signals'].add('stale_priority')
         hotspot['priority'] = str(row.get('priority', hotspot.get('priority', 'unassigned')))
+        if hotspot.get('coverage_href') is None:
+            hotspot['coverage_href'] = f"coverage.html#stale-priority-{_slugify_anchor_token(country_id)}"
         hotspot['freshness_hours'] = row.get('freshness_hours')
 
     historical_replay_summary = validation_view_model.get('historical_replay_summary', {})
@@ -920,6 +930,11 @@ def _build_analyst_country_hotspot_matrix(
                 'missing_domains': sorted(hotspot['missing_domains']),
                 'attention_case_count': len(attention_case_ids),
                 'top_attention_case_id': attention_case_ids[0] if attention_case_ids else None,
+                'coverage_href': hotspot.get('coverage_href'),
+                'validation_href': (
+                    f"validation.html#attention-case-{_slugify_anchor_token(attention_case_ids[0])}"
+                    if attention_case_ids else None
+                ),
                 'recommended_next_check': recommended_next_check,
             }
         )
@@ -1175,7 +1190,7 @@ def _render_stale_priority_watchlist(visibility: dict[str, Any]) -> str:
     rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(row.get('priority_rank', 'n/a')))}</td>"
-        f"<td>{html.escape(str(row.get('country_id', 'unknown')))}</td>"
+        f"<td><span id='stale-priority-{html.escape(_slugify_anchor_token(str(row.get('country_id', 'unknown'))))}'>{html.escape(str(row.get('country_id', 'unknown')))}</span></td>"
         f"<td>{html.escape(str(row.get('priority', 'unassigned')))}</td>"
         f"<td>{html.escape(_format_freshness(row.get('freshness_hours')))}</td>"
         f"<td>{html.escape(str(row.get('source_depth_band', 'minimal')))}</td>"
@@ -1218,7 +1233,7 @@ def _render_country_coverage_visibility(visibility: dict[str, Any]) -> str:
     ) or "<tr><td colspan='3'>No freshness summary available.</td></tr>"
     gap_rows = ''.join(
         "<tr>"
-        f"<td>{html.escape(str(row.get('country_id', 'n/a')))}</td>"
+        f"<td><span id='country-gap-{html.escape(_slugify_anchor_token(str(row.get('country_id', 'n/a'))))}'>{html.escape(str(row.get('country_id', 'n/a')))}</span></td>"
         f"<td>{html.escape(str(row.get('priority', 'n/a')))}</td>"
         f"<td>{html.escape(str(row.get('source_depth_band', 'n/a')))}</td>"
         f"<td>{html.escape(_format_freshness(row.get('freshness_hours')))}</td>"
@@ -1263,7 +1278,7 @@ def _render_country_coverage_matrix(visibility: dict[str, Any]) -> str:
     ) or "<tr><td colspan='3'>No freshness summary available.</td></tr>"
     rows = ''.join(
         "<tr>"
-        f"<td>{html.escape(str(row.get('country_id', 'n/a')))}</td>"
+        f"<td><span id='country-gap-{html.escape(_slugify_anchor_token(str(row.get('country_id', 'n/a'))))}'>{html.escape(str(row.get('country_id', 'n/a')))}</span></td>"
         f"<td>{html.escape(str(row.get('priority', 'n/a')))}</td>"
         f"<td>{html.escape(str(row.get('source_depth_band', 'n/a')))}</td>"
         f"<td>{html.escape(_format_freshness(row.get('freshness_hours')))}</td>"
@@ -3108,10 +3123,14 @@ def _render_readiness(
         f"<td>{html.escape(str(row.get('top_attention_case_id', 'n/a') or 'n/a'))}</td>"
         f"<td>{html.escape(_format_freshness(row.get('freshness_hours')))}</td>"
         f"<td>{html.escape(str(row.get('recommended_next_check', 'n/a')))}</td>"
+        f"<td>{' | '.join(link for link in [
+            (f"<a href=\"{html.escape(str(row.get('coverage_href')))}\">Coverage</a>" if row.get('coverage_href') else ''),
+            (f"<a href=\"{html.escape(str(row.get('validation_href')))}\">Validation</a>" if row.get('validation_href') else ''),
+        ] if link) or 'n/a'}</td>"
         "</tr>"
         for row in _analyst_hotspot_matrix.get('rows', [])
         if isinstance(row, dict)
-    ) or "<tr><td colspan='9'>No country hotspots currently detected.</td></tr>"
+    ) or "<tr><td colspan='10'>No country hotspots currently detected.</td></tr>"
 
     body = (
         # === KPI Header ===
@@ -3185,7 +3204,7 @@ def _render_readiness(
         f"<tbody>{_analyst_briefing_rows}</tbody></table></div>"
         "<div class='panel'><div class='panel-header'>Analyst Hotspot Matrix — cross-signal convergence</div>"
         f"<p>Multi-signal countries: <strong>{html.escape(str(_analyst_hotspot_matrix.get('multi_signal_country_count', 0)))}</strong> / {html.escape(str(_analyst_hotspot_matrix.get('row_count', 0)))} | signals combine coverage gaps, validation attention, and stale-priority cues per country.</p>"
-        "<table><thead><tr><th>Country</th><th>Signals</th><th>Signal Types</th><th>Priority</th><th>Missing Domains</th><th>Attention Cases</th><th>Top Case</th><th>Freshness</th><th>Recommended Next Check</th></tr></thead>"
+        "<table><thead><tr><th>Country</th><th>Signals</th><th>Signal Types</th><th>Priority</th><th>Missing Domains</th><th>Attention Cases</th><th>Top Case</th><th>Freshness</th><th>Recommended Next Check</th><th>Hotspot Links</th></tr></thead>"
         f"<tbody>{_analyst_hotspot_rows}</tbody></table></div>"
         # === Known Gaps ===
         "<div class='panel'><div class='panel-header'>Known Gaps Before Release</div>"
@@ -3627,6 +3646,7 @@ def _render_attention_case_cards(attention_cases: list[dict[str, Any]]) -> str:
         ).strip().lower()
         cards.append(
             "<div class='panel replay-attention-card'"
+            f" id='attention-case-{html.escape(_slugify_anchor_token(case_id_raw))}'"
             f" data-attention-level='{html.escape(att_level_raw.lower())}'"
             f" data-attention-owner='{html.escape(owner_raw.lower())}'"
             f" data-attention-reason='{html.escape(reason_raw.lower())}'"

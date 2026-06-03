@@ -202,6 +202,9 @@ Current Step-B progress:
 - B-2 completed: a country-centric hotspot convergence matrix now combines coverage gaps, validation-attention cases, and stale-priority cues per country into one deterministic analyst action board
 - current B-2 artifact fields: `country_hotspot_matrix.row_count`, `multi_signal_country_count`, and ranked rows with `country_id`, `signal_count`, `missing_domains`, `attention_case_count`, `top_attention_case_id`, `freshness_hours`, `recommended_next_check`
 - current B-2 validation evidence: `tests/unit/test_local_gui.py` plus full-suite pass (`486 passed`)
+- B-3 completed: hotspot rows now expose direct anchored handoff links into Coverage and Validation so the matrix becomes an executable follow-up surface rather than only a summary table
+- current B-3 artifact fields: `coverage_href`, `validation_href`, readiness `Hotspot Links` column, coverage anchors `country-gap-<ISO3>` / `stale-priority-<ISO3>`, and validation anchors `attention-case-<CASE_ID>`
+- current B-3 validation evidence: `tests/unit/test_local_gui.py` plus full-suite pass (`467 passed`)
 
 ### Step C: Demo/release productization
 

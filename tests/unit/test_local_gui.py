@@ -67,6 +67,8 @@ def test_render_stale_priority_watchlist_shows_summary_and_rows() -> None:
     assert "Stale Coverage Priority Queue" in html
     assert "Stale countries: 2 | P1=1, P2=1, P3=0" in html
     assert "UKR" in html and "POL" in html
+    assert "id='stale-priority-UKR'" in html
+    assert "id='stale-priority-POL'" in html
 
 
 
@@ -184,8 +186,14 @@ def test_build_analyst_briefing_view_model_adds_country_hotspot_matrix() -> None
     assert hotspot_matrix["rows"][0]["attention_case_count"] == 2
     assert hotspot_matrix["rows"][0]["missing_domains"] == ["B", "D"]
     assert hotspot_matrix["rows"][0]["recommended_next_check"] == "Coverage + Validation review"
+    assert hotspot_matrix["rows"][0]["coverage_href"] == "coverage.html#country-gap-POL"
+    assert hotspot_matrix["rows"][0]["validation_href"] == "validation.html#attention-case-VAL-POL-2024-001"
     assert hotspot_matrix["rows"][1]["country_id"] == "UKR"
+    assert hotspot_matrix["rows"][1]["coverage_href"] == "coverage.html#stale-priority-UKR"
+    assert hotspot_matrix["rows"][1]["validation_href"] == "validation.html#attention-case-VAL-UKR-2024-001"
     assert hotspot_matrix["rows"][2]["country_id"] == "EST"
+    assert hotspot_matrix["rows"][2]["coverage_href"] == "coverage.html#country-gap-EST"
+    assert hotspot_matrix["rows"][2]["validation_href"] is None
 
 
 
@@ -891,6 +899,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "failed_source:SRC-B" in coverage_html
     assert "ACLED" in coverage_html
     assert "Degraded Sources" in coverage_html
+    assert "id='country-gap-UKR'" in coverage_html
 
     reports_html = (pages.output_dir / "reports.html").read_text()
     assert "Report / Export View" in reports_html
@@ -1010,6 +1019,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "verdictCounts" in validation_html
     assert "resetReplayAttentionFilters" in validation_html
     assert "replay-attention-card" in validation_html
+    assert "id='attention-case-" in validation_html
     assert "suggested_next_action" in validation_html or "Suggested action" in validation_html
     assert "attention_level" in validation_html or "Attention" in validation_html  # was: "Attention Level"
     assert "owner_hint" in validation_html or "Follow-up" in validation_html  # was: "Follow-up Owner"
@@ -2200,6 +2210,7 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert "stale remediation actions: 1" in readiness_html
     assert "Analyst Hotspot Matrix — cross-signal convergence" in readiness_html
     assert "Multi-signal countries: <strong>0</strong> / 0" in readiness_html
+    assert "Hotspot Links" in readiness_html
     assert "Operator Release Steering (AP-16/AP-17/AP-19/AP-20/AP-22/AP-23/AP-24)" in readiness_html
     assert "AP-16 failed gates: <strong>0</strong>" in readiness_html
     assert "AP-26 primary root cause: <strong>none</strong>" in readiness_html
