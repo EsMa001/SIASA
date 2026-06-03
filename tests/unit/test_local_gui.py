@@ -113,6 +113,82 @@ def test_build_analyst_briefing_view_model_prioritizes_traceability_and_operabil
 
 
 
+def test_build_analyst_briefing_view_model_adds_country_hotspot_matrix() -> None:
+    briefing = local_app._build_analyst_briefing_view_model(
+        readiness_view_model={"release_verdict": "ready", "run_id": "RUN-TEST-002"},
+        release_gate_view_model={"gate_verdict": "go"},
+        system_status_read_model={
+            "country_coverage_visibility": {
+                "country_gap_rows": [
+                    {
+                        "country_id": "POL",
+                        "priority": "P1",
+                        "missing_domains": ["B", "D"],
+                    },
+                    {
+                        "country_id": "EST",
+                        "priority": "P2",
+                        "missing_domains": ["B"],
+                    },
+                ],
+                "stale_priority_watchlist": [
+                    {
+                        "priority_rank": 1,
+                        "country_id": "POL",
+                        "priority": "P1",
+                        "freshness_hours": 240.0,
+                        "source_depth_band": "moderate",
+                    },
+                    {
+                        "priority_rank": 2,
+                        "country_id": "UKR",
+                        "priority": "P1",
+                        "freshness_hours": 180.0,
+                        "source_depth_band": "deep",
+                    },
+                ],
+            }
+        },
+        validation_view_model={
+            "historical_replay_summary": {
+                "attention_cases": [
+                    {
+                        "country_id": "POL",
+                        "case_id": "VAL-POL-2024-001",
+                        "attention_reason": "status_mismatch",
+                        "suggested_next_action": "Review POL replay alignment.",
+                    },
+                    {
+                        "country_id": "POL",
+                        "case_id": "VAL-POL-2024-002",
+                        "attention_reason": "weak_replay_evidence",
+                        "suggested_next_action": "Inspect replay evidence tier.",
+                    },
+                    {
+                        "country_id": "UKR",
+                        "case_id": "VAL-UKR-2024-001",
+                        "attention_reason": "watch",
+                        "suggested_next_action": "Review UKR reference case.",
+                    },
+                ]
+            }
+        },
+    )
+
+    hotspot_matrix = briefing["country_hotspot_matrix"]
+    assert hotspot_matrix["row_count"] == 3
+    assert hotspot_matrix["multi_signal_country_count"] == 2
+    assert hotspot_matrix["rows"][0]["country_id"] == "POL"
+    assert hotspot_matrix["rows"][0]["signal_count"] == 3
+    assert hotspot_matrix["rows"][0]["signals"] == ["country_gap", "stale_priority", "validation_attention"]
+    assert hotspot_matrix["rows"][0]["attention_case_count"] == 2
+    assert hotspot_matrix["rows"][0]["missing_domains"] == ["B", "D"]
+    assert hotspot_matrix["rows"][0]["recommended_next_check"] == "Coverage + Validation review"
+    assert hotspot_matrix["rows"][1]["country_id"] == "UKR"
+    assert hotspot_matrix["rows"][2]["country_id"] == "EST"
+
+
+
 def test_source_depth_band_matches_artifact_thresholds() -> None:
     assert local_app._source_depth_band(1) == "minimal"
     assert local_app._source_depth_band(2) == "moderate"
@@ -2122,6 +2198,8 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert "Prioritized items: <strong>1</strong>" in readiness_html
     assert "Primary focus: <strong>Stale remediation action plan: AP25-STALE-01</strong>" in readiness_html
     assert "stale remediation actions: 1" in readiness_html
+    assert "Analyst Hotspot Matrix — cross-signal convergence" in readiness_html
+    assert "Multi-signal countries: <strong>0</strong> / 0" in readiness_html
     assert "Operator Release Steering (AP-16/AP-17/AP-19/AP-20/AP-22/AP-23/AP-24)" in readiness_html
     assert "AP-16 failed gates: <strong>0</strong>" in readiness_html
     assert "AP-26 primary root cause: <strong>none</strong>" in readiness_html

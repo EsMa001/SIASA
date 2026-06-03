@@ -199,6 +199,9 @@ Current Step-B progress:
 - current exported briefing artifact: `build/local_gui/latest/analyst_briefing.json`
 - current live evidence basis: `RUN-LIVE-EXT-FOCUS-LATEST-005`
 - current summary fields explicitly separate release blockers, country gaps, validation-attention cases, traceability risks, operability-cluster risks, and stale-priority/stale-remediation items, each with recommended next check and target page
+- B-2 completed: a country-centric hotspot convergence matrix now combines coverage gaps, validation-attention cases, and stale-priority cues per country into one deterministic analyst action board
+- current B-2 artifact fields: `country_hotspot_matrix.row_count`, `multi_signal_country_count`, and ranked rows with `country_id`, `signal_count`, `missing_domains`, `attention_case_count`, `top_attention_case_id`, `freshness_hours`, `recommended_next_check`
+- current B-2 validation evidence: `tests/unit/test_local_gui.py` plus full-suite pass (`486 passed`)
 
 ### Step C: Demo/release productization
 

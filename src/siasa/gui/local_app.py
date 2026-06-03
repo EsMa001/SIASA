@@ -835,6 +835,112 @@ def _country_coverage_visibility_rows(system_status_read_model: dict[str, Any]) 
 
 
 
+def _analyst_priority_sort_key(priority: str) -> int:
+    priority_upper = priority.upper()
+    if priority_upper == 'P1':
+        return 0
+    if priority_upper == 'P2':
+        return 1
+    if priority_upper == 'P3':
+        return 2
+    return 3
+
+
+
+def _build_analyst_country_hotspot_matrix(
+    *,
+    system_status_read_model: dict[str, Any] | None = None,
+    validation_view_model: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    visibility = _country_coverage_visibility_rows(system_status_read_model or {})
+    validation_view_model = validation_view_model or {}
+    hotspots: dict[str, dict[str, Any]] = {}
+
+    def _country_row(country_id: str) -> dict[str, Any]:
+        return hotspots.setdefault(
+            country_id,
+            {
+                'country_id': country_id,
+                'signals': set(),
+                'priority': 'unassigned',
+                'freshness_hours': None,
+                'missing_domains': set(),
+                'attention_case_ids': [],
+            },
+        )
+
+    for row in visibility.get('country_gap_rows', []):
+        if not isinstance(row, dict):
+            continue
+        country_id = str(row.get('country_id', 'UNKNOWN'))
+        hotspot = _country_row(country_id)
+        hotspot['signals'].add('country_gap')
+        hotspot['priority'] = str(row.get('priority', hotspot.get('priority', 'unassigned')))
+        hotspot['missing_domains'].update(str(item) for item in row.get('missing_domains', []) if str(item))
+        if hotspot.get('freshness_hours') is None and row.get('freshness_hours') is not None:
+            hotspot['freshness_hours'] = row.get('freshness_hours')
+
+    for row in visibility.get('stale_priority_watchlist', []):
+        if not isinstance(row, dict):
+            continue
+        country_id = str(row.get('country_id', 'UNKNOWN'))
+        hotspot = _country_row(country_id)
+        hotspot['signals'].add('stale_priority')
+        hotspot['priority'] = str(row.get('priority', hotspot.get('priority', 'unassigned')))
+        hotspot['freshness_hours'] = row.get('freshness_hours')
+
+    historical_replay_summary = validation_view_model.get('historical_replay_summary', {})
+    attention_cases = historical_replay_summary.get('attention_cases', []) if isinstance(historical_replay_summary, dict) else []
+    for item in attention_cases:
+        if not isinstance(item, dict):
+            continue
+        country_id = str(item.get('country_id', 'UNKNOWN'))
+        hotspot = _country_row(country_id)
+        hotspot['signals'].add('validation_attention')
+        hotspot['attention_case_ids'].append(str(item.get('case_id', 'unknown')))
+
+    rows: list[dict[str, Any]] = []
+    for country_id, hotspot in hotspots.items():
+        signals = [signal for signal in ('country_gap', 'stale_priority', 'validation_attention') if signal in hotspot['signals']]
+        attention_case_ids = sorted(hotspot['attention_case_ids'])
+        recommended_next_check = 'Coverage review'
+        if 'country_gap' in hotspot['signals'] and 'validation_attention' in hotspot['signals']:
+            recommended_next_check = 'Coverage + Validation review'
+        elif 'validation_attention' in hotspot['signals']:
+            recommended_next_check = 'Validation review'
+        elif 'stale_priority' in hotspot['signals']:
+            recommended_next_check = 'Coverage freshness review'
+        rows.append(
+            {
+                'country_id': country_id,
+                'signal_count': len(signals),
+                'signals': signals,
+                'priority': str(hotspot.get('priority', 'unassigned')),
+                'freshness_hours': hotspot.get('freshness_hours'),
+                'missing_domains': sorted(hotspot['missing_domains']),
+                'attention_case_count': len(attention_case_ids),
+                'top_attention_case_id': attention_case_ids[0] if attention_case_ids else None,
+                'recommended_next_check': recommended_next_check,
+            }
+        )
+
+    rows.sort(
+        key=lambda row: (
+            -int(row.get('signal_count', 0)),
+            _analyst_priority_sort_key(str(row.get('priority', 'unassigned'))),
+            -int(row.get('attention_case_count', 0)),
+            -(float(row.get('freshness_hours')) if isinstance(row.get('freshness_hours'), (int, float)) else -1.0),
+            str(row.get('country_id', 'UNKNOWN')),
+        )
+    )
+    return {
+        'row_count': len(rows),
+        'multi_signal_country_count': sum(1 for row in rows if int(row.get('signal_count', 0)) > 1),
+        'rows': rows,
+    }
+
+
+
 def _build_analyst_briefing_view_model(
     *,
     readiness_view_model: dict[str, Any],
@@ -1010,6 +1116,10 @@ def _build_analyst_briefing_view_model(
         'primary_item_next_check': top_item.get('recommended_next_check', 'n/a'),
         'primary_item_evidence_source': top_item.get('evidence_source', 'n/a'),
         'target_page_counts': target_page_counts,
+        'country_hotspot_matrix': _build_analyst_country_hotspot_matrix(
+            system_status_read_model=system_status_read_model,
+            validation_view_model=validation_view_model,
+        ),
         'items': items,
     }
 
@@ -2986,6 +3096,22 @@ def _render_readiness(
         "</tr>"
         for item in _analyst_briefing_items
     ) or "<tr><td colspan='6'>No analyst briefing items currently prioritized.</td></tr>"
+    _analyst_hotspot_matrix = _analyst_briefing.get('country_hotspot_matrix', {}) if isinstance(_analyst_briefing.get('country_hotspot_matrix', {}), dict) else {}
+    _analyst_hotspot_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(row.get('country_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(row.get('signal_count', 0)))}</td>"
+        f"<td>{html.escape(', '.join(str(item) for item in row.get('signals', [])) or 'none')}</td>"
+        f"<td>{html.escape(str(row.get('priority', 'n/a')))}</td>"
+        f"<td>{html.escape(', '.join(str(item) for item in row.get('missing_domains', [])) or 'none')}</td>"
+        f"<td>{html.escape(str(row.get('attention_case_count', 0)))}</td>"
+        f"<td>{html.escape(str(row.get('top_attention_case_id', 'n/a') or 'n/a'))}</td>"
+        f"<td>{html.escape(_format_freshness(row.get('freshness_hours')))}</td>"
+        f"<td>{html.escape(str(row.get('recommended_next_check', 'n/a')))}</td>"
+        "</tr>"
+        for row in _analyst_hotspot_matrix.get('rows', [])
+        if isinstance(row, dict)
+    ) or "<tr><td colspan='9'>No country hotspots currently detected.</td></tr>"
 
     body = (
         # === KPI Header ===
@@ -3057,6 +3183,10 @@ def _render_readiness(
         f"<p>Primary focus: <strong>{html.escape(str(_analyst_briefing.get('primary_item_title', 'n/a')))}</strong> → {html.escape(str(_analyst_briefing.get('primary_item_target_page', 'n/a')))} | next check: {html.escape(str(_analyst_briefing.get('primary_item_next_check', 'n/a')))} | evidence: {html.escape(str(_analyst_briefing.get('primary_item_evidence_source', 'n/a')))}</p>"
         "<table><thead><tr><th>Rank</th><th>Category</th><th>Title</th><th>Why it matters</th><th>Recommended next check</th><th>Target page</th></tr></thead>"
         f"<tbody>{_analyst_briefing_rows}</tbody></table></div>"
+        "<div class='panel'><div class='panel-header'>Analyst Hotspot Matrix — cross-signal convergence</div>"
+        f"<p>Multi-signal countries: <strong>{html.escape(str(_analyst_hotspot_matrix.get('multi_signal_country_count', 0)))}</strong> / {html.escape(str(_analyst_hotspot_matrix.get('row_count', 0)))} | signals combine coverage gaps, validation attention, and stale-priority cues per country.</p>"
+        "<table><thead><tr><th>Country</th><th>Signals</th><th>Signal Types</th><th>Priority</th><th>Missing Domains</th><th>Attention Cases</th><th>Top Case</th><th>Freshness</th><th>Recommended Next Check</th></tr></thead>"
+        f"<tbody>{_analyst_hotspot_rows}</tbody></table></div>"
         # === Known Gaps ===
         "<div class='panel'><div class='panel-header'>Known Gaps Before Release</div>"
         f"<ul>{known_gap_items}</ul></div>"
