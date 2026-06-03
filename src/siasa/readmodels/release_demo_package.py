@@ -445,6 +445,17 @@ def build_release_demo_package_view_model(
         ),
         'action_owner': reviewer_disposition_standard['follow_up_owner'],
     }
+    decision_packet_seed = {
+        'packet_headline': f"{executive_decision_summary['recommendation']} / {reviewer_disposition_standard['selected_disposition']} / {package_status}",
+        'decision_snapshot': {
+            'recommendation': executive_decision_summary['recommendation'],
+            'selected_disposition': reviewer_disposition_standard['selected_disposition'],
+            'decision_status': approval_state['decision_status'],
+            'primary_focus': source_items[0].get('title', 'n/a'),
+        },
+        'share_now_packet': reviewer_handoff_summary['share_now'],
+        'decision_packet_note': 'Export-ready seed for management/stakeholder forwarding; validate latest evidence before external send.',
+    }
 
     return {
         'generated_at_utc': datetime.now(UTC).isoformat(),
@@ -479,6 +490,7 @@ def build_release_demo_package_view_model(
         'decision_log_export_summary': decision_log_export_summary,
         'reviewer_disposition_standard': reviewer_disposition_standard,
         'disposition_action_routing': disposition_action_routing,
+        'decision_packet_seed': decision_packet_seed,
         'evidence_items': [{'label': label, 'value': value} for label, value in evidence_items],
         'priority_target_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
         'source_item_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
@@ -608,6 +620,17 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     ) or '<li>none</li>'
     escalation_handoff_route = html.escape(str(disposition_action_routing.get('escalation_handoff_route', 'n/a')))
     action_owner = html.escape(str(disposition_action_routing.get('action_owner', 'n/a')))
+    decision_packet_seed = dict(view_model.get('decision_packet_seed', {})) if isinstance(view_model.get('decision_packet_seed'), dict) else {}
+    packet_headline = html.escape(str(decision_packet_seed.get('packet_headline', 'n/a')))
+    decision_snapshot = dict(decision_packet_seed.get('decision_snapshot', {})) if isinstance(decision_packet_seed.get('decision_snapshot'), dict) else {}
+    decision_snapshot_html = ''.join(
+        f"<li><strong>{html.escape(str(key).replace('_', ' ').title())}</strong>: {html.escape(str(value))}</li>"
+        for key, value in decision_snapshot.items()
+    ) or '<li>none</li>'
+    share_now_packet_html = ''.join(
+        f"<li>{html.escape(str(item))}</li>" for item in decision_packet_seed.get('share_now_packet', [])
+    ) or '<li>none</li>'
+    decision_packet_note = html.escape(str(decision_packet_seed.get('decision_packet_note', 'n/a')))
     evidence_rows = ''.join(
         '<tr>'
         f"<td>{html.escape(str(item.get('label', '')))}</td>"
@@ -706,6 +729,13 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<div><strong>Primary action bundle</strong><ul>{primary_action_bundle_html}</ul></div>"
         f"<p><strong>Escalation / handoff route</strong>: {escalation_handoff_route}</p>"
         f"<p><strong>Action owner</strong>: {action_owner}</p>"
+        "</section>"
+        "<section class='panel'>"
+        "<div class='panel-header'>Decision packet seed</div>"
+        f"<p><strong>Packet headline</strong>: {packet_headline}</p>"
+        f"<div><strong>Decision snapshot</strong><ul>{decision_snapshot_html}</ul></div>"
+        f"<div><strong>Share now packet</strong><ul>{share_now_packet_html}</ul></div>"
+        f"<p><strong>Decision packet note</strong>: {decision_packet_note}</p>"
         "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Evidence bundle</div>"

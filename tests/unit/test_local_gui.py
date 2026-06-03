@@ -1134,6 +1134,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Primary action bundle" in (pages.output_dir / "release_package.html").read_text()
     assert "Escalation / handoff route" in (pages.output_dir / "release_package.html").read_text()
     assert "Action owner" in (pages.output_dir / "release_package.html").read_text()
+    assert "Decision packet seed" in (pages.output_dir / "release_package.html").read_text()
+    assert "Packet headline" in (pages.output_dir / "release_package.html").read_text()
+    assert "Decision snapshot" in (pages.output_dir / "release_package.html").read_text()
+    assert "Share now packet" in (pages.output_dir / "release_package.html").read_text()
+    assert "Decision packet note" in (pages.output_dir / "release_package.html").read_text()
     assert "Evidence bundle" in (pages.output_dir / "release_package.html").read_text()
     assert "stakeholder_e2e_flows_covered" in readiness_html
     assert "Stakeholder E2E Flow Coverage (AP-04/AP-05)" in readiness_html
