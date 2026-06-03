@@ -328,6 +328,20 @@ def build_release_demo_package_view_model(
         'strongest_evidence_points': strongest_evidence_points,
         'explicit_limitations': explicit_limitations,
     }
+    canonical_handoff_artifact = 'release_package.html'
+    share_now = [item for item in ['release_package.html', 'release_demo_package.json', 'reports.html'] if item in available_pages or item.endswith('.json')]
+    reviewer_handoff_summary = {
+        'next_reviewer_role': 'management' if package_status in {'ready', 'attention'} else 'operator',
+        'canonical_handoff_artifact': canonical_handoff_artifact,
+        'secondary_artifacts': share_now,
+        'share_now': share_now,
+        'decision_log_seed': {
+            'package_status': package_status,
+            'recommendation': executive_decision_summary['recommendation'],
+            'primary_focus': source_items[0].get('title', 'n/a'),
+            'next_check': source_items[0].get('recommended_next_check', 'n/a'),
+        },
+    }
 
     return {
         'generated_at_utc': datetime.now(UTC).isoformat(),
@@ -356,6 +370,7 @@ def build_release_demo_package_view_model(
         ],
         'review_sequence': review_sequence,
         'executive_decision_summary': executive_decision_summary,
+        'reviewer_handoff_summary': reviewer_handoff_summary,
         'evidence_items': [{'label': label, 'value': value} for label, value in evidence_items],
         'priority_target_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
         'source_item_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
@@ -421,6 +436,15 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     executive_blockers = ''.join(f"<li>{html.escape(str(item))}</li>" for item in executive_summary.get('top_blockers', [])) or '<li>none</li>'
     executive_evidence = ''.join(f"<li>{html.escape(str(item))}</li>" for item in executive_summary.get('strongest_evidence_points', [])) or '<li>none</li>'
     executive_limitations = ''.join(f"<li>{html.escape(str(item))}</li>" for item in executive_summary.get('explicit_limitations', [])) or '<li>none</li>'
+    handoff_summary = dict(view_model.get('reviewer_handoff_summary', {})) if isinstance(view_model.get('reviewer_handoff_summary'), dict) else {}
+    handoff_next_reviewer = html.escape(str(handoff_summary.get('next_reviewer_role', 'n/a')))
+    handoff_canonical_artifact = html.escape(str(handoff_summary.get('canonical_handoff_artifact', 'n/a')))
+    handoff_share_now = ''.join(f"<li>{html.escape(str(item))}</li>" for item in handoff_summary.get('share_now', [])) or '<li>none</li>'
+    decision_log_seed = dict(handoff_summary.get('decision_log_seed', {})) if isinstance(handoff_summary.get('decision_log_seed'), dict) else {}
+    decision_log_seed_html = ''.join(
+        f"<li><strong>{html.escape(str(key))}</strong>: {html.escape(str(value))}</li>"
+        for key, value in decision_log_seed.items()
+    ) or '<li>none</li>'
     evidence_rows = ''.join(
         '<tr>'
         f"<td>{html.escape(str(item.get('label', '')))}</td>"
@@ -473,6 +497,13 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<div><strong>Top blockers</strong><ul>{executive_blockers}</ul></div>"
         f"<div><strong>Strongest supporting evidence</strong><ul>{executive_evidence}</ul></div>"
         f"<div><strong>Explicit limitations</strong><ul>{executive_limitations}</ul></div>"
+        "</section>"
+        "<section class='panel'>"
+        "<div class='panel-header'>Reviewer handoff and export summary</div>"
+        f"<p><strong>Next reviewer role</strong>: {handoff_next_reviewer}</p>"
+        f"<p><strong>Canonical handoff artifact</strong>: {handoff_canonical_artifact}</p>"
+        f"<div><strong>Share/export now</strong><ul>{handoff_share_now}</ul></div>"
+        f"<div><strong>Decision log seed</strong><ul>{decision_log_seed_html}</ul></div>"
         "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Evidence bundle</div>"

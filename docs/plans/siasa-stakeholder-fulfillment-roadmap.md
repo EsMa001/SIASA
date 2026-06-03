@@ -239,15 +239,18 @@ Current Step-C progress:
 - C-2 completed: a dedicated Release / Failure Drill page now surfaces baseline and no-go drill scenarios as a separate reviewable operator surface
 - C-3 completed: the Release / Demo Package now includes a guided stakeholder review sequence instead of only static summary panels
 - C-4 completed: the Release / Demo Package now includes an executive decision summary with explicit recommendation, confidence, blockers, strongest evidence, and limitations
+- C-5 completed: the Release / Demo Package now includes an explicit reviewer handoff/export summary for next-role routing and decision-log seeding
 - current GUI evidence: `build/local_gui/latest/release_package.html`
 - current drill GUI evidence: `build/local_gui/latest/release_failure_drill.html`
 - current machine-readable package artifact: `build/local_gui/latest/release_demo_package.json`
 - current machine-readable drill artifact: `build/local_gui/latest/readmodels/release_failure_drill_report.json`
 - current C-3 artifact fields: `review_sequence` with steps `C3-01..C3-06`, phase/objective/reviewer-question/expected-signal fields, and rendered `Guided review sequence` panel in `release_package.html`
 - current C-4 artifact fields: `executive_decision_summary` with `recommendation`, `decision_confidence`, `decision_basis`, `review_completion_signal`, `top_blockers`, `strongest_evidence_points`, and `explicit_limitations`
+- current C-5 artifact fields: `reviewer_handoff_summary` with `next_reviewer_role`, `canonical_handoff_artifact`, `secondary_artifacts`, `share_now`, and `decision_log_seed`
 - current implementation evidence: `src/siasa/readmodels/release_demo_package.py`, `src/siasa/readmodels/release_evidence.py`, `src/siasa/gui/local_app.py`
 - current C-3 validation evidence: `tests/unit/test_local_gui.py` plus full-suite pass (`467 passed`)
 - current C-4 validation evidence: `tests/unit/test_local_gui.py` plus full-suite pass (`467 passed`)
+- current C-5 validation evidence: `tests/unit/test_local_gui.py` plus full-suite pass (`467 passed`)
 
 ### Recommended serial execution rule
 
