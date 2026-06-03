@@ -1123,6 +1123,12 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Requested decision linkage" in (pages.output_dir / "release_package.html").read_text()
     assert "Distribution bundle" in (pages.output_dir / "release_package.html").read_text()
     assert "Decision entry template" in (pages.output_dir / "release_package.html").read_text()
+    assert "Reviewer disposition standard" in (pages.output_dir / "release_package.html").read_text()
+    assert "Disposition options" in (pages.output_dir / "release_package.html").read_text()
+    assert "approve_with_conditions" in (pages.output_dir / "release_package.html").read_text()
+    assert "Selected disposition" in (pages.output_dir / "release_package.html").read_text()
+    assert "Disposition rationale bounds" in (pages.output_dir / "release_package.html").read_text()
+    assert "Follow-up owner" in (pages.output_dir / "release_package.html").read_text()
     assert "Evidence bundle" in (pages.output_dir / "release_package.html").read_text()
     assert "stakeholder_e2e_flows_covered" in readiness_html
     assert "Stakeholder E2E Flow Coverage (AP-04/AP-05)" in readiness_html

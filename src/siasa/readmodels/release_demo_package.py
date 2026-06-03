@@ -411,6 +411,18 @@ def build_release_demo_package_view_model(
             'canonical_artifact': reviewer_handoff_summary['canonical_handoff_artifact'],
         },
     }
+    reviewer_disposition_standard = {
+        'disposition_options': ['approve', 'approve_with_conditions', 'defer', 'reject'],
+        'selected_disposition': (
+            'approve' if package_status == 'ready'
+            else ('approve_with_conditions' if package_status == 'attention' else 'defer')
+        ),
+        'disposition_rationale_bounds': [
+            'State the decision in one of the standard disposition categories only.',
+            'Bound rationale to the current package evidence, top caveats, and explicit follow-up conditions.',
+        ],
+        'follow_up_owner': approval_state['reviewer_role'],
+    }
 
     return {
         'generated_at_utc': datetime.now(UTC).isoformat(),
@@ -443,6 +455,7 @@ def build_release_demo_package_view_model(
         'review_signoff_scaffold': review_signoff_scaffold,
         'stakeholder_cover_sheet': stakeholder_cover_sheet,
         'decision_log_export_summary': decision_log_export_summary,
+        'reviewer_disposition_standard': reviewer_disposition_standard,
         'evidence_items': [{'label': label, 'value': value} for label, value in evidence_items],
         'priority_target_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
         'source_item_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
@@ -556,6 +569,15 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<li><strong>{html.escape(str(key).replace('_', ' ').title())}</strong>: {html.escape(str(value))}</li>"
         for key, value in decision_entry_template.items()
     ) or '<li>none</li>'
+    reviewer_disposition_standard = dict(view_model.get('reviewer_disposition_standard', {})) if isinstance(view_model.get('reviewer_disposition_standard'), dict) else {}
+    disposition_options_html = ''.join(
+        f"<li>{html.escape(str(item))}</li>" for item in reviewer_disposition_standard.get('disposition_options', [])
+    ) or '<li>none</li>'
+    selected_disposition = html.escape(str(reviewer_disposition_standard.get('selected_disposition', 'n/a')))
+    disposition_rationale_bounds_html = ''.join(
+        f"<li>{html.escape(str(item))}</li>" for item in reviewer_disposition_standard.get('disposition_rationale_bounds', [])
+    ) or '<li>none</li>'
+    follow_up_owner = html.escape(str(reviewer_disposition_standard.get('follow_up_owner', 'n/a')))
     evidence_rows = ''.join(
         '<tr>'
         f"<td>{html.escape(str(item.get('label', '')))}</td>"
@@ -640,6 +662,13 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<div><strong>Requested decision linkage</strong><ul>{requested_decision_linkage_html}</ul></div>"
         f"<div><strong>Distribution bundle</strong><ul>{distribution_bundle_html}</ul></div>"
         f"<div><strong>Decision entry template</strong><ul>{decision_entry_template_html}</ul></div>"
+        "</section>"
+        "<section class='panel'>"
+        "<div class='panel-header'>Reviewer disposition standard</div>"
+        f"<div><strong>Disposition options</strong><ul>{disposition_options_html}</ul></div>"
+        f"<p><strong>Selected disposition</strong>: {selected_disposition}</p>"
+        f"<div><strong>Disposition rationale bounds</strong><ul>{disposition_rationale_bounds_html}</ul></div>"
+        f"<p><strong>Follow-up owner</strong>: {follow_up_owner}</p>"
         "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Evidence bundle</div>"

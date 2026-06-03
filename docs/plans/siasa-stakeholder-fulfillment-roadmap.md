@@ -243,6 +243,7 @@ Current Step-C progress:
 - C-6 completed: the Release / Demo Package now includes an explicit review sign-off scaffold for approval capture and bounded rationale/follow-up recording
 - C-7 completed: the Release / Demo Package now includes an explicit stakeholder cover sheet / external-share summary for one-screen external review handoff
 - C-8 completed: the Release / Demo Package now propagates approval state consistently into stakeholder handoff and decision-log export surfaces
+- C-9 completed: the Release / Demo Package now standardizes reviewer dispositions and follow-up ownership for decision capture
 - current GUI evidence: `build/local_gui/latest/release_package.html`
 - current drill GUI evidence: `build/local_gui/latest/release_failure_drill.html`
 - current machine-readable package artifact: `build/local_gui/latest/release_demo_package.json`
@@ -253,6 +254,7 @@ Current Step-C progress:
 - current C-6 artifact fields: `review_signoff_scaffold` with `reviewer_role`, `decision_status`, `decision_date_utc`, `bounded_rationale`, `follow_up_actions`, and `signoff_readiness`
 - current C-7 artifact fields: `stakeholder_cover_sheet` with `audience`, `requested_decision`, `top_3_caveats`, `start_here`, and `external_share_summary`
 - current C-8 artifact fields: `decision_log_export_summary` with `approval_state`, `requested_decision_linkage`, `distribution_bundle`, and `decision_entry_template`; `reviewer_handoff_summary.decision_log_seed` now also carries `decision_status`, `signoff_readiness`, `reviewer_role`, and `requested_decision`
+- current C-9 artifact fields: `reviewer_disposition_standard` with `disposition_options`, `selected_disposition`, `disposition_rationale_bounds`, and `follow_up_owner`
 - current implementation evidence: `src/siasa/readmodels/release_demo_package.py`, `src/siasa/readmodels/release_evidence.py`, `src/siasa/gui/local_app.py`
 - current C-3 validation evidence: `tests/unit/test_local_gui.py` plus full-suite pass (`467 passed`)
 - current C-4 validation evidence: `tests/unit/test_local_gui.py` plus full-suite pass (`467 passed`)
@@ -260,6 +262,7 @@ Current Step-C progress:
 - current C-6 validation evidence: `tests/unit/test_local_gui.py` plus full-suite pass (`467 passed`)
 - current C-7 validation evidence: focused `tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` (`1 passed in 2.04s`) plus targeted `tests/unit/test_local_gui.py -q` (`19 passed in 314.30s`) plus full-suite pass (`467 passed in 984.27s`)
 - current C-8 validation evidence: focused `tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` (`1 passed in 2.02s`) plus targeted `tests/unit/test_local_gui.py -q` (`19 passed in 312.26s`) plus full-suite pass (`467 passed in 963.96s`)
+- current C-9 validation evidence: focused `tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` (`1 passed in 2.03s`) plus targeted `tests/unit/test_local_gui.py -q` (`19 passed in 312.88s`) plus full-suite pass (`467 passed in 984.28s`)
 
 ### Recommended serial execution rule
 
