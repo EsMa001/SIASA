@@ -207,17 +207,28 @@ Closure achieved:
 - one fresh broader real probe bundle was generated on `focus-complete` via `RUN-OP-LATEST-20260604T103448Z`
 - the resulting real evidence shows honest degraded-mode governance rather than forced greenwashing: `run_status=partial_success`, `country_set_id=MVP-COUNTRIES-LIVE-focus-complete-v1`, `failed_sources=[SRC-GDELT-DOC, SRC-GDELT-DOC-E]`, `combined_ce_ratio=0.8571`, governance verdict `amber`, and policy gate verdict `pass`
 
-### N1-WP-003
+### N1-WP-003 (completed operational evidence-lane normalization slice)
 Name:
 Normalize the operator/project-lead evidence lane on top of the new broader live-probe governance artifacts so the latest/history surfaces expose `country_set_id`, C/E ratio, governance verdict, and policy-gate outcome without requiring raw JSON inspection.
 
+Closure achieved:
+- `src/siasa/data/storage.py` now persists and reloads per-run evidence-lane governance fields in run history: `country_set_id`, `combined_ce_ratio`, `governance_verdict`, and `policy_gate_verdict`
+- `src/siasa/runs/operational_latest.py` now writes `readmodels/operational_evidence_lane.json` with `latest_summary` plus recent run-history rows and seeds a fallback row when a custom writer does not persist to SQLite
+- `src/siasa/gui/local_app.py` now loads that evidence-lane readmodel and renders it directly in `runs.html` via an `Operational Evidence Lane` panel plus a `Recent Operational History` table
+- targeted verification passed (`47 passed in 311.75s`) across `test_storage_run_history.py`, `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, `test_scheduler.py`, and `test_local_gui.py`
+- full regression passed (`472 passed in 974.46s`)
+
+### N1-WP-004
+Name:
+Extend the normalized operational evidence lane so it also carries explicit readiness / release truth (`release_verdict`, `known_gaps`, and blocked-vs-degraded interpretation) alongside the runtime governance metrics.
+
 Why this is the default next package:
-- N1-WP-002 proved that the broader `focus-complete` slice can now produce fresh real evidence with explicit partial-success semantics and machine-readable governance outputs
-- the next remaining friction is not whether evidence can be produced, but whether the latest/history lane presents that evidence as one authoritative operator/project-lead truth surface
-- this directly attacks G3 (operational evidence-lane normalization) while preserving the already-proven broader runtime frontier
+- N1-WP-003 closed the structural visibility gap for runtime governance truth in latest/history surfaces
+- the next remaining ambiguity is still split across runtime-governance truth versus readiness/release truth, especially for `partial_success` runs that still pass policy gate but may differ in release posture
+- this stays bounded, operator-facing, and evidence-first without jumping into credential-gated external activation prematurely
 
 Definition of done:
-- latest/history operator-facing readmodel or summary surface carries the governed slice identity, combined C/E ratio, governance verdict, and policy-gate verdict
+- operational evidence-lane latest/history surface also carries readiness / release truth for the latest bundle
 - targeted tests green
 - full suite green
 - capability matrix updated
@@ -225,7 +236,7 @@ Definition of done:
 - commit + push completed
 
 Fallback reprioritization rule:
-- if valid source credentials/registrations become available before N1-WP-003 starts, reassess whether a credential-activation slice should jump ahead
+- if valid source credentials/registrations become available before N1-WP-004 starts, reassess whether a credential-activation slice should jump ahead
 
 ---
 
