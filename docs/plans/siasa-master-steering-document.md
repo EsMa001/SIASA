@@ -229,17 +229,29 @@ Closure achieved:
 - targeted verification passed (`47 passed in 312.85s`) across `test_storage_run_history.py`, `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, `test_scheduler.py`, and `test_local_gui.py`
 - full regression passed (`472 passed in 996.59s`)
 
-### N1-WP-005
+### N1-WP-005 (completed latest-bundle evidence navigation slice)
 Name:
 Add fresh-bundle deep links from the operational evidence lane into the exact readiness / coverage / release artifacts so an operator can pivot from summary truth to the governing evidence without manual file hunting.
 
+Closure achieved:
+- `src/siasa/runs/operational_latest.py` now stamps machine-readable `evidence_links` into `readmodels/operational_evidence_lane.json` for the latest bundle, covering coverage/readiness/release surfaces plus exported JSON artifacts (`coverage.html`, `source_coverage.json`, `system_status.json`, `readiness.html`, `readiness.json`, `release_package.html`, `release_demo_package.json`, `release_gate.json`)
+- `src/siasa/gui/local_app.py` now exports `source_coverage.json` and `system_status.json` beside the generated GUI pages so those evidence links resolve inside the local bundle
+- `src/siasa/gui/local_app.py` now renders a `Latest bundle evidence links` block in `runs.html` and adds an `Evidence` column in `Recent Operational History`, allowing one-click pivots from the evidence lane into the governing coverage/readiness/release artifacts for the latest bundle
+- targeted verification passed (`43 passed in 319.55s`) across `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, `test_scheduler.py`, and `test_local_gui.py`
+- full regression passed (`472 passed in 990.05s`)
+
+### N1-WP-006
+Name:
+Persist exact past-bundle artifact/gui paths in operational run history so recent-history rows can deep-link not only to the current latest bundle, but also to the exact archived bundle for each recorded run.
+
 Why this is the default next package:
-- N1-WP-004 closed the truth-model gap by placing runtime governance and readiness/release truth side by side in the normal operator lane
-- the next bounded improvement is navigation/actionability: turning that truth into one-click evidence pivot paths rather than another new metric layer
-- this remains a small operator-facing closure slice inside G3 instead of reopening broader strategic work
+- N1-WP-005 solved latest-bundle navigation, but historical rows still only get full evidence pivots for the current latest bundle
+- the next bounded improvement is to carry exact per-run bundle/gui path metadata through history persistence so operators can jump into prior evidenced runs without manual directory reconstruction
+- this remains a small operator-facing G3 closure slice and avoids prematurely jumping back into a riskier live-runtime expansion tranche
 
 Definition of done:
-- operational evidence-lane latest/history surface exposes direct links to governing readiness / coverage / release evidence for the latest bundle
+- run history persists exact per-run artifact/gui path metadata needed for deep links
+- recent operational history rows expose direct links into the archived bundle for each row
 - targeted tests green
 - full suite green
 - capability matrix updated
@@ -247,7 +259,7 @@ Definition of done:
 - commit + push completed
 
 Fallback reprioritization rule:
-- if valid source credentials/registrations become available before N1-WP-005 starts, reassess whether a credential-activation slice should jump ahead
+- if valid source credentials/registrations become available before N1-WP-006 starts, reassess whether a credential-activation slice should jump ahead
 
 ---
 
