@@ -213,6 +213,7 @@ Definition of done:
 - one real probe artifact bundle generated
 - readiness/release truth explicitly captured
 - explicit C/E evidence digest available for the slice
+- probe/evidence artifacts expose the governed slice identity explicitly (for example via `country_set_id` / named pilot-set identity) so broader runtime results are diagnosable without reconstructing the country list indirectly
 - capability matrix updated
 - this master steering document updated if frontier changed
 - commit + push completed

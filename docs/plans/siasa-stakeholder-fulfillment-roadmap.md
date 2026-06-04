@@ -171,6 +171,7 @@ Current Step-A closure status:
 - UCDP runtime breadth is now also credential-gated: governed live runtime activates `SRC-UCDP-GED` only when `UCDP_API_TOKEN` is configured, which removes default false-failures in uncredentialed representative runs; representative probe `RUN-LIVE-REP-UCDP-GATE-001` reduced `failed_sources` to only `SRC-GDELT-DOC-E`
 - representative GDELT-doc stabilization is now operationally bounded: the Domain-E `SRC-GDELT-DOC-E` branch uses a shallower multi-country retry profile (`max_retries=1`, `max_retry_delay_seconds=20.0`) so representative probes now complete deterministically under renewed 429 pressure; closure evidence `RUN-LIVE-REP-DOC-E-STAB-003` finished within the foreground timeout with explicit `failed_sources=SRC-GDELT-DOC,SRC-GDELT-DOC-E` instead of reproducing the earlier no-output stall
 - broader governed pilot-set truth is now hardened at the interface layer: `extended-focus-complete`, `focus-complete`, and `mvp-complete` are explicitly listed in live-runtime CLI help and covered by runtime unit tests, reducing mismatch between roadmap breadth claims and the selectable/tested runtime surface
+- broader governed probe evidence now also carries explicit slice identity: named pilot-set runs stamp a distinct `country_set_id`, `system_status.json` persists it, and the live-probe evidence digest exposes it in `run_context`, reducing diagnostic ambiguity before the next fresh broader live probe package
 
 ### Step B: Analyst interpretation and actionability depth
 
