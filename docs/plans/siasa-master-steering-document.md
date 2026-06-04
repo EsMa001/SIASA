@@ -240,18 +240,27 @@ Closure achieved:
 - targeted verification passed (`43 passed in 319.55s`) across `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, `test_scheduler.py`, and `test_local_gui.py`
 - full regression passed (`472 passed in 990.05s`)
 
-### N1-WP-006
+### N1-WP-006 (completed archived-bundle history navigation slice)
 Name:
 Persist exact past-bundle artifact/gui paths in operational run history so recent-history rows can deep-link not only to the current latest bundle, but also to the exact archived bundle for each recorded run.
 
+Closure achieved:
+- `src/siasa/runs/operational_latest.py` now carries `artifacts_dir`, `gui_index`, and per-row `evidence_links` into `recent_runs`, deriving deep links from each run’s own archived GUI bundle instead of only from the current latest bundle
+- `src/siasa/gui/local_app.py` now renders the `Evidence` history column from each row’s own `evidence_links`, including direct `Bundle`, `Coverage`, `Readiness`, and `Release` pivots for archived runs
+- targeted verification passed (`47 passed in 315.87s`) across `test_storage_run_history.py`, `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, `test_scheduler.py`, and `test_local_gui.py`
+- full regression passed (`472 passed in 983.10s`)
+
+### N1-WP-007
+Name:
+Extend archived history evidence navigation to machine-readable per-run JSON artifacts and explicit bundle-root metadata so historical audits can pivot not only into rendered pages, but also into the exact archived structured evidence payloads.
+
 Why this is the default next package:
-- N1-WP-005 solved latest-bundle navigation, but historical rows still only get full evidence pivots for the current latest bundle
-- the next bounded improvement is to carry exact per-run bundle/gui path metadata through history persistence so operators can jump into prior evidenced runs without manual directory reconstruction
-- this remains a small operator-facing G3 closure slice and avoids prematurely jumping back into a riskier live-runtime expansion tranche
+- N1-WP-006 closed page-level archived-run navigation, but historical audits still pivot mainly to rendered HTML pages rather than the exact structured evidence files for each row
+- the next bounded improvement is to expose archived JSON-level evidence pivots and bundle-root metadata directly in history rows
+- this remains a small G3 operator-truth/actionability closure slice without reopening broader runtime risk
 
 Definition of done:
-- run history persists exact per-run artifact/gui path metadata needed for deep links
-- recent operational history rows expose direct links into the archived bundle for each row
+- recent operational history rows expose archived machine-readable evidence links and/or bundle-root metadata per run
 - targeted tests green
 - full suite green
 - capability matrix updated
@@ -259,7 +268,7 @@ Definition of done:
 - commit + push completed
 
 Fallback reprioritization rule:
-- if valid source credentials/registrations become available before N1-WP-006 starts, reassess whether a credential-activation slice should jump ahead
+- if valid source credentials/registrations become available before N1-WP-007 starts, reassess whether a credential-activation slice should jump ahead
 
 ---
 
