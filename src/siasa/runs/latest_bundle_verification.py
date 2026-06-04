@@ -8,6 +8,8 @@ REQUIRED_LATEST_ARTIFACTS = (
     "snapshot.json",
     "readmodels/system_status.json",
     "readmodels/world_map.json",
+    "readmodels/live_probe_evidence_digest.json",
+    "readmodels/live_probe_policy_gate.json",
 )
 
 
@@ -40,6 +42,24 @@ def verify_latest_bundle(
     world_map = _read_json(artifacts_dir / "readmodels/world_map.json")
     active_domains = tuple(str(domain) for domain in world_map.get("active_domains", []))
 
+    digest = _read_json(artifacts_dir / "readmodels/live_probe_evidence_digest.json")
+    run_context = digest.get("run_context") if isinstance(digest.get("run_context"), dict) else {}
+    if str(run_context.get("run_id", "unknown")) != str(system_status.get("run_id", "unknown")):
+        raise ValueError("latest bundle digest run_id does not match system_status run_id")
+    if str(run_context.get("run_status", "unknown")) != run_status:
+        raise ValueError("latest bundle digest run_status does not match system_status run_status")
+    country_set_id = str(run_context.get("country_set_id", "unknown"))
+    if country_set_id == "unknown":
+        raise ValueError("latest bundle digest missing explicit country_set_id")
+
+    gate = _read_json(artifacts_dir / "readmodels/live_probe_policy_gate.json")
+    observed = gate.get("observed") if isinstance(gate.get("observed"), dict) else {}
+    if str(observed.get("run_id", "unknown")) != str(system_status.get("run_id", "unknown")):
+        raise ValueError("latest bundle policy gate run_id does not match system_status run_id")
+    gate_verdict = str(gate.get("gate_verdict", "unknown"))
+    if gate_verdict not in {"pass", "fail"}:
+        raise ValueError("latest bundle policy gate has invalid gate_verdict")
+
     missing_required_domains = [domain for domain in required_domains if domain not in active_domains]
     if missing_required_domains:
         raise ValueError(
@@ -65,7 +85,9 @@ def verify_latest_bundle(
         "artifacts_dir": str(artifacts_dir),
         "run_id": system_status.get("run_id"),
         "run_status": run_status,
+        "country_set_id": country_set_id,
         "failed_sources": failed_sources,
+        "policy_gate_verdict": gate_verdict,
         "country_profile_count": len(profile_paths),
         "active_domains": list(active_domains),
         "required_domains": list(required_domains),
