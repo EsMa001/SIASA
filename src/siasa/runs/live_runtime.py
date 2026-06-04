@@ -815,11 +815,14 @@ def build_governed_live_orchestrator(
         ]
     )
     runtime_profile = "live-multi-country-v1" if len(resolved_country_ids) > 1 else "live-single-country-v1"
-    country_set_id = (
-        "MVP-COUNTRIES-LIVE-MULTI-v1"
-        if len(resolved_country_ids) > 1
-        else f"MVP-COUNTRIES-LIVE-{resolved_country_ids[0]}-v1"
-    )
+    if pilot_set is not None:
+        country_set_id = f"MVP-COUNTRIES-LIVE-{pilot_set}-v1"
+    else:
+        country_set_id = (
+            "MVP-COUNTRIES-LIVE-MULTI-v1"
+            if len(resolved_country_ids) > 1
+            else f"MVP-COUNTRIES-LIVE-{resolved_country_ids[0]}-v1"
+        )
 
     reference_case_library = _load_reference_case_library()
     reference_case_library_summary = build_reference_case_library_summary(reference_case_library)

@@ -366,6 +366,7 @@ def write_run_artifacts(
                 failed_sources=run_state.failed_sources,
                 available_reports=available_reports,
                 snapshot_id=snapshot.snapshot_id,
+                country_set_id=snapshot.country_set_id,
                 reprocessing_status="idle",
                 last_run=run_state.run_id,
                 artifact_status=artifact_status,

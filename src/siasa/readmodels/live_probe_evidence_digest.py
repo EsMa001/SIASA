@@ -108,6 +108,7 @@ def build_live_probe_evidence_digest(*, artifacts_dir: Path) -> dict[str, Any]:
         "run_context": {
             "run_id": str(system_status.get("run_id") or system_status.get("last_run") or "unknown"),
             "run_status": run_status,
+            "country_set_id": str(system_status.get("country_set_id") or "unknown"),
             "failed_source_count": len(failed_sources),
             "failed_sources": failed_sources,
             "countries_total": total_countries,

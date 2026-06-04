@@ -146,6 +146,7 @@ def test_build_governed_live_orchestrator_supports_representative_pilot_set() ->
     gdelt_doc_e = next(adapter for adapter in orchestrator.adapters if adapter.source_id == "SRC-GDELT-DOC-E")
 
     assert world_bank.country_ids == ("UKR", "POL", "ISR")
+    assert orchestrator.country_set_id == "MVP-COUNTRIES-LIVE-representative-v1"
     assert orchestrator.country_expected_domains == {
         "UKR": ["A", "B", "D"],
         "POL": ["A", "B", "D"],
@@ -742,6 +743,7 @@ def test_build_governed_live_orchestrator_supports_extended_focus_complete_pilot
     gdacs = orchestrator.adapters[3]
 
     assert world_bank.country_ids == ("USA", "DEU", "EST", "FIN", "POL", "SAU", "QAT", "EGY", "NGA", "SDN", "MMR")
+    assert orchestrator.country_set_id == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
     assert orchestrator.country_expected_domains == {
         "USA": ["A", "B", "D"],
         "DEU": ["A", "B", "D"],
@@ -781,6 +783,7 @@ def test_build_governed_live_orchestrator_supports_focus_complete_pilot_set() ->
         "UKR", "RUS", "CHN", "IRN", "ISR", "TUR", "IND", "PAK", "GEO", "POL",
         "USA", "DEU", "EST", "FIN", "SAU", "QAT", "EGY", "NGA", "SDN", "MMR",
     )
+    assert orchestrator.country_set_id == "MVP-COUNTRIES-LIVE-focus-complete-v1"
     assert orchestrator.country_expected_domains["TWN"] == ["A", "B"]
     assert orchestrator.country_expected_domains["GEO"] == ["A", "D"]
     assert orchestrator.country_expected_domains["QAT"] == ["A", "D"]

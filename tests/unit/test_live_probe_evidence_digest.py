@@ -19,6 +19,7 @@ def test_live_probe_evidence_digest_summarizes_ce_utilization_and_run_context(tm
         {
             "run_id": "RUN-CI-1",
             "run_status": "success",
+            "country_set_id": "MVP-COUNTRIES-LIVE-focus-complete-v1",
             "failed_sources": [],
         },
     )
@@ -37,6 +38,7 @@ def test_live_probe_evidence_digest_summarizes_ce_utilization_and_run_context(tm
 
     assert digest["run_context"]["run_id"] == "RUN-CI-1"
     assert digest["run_context"]["run_status"] == "success"
+    assert digest["run_context"]["country_set_id"] == "MVP-COUNTRIES-LIVE-focus-complete-v1"
     assert digest["ce_utilization"]["domain_c_active_country_count"] == 1
     assert digest["ce_utilization"]["domain_e_active_country_count"] == 1
     assert digest["ce_utilization"]["countries_total"] == 2
@@ -48,7 +50,7 @@ def test_live_probe_evidence_digest_captures_policy_profile_context(tmp_path: Pa
     artifacts_dir = tmp_path / "artifacts"
     _write(
         artifacts_dir / "readmodels" / "system_status.json",
-        {"run_id": "RUN-CI-3", "run_status": "success", "failed_sources": []},
+        {"run_id": "RUN-CI-3", "run_status": "success", "country_set_id": "MVP-COUNTRIES-LIVE-extended-focus-complete-v1", "failed_sources": []},
     )
     _write(
         artifacts_dir / "readmodels" / "world_map.json",
@@ -85,7 +87,7 @@ def test_live_probe_evidence_digest_policy_resolution_error_is_exposed(tmp_path:
     artifacts_dir = tmp_path / "artifacts"
     _write(
         artifacts_dir / "readmodels" / "system_status.json",
-        {"run_id": "RUN-CI-ERR", "run_status": "success", "failed_sources": []},
+        {"run_id": "RUN-CI-ERR", "run_status": "success", "country_set_id": "MVP-COUNTRIES-LIVE-mvp-complete-v1", "failed_sources": []},
     )
     _write(
         artifacts_dir / "readmodels" / "world_map.json",
@@ -121,6 +123,7 @@ def test_live_probe_evidence_digest_marks_failed_sources_as_amber(tmp_path: Path
         {
             "run_id": "RUN-CI-2",
             "run_status": "partial_success",
+            "country_set_id": "MVP-COUNTRIES-LIVE-mvp-complete-v1",
             "failed_sources": ["SRC-EXAMPLE"],
         },
     )

@@ -11,6 +11,7 @@ def build_system_status_read_model(
     available_reports: list[str],
     snapshot_id: str | None,
     *,
+    country_set_id: str | None = None,
     reprocessing_status: str = "idle",
     last_run: str | None = None,
     top_status_changes: list[dict[str, object]] | None = None,
@@ -23,6 +24,7 @@ def build_system_status_read_model(
         "run_id": run_id,
         "run_status": run_status,
         "active_domains": active_domains,
+        "country_set_id": country_set_id,
         "coverage": {
             "countries_total": countries_total,
             "countries_with_updates": countries_with_updates,
