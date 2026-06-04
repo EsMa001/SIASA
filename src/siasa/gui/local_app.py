@@ -2914,6 +2914,12 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     latest_bundle_root = html.escape(str(latest_summary.get('bundle_root', 'n/a')))
     latest_artifacts_dir = html.escape(str(latest_summary.get('artifacts_dir', 'n/a')))
     latest_gui_index = html.escape(str(latest_summary.get('gui_index', 'n/a')))
+    latest_share_refs = latest_summary.get('share_refs', {}) if isinstance(latest_summary.get('share_refs'), dict) else {}
+    latest_share_ref_items = ''.join(
+        f"<li><code>{html.escape(str(value))}</code></li>"
+        for value in latest_share_refs.values()
+        if str(value).strip()
+    ) or "<li>none</li>"
 
     def _render_history_evidence_cell(item: dict[str, Any]) -> str:
         item_links = item.get('evidence_links', {}) if isinstance(item.get('evidence_links'), dict) else {}
@@ -2945,12 +2951,19 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         )
         bundle_root = html.escape(str(item.get('bundle_root', 'n/a')))
         artifacts_dir = html.escape(str(item.get('artifacts_dir', 'n/a')))
+        share_refs = item.get('share_refs', {}) if isinstance(item.get('share_refs'), dict) else {}
+        share_refs_text = '<br>'.join(
+            f"<code>{html.escape(str(value))}</code>"
+            for value in share_refs.values()
+            if str(value).strip()
+        ) or 'n/a'
         return (
             f"<div>{page_links or 'n/a'}</div>"
             f"<div style='margin-top:4px;font-size:0.85em;'>{json_links or 'n/a'}</div>"
             f"<div class='history-bundle-meta' style='margin-top:4px;font-size:0.8em;color:#6b7d99;'>"
             f"bundle_root={bundle_root}<br>artifacts_dir={artifacts_dir}"
             "</div>"
+            f"<div class='history-share-refs' style='margin-top:4px;font-size:0.8em;'>{share_refs_text}</div>"
         )
 
     recent_run_rows = ''.join(
@@ -2986,6 +2999,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<p>Operator next action: <strong>{operator_next_action}</strong></p>"
         f"<p>Bundle root: <strong>{latest_bundle_root}</strong> | GUI index: <strong>{latest_gui_index}</strong> | Artifacts dir: <strong>{latest_artifacts_dir}</strong></p>"
         f"<details><summary>Latest bundle evidence links</summary><ul>{latest_evidence_link_items}</ul></details>"
+        f"<details><summary>Latest bundle share refs</summary><ul>{latest_share_ref_items}</ul></details>"
         f"<details><summary>Latest failed sources ({html.escape(str(latest_summary.get('failed_source_count', 0)))})</summary><ul>{latest_failed_sources}</ul></details>"
         f"<details><summary>Latest known gaps ({html.escape(str(known_gap_count))})</summary><ul>{latest_known_gaps}</ul></details>"
         "<h3>Recent Operational History</h3>"

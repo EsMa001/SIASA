@@ -19,6 +19,18 @@ def _build_bundle_evidence_links(*, bundle_dir: Path) -> dict[str, str]:
         "release_gate_json_href": str(bundle_dir / "release_gate.json"),
     }
 
+
+def _build_bundle_share_refs(*, bundle_root: Path) -> dict[str, str]:
+    bundle_root = bundle_root.resolve()
+    return {
+        "bundle_ref": f"bundle:{bundle_root}",
+        "coverage_json_ref": f"coverage_json:{bundle_root / 'source_coverage.json'}",
+        "system_status_json_ref": f"system_status_json:{bundle_root / 'system_status.json'}",
+        "readiness_json_ref": f"readiness_json:{bundle_root / 'readiness.json'}",
+        "release_package_json_ref": f"release_package_json:{bundle_root / 'release_demo_package.json'}",
+        "release_gate_json_ref": f"release_gate_json:{bundle_root / 'release_gate.json'}",
+    }
+
 from siasa.data.storage import (
     load_recent_runs,
     persist_operational_latest_run,
@@ -143,6 +155,7 @@ def build_operational_latest_bundle(
     )
     evidence_links = _build_bundle_evidence_links(bundle_dir=gui_index.parent)
     bundle_root = str(gui_index.parent.resolve())
+    share_refs = _build_bundle_share_refs(bundle_root=gui_index.parent)
     recent_runs = [
         {
             "run_id": entry.run_id,
@@ -162,6 +175,7 @@ def build_operational_latest_bundle(
             "failed_source_count": len(entry.failed_sources),
             "failed_sources": entry.failed_sources,
             "evidence_links": _build_bundle_evidence_links(bundle_dir=Path(entry.gui_index).parent),
+            "share_refs": _build_bundle_share_refs(bundle_root=Path(entry.gui_index).parent),
         }
         for entry in load_recent_runs(resolved_history_db, limit=10)
     ]
@@ -185,6 +199,7 @@ def build_operational_latest_bundle(
                 "failed_source_count": len(list(run_state.failed_sources)),
                 "failed_sources": list(run_state.failed_sources),
                 "evidence_links": evidence_links,
+                "share_refs": share_refs,
             }
         ]
     evidence_lane = {
@@ -209,6 +224,7 @@ def build_operational_latest_bundle(
             "failed_sources": list(run_state.failed_sources),
             "operator_next_action": str(digest.get("governance_summary", {}).get("operator_next_action") or "n/a"),
             "evidence_links": evidence_links,
+            "share_refs": share_refs,
         },
         "recent_runs": recent_runs,
     }

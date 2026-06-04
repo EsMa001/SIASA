@@ -248,9 +248,18 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
     assert evidence_lane["latest_summary"]["bundle_root"] == str(gui_dir.resolve())
     assert evidence_lane["latest_summary"]["artifacts_dir"] == str(artifact_dir)
     assert evidence_lane["latest_summary"]["gui_index"] == str(gui_dir / "index.html")
+    assert evidence_lane["latest_summary"]["share_refs"] == {
+        "bundle_ref": f"bundle:{gui_dir.resolve()}",
+        "coverage_json_ref": f"coverage_json:{gui_dir.resolve() / 'source_coverage.json'}",
+        "system_status_json_ref": f"system_status_json:{gui_dir.resolve() / 'system_status.json'}",
+        "readiness_json_ref": f"readiness_json:{gui_dir.resolve() / 'readiness.json'}",
+        "release_package_json_ref": f"release_package_json:{gui_dir.resolve() / 'release_demo_package.json'}",
+        "release_gate_json_ref": f"release_gate_json:{gui_dir.resolve() / 'release_gate.json'}",
+    }
     assert evidence_lane["recent_runs"][0]["gui_index"] == str(gui_dir / "index.html")
     assert evidence_lane["recent_runs"][0]["bundle_root"] == str(gui_dir.resolve())
     assert evidence_lane["recent_runs"][0]["evidence_links"]["bundle_index_href"] == str(gui_dir.resolve() / "index.html")
+    assert evidence_lane["recent_runs"][0]["share_refs"]["bundle_ref"] == f"bundle:{gui_dir.resolve()}"
     assert evidence_lane["recent_runs"][0]["policy_gate_verdict"] == "pass"
 
 
