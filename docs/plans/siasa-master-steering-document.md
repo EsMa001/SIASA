@@ -250,17 +250,27 @@ Closure achieved:
 - targeted verification passed (`47 passed in 315.87s`) across `test_storage_run_history.py`, `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, `test_scheduler.py`, and `test_local_gui.py`
 - full regression passed (`472 passed in 983.10s`)
 
-### N1-WP-007
+### N1-WP-007 (completed archived structured-evidence navigation slice)
 Name:
 Extend archived history evidence navigation to machine-readable per-run JSON artifacts and explicit bundle-root metadata so historical audits can pivot not only into rendered pages, but also into the exact archived structured evidence payloads.
 
+Closure achieved:
+- `src/siasa/runs/operational_latest.py` now stamps absolute bundle-root metadata into `operational_evidence_lane.json` (`bundle_root`, `artifacts_dir`, `gui_index`) and derives per-run archived JSON links from each row’s own bundle root
+- `src/siasa/gui/local_app.py` now renders latest-bundle root metadata in the evidence lane and enriches each history-row `Evidence` cell with both page links (`Bundle`, `Coverage`, `Readiness`, `Release`) and machine-readable JSON pivots (`Coverage JSON`, `System JSON`, `Readiness JSON`, `Release JSON`, `Gate JSON`) plus explicit `bundle_root` / `artifacts_dir` metadata
+- targeted verification passed (`43 passed in 315.44s`) across `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, `test_scheduler.py`, and `test_local_gui.py`
+- full regression passed (`472 passed in 1008.17s`)
+
+### N1-WP-008
+Name:
+Add compact copy/shareable archived evidence references in history rows so operators can lift exact bundle/json references for external review or incident handoff without manual path assembly.
+
 Why this is the default next package:
-- N1-WP-006 closed page-level archived-run navigation, but historical audits still pivot mainly to rendered HTML pages rather than the exact structured evidence files for each row
-- the next bounded improvement is to expose archived JSON-level evidence pivots and bundle-root metadata directly in history rows
-- this remains a small G3 operator-truth/actionability closure slice without reopening broader runtime risk
+- N1-WP-007 closed direct page + JSON navigation, but external review/handoff still requires manually selecting and copying the relevant archived references
+- the next bounded improvement is lightweight operator handoff ergonomics on top of the now-complete archived evidence addressing
+- this remains a small G3 usability/governance closure slice without reopening broader runtime risk
 
 Definition of done:
-- recent operational history rows expose archived machine-readable evidence links and/or bundle-root metadata per run
+- history rows expose operator-usable archived reference strings and/or compact share targets for handoff
 - targeted tests green
 - full suite green
 - capability matrix updated
@@ -268,7 +278,7 @@ Definition of done:
 - commit + push completed
 
 Fallback reprioritization rule:
-- if valid source credentials/registrations become available before N1-WP-007 starts, reassess whether a credential-activation slice should jump ahead
+- if valid source credentials/registrations become available before N1-WP-008 starts, reassess whether a credential-activation slice should jump ahead
 
 ---
 
