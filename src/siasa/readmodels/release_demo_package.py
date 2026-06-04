@@ -456,6 +456,55 @@ def build_release_demo_package_view_model(
         'share_now_packet': reviewer_handoff_summary['share_now'],
         'decision_packet_note': 'Export-ready seed for management/stakeholder forwarding; validate latest evidence before external send.',
     }
+    decision_packet_send_readiness = {
+        'overall_send_readiness': (
+            'ready_to_send'
+            if package_status == 'ready' and approval_state['decision_status'] == 'approved'
+            else ('internal_review_only' if package_status in {'ready', 'attention'} else 'blocked')
+        ),
+        'external_send_allowed': package_status == 'ready' and approval_state['decision_status'] == 'approved',
+        'next_unblocker': (
+            'Capture explicit reviewer approval in the sign-off scaffold before external send.'
+            if package_status in {'ready', 'attention'} and approval_state['decision_status'] != 'approved'
+            else (
+                'Resolve the blocking package issue before any external distribution.'
+                if package_status == 'blocked'
+                else 'Packet may be distributed externally.'
+            )
+        ),
+        'checklist_items': [
+            {
+                'item_id': 'gate_posture_green',
+                'label': 'Release/gate posture is green',
+                'status': 'pass' if release_green else 'block',
+                'reason': f"release_green={release_green}",
+            },
+            {
+                'item_id': 'reviewer_signoff_captured',
+                'label': 'Reviewer sign-off is captured',
+                'status': 'pass' if approval_state['decision_status'] == 'approved' else 'pending',
+                'reason': f"decision_status={approval_state['decision_status']}",
+            },
+            {
+                'item_id': 'canonical_packet_available',
+                'label': 'Canonical packet artifact is available',
+                'status': 'pass' if reviewer_handoff_summary['canonical_handoff_artifact'] in share_now else 'block',
+                'reason': reviewer_handoff_summary['canonical_handoff_artifact'],
+            },
+            {
+                'item_id': 'distribution_bundle_prepared',
+                'label': 'Distribution bundle is prepared',
+                'status': 'pass' if bool(reviewer_handoff_summary['share_now']) else 'block',
+                'reason': ', '.join(reviewer_handoff_summary['share_now']) or 'none',
+            },
+            {
+                'item_id': 'decision_scope_bounded',
+                'label': 'Decision scope and caveats are bounded',
+                'status': 'pass' if bool(executive_decision_summary['explicit_limitations']) else 'pending',
+                'reason': '; '.join(executive_decision_summary['explicit_limitations']) or 'none',
+            },
+        ],
+    }
 
     return {
         'generated_at_utc': datetime.now(UTC).isoformat(),
@@ -491,6 +540,7 @@ def build_release_demo_package_view_model(
         'reviewer_disposition_standard': reviewer_disposition_standard,
         'disposition_action_routing': disposition_action_routing,
         'decision_packet_seed': decision_packet_seed,
+        'decision_packet_send_readiness': decision_packet_send_readiness,
         'evidence_items': [{'label': label, 'value': value} for label, value in evidence_items],
         'priority_target_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
         'source_item_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
@@ -631,6 +681,19 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<li>{html.escape(str(item))}</li>" for item in decision_packet_seed.get('share_now_packet', [])
     ) or '<li>none</li>'
     decision_packet_note = html.escape(str(decision_packet_seed.get('decision_packet_note', 'n/a')))
+    decision_packet_send_readiness = dict(view_model.get('decision_packet_send_readiness', {})) if isinstance(view_model.get('decision_packet_send_readiness'), dict) else {}
+    packet_send_readiness = html.escape(str(decision_packet_send_readiness.get('overall_send_readiness', 'n/a')))
+    packet_external_send_allowed = html.escape('yes' if bool(decision_packet_send_readiness.get('external_send_allowed')) else 'no')
+    packet_next_unblocker = html.escape(str(decision_packet_send_readiness.get('next_unblocker', 'n/a')))
+    packet_send_checklist_rows = ''.join(
+        '<tr>'
+        f"<td>{html.escape(str(item.get('item_id', '')))}</td>"
+        f"<td>{html.escape(str(item.get('label', '')))}</td>"
+        f"<td>{html.escape(str(item.get('status', '')))}</td>"
+        f"<td>{html.escape(str(item.get('reason', '')))}</td>"
+        '</tr>'
+        for item in _as_dict_list(decision_packet_send_readiness.get('checklist_items'))
+    ) or "<tr><td colspan='4'>No send-readiness checklist available.</td></tr>"
     evidence_rows = ''.join(
         '<tr>'
         f"<td>{html.escape(str(item.get('label', '')))}</td>"
@@ -736,6 +799,15 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<div><strong>Decision snapshot</strong><ul>{decision_snapshot_html}</ul></div>"
         f"<div><strong>Share now packet</strong><ul>{share_now_packet_html}</ul></div>"
         f"<p><strong>Decision packet note</strong>: {decision_packet_note}</p>"
+        "</section>"
+        "<section class='panel'>"
+        "<div class='panel-header'>Decision packet send-readiness checklist</div>"
+        f"<p><strong>Overall send readiness</strong>: {packet_send_readiness}</p>"
+        f"<p><strong>External send allowed</strong>: {packet_external_send_allowed}</p>"
+        f"<p><strong>Next unblocker</strong>: {packet_next_unblocker}</p>"
+        "<div class='table-wrap'><table><thead><tr><th>Item ID</th><th>Checklist item</th><th>Status</th><th>Reason</th></tr></thead><tbody>"
+        f"{packet_send_checklist_rows}"
+        "</tbody></table></div>"
         "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Evidence bundle</div>"

@@ -1089,6 +1089,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Gate Verdict" in readiness_html
     assert "Release Readiness Index" in readiness_html
     assert "Release / Demo Package" in (pages.output_dir / "release_package.html").read_text()
+    release_demo_package_json = json.loads((pages.output_dir / "release_demo_package.json").read_text())
+    assert release_demo_package_json["decision_packet_send_readiness"]["overall_send_readiness"] == "blocked"
+    assert release_demo_package_json["decision_packet_send_readiness"]["external_send_allowed"] is False
     assert "Prioritized items" in (pages.output_dir / "release_package.html").read_text()
     assert "Demo sequence" in (pages.output_dir / "release_package.html").read_text()
     assert "Guided review sequence" in (pages.output_dir / "release_package.html").read_text()
@@ -1139,6 +1142,13 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Decision snapshot" in (pages.output_dir / "release_package.html").read_text()
     assert "Share now packet" in (pages.output_dir / "release_package.html").read_text()
     assert "Decision packet note" in (pages.output_dir / "release_package.html").read_text()
+    assert "Decision packet send-readiness checklist" in (pages.output_dir / "release_package.html").read_text()
+    assert "Overall send readiness" in (pages.output_dir / "release_package.html").read_text()
+    assert "External send allowed" in (pages.output_dir / "release_package.html").read_text()
+    assert "Next unblocker" in (pages.output_dir / "release_package.html").read_text()
+    assert "reviewer_signoff_captured" in (pages.output_dir / "release_package.html").read_text()
+    assert "blocked" in (pages.output_dir / "release_package.html").read_text()
+    assert "Resolve the blocking package issue before any external distribution." in (pages.output_dir / "release_package.html").read_text()
     assert "Evidence bundle" in (pages.output_dir / "release_package.html").read_text()
     assert "stakeholder_e2e_flows_covered" in readiness_html
     assert "Stakeholder E2E Flow Coverage (AP-04/AP-05)" in readiness_html
