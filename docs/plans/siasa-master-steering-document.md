@@ -260,17 +260,27 @@ Closure achieved:
 - targeted verification passed (`43 passed in 315.44s`) across `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, `test_scheduler.py`, and `test_local_gui.py`
 - full regression passed (`472 passed in 1008.17s`)
 
-### N1-WP-008
+### N1-WP-008 (completed archived evidence handoff-reference slice)
 Name:
 Add compact copy/shareable archived evidence references in history rows so operators can lift exact bundle/json references for external review or incident handoff without manual path assembly.
 
+Closure achieved:
+- `src/siasa/runs/operational_latest.py` now stamps machine-readable `share_refs` alongside archived evidence links for both latest and historical rows, using compact reference strings such as `bundle:/...`, `coverage_json:/...`, `readiness_json:/...`, and `release_gate_json:/...`
+- `src/siasa/gui/local_app.py` now renders a `Latest bundle share refs` block in the evidence lane and appends compact `<code>` handoff references to each history-row `Evidence` cell, so operators can lift exact archived references without reconstructing paths manually
+- targeted verification passed (`43 passed in 326.85s`) across `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, `test_scheduler.py`, and `test_local_gui.py`
+- full regression passed (`472 passed in 1012.78s`)
+
+### N1-WP-009
+Name:
+Add concise run-level evidence handoff summaries in recent history so each archived row exposes one compact operator-facing sentence summarizing the bundle location and the primary JSON evidence targets for external review.
+
 Why this is the default next package:
-- N1-WP-007 closed direct page + JSON navigation, but external review/handoff still requires manually selecting and copying the relevant archived references
-- the next bounded improvement is lightweight operator handoff ergonomics on top of the now-complete archived evidence addressing
-- this remains a small G3 usability/governance closure slice without reopening broader runtime risk
+- N1-WP-008 closed copyable raw references, but handoff still requires a human to mentally assemble which of those references matter most
+- the next bounded improvement is a concise run-level handoff summary layer on top of the now complete evidence addressing
+- this remains a small G3 operator usability/governance slice without reopening runtime risk
 
 Definition of done:
-- history rows expose operator-usable archived reference strings and/or compact share targets for handoff
+- history rows expose a concise operator-facing handoff summary per archived run
 - targeted tests green
 - full suite green
 - capability matrix updated
@@ -278,7 +288,7 @@ Definition of done:
 - commit + push completed
 
 Fallback reprioritization rule:
-- if valid source credentials/registrations become available before N1-WP-008 starts, reassess whether a credential-activation slice should jump ahead
+- if valid source credentials/registrations become available before N1-WP-009 starts, reassess whether a credential-activation slice should jump ahead
 
 ---
 
