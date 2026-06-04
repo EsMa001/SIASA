@@ -109,6 +109,21 @@ def _write_minimal_artifacts(
         ),
         encoding="utf-8",
     )
+    release_verdict = "ready" if run_status == "success" and not failed_sources else "blocked_by_known_gaps"
+    (artifact_dir / "readmodels" / "readiness.json").write_text(
+        json.dumps(
+            {
+                "run_id": run_id,
+                "snapshot_id": "SNAP-001",
+                "demo_verdict": "ready",
+                "release_verdict": release_verdict,
+                "known_gaps": [f"failed_source:{item}" for item in failed_sources],
+                "suppressed_known_gaps": [],
+                "known_gap_suppression_reason": None,
+            }
+        ),
+        encoding="utf-8",
+    )
 
 
 def _write_policy_file(repo_root: Path) -> None:
@@ -197,6 +212,9 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
             "combined_ce_ratio": 1.0,
             "governance_verdict": "green",
             "policy_gate_verdict": "pass",
+            "release_verdict": "ready",
+            "readiness_interpretation": "release_ready",
+            "known_gap_count": 0,
         }
     ]
     assert result["pilot_set"] == "extended-focus-complete"
@@ -214,6 +232,8 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
     evidence_lane = _read_json(result["operational_evidence_lane_path"])
     assert evidence_lane["latest_summary"]["country_set_id"] == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
     assert evidence_lane["latest_summary"]["combined_ce_ratio"] == 1.0
+    assert evidence_lane["latest_summary"]["release_verdict"] == "ready"
+    assert evidence_lane["latest_summary"]["readiness_interpretation"] == "release_ready"
     assert evidence_lane["recent_runs"][0]["policy_gate_verdict"] == "pass"
 
 
@@ -346,7 +366,12 @@ def test_build_operational_latest_bundle_allows_degraded_runtime_when_explicitly
     assert run_history_writer.calls[0]["failed_sources"] == ["SRC-GDELT-DOC"]
     assert run_history_writer.calls[0]["country_set_id"] == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
     assert run_history_writer.calls[0]["governance_verdict"] == "amber"
+    assert run_history_writer.calls[0]["release_verdict"] == "blocked_by_known_gaps"
+    assert run_history_writer.calls[0]["readiness_interpretation"] == "runtime_degraded_and_release_blocked"
+    assert run_history_writer.calls[0]["known_gap_count"] == 1
     assert result["policy_gate_verdict"] == "pass"
     evidence_lane = _read_json(result["operational_evidence_lane_path"])
     assert evidence_lane["latest_summary"]["policy_gate_verdict"] == "pass"
     assert evidence_lane["latest_summary"]["governance_verdict"] == "amber"
+    assert evidence_lane["latest_summary"]["release_verdict"] == "blocked_by_known_gaps"
+    assert evidence_lane["latest_summary"]["readiness_interpretation"] == "runtime_degraded_and_release_blocked"

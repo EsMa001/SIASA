@@ -31,6 +31,9 @@ def test_persist_operational_latest_run_writes_run_and_sources(tmp_path: Path) -
         combined_ce_ratio=0.8571,
         governance_verdict="amber",
         policy_gate_verdict="pass",
+        release_verdict="blocked_by_known_gaps",
+        readiness_interpretation="runtime_degraded_and_release_blocked",
+        known_gap_count=2,
     )
 
     runs = load_recent_runs(db_path, limit=5)
@@ -43,6 +46,9 @@ def test_persist_operational_latest_run_writes_run_and_sources(tmp_path: Path) -
     assert runs[0].combined_ce_ratio == 0.8571
     assert runs[0].governance_verdict == "amber"
     assert runs[0].policy_gate_verdict == "pass"
+    assert runs[0].release_verdict == "blocked_by_known_gaps"
+    assert runs[0].readiness_interpretation == "runtime_degraded_and_release_blocked"
+    assert runs[0].known_gap_count == 2
 
     source_results = load_source_results_for_run(db_path, run_id="RUN-LATEST-001")
     assert [entry.source_id for entry in source_results] == ["SRC-GDELT-DOC", "WB-INDICATORS"]
@@ -68,6 +74,9 @@ def test_persist_operational_latest_run_upserts_existing_run(tmp_path: Path) -> 
         combined_ce_ratio=0.5,
         governance_verdict="amber",
         policy_gate_verdict="pass",
+        release_verdict="blocked_by_known_gaps",
+        readiness_interpretation="runtime_degraded_and_release_blocked",
+        known_gap_count=1,
     )
 
     persist_operational_latest_run(
@@ -85,6 +94,9 @@ def test_persist_operational_latest_run_upserts_existing_run(tmp_path: Path) -> 
         combined_ce_ratio=0.8571,
         governance_verdict="green",
         policy_gate_verdict="pass",
+        release_verdict="ready",
+        readiness_interpretation="release_ready",
+        known_gap_count=0,
     )
 
     runs = load_recent_runs(db_path, limit=5)
@@ -97,6 +109,9 @@ def test_persist_operational_latest_run_upserts_existing_run(tmp_path: Path) -> 
     assert runs[0].combined_ce_ratio == 0.8571
     assert runs[0].governance_verdict == "green"
     assert runs[0].policy_gate_verdict == "pass"
+    assert runs[0].release_verdict == "ready"
+    assert runs[0].readiness_interpretation == "release_ready"
+    assert runs[0].known_gap_count == 0
 
     source_results = load_source_results_for_run(db_path, run_id="RUN-LATEST-001")
     assert len(source_results) == 1

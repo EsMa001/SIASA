@@ -21,6 +21,9 @@ class RunHistoryEntry:
     combined_ce_ratio: float | None
     governance_verdict: str
     policy_gate_verdict: str
+    release_verdict: str
+    readiness_interpretation: str
+    known_gap_count: int
 
 
 @dataclass(frozen=True)
@@ -80,6 +83,9 @@ def initialize_run_history_schema(db_path: Path) -> None:
             "combined_ce_ratio": "ALTER TABLE runs ADD COLUMN combined_ce_ratio REAL",
             "governance_verdict": "ALTER TABLE runs ADD COLUMN governance_verdict TEXT",
             "policy_gate_verdict": "ALTER TABLE runs ADD COLUMN policy_gate_verdict TEXT",
+            "release_verdict": "ALTER TABLE runs ADD COLUMN release_verdict TEXT",
+            "readiness_interpretation": "ALTER TABLE runs ADD COLUMN readiness_interpretation TEXT",
+            "known_gap_count": "ALTER TABLE runs ADD COLUMN known_gap_count INTEGER",
         }
         for column_name, statement in run_column_migrations.items():
             if column_name not in existing_run_columns:
@@ -129,6 +135,9 @@ def persist_operational_latest_run(
     combined_ce_ratio: float | None = None,
     governance_verdict: str | None = None,
     policy_gate_verdict: str | None = None,
+    release_verdict: str | None = None,
+    readiness_interpretation: str | None = None,
+    known_gap_count: int | None = None,
 ) -> None:
     initialize_run_history_schema(db_path)
     now_utc = datetime.now(timezone.utc).isoformat()
@@ -148,9 +157,12 @@ def persist_operational_latest_run(
                 country_set_id,
                 combined_ce_ratio,
                 governance_verdict,
-                policy_gate_verdict
+                policy_gate_verdict,
+                release_verdict,
+                readiness_interpretation,
+                known_gap_count
             )
-            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(run_id) DO UPDATE SET
                 recorded_at=excluded.recorded_at,
                 run_status=excluded.run_status,
@@ -161,7 +173,10 @@ def persist_operational_latest_run(
                 country_set_id=excluded.country_set_id,
                 combined_ce_ratio=excluded.combined_ce_ratio,
                 governance_verdict=excluded.governance_verdict,
-                policy_gate_verdict=excluded.policy_gate_verdict
+                policy_gate_verdict=excluded.policy_gate_verdict,
+                release_verdict=excluded.release_verdict,
+                readiness_interpretation=excluded.readiness_interpretation,
+                known_gap_count=excluded.known_gap_count
             """,
             (
                 run_id,
@@ -175,6 +190,9 @@ def persist_operational_latest_run(
                 float(combined_ce_ratio) if combined_ce_ratio is not None else None,
                 str(governance_verdict or "unknown"),
                 str(policy_gate_verdict or "unknown"),
+                str(release_verdict or "unknown"),
+                str(readiness_interpretation or "unknown"),
+                int(known_gap_count) if known_gap_count is not None else 0,
             ),
         )
         connection.execute("DELETE FROM source_results WHERE run_id = ?", (run_id,))
@@ -212,7 +230,10 @@ def load_recent_runs(db_path: Path, *, limit: int = 20) -> list[RunHistoryEntry]
                 country_set_id,
                 combined_ce_ratio,
                 governance_verdict,
-                policy_gate_verdict
+                policy_gate_verdict,
+                release_verdict,
+                readiness_interpretation,
+                known_gap_count
             FROM runs
             ORDER BY recorded_at DESC
             LIMIT ?
@@ -233,6 +254,9 @@ def load_recent_runs(db_path: Path, *, limit: int = 20) -> list[RunHistoryEntry]
             combined_ce_ratio=float(row["combined_ce_ratio"]) if row["combined_ce_ratio"] is not None else None,
             governance_verdict=str(row["governance_verdict"] or "unknown"),
             policy_gate_verdict=str(row["policy_gate_verdict"] or "unknown"),
+            release_verdict=str(row["release_verdict"] or "unknown"),
+            readiness_interpretation=str(row["readiness_interpretation"] or "unknown"),
+            known_gap_count=int(row["known_gap_count"] or 0),
         )
         for row in rows
     ]

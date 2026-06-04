@@ -15,6 +15,25 @@ from siasa.readmodels.live_probe_policy_gate import evaluate_live_probe_digest_p
 from siasa.runs.latest_bundle_verification import verify_latest_bundle
 from siasa.runs.live_runtime import run_governed_live_pipeline
 
+
+def _derive_readiness_interpretation(*, run_status: str, release_verdict: str, known_gaps: list[str], policy_gate_verdict: str) -> str:
+    normalized_run_status = str(run_status or "unknown").lower()
+    normalized_release_verdict = str(release_verdict or "unknown").lower()
+    normalized_policy_gate = str(policy_gate_verdict or "unknown").lower()
+    if normalized_release_verdict == "ready":
+        if normalized_run_status == "partial_success":
+            return "degraded_but_release_ready"
+        return "release_ready"
+    if normalized_release_verdict == "blocked_by_known_gaps":
+        if normalized_run_status == "partial_success" and normalized_policy_gate == "pass":
+            return "runtime_degraded_and_release_blocked"
+        return "release_blocked_by_known_gaps"
+    if normalized_release_verdict == "blocked":
+        return "release_blocked"
+    if known_gaps:
+        return "release_truth_requires_review"
+    return "release_truth_unknown"
+
 DEFAULT_OPERATIONAL_LATEST_PILOT_SET = "extended-focus-complete"
 
 
@@ -78,6 +97,16 @@ def build_operational_latest_bundle(
         allow_partial_success=allow_partial_success,
         allow_failed_sources=allow_failed_sources,
     )
+    readiness = json.loads((readmodels_dir / "readiness.json").read_text(encoding="utf-8"))
+    release_verdict = str(readiness.get("release_verdict") or "unknown")
+    known_gaps = [str(item) for item in (readiness.get("known_gaps") or [])]
+    suppressed_known_gaps = [str(item) for item in (readiness.get("suppressed_known_gaps") or [])]
+    readiness_interpretation = _derive_readiness_interpretation(
+        run_status=run_state.status,
+        release_verdict=release_verdict,
+        known_gaps=known_gaps,
+        policy_gate_verdict=str(gate_evaluation.get("gate_verdict") or "unknown"),
+    )
 
     resolved_history_db = history_db_path or repo_root / "build/run_history/latest_runs.sqlite"
     run_history_writer(
@@ -93,6 +122,9 @@ def build_operational_latest_bundle(
         combined_ce_ratio=digest.get("ce_utilization", {}).get("combined_ce_ratio"),
         governance_verdict=str(digest.get("governance_summary", {}).get("verdict") or "unknown"),
         policy_gate_verdict=str(gate_evaluation.get("gate_verdict") or "unknown"),
+        release_verdict=release_verdict,
+        readiness_interpretation=readiness_interpretation,
+        known_gap_count=len(known_gaps),
     )
     recent_runs = [
         {
@@ -104,6 +136,9 @@ def build_operational_latest_bundle(
             "combined_ce_ratio": entry.combined_ce_ratio,
             "governance_verdict": entry.governance_verdict,
             "policy_gate_verdict": entry.policy_gate_verdict,
+            "release_verdict": entry.release_verdict,
+            "readiness_interpretation": entry.readiness_interpretation,
+            "known_gap_count": entry.known_gap_count,
             "failed_source_count": len(entry.failed_sources),
             "failed_sources": entry.failed_sources,
         }
@@ -120,6 +155,9 @@ def build_operational_latest_bundle(
                 "combined_ce_ratio": digest.get("ce_utilization", {}).get("combined_ce_ratio"),
                 "governance_verdict": str(digest.get("governance_summary", {}).get("verdict") or "unknown"),
                 "policy_gate_verdict": str(gate_evaluation.get("gate_verdict") or "unknown"),
+                "release_verdict": release_verdict,
+                "readiness_interpretation": readiness_interpretation,
+                "known_gap_count": len(known_gaps),
                 "failed_source_count": len(list(run_state.failed_sources)),
                 "failed_sources": list(run_state.failed_sources),
             }
@@ -133,6 +171,12 @@ def build_operational_latest_bundle(
             "combined_ce_ratio": digest.get("ce_utilization", {}).get("combined_ce_ratio"),
             "governance_verdict": str(digest.get("governance_summary", {}).get("verdict") or "unknown"),
             "policy_gate_verdict": str(gate_evaluation.get("gate_verdict") or "unknown"),
+            "release_verdict": release_verdict,
+            "known_gaps": known_gaps,
+            "known_gap_count": len(known_gaps),
+            "suppressed_known_gaps": suppressed_known_gaps,
+            "known_gap_suppression_reason": readiness.get("known_gap_suppression_reason"),
+            "readiness_interpretation": readiness_interpretation,
             "failed_source_count": len(list(run_state.failed_sources)),
             "failed_sources": list(run_state.failed_sources),
             "operator_next_action": str(digest.get("governance_summary", {}).get("operator_next_action") or "n/a"),

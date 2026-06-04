@@ -2881,6 +2881,9 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     )
     governance_verdict = str(latest_summary.get('governance_verdict', 'n/a'))
     policy_gate_verdict = str(latest_summary.get('policy_gate_verdict', 'n/a'))
+    release_verdict = str(latest_summary.get('release_verdict', 'n/a'))
+    readiness_interpretation = str(latest_summary.get('readiness_interpretation', 'n/a'))
+    known_gap_count = int(latest_summary.get('known_gap_count', 0) or 0)
 
     def _format_history_ratio(value: Any) -> str:
         return f"{float(value):.4f}" if isinstance(value, (int, float)) else str(value or 'n/a')
@@ -2894,6 +2897,9 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<td>{html.escape(_format_history_ratio(item.get('combined_ce_ratio')))}</td>"
         f"<td>{html.escape(str(item.get('governance_verdict', 'n/a')))}</td>"
         f"<td>{html.escape(str(item.get('policy_gate_verdict', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('release_verdict', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('readiness_interpretation', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('known_gap_count', 'n/a')))}</td>"
         f"<td>{html.escape(str(item.get('failed_source_count', 'n/a')))}</td>"
         "</tr>"
         for item in recent_runs
@@ -2904,13 +2910,19 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<li>{html.escape(str(item))}</li>"
         for item in latest_summary.get('failed_sources', [])
     ) or "<li>none</li>"
+    latest_known_gaps = ''.join(
+        f"<li>{html.escape(str(item))}</li>"
+        for item in latest_summary.get('known_gaps', [])
+    ) or "<li>none</li>"
     evidence_lane_section = (
         "<div class='panel' id='operational-evidence-lane'><div class='panel-header'>Operational Evidence Lane</div>"
         f"<p>Governed slice: <strong>{html.escape(str(latest_summary.get('country_set_id', 'n/a')))}</strong> | Combined C/E ratio: <strong>{combined_ce_ratio_text}</strong> | Governance verdict: <strong>{html.escape(governance_verdict)}</strong> | Policy gate: <strong>{html.escape(policy_gate_verdict)}</strong></p>"
+        f"<p>Release verdict: <strong>{html.escape(release_verdict)}</strong> | Readiness interpretation: <strong>{html.escape(readiness_interpretation)}</strong> | Known gaps: <strong>{html.escape(str(known_gap_count))}</strong></p>"
         f"<p>Operator next action: <strong>{operator_next_action}</strong></p>"
         f"<details><summary>Latest failed sources ({html.escape(str(latest_summary.get('failed_source_count', 0)))})</summary><ul>{latest_failed_sources}</ul></details>"
+        f"<details><summary>Latest known gaps ({html.escape(str(known_gap_count))})</summary><ul>{latest_known_gaps}</ul></details>"
         "<h3>Recent Operational History</h3>"
-        "<table id='operational-evidence-history-table'><thead><tr><th>Run ID</th><th>Status</th><th>Pilot Set</th><th>Country Set</th><th>Combined C/E Ratio</th><th>Governance</th><th>Policy Gate</th><th>Failed Sources</th></tr></thead>"
+        "<table id='operational-evidence-history-table'><thead><tr><th>Run ID</th><th>Status</th><th>Pilot Set</th><th>Country Set</th><th>Combined C/E Ratio</th><th>Governance</th><th>Policy Gate</th><th>Release Verdict</th><th>Readiness Interpretation</th><th>Known Gaps</th><th>Failed Sources</th></tr></thead>"
         f"<tbody>{recent_run_rows}</tbody></table></div>"
     ) if latest_summary else ""
     _run_color = html.escape(_run_status_color(str(system_status_read_model.get('run_status', 'n/a'))))
@@ -2926,6 +2938,8 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<div class='kpi-card'><span class='kpi-label'>Combined C/E Ratio</span><div class='kpi-value'>{combined_ce_ratio_text}</div></div>"
         f"<div class='kpi-card'><span class='kpi-label'>Governance Verdict</span><div class='kpi-value'>{html.escape(governance_verdict)}</div></div>"
         f"<div class='kpi-card'><span class='kpi-label'>Policy Gate</span><div class='kpi-value'>{html.escape(policy_gate_verdict)}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Release Verdict</span><div class='kpi-value'>{html.escape(release_verdict)}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Known Gaps</span><div class='kpi-value'>{html.escape(str(known_gap_count))}</div><div class='kpi-sub'>{html.escape(readiness_interpretation)}</div></div>"
         "</div>"
         f"{evidence_lane_section}"
         # === Coverage ===

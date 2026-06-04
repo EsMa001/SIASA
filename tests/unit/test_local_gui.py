@@ -709,6 +709,12 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 "combined_ce_ratio": 0.8571,
                 "governance_verdict": "amber",
                 "policy_gate_verdict": "pass",
+                "release_verdict": "blocked_by_known_gaps",
+                "readiness_interpretation": "runtime_degraded_and_release_blocked",
+                "known_gap_count": 2,
+                "known_gaps": ["failed_source:SRC-B", "country_gap:UKR:D:source_failed_this_run"],
+                "suppressed_known_gaps": [],
+                "known_gap_suppression_reason": None,
                 "failed_source_count": 1,
                 "failed_sources": ["SRC-B"],
                 "operator_next_action": "Investigate failed sources and restore source availability.",
@@ -723,6 +729,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                     "combined_ce_ratio": 0.8571,
                     "governance_verdict": "amber",
                     "policy_gate_verdict": "pass",
+                    "release_verdict": "blocked_by_known_gaps",
+                    "readiness_interpretation": "runtime_degraded_and_release_blocked",
+                    "known_gap_count": 2,
                     "failed_source_count": 1,
                     "failed_sources": ["SRC-B"],
                 }
@@ -968,6 +977,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Operational Evidence Lane" in runs_html
     assert "MVP-COUNTRIES-LIVE-focus-complete-v1" in runs_html
     assert "0.8571" in runs_html
+    assert "blocked_by_known_gaps" in runs_html
+    assert "runtime_degraded_and_release_blocked" in runs_html
+    assert "Latest known gaps (2)" in runs_html
     assert "operational-evidence-history-table" in runs_html
     assert "Repo Closure Summary" in runs_html
     assert "governance-and-run-controls" in runs_html
@@ -1954,6 +1966,12 @@ def test_load_site_payload_from_artifacts_falls_back_for_missing_readiness_suppo
                 "combined_ce_ratio": 1.0,
                 "governance_verdict": "green",
                 "policy_gate_verdict": "pass",
+                "release_verdict": "ready",
+                "readiness_interpretation": "release_ready",
+                "known_gap_count": 0,
+                "known_gaps": [],
+                "suppressed_known_gaps": [],
+                "known_gap_suppression_reason": None,
                 "failed_source_count": 0,
                 "failed_sources": [],
                 "operator_next_action": "No immediate action required; live probe governance summary is healthy.",
@@ -1968,6 +1986,9 @@ def test_load_site_payload_from_artifacts_falls_back_for_missing_readiness_suppo
                     "combined_ce_ratio": 1.0,
                     "governance_verdict": "green",
                     "policy_gate_verdict": "pass",
+                    "release_verdict": "ready",
+                    "readiness_interpretation": "release_ready",
+                    "known_gap_count": 0,
                     "failed_source_count": 0,
                     "failed_sources": [],
                 }
