@@ -195,31 +195,37 @@ Closure achieved:
 - unit coverage now verifies orchestrator support for `extended-focus-complete` and `focus-complete`
 - pipeline pass-through coverage now verifies `mvp-complete` without explicit `country_ids`
 
-### N1-WP-002
+### N1-WP-002 (completed broader live-probe closure slice)
 Name:
 Execute the next actual broader live probe slice on top of the now explicitly exposed/test-covered `extended-focus-complete` / `focus-complete` / `mvp-complete` pilot-set family, with explicit C/E evidence digest and honest partial-success semantics.
 
+Closure achieved:
+- `src/siasa/runs/operational_latest.py` now auto-builds `readmodels/live_probe_evidence_digest.json` and `readmodels/live_probe_policy_gate.json` for operational latest bundles before persisting run-history metadata
+- `src/siasa/runs/latest_bundle_verification.py` now requires these two machine-readable governance artifacts, verifies digest/gate alignment against `system_status.json`, and rejects bundles whose governed slice identity remains implicit
+- targeted verification passed for the new operational-latest + bundle-verification contract (`24 passed` across `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, `test_scheduler.py`)
+- full regression passed (`472 passed in 978.14s`)
+- one fresh broader real probe bundle was generated on `focus-complete` via `RUN-OP-LATEST-20260604T103448Z`
+- the resulting real evidence shows honest degraded-mode governance rather than forced greenwashing: `run_status=partial_success`, `country_set_id=MVP-COUNTRIES-LIVE-focus-complete-v1`, `failed_sources=[SRC-GDELT-DOC, SRC-GDELT-DOC-E]`, `combined_ce_ratio=0.8571`, governance verdict `amber`, and policy gate verdict `pass`
+
+### N1-WP-003
+Name:
+Normalize the operator/project-lead evidence lane on top of the new broader live-probe governance artifacts so the latest/history surfaces expose `country_set_id`, C/E ratio, governance verdict, and policy-gate outcome without requiring raw JSON inspection.
+
 Why this is the default next package:
-- it attacks the biggest remaining real stakeholder gap
-- it builds directly on the now-hardened runtime steering surface instead of probing a slice that is still partly implicit in CLI/test coverage
-- it uses the already-strong GUI/governance/release stack instead of polishing it prematurely
-- it preserves the project’s preferred evidence-first serial execution logic
+- N1-WP-002 proved that the broader `focus-complete` slice can now produce fresh real evidence with explicit partial-success semantics and machine-readable governance outputs
+- the next remaining friction is not whether evidence can be produced, but whether the latest/history lane presents that evidence as one authoritative operator/project-lead truth surface
+- this directly attacks G3 (operational evidence-lane normalization) while preserving the already-proven broader runtime frontier
 
 Definition of done:
-- one new bounded broader governed pilot slice selected for fresh live execution
-- runtime contract updated if required
-- targeted runtime tests green
+- latest/history operator-facing readmodel or summary surface carries the governed slice identity, combined C/E ratio, governance verdict, and policy-gate verdict
+- targeted tests green
 - full suite green
-- one real probe artifact bundle generated
-- readiness/release truth explicitly captured
-- explicit C/E evidence digest available for the slice
-- probe/evidence artifacts expose the governed slice identity explicitly (for example via `country_set_id` / named pilot-set identity) so broader runtime results are diagnosable without reconstructing the country list indirectly
 - capability matrix updated
 - this master steering document updated if frontier changed
 - commit + push completed
 
 Fallback reprioritization rule:
-- if valid source credentials/registrations become available before N1-WP-002 starts, reassess whether N2-WP-001 should become the immediate next package instead
+- if valid source credentials/registrations become available before N1-WP-003 starts, reassess whether a credential-activation slice should jump ahead
 
 ---
 
