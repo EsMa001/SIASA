@@ -246,6 +246,7 @@ Current Step-C progress:
 - C-9 completed: the Release / Demo Package now standardizes reviewer dispositions and follow-up ownership for decision capture
 - C-10 completed: the Release / Demo Package now maps reviewer dispositions directly to explicit action bundles and handoff routes
 - C-11 completed: the Release / Demo Package now exposes a compact decision packet seed for export-ready management/stakeholder forwarding
+- C-12 completed: the Release / Demo Package now adds an explicit decision-packet send-readiness checklist that distinguishes blocked vs internal-review-only vs ready-to-send packet state
 - current GUI evidence: `build/local_gui/latest/release_package.html`
 - current drill GUI evidence: `build/local_gui/latest/release_failure_drill.html`
 - current machine-readable package artifact: `build/local_gui/latest/release_demo_package.json`
@@ -259,6 +260,7 @@ Current Step-C progress:
 - current C-9 artifact fields: `reviewer_disposition_standard` with `disposition_options`, `selected_disposition`, `disposition_rationale_bounds`, and `follow_up_owner`
 - current C-10 artifact fields: `disposition_action_routing` with `route_trigger`, `primary_action_bundle`, `escalation_handoff_route`, and `action_owner`
 - current C-11 artifact fields: `decision_packet_seed` with `packet_headline`, `decision_snapshot`, `share_now_packet`, and `decision_packet_note`
+- current C-12 artifact fields: `decision_packet_send_readiness` with `overall_send_readiness`, `external_send_allowed`, `next_unblocker`, and deterministic `checklist_items`
 - current implementation evidence: `src/siasa/readmodels/release_demo_package.py`, `src/siasa/readmodels/release_evidence.py`, `src/siasa/gui/local_app.py`
 - current C-3 validation evidence: `tests/unit/test_local_gui.py` plus full-suite pass (`467 passed`)
 - current C-4 validation evidence: `tests/unit/test_local_gui.py` plus full-suite pass (`467 passed`)
@@ -269,6 +271,7 @@ Current Step-C progress:
 - current C-9 validation evidence: focused `tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` (`1 passed in 2.03s`) plus targeted `tests/unit/test_local_gui.py -q` (`19 passed in 312.88s`) plus full-suite pass (`467 passed in 984.28s`)
 - current C-10 validation evidence: focused `tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` (`1 passed in 1.95s`) plus targeted `tests/unit/test_local_gui.py -q` (`19 passed in 327.42s`) plus full-suite pass (`467 passed in 983.50s`)
 - current C-11 validation evidence: focused `tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` (`1 passed in 1.98s`) plus targeted `tests/unit/test_local_gui.py -q` (`19 passed in 322.20s`) plus full-suite pass (`467 passed in 995.17s`)
+- current C-12 validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/readmodels/release_demo_package.py tests/unit/test_local_gui.py`, targeted `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py -q` (`19 passed in 316.82s`), plus full-suite pass (`467 passed in 980.23s`)
 
 ### Recommended serial execution rule
 
