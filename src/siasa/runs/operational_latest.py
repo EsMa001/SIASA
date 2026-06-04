@@ -31,6 +31,16 @@ def _build_bundle_share_refs(*, bundle_root: Path) -> dict[str, str]:
         "release_gate_json_ref": f"release_gate_json:{bundle_root / 'release_gate.json'}",
     }
 
+
+def _build_bundle_handoff_summary(*, run_id: str, bundle_root: Path, share_refs: dict[str, str]) -> str:
+    bundle_root = bundle_root.resolve()
+    return (
+        f"Run {run_id}: bundle at {bundle_root}; "
+        f"review {share_refs.get('readiness_json_ref', 'readiness_json:n/a')}, "
+        f"{share_refs.get('coverage_json_ref', 'coverage_json:n/a')}, and "
+        f"{share_refs.get('release_gate_json_ref', 'release_gate_json:n/a')}."
+    )
+
 from siasa.data.storage import (
     load_recent_runs,
     persist_operational_latest_run,
@@ -156,6 +166,11 @@ def build_operational_latest_bundle(
     evidence_links = _build_bundle_evidence_links(bundle_dir=gui_index.parent)
     bundle_root = str(gui_index.parent.resolve())
     share_refs = _build_bundle_share_refs(bundle_root=gui_index.parent)
+    handoff_summary = _build_bundle_handoff_summary(
+        run_id=run_state.run_id,
+        bundle_root=gui_index.parent,
+        share_refs=share_refs,
+    )
     recent_runs = [
         {
             "run_id": entry.run_id,
@@ -176,6 +191,11 @@ def build_operational_latest_bundle(
             "failed_sources": entry.failed_sources,
             "evidence_links": _build_bundle_evidence_links(bundle_dir=Path(entry.gui_index).parent),
             "share_refs": _build_bundle_share_refs(bundle_root=Path(entry.gui_index).parent),
+            "handoff_summary": _build_bundle_handoff_summary(
+                run_id=entry.run_id,
+                bundle_root=Path(entry.gui_index).parent,
+                share_refs=_build_bundle_share_refs(bundle_root=Path(entry.gui_index).parent),
+            ),
         }
         for entry in load_recent_runs(resolved_history_db, limit=10)
     ]
@@ -200,6 +220,7 @@ def build_operational_latest_bundle(
                 "failed_sources": list(run_state.failed_sources),
                 "evidence_links": evidence_links,
                 "share_refs": share_refs,
+                "handoff_summary": handoff_summary,
             }
         ]
     evidence_lane = {
@@ -225,6 +246,7 @@ def build_operational_latest_bundle(
             "operator_next_action": str(digest.get("governance_summary", {}).get("operator_next_action") or "n/a"),
             "evidence_links": evidence_links,
             "share_refs": share_refs,
+            "handoff_summary": handoff_summary,
         },
         "recent_runs": recent_runs,
     }

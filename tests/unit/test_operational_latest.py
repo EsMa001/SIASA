@@ -256,10 +256,17 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
         "release_package_json_ref": f"release_package_json:{gui_dir.resolve() / 'release_demo_package.json'}",
         "release_gate_json_ref": f"release_gate_json:{gui_dir.resolve() / 'release_gate.json'}",
     }
+    assert evidence_lane["latest_summary"]["handoff_summary"] == (
+        f"Run RUN-OP-LATEST-001: bundle at {gui_dir.resolve()}; "
+        f"review readiness_json:{gui_dir.resolve() / 'readiness.json'}, "
+        f"coverage_json:{gui_dir.resolve() / 'source_coverage.json'}, and "
+        f"release_gate_json:{gui_dir.resolve() / 'release_gate.json'}."
+    )
     assert evidence_lane["recent_runs"][0]["gui_index"] == str(gui_dir / "index.html")
     assert evidence_lane["recent_runs"][0]["bundle_root"] == str(gui_dir.resolve())
     assert evidence_lane["recent_runs"][0]["evidence_links"]["bundle_index_href"] == str(gui_dir.resolve() / "index.html")
     assert evidence_lane["recent_runs"][0]["share_refs"]["bundle_ref"] == f"bundle:{gui_dir.resolve()}"
+    assert "Run RUN-OP-LATEST-001: bundle at" in evidence_lane["recent_runs"][0]["handoff_summary"]
     assert evidence_lane["recent_runs"][0]["policy_gate_verdict"] == "pass"
 
 
