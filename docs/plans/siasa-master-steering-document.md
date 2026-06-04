@@ -39,6 +39,7 @@ Current repo/program truth:
 - capability matrix fulfillment is currently `17/17 Done`, `100.0%`
 - the former major implementation-gap program (`AP-F01..AP-F27` style closure work) has been materially executed in the repo
 - analyst GUI, governed validation, release/readiness governance, and release productization have all progressed far beyond the earlier planning baselines
+- the broader governed pilot-set family (`extended-focus-complete`, `focus-complete`, `mvp-complete`) is now explicit in the live-runtime CLI help and covered by runtime unit tests, reducing mismatch between roadmap claims and user-facing runtime interface
 
 This means:
 - SIASA is no longer primarily in a “missing core implementation” phase
@@ -185,18 +186,28 @@ Only revisit steering priority when:
 
 ## 6. Current recommended next package
 
-### N1-WP-001
+### N1-WP-001 (completed steering-truth sub-slice)
 Name:
-Broaden governed live runtime to the next bounded MVP/P2 breadth slice with explicit C/E evidence digest and honest partial-success semantics.
+Expose and test the broader governed live-runtime pilot-set family (`extended-focus-complete`, `focus-complete`, `mvp-complete`) so runtime breadth claims are explicit in the CLI surface and protected by unit tests.
+
+Closure achieved:
+- live-runtime CLI help now lists the three broader named pilot sets explicitly
+- unit coverage now verifies orchestrator support for `extended-focus-complete` and `focus-complete`
+- pipeline pass-through coverage now verifies `mvp-complete` without explicit `country_ids`
+
+### N1-WP-002
+Name:
+Execute the next actual broader live probe slice on top of the now explicitly exposed/test-covered `extended-focus-complete` / `focus-complete` / `mvp-complete` pilot-set family, with explicit C/E evidence digest and honest partial-success semantics.
 
 Why this is the default next package:
 - it attacks the biggest remaining real stakeholder gap
+- it builds directly on the now-hardened runtime steering surface instead of probing a slice that is still partly implicit in CLI/test coverage
 - it uses the already-strong GUI/governance/release stack instead of polishing it prematurely
 - it preserves the project’s preferred evidence-first serial execution logic
 
 Definition of done:
-- one new bounded broader governed pilot slice selected
-- runtime contract updated
+- one new bounded broader governed pilot slice selected for fresh live execution
+- runtime contract updated if required
 - targeted runtime tests green
 - full suite green
 - one real probe artifact bundle generated
@@ -207,7 +218,7 @@ Definition of done:
 - commit + push completed
 
 Fallback reprioritization rule:
-- if valid source credentials/registrations become available before N1-WP-001 starts, reassess whether N2-WP-001 should become the immediate next package instead
+- if valid source credentials/registrations become available before N1-WP-002 starts, reassess whether N2-WP-001 should become the immediate next package instead
 
 ---
 
