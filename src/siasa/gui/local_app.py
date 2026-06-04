@@ -2849,6 +2849,12 @@ def _render_reports(report_catalog: dict[str, Any], *, nav_prefix: str = '', ava
 
 
 def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_model: dict[str, Any] | None = None, *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
+    def _render_evidence_link(label: str, href: Any) -> str:
+        href_text = str(href or '').strip()
+        if not href_text:
+            return ''
+        return f"<a href='{html.escape(href_text)}'>{html.escape(label)}</a>"
+
     repo_closure_section = ""
     if repo_closure_view_model is not None:
         repo_closure_rows = ''.join(
@@ -2888,6 +2894,38 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     def _format_history_ratio(value: Any) -> str:
         return f"{float(value):.4f}" if isinstance(value, (int, float)) else str(value or 'n/a')
 
+    operator_next_action = html.escape(str(latest_summary.get('operator_next_action', 'n/a')))
+    evidence_links = latest_summary.get('evidence_links', {}) if isinstance(latest_summary.get('evidence_links'), dict) else {}
+    latest_evidence_link_items = ''.join(
+        f"<li>{link}</li>"
+        for link in (
+            _render_evidence_link('Coverage page', evidence_links.get('coverage_page_href')),
+            _render_evidence_link('Coverage JSON', evidence_links.get('coverage_json_href')),
+            _render_evidence_link('System status JSON', evidence_links.get('system_status_json_href')),
+            _render_evidence_link('Readiness page', evidence_links.get('readiness_page_href')),
+            _render_evidence_link('Readiness JSON', evidence_links.get('readiness_json_href')),
+            _render_evidence_link('Release package page', evidence_links.get('release_package_page_href')),
+            _render_evidence_link('Release package JSON', evidence_links.get('release_package_json_href')),
+            _render_evidence_link('Release gate JSON', evidence_links.get('release_gate_json_href')),
+        )
+        if link
+    ) or "<li>none</li>"
+
+    def _render_history_evidence_cell(item: dict[str, Any]) -> str:
+        if str(item.get('run_id', '')) != str(latest_summary.get('run_id', '')):
+            return 'latest bundle only'
+        links = ''.join(
+            part
+            for part in (
+                _render_evidence_link('Coverage', evidence_links.get('coverage_page_href')),
+                ' | ' if evidence_links.get('coverage_page_href') and evidence_links.get('readiness_page_href') else '',
+                _render_evidence_link('Readiness', evidence_links.get('readiness_page_href')),
+                ' | ' if (evidence_links.get('coverage_page_href') or evidence_links.get('readiness_page_href')) and evidence_links.get('release_package_page_href') else '',
+                _render_evidence_link('Release', evidence_links.get('release_package_page_href')),
+            )
+        )
+        return links or 'latest bundle only'
+
     recent_run_rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(item.get('run_id', 'n/a')))}</td>"
@@ -2901,11 +2939,11 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<td>{html.escape(str(item.get('readiness_interpretation', 'n/a')))}</td>"
         f"<td>{html.escape(str(item.get('known_gap_count', 'n/a')))}</td>"
         f"<td>{html.escape(str(item.get('failed_source_count', 'n/a')))}</td>"
+        f"<td>{_render_history_evidence_cell(item)}</td>"
         "</tr>"
         for item in recent_runs
         if isinstance(item, dict)
-    ) or "<tr><td colspan='8'>No operational history available.</td></tr>"
-    operator_next_action = html.escape(str(latest_summary.get('operator_next_action', 'n/a')))
+    ) or "<tr><td colspan='12'>No operational history available.</td></tr>"
     latest_failed_sources = ''.join(
         f"<li>{html.escape(str(item))}</li>"
         for item in latest_summary.get('failed_sources', [])
@@ -2919,10 +2957,11 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<p>Governed slice: <strong>{html.escape(str(latest_summary.get('country_set_id', 'n/a')))}</strong> | Combined C/E ratio: <strong>{combined_ce_ratio_text}</strong> | Governance verdict: <strong>{html.escape(governance_verdict)}</strong> | Policy gate: <strong>{html.escape(policy_gate_verdict)}</strong></p>"
         f"<p>Release verdict: <strong>{html.escape(release_verdict)}</strong> | Readiness interpretation: <strong>{html.escape(readiness_interpretation)}</strong> | Known gaps: <strong>{html.escape(str(known_gap_count))}</strong></p>"
         f"<p>Operator next action: <strong>{operator_next_action}</strong></p>"
+        f"<details><summary>Latest bundle evidence links</summary><ul>{latest_evidence_link_items}</ul></details>"
         f"<details><summary>Latest failed sources ({html.escape(str(latest_summary.get('failed_source_count', 0)))})</summary><ul>{latest_failed_sources}</ul></details>"
         f"<details><summary>Latest known gaps ({html.escape(str(known_gap_count))})</summary><ul>{latest_known_gaps}</ul></details>"
         "<h3>Recent Operational History</h3>"
-        "<table id='operational-evidence-history-table'><thead><tr><th>Run ID</th><th>Status</th><th>Pilot Set</th><th>Country Set</th><th>Combined C/E Ratio</th><th>Governance</th><th>Policy Gate</th><th>Release Verdict</th><th>Readiness Interpretation</th><th>Known Gaps</th><th>Failed Sources</th></tr></thead>"
+        "<table id='operational-evidence-history-table'><thead><tr><th>Run ID</th><th>Status</th><th>Pilot Set</th><th>Country Set</th><th>Combined C/E Ratio</th><th>Governance</th><th>Policy Gate</th><th>Release Verdict</th><th>Readiness Interpretation</th><th>Known Gaps</th><th>Failed Sources</th><th>Evidence</th></tr></thead>"
         f"<tbody>{recent_run_rows}</tbody></table></div>"
     ) if latest_summary else ""
     _run_color = html.escape(_run_status_color(str(system_status_read_model.get('run_status', 'n/a'))))
@@ -5973,6 +6012,9 @@ def build_local_mvp_site(
         encoding='utf-8',
     )
     generated_files.append(coverage_file)
+    source_coverage_json_file = output_dir / 'source_coverage.json'
+    source_coverage_json_file.write_text(json.dumps(source_coverage_read_model, indent=2, sort_keys=True), encoding='utf-8')
+    generated_files.append(source_coverage_json_file)
 
     prepared_report_catalog, copied_export_files = _prepare_report_catalog(report_catalog, output_dir)
     generated_files.extend(copied_export_files)
@@ -5985,6 +6027,9 @@ def build_local_mvp_site(
         runs_file = output_dir / 'runs.html'
         runs_file.write_text(_render_runs(system_status_read_model, repo_closure_view_model, nav_prefix='', available_pages=available_pages), encoding='utf-8')
         generated_files.append(runs_file)
+    system_status_json_file = output_dir / 'system_status.json'
+    system_status_json_file.write_text(json.dumps(system_status_read_model, indent=2, sort_keys=True), encoding='utf-8')
+    generated_files.append(system_status_json_file)
 
     trends_file = output_dir / 'trends.html'
     trends_file.write_text(_render_trends(country_profile_read_models, nav_prefix='', available_pages=available_pages), encoding='utf-8')

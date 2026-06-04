@@ -718,6 +718,16 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 "failed_source_count": 1,
                 "failed_sources": ["SRC-B"],
                 "operator_next_action": "Investigate failed sources and restore source availability.",
+                "evidence_links": {
+                    "coverage_page_href": "coverage.html",
+                    "coverage_json_href": "source_coverage.json",
+                    "system_status_json_href": "system_status.json",
+                    "readiness_page_href": "readiness.html",
+                    "readiness_json_href": "readiness.json",
+                    "release_package_page_href": "release_package.html",
+                    "release_package_json_href": "release_demo_package.json",
+                    "release_gate_json_href": "release_gate.json",
+                },
             },
             "recent_runs": [
                 {
@@ -779,8 +789,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert (pages.output_dir / "countries" / "UKR.html").exists()
     assert (pages.output_dir / "domains" / "UKR-A.html").exists()
     assert (pages.output_dir / "coverage.html").exists()
+    assert (pages.output_dir / "source_coverage.json").exists()
     assert (pages.output_dir / "reports.html").exists()
     assert (pages.output_dir / "runs.html").exists()
+    assert (pages.output_dir / "system_status.json").exists()
     assert (pages.output_dir / "trends.html").exists()
     assert (pages.output_dir / "events.html").exists()
     assert (pages.output_dir / "comparison.html").exists()
@@ -980,6 +992,15 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "blocked_by_known_gaps" in runs_html
     assert "runtime_degraded_and_release_blocked" in runs_html
     assert "Latest known gaps (2)" in runs_html
+    assert "Latest bundle evidence links" in runs_html
+    assert "href='coverage.html'" in runs_html
+    assert "href='source_coverage.json'" in runs_html
+    assert "href='system_status.json'" in runs_html
+    assert "href='readiness.html'" in runs_html
+    assert "href='readiness.json'" in runs_html
+    assert "href='release_package.html'" in runs_html
+    assert "href='release_demo_package.json'" in runs_html
+    assert "href='release_gate.json'" in runs_html
     assert "operational-evidence-history-table" in runs_html
     assert "Repo Closure Summary" in runs_html
     assert "governance-and-run-controls" in runs_html

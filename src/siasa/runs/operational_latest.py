@@ -162,6 +162,16 @@ def build_operational_latest_bundle(
                 "failed_sources": list(run_state.failed_sources),
             }
         ]
+    evidence_links = {
+        "coverage_page_href": "coverage.html",
+        "coverage_json_href": "source_coverage.json",
+        "system_status_json_href": "system_status.json",
+        "readiness_page_href": "readiness.html",
+        "readiness_json_href": "readiness.json",
+        "release_package_page_href": "release_package.html",
+        "release_package_json_href": "release_demo_package.json",
+        "release_gate_json_href": "release_gate.json",
+    }
     evidence_lane = {
         "latest_summary": {
             "run_id": run_state.run_id,
@@ -180,6 +190,7 @@ def build_operational_latest_bundle(
             "failed_source_count": len(list(run_state.failed_sources)),
             "failed_sources": list(run_state.failed_sources),
             "operator_next_action": str(digest.get("governance_summary", {}).get("operator_next_action") or "n/a"),
+            "evidence_links": evidence_links,
         },
         "recent_runs": recent_runs,
     }

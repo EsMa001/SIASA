@@ -234,6 +234,16 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
     assert evidence_lane["latest_summary"]["combined_ce_ratio"] == 1.0
     assert evidence_lane["latest_summary"]["release_verdict"] == "ready"
     assert evidence_lane["latest_summary"]["readiness_interpretation"] == "release_ready"
+    assert evidence_lane["latest_summary"]["evidence_links"] == {
+        "coverage_page_href": "coverage.html",
+        "coverage_json_href": "source_coverage.json",
+        "system_status_json_href": "system_status.json",
+        "readiness_page_href": "readiness.html",
+        "readiness_json_href": "readiness.json",
+        "release_package_page_href": "release_package.html",
+        "release_package_json_href": "release_demo_package.json",
+        "release_gate_json_href": "release_gate.json",
+    }
     assert evidence_lane["recent_runs"][0]["policy_gate_verdict"] == "pass"
 
 
