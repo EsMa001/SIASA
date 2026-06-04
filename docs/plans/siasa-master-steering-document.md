@@ -270,17 +270,27 @@ Closure achieved:
 - targeted verification passed (`43 passed in 326.85s`) across `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, `test_scheduler.py`, and `test_local_gui.py`
 - full regression passed (`472 passed in 1012.78s`)
 
-### N1-WP-009
+### N1-WP-009 (completed evidence handoff-summary slice)
 Name:
 Add concise run-level evidence handoff summaries in recent history so each archived row exposes one compact operator-facing sentence summarizing the bundle location and the primary JSON evidence targets for external review.
 
+Closure achieved:
+- `src/siasa/runs/operational_latest.py` now stamps machine-readable `handoff_summary` text for latest and historical rows, summarizing the bundle path plus the primary structured evidence review targets (`readiness_json`, `coverage_json`, `release_gate_json`)
+- `src/siasa/gui/local_app.py` now renders the latest-bundle `Handoff summary` in the evidence lane and appends a dedicated handoff-summary line to each history-row `Evidence` cell above the compact share refs
+- targeted verification passed (`43 passed in 322.68s`) across `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, `test_scheduler.py`, and `test_local_gui.py`
+- full regression passed (`472 passed in 992.78s`)
+
+### N1-WP-010
+Name:
+Add concise operator triage tags to history rows so archived runs can be skimmed quickly by handoff relevance (for example degraded-release-blocked vs ready-green) before opening detailed evidence.
+
 Why this is the default next package:
-- N1-WP-008 closed copyable raw references, but handoff still requires a human to mentally assemble which of those references matter most
-- the next bounded improvement is a concise run-level handoff summary layer on top of the now complete evidence addressing
-- this remains a small G3 operator usability/governance slice without reopening runtime risk
+- N1-WP-009 closed compact handoff wording, but operators still need to visually parse multiple columns before knowing which archived run is most review-worthy
+- the next bounded improvement is a short triage classification layer on top of the now complete navigation and handoff surfaces
+- this remains a small G3 operator-ux/governance closure slice without reopening runtime risk
 
 Definition of done:
-- history rows expose a concise operator-facing handoff summary per archived run
+- history rows expose concise triage tags / review posture summaries per archived run
 - targeted tests green
 - full suite green
 - capability matrix updated
@@ -288,7 +298,7 @@ Definition of done:
 - commit + push completed
 
 Fallback reprioritization rule:
-- if valid source credentials/registrations become available before N1-WP-009 starts, reassess whether a credential-activation slice should jump ahead
+- if valid source credentials/registrations become available before N1-WP-010 starts, reassess whether a credential-activation slice should jump ahead
 
 ---
 
