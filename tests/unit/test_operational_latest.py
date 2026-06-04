@@ -234,6 +234,8 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
     assert evidence_lane["latest_summary"]["combined_ce_ratio"] == 1.0
     assert evidence_lane["latest_summary"]["release_verdict"] == "ready"
     assert evidence_lane["latest_summary"]["readiness_interpretation"] == "release_ready"
+    assert evidence_lane["latest_summary"]["triage_tag"] == "ready_green"
+    assert evidence_lane["latest_summary"]["triage_summary"] == "Run is green and release-ready; suitable as the default handoff baseline."
     assert evidence_lane["latest_summary"]["evidence_links"] == {
         "bundle_index_href": str(gui_dir.resolve() / "index.html"),
         "coverage_page_href": str(gui_dir.resolve() / "coverage.html"),
@@ -267,6 +269,8 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
     assert evidence_lane["recent_runs"][0]["evidence_links"]["bundle_index_href"] == str(gui_dir.resolve() / "index.html")
     assert evidence_lane["recent_runs"][0]["share_refs"]["bundle_ref"] == f"bundle:{gui_dir.resolve()}"
     assert "Run RUN-OP-LATEST-001: bundle at" in evidence_lane["recent_runs"][0]["handoff_summary"]
+    assert evidence_lane["recent_runs"][0]["triage_tag"] == "ready_green"
+    assert evidence_lane["recent_runs"][0]["triage_summary"] == "Run is green and release-ready; suitable as the default handoff baseline."
     assert evidence_lane["recent_runs"][0]["policy_gate_verdict"] == "pass"
 
 
@@ -404,7 +408,9 @@ def test_build_operational_latest_bundle_allows_degraded_runtime_when_explicitly
     assert run_history_writer.calls[0]["known_gap_count"] == 1
     assert result["policy_gate_verdict"] == "pass"
     evidence_lane = _read_json(result["operational_evidence_lane_path"])
-    assert evidence_lane["latest_summary"]["policy_gate_verdict"] == "pass"
     assert evidence_lane["latest_summary"]["governance_verdict"] == "amber"
     assert evidence_lane["latest_summary"]["release_verdict"] == "blocked_by_known_gaps"
     assert evidence_lane["latest_summary"]["readiness_interpretation"] == "runtime_degraded_and_release_blocked"
+    assert evidence_lane["latest_summary"]["triage_tag"] == "degraded_release_blocked"
+    assert evidence_lane["latest_summary"]["triage_summary"] == "Runtime degraded and release blocked; review failed sources and known gaps first."
+

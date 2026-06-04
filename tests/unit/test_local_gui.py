@@ -738,6 +738,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                     "release_gate_json_ref": "release_gate_json:/tmp/siasa-gui-test/release_gate.json",
                 },
                 "handoff_summary": "Run RUN-200: bundle at /tmp/siasa-gui-test; review readiness_json:/tmp/siasa-gui-test/readiness.json, coverage_json:/tmp/siasa-gui-test/source_coverage.json, and release_gate_json:/tmp/siasa-gui-test/release_gate.json.",
+                "triage_tag": "degraded_release_blocked",
+                "triage_summary": "Runtime degraded and release blocked; review failed sources and known gaps first.",
             },
             "recent_runs": [
                 {
@@ -777,6 +779,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                         "release_gate_json_ref": "release_gate_json:/tmp/siasa-gui-test/release_gate.json",
                     },
                     "handoff_summary": "Run RUN-200: bundle at /tmp/siasa-gui-test; review readiness_json:/tmp/siasa-gui-test/readiness.json, coverage_json:/tmp/siasa-gui-test/source_coverage.json, and release_gate_json:/tmp/siasa-gui-test/release_gate.json.",
+                    "triage_tag": "degraded_release_blocked",
+                    "triage_summary": "Runtime degraded and release blocked; review failed sources and known gaps first.",
                 },
                 {
                     "run_id": "RUN-150",
@@ -815,6 +819,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                         "release_gate_json_ref": "release_gate_json:/tmp/siasa-history/RUN-150/release_gate.json",
                     },
                     "handoff_summary": "Run RUN-150: bundle at /tmp/siasa-history/RUN-150; review readiness_json:/tmp/siasa-history/RUN-150/readiness.json, coverage_json:/tmp/siasa-history/RUN-150/source_coverage.json, and release_gate_json:/tmp/siasa-history/RUN-150/release_gate.json.",
+                    "triage_tag": "ready_green",
+                    "triage_summary": "Run is green and release-ready; suitable as the default handoff baseline.",
                 }
             ],
         },
@@ -1062,6 +1068,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "0.8571" in runs_html
     assert "blocked_by_known_gaps" in runs_html
     assert "runtime_degraded_and_release_blocked" in runs_html
+    assert "Triage tag:" in runs_html
+    assert "degraded_release_blocked" in runs_html
+    assert "Runtime degraded and release blocked; review failed sources and known gaps first." in runs_html
+    assert "ready_green" in runs_html
+    assert "Run is green and release-ready; suitable as the default handoff baseline." in runs_html
     assert "Latest known gaps (2)" in runs_html
     assert "Latest bundle evidence links" in runs_html
     assert "Latest bundle share refs" in runs_html

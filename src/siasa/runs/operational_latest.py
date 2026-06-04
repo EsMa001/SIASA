@@ -41,6 +41,48 @@ def _build_bundle_handoff_summary(*, run_id: str, bundle_root: Path, share_refs:
         f"{share_refs.get('release_gate_json_ref', 'release_gate_json:n/a')}."
     )
 
+
+def _derive_run_triage(*, run_status: str, governance_verdict: str, policy_gate_verdict: str, release_verdict: str, readiness_interpretation: str, known_gap_count: int, failed_source_count: int) -> dict[str, str]:
+    normalized_run_status = str(run_status or "unknown").lower()
+    normalized_governance = str(governance_verdict or "unknown").lower()
+    normalized_policy_gate = str(policy_gate_verdict or "unknown").lower()
+    normalized_release = str(release_verdict or "unknown").lower()
+    normalized_readiness = str(readiness_interpretation or "unknown").lower()
+
+    if normalized_readiness == "runtime_degraded_and_release_blocked" or (
+        normalized_release == "blocked_by_known_gaps" and normalized_run_status == "partial_success"
+    ):
+        return {
+            "triage_tag": "degraded_release_blocked",
+            "triage_summary": "Runtime degraded and release blocked; review failed sources and known gaps first.",
+        }
+    if normalized_readiness == "degraded_but_release_ready" or (
+        normalized_release == "ready" and normalized_run_status == "partial_success"
+    ):
+        return {
+            "triage_tag": "degraded_but_release_ready",
+            "triage_summary": "Runtime degraded but release remains ready; review degraded sources before reuse.",
+        }
+    if (
+        normalized_release == "ready"
+        and normalized_run_status == "success"
+        and normalized_governance == "green"
+        and normalized_policy_gate == "pass"
+        and known_gap_count == 0
+        and failed_source_count == 0
+    ):
+        return {
+            "triage_tag": "ready_green",
+            "triage_summary": "Run is green and release-ready; suitable as the default handoff baseline.",
+        }
+    return {
+        "triage_tag": "review_required",
+        "triage_summary": (
+            "Run requires manual review before reuse; "
+            f"readiness={normalized_readiness}, governance={normalized_governance}, policy_gate={normalized_policy_gate}."
+        ),
+    }
+
 from siasa.data.storage import (
     load_recent_runs,
     persist_operational_latest_run,
@@ -171,6 +213,15 @@ def build_operational_latest_bundle(
         bundle_root=gui_index.parent,
         share_refs=share_refs,
     )
+    latest_triage = _derive_run_triage(
+        run_status=run_state.status,
+        governance_verdict=str(digest.get("governance_summary", {}).get("verdict") or "unknown"),
+        policy_gate_verdict=str(gate_evaluation.get("gate_verdict") or "unknown"),
+        release_verdict=release_verdict,
+        readiness_interpretation=readiness_interpretation,
+        known_gap_count=len(known_gaps),
+        failed_source_count=len(list(run_state.failed_sources)),
+    )
     recent_runs = [
         {
             "run_id": entry.run_id,
@@ -195,6 +246,15 @@ def build_operational_latest_bundle(
                 run_id=entry.run_id,
                 bundle_root=Path(entry.gui_index).parent,
                 share_refs=_build_bundle_share_refs(bundle_root=Path(entry.gui_index).parent),
+            ),
+            **_derive_run_triage(
+                run_status=entry.run_status,
+                governance_verdict=entry.governance_verdict,
+                policy_gate_verdict=entry.policy_gate_verdict,
+                release_verdict=entry.release_verdict,
+                readiness_interpretation=entry.readiness_interpretation,
+                known_gap_count=entry.known_gap_count,
+                failed_source_count=len(entry.failed_sources),
             ),
         }
         for entry in load_recent_runs(resolved_history_db, limit=10)
@@ -221,6 +281,7 @@ def build_operational_latest_bundle(
                 "evidence_links": evidence_links,
                 "share_refs": share_refs,
                 "handoff_summary": handoff_summary,
+                **latest_triage,
             }
         ]
     evidence_lane = {
@@ -247,6 +308,7 @@ def build_operational_latest_bundle(
             "evidence_links": evidence_links,
             "share_refs": share_refs,
             "handoff_summary": handoff_summary,
+            **latest_triage,
         },
         "recent_runs": recent_runs,
     }
