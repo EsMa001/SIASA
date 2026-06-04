@@ -218,17 +218,28 @@ Closure achieved:
 - targeted verification passed (`47 passed in 311.75s`) across `test_storage_run_history.py`, `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, `test_scheduler.py`, and `test_local_gui.py`
 - full regression passed (`472 passed in 974.46s`)
 
-### N1-WP-004
+### N1-WP-004 (completed readiness-truth evidence-lane slice)
 Name:
 Extend the normalized operational evidence lane so it also carries explicit readiness / release truth (`release_verdict`, `known_gaps`, and blocked-vs-degraded interpretation) alongside the runtime governance metrics.
 
+Closure achieved:
+- `src/siasa/data/storage.py` now persists and reloads readiness-lane summary fields in run history: `release_verdict`, `readiness_interpretation`, and `known_gap_count`
+- `src/siasa/runs/operational_latest.py` now reads `readiness.json` from the artifact bundle and injects release truth into `operational_evidence_lane.json`: `release_verdict`, full `known_gaps`, `suppressed_known_gaps`, `known_gap_suppression_reason`, and a derived blocked-vs-degraded interpretation (`release_ready`, `degraded_but_release_ready`, `runtime_degraded_and_release_blocked`, etc.)
+- `src/siasa/gui/local_app.py` now exposes that readiness truth directly in `runs.html` via KPI cards, evidence-lane summary text, latest-known-gaps detail, and recent-history columns for release verdict / readiness interpretation / known-gap count
+- targeted verification passed (`47 passed in 312.85s`) across `test_storage_run_history.py`, `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, `test_scheduler.py`, and `test_local_gui.py`
+- full regression passed (`472 passed in 996.59s`)
+
+### N1-WP-005
+Name:
+Add fresh-bundle deep links from the operational evidence lane into the exact readiness / coverage / release artifacts so an operator can pivot from summary truth to the governing evidence without manual file hunting.
+
 Why this is the default next package:
-- N1-WP-003 closed the structural visibility gap for runtime governance truth in latest/history surfaces
-- the next remaining ambiguity is still split across runtime-governance truth versus readiness/release truth, especially for `partial_success` runs that still pass policy gate but may differ in release posture
-- this stays bounded, operator-facing, and evidence-first without jumping into credential-gated external activation prematurely
+- N1-WP-004 closed the truth-model gap by placing runtime governance and readiness/release truth side by side in the normal operator lane
+- the next bounded improvement is navigation/actionability: turning that truth into one-click evidence pivot paths rather than another new metric layer
+- this remains a small operator-facing closure slice inside G3 instead of reopening broader strategic work
 
 Definition of done:
-- operational evidence-lane latest/history surface also carries readiness / release truth for the latest bundle
+- operational evidence-lane latest/history surface exposes direct links to governing readiness / coverage / release evidence for the latest bundle
 - targeted tests green
 - full suite green
 - capability matrix updated
@@ -236,7 +247,7 @@ Definition of done:
 - commit + push completed
 
 Fallback reprioritization rule:
-- if valid source credentials/registrations become available before N1-WP-004 starts, reassess whether a credential-activation slice should jump ahead
+- if valid source credentials/registrations become available before N1-WP-005 starts, reassess whether a credential-activation slice should jump ahead
 
 ---
 
