@@ -1003,7 +1003,10 @@ def main(argv: list[str] | None = None) -> int:
             "'control-reference-initial' expands to CHE,NLD,SWE; "
             "'control-reference-broader' expands to NOR,CAN,AUS; "
             "'control-reference-third' expands to NZL,PRT,IRL; "
-            "'control-reference-complete' expands to NOR,CHE,SWE,NLD,IRL,PRT,NZL,CAN,AUS."
+            "'control-reference-complete' expands to NOR,CHE,SWE,NLD,IRL,PRT,NZL,CAN,AUS; "
+            "'extended-focus-complete' expands to USA,DEU,EST,FIN,POL,SAU,QAT,EGY,NGA,SDN,MMR; "
+            "'focus-complete' expands to UKR,RUS,CHN,TWN,IRN,ISR,TUR,IND,PAK,GEO,POL,USA,DEU,EST,FIN,SAU,QAT,EGY,NGA,SDN,MMR; "
+            "'mvp-complete' expands to UKR,RUS,CHN,TWN,IRN,ISR,TUR,IND,PAK,GEO,POL,USA,DEU,EST,FIN,SAU,QAT,EGY,NGA,SDN,MMR,NOR,CHE,SWE,NLD,IRL,PRT,NZL,CAN,AUS."
         ),
     )
     parser.add_argument(

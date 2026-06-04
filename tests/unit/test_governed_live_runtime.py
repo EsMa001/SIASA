@@ -730,6 +730,77 @@ def test_build_governed_live_orchestrator_supports_control_reference_complete_pi
 
 
 
+def test_build_governed_live_orchestrator_supports_extended_focus_complete_pilot_set() -> None:
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        pilot_set="extended-focus-complete",
+    )
+
+    world_bank = orchestrator.adapters[0]
+    gdelt_doc = orchestrator.adapters[1]
+    gdelt_events = orchestrator.adapters[2]
+    gdacs = orchestrator.adapters[3]
+
+    assert world_bank.country_ids == ("USA", "DEU", "EST", "FIN", "POL", "SAU", "QAT", "EGY", "NGA", "SDN", "MMR")
+    assert orchestrator.country_expected_domains == {
+        "USA": ["A", "B", "D"],
+        "DEU": ["A", "B", "D"],
+        "EST": ["A", "D"],
+        "FIN": ["A", "D"],
+        "POL": ["A", "B", "D"],
+        "SAU": ["A", "D"],
+        "QAT": ["A", "D"],
+        "EGY": ["A", "D"],
+        "NGA": ["A", "B", "D"],
+        "SDN": ["A", "D"],
+        "MMR": ["A", "D"],
+    }
+    assert gdelt_doc.max_records == 5
+    assert gdelt_doc.inter_request_delay_seconds == 3.0
+    assert gdelt_doc.max_retry_delay_seconds == 180.0
+    assert gdelt_doc.request_timeout_seconds == 90.0
+    assert gdelt_doc.max_full_fetch_retries == 2
+    assert gdelt_doc.full_fetch_retry_cooldown_seconds == 120.0
+    assert gdelt_events.recent_export_count == 8
+    assert set(gdacs.country_ids) == {"USA", "DEU", "EST", "FIN", "POL", "SAU", "QAT", "EGY", "NGA", "SDN", "MMR"}
+
+
+
+def test_build_governed_live_orchestrator_supports_focus_complete_pilot_set() -> None:
+    orchestrator = build_governed_live_orchestrator(
+        repo_root=REPO_ROOT,
+        pilot_set="focus-complete",
+    )
+
+    world_bank = orchestrator.adapters[0]
+    gdelt_doc = orchestrator.adapters[1]
+    gdelt_events = orchestrator.adapters[2]
+    gdacs = orchestrator.adapters[4]
+
+    assert world_bank.country_ids == (
+        "UKR", "RUS", "CHN", "IRN", "ISR", "TUR", "IND", "PAK", "GEO", "POL",
+        "USA", "DEU", "EST", "FIN", "SAU", "QAT", "EGY", "NGA", "SDN", "MMR",
+    )
+    assert orchestrator.country_expected_domains["TWN"] == ["A", "B"]
+    assert orchestrator.country_expected_domains["GEO"] == ["A", "D"]
+    assert orchestrator.country_expected_domains["QAT"] == ["A", "D"]
+    assert orchestrator.country_expected_domains["USA"] == ["A", "B", "D"]
+    assert len(orchestrator.country_expected_domains) == 21
+    assert gdelt_doc.max_records == 5
+    assert gdelt_doc.inter_request_delay_seconds == 3.0
+    assert gdelt_doc.max_retry_delay_seconds == 180.0
+    assert gdelt_doc.request_timeout_seconds == 90.0
+    assert gdelt_doc.max_full_fetch_retries == 2
+    assert gdelt_doc.full_fetch_retry_cooldown_seconds == 120.0
+    assert gdelt_events.recent_export_count == 8
+    assert len(gdacs.country_ids) == 21
+    assert set(gdacs.country_ids) == {
+        "UKR", "RUS", "CHN", "TWN", "IRN", "ISR", "TUR", "IND", "PAK", "GEO", "POL",
+        "USA", "DEU", "EST", "FIN", "SAU", "QAT", "EGY", "NGA", "SDN", "MMR",
+    }
+
+
+
 def test_build_governed_live_orchestrator_skips_reliefweb_without_appname(monkeypatch) -> None:
     monkeypatch.delenv("RELIEFWEB_APPNAME", raising=False)
 
@@ -822,6 +893,41 @@ def test_run_governed_live_pipeline_passes_control_reference_pilot_set_without_e
 
 
 
+def test_run_governed_live_pipeline_passes_mvp_complete_pilot_set_without_explicit_country_ids() -> None:
+    factory = SequenceOrchestratorFactory(
+        [
+            FakePipelineResult(
+                run_state=FakePipelineRunState(
+                    run_id="RUN-MVP-COMPLETE-001",
+                    status="partial_success",
+                    failed_sources=["SRC-GDELT-DOC"],
+                )
+            )
+        ]
+    )
+
+    result = run_governed_live_pipeline(
+        repo_root=REPO_ROOT,
+        run_id="RUN-MVP-COMPLETE-001",
+        pilot_set="mvp-complete",
+        orchestrator_factory=factory,
+        pipeline_retry_sleep=lambda _: None,
+        max_pipeline_retries=0,
+    )
+
+    assert result.run_state.status == "partial_success"
+    assert factory.calls == [
+        {
+            "repo_root": REPO_ROOT,
+            "country_id": "UKR",
+            "country_ids": None,
+            "pilot_set": "mvp-complete",
+            "output_dir": None,
+        }
+    ]
+
+
+
 def test_run_governed_live_pipeline_retries_after_isolated_gdelt_doc_e_failure() -> None:
     factory = SequenceOrchestratorFactory(
         [
@@ -857,7 +963,7 @@ def test_run_governed_live_pipeline_retries_after_isolated_gdelt_doc_e_failure()
 
 
 
-def test_live_runtime_cli_help_lists_control_reference_pilot_sets() -> None:
+def test_live_runtime_cli_help_lists_broader_runtime_pilot_sets() -> None:
     completed = subprocess.run(
         [sys.executable, "-m", "siasa.runs.live_runtime", "--help"],
         cwd=REPO_ROOT,
@@ -872,3 +978,6 @@ def test_live_runtime_cli_help_lists_control_reference_pilot_sets() -> None:
     assert "control-reference-broader" in stdout
     assert "control-reference-third" in stdout
     assert "control-reference-complete" in stdout
+    assert "extended-focus-complete" in stdout
+    assert "focus-complete" in stdout
+    assert "mvp-complete" in stdout
