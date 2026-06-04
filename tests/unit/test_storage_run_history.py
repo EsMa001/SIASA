@@ -27,6 +27,10 @@ def test_persist_operational_latest_run_writes_run_and_sources(tmp_path: Path) -
             {"source_id": "WB-INDICATORS", "status": "success", "diagnostics": ""},
             {"source_id": "SRC-GDELT-DOC", "status": "failed", "diagnostics": "timeout"},
         ],
+        country_set_id="MVP-COUNTRIES-LIVE-extended-focus-complete-v1",
+        combined_ce_ratio=0.8571,
+        governance_verdict="amber",
+        policy_gate_verdict="pass",
     )
 
     runs = load_recent_runs(db_path, limit=5)
@@ -35,6 +39,10 @@ def test_persist_operational_latest_run_writes_run_and_sources(tmp_path: Path) -
     assert runs[0].run_status == "success"
     assert runs[0].pilot_set == "extended-focus-complete"
     assert runs[0].failed_sources == []
+    assert runs[0].country_set_id == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
+    assert runs[0].combined_ce_ratio == 0.8571
+    assert runs[0].governance_verdict == "amber"
+    assert runs[0].policy_gate_verdict == "pass"
 
     source_results = load_source_results_for_run(db_path, run_id="RUN-LATEST-001")
     assert [entry.source_id for entry in source_results] == ["SRC-GDELT-DOC", "WB-INDICATORS"]
@@ -56,6 +64,10 @@ def test_persist_operational_latest_run_upserts_existing_run(tmp_path: Path) -> 
         source_results=[
             {"source_id": "SRC-GDELT-DOC", "status": "failed", "diagnostics": "timeout"},
         ],
+        country_set_id="MVP-COUNTRIES-LIVE-representative-v1",
+        combined_ce_ratio=0.5,
+        governance_verdict="amber",
+        policy_gate_verdict="pass",
     )
 
     persist_operational_latest_run(
@@ -69,6 +81,10 @@ def test_persist_operational_latest_run_upserts_existing_run(tmp_path: Path) -> 
         source_results=[
             {"source_id": "WB-INDICATORS", "status": "success", "diagnostics": ""},
         ],
+        country_set_id="MVP-COUNTRIES-LIVE-extended-focus-complete-v1",
+        combined_ce_ratio=0.8571,
+        governance_verdict="green",
+        policy_gate_verdict="pass",
     )
 
     runs = load_recent_runs(db_path, limit=5)
@@ -77,6 +93,10 @@ def test_persist_operational_latest_run_upserts_existing_run(tmp_path: Path) -> 
     assert runs[0].pilot_set == "extended-focus-complete"
     assert runs[0].artifacts_dir.endswith("artifacts/latest_v2")
     assert runs[0].failed_sources == []
+    assert runs[0].country_set_id == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
+    assert runs[0].combined_ce_ratio == 0.8571
+    assert runs[0].governance_verdict == "green"
+    assert runs[0].policy_gate_verdict == "pass"
 
     source_results = load_source_results_for_run(db_path, run_id="RUN-LATEST-001")
     assert len(source_results) == 1

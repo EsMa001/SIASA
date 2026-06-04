@@ -700,6 +700,34 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 }
             ],
         },
+        "operational_evidence_lane": {
+            "latest_summary": {
+                "run_id": "RUN-200",
+                "run_status": "partial_success",
+                "pilot_set": "focus-complete",
+                "country_set_id": "MVP-COUNTRIES-LIVE-focus-complete-v1",
+                "combined_ce_ratio": 0.8571,
+                "governance_verdict": "amber",
+                "policy_gate_verdict": "pass",
+                "failed_source_count": 1,
+                "failed_sources": ["SRC-B"],
+                "operator_next_action": "Investigate failed sources and restore source availability.",
+            },
+            "recent_runs": [
+                {
+                    "run_id": "RUN-200",
+                    "recorded_at": "2026-05-11T18:00:00Z",
+                    "run_status": "partial_success",
+                    "pilot_set": "focus-complete",
+                    "country_set_id": "MVP-COUNTRIES-LIVE-focus-complete-v1",
+                    "combined_ce_ratio": 0.8571,
+                    "governance_verdict": "amber",
+                    "policy_gate_verdict": "pass",
+                    "failed_source_count": 1,
+                    "failed_sources": ["SRC-B"],
+                }
+            ],
+        },
     }
 
     repo_closure_view = {
@@ -937,6 +965,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     runs_html = (pages.output_dir / "runs.html").read_text()
     assert "System Status / Runs" in runs_html
     assert "partial_success" in runs_html
+    assert "Operational Evidence Lane" in runs_html
+    assert "MVP-COUNTRIES-LIVE-focus-complete-v1" in runs_html
+    assert "0.8571" in runs_html
+    assert "operational-evidence-history-table" in runs_html
     assert "Repo Closure Summary" in runs_html
     assert "governance-and-run-controls" in runs_html
     assert "reporting-and-export" in runs_html
@@ -1912,6 +1944,36 @@ def test_load_site_payload_from_artifacts_falls_back_for_missing_readiness_suppo
             }
         })
     )
+    (artifacts_dir / "readmodels" / "operational_evidence_lane.json").write_text(
+        json.dumps({
+            "latest_summary": {
+                "run_id": "RUN-320",
+                "run_status": "success",
+                "pilot_set": "extended-focus-complete",
+                "country_set_id": "MVP-COUNTRIES-LIVE-extended-focus-complete-v1",
+                "combined_ce_ratio": 1.0,
+                "governance_verdict": "green",
+                "policy_gate_verdict": "pass",
+                "failed_source_count": 0,
+                "failed_sources": [],
+                "operator_next_action": "No immediate action required; live probe governance summary is healthy.",
+            },
+            "recent_runs": [
+                {
+                    "run_id": "RUN-320",
+                    "recorded_at": "2026-05-11T18:00:00Z",
+                    "run_status": "success",
+                    "pilot_set": "extended-focus-complete",
+                    "country_set_id": "MVP-COUNTRIES-LIVE-extended-focus-complete-v1",
+                    "combined_ce_ratio": 1.0,
+                    "governance_verdict": "green",
+                    "policy_gate_verdict": "pass",
+                    "failed_source_count": 0,
+                    "failed_sources": [],
+                }
+            ],
+        })
+    )
     (artifacts_dir / "readmodels" / "country_profiles" / "UKR.json").write_text(
         json.dumps({"country_id": "UKR", "multi_domain_status": "S3", "domain_states": {"A": "D3"}, "trends": {"yearly": ["2026-01"]}, "drivers": ["A_news_volume"], "linked_events": [], "coverage": 0.84, "confidence": 0.73, "counter_indicators": [], "uncertainty": []})
     )
@@ -1930,6 +1992,7 @@ def test_load_site_payload_from_artifacts_falls_back_for_missing_readiness_suppo
     assert payload["validation_view_model"] is None
     assert payload["annotations_view_model"] == {"annotations": [], "by_scope": {}, "by_linked_item": {}}
     assert payload["repo_closure_view_model"]["summary"] == {"slice_count": 9, "requirement_count": 51, "closed": 51, "at_risk": 0}
+    assert payload["system_status_read_model"]["operational_evidence_lane"]["latest_summary"]["country_set_id"] == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
 
     pages = build_local_mvp_site(output_dir=tmp_path / "site", **payload)
     readiness_html = (pages.output_dir / "readiness.html").read_text()

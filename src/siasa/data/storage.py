@@ -17,6 +17,10 @@ class RunHistoryEntry:
     artifacts_dir: str
     gui_index: str
     failed_sources: list[str]
+    country_set_id: str
+    combined_ce_ratio: float | None
+    governance_verdict: str
+    policy_gate_verdict: str
 
 
 @dataclass(frozen=True)
@@ -59,10 +63,27 @@ def initialize_run_history_schema(db_path: Path) -> None:
                 pilot_set TEXT NOT NULL,
                 artifacts_dir TEXT NOT NULL,
                 gui_index TEXT NOT NULL,
-                failed_sources_json TEXT NOT NULL
+                failed_sources_json TEXT NOT NULL,
+                country_set_id TEXT,
+                combined_ce_ratio REAL,
+                governance_verdict TEXT,
+                policy_gate_verdict TEXT
             )
             """
         )
+        existing_run_columns = {
+            str(row[1])
+            for row in connection.execute("PRAGMA table_info(runs)").fetchall()
+        }
+        run_column_migrations = {
+            "country_set_id": "ALTER TABLE runs ADD COLUMN country_set_id TEXT",
+            "combined_ce_ratio": "ALTER TABLE runs ADD COLUMN combined_ce_ratio REAL",
+            "governance_verdict": "ALTER TABLE runs ADD COLUMN governance_verdict TEXT",
+            "policy_gate_verdict": "ALTER TABLE runs ADD COLUMN policy_gate_verdict TEXT",
+        }
+        for column_name, statement in run_column_migrations.items():
+            if column_name not in existing_run_columns:
+                connection.execute(statement)
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS source_results (
@@ -104,6 +125,10 @@ def persist_operational_latest_run(
     gui_index: Path,
     failed_sources: list[str],
     source_results: list[dict[str, str]] | None = None,
+    country_set_id: str | None = None,
+    combined_ce_ratio: float | None = None,
+    governance_verdict: str | None = None,
+    policy_gate_verdict: str | None = None,
 ) -> None:
     initialize_run_history_schema(db_path)
     now_utc = datetime.now(timezone.utc).isoformat()
@@ -112,15 +137,31 @@ def persist_operational_latest_run(
     with _connect(db_path) as connection:
         connection.execute(
             """
-            INSERT INTO runs(run_id, recorded_at, run_status, pilot_set, artifacts_dir, gui_index, failed_sources_json)
-            VALUES(?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO runs(
+                run_id,
+                recorded_at,
+                run_status,
+                pilot_set,
+                artifacts_dir,
+                gui_index,
+                failed_sources_json,
+                country_set_id,
+                combined_ce_ratio,
+                governance_verdict,
+                policy_gate_verdict
+            )
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(run_id) DO UPDATE SET
                 recorded_at=excluded.recorded_at,
                 run_status=excluded.run_status,
                 pilot_set=excluded.pilot_set,
                 artifacts_dir=excluded.artifacts_dir,
                 gui_index=excluded.gui_index,
-                failed_sources_json=excluded.failed_sources_json
+                failed_sources_json=excluded.failed_sources_json,
+                country_set_id=excluded.country_set_id,
+                combined_ce_ratio=excluded.combined_ce_ratio,
+                governance_verdict=excluded.governance_verdict,
+                policy_gate_verdict=excluded.policy_gate_verdict
             """,
             (
                 run_id,
@@ -130,6 +171,10 @@ def persist_operational_latest_run(
                 str(artifacts_dir),
                 str(gui_index),
                 json.dumps(sorted(set(failed_sources))),
+                str(country_set_id or "unknown"),
+                float(combined_ce_ratio) if combined_ce_ratio is not None else None,
+                str(governance_verdict or "unknown"),
+                str(policy_gate_verdict or "unknown"),
             ),
         )
         connection.execute("DELETE FROM source_results WHERE run_id = ?", (run_id,))
@@ -156,7 +201,18 @@ def load_recent_runs(db_path: Path, *, limit: int = 20) -> list[RunHistoryEntry]
     with _connect(db_path) as connection:
         rows = connection.execute(
             """
-            SELECT run_id, recorded_at, run_status, pilot_set, artifacts_dir, gui_index, failed_sources_json
+            SELECT
+                run_id,
+                recorded_at,
+                run_status,
+                pilot_set,
+                artifacts_dir,
+                gui_index,
+                failed_sources_json,
+                country_set_id,
+                combined_ce_ratio,
+                governance_verdict,
+                policy_gate_verdict
             FROM runs
             ORDER BY recorded_at DESC
             LIMIT ?
@@ -173,6 +229,10 @@ def load_recent_runs(db_path: Path, *, limit: int = 20) -> list[RunHistoryEntry]
             artifacts_dir=str(row["artifacts_dir"]),
             gui_index=str(row["gui_index"]),
             failed_sources=list(json.loads(str(row["failed_sources_json"]))),
+            country_set_id=str(row["country_set_id"] or "unknown"),
+            combined_ce_ratio=float(row["combined_ce_ratio"]) if row["combined_ce_ratio"] is not None else None,
+            governance_verdict=str(row["governance_verdict"] or "unknown"),
+            policy_gate_verdict=str(row["policy_gate_verdict"] or "unknown"),
         )
         for row in rows
     ]

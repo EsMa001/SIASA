@@ -1859,6 +1859,11 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
     system_status_read_model.setdefault('run_status', snapshot.get('status'))
     system_status_read_model.setdefault('snapshot_id', snapshot.get('snapshot_id'))
     system_status_read_model.setdefault('active_domains', snapshot.get('active_domains', []))
+    operational_evidence_lane_path = readmodels_dir / 'operational_evidence_lane.json'
+    if operational_evidence_lane_path.exists():
+        operational_evidence_lane = _load_json(operational_evidence_lane_path)
+        if isinstance(operational_evidence_lane, dict):
+            system_status_read_model['operational_evidence_lane'] = operational_evidence_lane
 
     country_profile_read_models = {
         country_file.stem: _load_json(country_file)
@@ -2863,6 +2868,51 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
             "<table><thead><tr><th>Slice</th><th>Closed</th><th>At Risk</th></tr></thead>"
             f"<tbody>{repo_closure_rows}</tbody></table>"
         )
+    evidence_lane = system_status_read_model.get('operational_evidence_lane', {})
+    if not isinstance(evidence_lane, dict):
+        evidence_lane = {}
+    latest_summary = evidence_lane.get('latest_summary', {}) if isinstance(evidence_lane.get('latest_summary'), dict) else {}
+    recent_runs = evidence_lane.get('recent_runs', []) if isinstance(evidence_lane.get('recent_runs'), list) else []
+    combined_ce_ratio = latest_summary.get('combined_ce_ratio')
+    combined_ce_ratio_text = (
+        f"{float(combined_ce_ratio):.4f}"
+        if isinstance(combined_ce_ratio, (int, float))
+        else html.escape(str(combined_ce_ratio or 'n/a'))
+    )
+    governance_verdict = str(latest_summary.get('governance_verdict', 'n/a'))
+    policy_gate_verdict = str(latest_summary.get('policy_gate_verdict', 'n/a'))
+
+    def _format_history_ratio(value: Any) -> str:
+        return f"{float(value):.4f}" if isinstance(value, (int, float)) else str(value or 'n/a')
+
+    recent_run_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(item.get('run_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('run_status', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('pilot_set', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('country_set_id', 'n/a')))}</td>"
+        f"<td>{html.escape(_format_history_ratio(item.get('combined_ce_ratio')))}</td>"
+        f"<td>{html.escape(str(item.get('governance_verdict', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('policy_gate_verdict', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('failed_source_count', 'n/a')))}</td>"
+        "</tr>"
+        for item in recent_runs
+        if isinstance(item, dict)
+    ) or "<tr><td colspan='8'>No operational history available.</td></tr>"
+    operator_next_action = html.escape(str(latest_summary.get('operator_next_action', 'n/a')))
+    latest_failed_sources = ''.join(
+        f"<li>{html.escape(str(item))}</li>"
+        for item in latest_summary.get('failed_sources', [])
+    ) or "<li>none</li>"
+    evidence_lane_section = (
+        "<div class='panel' id='operational-evidence-lane'><div class='panel-header'>Operational Evidence Lane</div>"
+        f"<p>Governed slice: <strong>{html.escape(str(latest_summary.get('country_set_id', 'n/a')))}</strong> | Combined C/E ratio: <strong>{combined_ce_ratio_text}</strong> | Governance verdict: <strong>{html.escape(governance_verdict)}</strong> | Policy gate: <strong>{html.escape(policy_gate_verdict)}</strong></p>"
+        f"<p>Operator next action: <strong>{operator_next_action}</strong></p>"
+        f"<details><summary>Latest failed sources ({html.escape(str(latest_summary.get('failed_source_count', 0)))})</summary><ul>{latest_failed_sources}</ul></details>"
+        "<h3>Recent Operational History</h3>"
+        "<table id='operational-evidence-history-table'><thead><tr><th>Run ID</th><th>Status</th><th>Pilot Set</th><th>Country Set</th><th>Combined C/E Ratio</th><th>Governance</th><th>Policy Gate</th><th>Failed Sources</th></tr></thead>"
+        f"<tbody>{recent_run_rows}</tbody></table></div>"
+    ) if latest_summary else ""
     _run_color = html.escape(_run_status_color(str(system_status_read_model.get('run_status', 'n/a'))))
     body = (
         # === KPI Header ===
@@ -2872,7 +2922,12 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<div class='kpi-card'><span class='kpi-label'>Last Run</span><div class='kpi-value' style='font-size:0.8rem;'>{html.escape(str(system_status_read_model.get('last_run', 'n/a')))}</div></div>"
         f"<div class='kpi-card'><span class='kpi-label'>Snapshot</span><div class='kpi-value' style='font-size:0.8rem;color:#6b7d99;'>{html.escape(str(system_status_read_model.get('snapshot_id', 'n/a')))}</div></div>"
         f"<div class='kpi-card'><span class='kpi-label'>Reprocessing</span><div class='kpi-value' style='font-size:0.8rem;'>{html.escape(str(system_status_read_model.get('reprocessing_status', 'n/a')))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Country Set</span><div class='kpi-value' style='font-size:0.7rem;'>{html.escape(str(latest_summary.get('country_set_id', system_status_read_model.get('country_set_id', 'n/a'))))}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Combined C/E Ratio</span><div class='kpi-value'>{combined_ce_ratio_text}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Governance Verdict</span><div class='kpi-value'>{html.escape(governance_verdict)}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Policy Gate</span><div class='kpi-value'>{html.escape(policy_gate_verdict)}</div></div>"
         "</div>"
+        f"{evidence_lane_section}"
         # === Coverage ===
         "<div class='panel'><div class='panel-header'>Coverage</div>"
         f"<details><summary>Coverage Details</summary>{_json_block(system_status_read_model.get('coverage', {}))}</details>"

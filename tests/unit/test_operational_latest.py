@@ -193,6 +193,10 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
                 {"source_id": "WB-INDICATORS", "status": "success", "diagnostics": ""},
                 {"source_id": "SRC-GDELT-DOC", "status": "success", "diagnostics": ""},
             ],
+            "country_set_id": "MVP-COUNTRIES-LIVE-extended-focus-complete-v1",
+            "combined_ce_ratio": 1.0,
+            "governance_verdict": "green",
+            "policy_gate_verdict": "pass",
         }
     ]
     assert result["pilot_set"] == "extended-focus-complete"
@@ -207,6 +211,10 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
     assert digest["run_context"]["country_set_id"] == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
     gate = _read_json(result["policy_gate_path"])
     assert gate["gate_verdict"] == "pass"
+    evidence_lane = _read_json(result["operational_evidence_lane_path"])
+    assert evidence_lane["latest_summary"]["country_set_id"] == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
+    assert evidence_lane["latest_summary"]["combined_ce_ratio"] == 1.0
+    assert evidence_lane["recent_runs"][0]["policy_gate_verdict"] == "pass"
 
 
 def test_build_operational_latest_bundle_fails_closed_on_non_success_run(tmp_path: Path) -> None:
@@ -336,4 +344,9 @@ def test_build_operational_latest_bundle_allows_degraded_runtime_when_explicitly
     assert result["run_status"] == "partial_success"
     assert gui_builder.calls == [{"artifacts_dir": artifact_dir, "output_dir": gui_dir}]
     assert run_history_writer.calls[0]["failed_sources"] == ["SRC-GDELT-DOC"]
+    assert run_history_writer.calls[0]["country_set_id"] == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
+    assert run_history_writer.calls[0]["governance_verdict"] == "amber"
     assert result["policy_gate_verdict"] == "pass"
+    evidence_lane = _read_json(result["operational_evidence_lane_path"])
+    assert evidence_lane["latest_summary"]["policy_gate_verdict"] == "pass"
+    assert evidence_lane["latest_summary"]["governance_verdict"] == "amber"

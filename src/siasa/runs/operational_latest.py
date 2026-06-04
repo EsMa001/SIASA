@@ -4,7 +4,11 @@ import json
 from pathlib import Path
 from typing import Any, Callable
 
-from siasa.data.storage import persist_operational_latest_run, source_results_from_run_state
+from siasa.data.storage import (
+    load_recent_runs,
+    persist_operational_latest_run,
+    source_results_from_run_state,
+)
 from siasa.gui.local_app import build_local_mvp_site, load_site_payload_from_artifacts
 from siasa.readmodels.live_probe_evidence_digest import build_live_probe_evidence_digest
 from siasa.readmodels.live_probe_policy_gate import evaluate_live_probe_digest_policy, load_live_probe_policy_profile
@@ -85,7 +89,58 @@ def build_operational_latest_bundle(
         gui_index=gui_index,
         failed_sources=list(run_state.failed_sources),
         source_results=source_results_from_run_state(run_state),
+        country_set_id=str(verification_summary.get("country_set_id") or "unknown"),
+        combined_ce_ratio=digest.get("ce_utilization", {}).get("combined_ce_ratio"),
+        governance_verdict=str(digest.get("governance_summary", {}).get("verdict") or "unknown"),
+        policy_gate_verdict=str(gate_evaluation.get("gate_verdict") or "unknown"),
     )
+    recent_runs = [
+        {
+            "run_id": entry.run_id,
+            "recorded_at": entry.recorded_at,
+            "run_status": entry.run_status,
+            "pilot_set": entry.pilot_set,
+            "country_set_id": entry.country_set_id,
+            "combined_ce_ratio": entry.combined_ce_ratio,
+            "governance_verdict": entry.governance_verdict,
+            "policy_gate_verdict": entry.policy_gate_verdict,
+            "failed_source_count": len(entry.failed_sources),
+            "failed_sources": entry.failed_sources,
+        }
+        for entry in load_recent_runs(resolved_history_db, limit=10)
+    ]
+    if not recent_runs:
+        recent_runs = [
+            {
+                "run_id": run_state.run_id,
+                "recorded_at": "pending_persisted_history",
+                "run_status": run_state.status,
+                "pilot_set": pilot_set,
+                "country_set_id": str(verification_summary.get("country_set_id") or "unknown"),
+                "combined_ce_ratio": digest.get("ce_utilization", {}).get("combined_ce_ratio"),
+                "governance_verdict": str(digest.get("governance_summary", {}).get("verdict") or "unknown"),
+                "policy_gate_verdict": str(gate_evaluation.get("gate_verdict") or "unknown"),
+                "failed_source_count": len(list(run_state.failed_sources)),
+                "failed_sources": list(run_state.failed_sources),
+            }
+        ]
+    evidence_lane = {
+        "latest_summary": {
+            "run_id": run_state.run_id,
+            "run_status": run_state.status,
+            "pilot_set": pilot_set,
+            "country_set_id": str(verification_summary.get("country_set_id") or "unknown"),
+            "combined_ce_ratio": digest.get("ce_utilization", {}).get("combined_ce_ratio"),
+            "governance_verdict": str(digest.get("governance_summary", {}).get("verdict") or "unknown"),
+            "policy_gate_verdict": str(gate_evaluation.get("gate_verdict") or "unknown"),
+            "failed_source_count": len(list(run_state.failed_sources)),
+            "failed_sources": list(run_state.failed_sources),
+            "operator_next_action": str(digest.get("governance_summary", {}).get("operator_next_action") or "n/a"),
+        },
+        "recent_runs": recent_runs,
+    }
+    evidence_lane_path = readmodels_dir / "operational_evidence_lane.json"
+    evidence_lane_path.write_text(json.dumps(evidence_lane, indent=2, sort_keys=True), encoding="utf-8")
     return {
         "pilot_set": pilot_set,
         "run_id": run_state.run_id,
@@ -97,4 +152,5 @@ def build_operational_latest_bundle(
         "policy_gate_path": gate_path,
         "policy_gate_verdict": gate_evaluation.get("gate_verdict"),
         "verification_summary": verification_summary,
+        "operational_evidence_lane_path": evidence_lane_path,
     }
