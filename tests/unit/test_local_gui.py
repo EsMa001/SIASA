@@ -719,14 +719,15 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 "failed_sources": ["SRC-B"],
                 "operator_next_action": "Investigate failed sources and restore source availability.",
                 "evidence_links": {
-                    "coverage_page_href": "coverage.html",
-                    "coverage_json_href": "source_coverage.json",
-                    "system_status_json_href": "system_status.json",
-                    "readiness_page_href": "readiness.html",
-                    "readiness_json_href": "readiness.json",
-                    "release_package_page_href": "release_package.html",
-                    "release_package_json_href": "release_demo_package.json",
-                    "release_gate_json_href": "release_gate.json",
+                    "bundle_index_href": "/tmp/siasa-gui-test/index.html",
+                    "coverage_page_href": "/tmp/siasa-gui-test/coverage.html",
+                    "coverage_json_href": "/tmp/siasa-gui-test/source_coverage.json",
+                    "system_status_json_href": "/tmp/siasa-gui-test/system_status.json",
+                    "readiness_page_href": "/tmp/siasa-gui-test/readiness.html",
+                    "readiness_json_href": "/tmp/siasa-gui-test/readiness.json",
+                    "release_package_page_href": "/tmp/siasa-gui-test/release_package.html",
+                    "release_package_json_href": "/tmp/siasa-gui-test/release_demo_package.json",
+                    "release_gate_json_href": "/tmp/siasa-gui-test/release_gate.json",
                 },
             },
             "recent_runs": [
@@ -737,6 +738,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                     "pilot_set": "focus-complete",
                     "artifacts_dir": "/tmp/siasa-gui-test-artifacts/RUN-200",
                     "gui_index": "/tmp/siasa-gui-test/index.html",
+                    "bundle_root": "/tmp/siasa-gui-test",
                     "country_set_id": "MVP-COUNTRIES-LIVE-focus-complete-v1",
                     "combined_ce_ratio": 0.8571,
                     "governance_verdict": "amber",
@@ -749,8 +751,13 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                     "evidence_links": {
                         "bundle_index_href": "/tmp/siasa-gui-test/index.html",
                         "coverage_page_href": "/tmp/siasa-gui-test/coverage.html",
+                        "coverage_json_href": "/tmp/siasa-gui-test/source_coverage.json",
+                        "system_status_json_href": "/tmp/siasa-gui-test/system_status.json",
                         "readiness_page_href": "/tmp/siasa-gui-test/readiness.html",
+                        "readiness_json_href": "/tmp/siasa-gui-test/readiness.json",
                         "release_package_page_href": "/tmp/siasa-gui-test/release_package.html",
+                        "release_package_json_href": "/tmp/siasa-gui-test/release_demo_package.json",
+                        "release_gate_json_href": "/tmp/siasa-gui-test/release_gate.json",
                     },
                 },
                 {
@@ -760,6 +767,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                     "pilot_set": "extended-focus-complete",
                     "artifacts_dir": "/tmp/siasa-history/RUN-150",
                     "gui_index": "/tmp/siasa-history/RUN-150/index.html",
+                    "bundle_root": "/tmp/siasa-history/RUN-150",
                     "country_set_id": "MVP-COUNTRIES-LIVE-extended-focus-complete-v1",
                     "combined_ce_ratio": 1.0,
                     "governance_verdict": "green",
@@ -772,8 +780,13 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                     "evidence_links": {
                         "bundle_index_href": "/tmp/siasa-history/RUN-150/index.html",
                         "coverage_page_href": "/tmp/siasa-history/RUN-150/coverage.html",
+                        "coverage_json_href": "/tmp/siasa-history/RUN-150/source_coverage.json",
+                        "system_status_json_href": "/tmp/siasa-history/RUN-150/system_status.json",
                         "readiness_page_href": "/tmp/siasa-history/RUN-150/readiness.html",
+                        "readiness_json_href": "/tmp/siasa-history/RUN-150/readiness.json",
                         "release_package_page_href": "/tmp/siasa-history/RUN-150/release_package.html",
+                        "release_package_json_href": "/tmp/siasa-history/RUN-150/release_demo_package.json",
+                        "release_gate_json_href": "/tmp/siasa-history/RUN-150/release_gate.json",
                     },
                 }
             ],
@@ -1024,15 +1037,22 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "runtime_degraded_and_release_blocked" in runs_html
     assert "Latest known gaps (2)" in runs_html
     assert "Latest bundle evidence links" in runs_html
-    assert "href='coverage.html'" in runs_html
-    assert "href='source_coverage.json'" in runs_html
-    assert "href='system_status.json'" in runs_html
-    assert "href='readiness.html'" in runs_html
-    assert "href='readiness.json'" in runs_html
-    assert "href='release_package.html'" in runs_html
-    assert "href='release_demo_package.json'" in runs_html
-    assert "href='release_gate.json'" in runs_html
+    assert "Bundle root:" in runs_html
+    assert "/tmp/siasa-gui-test-artifacts/RUN-200" in runs_html
+    assert "/tmp/siasa-gui-test/index.html" in runs_html
+    assert "href='/tmp/siasa-gui-test/index.html'" in runs_html
+    assert "href='/tmp/siasa-gui-test/coverage.html'" in runs_html
+    assert "href='/tmp/siasa-gui-test/source_coverage.json'" in runs_html
+    assert "href='/tmp/siasa-gui-test/system_status.json'" in runs_html
+    assert "href='/tmp/siasa-gui-test/readiness.html'" in runs_html
+    assert "href='/tmp/siasa-gui-test/readiness.json'" in runs_html
+    assert "href='/tmp/siasa-gui-test/release_package.html'" in runs_html
+    assert "href='/tmp/siasa-gui-test/release_demo_package.json'" in runs_html
+    assert "href='/tmp/siasa-gui-test/release_gate.json'" in runs_html
     assert ">Bundle</a> | <a href='/tmp/siasa-history/RUN-150/coverage.html'>Coverage</a> | <a href='/tmp/siasa-history/RUN-150/readiness.html'>Readiness</a> | <a href='/tmp/siasa-history/RUN-150/release_package.html'>Release</a>" in runs_html
+    assert ">Coverage JSON</a> | <a href='/tmp/siasa-history/RUN-150/system_status.json'>System JSON</a> | <a href='/tmp/siasa-history/RUN-150/readiness.json'>Readiness JSON</a> | <a href='/tmp/siasa-history/RUN-150/release_demo_package.json'>Release JSON</a> | <a href='/tmp/siasa-history/RUN-150/release_gate.json'>Gate JSON</a>" in runs_html
+    assert "bundle_root=/tmp/siasa-history/RUN-150" in runs_html
+    assert "artifacts_dir=/tmp/siasa-history/RUN-150" in runs_html
     assert "operational-evidence-history-table" in runs_html
     assert "Repo Closure Summary" in runs_html
     assert "governance-and-run-controls" in runs_html

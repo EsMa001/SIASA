@@ -6,6 +6,7 @@ from typing import Any, Callable
 
 
 def _build_bundle_evidence_links(*, bundle_dir: Path) -> dict[str, str]:
+    bundle_dir = bundle_dir.resolve()
     return {
         "bundle_index_href": str(bundle_dir / "index.html"),
         "coverage_page_href": str(bundle_dir / "coverage.html"),
@@ -141,6 +142,7 @@ def build_operational_latest_bundle(
         known_gap_count=len(known_gaps),
     )
     evidence_links = _build_bundle_evidence_links(bundle_dir=gui_index.parent)
+    bundle_root = str(gui_index.parent.resolve())
     recent_runs = [
         {
             "run_id": entry.run_id,
@@ -149,6 +151,7 @@ def build_operational_latest_bundle(
             "pilot_set": entry.pilot_set,
             "artifacts_dir": entry.artifacts_dir,
             "gui_index": entry.gui_index,
+            "bundle_root": str(Path(entry.gui_index).resolve().parent),
             "country_set_id": entry.country_set_id,
             "combined_ce_ratio": entry.combined_ce_ratio,
             "governance_verdict": entry.governance_verdict,
@@ -171,6 +174,7 @@ def build_operational_latest_bundle(
                 "pilot_set": pilot_set,
                 "artifacts_dir": str(result.artifact_bundle.output_dir),
                 "gui_index": str(gui_index),
+                "bundle_root": bundle_root,
                 "country_set_id": str(verification_summary.get("country_set_id") or "unknown"),
                 "combined_ce_ratio": digest.get("ce_utilization", {}).get("combined_ce_ratio"),
                 "governance_verdict": str(digest.get("governance_summary", {}).get("verdict") or "unknown"),
@@ -188,6 +192,9 @@ def build_operational_latest_bundle(
             "run_id": run_state.run_id,
             "run_status": run_state.status,
             "pilot_set": pilot_set,
+            "artifacts_dir": str(result.artifact_bundle.output_dir),
+            "gui_index": str(gui_index),
+            "bundle_root": bundle_root,
             "country_set_id": str(verification_summary.get("country_set_id") or "unknown"),
             "combined_ce_ratio": digest.get("ce_utilization", {}).get("combined_ce_ratio"),
             "governance_verdict": str(digest.get("governance_summary", {}).get("verdict") or "unknown"),

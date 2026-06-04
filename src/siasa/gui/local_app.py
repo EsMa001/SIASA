@@ -2899,6 +2899,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     latest_evidence_link_items = ''.join(
         f"<li>{link}</li>"
         for link in (
+            _render_evidence_link('Bundle index', evidence_links.get('bundle_index_href')),
             _render_evidence_link('Coverage page', evidence_links.get('coverage_page_href')),
             _render_evidence_link('Coverage JSON', evidence_links.get('coverage_json_href')),
             _render_evidence_link('System status JSON', evidence_links.get('system_status_json_href')),
@@ -2910,10 +2911,13 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         )
         if link
     ) or "<li>none</li>"
+    latest_bundle_root = html.escape(str(latest_summary.get('bundle_root', 'n/a')))
+    latest_artifacts_dir = html.escape(str(latest_summary.get('artifacts_dir', 'n/a')))
+    latest_gui_index = html.escape(str(latest_summary.get('gui_index', 'n/a')))
 
     def _render_history_evidence_cell(item: dict[str, Any]) -> str:
         item_links = item.get('evidence_links', {}) if isinstance(item.get('evidence_links'), dict) else {}
-        links = ''.join(
+        page_links = ''.join(
             part
             for part in (
                 _render_evidence_link('Bundle', item_links.get('bundle_index_href')),
@@ -2925,7 +2929,29 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
                 _render_evidence_link('Release', item_links.get('release_package_page_href')),
             )
         )
-        return links or 'n/a'
+        json_links = ''.join(
+            part
+            for part in (
+                _render_evidence_link('Coverage JSON', item_links.get('coverage_json_href')),
+                ' | ' if item_links.get('coverage_json_href') and item_links.get('system_status_json_href') else '',
+                _render_evidence_link('System JSON', item_links.get('system_status_json_href')),
+                ' | ' if (item_links.get('coverage_json_href') or item_links.get('system_status_json_href')) and item_links.get('readiness_json_href') else '',
+                _render_evidence_link('Readiness JSON', item_links.get('readiness_json_href')),
+                ' | ' if (item_links.get('coverage_json_href') or item_links.get('system_status_json_href') or item_links.get('readiness_json_href')) and item_links.get('release_package_json_href') else '',
+                _render_evidence_link('Release JSON', item_links.get('release_package_json_href')),
+                ' | ' if (item_links.get('coverage_json_href') or item_links.get('system_status_json_href') or item_links.get('readiness_json_href') or item_links.get('release_package_json_href')) and item_links.get('release_gate_json_href') else '',
+                _render_evidence_link('Gate JSON', item_links.get('release_gate_json_href')),
+            )
+        )
+        bundle_root = html.escape(str(item.get('bundle_root', 'n/a')))
+        artifacts_dir = html.escape(str(item.get('artifacts_dir', 'n/a')))
+        return (
+            f"<div>{page_links or 'n/a'}</div>"
+            f"<div style='margin-top:4px;font-size:0.85em;'>{json_links or 'n/a'}</div>"
+            f"<div class='history-bundle-meta' style='margin-top:4px;font-size:0.8em;color:#6b7d99;'>"
+            f"bundle_root={bundle_root}<br>artifacts_dir={artifacts_dir}"
+            "</div>"
+        )
 
     recent_run_rows = ''.join(
         "<tr>"
@@ -2958,6 +2984,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<p>Governed slice: <strong>{html.escape(str(latest_summary.get('country_set_id', 'n/a')))}</strong> | Combined C/E ratio: <strong>{combined_ce_ratio_text}</strong> | Governance verdict: <strong>{html.escape(governance_verdict)}</strong> | Policy gate: <strong>{html.escape(policy_gate_verdict)}</strong></p>"
         f"<p>Release verdict: <strong>{html.escape(release_verdict)}</strong> | Readiness interpretation: <strong>{html.escape(readiness_interpretation)}</strong> | Known gaps: <strong>{html.escape(str(known_gap_count))}</strong></p>"
         f"<p>Operator next action: <strong>{operator_next_action}</strong></p>"
+        f"<p>Bundle root: <strong>{latest_bundle_root}</strong> | GUI index: <strong>{latest_gui_index}</strong> | Artifacts dir: <strong>{latest_artifacts_dir}</strong></p>"
         f"<details><summary>Latest bundle evidence links</summary><ul>{latest_evidence_link_items}</ul></details>"
         f"<details><summary>Latest failed sources ({html.escape(str(latest_summary.get('failed_source_count', 0)))})</summary><ul>{latest_failed_sources}</ul></details>"
         f"<details><summary>Latest known gaps ({html.escape(str(known_gap_count))})</summary><ul>{latest_known_gaps}</ul></details>"
