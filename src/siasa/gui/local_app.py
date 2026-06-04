@@ -2912,19 +2912,20 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     ) or "<li>none</li>"
 
     def _render_history_evidence_cell(item: dict[str, Any]) -> str:
-        if str(item.get('run_id', '')) != str(latest_summary.get('run_id', '')):
-            return 'latest bundle only'
+        item_links = item.get('evidence_links', {}) if isinstance(item.get('evidence_links'), dict) else {}
         links = ''.join(
             part
             for part in (
-                _render_evidence_link('Coverage', evidence_links.get('coverage_page_href')),
-                ' | ' if evidence_links.get('coverage_page_href') and evidence_links.get('readiness_page_href') else '',
-                _render_evidence_link('Readiness', evidence_links.get('readiness_page_href')),
-                ' | ' if (evidence_links.get('coverage_page_href') or evidence_links.get('readiness_page_href')) and evidence_links.get('release_package_page_href') else '',
-                _render_evidence_link('Release', evidence_links.get('release_package_page_href')),
+                _render_evidence_link('Bundle', item_links.get('bundle_index_href')),
+                ' | ' if item_links.get('bundle_index_href') and item_links.get('coverage_page_href') else '',
+                _render_evidence_link('Coverage', item_links.get('coverage_page_href')),
+                ' | ' if (item_links.get('bundle_index_href') or item_links.get('coverage_page_href')) and item_links.get('readiness_page_href') else '',
+                _render_evidence_link('Readiness', item_links.get('readiness_page_href')),
+                ' | ' if (item_links.get('bundle_index_href') or item_links.get('coverage_page_href') or item_links.get('readiness_page_href')) and item_links.get('release_package_page_href') else '',
+                _render_evidence_link('Release', item_links.get('release_package_page_href')),
             )
         )
-        return links or 'latest bundle only'
+        return links or 'n/a'
 
     recent_run_rows = ''.join(
         "<tr>"

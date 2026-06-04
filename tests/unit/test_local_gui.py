@@ -735,6 +735,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                     "recorded_at": "2026-05-11T18:00:00Z",
                     "run_status": "partial_success",
                     "pilot_set": "focus-complete",
+                    "artifacts_dir": "/tmp/siasa-gui-test-artifacts/RUN-200",
+                    "gui_index": "/tmp/siasa-gui-test/index.html",
                     "country_set_id": "MVP-COUNTRIES-LIVE-focus-complete-v1",
                     "combined_ce_ratio": 0.8571,
                     "governance_verdict": "amber",
@@ -744,6 +746,35 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                     "known_gap_count": 2,
                     "failed_source_count": 1,
                     "failed_sources": ["SRC-B"],
+                    "evidence_links": {
+                        "bundle_index_href": "/tmp/siasa-gui-test/index.html",
+                        "coverage_page_href": "/tmp/siasa-gui-test/coverage.html",
+                        "readiness_page_href": "/tmp/siasa-gui-test/readiness.html",
+                        "release_package_page_href": "/tmp/siasa-gui-test/release_package.html",
+                    },
+                },
+                {
+                    "run_id": "RUN-150",
+                    "recorded_at": "2026-05-10T18:00:00Z",
+                    "run_status": "success",
+                    "pilot_set": "extended-focus-complete",
+                    "artifacts_dir": "/tmp/siasa-history/RUN-150",
+                    "gui_index": "/tmp/siasa-history/RUN-150/index.html",
+                    "country_set_id": "MVP-COUNTRIES-LIVE-extended-focus-complete-v1",
+                    "combined_ce_ratio": 1.0,
+                    "governance_verdict": "green",
+                    "policy_gate_verdict": "pass",
+                    "release_verdict": "ready",
+                    "readiness_interpretation": "release_ready",
+                    "known_gap_count": 0,
+                    "failed_source_count": 0,
+                    "failed_sources": [],
+                    "evidence_links": {
+                        "bundle_index_href": "/tmp/siasa-history/RUN-150/index.html",
+                        "coverage_page_href": "/tmp/siasa-history/RUN-150/coverage.html",
+                        "readiness_page_href": "/tmp/siasa-history/RUN-150/readiness.html",
+                        "release_package_page_href": "/tmp/siasa-history/RUN-150/release_package.html",
+                    },
                 }
             ],
         },
@@ -1001,6 +1032,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "href='release_package.html'" in runs_html
     assert "href='release_demo_package.json'" in runs_html
     assert "href='release_gate.json'" in runs_html
+    assert ">Bundle</a> | <a href='/tmp/siasa-history/RUN-150/coverage.html'>Coverage</a> | <a href='/tmp/siasa-history/RUN-150/readiness.html'>Readiness</a> | <a href='/tmp/siasa-history/RUN-150/release_package.html'>Release</a>" in runs_html
     assert "operational-evidence-history-table" in runs_html
     assert "Repo Closure Summary" in runs_html
     assert "governance-and-run-controls" in runs_html

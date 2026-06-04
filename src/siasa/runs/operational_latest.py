@@ -4,6 +4,20 @@ import json
 from pathlib import Path
 from typing import Any, Callable
 
+
+def _build_bundle_evidence_links(*, bundle_dir: Path) -> dict[str, str]:
+    return {
+        "bundle_index_href": str(bundle_dir / "index.html"),
+        "coverage_page_href": str(bundle_dir / "coverage.html"),
+        "coverage_json_href": str(bundle_dir / "source_coverage.json"),
+        "system_status_json_href": str(bundle_dir / "system_status.json"),
+        "readiness_page_href": str(bundle_dir / "readiness.html"),
+        "readiness_json_href": str(bundle_dir / "readiness.json"),
+        "release_package_page_href": str(bundle_dir / "release_package.html"),
+        "release_package_json_href": str(bundle_dir / "release_demo_package.json"),
+        "release_gate_json_href": str(bundle_dir / "release_gate.json"),
+    }
+
 from siasa.data.storage import (
     load_recent_runs,
     persist_operational_latest_run,
@@ -126,12 +140,15 @@ def build_operational_latest_bundle(
         readiness_interpretation=readiness_interpretation,
         known_gap_count=len(known_gaps),
     )
+    evidence_links = _build_bundle_evidence_links(bundle_dir=gui_index.parent)
     recent_runs = [
         {
             "run_id": entry.run_id,
             "recorded_at": entry.recorded_at,
             "run_status": entry.run_status,
             "pilot_set": entry.pilot_set,
+            "artifacts_dir": entry.artifacts_dir,
+            "gui_index": entry.gui_index,
             "country_set_id": entry.country_set_id,
             "combined_ce_ratio": entry.combined_ce_ratio,
             "governance_verdict": entry.governance_verdict,
@@ -141,6 +158,7 @@ def build_operational_latest_bundle(
             "known_gap_count": entry.known_gap_count,
             "failed_source_count": len(entry.failed_sources),
             "failed_sources": entry.failed_sources,
+            "evidence_links": _build_bundle_evidence_links(bundle_dir=Path(entry.gui_index).parent),
         }
         for entry in load_recent_runs(resolved_history_db, limit=10)
     ]
@@ -151,6 +169,8 @@ def build_operational_latest_bundle(
                 "recorded_at": "pending_persisted_history",
                 "run_status": run_state.status,
                 "pilot_set": pilot_set,
+                "artifacts_dir": str(result.artifact_bundle.output_dir),
+                "gui_index": str(gui_index),
                 "country_set_id": str(verification_summary.get("country_set_id") or "unknown"),
                 "combined_ce_ratio": digest.get("ce_utilization", {}).get("combined_ce_ratio"),
                 "governance_verdict": str(digest.get("governance_summary", {}).get("verdict") or "unknown"),
@@ -160,18 +180,9 @@ def build_operational_latest_bundle(
                 "known_gap_count": len(known_gaps),
                 "failed_source_count": len(list(run_state.failed_sources)),
                 "failed_sources": list(run_state.failed_sources),
+                "evidence_links": evidence_links,
             }
         ]
-    evidence_links = {
-        "coverage_page_href": "coverage.html",
-        "coverage_json_href": "source_coverage.json",
-        "system_status_json_href": "system_status.json",
-        "readiness_page_href": "readiness.html",
-        "readiness_json_href": "readiness.json",
-        "release_package_page_href": "release_package.html",
-        "release_package_json_href": "release_demo_package.json",
-        "release_gate_json_href": "release_gate.json",
-    }
     evidence_lane = {
         "latest_summary": {
             "run_id": run_state.run_id,
