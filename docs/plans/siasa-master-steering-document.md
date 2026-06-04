@@ -280,17 +280,28 @@ Closure achieved:
 - targeted verification passed (`43 passed in 322.68s`) across `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, `test_scheduler.py`, and `test_local_gui.py`
 - full regression passed (`472 passed in 992.78s`)
 
-### N1-WP-010
+### N1-WP-010 (completed history triage-tag slice)
 Name:
 Add concise operator triage tags to history rows so archived runs can be skimmed quickly by handoff relevance (for example degraded-release-blocked vs ready-green) before opening detailed evidence.
 
+Closure achieved:
+- `src/siasa/runs/operational_latest.py` now derives machine-readable review posture fields (`triage_tag`, `triage_summary`) for latest and archived runs from runtime status, governance verdict, policy gate, release verdict, readiness interpretation, known-gap count, and failed-source count
+- the current bounded tag set now distinguishes at least `degraded_release_blocked`, `degraded_but_release_ready`, `ready_green`, and fallback `review_required`
+- `src/siasa/gui/local_app.py` now surfaces the latest-bundle triage posture directly in the evidence lane and adds a dedicated `Triage Tag` history column plus inline per-row triage summary text in the `Evidence` cell
+- targeted verification passed (`43 passed in 318.49s`) across `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, `test_scheduler.py`, and `test_local_gui.py`
+- full regression passed (`472 passed in 994.16s`)
+
+### N1-WP-011
+Name:
+Add compact operator-side filtering / counts by triage tag in recent operational history so archived runs can be narrowed quickly to blocked, degraded-but-ready, or green baselines without manual scanning.
+
 Why this is the default next package:
-- N1-WP-009 closed compact handoff wording, but operators still need to visually parse multiple columns before knowing which archived run is most review-worthy
-- the next bounded improvement is a short triage classification layer on top of the now complete navigation and handoff surfaces
+- N1-WP-010 now classifies archived runs, but operators still need to visually scan the full table when many runs accumulate
+- the next bounded improvement is to turn the new triage tags into a quick review-control surface (counts + filter) on top of the existing history table
 - this remains a small G3 operator-ux/governance closure slice without reopening runtime risk
 
 Definition of done:
-- history rows expose concise triage tags / review posture summaries per archived run
+- recent-history view exposes triage-tag counts and a quick filter control
 - targeted tests green
 - full suite green
 - capability matrix updated
@@ -298,7 +309,7 @@ Definition of done:
 - commit + push completed
 
 Fallback reprioritization rule:
-- if valid source credentials/registrations become available before N1-WP-010 starts, reassess whether a credential-activation slice should jump ahead
+- if valid source credentials/registrations become available before N1-WP-011 starts, reassess whether a credential-activation slice should jump ahead
 
 ---
 
