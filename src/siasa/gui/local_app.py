@@ -3036,7 +3036,9 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         return (
             "<tr class='operational-history-row' "
             f"data-triage-tag='{html.escape(str(item.get('triage_tag', 'n/a')))}' "
-            f"data-recency-band='{html.escape(recency_band)}'>"
+            f"data-recency-band='{html.escape(recency_band)}' "
+            f"data-recorded-at='{html.escape(str(item.get('recorded_at', 'n/a')))}' "
+            f"data-hours-behind-latest='{html.escape(hours_behind_latest.replace('h', '')) if hours_behind_latest.endswith('h') else html.escape(hours_behind_latest)}'>"
             f"<td>{html.escape(str(item.get('run_id', 'n/a')))}</td>"
             f"<td>{html.escape(str(item.get('recorded_at', 'n/a')))}</td>"
             f"<td>{html.escape(hours_behind_latest)}</td>"
@@ -3064,10 +3066,32 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
 (function() {
   const triageFilter = document.getElementById('operational-history-triage-filter');
   const recencyFilter = document.getElementById('operational-history-recency-filter');
+  const sortControl = document.getElementById('operational-history-sort');
+  const tableBody = document.querySelector('#operational-evidence-history-table tbody');
   const rows = Array.from(document.querySelectorAll('.operational-history-row'));
   const visibleCount = document.getElementById('operational-history-visible-count');
   const visibleTriageSummary = document.getElementById('operational-history-visible-triage-counts');
   const visibleRecencySummary = document.getElementById('operational-history-visible-recency-counts');
+
+  function sortOperationalHistoryRows() {
+    const sortMode = (sortControl ? sortControl.value : 'latest-first').trim().toLowerCase();
+    const sortedRows = rows.slice().sort((left, right) => {
+      const leftHours = Number.parseInt(left.getAttribute('data-hours-behind-latest') || '999999', 10);
+      const rightHours = Number.parseInt(right.getAttribute('data-hours-behind-latest') || '999999', 10);
+      const leftTag = (left.getAttribute('data-triage-tag') || 'n/a').trim().toLowerCase();
+      const rightTag = (right.getAttribute('data-triage-tag') || 'n/a').trim().toLowerCase();
+      if (sortMode === 'oldest-first') {
+        return rightHours - leftHours || leftTag.localeCompare(rightTag);
+      }
+      if (sortMode === 'triage-tag-asc') {
+        return leftTag.localeCompare(rightTag) || leftHours - rightHours;
+      }
+      return leftHours - rightHours || leftTag.localeCompare(rightTag);
+    });
+    if (tableBody) {
+      sortedRows.forEach((row) => tableBody.appendChild(row));
+    }
+  }
 
   function applyOperationalHistoryTriageFilter() {
     const selectedTag = (triageFilter ? triageFilter.value : 'all').trim().toLowerCase();
@@ -3087,6 +3111,8 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         recencyCounts[rowRecency] = (recencyCounts[rowRecency] || 0) + 1;
       }
     });
+
+    sortOperationalHistoryRows();
 
     if (visibleCount) {
       visibleCount.textContent = String(visible);
@@ -3109,6 +3135,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
 
   if (triageFilter) triageFilter.addEventListener('change', applyOperationalHistoryTriageFilter);
   if (recencyFilter) recencyFilter.addEventListener('change', applyOperationalHistoryTriageFilter);
+  if (sortControl) sortControl.addEventListener('change', applyOperationalHistoryTriageFilter);
   applyOperationalHistoryTriageFilter();
 })();
 </script>
@@ -3140,6 +3167,8 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<select id='operational-history-triage-filter'><option value='all'>All triage tags ({html.escape(str(len(recent_run_items)))})</option>{triage_tag_options}</select> "
         "<label for='operational-history-recency-filter'>Recency band filter:</label> "
         f"<select id='operational-history-recency-filter'><option value='all'>All recency bands ({html.escape(str(len(recent_run_items)))})</option>{recency_band_options}</select> "
+        "<label for='operational-history-sort'>Sort:</label> "
+        "<select id='operational-history-sort'><option value='latest-first'>Latest first</option><option value='oldest-first'>Oldest first</option><option value='triage-tag-asc'>Triage tag (A-Z)</option></select> "
         f"<span>Visible runs: <strong id='operational-history-visible-count'>{html.escape(str(len(recent_run_items)))}</strong></span>"
         "</div>"
         f"<p>Triage tag counts: <strong id='operational-history-triage-counts'>{triage_tag_count_summary}</strong></p>"

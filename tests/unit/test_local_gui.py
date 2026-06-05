@@ -1110,6 +1110,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "operational-evidence-history-table" in runs_html
     assert "operational-history-triage-filter" in runs_html
     assert "operational-history-recency-filter" in runs_html
+    assert "operational-history-sort" in runs_html
+    assert "Latest first" in runs_html
+    assert "Oldest first" in runs_html
+    assert "Triage tag (A-Z)" in runs_html
     assert "Recorded At" in runs_html
     assert "Hours Behind Latest" in runs_html
     assert "2026-05-11T18:00:00Z" in runs_html
@@ -1132,7 +1136,12 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "data-triage-tag='ready_green'" in runs_html
     assert "data-recency-band='latest'" in runs_html
     assert "data-recency-band='last_24h'" in runs_html
+    assert "data-hours-behind-latest='0'" in runs_html
+    assert "data-hours-behind-latest='24'" in runs_html
+    assert "data-recorded-at='2026-05-11T18:00:00Z'" in runs_html
+    assert "data-recorded-at='2026-05-10T18:00:00Z'" in runs_html
     assert "applyOperationalHistoryTriageFilter" in runs_html
+    assert "sortOperationalHistoryRows" in runs_html
     assert "operational-history-visible-triage-counts" in runs_html
     assert "operational-history-visible-recency-counts" in runs_html
     assert "Repo Closure Summary" in runs_html
