@@ -1109,6 +1109,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Run RUN-150: bundle at /tmp/siasa-history/RUN-150; review readiness_json:/tmp/siasa-history/RUN-150/readiness.json, coverage_json:/tmp/siasa-history/RUN-150/source_coverage.json, and release_gate_json:/tmp/siasa-history/RUN-150/release_gate.json." in runs_html
     assert "operational-evidence-history-table" in runs_html
     assert "operational-history-triage-filter" in runs_html
+    assert "Recorded At" in runs_html
+    assert "2026-05-11T18:00:00Z" in runs_html
+    assert "2026-05-10T18:00:00Z" in runs_html
     assert "All triage tags (2)" in runs_html
     assert "degraded_release_blocked (1)" in runs_html
     assert "ready_green (1)" in runs_html

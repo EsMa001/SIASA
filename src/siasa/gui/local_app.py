@@ -2991,6 +2991,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         "<tr class='operational-history-row' "
         f"data-triage-tag='{html.escape(str(item.get('triage_tag', 'n/a')))}'>"
         f"<td>{html.escape(str(item.get('run_id', 'n/a')))}</td>"
+        f"<td>{html.escape(str(item.get('recorded_at', 'n/a')))}</td>"
         f"<td>{html.escape(str(item.get('run_status', 'n/a')))}</td>"
         f"<td>{html.escape(str(item.get('pilot_set', 'n/a')))}</td>"
         f"<td>{html.escape(str(item.get('country_set_id', 'n/a')))}</td>"
@@ -3005,7 +3006,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<td>{_render_history_evidence_cell(item)}</td>"
         "</tr>"
         for item in recent_run_items
-    ) or "<tr><td colspan='13'>No operational history available.</td></tr>"
+    ) or "<tr><td colspan='14'>No operational history available.</td></tr>"
     operational_history_filter_script = """
 <script>
 (function() {
@@ -3075,7 +3076,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         "</div>"
         f"<p>Triage tag counts: <strong id='operational-history-triage-counts'>{triage_tag_count_summary}</strong></p>"
         "<p>Visible triage counts: <strong id='operational-history-visible-triage-counts'>n/a</strong></p>"
-        "<table id='operational-evidence-history-table'><thead><tr><th>Run ID</th><th>Status</th><th>Pilot Set</th><th>Country Set</th><th>Combined C/E Ratio</th><th>Governance</th><th>Policy Gate</th><th>Release Verdict</th><th>Readiness Interpretation</th><th>Triage Tag</th><th>Known Gaps</th><th>Failed Sources</th><th>Evidence</th></tr></thead>"
+        "<table id='operational-evidence-history-table'><thead><tr><th>Run ID</th><th>Recorded At</th><th>Status</th><th>Pilot Set</th><th>Country Set</th><th>Combined C/E Ratio</th><th>Governance</th><th>Policy Gate</th><th>Release Verdict</th><th>Readiness Interpretation</th><th>Triage Tag</th><th>Known Gaps</th><th>Failed Sources</th><th>Evidence</th></tr></thead>"
         f"<tbody>{recent_run_rows}</tbody></table>{operational_history_filter_script}</div>"
     ) if latest_summary else ""
     _run_color = html.escape(_run_status_color(str(system_status_read_model.get('run_status', 'n/a'))))
