@@ -295,15 +295,12 @@ Closure achieved:
 Name:
 Add compact operator-side filtering / counts by triage tag in recent operational history so archived runs can be narrowed quickly to blocked, degraded-but-ready, or green baselines without manual scanning.
 
-Why this is the default next package:
-- N1-WP-010 now classifies archived runs, but operators still need to visually scan the full table when many runs accumulate
-- the next bounded improvement is to turn the new triage tags into a quick review-control surface (counts + filter) on top of the existing history table
-- this remains a small G3 operator-ux/governance closure slice without reopening runtime risk
-
-Definition of done:
-- recent-history view exposes triage-tag counts and a quick filter control
-- targeted tests green
-- full suite green
+Closure achieved:
+- `src/siasa/gui/local_app.py` now renders a quick triage-control surface above the recent-history table with `operational-history-triage-filter`, static triage-tag counts, dynamic visible-run count, and a dynamic visible triage-count summary
+- each recent-history row now carries `.operational-history-row` plus `data-triage-tag`, and `applyOperationalHistoryTriageFilter()` deterministically narrows the visible slice without touching the underlying evidence metadata
+- `tests/unit/test_local_gui.py` now asserts the new controls, counts, row markers, and filter hook in generated `runs.html`
+- targeted verification passed (`43 passed in 329.45s`) across `test_local_gui.py`, `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, and `test_scheduler.py`
+- full regression passed (`472 passed in 1011.57s`)
 - capability matrix updated
 - this master steering document updated if frontier changed
 - commit + push completed
