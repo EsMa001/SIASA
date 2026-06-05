@@ -305,8 +305,19 @@ Closure achieved:
 - this master steering document updated if frontier changed
 - commit + push completed
 
+### N1-WP-012
+Name:
+Expose explicit persisted recency timestamps in recent operational history so operators can read chronology directly from the evidence-lane table instead of inferring it from run IDs or bundle paths.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now renders a `Recorded At` column in `operational-evidence-history-table` and fills each `.operational-history-row` from persisted `recorded_at`
+- the table empty-state colspan was aligned with the expanded 14-column layout so no-history rendering remains structurally correct
+- `tests/unit/test_local_gui.py` now asserts the new header plus deterministic rendered timestamps `2026-05-11T18:00:00Z` and `2026-05-10T18:00:00Z`
+- targeted verification passed (`43 passed in 320.37s`) across `test_local_gui.py`, `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, and `test_scheduler.py`
+- full regression passed (`472 passed in 1011.48s`)
+
 Fallback reprioritization rule:
-- if valid source credentials/registrations become available before N1-WP-011 starts, reassess whether a credential-activation slice should jump ahead
+- if valid source credentials/registrations become available before N1-WP-012 starts, reassess whether a credential-activation slice should jump ahead
 
 ---
 
