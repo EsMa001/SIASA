@@ -2974,8 +2974,22 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
             f"<div class='history-share-refs' style='margin-top:4px;font-size:0.8em;'>{share_refs_text}</div>"
         )
 
+    recent_run_items = [item for item in recent_runs if isinstance(item, dict)]
+    triage_tag_counts: dict[str, int] = {}
+    for item in recent_run_items:
+        triage_tag_key = str(item.get('triage_tag', 'n/a')).strip() or 'n/a'
+        triage_tag_counts[triage_tag_key] = triage_tag_counts.get(triage_tag_key, 0) + 1
+    triage_tag_options = ''.join(
+        f"<option value='{html.escape(tag)}'>{html.escape(tag)} ({count})</option>"
+        for tag, count in sorted(triage_tag_counts.items())
+    )
+    triage_tag_count_summary = ' | '.join(
+        f"{html.escape(tag)}: {count}"
+        for tag, count in sorted(triage_tag_counts.items())
+    ) or 'n/a'
     recent_run_rows = ''.join(
-        "<tr>"
+        "<tr class='operational-history-row' "
+        f"data-triage-tag='{html.escape(str(item.get('triage_tag', 'n/a')))}'>"
         f"<td>{html.escape(str(item.get('run_id', 'n/a')))}</td>"
         f"<td>{html.escape(str(item.get('run_status', 'n/a')))}</td>"
         f"<td>{html.escape(str(item.get('pilot_set', 'n/a')))}</td>"
@@ -2990,9 +3004,48 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<td>{html.escape(str(item.get('failed_source_count', 'n/a')))}</td>"
         f"<td>{_render_history_evidence_cell(item)}</td>"
         "</tr>"
-        for item in recent_runs
-        if isinstance(item, dict)
+        for item in recent_run_items
     ) or "<tr><td colspan='13'>No operational history available.</td></tr>"
+    operational_history_filter_script = """
+<script>
+(function() {
+  const triageFilter = document.getElementById('operational-history-triage-filter');
+  const rows = Array.from(document.querySelectorAll('.operational-history-row'));
+  const visibleCount = document.getElementById('operational-history-visible-count');
+  const visibleSummary = document.getElementById('operational-history-visible-triage-counts');
+
+  function applyOperationalHistoryTriageFilter() {
+    const selectedTag = (triageFilter ? triageFilter.value : 'all').trim().toLowerCase();
+    const counts = {};
+    let visible = 0;
+
+    rows.forEach((row) => {
+      const rowTag = (row.getAttribute('data-triage-tag') || 'n/a').trim().toLowerCase();
+      const show = selectedTag === 'all' || rowTag === selectedTag;
+      row.style.display = show ? '' : 'none';
+      if (show) {
+        visible += 1;
+        counts[rowTag] = (counts[rowTag] || 0) + 1;
+      }
+    });
+
+    if (visibleCount) {
+      visibleCount.textContent = String(visible);
+    }
+    if (visibleSummary) {
+      const summary = Object.entries(counts)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([tag, count]) => `${tag}: ${count}`)
+        .join(' | ');
+      visibleSummary.textContent = summary || 'none';
+    }
+  }
+
+  if (triageFilter) triageFilter.addEventListener('change', applyOperationalHistoryTriageFilter);
+  applyOperationalHistoryTriageFilter();
+})();
+</script>
+"""
     latest_failed_sources = ''.join(
         f"<li>{html.escape(str(item))}</li>"
         for item in latest_summary.get('failed_sources', [])
@@ -3014,8 +3067,16 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<details><summary>Latest failed sources ({html.escape(str(latest_summary.get('failed_source_count', 0)))})</summary><ul>{latest_failed_sources}</ul></details>"
         f"<details><summary>Latest known gaps ({html.escape(str(known_gap_count))})</summary><ul>{latest_known_gaps}</ul></details>"
         "<h3>Recent Operational History</h3>"
+        "<p>Quick triage controls help narrow archived runs by review posture before opening detailed evidence.</p>"
+        "<div class='controls-bar'>"
+        "<label for='operational-history-triage-filter'>Triage tag filter:</label> "
+        f"<select id='operational-history-triage-filter'><option value='all'>All triage tags ({html.escape(str(len(recent_run_items)))})</option>{triage_tag_options}</select> "
+        f"<span>Visible runs: <strong id='operational-history-visible-count'>{html.escape(str(len(recent_run_items)))}</strong></span>"
+        "</div>"
+        f"<p>Triage tag counts: <strong id='operational-history-triage-counts'>{triage_tag_count_summary}</strong></p>"
+        "<p>Visible triage counts: <strong id='operational-history-visible-triage-counts'>n/a</strong></p>"
         "<table id='operational-evidence-history-table'><thead><tr><th>Run ID</th><th>Status</th><th>Pilot Set</th><th>Country Set</th><th>Combined C/E Ratio</th><th>Governance</th><th>Policy Gate</th><th>Release Verdict</th><th>Readiness Interpretation</th><th>Triage Tag</th><th>Known Gaps</th><th>Failed Sources</th><th>Evidence</th></tr></thead>"
-        f"<tbody>{recent_run_rows}</tbody></table></div>"
+        f"<tbody>{recent_run_rows}</tbody></table>{operational_history_filter_script}</div>"
     ) if latest_summary else ""
     _run_color = html.escape(_run_status_color(str(system_status_read_model.get('run_status', 'n/a'))))
     body = (
