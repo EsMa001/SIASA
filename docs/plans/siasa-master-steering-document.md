@@ -327,8 +327,20 @@ Closure achieved:
 - targeted verification passed (`43 passed in 315.83s`) across `test_local_gui.py`, `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, and `test_scheduler.py`
 - full regression passed (`472 passed in 984.15s`)
 
+### N1-WP-014
+Name:
+Turn relative recency into a direct operator-side review control so archived runs can be narrowed immediately to `latest`, `last_24h`, or older chronology slices.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now stamps each `.operational-history-row` with deterministic `data-recency-band` derived from `recorded_at` / `Hours Behind Latest`
+- `runs.html` now renders `operational-history-recency-filter` plus static `operational-history-recency-counts` and dynamic `operational-history-visible-recency-counts` beside the existing triage controls
+- `applyOperationalHistoryTriageFilter()` now combines triage-tag and recency-band filtering in one client-side pass and recomputes both visible triage counts and visible recency counts from the currently shown slice only
+- `tests/unit/test_local_gui.py` now asserts the new filter, summaries, and deterministic fixture recency bands `latest` / `last_24h`
+- targeted verification passed (`43 passed in 322.29s`) across `test_local_gui.py`, `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, and `test_scheduler.py`
+- full regression passed (`472 passed in 990.35s`)
+
 Fallback reprioritization rule:
-- if valid source credentials/registrations become available before N1-WP-013 starts, reassess whether a credential-activation slice should jump ahead
+- if valid source credentials/registrations become available before N1-WP-014 starts, reassess whether a credential-activation slice should jump ahead
 
 ---
 
