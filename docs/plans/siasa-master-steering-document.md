@@ -316,8 +316,19 @@ Closure achieved:
 - targeted verification passed (`43 passed in 320.37s`) across `test_local_gui.py`, `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, and `test_scheduler.py`
 - full regression passed (`472 passed in 1011.48s`)
 
+### N1-WP-013
+Name:
+Expose relative recency deltas in recent operational history so archived runs are not only timestamped but also immediately readable as lag behind the freshest bundle.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now computes the latest persisted `recorded_at` in `recent_runs` and renders a dedicated `Hours Behind Latest` column beside `Recorded At`
+- each `.operational-history-row` now shows a deterministic relative lag such as `0h` for the freshest row and `24h` for the prior row, while preserving existing triage/evidence rendering
+- `tests/unit/test_local_gui.py` now asserts the new header plus rendered lag values `0h` and `24h`
+- targeted verification passed (`43 passed in 315.83s`) across `test_local_gui.py`, `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, and `test_scheduler.py`
+- full regression passed (`472 passed in 984.15s`)
+
 Fallback reprioritization rule:
-- if valid source credentials/registrations become available before N1-WP-012 starts, reassess whether a credential-activation slice should jump ahead
+- if valid source credentials/registrations become available before N1-WP-013 starts, reassess whether a credential-activation slice should jump ahead
 
 ---
 
