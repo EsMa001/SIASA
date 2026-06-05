@@ -1109,6 +1109,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Run RUN-150: bundle at /tmp/siasa-history/RUN-150; review readiness_json:/tmp/siasa-history/RUN-150/readiness.json, coverage_json:/tmp/siasa-history/RUN-150/source_coverage.json, and release_gate_json:/tmp/siasa-history/RUN-150/release_gate.json." in runs_html
     assert "operational-evidence-history-table" in runs_html
     assert "operational-history-triage-filter" in runs_html
+    assert "operational-history-recency-filter" in runs_html
     assert "Recorded At" in runs_html
     assert "Hours Behind Latest" in runs_html
     assert "2026-05-11T18:00:00Z" in runs_html
@@ -1116,16 +1117,24 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert ">0h<" in runs_html
     assert ">24h<" in runs_html
     assert "All triage tags (2)" in runs_html
+    assert "All recency bands (2)" in runs_html
+    assert "last_24h (1)" in runs_html
+    assert "latest (1)" in runs_html
     assert "degraded_release_blocked (1)" in runs_html
     assert "ready_green (1)" in runs_html
     assert "Visible runs: <strong id='operational-history-visible-count'>2</strong>" in runs_html
     assert "Triage tag counts: <strong id='operational-history-triage-counts'>degraded_release_blocked: 1 | ready_green: 1</strong>" in runs_html
+    assert "Recency band counts: <strong id='operational-history-recency-counts'>last_24h: 1 | latest: 1</strong>" in runs_html
     assert "Visible triage counts: <strong id='operational-history-visible-triage-counts'>n/a</strong>" in runs_html
+    assert "Visible recency counts: <strong id='operational-history-visible-recency-counts'>n/a</strong>" in runs_html
     assert "class='operational-history-row'" in runs_html
     assert "data-triage-tag='degraded_release_blocked'" in runs_html
     assert "data-triage-tag='ready_green'" in runs_html
+    assert "data-recency-band='latest'" in runs_html
+    assert "data-recency-band='last_24h'" in runs_html
     assert "applyOperationalHistoryTriageFilter" in runs_html
     assert "operational-history-visible-triage-counts" in runs_html
+    assert "operational-history-visible-recency-counts" in runs_html
     assert "Repo Closure Summary" in runs_html
     assert "governance-and-run-controls" in runs_html
     assert "reporting-and-export" in runs_html

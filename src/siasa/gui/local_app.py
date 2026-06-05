@@ -2993,27 +2993,50 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         ),
         default=None,
     )
+    def _classify_recency_band(parsed_recorded_at: datetime | None) -> str:
+        if latest_history_timestamp is None or parsed_recorded_at is None:
+            return 'n/a'
+        delta_hours = max(0, int((latest_history_timestamp - parsed_recorded_at).total_seconds() // 3600))
+        if delta_hours == 0:
+            return 'latest'
+        if delta_hours <= 24:
+            return 'last_24h'
+        return 'older'
+
     triage_tag_counts: dict[str, int] = {}
+    recency_band_counts: dict[str, int] = {}
     for item in recent_run_items:
         triage_tag_key = str(item.get('triage_tag', 'n/a')).strip() or 'n/a'
         triage_tag_counts[triage_tag_key] = triage_tag_counts.get(triage_tag_key, 0) + 1
+        recency_band_key = _classify_recency_band(_parse_history_timestamp(item.get('recorded_at')))
+        recency_band_counts[recency_band_key] = recency_band_counts.get(recency_band_key, 0) + 1
     triage_tag_options = ''.join(
         f"<option value='{html.escape(tag)}'>{html.escape(tag)} ({count})</option>"
         for tag, count in sorted(triage_tag_counts.items())
+    )
+    recency_band_options = ''.join(
+        f"<option value='{html.escape(band)}'>{html.escape(band)} ({count})</option>"
+        for band, count in sorted(recency_band_counts.items())
     )
     triage_tag_count_summary = ' | '.join(
         f"{html.escape(tag)}: {count}"
         for tag, count in sorted(triage_tag_counts.items())
     ) or 'n/a'
+    recency_band_count_summary = ' | '.join(
+        f"{html.escape(band)}: {count}"
+        for band, count in sorted(recency_band_counts.items())
+    ) or 'n/a'
     def _render_recent_run_row(item: dict[str, Any]) -> str:
         parsed_recorded_at = _parse_history_timestamp(item.get('recorded_at'))
+        recency_band = _classify_recency_band(parsed_recorded_at)
         if latest_history_timestamp is not None and parsed_recorded_at is not None:
             hours_behind_latest = f"{max(0, int((latest_history_timestamp - parsed_recorded_at).total_seconds() // 3600))}h"
         else:
             hours_behind_latest = 'n/a'
         return (
             "<tr class='operational-history-row' "
-            f"data-triage-tag='{html.escape(str(item.get('triage_tag', 'n/a')))}'>"
+            f"data-triage-tag='{html.escape(str(item.get('triage_tag', 'n/a')))}' "
+            f"data-recency-band='{html.escape(recency_band)}'>"
             f"<td>{html.escape(str(item.get('run_id', 'n/a')))}</td>"
             f"<td>{html.escape(str(item.get('recorded_at', 'n/a')))}</td>"
             f"<td>{html.escape(hours_behind_latest)}</td>"
@@ -3040,38 +3063,52 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
 <script>
 (function() {
   const triageFilter = document.getElementById('operational-history-triage-filter');
+  const recencyFilter = document.getElementById('operational-history-recency-filter');
   const rows = Array.from(document.querySelectorAll('.operational-history-row'));
   const visibleCount = document.getElementById('operational-history-visible-count');
-  const visibleSummary = document.getElementById('operational-history-visible-triage-counts');
+  const visibleTriageSummary = document.getElementById('operational-history-visible-triage-counts');
+  const visibleRecencySummary = document.getElementById('operational-history-visible-recency-counts');
 
   function applyOperationalHistoryTriageFilter() {
     const selectedTag = (triageFilter ? triageFilter.value : 'all').trim().toLowerCase();
-    const counts = {};
+    const selectedRecency = (recencyFilter ? recencyFilter.value : 'all').trim().toLowerCase();
+    const triageCounts = {};
+    const recencyCounts = {};
     let visible = 0;
 
     rows.forEach((row) => {
       const rowTag = (row.getAttribute('data-triage-tag') || 'n/a').trim().toLowerCase();
-      const show = selectedTag === 'all' || rowTag === selectedTag;
+      const rowRecency = (row.getAttribute('data-recency-band') || 'n/a').trim().toLowerCase();
+      const show = (selectedTag === 'all' || rowTag === selectedTag) && (selectedRecency === 'all' || rowRecency === selectedRecency);
       row.style.display = show ? '' : 'none';
       if (show) {
         visible += 1;
-        counts[rowTag] = (counts[rowTag] || 0) + 1;
+        triageCounts[rowTag] = (triageCounts[rowTag] || 0) + 1;
+        recencyCounts[rowRecency] = (recencyCounts[rowRecency] || 0) + 1;
       }
     });
 
     if (visibleCount) {
       visibleCount.textContent = String(visible);
     }
-    if (visibleSummary) {
-      const summary = Object.entries(counts)
+    if (visibleTriageSummary) {
+      const summary = Object.entries(triageCounts)
         .sort((a, b) => a[0].localeCompare(b[0]))
         .map(([tag, count]) => `${tag}: ${count}`)
         .join(' | ');
-      visibleSummary.textContent = summary || 'none';
+      visibleTriageSummary.textContent = summary || 'none';
+    }
+    if (visibleRecencySummary) {
+      const summary = Object.entries(recencyCounts)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([band, count]) => `${band}: ${count}`)
+        .join(' | ');
+      visibleRecencySummary.textContent = summary || 'none';
     }
   }
 
   if (triageFilter) triageFilter.addEventListener('change', applyOperationalHistoryTriageFilter);
+  if (recencyFilter) recencyFilter.addEventListener('change', applyOperationalHistoryTriageFilter);
   applyOperationalHistoryTriageFilter();
 })();
 </script>
@@ -3101,10 +3138,14 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         "<div class='controls-bar'>"
         "<label for='operational-history-triage-filter'>Triage tag filter:</label> "
         f"<select id='operational-history-triage-filter'><option value='all'>All triage tags ({html.escape(str(len(recent_run_items)))})</option>{triage_tag_options}</select> "
+        "<label for='operational-history-recency-filter'>Recency band filter:</label> "
+        f"<select id='operational-history-recency-filter'><option value='all'>All recency bands ({html.escape(str(len(recent_run_items)))})</option>{recency_band_options}</select> "
         f"<span>Visible runs: <strong id='operational-history-visible-count'>{html.escape(str(len(recent_run_items)))}</strong></span>"
         "</div>"
         f"<p>Triage tag counts: <strong id='operational-history-triage-counts'>{triage_tag_count_summary}</strong></p>"
+        f"<p>Recency band counts: <strong id='operational-history-recency-counts'>{recency_band_count_summary}</strong></p>"
         "<p>Visible triage counts: <strong id='operational-history-visible-triage-counts'>n/a</strong></p>"
+        "<p>Visible recency counts: <strong id='operational-history-visible-recency-counts'>n/a</strong></p>"
         "<table id='operational-evidence-history-table'><thead><tr><th>Run ID</th><th>Recorded At</th><th>Hours Behind Latest</th><th>Status</th><th>Pilot Set</th><th>Country Set</th><th>Combined C/E Ratio</th><th>Governance</th><th>Policy Gate</th><th>Release Verdict</th><th>Readiness Interpretation</th><th>Triage Tag</th><th>Known Gaps</th><th>Failed Sources</th><th>Evidence</th></tr></thead>"
         f"<tbody>{recent_run_rows}</tbody></table>{operational_history_filter_script}</div>"
     ) if latest_summary else ""
