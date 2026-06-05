@@ -339,8 +339,20 @@ Closure achieved:
 - targeted verification passed (`43 passed in 322.29s`) across `test_local_gui.py`, `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, and `test_scheduler.py`
 - full regression passed (`472 passed in 990.35s`)
 
+### N1-WP-015
+Name:
+Add explicit history ordering control so the operator can read the same filtered run slice newest-first, oldest-first, or grouped by triage posture without relying on one hardcoded table order.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now renders `operational-history-sort` with options `latest-first`, `oldest-first`, and `triage-tag-asc`
+- each `.operational-history-row` now exposes stable sort metadata via `data-recorded-at` and numeric `data-hours-behind-latest`
+- new client-side helper `sortOperationalHistoryRows()` reorders the `operational-evidence-history-table` body, and `applyOperationalHistoryTriageFilter()` now invokes it while preserving combined triage/recency filtering plus visible-slice summaries
+- `tests/unit/test_local_gui.py` now asserts the new sort control, options, row metadata, and JS hook name
+- targeted verification passed (`43 passed in 315.46s`) across `test_local_gui.py`, `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, and `test_scheduler.py`
+- full regression passed (`472 passed in 986.68s`)
+
 Fallback reprioritization rule:
-- if valid source credentials/registrations become available before N1-WP-014 starts, reassess whether a credential-activation slice should jump ahead
+- if valid source credentials/registrations become available before N1-WP-015 starts, reassess whether a credential-activation slice should jump ahead
 
 ---
 
