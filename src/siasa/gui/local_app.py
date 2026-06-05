@@ -2975,6 +2975,24 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         )
 
     recent_run_items = [item for item in recent_runs if isinstance(item, dict)]
+
+    def _parse_history_timestamp(value: Any) -> datetime | None:
+        text = str(value or '').strip()
+        if not text:
+            return None
+        try:
+            return datetime.fromisoformat(text.replace('Z', '+00:00'))
+        except ValueError:
+            return None
+
+    latest_history_timestamp = max(
+        (
+            parsed_timestamp
+            for item in recent_run_items
+            if (parsed_timestamp := _parse_history_timestamp(item.get('recorded_at'))) is not None
+        ),
+        default=None,
+    )
     triage_tag_counts: dict[str, int] = {}
     for item in recent_run_items:
         triage_tag_key = str(item.get('triage_tag', 'n/a')).strip() or 'n/a'
@@ -2987,26 +3005,37 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"{html.escape(tag)}: {count}"
         for tag, count in sorted(triage_tag_counts.items())
     ) or 'n/a'
+    def _render_recent_run_row(item: dict[str, Any]) -> str:
+        parsed_recorded_at = _parse_history_timestamp(item.get('recorded_at'))
+        if latest_history_timestamp is not None and parsed_recorded_at is not None:
+            hours_behind_latest = f"{max(0, int((latest_history_timestamp - parsed_recorded_at).total_seconds() // 3600))}h"
+        else:
+            hours_behind_latest = 'n/a'
+        return (
+            "<tr class='operational-history-row' "
+            f"data-triage-tag='{html.escape(str(item.get('triage_tag', 'n/a')))}'>"
+            f"<td>{html.escape(str(item.get('run_id', 'n/a')))}</td>"
+            f"<td>{html.escape(str(item.get('recorded_at', 'n/a')))}</td>"
+            f"<td>{html.escape(hours_behind_latest)}</td>"
+            f"<td>{html.escape(str(item.get('run_status', 'n/a')))}</td>"
+            f"<td>{html.escape(str(item.get('pilot_set', 'n/a')))}</td>"
+            f"<td>{html.escape(str(item.get('country_set_id', 'n/a')))}</td>"
+            f"<td>{html.escape(_format_history_ratio(item.get('combined_ce_ratio')))}</td>"
+            f"<td>{html.escape(str(item.get('governance_verdict', 'n/a')))}</td>"
+            f"<td>{html.escape(str(item.get('policy_gate_verdict', 'n/a')))}</td>"
+            f"<td>{html.escape(str(item.get('release_verdict', 'n/a')))}</td>"
+            f"<td>{html.escape(str(item.get('readiness_interpretation', 'n/a')))}</td>"
+            f"<td>{html.escape(str(item.get('triage_tag', 'n/a')))}</td>"
+            f"<td>{html.escape(str(item.get('known_gap_count', 'n/a')))}</td>"
+            f"<td>{html.escape(str(item.get('failed_source_count', 'n/a')))}</td>"
+            f"<td>{_render_history_evidence_cell(item)}</td>"
+            "</tr>"
+        )
+
     recent_run_rows = ''.join(
-        "<tr class='operational-history-row' "
-        f"data-triage-tag='{html.escape(str(item.get('triage_tag', 'n/a')))}'>"
-        f"<td>{html.escape(str(item.get('run_id', 'n/a')))}</td>"
-        f"<td>{html.escape(str(item.get('recorded_at', 'n/a')))}</td>"
-        f"<td>{html.escape(str(item.get('run_status', 'n/a')))}</td>"
-        f"<td>{html.escape(str(item.get('pilot_set', 'n/a')))}</td>"
-        f"<td>{html.escape(str(item.get('country_set_id', 'n/a')))}</td>"
-        f"<td>{html.escape(_format_history_ratio(item.get('combined_ce_ratio')))}</td>"
-        f"<td>{html.escape(str(item.get('governance_verdict', 'n/a')))}</td>"
-        f"<td>{html.escape(str(item.get('policy_gate_verdict', 'n/a')))}</td>"
-        f"<td>{html.escape(str(item.get('release_verdict', 'n/a')))}</td>"
-        f"<td>{html.escape(str(item.get('readiness_interpretation', 'n/a')))}</td>"
-        f"<td>{html.escape(str(item.get('triage_tag', 'n/a')))}</td>"
-        f"<td>{html.escape(str(item.get('known_gap_count', 'n/a')))}</td>"
-        f"<td>{html.escape(str(item.get('failed_source_count', 'n/a')))}</td>"
-        f"<td>{_render_history_evidence_cell(item)}</td>"
-        "</tr>"
+        _render_recent_run_row(item)
         for item in recent_run_items
-    ) or "<tr><td colspan='14'>No operational history available.</td></tr>"
+    ) or "<tr><td colspan='15'>No operational history available.</td></tr>"
     operational_history_filter_script = """
 <script>
 (function() {
@@ -3076,7 +3105,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         "</div>"
         f"<p>Triage tag counts: <strong id='operational-history-triage-counts'>{triage_tag_count_summary}</strong></p>"
         "<p>Visible triage counts: <strong id='operational-history-visible-triage-counts'>n/a</strong></p>"
-        "<table id='operational-evidence-history-table'><thead><tr><th>Run ID</th><th>Recorded At</th><th>Status</th><th>Pilot Set</th><th>Country Set</th><th>Combined C/E Ratio</th><th>Governance</th><th>Policy Gate</th><th>Release Verdict</th><th>Readiness Interpretation</th><th>Triage Tag</th><th>Known Gaps</th><th>Failed Sources</th><th>Evidence</th></tr></thead>"
+        "<table id='operational-evidence-history-table'><thead><tr><th>Run ID</th><th>Recorded At</th><th>Hours Behind Latest</th><th>Status</th><th>Pilot Set</th><th>Country Set</th><th>Combined C/E Ratio</th><th>Governance</th><th>Policy Gate</th><th>Release Verdict</th><th>Readiness Interpretation</th><th>Triage Tag</th><th>Known Gaps</th><th>Failed Sources</th><th>Evidence</th></tr></thead>"
         f"<tbody>{recent_run_rows}</tbody></table>{operational_history_filter_script}</div>"
     ) if latest_summary else ""
     _run_color = html.escape(_run_status_color(str(system_status_read_model.get('run_status', 'n/a'))))

@@ -1110,8 +1110,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "operational-evidence-history-table" in runs_html
     assert "operational-history-triage-filter" in runs_html
     assert "Recorded At" in runs_html
+    assert "Hours Behind Latest" in runs_html
     assert "2026-05-11T18:00:00Z" in runs_html
     assert "2026-05-10T18:00:00Z" in runs_html
+    assert ">0h<" in runs_html
+    assert ">24h<" in runs_html
     assert "All triage tags (2)" in runs_html
     assert "degraded_release_blocked (1)" in runs_html
     assert "ready_green (1)" in runs_html
