@@ -403,6 +403,19 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_latest_bundle_verification.py tests/unit/test_live_probe_policy_gate.py tests/unit/test_scheduler.py -q` passed
 
+### N1-WP-020
+Name:
+Add machine-readable visible-slice export for operational history so the exact currently visible archived-run slice can be downloaded as deterministic JSON, not only copied as prose summary.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now renders `operational-history-export-json` plus `operational-history-visible-payload`
+- new helpers `buildOperationalHistoryVisiblePayload()` and `exportOperationalHistoryVisiblePayload()` materialize the current visible rows as structured JSON with `visible_runs`, ordered `run_ids`, sorted `triage_counts`, and sorted `recency_counts`, then download it as `operational_history_visible_slice.json`
+- `applyOperationalHistoryTriageFilter()` now refreshes the machine-readable payload from the currently shown rows only, keeping it causally aligned with triage/recency/sort/search/preset state
+- `tests/unit/test_local_gui.py` now asserts the new export control IDs plus the payload/helper names
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/gui/local_app.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_latest_bundle_verification.py tests/unit/test_live_probe_policy_gate.py tests/unit/test_scheduler.py -q` passed
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 

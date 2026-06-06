@@ -1115,6 +1115,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "operational-history-reset" in runs_html
     assert "operational-history-copy-link" in runs_html
     assert "operational-history-copy-summary" in runs_html
+    assert "operational-history-export-json" in runs_html
     assert "operational-history-preset-blocked-review" in runs_html
     assert "operational-history-preset-latest-only" in runs_html
     assert "operational-history-preset-ready-green" in runs_html
@@ -1149,6 +1150,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Recency band counts: <strong id='operational-history-recency-counts'>last_24h: 1 | latest: 1</strong>" in runs_html
     assert "Active history filter state: <strong id='operational-history-active-state'>triage=all | recency=all | search=none | sort=latest-first</strong>" in runs_html
     assert "Visible slice summary: <strong id='operational-history-visible-summary'>visible_runs=0 | run_ids=none | triage=none | recency=none</strong>" in runs_html
+    assert "operational-history-visible-payload" in runs_html
+    assert "Visible slice payload" in runs_html
     assert "Visible triage counts: <strong id='operational-history-visible-triage-counts'>n/a</strong>" in runs_html
     assert "Visible recency counts: <strong id='operational-history-visible-recency-counts'>n/a</strong>" in runs_html
     assert "class='operational-history-row'" in runs_html
@@ -1169,7 +1172,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "applyOperationalHistoryStateFromHash" in runs_html
     assert "copyOperationalHistoryFilterLink" in runs_html
     assert "buildOperationalHistoryVisibleSummary" in runs_html
+    assert "buildOperationalHistoryVisiblePayload" in runs_html
     assert "copyOperationalHistoryVisibleSummary" in runs_html
+    assert "exportOperationalHistoryVisiblePayload" in runs_html
     assert "applyOperationalHistoryPreset" in runs_html
     assert "Preset applied: ${preset}." in runs_html
     assert "renderOperationalHistoryActiveState" in runs_html

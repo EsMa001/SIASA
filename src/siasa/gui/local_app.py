@@ -3091,7 +3091,9 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
   const copyLinkButton = document.getElementById('operational-history-copy-link');
   const presetButtons = Array.from(document.querySelectorAll('[data-operational-history-preset]'));
   const copySummaryButton = document.getElementById('operational-history-copy-summary');
+  const exportJsonButton = document.getElementById('operational-history-export-json');
   const visibleSummaryNode = document.getElementById('operational-history-visible-summary');
+  const visiblePayloadNode = document.getElementById('operational-history-visible-payload');
   const linkStatusNode = document.getElementById('operational-history-link-status');
   const activeStateSummary = document.getElementById('operational-history-active-state');
   const tableBody = document.querySelector('#operational-evidence-history-table tbody');
@@ -3248,6 +3250,15 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     return `visible_runs=${visibleRows.length} | run_ids=${runIds.join(', ') || 'none'} | triage=${triageSummary} | recency=${recencySummary}`;
   }
 
+  function buildOperationalHistoryVisiblePayload(visibleRows, triageCounts, recencyCounts) {
+    return {
+      visible_runs: visibleRows.length,
+      run_ids: visibleRows.map((row) => (row.children[0] ? row.children[0].textContent.trim() : 'n/a')).filter(Boolean),
+      triage_counts: Object.fromEntries(Object.entries(triageCounts).sort((a, b) => a[0].localeCompare(b[0]))),
+      recency_counts: Object.fromEntries(Object.entries(recencyCounts).sort((a, b) => a[0].localeCompare(b[0]))),
+    };
+  }
+
   async function copyOperationalHistoryVisibleSummary() {
     if (!visibleSummaryNode || !linkStatusNode) {
       return;
@@ -3261,6 +3272,24 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
       linkStatusNode.textContent = 'Visible summary copied.';
     } catch (_err) {
       linkStatusNode.textContent = 'Visible summary copy unavailable in this browser.';
+    }
+  }
+
+  function exportOperationalHistoryVisiblePayload() {
+    if (!visiblePayloadNode || !linkStatusNode) {
+      return;
+    }
+    const exportText = visiblePayloadNode.textContent || '{}';
+    try {
+      const blob = new Blob([exportText], { type: 'application/json' });
+      const exportLink = document.createElement('a');
+      exportLink.href = URL.createObjectURL(blob);
+      exportLink.download = 'operational_history_visible_slice.json';
+      exportLink.click();
+      URL.revokeObjectURL(exportLink.href);
+      linkStatusNode.textContent = 'Visible payload exported.';
+    } catch (_err) {
+      linkStatusNode.textContent = 'Visible payload export unavailable in this browser.';
     }
   }
 
@@ -3328,6 +3357,9 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     if (visibleSummaryNode) {
       visibleSummaryNode.textContent = buildOperationalHistoryVisibleSummary(visibleRows, triageCounts, recencyCounts);
     }
+    if (visiblePayloadNode) {
+      visiblePayloadNode.textContent = JSON.stringify(buildOperationalHistoryVisiblePayload(visibleRows, triageCounts, recencyCounts), null, 2);
+    }
   }
 
   if (triageFilter) triageFilter.addEventListener('change', applyOperationalHistoryTriageFilter);
@@ -3337,6 +3369,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
   if (resetButton) resetButton.addEventListener('click', () => resetOperationalHistoryFilters());
   if (copyLinkButton) copyLinkButton.addEventListener('click', copyOperationalHistoryFilterLink);
   if (copySummaryButton) copySummaryButton.addEventListener('click', copyOperationalHistoryVisibleSummary);
+  if (exportJsonButton) exportJsonButton.addEventListener('click', exportOperationalHistoryVisiblePayload);
   presetButtons.forEach((button) => button.addEventListener('click', () => applyOperationalHistoryPreset(button.getAttribute('data-operational-history-preset') || '')));
   const loadedFromHash = applyOperationalHistoryStateFromHash();
   if (loadedFromHash && linkStatusNode) {
@@ -3380,6 +3413,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         "<button type='button' id='operational-history-reset'>Reset</button> "
         "<button type='button' id='operational-history-copy-link'>Copy link</button> "
         "<button type='button' id='operational-history-copy-summary'>Copy visible summary</button> "
+        "<button type='button' id='operational-history-export-json'>Export visible JSON</button> "
         "<button type='button' id='operational-history-preset-blocked-review' data-operational-history-preset='blocked-review'>Blocked review</button> "
         "<button type='button' id='operational-history-preset-latest-only' data-operational-history-preset='latest-only'>Latest only</button> "
         "<button type='button' id='operational-history-preset-ready-green' data-operational-history-preset='ready-green'>Ready green</button> "
@@ -3391,6 +3425,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<p>Recency band counts: <strong id='operational-history-recency-counts'>{recency_band_count_summary}</strong></p>"
         "<p>Active history filter state: <strong id='operational-history-active-state'>triage=all | recency=all | search=none | sort=latest-first</strong></p>"
         "<p>Visible slice summary: <strong id='operational-history-visible-summary'>visible_runs=0 | run_ids=none | triage=none | recency=none</strong></p>"
+        "<details><summary>Visible slice payload</summary><pre id='operational-history-visible-payload'>{}</pre></details>"
         "<p>Visible triage counts: <strong id='operational-history-visible-triage-counts'>n/a</strong></p>"
         "<p>Visible recency counts: <strong id='operational-history-visible-recency-counts'>n/a</strong></p>"
         "<table id='operational-evidence-history-table'><thead><tr><th>Run ID</th><th>Recorded At</th><th>Hours Behind Latest</th><th>Status</th><th>Pilot Set</th><th>Country Set</th><th>Combined C/E Ratio</th><th>Governance</th><th>Policy Gate</th><th>Release Verdict</th><th>Readiness Interpretation</th><th>Triage Tag</th><th>Known Gaps</th><th>Failed Sources</th><th>Evidence</th></tr></thead>"
