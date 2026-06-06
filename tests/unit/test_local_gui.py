@@ -1114,7 +1114,19 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "operational-history-text-filter" in runs_html
     assert "operational-history-reset" in runs_html
     assert "operational-history-copy-link" in runs_html
+    assert "operational-history-preset-blocked-review" in runs_html
+    assert "operational-history-preset-latest-only" in runs_html
+    assert "operational-history-preset-ready-green" in runs_html
+    assert "operational-history-preset-oldest-audit" in runs_html
+    assert "data-operational-history-preset='blocked-review'" in runs_html
+    assert "data-operational-history-preset='latest-only'" in runs_html
+    assert "data-operational-history-preset='ready-green'" in runs_html
+    assert "data-operational-history-preset='oldest-audit'" in runs_html
     assert "operational-history-link-status" in runs_html
+    assert "Blocked review" in runs_html
+    assert "Latest only" in runs_html
+    assert "Ready green" in runs_html
+    assert "Oldest audit" in runs_html
     assert "Latest first" in runs_html
     assert "Oldest first" in runs_html
     assert "Triage tag (A-Z)" in runs_html
@@ -1154,6 +1166,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "persistOperationalHistoryStateToHash" in runs_html
     assert "applyOperationalHistoryStateFromHash" in runs_html
     assert "copyOperationalHistoryFilterLink" in runs_html
+    assert "applyOperationalHistoryPreset" in runs_html
+    assert "Preset applied: ${preset}." in runs_html
     assert "renderOperationalHistoryActiveState" in runs_html
     assert "resetOperationalHistoryFilters" in runs_html
     assert "oh_triage" in runs_html

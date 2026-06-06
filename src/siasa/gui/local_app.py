@@ -3089,6 +3089,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
   const textFilter = document.getElementById('operational-history-text-filter');
   const resetButton = document.getElementById('operational-history-reset');
   const copyLinkButton = document.getElementById('operational-history-copy-link');
+  const presetButtons = Array.from(document.querySelectorAll('[data-operational-history-preset]'));
   const linkStatusNode = document.getElementById('operational-history-link-status');
   const activeStateSummary = document.getElementById('operational-history-active-state');
   const tableBody = document.querySelector('#operational-evidence-history-table tbody');
@@ -3139,6 +3140,38 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     if (sortControl) sortControl.value = 'latest-first';
     if (textFilter) textFilter.value = '';
     applyOperationalHistoryTriageFilter({persistHash});
+  }
+
+  function applyOperationalHistoryPreset(presetId) {
+    const preset = (presetId || '').trim().toLowerCase();
+    if (preset === 'blocked-review') {
+      if (triageFilter) triageFilter.value = 'degraded_release_blocked';
+      if (recencyFilter) recencyFilter.value = 'all';
+      if (sortControl) sortControl.value = 'latest-first';
+      if (textFilter) textFilter.value = '';
+    } else if (preset === 'latest-only') {
+      if (triageFilter) triageFilter.value = 'all';
+      if (recencyFilter) recencyFilter.value = 'latest';
+      if (sortControl) sortControl.value = 'latest-first';
+      if (textFilter) textFilter.value = '';
+    } else if (preset === 'ready-green') {
+      if (triageFilter) triageFilter.value = 'ready_green';
+      if (recencyFilter) recencyFilter.value = 'all';
+      if (sortControl) sortControl.value = 'latest-first';
+      if (textFilter) textFilter.value = '';
+    } else if (preset === 'oldest-audit') {
+      if (triageFilter) triageFilter.value = 'all';
+      if (recencyFilter) recencyFilter.value = 'all';
+      if (sortControl) sortControl.value = 'oldest-first';
+      if (textFilter) textFilter.value = '';
+    } else {
+      resetOperationalHistoryFilters();
+      return;
+    }
+    if (linkStatusNode) {
+      linkStatusNode.textContent = `Preset applied: ${preset}.`;
+    }
+    applyOperationalHistoryTriageFilter();
   }
 
   function serializeOperationalHistoryState(state) {
@@ -3267,6 +3300,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
   if (textFilter) textFilter.addEventListener('input', applyOperationalHistoryTriageFilter);
   if (resetButton) resetButton.addEventListener('click', () => resetOperationalHistoryFilters());
   if (copyLinkButton) copyLinkButton.addEventListener('click', copyOperationalHistoryFilterLink);
+  presetButtons.forEach((button) => button.addEventListener('click', () => applyOperationalHistoryPreset(button.getAttribute('data-operational-history-preset') || '')));
   const loadedFromHash = applyOperationalHistoryStateFromHash();
   if (loadedFromHash && linkStatusNode) {
     linkStatusNode.textContent = 'History view loaded from link.';
@@ -3308,6 +3342,10 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         "<input id='operational-history-text-filter' type='search' placeholder='run id, pilot set, triage, handoff'> "
         "<button type='button' id='operational-history-reset'>Reset</button> "
         "<button type='button' id='operational-history-copy-link'>Copy link</button> "
+        "<button type='button' id='operational-history-preset-blocked-review' data-operational-history-preset='blocked-review'>Blocked review</button> "
+        "<button type='button' id='operational-history-preset-latest-only' data-operational-history-preset='latest-only'>Latest only</button> "
+        "<button type='button' id='operational-history-preset-ready-green' data-operational-history-preset='ready-green'>Ready green</button> "
+        "<button type='button' id='operational-history-preset-oldest-audit' data-operational-history-preset='oldest-audit'>Oldest audit</button> "
         "<span id='operational-history-link-status' style='font-size:0.85em;color:#9fb3d9;'></span> "
         f"<span>Visible runs: <strong id='operational-history-visible-count'>{html.escape(str(len(recent_run_items)))}</strong></span>"
         "</div>"

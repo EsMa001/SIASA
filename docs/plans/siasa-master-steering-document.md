@@ -377,6 +377,19 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_latest_bundle_verification.py tests/unit/test_live_probe_policy_gate.py tests/unit/test_scheduler.py -q` passed
 
+### N1-WP-018
+Name:
+Add preset quick-link review modes for operational history so common audit intents can be reached in one click instead of being rebuilt manually from triage/recency/sort controls.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now renders preset buttons `operational-history-preset-blocked-review`, `operational-history-preset-latest-only`, `operational-history-preset-ready-green`, and `operational-history-preset-oldest-audit`
+- new helper `applyOperationalHistoryPreset()` deterministically maps each preset onto the existing triage/recency/sort/text controls and reuses the existing share-hash flow
+- preset application now surfaces explicit status text via `operational-history-link-status`, so operator handoff feedback is visible even before copying a link
+- `tests/unit/test_local_gui.py` now asserts the preset control IDs, `data-operational-history-preset` markers, button labels, and `applyOperationalHistoryPreset()` hook
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/gui/local_app.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_latest_bundle_verification.py tests/unit/test_live_probe_policy_gate.py tests/unit/test_scheduler.py -q` passed
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 
