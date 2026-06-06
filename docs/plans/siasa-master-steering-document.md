@@ -390,6 +390,19 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_latest_bundle_verification.py tests/unit/test_live_probe_policy_gate.py tests/unit/test_scheduler.py -q` passed
 
+### N1-WP-019
+Name:
+Add visible-slice handoff summary export for operational history so the exact currently visible archived-run slice can be copied as one compact deterministic summary.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now renders `operational-history-visible-summary` plus `operational-history-copy-summary` in the runs-view control block
+- new helpers `buildOperationalHistoryVisibleSummary()` and `copyOperationalHistoryVisibleSummary()` summarize the currently visible rows as deterministic `visible_runs / run_ids / triage / recency` text and make it directly copyable
+- `applyOperationalHistoryTriageFilter()` now recomputes the visible-slice handoff summary from the currently shown rows only, keeping the summary causally aligned with triage/recency/sort/search/preset state
+- `tests/unit/test_local_gui.py` now asserts the new visible-summary control IDs and helper names
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/gui/local_app.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_latest_bundle_verification.py tests/unit/test_live_probe_policy_gate.py tests/unit/test_scheduler.py -q` passed
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 

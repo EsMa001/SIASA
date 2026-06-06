@@ -3090,6 +3090,8 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
   const resetButton = document.getElementById('operational-history-reset');
   const copyLinkButton = document.getElementById('operational-history-copy-link');
   const presetButtons = Array.from(document.querySelectorAll('[data-operational-history-preset]'));
+  const copySummaryButton = document.getElementById('operational-history-copy-summary');
+  const visibleSummaryNode = document.getElementById('operational-history-visible-summary');
   const linkStatusNode = document.getElementById('operational-history-link-status');
   const activeStateSummary = document.getElementById('operational-history-active-state');
   const tableBody = document.querySelector('#operational-evidence-history-table tbody');
@@ -3233,6 +3235,35 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     }
   }
 
+  function buildOperationalHistoryVisibleSummary(visibleRows, triageCounts, recencyCounts) {
+    const runIds = visibleRows.map((row) => (row.children[0] ? row.children[0].textContent.trim() : 'n/a')).filter(Boolean);
+    const triageSummary = Object.entries(triageCounts)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([tag, count]) => `${tag}:${count}`)
+      .join(', ') || 'none';
+    const recencySummary = Object.entries(recencyCounts)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([band, count]) => `${band}:${count}`)
+      .join(', ') || 'none';
+    return `visible_runs=${visibleRows.length} | run_ids=${runIds.join(', ') || 'none'} | triage=${triageSummary} | recency=${recencySummary}`;
+  }
+
+  async function copyOperationalHistoryVisibleSummary() {
+    if (!visibleSummaryNode || !linkStatusNode) {
+      return;
+    }
+    const summaryText = (visibleSummaryNode.textContent || '').trim();
+    try {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) {
+        throw new Error('clipboard_unavailable');
+      }
+      await navigator.clipboard.writeText(summaryText);
+      linkStatusNode.textContent = 'Visible summary copied.';
+    } catch (_err) {
+      linkStatusNode.textContent = 'Visible summary copy unavailable in this browser.';
+    }
+  }
+
   function getOperationalHistoryState() {
     return {
       triage: (triageFilter ? triageFilter.value : 'all').trim().toLowerCase(),
@@ -3251,6 +3282,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     const sortMode = state.sort;
     const triageCounts = {};
     const recencyCounts = {};
+    const visibleRows = [];
     let visible = 0;
 
     rows.forEach((row) => {
@@ -3264,6 +3296,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
       row.style.display = show ? '' : 'none';
       if (show) {
         visible += 1;
+        visibleRows.push(row);
         triageCounts[rowTag] = (triageCounts[rowTag] || 0) + 1;
         recencyCounts[rowRecency] = (recencyCounts[rowRecency] || 0) + 1;
       }
@@ -3292,6 +3325,9 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         .join(' | ');
       visibleRecencySummary.textContent = summary || 'none';
     }
+    if (visibleSummaryNode) {
+      visibleSummaryNode.textContent = buildOperationalHistoryVisibleSummary(visibleRows, triageCounts, recencyCounts);
+    }
   }
 
   if (triageFilter) triageFilter.addEventListener('change', applyOperationalHistoryTriageFilter);
@@ -3300,6 +3336,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
   if (textFilter) textFilter.addEventListener('input', applyOperationalHistoryTriageFilter);
   if (resetButton) resetButton.addEventListener('click', () => resetOperationalHistoryFilters());
   if (copyLinkButton) copyLinkButton.addEventListener('click', copyOperationalHistoryFilterLink);
+  if (copySummaryButton) copySummaryButton.addEventListener('click', copyOperationalHistoryVisibleSummary);
   presetButtons.forEach((button) => button.addEventListener('click', () => applyOperationalHistoryPreset(button.getAttribute('data-operational-history-preset') || '')));
   const loadedFromHash = applyOperationalHistoryStateFromHash();
   if (loadedFromHash && linkStatusNode) {
@@ -3342,6 +3379,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         "<input id='operational-history-text-filter' type='search' placeholder='run id, pilot set, triage, handoff'> "
         "<button type='button' id='operational-history-reset'>Reset</button> "
         "<button type='button' id='operational-history-copy-link'>Copy link</button> "
+        "<button type='button' id='operational-history-copy-summary'>Copy visible summary</button> "
         "<button type='button' id='operational-history-preset-blocked-review' data-operational-history-preset='blocked-review'>Blocked review</button> "
         "<button type='button' id='operational-history-preset-latest-only' data-operational-history-preset='latest-only'>Latest only</button> "
         "<button type='button' id='operational-history-preset-ready-green' data-operational-history-preset='ready-green'>Ready green</button> "
@@ -3352,6 +3390,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<p>Triage tag counts: <strong id='operational-history-triage-counts'>{triage_tag_count_summary}</strong></p>"
         f"<p>Recency band counts: <strong id='operational-history-recency-counts'>{recency_band_count_summary}</strong></p>"
         "<p>Active history filter state: <strong id='operational-history-active-state'>triage=all | recency=all | search=none | sort=latest-first</strong></p>"
+        "<p>Visible slice summary: <strong id='operational-history-visible-summary'>visible_runs=0 | run_ids=none | triage=none | recency=none</strong></p>"
         "<p>Visible triage counts: <strong id='operational-history-visible-triage-counts'>n/a</strong></p>"
         "<p>Visible recency counts: <strong id='operational-history-visible-recency-counts'>n/a</strong></p>"
         "<table id='operational-evidence-history-table'><thead><tr><th>Run ID</th><th>Recorded At</th><th>Hours Behind Latest</th><th>Status</th><th>Pilot Set</th><th>Country Set</th><th>Combined C/E Ratio</th><th>Governance</th><th>Policy Gate</th><th>Release Verdict</th><th>Readiness Interpretation</th><th>Triage Tag</th><th>Known Gaps</th><th>Failed Sources</th><th>Evidence</th></tr></thead>"
