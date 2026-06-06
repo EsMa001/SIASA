@@ -416,6 +416,18 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_latest_bundle_verification.py tests/unit/test_live_probe_policy_gate.py tests/unit/test_scheduler.py -q` passed
 
+### N1-WP-021
+Name:
+Add row-level metadata to the visible-slice JSON export so downstream review can consume the exact currently visible operational-history rows without reopening the HTML table.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now extends `buildOperationalHistoryVisiblePayload()` with deterministic `rows[]` entries carrying `run_id`, `recorded_at`, `hours_behind_latest`, `run_status`, `pilot_set`, `country_set_id`, `combined_ce_ratio`, `governance_verdict`, `policy_gate_verdict`, `release_verdict`, `readiness_interpretation`, `triage_tag`, `known_gap_count`, and `failed_source_count`
+- the visible-slice JSON export therefore now carries both aggregate slice counts and the concrete per-run metadata rows for the currently shown slice
+- `tests/unit/test_local_gui.py` now asserts the new row-level payload field names in generated `runs.html`
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/gui/local_app.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_latest_bundle_verification.py tests/unit/test_live_probe_policy_gate.py tests/unit/test_scheduler.py -q` passed
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 

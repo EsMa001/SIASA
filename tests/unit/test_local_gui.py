@@ -1173,6 +1173,23 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "copyOperationalHistoryFilterLink" in runs_html
     assert "buildOperationalHistoryVisibleSummary" in runs_html
     assert "buildOperationalHistoryVisiblePayload" in runs_html
+    assert "visible_runs" in runs_html
+    assert "run_ids" in runs_html
+    assert "triage_counts" in runs_html
+    assert "recency_counts" in runs_html
+    assert "recorded_at" in runs_html
+    assert "hours_behind_latest" in runs_html
+    assert "run_status" in runs_html
+    assert "pilot_set" in runs_html
+    assert "country_set_id" in runs_html
+    assert "combined_ce_ratio" in runs_html
+    assert "governance_verdict" in runs_html
+    assert "policy_gate_verdict" in runs_html
+    assert "release_verdict" in runs_html
+    assert "readiness_interpretation" in runs_html
+    assert "triage_tag" in runs_html
+    assert "known_gap_count" in runs_html
+    assert "failed_source_count" in runs_html
     assert "copyOperationalHistoryVisibleSummary" in runs_html
     assert "exportOperationalHistoryVisiblePayload" in runs_html
     assert "applyOperationalHistoryPreset" in runs_html

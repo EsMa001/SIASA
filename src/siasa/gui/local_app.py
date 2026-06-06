@@ -3256,6 +3256,22 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
       run_ids: visibleRows.map((row) => (row.children[0] ? row.children[0].textContent.trim() : 'n/a')).filter(Boolean),
       triage_counts: Object.fromEntries(Object.entries(triageCounts).sort((a, b) => a[0].localeCompare(b[0]))),
       recency_counts: Object.fromEntries(Object.entries(recencyCounts).sort((a, b) => a[0].localeCompare(b[0]))),
+      rows: visibleRows.map((row) => ({
+        run_id: row.children[0] ? row.children[0].textContent.trim() : 'n/a',
+        recorded_at: row.children[1] ? row.children[1].textContent.trim() : 'n/a',
+        hours_behind_latest: row.children[2] ? row.children[2].textContent.trim() : 'n/a',
+        run_status: row.children[3] ? row.children[3].textContent.trim() : 'n/a',
+        pilot_set: row.children[4] ? row.children[4].textContent.trim() : 'n/a',
+        country_set_id: row.children[5] ? row.children[5].textContent.trim() : 'n/a',
+        combined_ce_ratio: row.children[6] ? row.children[6].textContent.trim() : 'n/a',
+        governance_verdict: row.children[7] ? row.children[7].textContent.trim() : 'n/a',
+        policy_gate_verdict: row.children[8] ? row.children[8].textContent.trim() : 'n/a',
+        release_verdict: row.children[9] ? row.children[9].textContent.trim() : 'n/a',
+        readiness_interpretation: row.children[10] ? row.children[10].textContent.trim() : 'n/a',
+        triage_tag: row.children[11] ? row.children[11].textContent.trim() : 'n/a',
+        known_gap_count: row.children[12] ? row.children[12].textContent.trim() : 'n/a',
+        failed_source_count: row.children[13] ? row.children[13].textContent.trim() : 'n/a',
+      })),
     };
   }
 
