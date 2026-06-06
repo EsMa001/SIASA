@@ -3088,8 +3088,11 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
   const sortControl = document.getElementById('operational-history-sort');
   const textFilter = document.getElementById('operational-history-text-filter');
   const resetButton = document.getElementById('operational-history-reset');
+  const copyLinkButton = document.getElementById('operational-history-copy-link');
+  const linkStatusNode = document.getElementById('operational-history-link-status');
   const activeStateSummary = document.getElementById('operational-history-active-state');
   const tableBody = document.querySelector('#operational-evidence-history-table tbody');
+  const hashPrefix = 'oh=';
   const rows = Array.from(document.querySelectorAll('.operational-history-row'));
   const visibleCount = document.getElementById('operational-history-visible-count');
   const visibleTriageSummary = document.getElementById('operational-history-visible-triage-counts');
@@ -3129,19 +3132,90 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     activeStateSummary.textContent = stateParts.join(' | ');
   }
 
-  function resetOperationalHistoryFilters() {
+  function resetOperationalHistoryFilters(options) {
+    const persistHash = !options || options.persistHash !== false;
     if (triageFilter) triageFilter.value = 'all';
     if (recencyFilter) recencyFilter.value = 'all';
     if (sortControl) sortControl.value = 'latest-first';
     if (textFilter) textFilter.value = '';
-    applyOperationalHistoryTriageFilter();
+    applyOperationalHistoryTriageFilter({persistHash});
   }
 
-  function applyOperationalHistoryTriageFilter() {
-    const selectedTag = (triageFilter ? triageFilter.value : 'all').trim().toLowerCase();
-    const selectedRecency = (recencyFilter ? recencyFilter.value : 'all').trim().toLowerCase();
-    const searchText = (textFilter ? textFilter.value : '').trim().toLowerCase();
-    const sortMode = (sortControl ? sortControl.value : 'latest-first').trim().toLowerCase();
+  function serializeOperationalHistoryState(state) {
+    const params = new URLSearchParams();
+    if (state.triage && state.triage !== 'all') { params.set('oh_triage', state.triage); }
+    if (state.recency && state.recency !== 'all') { params.set('oh_recency', state.recency); }
+    if (state.sort && state.sort !== 'latest-first') { params.set('oh_sort', state.sort); }
+    if (state.text) { params.set('oh_text', state.text); }
+    return params.toString();
+  }
+
+  function persistOperationalHistoryStateToHash(state) {
+    const encoded = serializeOperationalHistoryState(state);
+    const base = `${window.location.pathname}${window.location.search}`;
+    if (!encoded) {
+      window.history.replaceState(null, '', base);
+      return;
+    }
+    window.history.replaceState(null, '', `${base}#${hashPrefix}${encoded}`);
+  }
+
+  function applyOperationalHistoryStateFromHash() {
+    const rawHash = window.location.hash || '';
+    if (!rawHash.startsWith(`#${hashPrefix}`)) {
+      return false;
+    }
+    try {
+      const params = new URLSearchParams(rawHash.slice(hashPrefix.length + 1));
+      const triage = params.get('oh_triage');
+      const recency = params.get('oh_recency');
+      const sort = params.get('oh_sort');
+      const text = params.get('oh_text');
+      if (triage && triageFilter) { triageFilter.value = triage; }
+      if (recency && recencyFilter) { recencyFilter.value = recency; }
+      if (sort && sortControl) { sortControl.value = sort; }
+      if (text && textFilter) { textFilter.value = text; }
+      return true;
+    } catch (_err) {
+      return false;
+    }
+  }
+
+  async function copyOperationalHistoryFilterLink() {
+    const state = getOperationalHistoryState();
+    const encoded = serializeOperationalHistoryState(state);
+    const baseUrl = `${window.location.origin}${window.location.pathname}${window.location.search}`;
+    const shareUrl = encoded ? `${baseUrl}#${hashPrefix}${encoded}` : baseUrl;
+    if (!linkStatusNode) {
+      return;
+    }
+    try {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) {
+        throw new Error('clipboard_unavailable');
+      }
+      await navigator.clipboard.writeText(shareUrl);
+      linkStatusNode.textContent = 'History link copied.';
+    } catch (_err) {
+      linkStatusNode.textContent = 'History link copy unavailable in this browser.';
+    }
+  }
+
+  function getOperationalHistoryState() {
+    return {
+      triage: (triageFilter ? triageFilter.value : 'all').trim().toLowerCase(),
+      recency: (recencyFilter ? recencyFilter.value : 'all').trim().toLowerCase(),
+      sort: (sortControl ? sortControl.value : 'latest-first').trim().toLowerCase(),
+      text: (textFilter ? textFilter.value : '').trim(),
+    };
+  }
+
+  function applyOperationalHistoryTriageFilter(options) {
+    const persistHash = !options || options.persistHash !== false;
+    const state = getOperationalHistoryState();
+    const selectedTag = state.triage;
+    const selectedRecency = state.recency;
+    const searchText = state.text.toLowerCase();
+    const sortMode = state.sort;
     const triageCounts = {};
     const recencyCounts = {};
     let visible = 0;
@@ -3164,6 +3238,9 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
 
     sortOperationalHistoryRows();
     renderOperationalHistoryActiveState(selectedTag, selectedRecency, searchText, sortMode);
+    if (persistHash) {
+      persistOperationalHistoryStateToHash(state);
+    }
 
     if (visibleCount) {
       visibleCount.textContent = String(visible);
@@ -3188,8 +3265,13 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
   if (recencyFilter) recencyFilter.addEventListener('change', applyOperationalHistoryTriageFilter);
   if (sortControl) sortControl.addEventListener('change', applyOperationalHistoryTriageFilter);
   if (textFilter) textFilter.addEventListener('input', applyOperationalHistoryTriageFilter);
-  if (resetButton) resetButton.addEventListener('click', resetOperationalHistoryFilters);
-  applyOperationalHistoryTriageFilter();
+  if (resetButton) resetButton.addEventListener('click', () => resetOperationalHistoryFilters());
+  if (copyLinkButton) copyLinkButton.addEventListener('click', copyOperationalHistoryFilterLink);
+  const loadedFromHash = applyOperationalHistoryStateFromHash();
+  if (loadedFromHash && linkStatusNode) {
+    linkStatusNode.textContent = 'History view loaded from link.';
+  }
+  applyOperationalHistoryTriageFilter({persistHash:false});
 })();
 </script>
 """
@@ -3225,6 +3307,8 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         "<label for='operational-history-text-filter'>Search:</label> "
         "<input id='operational-history-text-filter' type='search' placeholder='run id, pilot set, triage, handoff'> "
         "<button type='button' id='operational-history-reset'>Reset</button> "
+        "<button type='button' id='operational-history-copy-link'>Copy link</button> "
+        "<span id='operational-history-link-status' style='font-size:0.85em;color:#9fb3d9;'></span> "
         f"<span>Visible runs: <strong id='operational-history-visible-count'>{html.escape(str(len(recent_run_items)))}</strong></span>"
         "</div>"
         f"<p>Triage tag counts: <strong id='operational-history-triage-counts'>{triage_tag_count_summary}</strong></p>"

@@ -364,6 +364,19 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` (`1 passed in 1.97s`)
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_latest_bundle_verification.py tests/unit/test_live_probe_policy_gate.py tests/unit/test_scheduler.py -q` (`24 passed in 0.24s`)
 
+### N1-WP-017
+Name:
+Add shareable hash-state links for operational-history review controls so an operator can hand off the exact triage/recency/sort/search slice as one reproducible URL.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now renders `operational-history-copy-link` plus `operational-history-link-status` in the runs-view control bar
+- the history filter block now supports `getOperationalHistoryState()`, `serializeOperationalHistoryState()`, `persistOperationalHistoryStateToHash()`, `applyOperationalHistoryStateFromHash()`, and `copyOperationalHistoryFilterLink()` with deterministic `#oh=` state covering triage, recency, sort, and free-text search
+- `resetOperationalHistoryFilters()` now clears both control state and the hash-backed share state deterministically, while initial page load restores any incoming `#oh=` slice before applying the combined filter logic
+- `tests/unit/test_local_gui.py` now asserts the new copy-link controls plus the hash-state function names and query keys (`oh_triage`, `oh_recency`, `oh_sort`, `oh_text`)
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/gui/local_app.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_latest_bundle_verification.py tests/unit/test_live_probe_policy_gate.py tests/unit/test_scheduler.py -q` passed
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 

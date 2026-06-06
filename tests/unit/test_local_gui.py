@@ -1113,6 +1113,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "operational-history-sort" in runs_html
     assert "operational-history-text-filter" in runs_html
     assert "operational-history-reset" in runs_html
+    assert "operational-history-copy-link" in runs_html
+    assert "operational-history-link-status" in runs_html
     assert "Latest first" in runs_html
     assert "Oldest first" in runs_html
     assert "Triage tag (A-Z)" in runs_html
@@ -1147,8 +1149,17 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "data-recorded-at='2026-05-10T18:00:00Z'" in runs_html
     assert "applyOperationalHistoryTriageFilter" in runs_html
     assert "sortOperationalHistoryRows" in runs_html
+    assert "getOperationalHistoryState" in runs_html
+    assert "serializeOperationalHistoryState" in runs_html
+    assert "persistOperationalHistoryStateToHash" in runs_html
+    assert "applyOperationalHistoryStateFromHash" in runs_html
+    assert "copyOperationalHistoryFilterLink" in runs_html
     assert "renderOperationalHistoryActiveState" in runs_html
     assert "resetOperationalHistoryFilters" in runs_html
+    assert "oh_triage" in runs_html
+    assert "oh_recency" in runs_html
+    assert "oh_sort" in runs_html
+    assert "oh_text" in runs_html
     assert "operational-history-visible-triage-counts" in runs_html
     assert "operational-history-visible-recency-counts" in runs_html
     assert "Repo Closure Summary" in runs_html
