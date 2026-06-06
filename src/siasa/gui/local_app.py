@@ -3033,12 +3033,31 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
             hours_behind_latest = f"{max(0, int((latest_history_timestamp - parsed_recorded_at).total_seconds() // 3600))}h"
         else:
             hours_behind_latest = 'n/a'
+        history_search_text = ' '.join(
+            str(value).strip()
+            for value in (
+                item.get('run_id', ''),
+                item.get('recorded_at', ''),
+                item.get('run_status', ''),
+                item.get('pilot_set', ''),
+                item.get('country_set_id', ''),
+                item.get('governance_verdict', ''),
+                item.get('policy_gate_verdict', ''),
+                item.get('release_verdict', ''),
+                item.get('readiness_interpretation', ''),
+                item.get('triage_tag', ''),
+                item.get('triage_summary', ''),
+                item.get('handoff_summary', ''),
+            )
+            if str(value).strip()
+        ).lower()
         return (
             "<tr class='operational-history-row' "
             f"data-triage-tag='{html.escape(str(item.get('triage_tag', 'n/a')))}' "
             f"data-recency-band='{html.escape(recency_band)}' "
             f"data-recorded-at='{html.escape(str(item.get('recorded_at', 'n/a')))}' "
-            f"data-hours-behind-latest='{html.escape(hours_behind_latest.replace('h', '')) if hours_behind_latest.endswith('h') else html.escape(hours_behind_latest)}'>"
+            f"data-hours-behind-latest='{html.escape(hours_behind_latest.replace('h', '')) if hours_behind_latest.endswith('h') else html.escape(hours_behind_latest)}' "
+            f"data-history-search-text='{html.escape(history_search_text)}'>"
             f"<td>{html.escape(str(item.get('run_id', 'n/a')))}</td>"
             f"<td>{html.escape(str(item.get('recorded_at', 'n/a')))}</td>"
             f"<td>{html.escape(hours_behind_latest)}</td>"
@@ -3067,6 +3086,9 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
   const triageFilter = document.getElementById('operational-history-triage-filter');
   const recencyFilter = document.getElementById('operational-history-recency-filter');
   const sortControl = document.getElementById('operational-history-sort');
+  const textFilter = document.getElementById('operational-history-text-filter');
+  const resetButton = document.getElementById('operational-history-reset');
+  const activeStateSummary = document.getElementById('operational-history-active-state');
   const tableBody = document.querySelector('#operational-evidence-history-table tbody');
   const rows = Array.from(document.querySelectorAll('.operational-history-row'));
   const visibleCount = document.getElementById('operational-history-visible-count');
@@ -3093,9 +3115,33 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     }
   }
 
+  function renderOperationalHistoryActiveState(selectedTag, selectedRecency, searchText, sortMode) {
+    if (!activeStateSummary) {
+      return;
+    }
+    const normalizedSearch = (searchText || '').trim().toLowerCase();
+    const stateParts = [
+      `triage=${selectedTag || 'all'}`,
+      `recency=${selectedRecency || 'all'}`,
+      `search=${normalizedSearch || 'none'}`,
+      `sort=${sortMode || 'latest-first'}`,
+    ];
+    activeStateSummary.textContent = stateParts.join(' | ');
+  }
+
+  function resetOperationalHistoryFilters() {
+    if (triageFilter) triageFilter.value = 'all';
+    if (recencyFilter) recencyFilter.value = 'all';
+    if (sortControl) sortControl.value = 'latest-first';
+    if (textFilter) textFilter.value = '';
+    applyOperationalHistoryTriageFilter();
+  }
+
   function applyOperationalHistoryTriageFilter() {
     const selectedTag = (triageFilter ? triageFilter.value : 'all').trim().toLowerCase();
     const selectedRecency = (recencyFilter ? recencyFilter.value : 'all').trim().toLowerCase();
+    const searchText = (textFilter ? textFilter.value : '').trim().toLowerCase();
+    const sortMode = (sortControl ? sortControl.value : 'latest-first').trim().toLowerCase();
     const triageCounts = {};
     const recencyCounts = {};
     let visible = 0;
@@ -3103,7 +3149,11 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     rows.forEach((row) => {
       const rowTag = (row.getAttribute('data-triage-tag') || 'n/a').trim().toLowerCase();
       const rowRecency = (row.getAttribute('data-recency-band') || 'n/a').trim().toLowerCase();
-      const show = (selectedTag === 'all' || rowTag === selectedTag) && (selectedRecency === 'all' || rowRecency === selectedRecency);
+      const rowSearchText = (row.getAttribute('data-history-search-text') || '').trim().toLowerCase();
+      const matchesText = !searchText || rowSearchText.includes(searchText);
+      const show = (selectedTag === 'all' || rowTag === selectedTag)
+        && (selectedRecency === 'all' || rowRecency === selectedRecency)
+        && matchesText;
       row.style.display = show ? '' : 'none';
       if (show) {
         visible += 1;
@@ -3113,6 +3163,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     });
 
     sortOperationalHistoryRows();
+    renderOperationalHistoryActiveState(selectedTag, selectedRecency, searchText, sortMode);
 
     if (visibleCount) {
       visibleCount.textContent = String(visible);
@@ -3136,6 +3187,8 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
   if (triageFilter) triageFilter.addEventListener('change', applyOperationalHistoryTriageFilter);
   if (recencyFilter) recencyFilter.addEventListener('change', applyOperationalHistoryTriageFilter);
   if (sortControl) sortControl.addEventListener('change', applyOperationalHistoryTriageFilter);
+  if (textFilter) textFilter.addEventListener('input', applyOperationalHistoryTriageFilter);
+  if (resetButton) resetButton.addEventListener('click', resetOperationalHistoryFilters);
   applyOperationalHistoryTriageFilter();
 })();
 </script>
@@ -3169,10 +3222,14 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<select id='operational-history-recency-filter'><option value='all'>All recency bands ({html.escape(str(len(recent_run_items)))})</option>{recency_band_options}</select> "
         "<label for='operational-history-sort'>Sort:</label> "
         "<select id='operational-history-sort'><option value='latest-first'>Latest first</option><option value='oldest-first'>Oldest first</option><option value='triage-tag-asc'>Triage tag (A-Z)</option></select> "
+        "<label for='operational-history-text-filter'>Search:</label> "
+        "<input id='operational-history-text-filter' type='search' placeholder='run id, pilot set, triage, handoff'> "
+        "<button type='button' id='operational-history-reset'>Reset</button> "
         f"<span>Visible runs: <strong id='operational-history-visible-count'>{html.escape(str(len(recent_run_items)))}</strong></span>"
         "</div>"
         f"<p>Triage tag counts: <strong id='operational-history-triage-counts'>{triage_tag_count_summary}</strong></p>"
         f"<p>Recency band counts: <strong id='operational-history-recency-counts'>{recency_band_count_summary}</strong></p>"
+        "<p>Active history filter state: <strong id='operational-history-active-state'>triage=all | recency=all | search=none | sort=latest-first</strong></p>"
         "<p>Visible triage counts: <strong id='operational-history-visible-triage-counts'>n/a</strong></p>"
         "<p>Visible recency counts: <strong id='operational-history-visible-recency-counts'>n/a</strong></p>"
         "<table id='operational-evidence-history-table'><thead><tr><th>Run ID</th><th>Recorded At</th><th>Hours Behind Latest</th><th>Status</th><th>Pilot Set</th><th>Country Set</th><th>Combined C/E Ratio</th><th>Governance</th><th>Policy Gate</th><th>Release Verdict</th><th>Readiness Interpretation</th><th>Triage Tag</th><th>Known Gaps</th><th>Failed Sources</th><th>Evidence</th></tr></thead>"

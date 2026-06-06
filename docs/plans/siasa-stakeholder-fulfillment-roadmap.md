@@ -118,13 +118,13 @@ Current repo-evidenced status on branch `hermes/repo-scaffold`:
   - source-dependency cluster candidates and explicit source-origin groundwork are now visible in the traceability view
 - project-lead fulfillment steering is now explicit and reproducible:
   - new functional stakeholder-fulfillment estimator is available in code (`src/siasa/readmodels/functional_fulfillment.py`) with unit tests
-  - default weighted steering estimate from the current capability matrix is now `100.0%` (`Done=16`, `Partial=0`, `Weak=0`, `N=16`)
+  - default weighted steering estimate from the current capability matrix is now `100.0%` (`Done=17`, `Partial=0`, `Weak=0`, `N=17`)
 
 Interpretation:
 - the old roadmap order was correct as a program scaffold
 - however, execution has now overtaken parts of the document
 - capability closure and release readiness must be steered as two distinct signals: capability matrix completion answers "implemented scope", while release-readiness gates/failure drills answer "operationally safe to release"
-- with matrix fulfillment now at `100.0%` (`Done=16/16`), the immediate risk is metric conflation rather than missing top-level capability rows
+- with matrix fulfillment now at `100.0%` (`Done=17/17`), the immediate risk is metric conflation rather than missing top-level capability rows
 - AP-22 is now closed: release-failure drill now emits recurrence-aware remediation prioritization (`operator_recurrence_aware_remediation_prioritization`) that combines AP-19 recurrence baseline with AP-20 stale-remediation closure urgency, and readiness GUI surfaces AP-22 ranked remediation rows.
 - AP-23 is now closed: release-failure drill now also emits `operator_failure_drill_delta_ledger`, compares against the prior persisted drill summary when available, classifies movement rows (`new_issue/improved/regressed/resolved/steady`), and renders an operator impact narrative in readiness GUI and drill outputs.
 - AP-24 is now closed: `operator_remediation_execution_loop` turns ranked priorities into explicit next-up/queued action records with closure targets and evidence sources.

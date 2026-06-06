@@ -1111,9 +1111,12 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "operational-history-triage-filter" in runs_html
     assert "operational-history-recency-filter" in runs_html
     assert "operational-history-sort" in runs_html
+    assert "operational-history-text-filter" in runs_html
+    assert "operational-history-reset" in runs_html
     assert "Latest first" in runs_html
     assert "Oldest first" in runs_html
     assert "Triage tag (A-Z)" in runs_html
+    assert "run id, pilot set, triage, handoff" in runs_html
     assert "Recorded At" in runs_html
     assert "Hours Behind Latest" in runs_html
     assert "2026-05-11T18:00:00Z" in runs_html
@@ -1129,6 +1132,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Visible runs: <strong id='operational-history-visible-count'>2</strong>" in runs_html
     assert "Triage tag counts: <strong id='operational-history-triage-counts'>degraded_release_blocked: 1 | ready_green: 1</strong>" in runs_html
     assert "Recency band counts: <strong id='operational-history-recency-counts'>last_24h: 1 | latest: 1</strong>" in runs_html
+    assert "Active history filter state: <strong id='operational-history-active-state'>triage=all | recency=all | search=none | sort=latest-first</strong>" in runs_html
     assert "Visible triage counts: <strong id='operational-history-visible-triage-counts'>n/a</strong>" in runs_html
     assert "Visible recency counts: <strong id='operational-history-visible-recency-counts'>n/a</strong>" in runs_html
     assert "class='operational-history-row'" in runs_html
@@ -1138,10 +1142,13 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "data-recency-band='last_24h'" in runs_html
     assert "data-hours-behind-latest='0'" in runs_html
     assert "data-hours-behind-latest='24'" in runs_html
+    assert "data-history-search-text='run-150 2026-05-10t18:00:00z success extended-focus-complete mvp-countries-live-extended-focus-complete-v1 green pass ready release_ready ready_green" in runs_html
     assert "data-recorded-at='2026-05-11T18:00:00Z'" in runs_html
     assert "data-recorded-at='2026-05-10T18:00:00Z'" in runs_html
     assert "applyOperationalHistoryTriageFilter" in runs_html
     assert "sortOperationalHistoryRows" in runs_html
+    assert "renderOperationalHistoryActiveState" in runs_html
+    assert "resetOperationalHistoryFilters" in runs_html
     assert "operational-history-visible-triage-counts" in runs_html
     assert "operational-history-visible-recency-counts" in runs_html
     assert "Repo Closure Summary" in runs_html

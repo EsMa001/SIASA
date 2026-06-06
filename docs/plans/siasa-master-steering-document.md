@@ -351,8 +351,21 @@ Closure achieved:
 - targeted verification passed (`43 passed in 315.46s`) across `test_local_gui.py`, `test_operational_latest.py`, `test_latest_bundle_verification.py`, `test_live_probe_policy_gate.py`, and `test_scheduler.py`
 - full regression passed (`472 passed in 986.68s`)
 
+### N1-WP-016
+Name:
+Add free-text history discovery and explicit active-state/reset controls so operators can locate archived runs by run id / pilot set / posture / handoff wording and can always see the exact review slice they are looking at.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now renders `operational-history-text-filter`, `operational-history-reset`, and `operational-history-active-state` beside the existing triage/recency/sort controls in `runs.html`
+- each `.operational-history-row` now exposes deterministic `data-history-search-text` compiled from run id, timestamp, pilot set, country-set identity, release posture, triage summary, and handoff summary so discovery stays client-side and testable
+- `applyOperationalHistoryTriageFilter()` now combines triage-tag, recency-band, sort, and free-text predicates in one pass, while `renderOperationalHistoryActiveState()` and `resetOperationalHistoryFilters()` keep the current slice explicit and reproducible
+- `tests/unit/test_local_gui.py` now asserts the new control IDs, placeholder text, active-state summary, row search payload, and JS hook names
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/gui/local_app.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` (`1 passed in 1.97s`)
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_latest_bundle_verification.py tests/unit/test_live_probe_policy_gate.py tests/unit/test_scheduler.py -q` (`24 passed in 0.24s`)
+
 Fallback reprioritization rule:
-- if valid source credentials/registrations become available before N1-WP-015 starts, reassess whether a credential-activation slice should jump ahead
+- if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 
 ---
 
