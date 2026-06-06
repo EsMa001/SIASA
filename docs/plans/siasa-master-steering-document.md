@@ -428,6 +428,19 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_latest_bundle_verification.py tests/unit/test_live_probe_policy_gate.py tests/unit/test_scheduler.py -q` passed
 
+### N1-WP-022
+Name:
+Add CSV export for the visible operational-history slice so the current archived-run review subset is directly usable in spreadsheet and audit workflows alongside the JSON export.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now renders `operational-history-export-csv`
+- new helpers `buildOperationalHistoryVisibleCsv()` and `exportOperationalHistoryVisibleCsv()` emit the current visible rows as deterministic CSV aligned to the rendered history table columns and download it as `operational_history_visible_slice.csv`
+- the CSV export reuses the current visible slice, so export content remains causally aligned with triage/recency/sort/search/preset state
+- `tests/unit/test_local_gui.py` now asserts the new CSV export control ID, helper names, MIME text, and filename
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/gui/local_app.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_latest_bundle_verification.py tests/unit/test_live_probe_policy_gate.py tests/unit/test_scheduler.py -q` passed
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 

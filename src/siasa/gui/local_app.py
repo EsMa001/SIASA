@@ -3092,6 +3092,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
   const presetButtons = Array.from(document.querySelectorAll('[data-operational-history-preset]'));
   const copySummaryButton = document.getElementById('operational-history-copy-summary');
   const exportJsonButton = document.getElementById('operational-history-export-json');
+  const exportCsvButton = document.getElementById('operational-history-export-csv');
   const visibleSummaryNode = document.getElementById('operational-history-visible-summary');
   const visiblePayloadNode = document.getElementById('operational-history-visible-payload');
   const linkStatusNode = document.getElementById('operational-history-link-status');
@@ -3309,6 +3310,50 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     }
   }
 
+  function buildOperationalHistoryVisibleCsv(visibleRows) {
+    const header = [
+      'run_id',
+      'recorded_at',
+      'hours_behind_latest',
+      'run_status',
+      'pilot_set',
+      'country_set_id',
+      'combined_ce_ratio',
+      'governance_verdict',
+      'policy_gate_verdict',
+      'release_verdict',
+      'readiness_interpretation',
+      'triage_tag',
+      'known_gap_count',
+      'failed_source_count',
+    ];
+    const rowsCsv = visibleRows.map((row) => header.map((_, index) => {
+      const value = row.children[index] ? row.children[index].textContent.trim() : 'n/a';
+      const escaped = String(value).replace(/"/g, '""');
+      return `"${escaped}"`;
+    }).join(','));
+    return [header.join(','), ...rowsCsv].join('\n');
+  }
+
+  function exportOperationalHistoryVisibleCsv() {
+    if (!linkStatusNode) {
+      return;
+    }
+    const visibleRows = Array.from(document.querySelectorAll('.operational-history-row')).filter((row) => row.style.display !== 'none');
+    const exportText = buildOperationalHistoryVisibleCsv(visibleRows);
+    try {
+      const blob = new Blob([exportText], { type: 'text/csv;charset=utf-8' });
+      const exportLink = document.createElement('a');
+      exportLink.href = URL.createObjectURL(blob);
+      exportLink.download = 'operational_history_visible_slice.csv';
+      exportLink.click();
+      URL.revokeObjectURL(exportLink.href);
+      linkStatusNode.textContent = 'Visible CSV exported.';
+    } catch (_err) {
+      linkStatusNode.textContent = 'Visible CSV export unavailable in this browser.';
+    }
+  }
+
   function getOperationalHistoryState() {
     return {
       triage: (triageFilter ? triageFilter.value : 'all').trim().toLowerCase(),
@@ -3386,6 +3431,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
   if (copyLinkButton) copyLinkButton.addEventListener('click', copyOperationalHistoryFilterLink);
   if (copySummaryButton) copySummaryButton.addEventListener('click', copyOperationalHistoryVisibleSummary);
   if (exportJsonButton) exportJsonButton.addEventListener('click', exportOperationalHistoryVisiblePayload);
+  if (exportCsvButton) exportCsvButton.addEventListener('click', exportOperationalHistoryVisibleCsv);
   presetButtons.forEach((button) => button.addEventListener('click', () => applyOperationalHistoryPreset(button.getAttribute('data-operational-history-preset') || '')));
   const loadedFromHash = applyOperationalHistoryStateFromHash();
   if (loadedFromHash && linkStatusNode) {
@@ -3430,6 +3476,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         "<button type='button' id='operational-history-copy-link'>Copy link</button> "
         "<button type='button' id='operational-history-copy-summary'>Copy visible summary</button> "
         "<button type='button' id='operational-history-export-json'>Export visible JSON</button> "
+        "<button type='button' id='operational-history-export-csv'>Export visible CSV</button> "
         "<button type='button' id='operational-history-preset-blocked-review' data-operational-history-preset='blocked-review'>Blocked review</button> "
         "<button type='button' id='operational-history-preset-latest-only' data-operational-history-preset='latest-only'>Latest only</button> "
         "<button type='button' id='operational-history-preset-ready-green' data-operational-history-preset='ready-green'>Ready green</button> "
