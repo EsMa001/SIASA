@@ -2895,6 +2895,14 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         return f"{float(value):.4f}" if isinstance(value, (int, float)) else str(value or 'n/a')
 
     operator_next_action = html.escape(str(latest_summary.get('operator_next_action', 'n/a')))
+    verification_policy = latest_summary.get('verification_policy', {}) if isinstance(latest_summary.get('verification_policy'), dict) else {}
+    verification_mode = str(verification_policy.get('mode') or 'n/a')
+    enabled_verification_overrides = [
+        str(item).strip()
+        for item in (verification_policy.get('enabled_overrides') or [])
+        if str(item).strip()
+    ]
+    verification_override_text = ', '.join(enabled_verification_overrides) if enabled_verification_overrides else 'none'
     evidence_links = latest_summary.get('evidence_links', {}) if isinstance(latest_summary.get('evidence_links'), dict) else {}
     latest_evidence_link_items = ''.join(
         f"<li>{link}</li>"
@@ -3047,6 +3055,15 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
                 item.get('readiness_interpretation', ''),
                 item.get('triage_tag', ''),
                 item.get('triage_summary', ''),
+                item.get('verification_policy', {}).get('mode', '') if isinstance(item.get('verification_policy'), dict) else '',
+                ' '.join(
+                    str(value).strip()
+                    for value in (
+                        (item.get('verification_policy', {}) or {}).get('enabled_overrides', [])
+                        if isinstance(item.get('verification_policy'), dict) else []
+                    )
+                    if isinstance(value, str) and value.strip()
+                ),
                 item.get('handoff_summary', ''),
             )
             if str(value).strip()
@@ -3069,6 +3086,8 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
             f"<td>{html.escape(str(item.get('policy_gate_verdict', 'n/a')))}</td>"
             f"<td>{html.escape(str(item.get('release_verdict', 'n/a')))}</td>"
             f"<td>{html.escape(str(item.get('readiness_interpretation', 'n/a')))}</td>"
+            f"<td>{html.escape(str(item.get('verification_policy', {}).get('mode', 'n/a') if isinstance(item.get('verification_policy'), dict) else 'n/a'))}</td>"
+            f"<td>{html.escape(', '.join(str(value).strip() for value in ((item.get('verification_policy', {}) or {}).get('enabled_overrides', []) if isinstance(item.get('verification_policy'), dict) else []) if str(value).strip()) or 'none')}</td>"
             f"<td>{html.escape(str(item.get('triage_tag', 'n/a')))}</td>"
             f"<td>{html.escape(str(item.get('known_gap_count', 'n/a')))}</td>"
             f"<td>{html.escape(str(item.get('failed_source_count', 'n/a')))}</td>"
@@ -3079,7 +3098,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     recent_run_rows = ''.join(
         _render_recent_run_row(item)
         for item in recent_run_items
-    ) or "<tr><td colspan='15'>No operational history available.</td></tr>"
+    ) or "<tr><td colspan='17'>No operational history available.</td></tr>"
     operational_history_filter_script = """
 <script>
 (function() {
@@ -3270,9 +3289,11 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         policy_gate_verdict: row.children[8] ? row.children[8].textContent.trim() : 'n/a',
         release_verdict: row.children[9] ? row.children[9].textContent.trim() : 'n/a',
         readiness_interpretation: row.children[10] ? row.children[10].textContent.trim() : 'n/a',
-        triage_tag: row.children[11] ? row.children[11].textContent.trim() : 'n/a',
-        known_gap_count: row.children[12] ? row.children[12].textContent.trim() : 'n/a',
-        failed_source_count: row.children[13] ? row.children[13].textContent.trim() : 'n/a',
+        verification_mode: row.children[11] ? row.children[11].textContent.trim() : 'n/a',
+        enabled_overrides: row.children[12] ? row.children[12].textContent.trim() : 'n/a',
+        triage_tag: row.children[13] ? row.children[13].textContent.trim() : 'n/a',
+        known_gap_count: row.children[14] ? row.children[14].textContent.trim() : 'n/a',
+        failed_source_count: row.children[15] ? row.children[15].textContent.trim() : 'n/a',
       })),
     };
   }
@@ -3324,6 +3345,8 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
       'policy_gate_verdict',
       'release_verdict',
       'readiness_interpretation',
+      'verification_mode',
+      'enabled_overrides',
       'triage_tag',
       'known_gap_count',
       'failed_source_count',
@@ -3470,6 +3493,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<p>Governed slice: <strong>{html.escape(str(latest_summary.get('country_set_id', 'n/a')))}</strong> | Combined C/E ratio: <strong>{combined_ce_ratio_text}</strong> | Governance verdict: <strong>{html.escape(governance_verdict)}</strong> | Policy gate: <strong>{html.escape(policy_gate_verdict)}</strong></p>"
         f"<p>Release verdict: <strong>{html.escape(release_verdict)}</strong> | Readiness interpretation: <strong>{html.escape(readiness_interpretation)}</strong> | Known gaps: <strong>{html.escape(str(known_gap_count))}</strong></p>"
         f"<p>Triage tag: <strong>{latest_triage_tag}</strong> | Triage summary: <strong>{latest_triage_summary}</strong></p>"
+        f"<p>Verification mode: <strong>{html.escape(verification_mode)}</strong> | Enabled overrides: <strong>{html.escape(verification_override_text)}</strong></p>"
         f"<p>Operator next action: <strong>{operator_next_action}</strong></p>"
         f"<p>Bundle root: <strong>{latest_bundle_root}</strong> | GUI index: <strong>{latest_gui_index}</strong> | Artifacts dir: <strong>{latest_artifacts_dir}</strong></p>"
         f"<p>Handoff summary: <strong>{latest_handoff_summary}</strong></p>"
@@ -3508,7 +3532,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         "<details><summary>Visible slice payload</summary><pre id='operational-history-visible-payload'>{}</pre></details>"
         "<p>Visible triage counts: <strong id='operational-history-visible-triage-counts'>n/a</strong></p>"
         "<p>Visible recency counts: <strong id='operational-history-visible-recency-counts'>n/a</strong></p>"
-        "<table id='operational-evidence-history-table'><thead><tr><th>Run ID</th><th>Recorded At</th><th>Hours Behind Latest</th><th>Status</th><th>Pilot Set</th><th>Country Set</th><th>Combined C/E Ratio</th><th>Governance</th><th>Policy Gate</th><th>Release Verdict</th><th>Readiness Interpretation</th><th>Triage Tag</th><th>Known Gaps</th><th>Failed Sources</th><th>Evidence</th></tr></thead>"
+        "<table id='operational-evidence-history-table'><thead><tr><th>Run ID</th><th>Recorded At</th><th>Hours Behind Latest</th><th>Status</th><th>Pilot Set</th><th>Country Set</th><th>Combined C/E Ratio</th><th>Governance</th><th>Policy Gate</th><th>Release Verdict</th><th>Readiness Interpretation</th><th>Verification Mode</th><th>Enabled Overrides</th><th>Triage Tag</th><th>Known Gaps</th><th>Failed Sources</th><th>Evidence</th></tr></thead>"
         f"<tbody>{recent_run_rows}</tbody></table>{operational_history_filter_script}</div>"
     ) if latest_summary else ""
     _run_color = html.escape(_run_status_color(str(system_status_read_model.get('run_status', 'n/a'))))

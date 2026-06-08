@@ -530,6 +530,20 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_storage_run_history.py tests/unit/test_latest_bundle_verification.py -q` passed
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_build_operational_latest_bundle_script.py -q` passed
 
+### N1-WP-030
+Name:
+Expose strict-vs-override verification provenance directly in the runs GUI and visible-slice exports so project lead/operators can see at a glance whether an operational bundle is strict-mode or explicitly degraded/override-enabled.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now renders `Verification mode` and `Enabled overrides` in the Operational Evidence Lane summary
+- the recent operational-history table now includes explicit columns `Verification Mode` and `Enabled Overrides`
+- visible-slice JSON and CSV export builders now carry `verification_mode` and `enabled_overrides`
+- `tests/unit/test_local_gui.py` now seeds verification-policy fixture data and asserts the new GUI/export strings and search payload behavior
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/gui/local_app.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_local_gui.py::test_load_site_payload_from_artifacts_reads_persisted_json_bundle -q` passed
+- adjacent runtime/storage regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_operational_latest.py tests/unit/test_storage_run_history.py -q` passed
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 

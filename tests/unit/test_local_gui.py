@@ -717,6 +717,13 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 "known_gap_suppression_reason": None,
                 "failed_source_count": 1,
                 "failed_sources": ["SRC-B"],
+                "verification_policy": {
+                    "allow_partial_success": True,
+                    "allow_failed_sources": True,
+                    "allow_policy_gate_fail": False,
+                    "enabled_overrides": ["allow_partial_success", "allow_failed_sources"],
+                    "mode": "explicit_override_enabled",
+                },
                 "operator_next_action": "Investigate failed sources and restore source availability.",
                 "evidence_links": {
                     "bundle_index_href": "/tmp/siasa-gui-test/index.html",
@@ -759,6 +766,13 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                     "known_gap_count": 2,
                     "failed_source_count": 1,
                     "failed_sources": ["SRC-B"],
+                    "verification_policy": {
+                        "allow_partial_success": True,
+                        "allow_failed_sources": True,
+                        "allow_policy_gate_fail": False,
+                        "enabled_overrides": ["allow_partial_success", "allow_failed_sources"],
+                        "mode": "explicit_override_enabled",
+                    },
                     "evidence_links": {
                         "bundle_index_href": "/tmp/siasa-gui-test/index.html",
                         "coverage_page_href": "/tmp/siasa-gui-test/coverage.html",
@@ -799,6 +813,13 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                     "known_gap_count": 0,
                     "failed_source_count": 0,
                     "failed_sources": [],
+                    "verification_policy": {
+                        "allow_partial_success": False,
+                        "allow_failed_sources": False,
+                        "allow_policy_gate_fail": False,
+                        "enabled_overrides": [],
+                        "mode": "strict",
+                    },
                     "evidence_links": {
                         "bundle_index_href": "/tmp/siasa-history/RUN-150/index.html",
                         "coverage_page_href": "/tmp/siasa-history/RUN-150/coverage.html",
@@ -1071,6 +1092,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Triage tag:" in runs_html
     assert "degraded_release_blocked" in runs_html
     assert "Runtime degraded and release blocked; review failed sources and known gaps first." in runs_html
+    assert "Verification mode:" in runs_html
+    assert "explicit_override_enabled" in runs_html
+    assert "Enabled overrides:" in runs_html
+    assert "allow_partial_success, allow_failed_sources" in runs_html
     assert "ready_green" in runs_html
     assert "Run is green and release-ready; suitable as the default handoff baseline." in runs_html
     assert "Latest known gaps (2)" in runs_html
@@ -1141,6 +1166,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "2026-05-10T18:00:00Z" in runs_html
     assert ">0h<" in runs_html
     assert ">24h<" in runs_html
+    assert "Verification Mode" in runs_html
+    assert "Enabled Overrides" in runs_html
     assert "All triage tags (2)" in runs_html
     assert "All recency bands (2)" in runs_html
     assert "last_24h (1)" in runs_html
@@ -1164,6 +1191,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "data-hours-behind-latest='0'" in runs_html
     assert "data-hours-behind-latest='24'" in runs_html
     assert "data-history-search-text='run-150 2026-05-10t18:00:00z success extended-focus-complete mvp-countries-live-extended-focus-complete-v1 green pass ready release_ready ready_green" in runs_html
+    assert "run is green and release-ready; suitable as the default handoff baseline. strict run" in runs_html
     assert "data-recorded-at='2026-05-11T18:00:00Z'" in runs_html
     assert "data-recorded-at='2026-05-10T18:00:00Z'" in runs_html
     assert "applyOperationalHistoryTriageFilter" in runs_html
@@ -1189,6 +1217,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "policy_gate_verdict" in runs_html
     assert "release_verdict" in runs_html
     assert "readiness_interpretation" in runs_html
+    assert "verification_mode" in runs_html
+    assert "enabled_overrides" in runs_html
     assert "triage_tag" in runs_html
     assert "known_gap_count" in runs_html
     assert "failed_source_count" in runs_html
