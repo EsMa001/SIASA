@@ -517,6 +517,19 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_build_operational_latest_bundle_script.py -q` passed
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_latest_bundle_verification.py -q` passed
 
+### N1-WP-029
+Name:
+Persist and expose explicit verification-override provenance for accepted degraded operational bundles so later reviewers can distinguish strict-mode closure from intentionally override-enabled inspection/runtime runs.
+
+Closure achieved:
+- `src/siasa/runs/latest_bundle_verification.py` now emits `verification_policy` plus ordered `enabled_verification_overrides` in bundle verification summaries
+- `src/siasa/runs/operational_latest.py` now builds the same verification-policy view model, persists the flags through run-history writes, and surfaces them in `operational_evidence_lane.json` for both the latest bundle and loaded recent runs
+- `src/siasa/data/storage.py` schema and `RunHistoryEntry` now persist `allow_partial_success`, `allow_failed_sources`, and `allow_policy_gate_fail` as explicit run-history provenance fields
+- `tests/unit/test_storage_run_history.py`, `tests/unit/test_latest_bundle_verification.py`, and `tests/unit/test_operational_latest.py` now assert both strict-mode and override-enabled provenance behavior
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/data/storage.py src/siasa/runs/latest_bundle_verification.py src/siasa/runs/operational_latest.py tests/unit/test_storage_run_history.py tests/unit/test_latest_bundle_verification.py tests/unit/test_operational_latest.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_storage_run_history.py tests/unit/test_latest_bundle_verification.py -q` passed
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_build_operational_latest_bundle_script.py -q` passed
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 

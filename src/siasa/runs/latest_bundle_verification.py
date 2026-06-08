@@ -17,6 +17,22 @@ def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _enabled_verification_overrides(
+    *,
+    allow_partial_success: bool,
+    allow_failed_sources: bool,
+    allow_policy_gate_fail: bool,
+) -> list[str]:
+    overrides: list[str] = []
+    if allow_partial_success:
+        overrides.append("allow_partial_success")
+    if allow_failed_sources:
+        overrides.append("allow_failed_sources")
+    if allow_policy_gate_fail:
+        overrides.append("allow_policy_gate_fail")
+    return overrides
+
+
 def verify_latest_bundle(
     artifacts_dir: Path,
     *,
@@ -110,5 +126,15 @@ def verify_latest_bundle(
         "countries_with_domain_e": countries_with_domain_e,
         "countries_missing_both_ce_count": countries_missing_both_ce_count,
         "countries_missing_both_ce": countries_missing_both_ce,
+        "verification_policy": {
+            "allow_partial_success": allow_partial_success,
+            "allow_failed_sources": allow_failed_sources,
+            "allow_policy_gate_fail": allow_policy_gate_fail,
+        },
+        "enabled_verification_overrides": _enabled_verification_overrides(
+            allow_partial_success=allow_partial_success,
+            allow_failed_sources=allow_failed_sources,
+            allow_policy_gate_fail=allow_policy_gate_fail,
+        ),
         "status": "ok",
     }

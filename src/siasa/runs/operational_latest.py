@@ -113,6 +113,23 @@ def _derive_readiness_interpretation(*, run_status: str, release_verdict: str, k
         return "release_truth_requires_review"
     return "release_truth_unknown"
 
+
+def _build_verification_policy(*, allow_partial_success: bool, allow_failed_sources: bool, allow_policy_gate_fail: bool) -> dict[str, Any]:
+    enabled_overrides: list[str] = []
+    if allow_partial_success:
+        enabled_overrides.append("allow_partial_success")
+    if allow_failed_sources:
+        enabled_overrides.append("allow_failed_sources")
+    if allow_policy_gate_fail:
+        enabled_overrides.append("allow_policy_gate_fail")
+    return {
+        "allow_partial_success": allow_partial_success,
+        "allow_failed_sources": allow_failed_sources,
+        "allow_policy_gate_fail": allow_policy_gate_fail,
+        "enabled_overrides": enabled_overrides,
+        "mode": "strict" if not enabled_overrides else "explicit_override_enabled",
+    }
+
 DEFAULT_OPERATIONAL_LATEST_PILOT_SET = "extended-focus-complete"
 
 
@@ -178,6 +195,11 @@ def build_operational_latest_bundle(
         allow_failed_sources=allow_failed_sources,
         allow_policy_gate_fail=allow_policy_gate_fail,
     )
+    verification_policy = _build_verification_policy(
+        allow_partial_success=allow_partial_success,
+        allow_failed_sources=allow_failed_sources,
+        allow_policy_gate_fail=allow_policy_gate_fail,
+    )
     readiness = json.loads((readmodels_dir / "readiness.json").read_text(encoding="utf-8"))
     release_verdict = str(readiness.get("release_verdict") or "unknown")
     known_gaps = [str(item) for item in (readiness.get("known_gaps") or [])]
@@ -206,6 +228,9 @@ def build_operational_latest_bundle(
         release_verdict=release_verdict,
         readiness_interpretation=readiness_interpretation,
         known_gap_count=len(known_gaps),
+        allow_partial_success=allow_partial_success,
+        allow_failed_sources=allow_failed_sources,
+        allow_policy_gate_fail=allow_policy_gate_fail,
     )
     evidence_links = _build_bundle_evidence_links(bundle_dir=gui_index.parent)
     bundle_root = str(gui_index.parent.resolve())
@@ -242,6 +267,11 @@ def build_operational_latest_bundle(
             "known_gap_count": entry.known_gap_count,
             "failed_source_count": len(entry.failed_sources),
             "failed_sources": entry.failed_sources,
+            "verification_policy": _build_verification_policy(
+                allow_partial_success=entry.allow_partial_success,
+                allow_failed_sources=entry.allow_failed_sources,
+                allow_policy_gate_fail=entry.allow_policy_gate_fail,
+            ),
             "evidence_links": _build_bundle_evidence_links(bundle_dir=Path(entry.gui_index).parent),
             "share_refs": _build_bundle_share_refs(bundle_root=Path(entry.gui_index).parent),
             "handoff_summary": _build_bundle_handoff_summary(
@@ -282,6 +312,7 @@ def build_operational_latest_bundle(
                 "known_gap_count": len(known_gaps),
                 "failed_source_count": len(list(run_state.failed_sources)),
                 "failed_sources": list(run_state.failed_sources),
+                "verification_policy": verification_policy,
                 "evidence_links": evidence_links,
                 "share_refs": share_refs,
                 "handoff_summary": handoff_summary,
@@ -310,6 +341,7 @@ def build_operational_latest_bundle(
             "readiness_interpretation": readiness_interpretation,
             "failed_source_count": len(list(run_state.failed_sources)),
             "failed_sources": list(run_state.failed_sources),
+            "verification_policy": verification_policy,
             "operator_next_action": str(digest.get("governance_summary", {}).get("operator_next_action") or "n/a"),
             "evidence_links": evidence_links,
             "share_refs": share_refs,

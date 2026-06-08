@@ -204,6 +204,12 @@ def test_verify_latest_bundle_accepts_partial_success_and_failed_sources_when_en
     assert summary["failed_sources"] == ["SRC-GDELT-DOC"]
     assert summary["countries_missing_both_ce_count"] == 0
     assert summary["countries_missing_both_ce"] == []
+    assert summary["verification_policy"] == {
+        "allow_partial_success": True,
+        "allow_failed_sources": True,
+        "allow_policy_gate_fail": False,
+    }
+    assert summary["enabled_verification_overrides"] == ["allow_partial_success", "allow_failed_sources"]
 
 
 def test_verify_latest_bundle_rejects_policy_gate_fail_by_default(tmp_path: Path) -> None:
@@ -280,6 +286,12 @@ def test_verify_latest_bundle_accepts_policy_gate_fail_when_enabled(tmp_path: Pa
     assert summary["policy_gate_verdict"] == "fail"
     assert summary["countries_missing_both_ce_count"] == 1
     assert summary["countries_missing_both_ce"] == ["UKR"]
+    assert summary["verification_policy"] == {
+        "allow_partial_success": False,
+        "allow_failed_sources": False,
+        "allow_policy_gate_fail": True,
+    }
+    assert summary["enabled_verification_overrides"] == ["allow_policy_gate_fail"]
 
 
 def test_verify_latest_bundle_rejects_countries_missing_both_ce_mismatch_between_digest_and_gate(tmp_path: Path) -> None:

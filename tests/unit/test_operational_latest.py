@@ -218,6 +218,9 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
             "release_verdict": "ready",
             "readiness_interpretation": "release_ready",
             "known_gap_count": 0,
+            "allow_partial_success": False,
+            "allow_failed_sources": False,
+            "allow_policy_gate_fail": False,
         }
     ]
     assert result["pilot_set"] == "extended-focus-complete"
@@ -229,6 +232,12 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
     assert result["verification_summary"]["country_set_id"] == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
     assert result["verification_summary"]["countries_missing_both_ce_count"] == 0
     assert result["verification_summary"]["countries_missing_both_ce"] == []
+    assert result["verification_summary"]["verification_policy"] == {
+        "allow_partial_success": False,
+        "allow_failed_sources": False,
+        "allow_policy_gate_fail": False,
+    }
+    assert result["verification_summary"]["enabled_verification_overrides"] == []
     digest = _read_json(result["digest_path"])
     assert digest["run_context"]["run_id"] == "RUN-OP-LATEST-001"
     assert digest["run_context"]["country_set_id"] == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
@@ -241,6 +250,13 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
     assert evidence_lane["latest_summary"]["countries_missing_both_ce"] == []
     assert evidence_lane["latest_summary"]["release_verdict"] == "ready"
     assert evidence_lane["latest_summary"]["readiness_interpretation"] == "release_ready"
+    assert evidence_lane["latest_summary"]["verification_policy"] == {
+        "allow_partial_success": False,
+        "allow_failed_sources": False,
+        "allow_policy_gate_fail": False,
+        "enabled_overrides": [],
+        "mode": "strict",
+    }
     assert evidence_lane["latest_summary"]["triage_tag"] == "ready_green"
     assert evidence_lane["latest_summary"]["triage_summary"] == "Run is green and release-ready; suitable as the default handoff baseline."
     assert evidence_lane["latest_summary"]["evidence_links"] == {
@@ -278,6 +294,13 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
     assert "Run RUN-OP-LATEST-001: bundle at" in evidence_lane["recent_runs"][0]["handoff_summary"]
     assert evidence_lane["recent_runs"][0]["triage_tag"] == "ready_green"
     assert evidence_lane["recent_runs"][0]["triage_summary"] == "Run is green and release-ready; suitable as the default handoff baseline."
+    assert evidence_lane["recent_runs"][0]["verification_policy"] == {
+        "allow_partial_success": False,
+        "allow_failed_sources": False,
+        "allow_policy_gate_fail": False,
+        "enabled_overrides": [],
+        "mode": "strict",
+    }
     assert evidence_lane["recent_runs"][0]["policy_gate_verdict"] == "pass"
 
 
@@ -413,6 +436,9 @@ def test_build_operational_latest_bundle_allows_degraded_runtime_when_explicitly
     assert run_history_writer.calls[0]["release_verdict"] == "blocked_by_known_gaps"
     assert run_history_writer.calls[0]["readiness_interpretation"] == "runtime_degraded_and_release_blocked"
     assert run_history_writer.calls[0]["known_gap_count"] == 1
+    assert run_history_writer.calls[0]["allow_partial_success"] is True
+    assert run_history_writer.calls[0]["allow_failed_sources"] is True
+    assert run_history_writer.calls[0]["allow_policy_gate_fail"] is False
     assert result["policy_gate_verdict"] == "pass"
     evidence_lane = _read_json(result["operational_evidence_lane_path"])
     assert evidence_lane["latest_summary"]["governance_verdict"] == "amber"
@@ -420,6 +446,13 @@ def test_build_operational_latest_bundle_allows_degraded_runtime_when_explicitly
     assert evidence_lane["latest_summary"]["countries_missing_both_ce"] == []
     assert evidence_lane["latest_summary"]["release_verdict"] == "blocked_by_known_gaps"
     assert evidence_lane["latest_summary"]["readiness_interpretation"] == "runtime_degraded_and_release_blocked"
+    assert evidence_lane["latest_summary"]["verification_policy"] == {
+        "allow_partial_success": True,
+        "allow_failed_sources": True,
+        "allow_policy_gate_fail": False,
+        "enabled_overrides": ["allow_partial_success", "allow_failed_sources"],
+        "mode": "explicit_override_enabled",
+    }
     assert evidence_lane["latest_summary"]["triage_tag"] == "degraded_release_blocked"
     assert evidence_lane["latest_summary"]["triage_summary"] == "Runtime degraded and release blocked; review failed sources and known gaps first."
 
@@ -525,4 +558,18 @@ def test_build_operational_latest_bundle_accepts_policy_gate_fail_when_explicitl
     assert result["policy_gate_verdict"] == "fail"
     assert result["verification_summary"]["countries_missing_both_ce_count"] == 1
     assert result["verification_summary"]["countries_missing_both_ce"] == ["UKR"]
+    assert result["verification_summary"]["verification_policy"] == {
+        "allow_partial_success": False,
+        "allow_failed_sources": False,
+        "allow_policy_gate_fail": True,
+    }
+    assert result["verification_summary"]["enabled_verification_overrides"] == ["allow_policy_gate_fail"]
+    evidence_lane = _read_json(result["operational_evidence_lane_path"])
+    assert evidence_lane["latest_summary"]["verification_policy"] == {
+        "allow_partial_success": False,
+        "allow_failed_sources": False,
+        "allow_policy_gate_fail": True,
+        "enabled_overrides": ["allow_policy_gate_fail"],
+        "mode": "explicit_override_enabled",
+    }
 

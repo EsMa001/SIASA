@@ -24,6 +24,9 @@ class RunHistoryEntry:
     release_verdict: str
     readiness_interpretation: str
     known_gap_count: int
+    allow_partial_success: bool
+    allow_failed_sources: bool
+    allow_policy_gate_fail: bool
 
 
 @dataclass(frozen=True)
@@ -86,6 +89,9 @@ def initialize_run_history_schema(db_path: Path) -> None:
             "release_verdict": "ALTER TABLE runs ADD COLUMN release_verdict TEXT",
             "readiness_interpretation": "ALTER TABLE runs ADD COLUMN readiness_interpretation TEXT",
             "known_gap_count": "ALTER TABLE runs ADD COLUMN known_gap_count INTEGER",
+            "allow_partial_success": "ALTER TABLE runs ADD COLUMN allow_partial_success INTEGER DEFAULT 0",
+            "allow_failed_sources": "ALTER TABLE runs ADD COLUMN allow_failed_sources INTEGER DEFAULT 0",
+            "allow_policy_gate_fail": "ALTER TABLE runs ADD COLUMN allow_policy_gate_fail INTEGER DEFAULT 0",
         }
         for column_name, statement in run_column_migrations.items():
             if column_name not in existing_run_columns:
@@ -138,6 +144,9 @@ def persist_operational_latest_run(
     release_verdict: str | None = None,
     readiness_interpretation: str | None = None,
     known_gap_count: int | None = None,
+    allow_partial_success: bool = False,
+    allow_failed_sources: bool = False,
+    allow_policy_gate_fail: bool = False,
 ) -> None:
     initialize_run_history_schema(db_path)
     now_utc = datetime.now(timezone.utc).isoformat()
@@ -160,9 +169,12 @@ def persist_operational_latest_run(
                 policy_gate_verdict,
                 release_verdict,
                 readiness_interpretation,
-                known_gap_count
+                known_gap_count,
+                allow_partial_success,
+                allow_failed_sources,
+                allow_policy_gate_fail
             )
-            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(run_id) DO UPDATE SET
                 recorded_at=excluded.recorded_at,
                 run_status=excluded.run_status,
@@ -176,7 +188,10 @@ def persist_operational_latest_run(
                 policy_gate_verdict=excluded.policy_gate_verdict,
                 release_verdict=excluded.release_verdict,
                 readiness_interpretation=excluded.readiness_interpretation,
-                known_gap_count=excluded.known_gap_count
+                known_gap_count=excluded.known_gap_count,
+                allow_partial_success=excluded.allow_partial_success,
+                allow_failed_sources=excluded.allow_failed_sources,
+                allow_policy_gate_fail=excluded.allow_policy_gate_fail
             """,
             (
                 run_id,
@@ -193,6 +208,9 @@ def persist_operational_latest_run(
                 str(release_verdict or "unknown"),
                 str(readiness_interpretation or "unknown"),
                 int(known_gap_count) if known_gap_count is not None else 0,
+                1 if allow_partial_success else 0,
+                1 if allow_failed_sources else 0,
+                1 if allow_policy_gate_fail else 0,
             ),
         )
         connection.execute("DELETE FROM source_results WHERE run_id = ?", (run_id,))
@@ -233,7 +251,10 @@ def load_recent_runs(db_path: Path, *, limit: int = 20) -> list[RunHistoryEntry]
                 policy_gate_verdict,
                 release_verdict,
                 readiness_interpretation,
-                known_gap_count
+                known_gap_count,
+                allow_partial_success,
+                allow_failed_sources,
+                allow_policy_gate_fail
             FROM runs
             ORDER BY recorded_at DESC
             LIMIT ?
@@ -257,6 +278,9 @@ def load_recent_runs(db_path: Path, *, limit: int = 20) -> list[RunHistoryEntry]
             release_verdict=str(row["release_verdict"] or "unknown"),
             readiness_interpretation=str(row["readiness_interpretation"] or "unknown"),
             known_gap_count=int(row["known_gap_count"] or 0),
+            allow_partial_success=bool(row["allow_partial_success"]),
+            allow_failed_sources=bool(row["allow_failed_sources"]),
+            allow_policy_gate_fail=bool(row["allow_policy_gate_fail"]),
         )
         for row in rows
     ]
