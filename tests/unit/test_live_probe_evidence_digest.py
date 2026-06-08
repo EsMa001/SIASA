@@ -47,7 +47,9 @@ def test_live_probe_evidence_digest_summarizes_ce_utilization_and_run_context(tm
     assert digest["ce_utilization"]["countries_missing_domain_e"] == ["POL"]
     assert digest["ce_utilization"]["countries_missing_both_ce"] == ["POL"]
     assert digest["ce_utilization"]["countries_with_full_ce"] == ["UKR"]
-    assert digest["governance_summary"]["verdict"] == "green"
+    assert digest["governance_summary"]["verdict"] == "amber"
+    assert "countries_missing_both_ce_present" in digest["governance_summary"]["reasons"]
+    assert digest["governance_summary"]["operator_next_action"] == "Increase structured Domain C/E coverage in countries missing both signals (POL)."
 
 
 def test_live_probe_evidence_digest_captures_policy_profile_context(tmp_path: Path) -> None:
@@ -146,3 +148,4 @@ def test_live_probe_evidence_digest_marks_failed_sources_as_amber(tmp_path: Path
 
     assert digest["governance_summary"]["verdict"] == "amber"
     assert "failed_sources_present" in digest["governance_summary"]["reasons"]
+    assert digest["governance_summary"]["operator_next_action"] == "Investigate failed sources and restore source availability (failed_sources=SRC-EXAMPLE)."

@@ -480,6 +480,18 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_latest_bundle_verification.py -q` passed
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_governed_live_runtime.py tests/unit/test_live_probe_policy_gate.py -q` passed
 
+### N1-WP-026
+Name:
+Make live-probe governance operator guidance explicitly country-specific for the dual C/E gap case so broader runtime triage does not stop at a generic aggregate warning.
+
+Closure achieved:
+- `src/siasa/readmodels/live_probe_evidence_digest.py` now upgrades governance to `amber` when `countries_missing_both_ce` is non-empty even without failed sources, stamps reason `countries_missing_both_ce_present`, and emits a country-specific `operator_next_action` such as `Increase structured Domain C/E coverage in countries missing both signals (POL).`
+- failed-source actionability was also sharpened: `operator_next_action` now includes explicit failed source IDs when source outages are the primary issue
+- `tests/unit/test_live_probe_evidence_digest.py` now asserts both the new country-specific dual-C/E action text and the enriched failed-source action text
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/readmodels/live_probe_evidence_digest.py tests/unit/test_live_probe_evidence_digest.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_live_probe_evidence_digest.py -q` passed
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_live_probe_policy_gate.py tests/unit/test_operational_latest.py tests/unit/test_governed_live_runtime.py -q` passed
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 

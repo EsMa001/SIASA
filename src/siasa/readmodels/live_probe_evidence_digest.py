@@ -103,6 +103,24 @@ def build_live_probe_evidence_digest(*, artifacts_dir: Path) -> dict[str, Any]:
     if governance_verdict == "green" and failed_sources:
         governance_verdict = "amber"
         governance_reasons.append("failed_sources_present")
+    if governance_verdict == "green" and countries_missing_both_ce:
+        governance_verdict = "amber"
+        governance_reasons.append("countries_missing_both_ce_present")
+
+    if failed_sources:
+        operator_next_action = (
+            "Investigate failed sources and restore source availability"
+            f" (failed_sources={','.join(failed_sources)})."
+        )
+    elif countries_missing_both_ce:
+        operator_next_action = (
+            "Increase structured Domain C/E coverage in countries missing both signals"
+            f" ({','.join(sorted(countries_missing_both_ce))})."
+        )
+    elif ce_ratio < 1.0:
+        operator_next_action = "Increase Domain C/E live coverage in countries where C/E stayed inactive."
+    else:
+        operator_next_action = "No immediate action required; live probe governance summary is healthy."
 
     return {
         "schema_version": "v1",
@@ -144,12 +162,6 @@ def build_live_probe_evidence_digest(*, artifacts_dir: Path) -> dict[str, Any]:
         "governance_summary": {
             "verdict": governance_verdict,
             "reasons": governance_reasons,
-            "operator_next_action": (
-                "Investigate failed sources and restore source availability."
-                if failed_sources
-                else "Increase Domain C/E live coverage in countries where C/E stayed inactive."
-                if ce_ratio < 1.0
-                else "No immediate action required; live probe governance summary is healthy."
-            ),
+            "operator_next_action": operator_next_action,
         },
     }
