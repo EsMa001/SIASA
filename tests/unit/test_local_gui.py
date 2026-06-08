@@ -1117,6 +1117,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "operational-history-copy-summary" in runs_html
     assert "operational-history-export-json" in runs_html
     assert "operational-history-export-csv" in runs_html
+    assert "operational-history-copy-csv" in runs_html
     assert "operational-history-preset-blocked-review" in runs_html
     assert "operational-history-preset-latest-only" in runs_html
     assert "operational-history-preset-ready-green" in runs_html
@@ -1195,6 +1196,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "exportOperationalHistoryVisiblePayload" in runs_html
     assert "buildOperationalHistoryVisibleCsv" in runs_html
     assert "exportOperationalHistoryVisibleCsv" in runs_html
+    assert "copyOperationalHistoryVisibleCsv" in runs_html
+    assert "Visible CSV copied." in runs_html
+    assert "Visible CSV copy unavailable in this browser." in runs_html
     assert "operational_history_visible_slice.csv" in runs_html
     assert "text/csv;charset=utf-8" in runs_html
     assert "applyOperationalHistoryPreset" in runs_html

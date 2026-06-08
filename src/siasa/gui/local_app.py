@@ -3093,6 +3093,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
   const copySummaryButton = document.getElementById('operational-history-copy-summary');
   const exportJsonButton = document.getElementById('operational-history-export-json');
   const exportCsvButton = document.getElementById('operational-history-export-csv');
+  const copyCsvButton = document.getElementById('operational-history-copy-csv');
   const visibleSummaryNode = document.getElementById('operational-history-visible-summary');
   const visiblePayloadNode = document.getElementById('operational-history-visible-payload');
   const linkStatusNode = document.getElementById('operational-history-link-status');
@@ -3354,6 +3355,20 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     }
   }
 
+  async function copyOperationalHistoryVisibleCsv() {
+    if (!linkStatusNode) {
+      return;
+    }
+    const visibleRows = Array.from(document.querySelectorAll('.operational-history-row')).filter((row) => row.style.display !== 'none');
+    const exportText = buildOperationalHistoryVisibleCsv(visibleRows);
+    try {
+      await navigator.clipboard.writeText(exportText);
+      linkStatusNode.textContent = 'Visible CSV copied.';
+    } catch (_err) {
+      linkStatusNode.textContent = 'Visible CSV copy unavailable in this browser.';
+    }
+  }
+
   function getOperationalHistoryState() {
     return {
       triage: (triageFilter ? triageFilter.value : 'all').trim().toLowerCase(),
@@ -3432,6 +3447,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
   if (copySummaryButton) copySummaryButton.addEventListener('click', copyOperationalHistoryVisibleSummary);
   if (exportJsonButton) exportJsonButton.addEventListener('click', exportOperationalHistoryVisiblePayload);
   if (exportCsvButton) exportCsvButton.addEventListener('click', exportOperationalHistoryVisibleCsv);
+  if (copyCsvButton) copyCsvButton.addEventListener('click', copyOperationalHistoryVisibleCsv);
   presetButtons.forEach((button) => button.addEventListener('click', () => applyOperationalHistoryPreset(button.getAttribute('data-operational-history-preset') || '')));
   const loadedFromHash = applyOperationalHistoryStateFromHash();
   if (loadedFromHash && linkStatusNode) {
@@ -3477,6 +3493,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         "<button type='button' id='operational-history-copy-summary'>Copy visible summary</button> "
         "<button type='button' id='operational-history-export-json'>Export visible JSON</button> "
         "<button type='button' id='operational-history-export-csv'>Export visible CSV</button> "
+        "<button type='button' id='operational-history-copy-csv'>Copy visible CSV</button> "
         "<button type='button' id='operational-history-preset-blocked-review' data-operational-history-preset='blocked-review'>Blocked review</button> "
         "<button type='button' id='operational-history-preset-latest-only' data-operational-history-preset='latest-only'>Latest only</button> "
         "<button type='button' id='operational-history-preset-ready-green' data-operational-history-preset='ready-green'>Ready green</button> "

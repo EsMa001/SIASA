@@ -441,6 +441,19 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_latest_bundle_verification.py tests/unit/test_live_probe_policy_gate.py tests/unit/test_scheduler.py -q` passed
 
+### N1-WP-023
+Name:
+Add clipboard-copy support for the visible operational-history CSV slice so the currently filtered archived-run subset can be pasted directly into chat, tickets, and incident notes without a file-download round trip.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now renders `operational-history-copy-csv` beside the existing visible-slice export controls in `runs.html`
+- new helper `copyOperationalHistoryVisibleCsv()` reuses the existing deterministic `buildOperationalHistoryVisibleCsv()` output and copies the current visible slice via `navigator.clipboard.writeText(...)`
+- the runs-view status surface now emits explicit copy feedback (`Visible CSV copied.` / `Visible CSV copy unavailable in this browser.`), keeping clipboard handoff semantics operator-visible and bounded
+- `tests/unit/test_local_gui.py` now asserts the new copy control, helper hook, and clipboard status strings in generated `runs.html`
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/gui/local_app.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_latest_bundle_verification.py tests/unit/test_live_probe_policy_gate.py tests/unit/test_scheduler.py -q` passed
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 
