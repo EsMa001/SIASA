@@ -49,7 +49,7 @@ def _build_minimal_latest_bundle(tmp_path: Path) -> Path:
                 "failed_source_count": 0,
             },
             "governance_summary": {"verdict": "green"},
-            "ce_utilization": {"combined_ce_ratio": 1.0},
+            "ce_utilization": {"combined_ce_ratio": 1.0, "countries_missing_both_ce": []},
         },
     )
     _write_json(
@@ -62,6 +62,8 @@ def _build_minimal_latest_bundle(tmp_path: Path) -> Path:
                 "run_status": "success",
                 "combined_ce_ratio": 1.0,
                 "failed_source_count": 0,
+                "countries_missing_both_ce_count": 0,
+                "countries_missing_both_ce": [],
                 "governance_verdict": "green",
             },
         },
@@ -79,6 +81,8 @@ def test_verify_latest_bundle_accepts_valid_bundle(tmp_path: Path) -> None:
     assert summary["country_set_id"] == "MVP-COUNTRIES-LIVE-focus-complete-v1"
     assert summary["policy_gate_verdict"] == "pass"
     assert summary["countries_with_domain_e"] == ["UKR"]
+    assert summary["countries_missing_both_ce_count"] == 0
+    assert summary["countries_missing_both_ce"] == []
 
 
 def test_verify_latest_bundle_rejects_missing_required_artifact(tmp_path: Path) -> None:
@@ -124,7 +128,7 @@ def test_verify_latest_bundle_rejects_partial_success_by_default(tmp_path: Path)
                 "failed_source_count": 1,
             },
             "governance_summary": {"verdict": "amber"},
-            "ce_utilization": {"combined_ce_ratio": 0.75},
+            "ce_utilization": {"combined_ce_ratio": 0.75, "countries_missing_both_ce": []},
         },
     )
     _write_json(
@@ -137,6 +141,8 @@ def test_verify_latest_bundle_rejects_partial_success_by_default(tmp_path: Path)
                 "run_status": "partial_success",
                 "combined_ce_ratio": 0.75,
                 "failed_source_count": 1,
+                "countries_missing_both_ce_count": 0,
+                "countries_missing_both_ce": [],
                 "governance_verdict": "amber",
             },
         },
@@ -167,7 +173,7 @@ def test_verify_latest_bundle_accepts_partial_success_and_failed_sources_when_en
                 "failed_source_count": 1,
             },
             "governance_summary": {"verdict": "amber"},
-            "ce_utilization": {"combined_ce_ratio": 0.75},
+            "ce_utilization": {"combined_ce_ratio": 0.75, "countries_missing_both_ce": []},
         },
     )
     _write_json(
@@ -180,6 +186,8 @@ def test_verify_latest_bundle_accepts_partial_success_and_failed_sources_when_en
                 "run_status": "partial_success",
                 "combined_ce_ratio": 0.75,
                 "failed_source_count": 1,
+                "countries_missing_both_ce_count": 0,
+                "countries_missing_both_ce": [],
                 "governance_verdict": "amber",
             },
         },
@@ -194,6 +202,44 @@ def test_verify_latest_bundle_accepts_partial_success_and_failed_sources_when_en
     assert summary["status"] == "ok"
     assert summary["run_status"] == "partial_success"
     assert summary["failed_sources"] == ["SRC-GDELT-DOC"]
+    assert summary["countries_missing_both_ce_count"] == 0
+    assert summary["countries_missing_both_ce"] == []
+
+
+def test_verify_latest_bundle_rejects_countries_missing_both_ce_mismatch_between_digest_and_gate(tmp_path: Path) -> None:
+    artifacts_dir = _build_minimal_latest_bundle(tmp_path)
+    _write_json(
+        artifacts_dir / "readmodels/live_probe_evidence_digest.json",
+        {
+            "run_context": {
+                "run_id": "RUN-LIVE-001",
+                "run_status": "success",
+                "country_set_id": "MVP-COUNTRIES-LIVE-focus-complete-v1",
+                "failed_source_count": 0,
+            },
+            "governance_summary": {"verdict": "green"},
+            "ce_utilization": {"combined_ce_ratio": 0.75, "countries_missing_both_ce": ["POL"]},
+        },
+    )
+    _write_json(
+        artifacts_dir / "readmodels/live_probe_policy_gate.json",
+        {
+            "gate_verdict": "pass",
+            "blockers": [],
+            "observed": {
+                "run_id": "RUN-LIVE-001",
+                "run_status": "success",
+                "combined_ce_ratio": 0.75,
+                "failed_source_count": 0,
+                "countries_missing_both_ce_count": 0,
+                "countries_missing_both_ce": [],
+                "governance_verdict": "green",
+            },
+        },
+    )
+
+    with pytest.raises(ValueError, match="countries_missing_both_ce_count does not match digest"):
+        verify_latest_bundle(artifacts_dir)
 
 
 def test_verify_latest_bundle_rejects_digest_run_id_mismatch(tmp_path: Path) -> None:
@@ -208,7 +254,7 @@ def test_verify_latest_bundle_rejects_digest_run_id_mismatch(tmp_path: Path) -> 
                 "failed_source_count": 0,
             },
             "governance_summary": {"verdict": "green"},
-            "ce_utilization": {"combined_ce_ratio": 1.0},
+            "ce_utilization": {"combined_ce_ratio": 1.0, "countries_missing_both_ce": []},
         },
     )
 
@@ -228,7 +274,7 @@ def test_verify_latest_bundle_rejects_missing_country_set_id_in_digest(tmp_path:
                 "failed_source_count": 0,
             },
             "governance_summary": {"verdict": "green"},
-            "ce_utilization": {"combined_ce_ratio": 1.0},
+            "ce_utilization": {"combined_ce_ratio": 1.0, "countries_missing_both_ce": []},
         },
     )
 

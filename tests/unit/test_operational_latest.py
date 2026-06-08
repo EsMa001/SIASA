@@ -225,6 +225,8 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
     assert result["history_db"] == tmp_path / "build/run_history/latest_runs.sqlite"
     assert result["policy_gate_verdict"] == "pass"
     assert result["verification_summary"]["country_set_id"] == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
+    assert result["verification_summary"]["countries_missing_both_ce_count"] == 0
+    assert result["verification_summary"]["countries_missing_both_ce"] == []
     digest = _read_json(result["digest_path"])
     assert digest["run_context"]["run_id"] == "RUN-OP-LATEST-001"
     assert digest["run_context"]["country_set_id"] == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
@@ -233,6 +235,8 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
     evidence_lane = _read_json(result["operational_evidence_lane_path"])
     assert evidence_lane["latest_summary"]["country_set_id"] == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
     assert evidence_lane["latest_summary"]["combined_ce_ratio"] == 1.0
+    assert evidence_lane["latest_summary"]["countries_missing_both_ce_count"] == 0
+    assert evidence_lane["latest_summary"]["countries_missing_both_ce"] == []
     assert evidence_lane["latest_summary"]["release_verdict"] == "ready"
     assert evidence_lane["latest_summary"]["readiness_interpretation"] == "release_ready"
     assert evidence_lane["latest_summary"]["triage_tag"] == "ready_green"
@@ -410,6 +414,8 @@ def test_build_operational_latest_bundle_allows_degraded_runtime_when_explicitly
     assert result["policy_gate_verdict"] == "pass"
     evidence_lane = _read_json(result["operational_evidence_lane_path"])
     assert evidence_lane["latest_summary"]["governance_verdict"] == "amber"
+    assert evidence_lane["latest_summary"]["countries_missing_both_ce_count"] == 0
+    assert evidence_lane["latest_summary"]["countries_missing_both_ce"] == []
     assert evidence_lane["latest_summary"]["release_verdict"] == "blocked_by_known_gaps"
     assert evidence_lane["latest_summary"]["readiness_interpretation"] == "runtime_degraded_and_release_blocked"
     assert evidence_lane["latest_summary"]["triage_tag"] == "degraded_release_blocked"

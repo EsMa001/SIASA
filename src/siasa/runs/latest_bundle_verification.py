@@ -44,6 +44,7 @@ def verify_latest_bundle(
 
     digest = _read_json(artifacts_dir / "readmodels/live_probe_evidence_digest.json")
     run_context = digest.get("run_context") if isinstance(digest.get("run_context"), dict) else {}
+    ce_utilization = digest.get("ce_utilization") if isinstance(digest.get("ce_utilization"), dict) else {}
     if str(run_context.get("run_id", "unknown")) != str(system_status.get("run_id", "unknown")):
         raise ValueError("latest bundle digest run_id does not match system_status run_id")
     if str(run_context.get("run_status", "unknown")) != run_status:
@@ -51,11 +52,23 @@ def verify_latest_bundle(
     country_set_id = str(run_context.get("country_set_id", "unknown"))
     if country_set_id == "unknown":
         raise ValueError("latest bundle digest missing explicit country_set_id")
+    countries_missing_both_ce = [
+        str(item) for item in (ce_utilization.get("countries_missing_both_ce") or []) if str(item).strip()
+    ]
+    countries_missing_both_ce_count = len(countries_missing_both_ce)
 
     gate = _read_json(artifacts_dir / "readmodels/live_probe_policy_gate.json")
     observed = gate.get("observed") if isinstance(gate.get("observed"), dict) else {}
     if str(observed.get("run_id", "unknown")) != str(system_status.get("run_id", "unknown")):
         raise ValueError("latest bundle policy gate run_id does not match system_status run_id")
+    observed_missing_both_ce_count = int(observed.get("countries_missing_both_ce_count", 0) or 0)
+    observed_missing_both_ce = [
+        str(item) for item in (observed.get("countries_missing_both_ce") or []) if str(item).strip()
+    ]
+    if observed_missing_both_ce_count != countries_missing_both_ce_count:
+        raise ValueError("latest bundle policy gate countries_missing_both_ce_count does not match digest")
+    if sorted(observed_missing_both_ce) != sorted(countries_missing_both_ce):
+        raise ValueError("latest bundle policy gate countries_missing_both_ce list does not match digest")
     gate_verdict = str(gate.get("gate_verdict", "unknown"))
     if gate_verdict not in {"pass", "fail"}:
         raise ValueError("latest bundle policy gate has invalid gate_verdict")
@@ -92,5 +105,7 @@ def verify_latest_bundle(
         "active_domains": list(active_domains),
         "required_domains": list(required_domains),
         "countries_with_domain_e": countries_with_domain_e,
+        "countries_missing_both_ce_count": countries_missing_both_ce_count,
+        "countries_missing_both_ce": countries_missing_both_ce,
         "status": "ok",
     }

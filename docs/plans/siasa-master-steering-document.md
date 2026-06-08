@@ -468,6 +468,18 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_live_probe_evidence_digest.py tests/unit/test_live_probe_policy_gate.py -q` passed
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_latest_bundle_verification.py tests/unit/test_governed_live_runtime.py -q` passed
 
+### N1-WP-025
+Name:
+Propagate the new country-level dual C/E gap signal into latest-bundle verification and operational-latest summaries so broader governed runs can be validated and reviewed against that metric without opening raw digest JSON manually.
+
+Closure achieved:
+- `src/siasa/runs/latest_bundle_verification.py` now reads `countries_missing_both_ce` from `live_probe_evidence_digest.json`, verifies count/list consistency against `live_probe_policy_gate.json observed`, and returns `countries_missing_both_ce_count` plus `countries_missing_both_ce` in the machine-readable verification summary
+- `src/siasa/runs/operational_latest.py` now propagates those verified fields into `verification_summary` and the fresh `operational_evidence_lane.json latest_summary`, so the bounded operator/runtime summary carries the same governed signal
+- `tests/unit/test_latest_bundle_verification.py` now asserts accepted-summary propagation and rejects digest/gate mismatch on the new metric; `tests/unit/test_operational_latest.py` now asserts operational-latest propagation of the verified fields
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/runs/latest_bundle_verification.py src/siasa/runs/operational_latest.py tests/unit/test_latest_bundle_verification.py tests/unit/test_operational_latest.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_latest_bundle_verification.py -q` passed
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_governed_live_runtime.py tests/unit/test_live_probe_policy_gate.py -q` passed
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 
