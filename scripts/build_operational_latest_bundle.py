@@ -28,6 +28,11 @@ def main() -> int:
         action="store_true",
         help="Allow non-empty failed_sources when run status is accepted.",
     )
+    parser.add_argument(
+        "--allow-policy-gate-fail",
+        action="store_true",
+        help="Allow live-probe policy gate failure for explicit degraded inspection mode.",
+    )
     args = parser.parse_args()
 
     result = build_operational_latest_bundle(
@@ -39,6 +44,7 @@ def main() -> int:
         history_db_path=Path(args.history_db),
         allow_partial_success=args.allow_partial_success,
         allow_failed_sources=args.allow_failed_sources,
+        allow_policy_gate_fail=args.allow_policy_gate_fail,
     )
     print(
         f"run_status={result['run_status']} pilot_set={result['pilot_set']} "

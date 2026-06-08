@@ -505,6 +505,18 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_latest_bundle_verification.py -q` passed
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_governed_live_runtime.py tests/unit/test_live_probe_policy_gate.py -q` passed
 
+### N1-WP-028
+Name:
+Expose the explicit `allow_policy_gate_fail` degraded-inspection override on the operational-latest build CLI so automation and operators are not forced onto the Python API for parity with latest-bundle verification behavior.
+
+Closure achieved:
+- `scripts/build_operational_latest_bundle.py` now exposes CLI flag `--allow-policy-gate-fail`
+- the operational-latest CLI now threads that flag into `build_operational_latest_bundle(..., allow_policy_gate_fail=...)`
+- `tests/unit/test_build_operational_latest_bundle_script.py` now asserts the CLI passes the override into the builder and still emits the standard summary line
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile scripts/build_operational_latest_bundle.py tests/unit/test_build_operational_latest_bundle_script.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_build_operational_latest_bundle_script.py -q` passed
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_latest_bundle_verification.py -q` passed
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 
