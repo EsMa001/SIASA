@@ -132,6 +132,7 @@ def build_operational_latest_bundle(
     history_db_path: Path | None = None,
     allow_partial_success: bool = False,
     allow_failed_sources: bool = False,
+    allow_policy_gate_fail: bool = False,
     pipeline_runner: Callable[..., Any] = run_governed_live_pipeline,
     gui_builder: Callable[..., Path] = _default_gui_builder,
     run_history_writer: Callable[..., None] = persist_operational_latest_run,
@@ -175,6 +176,7 @@ def build_operational_latest_bundle(
         result.artifact_bundle.output_dir,
         allow_partial_success=allow_partial_success,
         allow_failed_sources=allow_failed_sources,
+        allow_policy_gate_fail=allow_policy_gate_fail,
     )
     readiness = json.loads((readmodels_dir / "readiness.json").read_text(encoding="utf-8"))
     release_verdict = str(readiness.get("release_verdict") or "unknown")

@@ -492,6 +492,19 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_live_probe_evidence_digest.py -q` passed
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_live_probe_policy_gate.py tests/unit/test_operational_latest.py tests/unit/test_governed_live_runtime.py -q` passed
 
+### N1-WP-027
+Name:
+Fail-close latest-bundle verification on live-probe policy-gate failure by default, while preserving an explicit override path for degraded inspection use cases.
+
+Closure achieved:
+- `src/siasa/runs/latest_bundle_verification.py` now rejects `gate_verdict=fail` by default and only accepts it when `allow_policy_gate_fail=True`
+- `src/siasa/runs/operational_latest.py` now threads `allow_policy_gate_fail` into bounded latest-bundle verification so operational-latest generation stays aligned with the governed live-probe gate contract
+- `scripts/verify_latest_bundle.py` now exposes CLI flag `--allow-policy-gate-fail` for explicit degraded inspection mode
+- `tests/unit/test_latest_bundle_verification.py` now asserts both default rejection and explicit acceptance of policy-gate fail bundles; `tests/unit/test_operational_latest.py` now asserts both default rejection and explicit acceptance in operational-latest flow under a constructed dual-C/E gap gate-fail scenario
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/runs/latest_bundle_verification.py src/siasa/runs/operational_latest.py scripts/verify_latest_bundle.py tests/unit/test_latest_bundle_verification.py tests/unit/test_operational_latest.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_latest_bundle_verification.py -q` passed
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_governed_live_runtime.py tests/unit/test_live_probe_policy_gate.py -q` passed
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 

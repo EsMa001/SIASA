@@ -4,6 +4,8 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
+import pytest
+
 from siasa.runs.operational_latest import DEFAULT_OPERATIONAL_LATEST_PILOT_SET, build_operational_latest_bundle
 
 
@@ -420,4 +422,107 @@ def test_build_operational_latest_bundle_allows_degraded_runtime_when_explicitly
     assert evidence_lane["latest_summary"]["readiness_interpretation"] == "runtime_degraded_and_release_blocked"
     assert evidence_lane["latest_summary"]["triage_tag"] == "degraded_release_blocked"
     assert evidence_lane["latest_summary"]["triage_summary"] == "Runtime degraded and release blocked; review failed sources and known gaps first."
+
+
+def test_build_operational_latest_bundle_fails_closed_on_policy_gate_fail_by_default(tmp_path: Path) -> None:
+    artifact_dir = tmp_path / "artifacts"
+    _write_policy_file(tmp_path)
+    _write_minimal_artifacts(
+        artifact_dir,
+        run_id="RUN-OP-LATEST-004",
+        run_status="success",
+        failed_sources=[],
+        country_set_id="MVP-COUNTRIES-LIVE-extended-focus-complete-v1",
+    )
+    (artifact_dir / "readmodels" / "world_map.json").write_text(
+        json.dumps(
+            {
+                "active_domains": ["A", "B", "C", "D", "E"],
+                "countries": [
+                    {
+                        "country_id": "UKR",
+                        "status": "warning",
+                        "active_domains": ["A", "B", "D"],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    runner = RecordingPipelineRunner(
+        FakePipelineResult(
+            run_state=FakeRunState(
+                run_id="RUN-OP-LATEST-004",
+                status="success",
+                failed_sources=[],
+                source_results=[FakeSourceResult(source_id="WB-INDICATORS", status="success")],
+            ),
+            artifact_bundle=FakeArtifactBundle(output_dir=artifact_dir),
+        )
+    )
+    gui_builder = RecordingGuiBuilder()
+
+    with pytest.raises(ValueError, match="policy gate failed closed"):
+        build_operational_latest_bundle(
+            repo_root=tmp_path,
+            run_id="RUN-OP-LATEST-004",
+            artifacts_dir=artifact_dir,
+            gui_output_dir=tmp_path / "gui",
+            pipeline_runner=runner,
+            gui_builder=gui_builder,
+        )
+
+
+def test_build_operational_latest_bundle_accepts_policy_gate_fail_when_explicitly_enabled(tmp_path: Path) -> None:
+    artifact_dir = tmp_path / "artifacts"
+    gui_dir = tmp_path / "gui"
+    _write_policy_file(tmp_path)
+    _write_minimal_artifacts(
+        artifact_dir,
+        run_id="RUN-OP-LATEST-005",
+        run_status="success",
+        failed_sources=[],
+        country_set_id="MVP-COUNTRIES-LIVE-extended-focus-complete-v1",
+    )
+    (artifact_dir / "readmodels" / "world_map.json").write_text(
+        json.dumps(
+            {
+                "active_domains": ["A", "B", "C", "D", "E"],
+                "countries": [
+                    {
+                        "country_id": "UKR",
+                        "status": "warning",
+                        "active_domains": ["A", "B", "D"],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    runner = RecordingPipelineRunner(
+        FakePipelineResult(
+            run_state=FakeRunState(
+                run_id="RUN-OP-LATEST-005",
+                status="success",
+                failed_sources=[],
+                source_results=[FakeSourceResult(source_id="WB-INDICATORS", status="success")],
+            ),
+            artifact_bundle=FakeArtifactBundle(output_dir=artifact_dir),
+        )
+    )
+    gui_builder = RecordingGuiBuilder()
+
+    result = build_operational_latest_bundle(
+        repo_root=tmp_path,
+        run_id="RUN-OP-LATEST-005",
+        artifacts_dir=artifact_dir,
+        gui_output_dir=gui_dir,
+        allow_policy_gate_fail=True,
+        pipeline_runner=runner,
+        gui_builder=gui_builder,
+    )
+
+    assert result["policy_gate_verdict"] == "fail"
+    assert result["verification_summary"]["countries_missing_both_ce_count"] == 1
+    assert result["verification_summary"]["countries_missing_both_ce"] == ["UKR"]
 

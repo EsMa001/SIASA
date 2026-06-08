@@ -206,6 +206,82 @@ def test_verify_latest_bundle_accepts_partial_success_and_failed_sources_when_en
     assert summary["countries_missing_both_ce"] == []
 
 
+def test_verify_latest_bundle_rejects_policy_gate_fail_by_default(tmp_path: Path) -> None:
+    artifacts_dir = _build_minimal_latest_bundle(tmp_path)
+    _write_json(
+        artifacts_dir / "readmodels/live_probe_policy_gate.json",
+        {
+            "gate_verdict": "fail",
+            "blockers": ["combined_ce_ratio_below_threshold:0.0000<0.5000"],
+            "observed": {
+                "run_id": "RUN-LIVE-001",
+                "run_status": "success",
+                "combined_ce_ratio": 0.0,
+                "failed_source_count": 0,
+                "countries_missing_both_ce_count": 1,
+                "countries_missing_both_ce": ["UKR"],
+                "governance_verdict": "amber",
+            },
+        },
+    )
+    _write_json(
+        artifacts_dir / "readmodels/live_probe_evidence_digest.json",
+        {
+            "run_context": {
+                "run_id": "RUN-LIVE-001",
+                "run_status": "success",
+                "country_set_id": "MVP-COUNTRIES-LIVE-focus-complete-v1",
+                "failed_source_count": 0,
+            },
+            "governance_summary": {"verdict": "amber"},
+            "ce_utilization": {"combined_ce_ratio": 0.0, "countries_missing_both_ce": ["UKR"]},
+        },
+    )
+
+    with pytest.raises(ValueError, match="policy gate failed closed"):
+        verify_latest_bundle(artifacts_dir)
+
+
+def test_verify_latest_bundle_accepts_policy_gate_fail_when_enabled(tmp_path: Path) -> None:
+    artifacts_dir = _build_minimal_latest_bundle(tmp_path)
+    _write_json(
+        artifacts_dir / "readmodels/live_probe_policy_gate.json",
+        {
+            "gate_verdict": "fail",
+            "blockers": ["combined_ce_ratio_below_threshold:0.0000<0.5000"],
+            "observed": {
+                "run_id": "RUN-LIVE-001",
+                "run_status": "success",
+                "combined_ce_ratio": 0.0,
+                "failed_source_count": 0,
+                "countries_missing_both_ce_count": 1,
+                "countries_missing_both_ce": ["UKR"],
+                "governance_verdict": "amber",
+            },
+        },
+    )
+    _write_json(
+        artifacts_dir / "readmodels/live_probe_evidence_digest.json",
+        {
+            "run_context": {
+                "run_id": "RUN-LIVE-001",
+                "run_status": "success",
+                "country_set_id": "MVP-COUNTRIES-LIVE-focus-complete-v1",
+                "failed_source_count": 0,
+            },
+            "governance_summary": {"verdict": "amber"},
+            "ce_utilization": {"combined_ce_ratio": 0.0, "countries_missing_both_ce": ["UKR"]},
+        },
+    )
+
+    summary = verify_latest_bundle(artifacts_dir, allow_policy_gate_fail=True)
+
+    assert summary["status"] == "ok"
+    assert summary["policy_gate_verdict"] == "fail"
+    assert summary["countries_missing_both_ce_count"] == 1
+    assert summary["countries_missing_both_ce"] == ["UKR"]
+
+
 def test_verify_latest_bundle_rejects_countries_missing_both_ce_mismatch_between_digest_and_gate(tmp_path: Path) -> None:
     artifacts_dir = _build_minimal_latest_bundle(tmp_path)
     _write_json(

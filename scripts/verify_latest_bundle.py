@@ -20,12 +20,18 @@ def main() -> int:
         action="store_true",
         help="Allow non-empty failed_sources list when run_status is acceptable.",
     )
+    parser.add_argument(
+        "--allow-policy-gate-fail",
+        action="store_true",
+        help="Allow live-probe policy gate verdict fail instead of requiring pass.",
+    )
     args = parser.parse_args()
 
     summary = verify_latest_bundle(
         Path(args.artifacts_dir),
         allow_partial_success=args.allow_partial_success,
         allow_failed_sources=args.allow_failed_sources,
+        allow_policy_gate_fail=args.allow_policy_gate_fail,
     )
     print(json.dumps(summary, indent=2, sort_keys=True))
     return 0

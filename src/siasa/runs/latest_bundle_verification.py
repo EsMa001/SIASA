@@ -23,6 +23,7 @@ def verify_latest_bundle(
     required_domains: tuple[str, ...] = ("A", "B", "D", "E"),
     allow_partial_success: bool = False,
     allow_failed_sources: bool = False,
+    allow_policy_gate_fail: bool = False,
 ) -> dict[str, Any]:
     missing_paths = [relative for relative in REQUIRED_LATEST_ARTIFACTS if not (artifacts_dir / relative).exists()]
     if missing_paths:
@@ -72,6 +73,8 @@ def verify_latest_bundle(
     gate_verdict = str(gate.get("gate_verdict", "unknown"))
     if gate_verdict not in {"pass", "fail"}:
         raise ValueError("latest bundle policy gate has invalid gate_verdict")
+    if gate_verdict != "pass" and not allow_policy_gate_fail:
+        raise ValueError("latest bundle policy gate failed closed: gate_verdict=fail")
 
     missing_required_domains = [domain for domain in required_domains if domain not in active_domains]
     if missing_required_domains:
