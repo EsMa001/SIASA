@@ -50,6 +50,12 @@ def _parse_args() -> argparse.Namespace:
         help="Optional override: maximum allowed failed source count",
     )
     parser.add_argument(
+        "--max-countries-missing-both-ce",
+        type=int,
+        default=None,
+        help="Optional override: maximum allowed countries missing both Domain C and Domain E evidence",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=None,
@@ -71,6 +77,7 @@ def main() -> int:
             min_combined_ce_ratio=float(args.min_combined_ce_ratio),
             allowed_verdicts=policy.allowed_verdicts,
             max_failed_sources=policy.max_failed_sources,
+            max_countries_missing_both_ce=policy.max_countries_missing_both_ce,
         )
     if args.allowed_verdicts is not None:
         allowed_verdicts = tuple(item.strip() for item in args.allowed_verdicts.split(",") if item.strip())
@@ -78,12 +85,21 @@ def main() -> int:
             min_combined_ce_ratio=policy.min_combined_ce_ratio,
             allowed_verdicts=allowed_verdicts or policy.allowed_verdicts,
             max_failed_sources=policy.max_failed_sources,
+            max_countries_missing_both_ce=policy.max_countries_missing_both_ce,
         )
     if args.max_failed_sources is not None:
         policy = LiveProbePolicy(
             min_combined_ce_ratio=policy.min_combined_ce_ratio,
             allowed_verdicts=policy.allowed_verdicts,
             max_failed_sources=int(args.max_failed_sources),
+            max_countries_missing_both_ce=policy.max_countries_missing_both_ce,
+        )
+    if args.max_countries_missing_both_ce is not None:
+        policy = LiveProbePolicy(
+            min_combined_ce_ratio=policy.min_combined_ce_ratio,
+            allowed_verdicts=policy.allowed_verdicts,
+            max_failed_sources=policy.max_failed_sources,
+            max_countries_missing_both_ce=int(args.max_countries_missing_both_ce),
         )
     evaluation = evaluate_live_probe_digest_policy(digest, policy=policy)
     if args.output is not None:

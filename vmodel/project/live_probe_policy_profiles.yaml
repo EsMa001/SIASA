@@ -4,11 +4,14 @@ profiles:
     min_combined_ce_ratio: 0.75
     allowed_verdicts: [green]
     max_failed_sources: 0
+    max_countries_missing_both_ce: 0
   standard:
     min_combined_ce_ratio: 0.50
     allowed_verdicts: [green, amber]
     max_failed_sources: 3
+    max_countries_missing_both_ce: 1
   degraded:
     min_combined_ce_ratio: 0.25
     allowed_verdicts: [green, amber]
     max_failed_sources: 8
+    max_countries_missing_both_ce: 8

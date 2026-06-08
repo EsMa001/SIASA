@@ -29,6 +29,10 @@ def build_live_probe_evidence_digest(*, artifacts_dir: Path) -> dict[str, Any]:
     country_rows: list[dict[str, Any]] = []
     c_active_count = 0
     e_active_count = 0
+    countries_missing_domain_c: list[str] = []
+    countries_missing_domain_e: list[str] = []
+    countries_missing_both_ce: list[str] = []
+    countries_with_full_ce: list[str] = []
 
     for country in countries:
         if not isinstance(country, dict):
@@ -41,6 +45,15 @@ def build_live_probe_evidence_digest(*, artifacts_dir: Path) -> dict[str, Any]:
         has_e = (domain_details_dir / f"{country_id}__E.json").exists() or ("E" in active_domains)
         c_active_count += 1 if has_c else 0
         e_active_count += 1 if has_e else 0
+        if not has_c:
+            countries_missing_domain_c.append(country_id)
+        if not has_e:
+            countries_missing_domain_e.append(country_id)
+        if has_c and has_e:
+            countries_with_full_ce.append(country_id)
+        else:
+            if not has_c and not has_e:
+                countries_missing_both_ce.append(country_id)
         country_rows.append(
             {
                 "country_id": country_id,
@@ -70,6 +83,7 @@ def build_live_probe_evidence_digest(*, artifacts_dir: Path) -> dict[str, Any]:
                 "min_combined_ce_ratio": policy.min_combined_ce_ratio,
                 "allowed_verdicts": list(policy.allowed_verdicts),
                 "max_failed_sources": policy.max_failed_sources,
+                "max_countries_missing_both_ce": policy.max_countries_missing_both_ce,
             }
         except Exception as exc:
             policy_resolution_error = str(exc)
@@ -121,6 +135,10 @@ def build_live_probe_evidence_digest(*, artifacts_dir: Path) -> dict[str, Any]:
             "domain_c_ratio": round(c_ratio, 4),
             "domain_e_ratio": round(e_ratio, 4),
             "combined_ce_ratio": round(ce_ratio, 4),
+            "countries_missing_domain_c": sorted(countries_missing_domain_c),
+            "countries_missing_domain_e": sorted(countries_missing_domain_e),
+            "countries_missing_both_ce": sorted(countries_missing_both_ce),
+            "countries_with_full_ce": sorted(countries_with_full_ce),
             "country_rows": country_rows,
         },
         "governance_summary": {

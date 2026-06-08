@@ -454,6 +454,20 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_latest_bundle_verification.py tests/unit/test_live_probe_policy_gate.py tests/unit/test_scheduler.py -q` passed
 
+### N1-WP-024
+Name:
+Add country-level dual C/E gap governance to the live-probe digest and policy gate so broader runtime slices cannot pass purely on aggregate combined C/E ratio while multiple countries still miss both structured Domain C and Domain E evidence.
+
+Closure achieved:
+- `src/siasa/readmodels/live_probe_evidence_digest.py` now emits deterministic country lists for `countries_missing_domain_c`, `countries_missing_domain_e`, `countries_missing_both_ce`, and `countries_with_full_ce` inside `ce_utilization`
+- `src/siasa/readmodels/live_probe_policy_gate.py` now supports policy field `max_countries_missing_both_ce`, exports the same threshold in the gate result, and fail-closes with blocker `countries_missing_both_ce_above_threshold:*` when too many countries lack both C and E evidence
+- `scripts/ci_live_probe_digest_gate_check.py` now exposes CLI override `--max-countries-missing-both-ce`, preserving profile-based governance while keeping runtime-specific overrides explicit
+- `vmodel/project/live_probe_policy_profiles.yaml` now versions the new threshold by posture (`strict=0`, `standard=1`, `degraded=8`), and `tests/unit/test_operational_latest.py` fixture policy setup was synchronized to the new profile contract
+- `tests/unit/test_live_probe_evidence_digest.py` now asserts the deterministic country-level gap lists; `tests/unit/test_live_probe_policy_gate.py` now asserts the new blocker and observed counters
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/readmodels/live_probe_evidence_digest.py src/siasa/readmodels/live_probe_policy_gate.py scripts/ci_live_probe_digest_gate_check.py tests/unit/test_live_probe_evidence_digest.py tests/unit/test_live_probe_policy_gate.py tests/unit/test_operational_latest.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_live_probe_evidence_digest.py tests/unit/test_live_probe_policy_gate.py -q` passed
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_latest_bundle_verification.py tests/unit/test_governed_live_runtime.py -q` passed
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 

@@ -43,6 +43,10 @@ def test_live_probe_evidence_digest_summarizes_ce_utilization_and_run_context(tm
     assert digest["ce_utilization"]["domain_e_active_country_count"] == 1
     assert digest["ce_utilization"]["countries_total"] == 2
     assert digest["ce_utilization"]["combined_ce_ratio"] == 0.5
+    assert digest["ce_utilization"]["countries_missing_domain_c"] == ["POL"]
+    assert digest["ce_utilization"]["countries_missing_domain_e"] == ["POL"]
+    assert digest["ce_utilization"]["countries_missing_both_ce"] == ["POL"]
+    assert digest["ce_utilization"]["countries_with_full_ce"] == ["UKR"]
     assert digest["governance_summary"]["verdict"] == "green"
 
 
@@ -79,6 +83,7 @@ def test_live_probe_evidence_digest_captures_policy_profile_context(tmp_path: Pa
         "min_combined_ce_ratio": 0.5,
         "allowed_verdicts": ["green", "amber"],
         "max_failed_sources": 3,
+        "max_countries_missing_both_ce": 1,
     }
     assert digest["ci_context"]["live_probe_policy_resolution_error"] is None
 

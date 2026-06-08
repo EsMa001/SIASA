@@ -134,7 +134,8 @@ def _write_policy_file(repo_root: Path) -> None:
         "  standard:\n"
         "    min_combined_ce_ratio: 0.5\n"
         "    allowed_verdicts: [green, amber]\n"
-        "    max_failed_sources: 3\n",
+        "    max_failed_sources: 3\n"
+        "    max_countries_missing_both_ce: 1\n",
         encoding="utf-8",
     )
 
