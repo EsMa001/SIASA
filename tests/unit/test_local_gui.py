@@ -706,6 +706,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 "run_status": "partial_success",
                 "pilot_set": "focus-complete",
                 "country_set_id": "MVP-COUNTRIES-LIVE-focus-complete-v1",
+                "countries_total": 21,
+                "countries_with_updates": 18,
+                "countries_without_updates_count": 3,
                 "combined_ce_ratio": 0.8571,
                 "governance_verdict": "amber",
                 "policy_gate_verdict": "pass",
@@ -758,6 +761,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                     "gui_index": "/tmp/siasa-gui-test/index.html",
                     "bundle_root": "/tmp/siasa-gui-test",
                     "country_set_id": "MVP-COUNTRIES-LIVE-focus-complete-v1",
+                    "countries_total": 21,
+                    "countries_with_updates": 18,
+                    "countries_without_updates_count": 3,
                     "combined_ce_ratio": 0.8571,
                     "governance_verdict": "amber",
                     "policy_gate_verdict": "pass",
@@ -805,6 +811,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                     "gui_index": "/tmp/siasa-history/RUN-150/index.html",
                     "bundle_root": "/tmp/siasa-history/RUN-150",
                     "country_set_id": "MVP-COUNTRIES-LIVE-extended-focus-complete-v1",
+                    "countries_total": 11,
+                    "countries_with_updates": 11,
+                    "countries_without_updates_count": 0,
                     "combined_ce_ratio": 1.0,
                     "governance_verdict": "green",
                     "policy_gate_verdict": "pass",
@@ -1086,6 +1095,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "partial_success" in runs_html
     assert "Operational Evidence Lane" in runs_html
     assert "MVP-COUNTRIES-LIVE-focus-complete-v1" in runs_html
+    assert "Coverage scope: <strong>18/21</strong> updated" in runs_html
+    assert "Countries without updates: <strong>3</strong>" in runs_html
     assert "0.8571" in runs_html
     assert "blocked_by_known_gaps" in runs_html
     assert "runtime_degraded_and_release_blocked" in runs_html
@@ -1132,6 +1143,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "release_package_json:/tmp/siasa-history/RUN-150/release_demo_package.json" in runs_html
     assert "release_gate_json:/tmp/siasa-history/RUN-150/release_gate.json" in runs_html
     assert "Run RUN-150: bundle at /tmp/siasa-history/RUN-150; review readiness_json:/tmp/siasa-history/RUN-150/readiness.json, coverage_json:/tmp/siasa-history/RUN-150/source_coverage.json, and release_gate_json:/tmp/siasa-history/RUN-150/release_gate.json." in runs_html
+    assert "Coverage scope: 18/21 updated | without updates: 3" in runs_html
+    assert "Coverage scope: 11/11 updated | without updates: 0" in runs_html
     assert "operational-evidence-history-table" in runs_html
     assert "operational-history-triage-filter" in runs_html
     assert "operational-history-recency-filter" in runs_html
@@ -1190,7 +1203,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "data-recency-band='last_24h'" in runs_html
     assert "data-hours-behind-latest='0'" in runs_html
     assert "data-hours-behind-latest='24'" in runs_html
-    assert "data-history-search-text='run-150 2026-05-10t18:00:00z success extended-focus-complete mvp-countries-live-extended-focus-complete-v1 green pass ready release_ready ready_green" in runs_html
+    assert "data-history-search-text='run-150 2026-05-10t18:00:00z success extended-focus-complete mvp-countries-live-extended-focus-complete-v1 11 11 0 green pass ready release_ready ready_green" in runs_html
     assert "run is green and release-ready; suitable as the default handoff baseline. strict run" in runs_html
     assert "data-recorded-at='2026-05-11T18:00:00Z'" in runs_html
     assert "data-recorded-at='2026-05-10T18:00:00Z'" in runs_html

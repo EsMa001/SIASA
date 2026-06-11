@@ -23,6 +23,11 @@ def _build_minimal_latest_bundle(tmp_path: Path) -> Path:
             "run_status": "success",
             "failed_sources": [],
             "country_set_id": "MVP-COUNTRIES-LIVE-focus-complete-v1",
+            "coverage": {
+                "countries_total": 3,
+                "countries_with_updates": 2,
+                "countries_without_updates": ["POL"],
+            },
         },
     )
     _write_json(
@@ -80,6 +85,10 @@ def test_verify_latest_bundle_accepts_valid_bundle(tmp_path: Path) -> None:
     assert summary["run_id"] == "RUN-LIVE-001"
     assert summary["country_set_id"] == "MVP-COUNTRIES-LIVE-focus-complete-v1"
     assert summary["policy_gate_verdict"] == "pass"
+    assert summary["countries_total"] == 3
+    assert summary["countries_with_updates"] == 2
+    assert summary["countries_without_updates_count"] == 1
+    assert summary["countries_without_updates"] == ["POL"]
     assert summary["countries_with_domain_e"] == ["UKR"]
     assert summary["countries_missing_both_ce_count"] == 0
     assert summary["countries_missing_both_ce"] == []
@@ -104,6 +113,27 @@ def test_verify_latest_bundle_rejects_when_domain_e_absent_in_profiles(tmp_path:
     )
 
     with pytest.raises(ValueError, match="no country profile with Domain E state"):
+        verify_latest_bundle(artifacts_dir)
+
+
+def test_verify_latest_bundle_rejects_when_coverage_exceeds_total(tmp_path: Path) -> None:
+    artifacts_dir = _build_minimal_latest_bundle(tmp_path)
+    _write_json(
+        artifacts_dir / "readmodels/system_status.json",
+        {
+            "run_id": "RUN-LIVE-001",
+            "run_status": "success",
+            "failed_sources": [],
+            "country_set_id": "MVP-COUNTRIES-LIVE-focus-complete-v1",
+            "coverage": {
+                "countries_total": 2,
+                "countries_with_updates": 3,
+                "countries_without_updates": [],
+            },
+        },
+    )
+
+    with pytest.raises(ValueError, match="countries_with_updates exceeds countries_total"):
         verify_latest_bundle(artifacts_dir)
 
 

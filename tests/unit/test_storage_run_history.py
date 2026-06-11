@@ -28,6 +28,9 @@ def test_persist_operational_latest_run_writes_run_and_sources(tmp_path: Path) -
             {"source_id": "SRC-GDELT-DOC", "status": "failed", "diagnostics": "timeout"},
         ],
         country_set_id="MVP-COUNTRIES-LIVE-extended-focus-complete-v1",
+        countries_total=11,
+        countries_with_updates=9,
+        countries_without_updates_count=2,
         combined_ce_ratio=0.8571,
         governance_verdict="amber",
         policy_gate_verdict="pass",
@@ -46,6 +49,9 @@ def test_persist_operational_latest_run_writes_run_and_sources(tmp_path: Path) -
     assert runs[0].pilot_set == "extended-focus-complete"
     assert runs[0].failed_sources == []
     assert runs[0].country_set_id == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
+    assert runs[0].countries_total == 11
+    assert runs[0].countries_with_updates == 9
+    assert runs[0].countries_without_updates_count == 2
     assert runs[0].combined_ce_ratio == 0.8571
     assert runs[0].governance_verdict == "amber"
     assert runs[0].policy_gate_verdict == "pass"
@@ -77,6 +83,9 @@ def test_persist_operational_latest_run_upserts_existing_run(tmp_path: Path) -> 
             {"source_id": "SRC-GDELT-DOC", "status": "failed", "diagnostics": "timeout"},
         ],
         country_set_id="MVP-COUNTRIES-LIVE-representative-v1",
+        countries_total=4,
+        countries_with_updates=3,
+        countries_without_updates_count=1,
         combined_ce_ratio=0.5,
         governance_verdict="amber",
         policy_gate_verdict="pass",
@@ -100,6 +109,9 @@ def test_persist_operational_latest_run_upserts_existing_run(tmp_path: Path) -> 
             {"source_id": "WB-INDICATORS", "status": "success", "diagnostics": ""},
         ],
         country_set_id="MVP-COUNTRIES-LIVE-extended-focus-complete-v1",
+        countries_total=11,
+        countries_with_updates=11,
+        countries_without_updates_count=0,
         combined_ce_ratio=0.8571,
         governance_verdict="green",
         policy_gate_verdict="pass",
@@ -119,6 +131,9 @@ def test_persist_operational_latest_run_upserts_existing_run(tmp_path: Path) -> 
     assert runs[0].gui_index.endswith("gui/latest_v2/index.html")
     assert runs[0].failed_sources == []
     assert runs[0].country_set_id == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
+    assert runs[0].countries_total == 11
+    assert runs[0].countries_with_updates == 11
+    assert runs[0].countries_without_updates_count == 0
     assert runs[0].combined_ce_ratio == 0.8571
     assert runs[0].governance_verdict == "green"
     assert runs[0].policy_gate_verdict == "pass"

@@ -578,6 +578,19 @@ Closure achieved:
 - updated `docs/plans/siasa-stakeholder-fulfillment-roadmap.md` with a direct shortcut reference to the executive view while keeping the master steering document as the single execution authority
 - validation evidence: targeted documentation check script passed and confirmed the new executive-view file plus expected headings/references; fulfillment recomputation remains `17/17 Done`, `100.0%`
 
+### N1-WP-034
+Name:
+Expose governed slice country-coverage breadth truth in latest-bundle verification, persisted run history, and the operational evidence lane so broader-runtime value is visible as actual updated-country scope rather than only pilot-set naming.
+
+Closure achieved:
+- `src/siasa/runs/latest_bundle_verification.py` now validates and returns `countries_total`, `countries_with_updates`, `countries_without_updates_count`, and `countries_without_updates` from `system_status.json coverage`, with fail-closed checks against impossible count combinations
+- `src/siasa/data/storage.py` and `RunHistoryEntry` now persist those breadth metrics through run history so broader-slice evidence remains historically comparable
+- `src/siasa/runs/operational_latest.py` now propagates the same coverage-scope fields into `latest_summary` and `recent_runs` inside `operational_evidence_lane.json`
+- `src/siasa/gui/local_app.py` now surfaces `Coverage scope` and countries-without-updates truth directly in the Operational Evidence Lane and in each archived history evidence cell
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/data/storage.py src/siasa/runs/latest_bundle_verification.py src/siasa/runs/operational_latest.py src/siasa/gui/local_app.py tests/unit/test_storage_run_history.py tests/unit/test_latest_bundle_verification.py tests/unit/test_operational_latest.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_storage_run_history.py tests/unit/test_latest_bundle_verification.py tests/unit/test_operational_latest.py tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`23 passed`)
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_live_probe_policy_gate.py tests/unit/test_live_probe_evidence_digest.py -q` passed (`11 passed`)
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 

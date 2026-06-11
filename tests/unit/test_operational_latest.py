@@ -73,6 +73,9 @@ def _write_minimal_artifacts(
     run_status: str,
     failed_sources: list[str],
     country_set_id: str,
+    countries_total: int = 3,
+    countries_with_updates: int = 2,
+    countries_without_updates: list[str] | None = None,
 ) -> None:
     (artifact_dir / "readmodels" / "country_profiles").mkdir(parents=True, exist_ok=True)
     (artifact_dir / "snapshot.json").write_text(json.dumps({"snapshot_id": "SNAP-001"}), encoding="utf-8")
@@ -83,6 +86,11 @@ def _write_minimal_artifacts(
                 "run_status": run_status,
                 "failed_sources": failed_sources,
                 "country_set_id": country_set_id,
+                "coverage": {
+                    "countries_total": countries_total,
+                    "countries_with_updates": countries_with_updates,
+                    "countries_without_updates": list(countries_without_updates or []),
+                },
             }
         ),
         encoding="utf-8",
@@ -212,6 +220,9 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
                 {"source_id": "SRC-GDELT-DOC", "status": "success", "diagnostics": ""},
             ],
             "country_set_id": "MVP-COUNTRIES-LIVE-extended-focus-complete-v1",
+            "countries_total": 3,
+            "countries_with_updates": 2,
+            "countries_without_updates_count": 0,
             "combined_ce_ratio": 1.0,
             "governance_verdict": "green",
             "policy_gate_verdict": "pass",
@@ -230,6 +241,9 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
     assert result["history_db"] == tmp_path / "build/run_history/latest_runs.sqlite"
     assert result["policy_gate_verdict"] == "pass"
     assert result["verification_summary"]["country_set_id"] == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
+    assert result["verification_summary"]["countries_total"] == 3
+    assert result["verification_summary"]["countries_with_updates"] == 2
+    assert result["verification_summary"]["countries_without_updates_count"] == 0
     assert result["verification_summary"]["countries_missing_both_ce_count"] == 0
     assert result["verification_summary"]["countries_missing_both_ce"] == []
     assert result["verification_summary"]["verification_policy"] == {
@@ -245,6 +259,9 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
     assert gate["gate_verdict"] == "pass"
     evidence_lane = _read_json(result["operational_evidence_lane_path"])
     assert evidence_lane["latest_summary"]["country_set_id"] == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
+    assert evidence_lane["latest_summary"]["countries_total"] == 3
+    assert evidence_lane["latest_summary"]["countries_with_updates"] == 2
+    assert evidence_lane["latest_summary"]["countries_without_updates_count"] == 0
     assert evidence_lane["latest_summary"]["combined_ce_ratio"] == 1.0
     assert evidence_lane["latest_summary"]["countries_missing_both_ce_count"] == 0
     assert evidence_lane["latest_summary"]["countries_missing_both_ce"] == []
@@ -288,6 +305,9 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
         f"release_gate_json:{gui_dir.resolve() / 'release_gate.json'}."
     )
     assert evidence_lane["recent_runs"][0]["gui_index"] == str(gui_dir / "index.html")
+    assert evidence_lane["recent_runs"][0]["countries_total"] == 3
+    assert evidence_lane["recent_runs"][0]["countries_with_updates"] == 2
+    assert evidence_lane["recent_runs"][0]["countries_without_updates_count"] == 0
     assert evidence_lane["recent_runs"][0]["bundle_root"] == str(gui_dir.resolve())
     assert evidence_lane["recent_runs"][0]["evidence_links"]["bundle_index_href"] == str(gui_dir.resolve() / "index.html")
     assert evidence_lane["recent_runs"][0]["share_refs"]["bundle_ref"] == f"bundle:{gui_dir.resolve()}"

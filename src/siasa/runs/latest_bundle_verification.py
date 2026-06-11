@@ -55,6 +55,17 @@ def verify_latest_bundle(
     failed_sources = list(system_status.get("failed_sources", []))
     if failed_sources and not allow_failed_sources:
         raise ValueError(f"latest bundle has failed_sources: {failed_sources}")
+    coverage = system_status.get("coverage") if isinstance(system_status.get("coverage"), dict) else {}
+    countries_total = int(coverage.get("countries_total", 0) or 0)
+    countries_with_updates = int(coverage.get("countries_with_updates", 0) or 0)
+    countries_without_updates = [
+        str(item) for item in (coverage.get("countries_without_updates") or []) if str(item).strip()
+    ]
+    countries_without_updates_count = len(countries_without_updates)
+    if countries_total and countries_with_updates > countries_total:
+        raise ValueError("latest bundle coverage countries_with_updates exceeds countries_total")
+    if countries_total and countries_with_updates + countries_without_updates_count > countries_total:
+        raise ValueError("latest bundle coverage countries_with_updates plus countries_without_updates exceeds countries_total")
 
     world_map = _read_json(artifacts_dir / "readmodels/world_map.json")
     active_domains = tuple(str(domain) for domain in world_map.get("active_domains", []))
@@ -118,6 +129,10 @@ def verify_latest_bundle(
         "run_id": system_status.get("run_id"),
         "run_status": run_status,
         "country_set_id": country_set_id,
+        "countries_total": countries_total,
+        "countries_with_updates": countries_with_updates,
+        "countries_without_updates_count": countries_without_updates_count,
+        "countries_without_updates": countries_without_updates,
         "failed_sources": failed_sources,
         "policy_gate_verdict": gate_verdict,
         "country_profile_count": len(profile_paths),

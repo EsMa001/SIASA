@@ -2971,12 +2971,21 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         handoff_summary = html.escape(str(item.get('handoff_summary', 'n/a')))
         triage_tag = html.escape(str(item.get('triage_tag', 'n/a')))
         triage_summary = html.escape(str(item.get('triage_summary', 'n/a')))
+        countries_total = int(item.get('countries_total', 0) or 0)
+        countries_with_updates = int(item.get('countries_with_updates', 0) or 0)
+        countries_without_updates_count = int(item.get('countries_without_updates_count', 0) or 0)
+        coverage_scope_summary = (
+            f"Coverage scope: {countries_with_updates}/{countries_total} updated | without updates: {countries_without_updates_count}"
+            if countries_total > 0
+            else "Coverage scope: n/a"
+        )
         return (
             f"<div>{page_links or 'n/a'}</div>"
             f"<div style='margin-top:4px;font-size:0.85em;'>{json_links or 'n/a'}</div>"
             f"<div class='history-bundle-meta' style='margin-top:4px;font-size:0.8em;color:#6b7d99;'>"
             f"bundle_root={bundle_root}<br>artifacts_dir={artifacts_dir}"
             "</div>"
+            f"<div class='history-coverage-scope' style='margin-top:4px;font-size:0.8em;color:#9fb3d9;'>{html.escape(coverage_scope_summary)}</div>"
             f"<div class='history-triage-summary' style='margin-top:4px;font-size:0.8em;color:#ffd479;'><strong>{triage_tag}</strong>: {triage_summary}</div>"
             f"<div class='history-handoff-summary' style='margin-top:4px;font-size:0.8em;color:#dae2fd;'>{handoff_summary}</div>"
             f"<div class='history-share-refs' style='margin-top:4px;font-size:0.8em;'>{share_refs_text}</div>"
@@ -3049,6 +3058,9 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
                 item.get('run_status', ''),
                 item.get('pilot_set', ''),
                 item.get('country_set_id', ''),
+                item.get('countries_total', ''),
+                item.get('countries_with_updates', ''),
+                item.get('countries_without_updates_count', ''),
                 item.get('governance_verdict', ''),
                 item.get('policy_gate_verdict', ''),
                 item.get('release_verdict', ''),
@@ -3530,7 +3542,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     ) or "<li>none</li>"
     evidence_lane_section = (
         "<div class='panel' id='operational-evidence-lane'><div class='panel-header'>Operational Evidence Lane</div>"
-        f"<p>Governed slice: <strong>{html.escape(str(latest_summary.get('country_set_id', 'n/a')))}</strong> | Combined C/E ratio: <strong>{combined_ce_ratio_text}</strong> | Governance verdict: <strong>{html.escape(governance_verdict)}</strong> | Policy gate: <strong>{html.escape(policy_gate_verdict)}</strong></p>"
+        f"<p>Governed slice: <strong>{html.escape(str(latest_summary.get('country_set_id', 'n/a')))}</strong> | Coverage scope: <strong>{html.escape(str(latest_summary.get('countries_with_updates', 0)))}/{html.escape(str(latest_summary.get('countries_total', 0)))}</strong> updated | Countries without updates: <strong>{html.escape(str(latest_summary.get('countries_without_updates_count', 0)))}</strong> | Combined C/E ratio: <strong>{combined_ce_ratio_text}</strong> | Governance verdict: <strong>{html.escape(governance_verdict)}</strong> | Policy gate: <strong>{html.escape(policy_gate_verdict)}</strong></p>"
         f"<p>Release verdict: <strong>{html.escape(release_verdict)}</strong> | Readiness interpretation: <strong>{html.escape(readiness_interpretation)}</strong> | Known gaps: <strong>{html.escape(str(known_gap_count))}</strong></p>"
         f"<p>Triage tag: <strong>{latest_triage_tag}</strong> | Triage summary: <strong>{latest_triage_summary}</strong></p>"
         f"<p>Verification mode: <strong>{html.escape(verification_mode)}</strong> | Enabled overrides: <strong>{html.escape(verification_override_text)}</strong></p>"
