@@ -3292,11 +3292,31 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
   }
 
   function buildOperationalHistoryVisiblePayload(visibleRows, triageCounts, recencyCounts) {
+    const verificationModeCounts = Object.fromEntries(
+      Object.entries(
+        visibleRows.reduce((counts, row) => {
+          const mode = (row.children[11] ? row.children[11].textContent.trim() : 'n/a') || 'n/a';
+          counts[mode] = (counts[mode] || 0) + 1;
+          return counts;
+        }, {})
+      ).sort((a, b) => a[0].localeCompare(b[0]))
+    );
+    const overrideProfileCounts = Object.fromEntries(
+      Object.entries(
+        visibleRows.reduce((counts, row) => {
+          const overrides = (row.children[12] ? row.children[12].textContent.trim() : 'none') || 'none';
+          counts[overrides] = (counts[overrides] || 0) + 1;
+          return counts;
+        }, {})
+      ).sort((a, b) => a[0].localeCompare(b[0]))
+    );
     return {
       visible_runs: visibleRows.length,
       run_ids: visibleRows.map((row) => (row.children[0] ? row.children[0].textContent.trim() : 'n/a')).filter(Boolean),
       triage_counts: Object.fromEntries(Object.entries(triageCounts).sort((a, b) => a[0].localeCompare(b[0]))),
       recency_counts: Object.fromEntries(Object.entries(recencyCounts).sort((a, b) => a[0].localeCompare(b[0]))),
+      verification_mode_counts: verificationModeCounts,
+      override_profile_counts: overrideProfileCounts,
       rows: visibleRows.map((row) => ({
         run_id: row.children[0] ? row.children[0].textContent.trim() : 'n/a',
         recorded_at: row.children[1] ? row.children[1].textContent.trim() : 'n/a',

@@ -1205,10 +1205,14 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "verification=${verificationModeSummary}" in runs_html
     assert "overrides=${overrideSummary}" in runs_html
     assert "buildOperationalHistoryVisiblePayload" in runs_html
+    assert "verification_mode_counts: verificationModeCounts" in runs_html
+    assert "override_profile_counts: overrideProfileCounts" in runs_html
     assert "visible_runs" in runs_html
     assert "run_ids" in runs_html
     assert "triage_counts" in runs_html
     assert "recency_counts" in runs_html
+    assert "verification_mode_counts" in runs_html
+    assert "override_profile_counts" in runs_html
     assert "recorded_at" in runs_html
     assert "hours_behind_latest" in runs_html
     assert "run_status" in runs_html

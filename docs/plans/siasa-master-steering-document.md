@@ -556,6 +556,18 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_operational_latest.py tests/unit/test_storage_run_history.py -q` passed
 
+### N1-WP-032
+Name:
+Expose machine-readable verification-mode composition in the operational-history visible-slice JSON payload so downstream audit/export consumers preserve strict-vs-override slice truth without row-by-row reconstruction.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now extends `buildOperationalHistoryVisiblePayload()` with deterministic top-level `verification_mode_counts` and `override_profile_counts` aggregates derived from the currently visible rows
+- per-row payload fields remain unchanged, but exported visible-slice JSON now also carries slice-level verification composition directly for machine consumers
+- `tests/unit/test_local_gui.py` now asserts the new payload keys plus the helper wiring strings `verification_mode_counts: verificationModeCounts` and `override_profile_counts: overrideProfileCounts`
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/gui/local_app.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_operational_latest.py tests/unit/test_storage_run_history.py -q` passed
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 
