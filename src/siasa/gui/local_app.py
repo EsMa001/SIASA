@@ -2974,10 +2974,16 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         countries_total = int(item.get('countries_total', 0) or 0)
         countries_with_updates = int(item.get('countries_with_updates', 0) or 0)
         countries_without_updates_count = int(item.get('countries_without_updates_count', 0) or 0)
+        countries_without_updates = [str(value).strip() for value in (item.get('countries_without_updates') or []) if str(value).strip()]
         coverage_scope_summary = (
             f"Coverage scope: {countries_with_updates}/{countries_total} updated | without updates: {countries_without_updates_count}"
             if countries_total > 0
             else "Coverage scope: n/a"
+        )
+        coverage_scope_detail = (
+            f"Countries without updates: {', '.join(countries_without_updates)}"
+            if countries_without_updates
+            else "Countries without updates: none"
         )
         return (
             f"<div>{page_links or 'n/a'}</div>"
@@ -2986,6 +2992,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
             f"bundle_root={bundle_root}<br>artifacts_dir={artifacts_dir}"
             "</div>"
             f"<div class='history-coverage-scope' style='margin-top:4px;font-size:0.8em;color:#9fb3d9;'>{html.escape(coverage_scope_summary)}</div>"
+            f"<div class='history-coverage-gaps' style='margin-top:4px;font-size:0.8em;color:#9fb3d9;'>{html.escape(coverage_scope_detail)}</div>"
             f"<div class='history-triage-summary' style='margin-top:4px;font-size:0.8em;color:#ffd479;'><strong>{triage_tag}</strong>: {triage_summary}</div>"
             f"<div class='history-handoff-summary' style='margin-top:4px;font-size:0.8em;color:#dae2fd;'>{handoff_summary}</div>"
             f"<div class='history-share-refs' style='margin-top:4px;font-size:0.8em;'>{share_refs_text}</div>"
@@ -3061,6 +3068,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
                 item.get('countries_total', ''),
                 item.get('countries_with_updates', ''),
                 item.get('countries_without_updates_count', ''),
+                ' '.join(str(value).strip() for value in (item.get('countries_without_updates') or []) if str(value).strip()),
                 item.get('governance_verdict', ''),
                 item.get('policy_gate_verdict', ''),
                 item.get('release_verdict', ''),
@@ -3540,6 +3548,10 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<li>{html.escape(str(item))}</li>"
         for item in latest_summary.get('known_gaps', [])
     ) or "<li>none</li>"
+    latest_countries_without_updates = ''.join(
+        f"<li>{html.escape(str(item))}</li>"
+        for item in latest_summary.get('countries_without_updates', [])
+    ) or "<li>none</li>"
     evidence_lane_section = (
         "<div class='panel' id='operational-evidence-lane'><div class='panel-header'>Operational Evidence Lane</div>"
         f"<p>Governed slice: <strong>{html.escape(str(latest_summary.get('country_set_id', 'n/a')))}</strong> | Coverage scope: <strong>{html.escape(str(latest_summary.get('countries_with_updates', 0)))}/{html.escape(str(latest_summary.get('countries_total', 0)))}</strong> updated | Countries without updates: <strong>{html.escape(str(latest_summary.get('countries_without_updates_count', 0)))}</strong> | Combined C/E ratio: <strong>{combined_ce_ratio_text}</strong> | Governance verdict: <strong>{html.escape(governance_verdict)}</strong> | Policy gate: <strong>{html.escape(policy_gate_verdict)}</strong></p>"
@@ -3552,6 +3564,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<details><summary>Latest bundle evidence links</summary><ul>{latest_evidence_link_items}</ul></details>"
         f"<details><summary>Latest bundle share refs</summary><ul>{latest_share_ref_items}</ul></details>"
         f"<details><summary>Latest failed sources ({html.escape(str(latest_summary.get('failed_source_count', 0)))})</summary><ul>{latest_failed_sources}</ul></details>"
+        f"<details><summary>Countries without updates ({html.escape(str(latest_summary.get('countries_without_updates_count', 0)))})</summary><ul>{latest_countries_without_updates}</ul></details>"
         f"<details><summary>Latest known gaps ({html.escape(str(known_gap_count))})</summary><ul>{latest_known_gaps}</ul></details>"
         "<h3>Recent Operational History</h3>"
         "<p>Quick triage controls help narrow archived runs by review posture before opening detailed evidence.</p>"

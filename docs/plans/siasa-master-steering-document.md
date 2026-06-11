@@ -591,6 +591,18 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_storage_run_history.py tests/unit/test_latest_bundle_verification.py tests/unit/test_operational_latest.py tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`23 passed`)
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_live_probe_policy_gate.py tests/unit/test_live_probe_evidence_digest.py -q` passed (`11 passed`)
 
+### N1-WP-035
+Name:
+Expose the concrete countries-without-updates list in persisted run history and the operational evidence lane so broader-slice breadth loss can be audited and handed off by affected country, not only by aggregate count.
+
+Closure achieved:
+- `src/siasa/data/storage.py` and `RunHistoryEntry` now persist `countries_without_updates` as a historical JSON list alongside the breadth counts
+- `src/siasa/runs/operational_latest.py` now propagates the same list into `latest_summary` and `recent_runs` inside `operational_evidence_lane.json`
+- `src/siasa/gui/local_app.py` now renders `Countries without updates (...)` detail in the latest evidence lane, adds a concrete `Countries without updates: ...` line in each archived history evidence cell, and threads the missing-country IDs into the history search payload
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/data/storage.py src/siasa/runs/latest_bundle_verification.py src/siasa/runs/operational_latest.py src/siasa/gui/local_app.py tests/unit/test_storage_run_history.py tests/unit/test_latest_bundle_verification.py tests/unit/test_operational_latest.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_storage_run_history.py tests/unit/test_latest_bundle_verification.py tests/unit/test_operational_latest.py tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`23 passed`)
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_live_probe_policy_gate.py tests/unit/test_live_probe_evidence_digest.py -q` passed (`11 passed`)
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 

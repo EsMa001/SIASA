@@ -21,6 +21,7 @@ class RunHistoryEntry:
     countries_total: int
     countries_with_updates: int
     countries_without_updates_count: int
+    countries_without_updates: list[str]
     combined_ce_ratio: float | None
     governance_verdict: str
     policy_gate_verdict: str
@@ -89,6 +90,7 @@ def initialize_run_history_schema(db_path: Path) -> None:
             "countries_total": "ALTER TABLE runs ADD COLUMN countries_total INTEGER DEFAULT 0",
             "countries_with_updates": "ALTER TABLE runs ADD COLUMN countries_with_updates INTEGER DEFAULT 0",
             "countries_without_updates_count": "ALTER TABLE runs ADD COLUMN countries_without_updates_count INTEGER DEFAULT 0",
+            "countries_without_updates_json": "ALTER TABLE runs ADD COLUMN countries_without_updates_json TEXT DEFAULT '[]'",
             "combined_ce_ratio": "ALTER TABLE runs ADD COLUMN combined_ce_ratio REAL",
             "governance_verdict": "ALTER TABLE runs ADD COLUMN governance_verdict TEXT",
             "policy_gate_verdict": "ALTER TABLE runs ADD COLUMN policy_gate_verdict TEXT",
@@ -147,6 +149,7 @@ def persist_operational_latest_run(
     countries_total: int | None = None,
     countries_with_updates: int | None = None,
     countries_without_updates_count: int | None = None,
+    countries_without_updates: list[str] | None = None,
     combined_ce_ratio: float | None = None,
     governance_verdict: str | None = None,
     policy_gate_verdict: str | None = None,
@@ -176,6 +179,7 @@ def persist_operational_latest_run(
                 countries_total,
                 countries_with_updates,
                 countries_without_updates_count,
+                countries_without_updates_json,
                 combined_ce_ratio,
                 governance_verdict,
                 policy_gate_verdict,
@@ -186,7 +190,7 @@ def persist_operational_latest_run(
                 allow_failed_sources,
                 allow_policy_gate_fail
             )
-            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(run_id) DO UPDATE SET
                 recorded_at=excluded.recorded_at,
                 run_status=excluded.run_status,
@@ -198,6 +202,7 @@ def persist_operational_latest_run(
                 countries_total=excluded.countries_total,
                 countries_with_updates=excluded.countries_with_updates,
                 countries_without_updates_count=excluded.countries_without_updates_count,
+                countries_without_updates_json=excluded.countries_without_updates_json,
                 combined_ce_ratio=excluded.combined_ce_ratio,
                 governance_verdict=excluded.governance_verdict,
                 policy_gate_verdict=excluded.policy_gate_verdict,
@@ -220,6 +225,7 @@ def persist_operational_latest_run(
                 int(countries_total) if countries_total is not None else 0,
                 int(countries_with_updates) if countries_with_updates is not None else 0,
                 int(countries_without_updates_count) if countries_without_updates_count is not None else 0,
+                json.dumps(sorted(str(item).strip() for item in (countries_without_updates or []) if str(item).strip())),
                 float(combined_ce_ratio) if combined_ce_ratio is not None else None,
                 str(governance_verdict or "unknown"),
                 str(policy_gate_verdict or "unknown"),
@@ -267,6 +273,7 @@ def load_recent_runs(db_path: Path, *, limit: int = 20) -> list[RunHistoryEntry]
                 countries_total,
                 countries_with_updates,
                 countries_without_updates_count,
+                countries_without_updates_json,
                 combined_ce_ratio,
                 governance_verdict,
                 policy_gate_verdict,
@@ -296,6 +303,7 @@ def load_recent_runs(db_path: Path, *, limit: int = 20) -> list[RunHistoryEntry]
             countries_total=int(row["countries_total"] or 0),
             countries_with_updates=int(row["countries_with_updates"] or 0),
             countries_without_updates_count=int(row["countries_without_updates_count"] or 0),
+            countries_without_updates=list(json.loads(str(row["countries_without_updates_json"] or "[]"))),
             combined_ce_ratio=float(row["combined_ce_ratio"]) if row["combined_ce_ratio"] is not None else None,
             governance_verdict=str(row["governance_verdict"] or "unknown"),
             policy_gate_verdict=str(row["policy_gate_verdict"] or "unknown"),

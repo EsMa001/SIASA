@@ -31,6 +31,7 @@ def test_persist_operational_latest_run_writes_run_and_sources(tmp_path: Path) -
         countries_total=11,
         countries_with_updates=9,
         countries_without_updates_count=2,
+        countries_without_updates=["EST", "MMR"],
         combined_ce_ratio=0.8571,
         governance_verdict="amber",
         policy_gate_verdict="pass",
@@ -52,6 +53,7 @@ def test_persist_operational_latest_run_writes_run_and_sources(tmp_path: Path) -
     assert runs[0].countries_total == 11
     assert runs[0].countries_with_updates == 9
     assert runs[0].countries_without_updates_count == 2
+    assert runs[0].countries_without_updates == ["EST", "MMR"]
     assert runs[0].combined_ce_ratio == 0.8571
     assert runs[0].governance_verdict == "amber"
     assert runs[0].policy_gate_verdict == "pass"
@@ -86,6 +88,7 @@ def test_persist_operational_latest_run_upserts_existing_run(tmp_path: Path) -> 
         countries_total=4,
         countries_with_updates=3,
         countries_without_updates_count=1,
+        countries_without_updates=["POL"],
         combined_ce_ratio=0.5,
         governance_verdict="amber",
         policy_gate_verdict="pass",
@@ -112,6 +115,7 @@ def test_persist_operational_latest_run_upserts_existing_run(tmp_path: Path) -> 
         countries_total=11,
         countries_with_updates=11,
         countries_without_updates_count=0,
+        countries_without_updates=[],
         combined_ce_ratio=0.8571,
         governance_verdict="green",
         policy_gate_verdict="pass",
@@ -134,6 +138,7 @@ def test_persist_operational_latest_run_upserts_existing_run(tmp_path: Path) -> 
     assert runs[0].countries_total == 11
     assert runs[0].countries_with_updates == 11
     assert runs[0].countries_without_updates_count == 0
+    assert runs[0].countries_without_updates == []
     assert runs[0].combined_ce_ratio == 0.8571
     assert runs[0].governance_verdict == "green"
     assert runs[0].policy_gate_verdict == "pass"
