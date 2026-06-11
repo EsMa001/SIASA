@@ -568,6 +568,16 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_operational_latest.py tests/unit/test_storage_run_history.py -q` passed
 
+### N1-WP-033
+Name:
+Add a one-page executive steering view of the next large SIASA package families so project-lead communication can stay compact without creating a competing steering source.
+
+Closure achieved:
+- added `docs/plans/siasa-next-big-packages-executive-view.md` as a compact management-facing summary of the next major package families (`G1`, `G2`, `G4`, `G5`) with target state, user value, main risks, dependencies/gating, relative size, recommended order, and next bounded package focus
+- updated `docs/plans/siasa-planning-audit-and-next-steps.md` to classify the new file as an active project-lead communication layer
+- updated `docs/plans/siasa-stakeholder-fulfillment-roadmap.md` with a direct shortcut reference to the executive view while keeping the master steering document as the single execution authority
+- validation evidence: targeted documentation check script passed and confirmed the new executive-view file plus expected headings/references; fulfillment recomputation remains `17/17 Done`, `100.0%`
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 

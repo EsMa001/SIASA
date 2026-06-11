@@ -2,6 +2,8 @@
 
 > Steering note: `docs/plans/siasa-master-steering-document.md` is now the single steering document. This roadmap remains a strategic reference, but next-step selection should be taken from the master steering document.
 >
+> Project-lead communication shortcut: `docs/plans/siasa-next-big-packages-executive-view.md` provides a one-page summary of the next large package families (G1/G2/G4/G5) and their recommended order.
+>
 > For Hermes: execute serially, one work package at a time, with TDD, validation, commit, and push after each completed package.
 
 Goal: turn the current requirements-driven SIASA MVP baseline into a program that substantively satisfies the stakeholder GUI and analyst-workflow expectations, not only the current static read-model baseline.

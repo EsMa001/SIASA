@@ -58,6 +58,18 @@ How it should be used:
 - deciding which plan is authoritative for which purpose
 - defining the next serial execution sequence from the current baseline
 
+#### D) `docs/plans/siasa-next-big-packages-executive-view.md`
+Status: ACTIVE / PROJECT-LEAD COMMUNICATION LAYER
+
+Why it exists:
+- Project lead sometimes needs a one-page view of the next major package families rather than the full steering narrative.
+- The master steering document is authoritative, but it is intentionally more detailed and execution-oriented.
+
+How it should be used:
+- management/executive communication
+- quick comparison of G1/G2/G4/G5 package families
+- explaining recommended order, risk, gating, and next bounded package focus
+
 ---
 
 ### 1.2 Historical-but-still-useful reference documents
