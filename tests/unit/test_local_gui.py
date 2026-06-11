@@ -751,6 +751,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 "handoff_summary": "Run RUN-200: bundle at /tmp/siasa-gui-test; review readiness_json:/tmp/siasa-gui-test/readiness.json, coverage_json:/tmp/siasa-gui-test/source_coverage.json, and release_gate_json:/tmp/siasa-gui-test/release_gate.json.",
                 "triage_tag": "degraded_release_blocked",
                 "triage_summary": "Runtime degraded and release blocked; review failed sources and known gaps first.",
+                "breadth_coverage_tag": "breadth_partial_slice_updated",
+                "breadth_coverage_summary": "18/21 countries updated; missing updates remain in EST, MMR, QAT.",
             },
             "recent_runs": [
                 {
@@ -803,6 +805,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                     "handoff_summary": "Run RUN-200: bundle at /tmp/siasa-gui-test; review readiness_json:/tmp/siasa-gui-test/readiness.json, coverage_json:/tmp/siasa-gui-test/source_coverage.json, and release_gate_json:/tmp/siasa-gui-test/release_gate.json.",
                     "triage_tag": "degraded_release_blocked",
                     "triage_summary": "Runtime degraded and release blocked; review failed sources and known gaps first.",
+                    "breadth_coverage_tag": "breadth_partial_slice_updated",
+                    "breadth_coverage_summary": "18/21 countries updated; missing updates remain in EST, MMR, QAT.",
                 },
                 {
                     "run_id": "RUN-150",
@@ -854,6 +858,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                     "handoff_summary": "Run RUN-150: bundle at /tmp/siasa-history/RUN-150; review readiness_json:/tmp/siasa-history/RUN-150/readiness.json, coverage_json:/tmp/siasa-history/RUN-150/source_coverage.json, and release_gate_json:/tmp/siasa-history/RUN-150/release_gate.json.",
                     "triage_tag": "ready_green",
                     "triage_summary": "Run is green and release-ready; suitable as the default handoff baseline.",
+                    "breadth_coverage_tag": "breadth_full_slice_updated",
+                    "breadth_coverage_summary": "All countries in the governed slice produced updates; this run is a full breadth proof for the selected slice.",
                 }
             ],
         },
@@ -1100,6 +1106,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "MVP-COUNTRIES-LIVE-focus-complete-v1" in runs_html
     assert "Coverage scope: <strong>18/21</strong> updated" in runs_html
     assert "Countries without updates: <strong>3</strong>" in runs_html
+    assert "Breadth coverage: <strong>breadth_partial_slice_updated</strong>" in runs_html
+    assert "18/21 countries updated; missing updates remain in EST, MMR, QAT." in runs_html
     assert "Countries without updates (3)" in runs_html
     assert "EST" in runs_html and "MMR" in runs_html and "QAT" in runs_html
     assert "0.8571" in runs_html
@@ -1150,8 +1158,12 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Run RUN-150: bundle at /tmp/siasa-history/RUN-150; review readiness_json:/tmp/siasa-history/RUN-150/readiness.json, coverage_json:/tmp/siasa-history/RUN-150/source_coverage.json, and release_gate_json:/tmp/siasa-history/RUN-150/release_gate.json." in runs_html
     assert "Coverage scope: 18/21 updated | without updates: 3" in runs_html
     assert "Countries without updates: EST, MMR, QAT" in runs_html
+    assert "breadth_partial_slice_updated" in runs_html
+    assert "18/21 countries updated; missing updates remain in EST, MMR, QAT." in runs_html
     assert "Coverage scope: 11/11 updated | without updates: 0" in runs_html
     assert "Countries without updates: none" in runs_html
+    assert "breadth_full_slice_updated" in runs_html
+    assert "All countries in the governed slice produced updates; this run is a full breadth proof for the selected slice." in runs_html
     assert "operational-evidence-history-table" in runs_html
     assert "operational-history-triage-filter" in runs_html
     assert "operational-history-recency-filter" in runs_html
@@ -1210,8 +1222,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "data-recency-band='last_24h'" in runs_html
     assert "data-hours-behind-latest='0'" in runs_html
     assert "data-hours-behind-latest='24'" in runs_html
-    assert "data-history-search-text='run-150 2026-05-10t18:00:00z success extended-focus-complete mvp-countries-live-extended-focus-complete-v1 11 11 0 green pass ready release_ready ready_green" in runs_html
-    assert "data-history-search-text='run-200 2026-05-11t18:00:00z partial_success focus-complete mvp-countries-live-focus-complete-v1 21 18 3 est mmr qat amber pass blocked_by_known_gaps runtime_degraded_and_release_blocked degraded_release_blocked" in runs_html
+    assert "data-history-search-text='run-150 2026-05-10t18:00:00z success extended-focus-complete mvp-countries-live-extended-focus-complete-v1 11 11 0 breadth_full_slice_updated all countries in the governed slice produced updates; this run is a full breadth proof for the selected slice. green pass ready release_ready ready_green" in runs_html
+    assert "data-history-search-text='run-200 2026-05-11t18:00:00z partial_success focus-complete mvp-countries-live-focus-complete-v1 21 18 3 est mmr qat breadth_partial_slice_updated 18/21 countries updated; missing updates remain in est, mmr, qat. amber pass blocked_by_known_gaps runtime_degraded_and_release_blocked degraded_release_blocked" in runs_html
     assert "run is green and release-ready; suitable as the default handoff baseline. strict run" in runs_html
     assert "data-recorded-at='2026-05-11T18:00:00Z'" in runs_html
     assert "data-recorded-at='2026-05-10T18:00:00Z'" in runs_html

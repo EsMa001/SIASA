@@ -2931,6 +2931,8 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     latest_handoff_summary = html.escape(str(latest_summary.get('handoff_summary', 'n/a')))
     latest_triage_tag = html.escape(str(latest_summary.get('triage_tag', 'n/a')))
     latest_triage_summary = html.escape(str(latest_summary.get('triage_summary', 'n/a')))
+    latest_breadth_coverage_tag = html.escape(str(latest_summary.get('breadth_coverage_tag', 'n/a')))
+    latest_breadth_coverage_summary = html.escape(str(latest_summary.get('breadth_coverage_summary', 'n/a')))
 
     def _render_history_evidence_cell(item: dict[str, Any]) -> str:
         item_links = item.get('evidence_links', {}) if isinstance(item.get('evidence_links'), dict) else {}
@@ -2985,6 +2987,8 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
             if countries_without_updates
             else "Countries without updates: none"
         )
+        breadth_coverage_tag = html.escape(str(item.get('breadth_coverage_tag', 'n/a')))
+        breadth_coverage_summary = html.escape(str(item.get('breadth_coverage_summary', 'n/a')))
         return (
             f"<div>{page_links or 'n/a'}</div>"
             f"<div style='margin-top:4px;font-size:0.85em;'>{json_links or 'n/a'}</div>"
@@ -2993,6 +2997,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
             "</div>"
             f"<div class='history-coverage-scope' style='margin-top:4px;font-size:0.8em;color:#9fb3d9;'>{html.escape(coverage_scope_summary)}</div>"
             f"<div class='history-coverage-gaps' style='margin-top:4px;font-size:0.8em;color:#9fb3d9;'>{html.escape(coverage_scope_detail)}</div>"
+            f"<div class='history-breadth-coverage' style='margin-top:4px;font-size:0.8em;color:#9fb3d9;'><strong>{breadth_coverage_tag}</strong>: {breadth_coverage_summary}</div>"
             f"<div class='history-triage-summary' style='margin-top:4px;font-size:0.8em;color:#ffd479;'><strong>{triage_tag}</strong>: {triage_summary}</div>"
             f"<div class='history-handoff-summary' style='margin-top:4px;font-size:0.8em;color:#dae2fd;'>{handoff_summary}</div>"
             f"<div class='history-share-refs' style='margin-top:4px;font-size:0.8em;'>{share_refs_text}</div>"
@@ -3069,6 +3074,8 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
                 item.get('countries_with_updates', ''),
                 item.get('countries_without_updates_count', ''),
                 ' '.join(str(value).strip() for value in (item.get('countries_without_updates') or []) if str(value).strip()),
+                item.get('breadth_coverage_tag', ''),
+                item.get('breadth_coverage_summary', ''),
                 item.get('governance_verdict', ''),
                 item.get('policy_gate_verdict', ''),
                 item.get('release_verdict', ''),
@@ -3555,6 +3562,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     evidence_lane_section = (
         "<div class='panel' id='operational-evidence-lane'><div class='panel-header'>Operational Evidence Lane</div>"
         f"<p>Governed slice: <strong>{html.escape(str(latest_summary.get('country_set_id', 'n/a')))}</strong> | Coverage scope: <strong>{html.escape(str(latest_summary.get('countries_with_updates', 0)))}/{html.escape(str(latest_summary.get('countries_total', 0)))}</strong> updated | Countries without updates: <strong>{html.escape(str(latest_summary.get('countries_without_updates_count', 0)))}</strong> | Combined C/E ratio: <strong>{combined_ce_ratio_text}</strong> | Governance verdict: <strong>{html.escape(governance_verdict)}</strong> | Policy gate: <strong>{html.escape(policy_gate_verdict)}</strong></p>"
+        f"<p>Breadth coverage: <strong>{latest_breadth_coverage_tag}</strong> | Summary: <strong>{latest_breadth_coverage_summary}</strong></p>"
         f"<p>Release verdict: <strong>{html.escape(release_verdict)}</strong> | Readiness interpretation: <strong>{html.escape(readiness_interpretation)}</strong> | Known gaps: <strong>{html.escape(str(known_gap_count))}</strong></p>"
         f"<p>Triage tag: <strong>{latest_triage_tag}</strong> | Triage summary: <strong>{latest_triage_summary}</strong></p>"
         f"<p>Verification mode: <strong>{html.escape(verification_mode)}</strong> | Enabled overrides: <strong>{html.escape(verification_override_text)}</strong></p>"

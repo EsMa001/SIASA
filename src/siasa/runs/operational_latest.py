@@ -83,6 +83,30 @@ def _derive_run_triage(*, run_status: str, governance_verdict: str, policy_gate_
         ),
     }
 
+
+def _derive_breadth_coverage_posture(*, countries_total: int, countries_with_updates: int, countries_without_updates: list[str]) -> dict[str, str]:
+    if countries_total <= 0:
+        return {
+            "breadth_coverage_tag": "breadth_scope_unknown",
+            "breadth_coverage_summary": "Breadth coverage scope is unknown; verify governed slice accounting before relying on this run.",
+        }
+    if countries_with_updates <= 0:
+        return {
+            "breadth_coverage_tag": "breadth_no_updates",
+            "breadth_coverage_summary": "No countries in the governed slice produced updates; this run is not usable as a breadth proof.",
+        }
+    if not countries_without_updates:
+        return {
+            "breadth_coverage_tag": "breadth_full_slice_updated",
+            "breadth_coverage_summary": "All countries in the governed slice produced updates; this run is a full breadth proof for the selected slice.",
+        }
+    return {
+        "breadth_coverage_tag": "breadth_partial_slice_updated",
+        "breadth_coverage_summary": (
+            f"{countries_with_updates}/{countries_total} countries updated; missing updates remain in {', '.join(countries_without_updates)}."
+        ),
+    }
+
 from siasa.data.storage import (
     load_recent_runs,
     persist_operational_latest_run,
@@ -253,6 +277,11 @@ def build_operational_latest_bundle(
         known_gap_count=len(known_gaps),
         failed_source_count=len(list(run_state.failed_sources)),
     )
+    latest_breadth_posture = _derive_breadth_coverage_posture(
+        countries_total=int(verification_summary.get("countries_total", 0) or 0),
+        countries_with_updates=int(verification_summary.get("countries_with_updates", 0) or 0),
+        countries_without_updates=[str(item) for item in (verification_summary.get("countries_without_updates") or []) if str(item).strip()],
+    )
     recent_runs = [
         {
             "run_id": entry.run_id,
@@ -286,6 +315,11 @@ def build_operational_latest_bundle(
                 run_id=entry.run_id,
                 bundle_root=Path(entry.gui_index).parent,
                 share_refs=_build_bundle_share_refs(bundle_root=Path(entry.gui_index).parent),
+            ),
+            **_derive_breadth_coverage_posture(
+                countries_total=entry.countries_total,
+                countries_with_updates=entry.countries_with_updates,
+                countries_without_updates=list(entry.countries_without_updates),
             ),
             **_derive_run_triage(
                 run_status=entry.run_status,
@@ -328,6 +362,7 @@ def build_operational_latest_bundle(
                 "evidence_links": evidence_links,
                 "share_refs": share_refs,
                 "handoff_summary": handoff_summary,
+                **latest_breadth_posture,
                 **latest_triage,
             }
         ]
@@ -362,6 +397,7 @@ def build_operational_latest_bundle(
             "evidence_links": evidence_links,
             "share_refs": share_refs,
             "handoff_summary": handoff_summary,
+            **latest_breadth_posture,
             **latest_triage,
         },
         "recent_runs": recent_runs,

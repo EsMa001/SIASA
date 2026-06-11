@@ -603,6 +603,18 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_storage_run_history.py tests/unit/test_latest_bundle_verification.py tests/unit/test_operational_latest.py tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`23 passed`)
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_live_probe_policy_gate.py tests/unit/test_live_probe_evidence_digest.py -q` passed (`11 passed`)
 
+### N1-WP-036
+Name:
+Expose an explicit breadth-coverage qualification in the operational evidence lane so broader-runtime runs read immediately as full breadth proof, partial breadth proof, or non-usable breadth proof instead of requiring manual interpretation of counts and missing-country lists.
+
+Closure achieved:
+- `src/siasa/runs/operational_latest.py` now derives deterministic `breadth_coverage_tag` and `breadth_coverage_summary` from `countries_total`, `countries_with_updates`, and `countries_without_updates`
+- `src/siasa/gui/local_app.py` now surfaces `Breadth coverage` plus a human-readable summary in the latest Operational Evidence Lane and renders the same posture in archived history evidence cells
+- the history search payload now also includes the breadth-coverage tag/summary so slice discovery remains aligned with the newly surfaced posture
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/data/storage.py src/siasa/runs/operational_latest.py src/siasa/gui/local_app.py tests/unit/test_storage_run_history.py tests/unit/test_operational_latest.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_storage_run_history.py tests/unit/test_operational_latest.py tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`12 passed`)
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_latest_bundle_verification.py tests/unit/test_live_probe_policy_gate.py tests/unit/test_live_probe_evidence_digest.py -q` passed (`22 passed`)
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 

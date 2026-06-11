@@ -266,6 +266,8 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
     assert evidence_lane["latest_summary"]["countries_with_updates"] == 2
     assert evidence_lane["latest_summary"]["countries_without_updates_count"] == 1
     assert evidence_lane["latest_summary"]["countries_without_updates"] == ["POL"]
+    assert evidence_lane["latest_summary"]["breadth_coverage_tag"] == "breadth_partial_slice_updated"
+    assert evidence_lane["latest_summary"]["breadth_coverage_summary"] == "2/3 countries updated; missing updates remain in POL."
     assert evidence_lane["latest_summary"]["combined_ce_ratio"] == 1.0
     assert evidence_lane["latest_summary"]["countries_missing_both_ce_count"] == 0
     assert evidence_lane["latest_summary"]["countries_missing_both_ce"] == []
@@ -313,6 +315,8 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
     assert evidence_lane["recent_runs"][0]["countries_with_updates"] == 2
     assert evidence_lane["recent_runs"][0]["countries_without_updates_count"] == 1
     assert evidence_lane["recent_runs"][0]["countries_without_updates"] == ["POL"]
+    assert evidence_lane["recent_runs"][0]["breadth_coverage_tag"] == "breadth_partial_slice_updated"
+    assert evidence_lane["recent_runs"][0]["breadth_coverage_summary"] == "2/3 countries updated; missing updates remain in POL."
     assert evidence_lane["recent_runs"][0]["bundle_root"] == str(gui_dir.resolve())
     assert evidence_lane["recent_runs"][0]["evidence_links"]["bundle_index_href"] == str(gui_dir.resolve() / "index.html")
     assert evidence_lane["recent_runs"][0]["share_refs"]["bundle_ref"] == f"bundle:{gui_dir.resolve()}"
