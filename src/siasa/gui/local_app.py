@@ -3268,7 +3268,27 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([band, count]) => `${band}:${count}`)
       .join(', ') || 'none';
-    return `visible_runs=${visibleRows.length} | run_ids=${runIds.join(', ') || 'none'} | triage=${triageSummary} | recency=${recencySummary}`;
+    const verificationModeSummary = Object.entries(
+      visibleRows.reduce((counts, row) => {
+        const mode = (row.children[11] ? row.children[11].textContent.trim() : 'n/a') || 'n/a';
+        counts[mode] = (counts[mode] || 0) + 1;
+        return counts;
+      }, {})
+    )
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([mode, count]) => `${mode}:${count}`)
+      .join(', ') || 'none';
+    const overrideSummary = Object.entries(
+      visibleRows.reduce((counts, row) => {
+        const overrides = (row.children[12] ? row.children[12].textContent.trim() : 'none') || 'none';
+        counts[overrides] = (counts[overrides] || 0) + 1;
+        return counts;
+      }, {})
+    )
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([overrides, count]) => `${overrides}:${count}`)
+      .join(', ') || 'none';
+    return `visible_runs=${visibleRows.length} | run_ids=${runIds.join(', ') || 'none'} | triage=${triageSummary} | recency=${recencySummary} | verification=${verificationModeSummary} | overrides=${overrideSummary}`;
   }
 
   function buildOperationalHistoryVisiblePayload(visibleRows, triageCounts, recencyCounts) {
@@ -3528,7 +3548,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<p>Triage tag counts: <strong id='operational-history-triage-counts'>{triage_tag_count_summary}</strong></p>"
         f"<p>Recency band counts: <strong id='operational-history-recency-counts'>{recency_band_count_summary}</strong></p>"
         "<p>Active history filter state: <strong id='operational-history-active-state'>triage=all | recency=all | search=none | sort=latest-first</strong></p>"
-        "<p>Visible slice summary: <strong id='operational-history-visible-summary'>visible_runs=0 | run_ids=none | triage=none | recency=none</strong></p>"
+        "<p>Visible slice summary: <strong id='operational-history-visible-summary'>visible_runs=0 | run_ids=none | triage=none | recency=none | verification=none | overrides=none</strong></p>"
         "<details><summary>Visible slice payload</summary><pre id='operational-history-visible-payload'>{}</pre></details>"
         "<p>Visible triage counts: <strong id='operational-history-visible-triage-counts'>n/a</strong></p>"
         "<p>Visible recency counts: <strong id='operational-history-visible-recency-counts'>n/a</strong></p>"

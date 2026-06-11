@@ -544,6 +544,18 @@ Closure achieved:
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_local_gui.py::test_load_site_payload_from_artifacts_reads_persisted_json_bundle -q` passed
 - adjacent runtime/storage regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_operational_latest.py tests/unit/test_storage_run_history.py -q` passed
 
+### N1-WP-031
+Name:
+Expose verification-mode truth in the copied operational-history visible-slice summary so the smallest operator handoff surface preserves strict-vs-override governance context instead of dropping it.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now extends `buildOperationalHistoryVisibleSummary()` with deterministic `verification=` and `overrides=` composition summaries derived from the currently visible rows
+- the initial `operational-history-visible-summary` placeholder now matches the stronger copied-handoff contract (`verification=none | overrides=none` before any rows are visible)
+- `tests/unit/test_local_gui.py` now asserts the new summary placeholder shape plus the generated helper output markers for verification/override composition
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/gui/local_app.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_operational_latest.py tests/unit/test_storage_run_history.py -q` passed
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 
