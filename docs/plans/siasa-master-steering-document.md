@@ -642,6 +642,19 @@ Closure achieved:
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py -q` passed (`19 passed in 326.36s`)
 - full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`480 passed in 1030.80s`)
 
+### N1-WP-039
+Name:
+Expose visible-slice breadth composition counts directly in the runs GUI so operators can read the currently filtered breadth-proof mix without inferring it only from the copied summary or exported artifacts.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now renders a dedicated `Visible breadth counts` surface via `operational-history-visible-breadth-counts`
+- `applyOperationalHistoryTriageFilter()` now derives deterministic `breadthCounts` from the visible rows using the row-level `data-breadth-coverage-tag` attribute and updates the GUI summary alongside visible triage and recency counts
+- `tests/unit/test_local_gui.py` now asserts the new visible breadth-count placeholder and DOM hook in generated `runs.html`
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/gui/local_app.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`1 passed in 2.10s`)
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py -q` passed (`19 passed in 325.50s`)
+- full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`480 passed in 1031.43s`)
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 

@@ -1215,6 +1215,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Visible slice payload" in runs_html
     assert "Visible triage counts: <strong id='operational-history-visible-triage-counts'>n/a</strong>" in runs_html
     assert "Visible recency counts: <strong id='operational-history-visible-recency-counts'>n/a</strong>" in runs_html
+    assert "Visible breadth counts: <strong id='operational-history-visible-breadth-counts'>n/a</strong>" in runs_html
     assert "class='operational-history-row'" in runs_html
     assert "data-triage-tag='degraded_release_blocked'" in runs_html
     assert "data-triage-tag='ready_green'" in runs_html
@@ -1287,6 +1288,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "oh_text" in runs_html
     assert "operational-history-visible-triage-counts" in runs_html
     assert "operational-history-visible-recency-counts" in runs_html
+    assert "operational-history-visible-breadth-counts" in runs_html
     assert "Repo Closure Summary" in runs_html
     assert "governance-and-run-controls" in runs_html
     assert "reporting-and-export" in runs_html
