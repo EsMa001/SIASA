@@ -3154,6 +3154,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
   const visibleRecencySummary = document.getElementById('operational-history-visible-recency-counts');
   const visibleBreadthSummary = document.getElementById('operational-history-visible-breadth-counts');
   const visibleVerificationSummary = document.getElementById('operational-history-visible-verification-counts');
+  const visibleOverrideSummary = document.getElementById('operational-history-visible-override-counts');
 
   function sortOperationalHistoryRows() {
     const sortMode = (sortControl ? sortControl.value : 'latest-first').trim().toLowerCase();
@@ -3528,6 +3529,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     const recencyCounts = {};
     const breadthCounts = {};
     const verificationCounts = {};
+    const overrideCounts = {};
     const visibleRows = [];
     let visible = 0;
 
@@ -3549,6 +3551,8 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         breadthCounts[breadthTag] = (breadthCounts[breadthTag] || 0) + 1;
         const verificationMode = (row.children[11] ? row.children[11].textContent.trim() : 'n/a') || 'n/a';
         verificationCounts[verificationMode] = (verificationCounts[verificationMode] || 0) + 1;
+        const overrideProfile = (row.children[12] ? row.children[12].textContent.trim() : 'none') || 'none';
+        overrideCounts[overrideProfile] = (overrideCounts[overrideProfile] || 0) + 1;
       }
     });
 
@@ -3588,6 +3592,13 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         .map(([mode, count]) => `${mode}: ${count}`)
         .join(' | ');
       visibleVerificationSummary.textContent = summary || 'none';
+    }
+    if (visibleOverrideSummary) {
+      const summary = Object.entries(overrideCounts)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([profile, count]) => `${profile}: ${count}`)
+        .join(' | ');
+      visibleOverrideSummary.textContent = summary || 'none';
     }
     if (visibleSummaryNode) {
       visibleSummaryNode.textContent = buildOperationalHistoryVisibleSummary(visibleRows, triageCounts, recencyCounts);
@@ -3676,6 +3687,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         "<p>Visible recency counts: <strong id='operational-history-visible-recency-counts'>n/a</strong></p>"
         "<p>Visible breadth counts: <strong id='operational-history-visible-breadth-counts'>n/a</strong></p>"
         "<p>Visible verification counts: <strong id='operational-history-visible-verification-counts'>n/a</strong></p>"
+        "<p>Visible override counts: <strong id='operational-history-visible-override-counts'>n/a</strong></p>"
         "<table id='operational-evidence-history-table'><thead><tr><th>Run ID</th><th>Recorded At</th><th>Hours Behind Latest</th><th>Status</th><th>Pilot Set</th><th>Country Set</th><th>Combined C/E Ratio</th><th>Governance</th><th>Policy Gate</th><th>Release Verdict</th><th>Readiness Interpretation</th><th>Verification Mode</th><th>Enabled Overrides</th><th>Triage Tag</th><th>Known Gaps</th><th>Failed Sources</th><th>Evidence</th></tr></thead>"
         f"<tbody>{recent_run_rows}</tbody></table>{operational_history_filter_script}</div>"
     ) if latest_summary else ""
