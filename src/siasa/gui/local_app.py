@@ -3441,12 +3441,35 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
       'triage_tag',
       'known_gap_count',
       'failed_source_count',
+      'breadth_coverage_tag',
+      'breadth_coverage_summary',
     ];
-    const rowsCsv = visibleRows.map((row) => header.map((_, index) => {
-      const value = row.children[index] ? row.children[index].textContent.trim() : 'n/a';
-      const escaped = String(value).replace(/"/g, '""');
-      return `"${escaped}"`;
-    }).join(','));
+    const rowsCsv = visibleRows.map((row) => {
+      const values = [
+        row.children[0] ? row.children[0].textContent.trim() : 'n/a',
+        row.children[1] ? row.children[1].textContent.trim() : 'n/a',
+        row.children[2] ? row.children[2].textContent.trim() : 'n/a',
+        row.children[3] ? row.children[3].textContent.trim() : 'n/a',
+        row.children[4] ? row.children[4].textContent.trim() : 'n/a',
+        row.children[5] ? row.children[5].textContent.trim() : 'n/a',
+        row.children[6] ? row.children[6].textContent.trim() : 'n/a',
+        row.children[7] ? row.children[7].textContent.trim() : 'n/a',
+        row.children[8] ? row.children[8].textContent.trim() : 'n/a',
+        row.children[9] ? row.children[9].textContent.trim() : 'n/a',
+        row.children[10] ? row.children[10].textContent.trim() : 'n/a',
+        row.children[11] ? row.children[11].textContent.trim() : 'n/a',
+        row.children[12] ? row.children[12].textContent.trim() : 'n/a',
+        row.children[13] ? row.children[13].textContent.trim() : 'n/a',
+        row.children[14] ? row.children[14].textContent.trim() : 'n/a',
+        row.children[15] ? row.children[15].textContent.trim() : 'n/a',
+        row.getAttribute('data-breadth-coverage-tag') || 'n/a',
+        row.getAttribute('data-breadth-coverage-summary') || 'n/a',
+      ];
+      return values.map((value) => {
+        const escaped = String(value).replace(/"/g, '""');
+        return `"${escaped}"`;
+      }).join(',');
+    });
     return [header.join(','), ...rowsCsv].join('\n');
   }
 

@@ -1262,8 +1262,12 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "verification_mode" in runs_html
     assert "enabled_overrides" in runs_html
     assert "triage_tag" in runs_html
-    assert "known_gap_count" in runs_html
-    assert "failed_source_count" in runs_html
+    assert "'known_gap_count'," in runs_html
+    assert "'failed_source_count'," in runs_html
+    assert "'breadth_coverage_tag'," in runs_html
+    assert "'breadth_coverage_summary'," in runs_html
+    assert "row.getAttribute('data-breadth-coverage-tag')" in runs_html
+    assert "row.getAttribute('data-breadth-coverage-summary')" in runs_html
     assert "copyOperationalHistoryVisibleSummary" in runs_html
     assert "exportOperationalHistoryVisiblePayload" in runs_html
     assert "buildOperationalHistoryVisibleCsv" in runs_html

@@ -629,6 +629,19 @@ Closure achieved:
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py -q` passed (`19 passed in 334.67s`)
 - full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`480 passed in 1029.64s`)
 
+### N1-WP-038
+Name:
+Propagate breadth-coverage posture into the visible-slice CSV export/copy path so spreadsheet and clipboard handoff preserve breadth-proof truth alongside the existing run/governance fields.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now extends `buildOperationalHistoryVisibleCsv(...)` with CSV columns `breadth_coverage_tag` and `breadth_coverage_summary`
+- the CSV builder now reads those two breadth fields from the row-level `data-breadth-coverage-*` attributes, keeping CSV export/copy causally aligned with the same visible-slice breadth posture already used by summary and JSON export
+- `tests/unit/test_local_gui.py` now asserts the CSV builder wiring includes the new breadth columns and row-attribute lookups in generated `runs.html`
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/gui/local_app.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`1 passed in 2.01s`)
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py -q` passed (`19 passed in 326.36s`)
+- full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`480 passed in 1030.80s`)
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 
