@@ -749,6 +749,22 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_governed_live_runtime.py -q` passed (`26 passed in 4.55s`)
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`1 passed in 2.59s`)
 
+### N1-WP-047
+Name:
+Add a compact credential-gated activation readiness summary so G2 status can be scanned immediately from counts and source lists before reading the detailed readiness table.
+
+Closure achieved:
+- `src/siasa/readmodels/source_coverage.py` now derives machine-readable `source_activation_readiness_summary` from the existing readiness rows
+- the summary exposes deterministic `total_sources`, `blocked_source_count`, `configured_ready_count`, `status_counts`, `blocked_sources`, and `configured_ready_sources`
+- `src/siasa/gui/local_app.py` now renders a dedicated `Credential-gated Source Activation Readiness Summary` table in `coverage.html` ahead of the detailed readiness table
+- the GUI summary makes G2 scanable as one compact activation snapshot instead of requiring row-by-row reading of the full table
+- `tests/unit/test_readmodels_country_profile.py` now asserts the new summary contract exists even when no credential-gated sources are present
+- `tests/unit/test_local_gui.py` now asserts the generated coverage page renders the new G2 summary panel, counts, and source-list fields
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/readmodels/source_coverage.py src/siasa/gui/local_app.py tests/unit/test_readmodels_country_profile.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_readmodels_country_profile.py -q` passed (`4 passed in 0.04s`)
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`1 passed in 2.20s`)
+- full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`480 passed in 1018.45s`)
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 

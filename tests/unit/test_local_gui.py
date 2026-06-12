@@ -284,6 +284,14 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             {"source_id": "SRC-UCDP-GED", "domain": "B", "activation_status": "blocked_missing_credentials", "credential_name": "UCDP_API_TOKEN", "configured": False, "provider_requirement": "api_token", "applicable_country_ids": ["UKR", "POL"], "blocked_reason": "missing_credential:UCDP_API_TOKEN", "activation_next_step": "Set UCDP_API_TOKEN in the runtime environment and rerun the governed live pipeline."},
             {"source_id": "SRC-RELIEFWEB", "domain": "C", "activation_status": "blocked_missing_credentials", "credential_name": "RELIEFWEB_APPNAME", "configured": False, "provider_requirement": "pre_approved_appname", "applicable_country_ids": ["UKR", "POL"], "blocked_reason": "missing_credential:RELIEFWEB_APPNAME", "activation_next_step": "Obtain an approved ReliefWeb appname, set RELIEFWEB_APPNAME, and rerun the governed live pipeline."},
         ],
+        "source_activation_readiness_summary": {
+            "total_sources": 2,
+            "blocked_source_count": 2,
+            "configured_ready_count": 0,
+            "status_counts": {"blocked_missing_credentials": 2},
+            "blocked_sources": ["SRC-UCDP-GED", "SRC-RELIEFWEB"],
+            "configured_ready_sources": [],
+        },
     }
     reports = {
         "daily_snapshot": {
@@ -1078,6 +1086,14 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "ACLED" in coverage_html
     assert "Degraded Sources" in coverage_html
     assert "Credential-gated Source Activation Readiness" in coverage_html
+    assert "Credential-gated Source Activation Readiness Summary" in coverage_html
+    assert "Provides a compact activation snapshot so operators can scan how many credential-gated sources are ready versus blocked before reading the detailed source table." in coverage_html
+    assert "Total credential-gated sources" in coverage_html
+    assert "Blocked missing credentials" in coverage_html
+    assert "Configured-ready sources" in coverage_html
+    assert "Blocked sources" in coverage_html
+    assert "blocked_missing_credentials: 2" in coverage_html
+    assert "SRC-UCDP-GED, SRC-RELIEFWEB" in coverage_html
     assert "operationally activatable in the current environment or still blocked by missing credentials/registrations" in coverage_html
     assert "SRC-UCDP-GED" in coverage_html
     assert "SRC-RELIEFWEB" in coverage_html

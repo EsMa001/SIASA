@@ -75,3 +75,11 @@ def test_source_coverage_read_model_exposes_status_horizon_freshness_confidence_
     assert read_model["sources"][1]["diagnostics"] == "timeout"
     assert read_model["degraded_sources"] == ["SRC-B", "ACLED"]
     assert read_model["source_status_summary"] == {"success": 1, "failed": 1, "prepared_adapter": 1}
+    assert read_model["source_activation_readiness_summary"] == {
+        "total_sources": 0,
+        "blocked_source_count": 0,
+        "configured_ready_count": 0,
+        "status_counts": {},
+        "blocked_sources": [],
+        "configured_ready_sources": [],
+    }

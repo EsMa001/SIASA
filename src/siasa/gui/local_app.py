@@ -2603,6 +2603,31 @@ def _render_source_coverage(
         f"<li>{html.escape(str(item))}</li>"
         for item in source_coverage_read_model.get('degraded_sources', [])
     ) or "<li>none</li>"
+    activation_summary = source_coverage_read_model.get('source_activation_readiness_summary', {})
+    activation_status_counts = ', '.join(
+        f"{status}: {count}"
+        for status, count in sorted((activation_summary.get('status_counts') or {}).items())
+    ) or 'none'
+    activation_summary_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(label))}</td>"
+        f"<td>{html.escape(str(value))}</td>"
+        "</tr>"
+        for label, value in [
+            ('Total credential-gated sources', activation_summary.get('total_sources', 0)),
+            ('Configured ready', activation_summary.get('configured_ready_count', 0)),
+            ('Blocked missing credentials', activation_summary.get('blocked_source_count', 0)),
+            ('Status counts', activation_status_counts),
+            (
+                'Configured-ready sources',
+                ', '.join(str(item) for item in activation_summary.get('configured_ready_sources', [])) or 'none',
+            ),
+            (
+                'Blocked sources',
+                ', '.join(str(item) for item in activation_summary.get('blocked_sources', [])) or 'none',
+            ),
+        ]
+    )
     source_activation_rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(item.get('source_id', '')))}</td>"
@@ -2639,6 +2664,10 @@ def _render_source_coverage(
         f"<tbody>{source_status_summary_rows}</tbody></table>"
         f"<h4>Data Gaps / Trust Limits</h4><ul>{trust_gaps}</ul>"
         f"<h4>Degraded Sources</h4><ul>{degraded_sources}</ul>"
+        "<h4>Credential-gated Source Activation Readiness Summary</h4>"
+        "<p>Provides a compact activation snapshot so operators can scan how many credential-gated sources are ready versus blocked before reading the detailed source table.</p>"
+        "<table><thead><tr><th>Activation Summary</th><th>Value</th></tr></thead>"
+        f"<tbody>{activation_summary_rows}</tbody></table>"
         "<h4>Credential-gated Source Activation Readiness</h4>"
         "<p>Shows whether provider-gated sources are operationally activatable in the current environment or still blocked by missing credentials/registrations.</p>"
         "<p>The Next Step column turns each blocker/configured-ready state into the concrete follow-through action required for the first real credential-backed evidence run.</p>"
