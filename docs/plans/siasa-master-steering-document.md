@@ -681,6 +681,19 @@ Closure achieved:
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py -q` passed (`19 passed in 334.71s`)
 - full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`480 passed in 1027.45s`)
 
+### N1-WP-042
+Name:
+Expose one compact visible-slice governance digest directly in the runs GUI so operators can scan the currently filtered triage / recency / breadth / verification / override posture in one line instead of manually combining five separate summaries.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now renders a dedicated `Visible governance digest` surface via `operational-history-visible-governance-digest`
+- added `buildOperationalHistoryVisibleGovernanceDigest(...)`, which composes one deterministic on-page digest from the same visible-slice `triageCounts`, `recencyCounts`, `breadthCounts`, `verificationCounts`, and `overrideCounts` already maintained by `applyOperationalHistoryTriageFilter()`
+- `applyOperationalHistoryTriageFilter()` now refreshes that digest whenever the visible archived-run slice changes, keeping the compact operator line causally aligned with the detailed count rows and export surfaces
+- `tests/unit/test_local_gui.py` now asserts the new placeholder text, DOM hook, and helper wiring in generated `runs.html`
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/gui/local_app.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`1 passed in 2.59s`)
+- full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`480 passed in 1023.28s`)
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 
