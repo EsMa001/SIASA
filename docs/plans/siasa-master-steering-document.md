@@ -694,6 +694,18 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`1 passed in 2.59s`)
 - full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`480 passed in 1023.28s`)
 
+### N1-WP-043
+Name:
+Expose the compact visible-slice governance digest in the machine-readable visible JSON payload so downstream review/export consumers receive the same one-line governance synthesis already shown in the GUI.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now derives `governanceDigest` inside `buildOperationalHistoryVisiblePayload()` from the existing `buildOperationalHistoryVisibleGovernanceDigest(...)` helper instead of duplicating a second aggregation path
+- the visible-slice JSON payload now exports that compact synthesis as top-level `governance_digest` beside `triage_counts`, `recency_counts`, `breadth_coverage_counts`, `verification_mode_counts`, and `override_profile_counts`
+- `tests/unit/test_local_gui.py` now asserts the new payload field plus helper wiring in generated `runs.html`
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/gui/local_app.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`1 passed in 2.57s`)
+- full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`480 passed in 1032.76s`)
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 

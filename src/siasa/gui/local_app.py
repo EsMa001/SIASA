@@ -3370,6 +3370,14 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         }, {})
       ).sort((a, b) => a[0].localeCompare(b[0]))
     );
+    const governanceDigest = buildOperationalHistoryVisibleGovernanceDigest(
+      visibleRows,
+      triageCounts,
+      recencyCounts,
+      breadthCoverageCounts,
+      verificationModeCounts,
+      overrideProfileCounts,
+    );
     return {
       visible_runs: visibleRows.length,
       run_ids: visibleRows.map((row) => (row.children[0] ? row.children[0].textContent.trim() : 'n/a')).filter(Boolean),
@@ -3378,6 +3386,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
       breadth_coverage_counts: breadthCoverageCounts,
       verification_mode_counts: verificationModeCounts,
       override_profile_counts: overrideProfileCounts,
+      governance_digest: governanceDigest,
       rows: visibleRows.map((row) => ({
         run_id: row.children[0] ? row.children[0].textContent.trim() : 'n/a',
         recorded_at: row.children[1] ? row.children[1].textContent.trim() : 'n/a',
