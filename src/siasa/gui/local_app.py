@@ -2613,9 +2613,10 @@ def _render_source_coverage(
         f"<td>{html.escape(str(item.get('provider_requirement', '')))}</td>"
         f"<td>{html.escape(', '.join(str(country_id) for country_id in item.get('applicable_country_ids', [])) or 'none')}</td>"
         f"<td>{html.escape(str(item.get('blocked_reason', '')))}</td>"
+        f"<td>{html.escape(str(item.get('activation_next_step', '')))}</td>"
         "</tr>"
         for item in source_coverage_read_model.get('source_activation_readiness', [])
-    ) or "<tr><td colspan='8'>No credential-gated source activation readiness recorded.</td></tr>"
+    ) or "<tr><td colspan='9'>No credential-gated source activation readiness recorded.</td></tr>"
     source_status_summary_rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(status))}</td>"
@@ -2640,7 +2641,8 @@ def _render_source_coverage(
         f"<h4>Degraded Sources</h4><ul>{degraded_sources}</ul>"
         "<h4>Credential-gated Source Activation Readiness</h4>"
         "<p>Shows whether provider-gated sources are operationally activatable in the current environment or still blocked by missing credentials/registrations.</p>"
-        "<table><thead><tr><th>Source</th><th>Domain</th><th>Activation Status</th><th>Credential</th><th>Configured</th><th>Provider Requirement</th><th>Applicable Countries</th><th>Blocked Reason</th></tr></thead>"
+        "<p>The Next Step column turns each blocker/configured-ready state into the concrete follow-through action required for the first real credential-backed evidence run.</p>"
+        "<table><thead><tr><th>Source</th><th>Domain</th><th>Activation Status</th><th>Credential</th><th>Configured</th><th>Provider Requirement</th><th>Applicable Countries</th><th>Blocked Reason</th><th>Next Step</th></tr></thead>"
         f"<tbody>{source_activation_rows}</tbody></table>"
         f"{_render_country_coverage_matrix(coverage_visibility)}"
         "<h3>Coverage / Confidence Matrix</h3>"

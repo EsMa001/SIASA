@@ -188,6 +188,7 @@ def test_build_governed_live_orchestrator_supports_representative_pilot_set() ->
             "requested_country_count": 4,
             "applicable_country_count": 3,
             "provider_requirement": "api_token",
+            "activation_next_step": "Run governed live pipeline to collect first credential-backed source evidence.",
         },
         {
             "source_id": "SRC-RELIEFWEB",
@@ -200,6 +201,7 @@ def test_build_governed_live_orchestrator_supports_representative_pilot_set() ->
             "requested_country_count": 4,
             "applicable_country_count": 4,
             "provider_requirement": "pre_approved_appname",
+            "activation_next_step": "Obtain an approved ReliefWeb appname, set RELIEFWEB_APPNAME, and rerun the governed live pipeline.",
         },
     ]
 

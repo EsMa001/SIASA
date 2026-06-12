@@ -281,8 +281,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
         "failed_sources": ["SRC-B"],
         "missing_sources": ["SRC-C"],
         "source_activation_readiness": [
-            {"source_id": "SRC-UCDP-GED", "domain": "B", "activation_status": "blocked_missing_credentials", "credential_name": "UCDP_API_TOKEN", "configured": False, "provider_requirement": "api_token", "applicable_country_ids": ["UKR", "POL"], "blocked_reason": "missing_credential:UCDP_API_TOKEN"},
-            {"source_id": "SRC-RELIEFWEB", "domain": "C", "activation_status": "blocked_missing_credentials", "credential_name": "RELIEFWEB_APPNAME", "configured": False, "provider_requirement": "pre_approved_appname", "applicable_country_ids": ["UKR", "POL"], "blocked_reason": "missing_credential:RELIEFWEB_APPNAME"},
+            {"source_id": "SRC-UCDP-GED", "domain": "B", "activation_status": "blocked_missing_credentials", "credential_name": "UCDP_API_TOKEN", "configured": False, "provider_requirement": "api_token", "applicable_country_ids": ["UKR", "POL"], "blocked_reason": "missing_credential:UCDP_API_TOKEN", "activation_next_step": "Set UCDP_API_TOKEN in the runtime environment and rerun the governed live pipeline."},
+            {"source_id": "SRC-RELIEFWEB", "domain": "C", "activation_status": "blocked_missing_credentials", "credential_name": "RELIEFWEB_APPNAME", "configured": False, "provider_requirement": "pre_approved_appname", "applicable_country_ids": ["UKR", "POL"], "blocked_reason": "missing_credential:RELIEFWEB_APPNAME", "activation_next_step": "Obtain an approved ReliefWeb appname, set RELIEFWEB_APPNAME, and rerun the governed live pipeline."},
         ],
     }
     reports = {
@@ -1085,6 +1085,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "missing_credential:RELIEFWEB_APPNAME" in coverage_html
     assert "pre_approved_appname" in coverage_html
     assert "api_token" in coverage_html
+    assert "Next Step" in coverage_html
+    assert "The Next Step column turns each blocker/configured-ready state into the concrete follow-through action required for the first real credential-backed evidence run." in coverage_html
+    assert "Set UCDP_API_TOKEN in the runtime environment and rerun the governed live pipeline." in coverage_html
+    assert "Obtain an approved ReliefWeb appname, set RELIEFWEB_APPNAME, and rerun the governed live pipeline." in coverage_html
     assert "id='country-gap-UKR'" in coverage_html
     assert "class='coverage-focus-target'" in coverage_html
     assert "data-focus-country='UKR'" in coverage_html

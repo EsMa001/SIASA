@@ -735,6 +735,20 @@ Closure achieved:
 - full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`480 passed in 1015.77s`)
 - runtime evidence in the current environment: with neither `RELIEFWEB_APPNAME` nor `UCDP_API_TOKEN` configured, representative degraded bundle `RUN-OP-LATEST-G2-READINESS-001` completed and now persists `source_activation_readiness` into `build/run_artifacts/latest-g2-readiness-001/readmodels/source_coverage.json` and `system_status.json`; generated GUI `build/local_gui/latest-g2-readiness-001/coverage.html` renders both sources as `blocked_missing_credentials`
 
+### N1-WP-046
+Name:
+Turn credential-gated source readiness from passive blocker visibility into explicit activation follow-through guidance so G2 can move from “blocked” to “do this next” without reopening code or planning context.
+
+Closure achieved:
+- `src/siasa/runs/live_runtime.py` now stamps deterministic `activation_next_step` guidance into the `source_activation_readiness` rows for `SRC-UCDP-GED` and `SRC-RELIEFWEB`
+- the guidance is source-specific and environment-truthful: UCDP points to setting `UCDP_API_TOKEN`, while ReliefWeb points to obtaining an approved appname, setting `RELIEFWEB_APPNAME`, and rerunning the governed live pipeline
+- `src/siasa/gui/local_app.py` now extends the `Credential-gated Source Activation Readiness` table with a `Next Step` column plus explanatory text, making the first real activation action directly visible in `coverage.html`
+- `tests/unit/test_governed_live_runtime.py` now asserts the representative orchestrator exposes the new machine-readable next-step guidance
+- `tests/unit/test_local_gui.py` now asserts the coverage page renders the new `Next Step` contract and both source-specific guidance strings
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/runs/live_runtime.py src/siasa/gui/local_app.py tests/unit/test_governed_live_runtime.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_governed_live_runtime.py -q` passed (`26 passed in 4.55s`)
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`1 passed in 2.59s`)
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 

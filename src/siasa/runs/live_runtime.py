@@ -961,6 +961,11 @@ def _build_credential_gated_source_activation_readiness(
             "requested_country_count": len(resolved_country_ids),
             "applicable_country_count": len(supported_ucdp_country_ids),
             "provider_requirement": "api_token",
+            "activation_next_step": (
+                "Run governed live pipeline to collect first credential-backed source evidence."
+                if ucdp_configured
+                else "Set UCDP_API_TOKEN in the runtime environment and rerun the governed live pipeline."
+            ),
         }
     )
     reliefweb_configured = _reliefweb_appname_is_configured()
@@ -976,6 +981,11 @@ def _build_credential_gated_source_activation_readiness(
             "requested_country_count": len(resolved_country_ids),
             "applicable_country_count": len(supported_reliefweb_country_ids),
             "provider_requirement": "pre_approved_appname",
+            "activation_next_step": (
+                "Run governed live pipeline to collect first credential-backed source evidence."
+                if reliefweb_configured
+                else "Obtain an approved ReliefWeb appname, set RELIEFWEB_APPNAME, and rerun the governed live pipeline."
+            ),
         }
     )
     return readiness_rows
