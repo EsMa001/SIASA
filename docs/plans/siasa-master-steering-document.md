@@ -719,6 +719,22 @@ Closure achieved:
 - real runtime evidence now shows deterministic bounded behavior on the broader 21-country latest path: strict attempts `RUN-OP-LATEST-FOCUS-HARDEN-001` and `RUN-OP-LATEST-FOCUS-HARDEN-002` both terminated fail-closed with explicit `run_status=partial_success` instead of stalling silently
 - degraded inspection closure evidence: `RUN-OP-LATEST-FOCUS-HARDEN-DEG-003` completed with `country_set_id=MVP-COUNTRIES-LIVE-focus-complete-v1`, `countries_with_updates=21/21`, `failed_sources=[SRC-GDELT-DOC,SRC-GDELT-DOC-E]`, artifact bundle `build/run_artifacts/latest-focus-complete-harden-deg-003`, and GUI `build/local_gui/latest-focus-complete-harden-deg-003/index.html`
 
+### N1-WP-045
+Name:
+Make credential-gated source activation readiness explicit in artifact-backed coverage evidence so G2 starts from visible operational blockers rather than hidden environment assumptions.
+
+Closure achieved:
+- `src/siasa/runs/live_runtime.py` now derives credential-gated activation readiness rows for `SRC-UCDP-GED` and `SRC-RELIEFWEB`, including credential name, configured state, blocked reason, provider requirement, and applicable governed country scope
+- `src/siasa/runs/orchestrator.py`, `src/siasa/runs/artifacts.py`, `src/siasa/readmodels/source_coverage.py`, and `src/siasa/readmodels/system_status.py` now persist those rows as machine-readable `source_activation_readiness` in artifact bundles
+- `src/siasa/gui/local_app.py` now renders a dedicated `Credential-gated Source Activation Readiness` table in `coverage.html`
+- `tests/unit/test_governed_live_runtime.py` now asserts the representative orchestrator exposes correct readiness rows (`UCDP` configured in test env, `ReliefWeb` blocked without appname)
+- `tests/unit/test_local_gui.py` now asserts the coverage page renders the new readiness table and blocker fields
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/readmodels/source_coverage.py src/siasa/readmodels/system_status.py src/siasa/runs/artifacts.py src/siasa/runs/orchestrator.py src/siasa/runs/live_runtime.py src/siasa/gui/local_app.py tests/unit/test_governed_live_runtime.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_governed_live_runtime.py -q` passed (`26 passed in 4.23s`)
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`1 passed in 2.61s`)
+- full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`480 passed in 1015.77s`)
+- runtime evidence in the current environment: with neither `RELIEFWEB_APPNAME` nor `UCDP_API_TOKEN` configured, representative degraded bundle `RUN-OP-LATEST-G2-READINESS-001` completed and now persists `source_activation_readiness` into `build/run_artifacts/latest-g2-readiness-001/readmodels/source_coverage.json` and `system_status.json`; generated GUI `build/local_gui/latest-g2-readiness-001/coverage.html` renders both sources as `blocked_missing_credentials`
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 
