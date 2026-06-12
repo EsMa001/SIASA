@@ -19,6 +19,7 @@ def build_system_status_read_model(
     artifact_status: dict[str, dict[str, object | None]] | None = None,
     country_coverage_visibility: dict[str, object] | None = None,
     countries_without_updates: list[str] | None = None,
+    source_activation_readiness: list[dict[str, object]] | None = None,
 ) -> dict[str, object]:
     return {
         "run_id": run_id,
@@ -39,4 +40,5 @@ def build_system_status_read_model(
         "data_gaps": list(data_gaps or []),
         "artifact_status": dict(artifact_status or {}),
         "country_coverage_visibility": dict(country_coverage_visibility or {}),
+        "source_activation_readiness": list(source_activation_readiness or []),
     }

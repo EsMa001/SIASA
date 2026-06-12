@@ -764,6 +764,11 @@ def build_governed_live_orchestrator(
     supported_reliefweb_country_ids = tuple(
         country_id for country_id in resolved_country_ids if country_id in _RELIEFWEB_SUPPORTED_LIVE_COUNTRIES
     )
+    source_activation_readiness = _build_credential_gated_source_activation_readiness(
+        resolved_country_ids,
+        supported_ucdp_country_ids=supported_ucdp_country_ids,
+        supported_reliefweb_country_ids=supported_reliefweb_country_ids,
+    )
     country_expected_domains = {
         country_id: list(_GOVERNED_LIVE_DOMAINS_BY_COUNTRY.get(country_id, ["A", "B", "D"]))
         for country_id in resolved_country_ids
@@ -913,6 +918,7 @@ def build_governed_live_orchestrator(
         validation_view_model_builder=_validation_view_model_builder,
         requested_country_ids=resolved_country_ids,
         country_expected_domains=country_expected_domains,
+        source_activation_readiness=source_activation_readiness,
     )
 
 
@@ -933,6 +939,46 @@ def _reliefweb_appname_is_configured() -> bool:
 
 def _ucdp_api_token_is_configured() -> bool:
     return bool(os.environ.get("UCDP_API_TOKEN", "").strip())
+
+
+def _build_credential_gated_source_activation_readiness(
+    resolved_country_ids: tuple[str, ...],
+    *,
+    supported_ucdp_country_ids: tuple[str, ...],
+    supported_reliefweb_country_ids: tuple[str, ...],
+) -> list[dict[str, object]]:
+    readiness_rows: list[dict[str, object]] = []
+    ucdp_configured = _ucdp_api_token_is_configured()
+    readiness_rows.append(
+        {
+            "source_id": "SRC-UCDP-GED",
+            "domain": "B",
+            "credential_name": "UCDP_API_TOKEN",
+            "configured": ucdp_configured,
+            "activation_status": "configured_ready" if ucdp_configured else "blocked_missing_credentials",
+            "blocked_reason": "missing_credential:UCDP_API_TOKEN" if not ucdp_configured else "none",
+            "applicable_country_ids": list(supported_ucdp_country_ids),
+            "requested_country_count": len(resolved_country_ids),
+            "applicable_country_count": len(supported_ucdp_country_ids),
+            "provider_requirement": "api_token",
+        }
+    )
+    reliefweb_configured = _reliefweb_appname_is_configured()
+    readiness_rows.append(
+        {
+            "source_id": "SRC-RELIEFWEB",
+            "domain": "C",
+            "credential_name": "RELIEFWEB_APPNAME",
+            "configured": reliefweb_configured,
+            "activation_status": "configured_ready" if reliefweb_configured else "blocked_missing_credentials",
+            "blocked_reason": "missing_credential:RELIEFWEB_APPNAME" if not reliefweb_configured else "none",
+            "applicable_country_ids": list(supported_reliefweb_country_ids),
+            "requested_country_count": len(resolved_country_ids),
+            "applicable_country_count": len(supported_reliefweb_country_ids),
+            "provider_requirement": "pre_approved_appname",
+        }
+    )
+    return readiness_rows
 
 
 def run_governed_live_pipeline(

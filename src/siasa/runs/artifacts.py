@@ -76,6 +76,7 @@ def write_run_artifacts(
     artifact_status: dict[str, dict[str, object | None]] | None = None,
     source_domain_by_source: dict[str, str] | None = None,
     source_countries_by_source: dict[str, list[str] | None] | None = None,
+    source_activation_readiness: list[dict[str, object]] | None = None,
     requested_country_ids: list[str] | None = None,
     country_expected_domains: dict[str, list[str]] | None = None,
     rule_evaluation_results: list[object] | None = None,
@@ -328,6 +329,7 @@ def write_run_artifacts(
             build_source_coverage_read_model(
                 source_coverage_rows,
                 missing_sources=[],
+                source_activation_readiness=source_activation_readiness,
             ),
             indent=2,
             sort_keys=True,
@@ -371,6 +373,7 @@ def write_run_artifacts(
                 last_run=run_state.run_id,
                 artifact_status=artifact_status,
                 country_coverage_visibility=_build_country_coverage_visibility(country_coverage_rows),
+                source_activation_readiness=source_activation_readiness,
             ),
             indent=2,
             sort_keys=True,

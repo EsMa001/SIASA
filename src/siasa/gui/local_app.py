@@ -2603,6 +2603,19 @@ def _render_source_coverage(
         f"<li>{html.escape(str(item))}</li>"
         for item in source_coverage_read_model.get('degraded_sources', [])
     ) or "<li>none</li>"
+    source_activation_rows = ''.join(
+        "<tr>"
+        f"<td>{html.escape(str(item.get('source_id', '')))}</td>"
+        f"<td>{html.escape(str(item.get('domain', '')))}</td>"
+        f"<td>{html.escape(str(item.get('activation_status', '')))}</td>"
+        f"<td>{html.escape(str(item.get('credential_name', '')))}</td>"
+        f"<td>{html.escape(str(item.get('configured', '')))}</td>"
+        f"<td>{html.escape(str(item.get('provider_requirement', '')))}</td>"
+        f"<td>{html.escape(', '.join(str(country_id) for country_id in item.get('applicable_country_ids', [])) or 'none')}</td>"
+        f"<td>{html.escape(str(item.get('blocked_reason', '')))}</td>"
+        "</tr>"
+        for item in source_coverage_read_model.get('source_activation_readiness', [])
+    ) or "<tr><td colspan='8'>No credential-gated source activation readiness recorded.</td></tr>"
     source_status_summary_rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(status))}</td>"
@@ -2625,6 +2638,10 @@ def _render_source_coverage(
         f"<tbody>{source_status_summary_rows}</tbody></table>"
         f"<h4>Data Gaps / Trust Limits</h4><ul>{trust_gaps}</ul>"
         f"<h4>Degraded Sources</h4><ul>{degraded_sources}</ul>"
+        "<h4>Credential-gated Source Activation Readiness</h4>"
+        "<p>Shows whether provider-gated sources are operationally activatable in the current environment or still blocked by missing credentials/registrations.</p>"
+        "<table><thead><tr><th>Source</th><th>Domain</th><th>Activation Status</th><th>Credential</th><th>Configured</th><th>Provider Requirement</th><th>Applicable Countries</th><th>Blocked Reason</th></tr></thead>"
+        f"<tbody>{source_activation_rows}</tbody></table>"
         f"{_render_country_coverage_matrix(coverage_visibility)}"
         "<h3>Coverage / Confidence Matrix</h3>"
         "<p>Confidence Band highlights source trust at a glance while keeping freshness visible.</p>"

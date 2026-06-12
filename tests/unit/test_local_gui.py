@@ -280,6 +280,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
         ],
         "failed_sources": ["SRC-B"],
         "missing_sources": ["SRC-C"],
+        "source_activation_readiness": [
+            {"source_id": "SRC-UCDP-GED", "domain": "B", "activation_status": "blocked_missing_credentials", "credential_name": "UCDP_API_TOKEN", "configured": False, "provider_requirement": "api_token", "applicable_country_ids": ["UKR", "POL"], "blocked_reason": "missing_credential:UCDP_API_TOKEN"},
+            {"source_id": "SRC-RELIEFWEB", "domain": "C", "activation_status": "blocked_missing_credentials", "credential_name": "RELIEFWEB_APPNAME", "configured": False, "provider_requirement": "pre_approved_appname", "applicable_country_ids": ["UKR", "POL"], "blocked_reason": "missing_credential:RELIEFWEB_APPNAME"},
+        ],
     }
     reports = {
         "daily_snapshot": {
@@ -1073,6 +1077,14 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "failed_source:SRC-B" in coverage_html
     assert "ACLED" in coverage_html
     assert "Degraded Sources" in coverage_html
+    assert "Credential-gated Source Activation Readiness" in coverage_html
+    assert "operationally activatable in the current environment or still blocked by missing credentials/registrations" in coverage_html
+    assert "SRC-UCDP-GED" in coverage_html
+    assert "SRC-RELIEFWEB" in coverage_html
+    assert "missing_credential:UCDP_API_TOKEN" in coverage_html
+    assert "missing_credential:RELIEFWEB_APPNAME" in coverage_html
+    assert "pre_approved_appname" in coverage_html
+    assert "api_token" in coverage_html
     assert "id='country-gap-UKR'" in coverage_html
     assert "class='coverage-focus-target'" in coverage_html
     assert "data-focus-country='UKR'" in coverage_html

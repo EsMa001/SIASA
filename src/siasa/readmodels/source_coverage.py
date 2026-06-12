@@ -5,6 +5,7 @@ def build_source_coverage_read_model(
     sources: list[dict[str, object]],
     *,
     missing_sources: list[str] | None = None,
+    source_activation_readiness: list[dict[str, object]] | None = None,
 ) -> dict[str, object]:
     failed_sources = [str(source["source_id"]) for source in sources if source.get("status") == "failed"]
     degraded_sources = [str(source["source_id"]) for source in sources if source.get("status") != "success"]
@@ -18,4 +19,5 @@ def build_source_coverage_read_model(
         "missing_sources": missing_sources or [],
         "degraded_sources": degraded_sources,
         "source_status_summary": source_status_summary,
+        "source_activation_readiness": list(source_activation_readiness or []),
     }

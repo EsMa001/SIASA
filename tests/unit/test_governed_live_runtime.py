@@ -176,6 +176,32 @@ def test_build_governed_live_orchestrator_supports_representative_pilot_set() ->
     assert gdelt_events.recent_export_count == 8
     assert ucdp.country_ids == {"UKR", "POL", "ISR"}
     assert set(gdacs.country_ids) == {"UKR", "POL", "ISR", "TWN"}
+    assert orchestrator.source_activation_readiness == [
+        {
+            "source_id": "SRC-UCDP-GED",
+            "domain": "B",
+            "credential_name": "UCDP_API_TOKEN",
+            "configured": True,
+            "activation_status": "configured_ready",
+            "blocked_reason": "none",
+            "applicable_country_ids": ["UKR", "POL", "ISR"],
+            "requested_country_count": 4,
+            "applicable_country_count": 3,
+            "provider_requirement": "api_token",
+        },
+        {
+            "source_id": "SRC-RELIEFWEB",
+            "domain": "C",
+            "credential_name": "RELIEFWEB_APPNAME",
+            "configured": False,
+            "activation_status": "blocked_missing_credentials",
+            "blocked_reason": "missing_credential:RELIEFWEB_APPNAME",
+            "applicable_country_ids": ["UKR", "POL", "ISR", "TWN"],
+            "requested_country_count": 4,
+            "applicable_country_count": 4,
+            "provider_requirement": "pre_approved_appname",
+        },
+    ]
 
 
 
