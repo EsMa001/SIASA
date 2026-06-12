@@ -615,6 +615,20 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_storage_run_history.py tests/unit/test_operational_latest.py tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`12 passed`)
 - focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_latest_bundle_verification.py tests/unit/test_live_probe_policy_gate.py tests/unit/test_live_probe_evidence_digest.py -q` passed (`22 passed`)
 
+### N1-WP-037
+Name:
+Propagate breadth-coverage posture composition into the copied visible-slice summary and machine-readable JSON export so operational-history handoff keeps breadth-proof truth without forcing row-by-row reconstruction.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now stamps each `.operational-history-row` with `data-breadth-coverage-tag` and `data-breadth-coverage-summary`, making the breadth posture reusable by the client-side summary/export helpers instead of remaining buried only in rendered evidence text
+- `buildOperationalHistoryVisibleSummary(...)` now includes deterministic `breadth=` composition beside triage / recency / verification / override composition, and the initial visible-slice placeholder now starts from `breadth=none`
+- `buildOperationalHistoryVisiblePayload(...)` now emits top-level `breadth_coverage_counts` plus per-row `breadth_coverage_tag` / `breadth_coverage_summary`, so downstream audit/export consumers receive breadth-proof posture directly in the machine-readable visible slice
+- `tests/unit/test_local_gui.py` now asserts the strengthened visible-slice summary contract and the new breadth-coverage payload wiring in generated `runs.html`
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/gui/local_app.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`1 passed in 2.42s`)
+- focused regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py -q` passed (`19 passed in 334.67s`)
+- full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`480 passed in 1029.64s`)
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 

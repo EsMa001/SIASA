@@ -1210,7 +1210,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Triage tag counts: <strong id='operational-history-triage-counts'>degraded_release_blocked: 1 | ready_green: 1</strong>" in runs_html
     assert "Recency band counts: <strong id='operational-history-recency-counts'>last_24h: 1 | latest: 1</strong>" in runs_html
     assert "Active history filter state: <strong id='operational-history-active-state'>triage=all | recency=all | search=none | sort=latest-first</strong>" in runs_html
-    assert "Visible slice summary: <strong id='operational-history-visible-summary'>visible_runs=0 | run_ids=none | triage=none | recency=none | verification=none | overrides=none</strong>" in runs_html
+    assert "Visible slice summary: <strong id='operational-history-visible-summary'>visible_runs=0 | run_ids=none | triage=none | recency=none | breadth=none | verification=none | overrides=none</strong>" in runs_html
     assert "operational-history-visible-payload" in runs_html
     assert "Visible slice payload" in runs_html
     assert "Visible triage counts: <strong id='operational-history-visible-triage-counts'>n/a</strong>" in runs_html
@@ -1236,14 +1236,17 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "copyOperationalHistoryFilterLink" in runs_html
     assert "buildOperationalHistoryVisibleSummary" in runs_html
     assert "verification=${verificationModeSummary}" in runs_html
+    assert "breadth=${breadthSummary}" in runs_html
     assert "overrides=${overrideSummary}" in runs_html
     assert "buildOperationalHistoryVisiblePayload" in runs_html
     assert "verification_mode_counts: verificationModeCounts" in runs_html
+    assert "breadth_coverage_counts: breadthCoverageCounts" in runs_html
     assert "override_profile_counts: overrideProfileCounts" in runs_html
     assert "visible_runs" in runs_html
     assert "run_ids" in runs_html
     assert "triage_counts" in runs_html
     assert "recency_counts" in runs_html
+    assert "breadth_coverage_counts" in runs_html
     assert "verification_mode_counts" in runs_html
     assert "override_profile_counts" in runs_html
     assert "recorded_at" in runs_html

@@ -3099,6 +3099,8 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
             "<tr class='operational-history-row' "
             f"data-triage-tag='{html.escape(str(item.get('triage_tag', 'n/a')))}' "
             f"data-recency-band='{html.escape(recency_band)}' "
+            f"data-breadth-coverage-tag='{html.escape(str(item.get('breadth_coverage_tag', 'n/a')))}' "
+            f"data-breadth-coverage-summary='{html.escape(str(item.get('breadth_coverage_summary', 'n/a')))}' "
             f"data-recorded-at='{html.escape(str(item.get('recorded_at', 'n/a')))}' "
             f"data-hours-behind-latest='{html.escape(hours_behind_latest.replace('h', '')) if hours_behind_latest.endswith('h') else html.escape(hours_behind_latest)}' "
             f"data-history-search-text='{html.escape(history_search_text)}'>"
@@ -3295,6 +3297,16 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([band, count]) => `${band}:${count}`)
       .join(', ') || 'none';
+    const breadthSummary = Object.entries(
+      visibleRows.reduce((counts, row) => {
+        const breadthTag = (row.getAttribute('data-breadth-coverage-tag') || 'n/a').trim() || 'n/a';
+        counts[breadthTag] = (counts[breadthTag] || 0) + 1;
+        return counts;
+      }, {})
+    )
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([tag, count]) => `${tag}:${count}`)
+      .join(', ') || 'none';
     const verificationModeSummary = Object.entries(
       visibleRows.reduce((counts, row) => {
         const mode = (row.children[11] ? row.children[11].textContent.trim() : 'n/a') || 'n/a';
@@ -3315,10 +3327,19 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([overrides, count]) => `${overrides}:${count}`)
       .join(', ') || 'none';
-    return `visible_runs=${visibleRows.length} | run_ids=${runIds.join(', ') || 'none'} | triage=${triageSummary} | recency=${recencySummary} | verification=${verificationModeSummary} | overrides=${overrideSummary}`;
+    return `visible_runs=${visibleRows.length} | run_ids=${runIds.join(', ') || 'none'} | triage=${triageSummary} | recency=${recencySummary} | breadth=${breadthSummary} | verification=${verificationModeSummary} | overrides=${overrideSummary}`;
   }
 
   function buildOperationalHistoryVisiblePayload(visibleRows, triageCounts, recencyCounts) {
+    const breadthCoverageCounts = Object.fromEntries(
+      Object.entries(
+        visibleRows.reduce((counts, row) => {
+          const breadthTag = (row.getAttribute('data-breadth-coverage-tag') || 'n/a').trim() || 'n/a';
+          counts[breadthTag] = (counts[breadthTag] || 0) + 1;
+          return counts;
+        }, {})
+      ).sort((a, b) => a[0].localeCompare(b[0]))
+    );
     const verificationModeCounts = Object.fromEntries(
       Object.entries(
         visibleRows.reduce((counts, row) => {
@@ -3342,6 +3363,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
       run_ids: visibleRows.map((row) => (row.children[0] ? row.children[0].textContent.trim() : 'n/a')).filter(Boolean),
       triage_counts: Object.fromEntries(Object.entries(triageCounts).sort((a, b) => a[0].localeCompare(b[0]))),
       recency_counts: Object.fromEntries(Object.entries(recencyCounts).sort((a, b) => a[0].localeCompare(b[0]))),
+      breadth_coverage_counts: breadthCoverageCounts,
       verification_mode_counts: verificationModeCounts,
       override_profile_counts: overrideProfileCounts,
       rows: visibleRows.map((row) => ({
@@ -3361,6 +3383,8 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         triage_tag: row.children[13] ? row.children[13].textContent.trim() : 'n/a',
         known_gap_count: row.children[14] ? row.children[14].textContent.trim() : 'n/a',
         failed_source_count: row.children[15] ? row.children[15].textContent.trim() : 'n/a',
+        breadth_coverage_tag: row.getAttribute('data-breadth-coverage-tag') || 'n/a',
+        breadth_coverage_summary: row.getAttribute('data-breadth-coverage-summary') || 'n/a',
       })),
     };
   }
@@ -3601,7 +3625,7 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<p>Triage tag counts: <strong id='operational-history-triage-counts'>{triage_tag_count_summary}</strong></p>"
         f"<p>Recency band counts: <strong id='operational-history-recency-counts'>{recency_band_count_summary}</strong></p>"
         "<p>Active history filter state: <strong id='operational-history-active-state'>triage=all | recency=all | search=none | sort=latest-first</strong></p>"
-        "<p>Visible slice summary: <strong id='operational-history-visible-summary'>visible_runs=0 | run_ids=none | triage=none | recency=none | verification=none | overrides=none</strong></p>"
+        "<p>Visible slice summary: <strong id='operational-history-visible-summary'>visible_runs=0 | run_ids=none | triage=none | recency=none | breadth=none | verification=none | overrides=none</strong></p>"
         "<details><summary>Visible slice payload</summary><pre id='operational-history-visible-payload'>{}</pre></details>"
         "<p>Visible triage counts: <strong id='operational-history-visible-triage-counts'>n/a</strong></p>"
         "<p>Visible recency counts: <strong id='operational-history-visible-recency-counts'>n/a</strong></p>"
