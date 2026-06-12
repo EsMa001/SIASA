@@ -706,6 +706,19 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`1 passed in 2.57s`)
 - full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`480 passed in 1032.76s`)
 
+### N1-WP-044
+Name:
+Harden the 21-country `focus-complete` latest path so broader operational-latest runs terminate deterministically with explicit degraded-mode truth instead of risking ambiguous no-output stalls under GDELT load.
+
+Closure achieved:
+- `src/siasa/runs/live_runtime.py` now applies a dedicated 21-country GDELT profile for `focus-complete`-scale runs: `recent_export_count=4`, `max_records=4`, `inter_request_delay_seconds=4.0`, `max_retry_delay_seconds=90.0`, `request_timeout_seconds=60.0`, `max_full_fetch_retries=1`, and `full_fetch_retry_cooldown_seconds=60.0`
+- `tests/unit/test_governed_live_runtime.py` now asserts that the 21-country `focus-complete` orchestrator uses that bounded runtime profile instead of the looser 11-country settings
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/runs/live_runtime.py tests/unit/test_governed_live_runtime.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_governed_live_runtime.py -q` passed (`26 passed in 4.49s`)
+- full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`480 passed in 1021.77s`)
+- real runtime evidence now shows deterministic bounded behavior on the broader 21-country latest path: strict attempts `RUN-OP-LATEST-FOCUS-HARDEN-001` and `RUN-OP-LATEST-FOCUS-HARDEN-002` both terminated fail-closed with explicit `run_status=partial_success` instead of stalling silently
+- degraded inspection closure evidence: `RUN-OP-LATEST-FOCUS-HARDEN-DEG-003` completed with `country_set_id=MVP-COUNTRIES-LIVE-focus-complete-v1`, `countries_with_updates=21/21`, `failed_sources=[SRC-GDELT-DOC,SRC-GDELT-DOC-E]`, artifact bundle `build/run_artifacts/latest-focus-complete-harden-deg-003`, and GUI `build/local_gui/latest-focus-complete-harden-deg-003/index.html`
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 
