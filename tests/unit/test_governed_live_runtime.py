@@ -789,13 +789,13 @@ def test_build_governed_live_orchestrator_supports_focus_complete_pilot_set() ->
     assert orchestrator.country_expected_domains["QAT"] == ["A", "D"]
     assert orchestrator.country_expected_domains["USA"] == ["A", "B", "D"]
     assert len(orchestrator.country_expected_domains) == 21
-    assert gdelt_doc.max_records == 5
-    assert gdelt_doc.inter_request_delay_seconds == 3.0
-    assert gdelt_doc.max_retry_delay_seconds == 180.0
-    assert gdelt_doc.request_timeout_seconds == 90.0
-    assert gdelt_doc.max_full_fetch_retries == 2
-    assert gdelt_doc.full_fetch_retry_cooldown_seconds == 120.0
-    assert gdelt_events.recent_export_count == 8
+    assert gdelt_doc.max_records == 4
+    assert gdelt_doc.inter_request_delay_seconds == 4.0
+    assert gdelt_doc.max_retry_delay_seconds == 90.0
+    assert gdelt_doc.request_timeout_seconds == 60.0
+    assert gdelt_doc.max_full_fetch_retries == 1
+    assert gdelt_doc.full_fetch_retry_cooldown_seconds == 60.0
+    assert gdelt_events.recent_export_count == 4
     assert len(gdacs.country_ids) == 21
     assert set(gdacs.country_ids) == {
         "UKR", "RUS", "CHN", "TWN", "IRN", "ISR", "TUR", "IND", "PAK", "GEO", "POL",

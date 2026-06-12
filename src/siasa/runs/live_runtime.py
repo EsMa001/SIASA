@@ -276,7 +276,7 @@ _MULTI_COUNTRY_GDELT_EVENTS_RECENT_EXPORT_COUNT = 8
 def _gdelt_events_recent_export_count_for_country_count(country_count: int) -> int:
     if country_count >= 30:
         return 2
-    if country_count >= 24:
+    if country_count >= 21:
         return 4
     return _MULTI_COUNTRY_GDELT_EVENTS_RECENT_EXPORT_COUNT
 _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
@@ -348,6 +348,8 @@ def _gdelt_doc_max_records_for_country_count(country_count: int) -> int:
         return 50
     if country_count >= 24:
         return 3
+    if country_count >= 21:
+        return 4
     return max(5, 20 // country_count)
 
 
@@ -355,6 +357,8 @@ def _gdelt_doc_max_records_for_country_count(country_count: int) -> int:
 def _gdelt_doc_inter_request_delay_seconds_for_country_count(country_count: int) -> float:
     if country_count <= 1:
         return 0.0
+    if country_count >= 21:
+        return 4.0
     if country_count >= 11:
         return 3.0
     return 1.0
@@ -363,6 +367,8 @@ def _gdelt_doc_inter_request_delay_seconds_for_country_count(country_count: int)
 def _gdelt_doc_max_full_fetch_retries_for_country_count(country_count: int) -> int:
     if country_count >= 24:
         return 0
+    if country_count >= 21:
+        return 1
     if country_count > 1:
         return 2
     return 0
@@ -370,6 +376,8 @@ def _gdelt_doc_max_full_fetch_retries_for_country_count(country_count: int) -> i
 
 
 def _gdelt_doc_max_retry_delay_seconds_for_country_count(country_count: int) -> float:
+    if country_count >= 21:
+        return 90.0
     if country_count >= 11:
         return 180.0
     return 60.0
@@ -392,6 +400,8 @@ def _gdelt_doc_effective_max_retry_delay_seconds(source_id: str, country_count: 
 
 
 def _gdelt_doc_request_timeout_seconds_for_country_count(country_count: int) -> float:
+    if country_count >= 21:
+        return 60.0
     if country_count >= 11:
         return 90.0
     return 30.0
@@ -401,6 +411,8 @@ def _gdelt_doc_request_timeout_seconds_for_country_count(country_count: int) -> 
 def _gdelt_doc_full_fetch_retry_cooldown_seconds_for_country_count(country_count: int) -> float:
     if country_count >= 24:
         return 0.0
+    if country_count >= 21:
+        return 60.0
     if country_count >= 11:
         return 120.0
     if country_count > 1:
