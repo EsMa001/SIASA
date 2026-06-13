@@ -69,16 +69,17 @@ The remaining substantive work is now concentrated in fewer higher-level practic
 ### G1. Runtime breadth beyond the already-proven governed subsets
 
 Current truth:
-- runtime breadth has progressed strongly
-- but practical supported scope is still narrower than the full intended stakeholder breadth picture
+- broader governed runtime breadth is now materially proven through the full `mvp-complete` slice in code, tests, and fresh operational evidence
+- the latest closure probe `RUN-OP-LATEST-G1-CLOSE-001` produced `country_set_id=MVP-COUNTRIES-LIVE-mvp-complete-v1`, `countries_with_updates=30/30`, `breadth_coverage_tag=breadth_full_slice_updated`, and policy gate verdict `pass`
+- this means the repo-controlled G1 question (“can SIASA operationally cover the governed full MVP slice at all?”) is now answered yes
 
 Remaining gap:
-- broader repeatable live runtime proof across the next bounded MVP/P2 country slices
-- explicit honest handling of rate limits, partial success, and effective C/E usage under broader real runs
+- no further meaningful repo-only G1 closure remains
+- the remaining runtime delta is provider/source degradation truth (`SRC-GDELT-DOC`, `SRC-GDELT-DOC-E`) and release/readiness consequence handling, not unsupported governed breadth
 
 Why it matters:
-- this is the largest remaining real product-reach gap
-- it most directly affects whether SIASA is merely strong on curated/proven subsets or genuinely broader in operational usefulness
+- G1 is no longer the main internal product frontier
+- breadth proof is now operationally closed for the governed full-MVP slice even when release truth remains degraded by live-source outages
 
 ### G2. Credential-/provider-gated source activation
 
@@ -140,30 +141,23 @@ Steering status:
 
 The active serial priority order is now:
 
-### Priority 1: Runtime breadth and live evidence expansion
+### Priority 1: Operational evidence-lane normalization
 Why first:
-- largest remaining stakeholder-value gap
-- increases real product reach rather than only improving already-strong presentation/governance surfaces
-- best fits current SIASA maturity stage
+- with G1 and repo-controlled G2 now materially closed, the biggest remaining repo-controlled value is truthful fresh evidence and low-ambiguity operator/project-lead steering
+- broader live-source degradation and release consequences still need one authoritative evidence lane rather than another breadth-claim package
 
-### Priority 2: Operational evidence-lane normalization
+### Priority 2: Approval-to-distribution release closure
 Why second:
-- broader runs and newly activated sources need one authoritative, fresh evidence baseline
-- improves operator/project-lead truthfulness and review efficiency
-- now remains the highest-value repo-controlled support lane once G2 has been reduced to an external credential/app-registration dependency
-
-### Priority 3: Approval-to-distribution release closure
-Why third:
 - release/demo productization is already advanced
 - the remaining useful increment is lifecycle completion, not another summary panel
 
-### Priority 4: External credentialed-source activation follow-through (triggered, not default)
-Why fourth / conditional:
+### Priority 3: External credentialed-source activation follow-through (triggered, not default)
+Why third / conditional:
 - repo-controlled G2 closure is now materially complete: blockers, next actions, country scope, and activation-vs-evidence truth are explicit
 - the next real step depends on external credential/app-registration availability rather than further internal implementation
 - jump this back upward immediately if valid ReliefWeb/UCDP credentials become available
 
-### Priority 5: Deferred architecture uplifts
+### Priority 4: Deferred architecture uplifts
 Why last/default deferred:
 - multi-user/server-backed architecture is valuable only if the target operating model explicitly requires it now
 
@@ -799,6 +793,21 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`1 passed in 2.65s`)
 - full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`480 passed in 1024.14s`)
 
+### N1-WP-050
+Name:
+Close the repo-controlled G1 package by deriving explicit breadth-closure truth and capturing one fresh full-MVP operational proof that separates governed breadth completion from degraded release truth.
+
+Closure achieved:
+- fresh closure evidence was generated with `RUN-OP-LATEST-G1-CLOSE-001` on `pilot_set=mvp-complete`, writing `build/run_artifacts/latest-g1-close-001` and GUI `build/local_gui/latest-g1-close-001/index.html`
+- that fresh run produced `country_set_id=MVP-COUNTRIES-LIVE-mvp-complete-v1`, `countries_with_updates=30/30`, `breadth_coverage_tag=breadth_full_slice_updated`, and policy gate verdict `pass`, proving the governed full-MVP breadth slice operationally updates end-to-end even under degraded live-source conditions
+- `src/siasa/runs/operational_latest.py` now derives explicit `breadth_closure_status` / `breadth_closure_summary`, separating `breadth_operationally_closed_green`, `breadth_operationally_closed_but_runtime_degraded`, and not-yet-closed partial/no-update cases from the lower-level coverage counts
+- `src/siasa/gui/local_app.py` now renders that breadth-closure truth in the Operational Evidence Lane and archived-history evidence cells so project lead/operators can read whether breadth itself is closed even when release truth is still blocked by live-source failures
+- `tests/unit/test_operational_latest.py` now asserts both partial-slice not-yet-closed and full-slice breadth-closed behavior; `tests/unit/test_local_gui.py` now asserts the new breadth-closure strings in `runs.html`
+- steering interpretation is now explicit: the remaining runtime problem shown by `RUN-OP-LATEST-G1-CLOSE-001` is source degradation (`SRC-GDELT-DOC`, `SRC-GDELT-DOC-E`) plus release/readiness consequences, not missing governed breadth support
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/runs/operational_latest.py src/siasa/gui/local_app.py tests/unit/test_operational_latest.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`8 passed in 2.27s`)
+- full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`481 passed in 1003.64s`)
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 
@@ -807,9 +816,9 @@ Fallback reprioritization rule:
 ## 7. Trigger for the next steering pivot
 
 Stay on the current steering path until one of these becomes true:
-- a broader runtime slice is successfully closed and the next largest gap becomes credentialed source activation
-- valid ReliefWeb/UCDP credentials become available and activation becomes the highest-value bounded next slice
-- operational evidence-lane inconsistency becomes the main blocker for truthful steering
+- operational evidence-lane inconsistency becomes the main blocker for truthful steering and review handoff
+- valid ReliefWeb/UCDP credentials become available and external source activation becomes the highest-value bounded next slice
+- release/distribution lifecycle closure becomes the dominant stakeholder-facing remaining gap
 - external steering explicitly prioritizes multi-user/server-backed deployment
 
 Until then, do not reopen the old AP-F/AP-N/L3/L4 planning generations as active steering sources.
