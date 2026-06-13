@@ -782,6 +782,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 "triage_summary": "Runtime degraded and release blocked; review failed sources and known gaps first.",
                 "breadth_coverage_tag": "breadth_partial_slice_updated",
                 "breadth_coverage_summary": "18/21 countries updated; missing updates remain in EST, MMR, QAT.",
+                "breadth_closure_status": "breadth_not_yet_closed_partial_slice",
+                "breadth_closure_summary": "Breadth is not yet closed for this slice because some governed countries still lack updates.",
             },
             "recent_runs": [
                 {
@@ -836,6 +838,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                     "triage_summary": "Runtime degraded and release blocked; review failed sources and known gaps first.",
                     "breadth_coverage_tag": "breadth_partial_slice_updated",
                     "breadth_coverage_summary": "18/21 countries updated; missing updates remain in EST, MMR, QAT.",
+                    "breadth_closure_status": "breadth_not_yet_closed_partial_slice",
+                    "breadth_closure_summary": "Breadth is not yet closed for this slice because some governed countries still lack updates.",
                 },
                 {
                     "run_id": "RUN-150",
@@ -889,6 +893,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                     "triage_summary": "Run is green and release-ready; suitable as the default handoff baseline.",
                     "breadth_coverage_tag": "breadth_full_slice_updated",
                     "breadth_coverage_summary": "All countries in the governed slice produced updates; this run is a full breadth proof for the selected slice.",
+                    "breadth_closure_status": "breadth_operationally_closed_green",
+                    "breadth_closure_summary": "Governed slice breadth is fully proven with green runtime and release truth.",
                 }
             ],
         },
@@ -1180,6 +1186,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Countries without updates: <strong>3</strong>" in runs_html
     assert "Breadth coverage: <strong>breadth_partial_slice_updated</strong>" in runs_html
     assert "18/21 countries updated; missing updates remain in EST, MMR, QAT." in runs_html
+    assert "Breadth closure: <strong>breadth_not_yet_closed_partial_slice</strong>" in runs_html
+    assert "Breadth is not yet closed for this slice because some governed countries still lack updates." in runs_html
     assert "Countries without updates (3)" in runs_html
     assert "EST" in runs_html and "MMR" in runs_html and "QAT" in runs_html
     assert "0.8571" in runs_html
@@ -1236,6 +1244,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Countries without updates: none" in runs_html
     assert "breadth_full_slice_updated" in runs_html
     assert "All countries in the governed slice produced updates; this run is a full breadth proof for the selected slice." in runs_html
+    assert "breadth_operationally_closed_green" in runs_html
+    assert "Governed slice breadth is fully proven with green runtime and release truth." in runs_html
     assert "operational-evidence-history-table" in runs_html
     assert "operational-history-triage-filter" in runs_html
     assert "operational-history-recency-filter" in runs_html

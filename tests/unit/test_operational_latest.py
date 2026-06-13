@@ -77,7 +77,7 @@ def _write_minimal_artifacts(
     countries_with_updates: int = 2,
     countries_without_updates: list[str] | None = None,
 ) -> None:
-    countries_without_updates = list(countries_without_updates or ["POL"])
+    countries_without_updates = ["POL"] if countries_without_updates is None else list(countries_without_updates)
     (artifact_dir / "readmodels" / "country_profiles").mkdir(parents=True, exist_ok=True)
     (artifact_dir / "snapshot.json").write_text(json.dumps({"snapshot_id": "SNAP-001"}), encoding="utf-8")
     (artifact_dir / "readmodels" / "system_status.json").write_text(
@@ -268,6 +268,8 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
     assert evidence_lane["latest_summary"]["countries_without_updates"] == ["POL"]
     assert evidence_lane["latest_summary"]["breadth_coverage_tag"] == "breadth_partial_slice_updated"
     assert evidence_lane["latest_summary"]["breadth_coverage_summary"] == "2/3 countries updated; missing updates remain in POL."
+    assert evidence_lane["latest_summary"]["breadth_closure_status"] == "breadth_not_yet_closed_partial_slice"
+    assert evidence_lane["latest_summary"]["breadth_closure_summary"] == "Breadth is not yet closed for this slice because some governed countries still lack updates."
     assert evidence_lane["latest_summary"]["combined_ce_ratio"] == 1.0
     assert evidence_lane["latest_summary"]["countries_missing_both_ce_count"] == 0
     assert evidence_lane["latest_summary"]["countries_missing_both_ce"] == []
@@ -317,6 +319,8 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
     assert evidence_lane["recent_runs"][0]["countries_without_updates"] == ["POL"]
     assert evidence_lane["recent_runs"][0]["breadth_coverage_tag"] == "breadth_partial_slice_updated"
     assert evidence_lane["recent_runs"][0]["breadth_coverage_summary"] == "2/3 countries updated; missing updates remain in POL."
+    assert evidence_lane["recent_runs"][0]["breadth_closure_status"] == "breadth_not_yet_closed_partial_slice"
+    assert evidence_lane["recent_runs"][0]["breadth_closure_summary"] == "Breadth is not yet closed for this slice because some governed countries still lack updates."
     assert evidence_lane["recent_runs"][0]["bundle_root"] == str(gui_dir.resolve())
     assert evidence_lane["recent_runs"][0]["evidence_links"]["bundle_index_href"] == str(gui_dir.resolve() / "index.html")
     assert evidence_lane["recent_runs"][0]["share_refs"]["bundle_ref"] == f"bundle:{gui_dir.resolve()}"
@@ -427,6 +431,8 @@ def test_build_operational_latest_bundle_allows_degraded_runtime_when_explicitly
         run_status="partial_success",
         failed_sources=["SRC-GDELT-DOC"],
         country_set_id="MVP-COUNTRIES-LIVE-extended-focus-complete-v1",
+        countries_with_updates=3,
+        countries_without_updates=[],
     )
     runner = RecordingPipelineRunner(
         FakePipelineResult(
@@ -484,6 +490,10 @@ def test_build_operational_latest_bundle_allows_degraded_runtime_when_explicitly
     }
     assert evidence_lane["latest_summary"]["triage_tag"] == "degraded_release_blocked"
     assert evidence_lane["latest_summary"]["triage_summary"] == "Runtime degraded and release blocked; review failed sources and known gaps first."
+    assert evidence_lane["latest_summary"]["breadth_closure_status"] == "breadth_operationally_closed_but_runtime_degraded"
+    assert evidence_lane["latest_summary"]["breadth_closure_summary"] == (
+        "All countries updated and the governed breadth gate passed; breadth is operationally proven for this slice, but runtime/release still degrades due to source failures or known-gap truth."
+    )
 
 
 def test_build_operational_latest_bundle_fails_closed_on_policy_gate_fail_by_default(tmp_path: Path) -> None:

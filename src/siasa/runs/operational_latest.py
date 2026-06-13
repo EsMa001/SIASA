@@ -107,6 +107,55 @@ def _derive_breadth_coverage_posture(*, countries_total: int, countries_with_upd
         ),
     }
 
+
+def _derive_breadth_closure_posture(
+    *,
+    countries_total: int,
+    countries_with_updates: int,
+    countries_without_updates: list[str],
+    run_status: str,
+    policy_gate_verdict: str,
+    release_verdict: str,
+    failed_source_count: int,
+) -> dict[str, str]:
+    breadth_posture = _derive_breadth_coverage_posture(
+        countries_total=countries_total,
+        countries_with_updates=countries_with_updates,
+        countries_without_updates=countries_without_updates,
+    )
+    normalized_breadth_tag = str(breadth_posture.get("breadth_coverage_tag") or "unknown").lower()
+    normalized_run_status = str(run_status or "unknown").lower()
+    normalized_policy_gate = str(policy_gate_verdict or "unknown").lower()
+    normalized_release = str(release_verdict or "unknown").lower()
+
+    if normalized_breadth_tag == "breadth_full_slice_updated" and normalized_policy_gate == "pass":
+        if normalized_run_status == "success" and failed_source_count == 0 and normalized_release == "ready":
+            return {
+                "breadth_closure_status": "breadth_operationally_closed_green",
+                "breadth_closure_summary": "Governed slice breadth is fully proven with green runtime and release truth.",
+            }
+        return {
+            "breadth_closure_status": "breadth_operationally_closed_but_runtime_degraded",
+            "breadth_closure_summary": (
+                "All countries updated and the governed breadth gate passed; breadth is operationally proven for this slice, "
+                "but runtime/release still degrades due to source failures or known-gap truth."
+            ),
+        }
+    if normalized_breadth_tag == "breadth_partial_slice_updated":
+        return {
+            "breadth_closure_status": "breadth_not_yet_closed_partial_slice",
+            "breadth_closure_summary": "Breadth is not yet closed for this slice because some governed countries still lack updates.",
+        }
+    if normalized_breadth_tag == "breadth_no_updates":
+        return {
+            "breadth_closure_status": "breadth_not_yet_closed_no_updates",
+            "breadth_closure_summary": "Breadth is not closed for this slice because no governed-country updates were produced.",
+        }
+    return {
+        "breadth_closure_status": "breadth_closure_requires_review",
+        "breadth_closure_summary": "Breadth closure needs review before this run is used as a governed breadth proof.",
+    }
+
 from siasa.data.storage import (
     load_recent_runs,
     persist_operational_latest_run,
@@ -282,6 +331,15 @@ def build_operational_latest_bundle(
         countries_with_updates=int(verification_summary.get("countries_with_updates", 0) or 0),
         countries_without_updates=[str(item) for item in (verification_summary.get("countries_without_updates") or []) if str(item).strip()],
     )
+    latest_breadth_closure = _derive_breadth_closure_posture(
+        countries_total=int(verification_summary.get("countries_total", 0) or 0),
+        countries_with_updates=int(verification_summary.get("countries_with_updates", 0) or 0),
+        countries_without_updates=[str(item) for item in (verification_summary.get("countries_without_updates") or []) if str(item).strip()],
+        run_status=run_state.status,
+        policy_gate_verdict=str(gate_evaluation.get("gate_verdict") or "unknown"),
+        release_verdict=release_verdict,
+        failed_source_count=len(list(run_state.failed_sources)),
+    )
     recent_runs = [
         {
             "run_id": entry.run_id,
@@ -320,6 +378,15 @@ def build_operational_latest_bundle(
                 countries_total=entry.countries_total,
                 countries_with_updates=entry.countries_with_updates,
                 countries_without_updates=list(entry.countries_without_updates),
+            ),
+            **_derive_breadth_closure_posture(
+                countries_total=entry.countries_total,
+                countries_with_updates=entry.countries_with_updates,
+                countries_without_updates=list(entry.countries_without_updates),
+                run_status=entry.run_status,
+                policy_gate_verdict=entry.policy_gate_verdict,
+                release_verdict=entry.release_verdict,
+                failed_source_count=len(entry.failed_sources),
             ),
             **_derive_run_triage(
                 run_status=entry.run_status,
@@ -363,6 +430,7 @@ def build_operational_latest_bundle(
                 "share_refs": share_refs,
                 "handoff_summary": handoff_summary,
                 **latest_breadth_posture,
+                **latest_breadth_closure,
                 **latest_triage,
             }
         ]
@@ -398,6 +466,7 @@ def build_operational_latest_bundle(
             "share_refs": share_refs,
             "handoff_summary": handoff_summary,
             **latest_breadth_posture,
+            **latest_breadth_closure,
             **latest_triage,
         },
         "recent_runs": recent_runs,
