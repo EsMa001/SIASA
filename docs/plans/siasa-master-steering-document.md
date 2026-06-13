@@ -765,6 +765,20 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`1 passed in 2.20s`)
 - full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`480 passed in 1018.45s`)
 
+### N1-WP-048
+Name:
+Expose blocked-vs-ready governed country scope directly in the compact credential-gated activation summary so G2 breadth impact is readable immediately, not only after opening per-source readiness rows.
+
+Closure achieved:
+- `src/siasa/readmodels/source_coverage.py` now extends `source_activation_readiness_summary` with deterministic `blocked_applicable_country_count`, `blocked_applicable_countries`, `configured_ready_applicable_country_count`, and `configured_ready_applicable_countries`
+- `src/siasa/gui/local_app.py` now renders `Configured-ready country scope/count` and `Blocked country scope/count` in the `Credential-gated Source Activation Readiness Summary` table
+- `tests/unit/test_readmodels_country_profile.py` now asserts the empty-summary contract includes the new country-scope fields
+- `tests/unit/test_local_gui.py` now seeds and asserts blocked-country-scope rendering (`POL, UKR`) in `coverage.html`
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/readmodels/source_coverage.py src/siasa/gui/local_app.py tests/unit/test_readmodels_country_profile.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_readmodels_country_profile.py -q` passed (`4 passed in 0.12s`)
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`1 passed in 3.84s`)
+- full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`480 passed in 1024.14s`)
+
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
 
