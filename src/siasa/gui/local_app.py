@@ -2608,6 +2608,10 @@ def _render_source_coverage(
         f"{status}: {count}"
         for status, count in sorted((activation_summary.get('status_counts') or {}).items())
     ) or 'none'
+    activation_closure_counts = ', '.join(
+        f"{status}: {count}"
+        for status, count in sorted((activation_summary.get('closure_status_counts') or {}).items())
+    ) or 'none'
     activation_summary_rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(label))}</td>"
@@ -2618,6 +2622,24 @@ def _render_source_coverage(
             ('Configured ready', activation_summary.get('configured_ready_count', 0)),
             ('Blocked missing credentials', activation_summary.get('blocked_source_count', 0)),
             ('Status counts', activation_status_counts),
+            ('G2 closure status', activation_summary.get('overall_closure_status', 'unknown')),
+            ('Closure status counts', activation_closure_counts),
+            (
+                'Activated with live evidence',
+                ', '.join(str(item) for item in activation_summary.get('activated_with_live_evidence_sources', [])) or 'none',
+            ),
+            (
+                'Pending activation evidence',
+                ', '.join(str(item) for item in activation_summary.get('pending_evidence_sources', [])) or 'none',
+            ),
+            (
+                'Live fetch failed',
+                ', '.join(str(item) for item in activation_summary.get('live_fetch_failed_sources', [])) or 'none',
+            ),
+            (
+                'External blockers',
+                ', '.join(str(item) for item in activation_summary.get('external_blocker_sources', [])) or 'none',
+            ),
             (
                 'Configured-ready sources',
                 ', '.join(str(item) for item in activation_summary.get('configured_ready_sources', [])) or 'none',
@@ -2642,6 +2664,7 @@ def _render_source_coverage(
                 'Blocked country count',
                 activation_summary.get('blocked_applicable_country_count', 0),
             ),
+            ('Operator next step', activation_summary.get('operator_next_step', 'none')),
         ]
     )
     source_activation_rows = ''.join(
@@ -2649,15 +2672,18 @@ def _render_source_coverage(
         f"<td>{html.escape(str(item.get('source_id', '')))}</td>"
         f"<td>{html.escape(str(item.get('domain', '')))}</td>"
         f"<td>{html.escape(str(item.get('activation_status', '')))}</td>"
+        f"<td>{html.escape(str(item.get('runtime_source_status', '')))}</td>"
+        f"<td>{html.escape(str(item.get('activation_evidence', '')))}</td>"
+        f"<td>{html.escape(str(item.get('closure_status', '')))}</td>"
         f"<td>{html.escape(str(item.get('credential_name', '')))}</td>"
         f"<td>{html.escape(str(item.get('configured', '')))}</td>"
         f"<td>{html.escape(str(item.get('provider_requirement', '')))}</td>"
         f"<td>{html.escape(', '.join(str(country_id) for country_id in item.get('applicable_country_ids', [])) or 'none')}</td>"
         f"<td>{html.escape(str(item.get('blocked_reason', '')))}</td>"
-        f"<td>{html.escape(str(item.get('activation_next_step', '')))}</td>"
+        f"<td>{html.escape(str(item.get('closure_next_step', item.get('activation_next_step', ''))))}</td>"
         "</tr>"
         for item in source_coverage_read_model.get('source_activation_readiness', [])
-    ) or "<tr><td colspan='9'>No credential-gated source activation readiness recorded.</td></tr>"
+    ) or "<tr><td colspan='12'>No credential-gated source activation readiness recorded.</td></tr>"
     source_status_summary_rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(status))}</td>"
@@ -2682,12 +2708,14 @@ def _render_source_coverage(
         f"<h4>Degraded Sources</h4><ul>{degraded_sources}</ul>"
         "<h4>Credential-gated Source Activation Readiness Summary</h4>"
         "<p>Provides a compact activation snapshot so operators can scan how many credential-gated sources are ready versus blocked before reading the detailed source table.</p>"
+        "<p>The summary now also makes G2 closure truth explicit: whether sources are already evidenced live, still blocked externally, or still pending first governed activation evidence.</p>"
         "<table><thead><tr><th>Activation Summary</th><th>Value</th></tr></thead>"
         f"<tbody>{activation_summary_rows}</tbody></table>"
         "<h4>Credential-gated Source Activation Readiness</h4>"
         "<p>Shows whether provider-gated sources are operationally activatable in the current environment or still blocked by missing credentials/registrations.</p>"
+        "<p>The table distinguishes raw activation status from runtime evidence truth (`Runtime Source Status`, `Activation Evidence`, `Closure Posture`) so configured credentials are not confused with proven live activation.</p>"
         "<p>The Next Step column turns each blocker/configured-ready state into the concrete follow-through action required for the first real credential-backed evidence run.</p>"
-        "<table><thead><tr><th>Source</th><th>Domain</th><th>Activation Status</th><th>Credential</th><th>Configured</th><th>Provider Requirement</th><th>Applicable Countries</th><th>Blocked Reason</th><th>Next Step</th></tr></thead>"
+        "<table><thead><tr><th>Source</th><th>Domain</th><th>Activation Status</th><th>Runtime Source Status</th><th>Activation Evidence</th><th>Closure Posture</th><th>Credential</th><th>Configured</th><th>Provider Requirement</th><th>Applicable Countries</th><th>Blocked Reason</th><th>Next Step</th></tr></thead>"
         f"<tbody>{source_activation_rows}</tbody></table>"
         f"{_render_country_coverage_matrix(coverage_visibility)}"
         "<h3>Coverage / Confidence Matrix</h3>"

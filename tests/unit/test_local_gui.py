@@ -281,8 +281,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
         "failed_sources": ["SRC-B"],
         "missing_sources": ["SRC-C"],
         "source_activation_readiness": [
-            {"source_id": "SRC-UCDP-GED", "domain": "B", "activation_status": "blocked_missing_credentials", "credential_name": "UCDP_API_TOKEN", "configured": False, "provider_requirement": "api_token", "applicable_country_ids": ["UKR", "POL"], "blocked_reason": "missing_credential:UCDP_API_TOKEN", "activation_next_step": "Set UCDP_API_TOKEN in the runtime environment and rerun the governed live pipeline."},
-            {"source_id": "SRC-RELIEFWEB", "domain": "C", "activation_status": "blocked_missing_credentials", "credential_name": "RELIEFWEB_APPNAME", "configured": False, "provider_requirement": "pre_approved_appname", "applicable_country_ids": ["UKR", "POL"], "blocked_reason": "missing_credential:RELIEFWEB_APPNAME", "activation_next_step": "Obtain an approved ReliefWeb appname, set RELIEFWEB_APPNAME, and rerun the governed live pipeline."},
+            {"source_id": "SRC-UCDP-GED", "domain": "B", "activation_status": "blocked_missing_credentials", "runtime_source_status": "not_in_run", "activation_evidence": "not_attempted_missing_credentials", "closure_status": "external_blocker_present", "credential_name": "UCDP_API_TOKEN", "configured": False, "provider_requirement": "api_token", "applicable_country_ids": ["UKR", "POL"], "blocked_reason": "missing_credential:UCDP_API_TOKEN", "activation_next_step": "Set UCDP_API_TOKEN in the runtime environment and rerun the governed live pipeline.", "closure_next_step": "Set UCDP_API_TOKEN in the runtime environment and rerun the governed live pipeline."},
+            {"source_id": "SRC-RELIEFWEB", "domain": "C", "activation_status": "blocked_missing_credentials", "runtime_source_status": "not_in_run", "activation_evidence": "not_attempted_missing_credentials", "closure_status": "external_blocker_present", "credential_name": "RELIEFWEB_APPNAME", "configured": False, "provider_requirement": "pre_approved_appname", "applicable_country_ids": ["UKR", "POL"], "blocked_reason": "missing_credential:RELIEFWEB_APPNAME", "activation_next_step": "Obtain an approved ReliefWeb appname, set RELIEFWEB_APPNAME, and rerun the governed live pipeline.", "closure_next_step": "Obtain an approved ReliefWeb appname, set RELIEFWEB_APPNAME, and rerun the governed live pipeline."},
         ],
         "source_activation_readiness_summary": {
             "total_sources": 2,
@@ -295,6 +295,19 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             "blocked_applicable_countries": ["POL", "UKR"],
             "configured_ready_applicable_country_count": 0,
             "configured_ready_applicable_countries": [],
+            "closure_status_counts": {"external_blocker_present": 2},
+            "activated_with_live_evidence_count": 0,
+            "activated_with_live_evidence_sources": [],
+            "external_blocker_count": 2,
+            "external_blocker_sources": ["SRC-UCDP-GED", "SRC-RELIEFWEB"],
+            "live_fetch_failed_count": 0,
+            "live_fetch_failed_sources": [],
+            "pending_evidence_count": 0,
+            "pending_evidence_sources": [],
+            "out_of_scope_count": 0,
+            "out_of_scope_sources": [],
+            "overall_closure_status": "external_blockers_present",
+            "operator_next_step": "Resolve credential/registration blockers for: SRC-UCDP-GED, SRC-RELIEFWEB",
         },
     }
     reports = {
@@ -1092,18 +1105,36 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Credential-gated Source Activation Readiness" in coverage_html
     assert "Credential-gated Source Activation Readiness Summary" in coverage_html
     assert "Provides a compact activation snapshot so operators can scan how many credential-gated sources are ready versus blocked before reading the detailed source table." in coverage_html
+    assert "The summary now also makes G2 closure truth explicit: whether sources are already evidenced live, still blocked externally, or still pending first governed activation evidence." in coverage_html
     assert "Total credential-gated sources" in coverage_html
     assert "Blocked missing credentials" in coverage_html
+    assert "G2 closure status" in coverage_html
+    assert "Closure status counts" in coverage_html
+    assert "Activated with live evidence" in coverage_html
+    assert "Pending activation evidence" in coverage_html
+    assert "Live fetch failed" in coverage_html
+    assert "External blockers" in coverage_html
     assert "Configured-ready sources" in coverage_html
     assert "Configured-ready country scope" in coverage_html
     assert "Configured-ready country count" in coverage_html
     assert "Blocked sources" in coverage_html
     assert "Blocked country scope" in coverage_html
     assert "Blocked country count" in coverage_html
+    assert "Operator next step" in coverage_html
     assert "blocked_missing_credentials: 2" in coverage_html
+    assert "external_blocker_present: 2" in coverage_html
+    assert "external_blockers_present" in coverage_html
+    assert "Resolve credential/registration blockers for: SRC-UCDP-GED, SRC-RELIEFWEB" in coverage_html
     assert "SRC-UCDP-GED, SRC-RELIEFWEB" in coverage_html
     assert "POL, UKR" in coverage_html
     assert "operationally activatable in the current environment or still blocked by missing credentials/registrations" in coverage_html
+    assert "The table distinguishes raw activation status from runtime evidence truth (`Runtime Source Status`, `Activation Evidence`, `Closure Posture`) so configured credentials are not confused with proven live activation." in coverage_html
+    assert "Runtime Source Status" in coverage_html
+    assert "Activation Evidence" in coverage_html
+    assert "Closure Posture" in coverage_html
+    assert "not_in_run" in coverage_html
+    assert "not_attempted_missing_credentials" in coverage_html
+    assert "external_blocker_present" in coverage_html
     assert "SRC-UCDP-GED" in coverage_html
     assert "SRC-RELIEFWEB" in coverage_html
     assert "missing_credential:UCDP_API_TOKEN" in coverage_html

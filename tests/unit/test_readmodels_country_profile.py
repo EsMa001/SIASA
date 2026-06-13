@@ -86,4 +86,72 @@ def test_source_coverage_read_model_exposes_status_horizon_freshness_confidence_
         "blocked_applicable_countries": [],
         "configured_ready_applicable_country_count": 0,
         "configured_ready_applicable_countries": [],
+        "closure_status_counts": {},
+        "activated_with_live_evidence_count": 0,
+        "activated_with_live_evidence_sources": [],
+        "external_blocker_count": 0,
+        "external_blocker_sources": [],
+        "live_fetch_failed_count": 0,
+        "live_fetch_failed_sources": [],
+        "pending_evidence_count": 0,
+        "pending_evidence_sources": [],
+        "out_of_scope_count": 0,
+        "out_of_scope_sources": [],
+        "overall_closure_status": "no_credential_gated_sources_in_scope",
+        "operator_next_step": "No credential-gated source activation is relevant for this governed slice.",
     }
+
+
+def test_source_coverage_read_model_derives_g2_activation_closure_truth_from_runtime_and_credentials() -> None:
+    read_model = build_source_coverage_read_model(
+        sources=[
+            {"source_id": "SRC-UCDP-GED", "status": "success", "history_horizon": "3y", "freshness_hours": 6, "confidence": 0.9, "record_count": 12, "diagnostics": "fetch_ok"},
+            {"source_id": "SRC-RELIEFWEB", "status": "prepared_adapter", "history_horizon": "n/a", "freshness_hours": None, "confidence": None, "record_count": 0, "diagnostics": "not_enabled"},
+            {"source_id": "SRC-OTHER", "status": "failed", "history_horizon": "1y", "freshness_hours": 48, "confidence": 0.4, "record_count": 0, "diagnostics": "timeout"},
+        ],
+        source_activation_readiness=[
+            {
+                "source_id": "SRC-UCDP-GED",
+                "domain": "B",
+                "credential_name": "UCDP_API_TOKEN",
+                "configured": True,
+                "activation_status": "configured_ready",
+                "blocked_reason": "none",
+                "applicable_country_ids": ["UKR", "POL"],
+                "requested_country_count": 2,
+                "applicable_country_count": 2,
+                "provider_requirement": "api_token",
+                "activation_next_step": "Run governed live pipeline to collect first credential-backed source evidence.",
+            },
+            {
+                "source_id": "SRC-RELIEFWEB",
+                "domain": "C",
+                "credential_name": "RELIEFWEB_APPNAME",
+                "configured": False,
+                "activation_status": "blocked_missing_credentials",
+                "blocked_reason": "missing_credential:RELIEFWEB_APPNAME",
+                "applicable_country_ids": ["UKR", "POL"],
+                "requested_country_count": 2,
+                "applicable_country_count": 2,
+                "provider_requirement": "pre_approved_appname",
+                "activation_next_step": "Obtain an approved ReliefWeb appname, set RELIEFWEB_APPNAME, and rerun the governed live pipeline.",
+            },
+        ],
+    )
+
+    assert read_model["source_activation_readiness"][0]["runtime_source_status"] == "success"
+    assert read_model["source_activation_readiness"][0]["activation_evidence"] == "live_source_success"
+    assert read_model["source_activation_readiness"][0]["closure_status"] == "activated_with_live_evidence"
+    assert read_model["source_activation_readiness"][1]["runtime_source_status"] == "prepared_adapter"
+    assert read_model["source_activation_readiness"][1]["activation_evidence"] == "not_attempted_missing_credentials"
+    assert read_model["source_activation_readiness"][1]["closure_status"] == "external_blocker_present"
+    assert read_model["source_activation_readiness_summary"]["closure_status_counts"] == {
+        "activated_with_live_evidence": 1,
+        "external_blocker_present": 1,
+    }
+    assert read_model["source_activation_readiness_summary"]["activated_with_live_evidence_sources"] == ["SRC-UCDP-GED"]
+    assert read_model["source_activation_readiness_summary"]["external_blocker_sources"] == ["SRC-RELIEFWEB"]
+    assert read_model["source_activation_readiness_summary"]["overall_closure_status"] == "external_blockers_present"
+    assert read_model["source_activation_readiness_summary"]["operator_next_step"] == (
+        "Resolve credential/registration blockers for: SRC-RELIEFWEB"
+    )
