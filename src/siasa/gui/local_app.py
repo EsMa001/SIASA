@@ -2623,8 +2623,24 @@ def _render_source_coverage(
                 ', '.join(str(item) for item in activation_summary.get('configured_ready_sources', [])) or 'none',
             ),
             (
+                'Configured-ready country scope',
+                ', '.join(str(item) for item in activation_summary.get('configured_ready_applicable_countries', [])) or 'none',
+            ),
+            (
+                'Configured-ready country count',
+                activation_summary.get('configured_ready_applicable_country_count', 0),
+            ),
+            (
                 'Blocked sources',
                 ', '.join(str(item) for item in activation_summary.get('blocked_sources', [])) or 'none',
+            ),
+            (
+                'Blocked country scope',
+                ', '.join(str(item) for item in activation_summary.get('blocked_applicable_countries', [])) or 'none',
+            ),
+            (
+                'Blocked country count',
+                activation_summary.get('blocked_applicable_country_count', 0),
             ),
         ]
     )

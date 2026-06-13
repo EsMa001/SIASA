@@ -82,4 +82,8 @@ def test_source_coverage_read_model_exposes_status_horizon_freshness_confidence_
         "status_counts": {},
         "blocked_sources": [],
         "configured_ready_sources": [],
+        "blocked_applicable_country_count": 0,
+        "blocked_applicable_countries": [],
+        "configured_ready_applicable_country_count": 0,
+        "configured_ready_applicable_countries": [],
     }

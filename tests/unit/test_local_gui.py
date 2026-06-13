@@ -291,6 +291,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             "status_counts": {"blocked_missing_credentials": 2},
             "blocked_sources": ["SRC-UCDP-GED", "SRC-RELIEFWEB"],
             "configured_ready_sources": [],
+            "blocked_applicable_country_count": 2,
+            "blocked_applicable_countries": ["POL", "UKR"],
+            "configured_ready_applicable_country_count": 0,
+            "configured_ready_applicable_countries": [],
         },
     }
     reports = {
@@ -1091,9 +1095,14 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Total credential-gated sources" in coverage_html
     assert "Blocked missing credentials" in coverage_html
     assert "Configured-ready sources" in coverage_html
+    assert "Configured-ready country scope" in coverage_html
+    assert "Configured-ready country count" in coverage_html
     assert "Blocked sources" in coverage_html
+    assert "Blocked country scope" in coverage_html
+    assert "Blocked country count" in coverage_html
     assert "blocked_missing_credentials: 2" in coverage_html
     assert "SRC-UCDP-GED, SRC-RELIEFWEB" in coverage_html
+    assert "POL, UKR" in coverage_html
     assert "operationally activatable in the current environment or still blocked by missing credentials/registrations" in coverage_html
     assert "SRC-UCDP-GED" in coverage_html
     assert "SRC-RELIEFWEB" in coverage_html
