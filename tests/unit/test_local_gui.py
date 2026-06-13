@@ -780,6 +780,12 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                 "handoff_summary": "Run RUN-200: bundle at /tmp/siasa-gui-test; review readiness_json:/tmp/siasa-gui-test/readiness.json, coverage_json:/tmp/siasa-gui-test/source_coverage.json, and release_gate_json:/tmp/siasa-gui-test/release_gate.json.",
                 "triage_tag": "degraded_release_blocked",
                 "triage_summary": "Runtime degraded and release blocked; review failed sources and known gaps first.",
+                "recorded_at": "2026-05-11T18:00:00Z",
+                "evidence_freshness_status": "fresh_current",
+                "evidence_freshness_summary": "Latest evidence is current (2.00h old).",
+                "evidence_age_hours": 2.0,
+                "evidence_lane_closure_status": "evidence_lane_fresh_but_override_governed",
+                "evidence_lane_closure_summary": "Evidence is fresh, but the latest lane relied on explicit verification overrides; use it for governed degraded inspection, not as an unqualified green baseline.",
                 "breadth_coverage_tag": "breadth_partial_slice_updated",
                 "breadth_coverage_summary": "18/21 countries updated; missing updates remain in EST, MMR, QAT.",
                 "breadth_closure_status": "breadth_not_yet_closed_partial_slice",
@@ -836,6 +842,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                     "handoff_summary": "Run RUN-200: bundle at /tmp/siasa-gui-test; review readiness_json:/tmp/siasa-gui-test/readiness.json, coverage_json:/tmp/siasa-gui-test/source_coverage.json, and release_gate_json:/tmp/siasa-gui-test/release_gate.json.",
                     "triage_tag": "degraded_release_blocked",
                     "triage_summary": "Runtime degraded and release blocked; review failed sources and known gaps first.",
+                    "evidence_freshness_status": "fresh_current",
+                    "evidence_freshness_summary": "Latest evidence is current (2.00h old).",
+                    "evidence_age_hours": 2.0,
+                    "evidence_lane_closure_status": "evidence_lane_fresh_but_override_governed",
+                    "evidence_lane_closure_summary": "Evidence is fresh, but the latest lane relied on explicit verification overrides; use it for governed degraded inspection, not as an unqualified green baseline.",
                     "breadth_coverage_tag": "breadth_partial_slice_updated",
                     "breadth_coverage_summary": "18/21 countries updated; missing updates remain in EST, MMR, QAT.",
                     "breadth_closure_status": "breadth_not_yet_closed_partial_slice",
@@ -891,6 +902,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                     "handoff_summary": "Run RUN-150: bundle at /tmp/siasa-history/RUN-150; review readiness_json:/tmp/siasa-history/RUN-150/readiness.json, coverage_json:/tmp/siasa-history/RUN-150/source_coverage.json, and release_gate_json:/tmp/siasa-history/RUN-150/release_gate.json.",
                     "triage_tag": "ready_green",
                     "triage_summary": "Run is green and release-ready; suitable as the default handoff baseline.",
+                    "evidence_freshness_status": "aging_recent",
+                    "evidence_freshness_summary": "Latest evidence is still recent but aging (26.00h old); refresh soon.",
+                    "evidence_age_hours": 26.0,
+                    "evidence_lane_closure_status": "evidence_lane_authoritative_green",
+                    "evidence_lane_closure_summary": "Evidence is fresh, strictly verified, and green; this lane is authoritative for default steering and handoff.",
                     "breadth_coverage_tag": "breadth_full_slice_updated",
                     "breadth_coverage_summary": "All countries in the governed slice produced updates; this run is a full breadth proof for the selected slice.",
                     "breadth_closure_status": "breadth_operationally_closed_green",
@@ -1196,10 +1212,18 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Triage tag:" in runs_html
     assert "degraded_release_blocked" in runs_html
     assert "Runtime degraded and release blocked; review failed sources and known gaps first." in runs_html
+    assert "Evidence freshness:" in runs_html
+    assert "fresh_current" in runs_html
+    assert "Latest evidence is current (2.00h old)." in runs_html
+    assert "Evidence lane closure:" in runs_html
+    assert "evidence_lane_fresh_but_override_governed" in runs_html
+    assert "Evidence is fresh, but the latest lane relied on explicit verification overrides; use it for governed degraded inspection, not as an unqualified green baseline." in runs_html
     assert "Verification mode:" in runs_html
     assert "explicit_override_enabled" in runs_html
     assert "Enabled overrides:" in runs_html
     assert "allow_partial_success, allow_failed_sources" in runs_html
+    assert "Recorded at:" in runs_html
+    assert "2026-05-11T18:00:00Z" in runs_html
     assert "ready_green" in runs_html
     assert "Run is green and release-ready; suitable as the default handoff baseline." in runs_html
     assert "Latest known gaps (2)" in runs_html
@@ -1238,10 +1262,15 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Run RUN-150: bundle at /tmp/siasa-history/RUN-150; review readiness_json:/tmp/siasa-history/RUN-150/readiness.json, coverage_json:/tmp/siasa-history/RUN-150/source_coverage.json, and release_gate_json:/tmp/siasa-history/RUN-150/release_gate.json." in runs_html
     assert "Coverage scope: 18/21 updated | without updates: 3" in runs_html
     assert "Countries without updates: EST, MMR, QAT" in runs_html
+    assert "fresh_current" in runs_html
+    assert "evidence_lane_fresh_but_override_governed" in runs_html
     assert "breadth_partial_slice_updated" in runs_html
     assert "18/21 countries updated; missing updates remain in EST, MMR, QAT." in runs_html
     assert "Coverage scope: 11/11 updated | without updates: 0" in runs_html
     assert "Countries without updates: none" in runs_html
+    assert "aging_recent" in runs_html
+    assert "Latest evidence is still recent but aging (26.00h old); refresh soon." in runs_html
+    assert "evidence_lane_authoritative_green" in runs_html
     assert "breadth_full_slice_updated" in runs_html
     assert "All countries in the governed slice produced updates; this run is a full breadth proof for the selected slice." in runs_html
     assert "breadth_operationally_closed_green" in runs_html
@@ -1308,9 +1337,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "data-recency-band='last_24h'" in runs_html
     assert "data-hours-behind-latest='0'" in runs_html
     assert "data-hours-behind-latest='24'" in runs_html
-    assert "data-history-search-text='run-150 2026-05-10t18:00:00z success extended-focus-complete mvp-countries-live-extended-focus-complete-v1 11 11 0 breadth_full_slice_updated all countries in the governed slice produced updates; this run is a full breadth proof for the selected slice. green pass ready release_ready ready_green" in runs_html
-    assert "data-history-search-text='run-200 2026-05-11t18:00:00z partial_success focus-complete mvp-countries-live-focus-complete-v1 21 18 3 est mmr qat breadth_partial_slice_updated 18/21 countries updated; missing updates remain in est, mmr, qat. amber pass blocked_by_known_gaps runtime_degraded_and_release_blocked degraded_release_blocked" in runs_html
-    assert "run is green and release-ready; suitable as the default handoff baseline. strict run" in runs_html
+    assert "data-history-search-text='run-150 2026-05-10t18:00:00z success extended-focus-complete mvp-countries-live-extended-focus-complete-v1 11 11 0 breadth_full_slice_updated" in runs_html
+    assert "data-history-search-text='run-200 2026-05-11t18:00:00z partial_success focus-complete mvp-countries-live-focus-complete-v1 21 18 3 est mmr qat breadth_partial_slice_updated" in runs_html
+    assert "run is green and release-ready; suitable as the default handoff baseline." in runs_html
+    assert "evidence_lane_authoritative_green" in runs_html
+    assert "strict run run-150: bundle at /tmp/siasa-history/run-150" in runs_html
     assert "data-recorded-at='2026-05-11T18:00:00Z'" in runs_html
     assert "data-recorded-at='2026-05-10T18:00:00Z'" in runs_html
     assert "applyOperationalHistoryTriageFilter" in runs_html

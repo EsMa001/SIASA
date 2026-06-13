@@ -3023,6 +3023,17 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
     latest_handoff_summary = html.escape(str(latest_summary.get('handoff_summary', 'n/a')))
     latest_triage_tag = html.escape(str(latest_summary.get('triage_tag', 'n/a')))
     latest_triage_summary = html.escape(str(latest_summary.get('triage_summary', 'n/a')))
+    latest_recorded_at = html.escape(str(latest_summary.get('recorded_at', 'n/a')))
+    latest_evidence_freshness_status = html.escape(str(latest_summary.get('evidence_freshness_status', 'n/a')))
+    latest_evidence_freshness_summary = html.escape(str(latest_summary.get('evidence_freshness_summary', 'n/a')))
+    latest_evidence_closure_status = html.escape(str(latest_summary.get('evidence_lane_closure_status', 'n/a')))
+    latest_evidence_closure_summary = html.escape(str(latest_summary.get('evidence_lane_closure_summary', 'n/a')))
+    latest_evidence_age_hours_raw = latest_summary.get('evidence_age_hours')
+    latest_evidence_age_hours = (
+        f"{float(latest_evidence_age_hours_raw):.2f}"
+        if isinstance(latest_evidence_age_hours_raw, (int, float))
+        else html.escape(str(latest_evidence_age_hours_raw or 'n/a'))
+    )
     latest_breadth_coverage_tag = html.escape(str(latest_summary.get('breadth_coverage_tag', 'n/a')))
     latest_breadth_coverage_summary = html.escape(str(latest_summary.get('breadth_coverage_summary', 'n/a')))
     latest_breadth_closure_status = html.escape(str(latest_summary.get('breadth_closure_status', 'n/a')))
@@ -3067,6 +3078,16 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         handoff_summary = html.escape(str(item.get('handoff_summary', 'n/a')))
         triage_tag = html.escape(str(item.get('triage_tag', 'n/a')))
         triage_summary = html.escape(str(item.get('triage_summary', 'n/a')))
+        evidence_freshness_status = html.escape(str(item.get('evidence_freshness_status', 'n/a')))
+        evidence_freshness_summary = html.escape(str(item.get('evidence_freshness_summary', 'n/a')))
+        evidence_closure_status = html.escape(str(item.get('evidence_lane_closure_status', 'n/a')))
+        evidence_closure_summary = html.escape(str(item.get('evidence_lane_closure_summary', 'n/a')))
+        evidence_age_hours_raw = item.get('evidence_age_hours')
+        evidence_age_hours = (
+            f"{float(evidence_age_hours_raw):.2f}h"
+            if isinstance(evidence_age_hours_raw, (int, float))
+            else html.escape(str(evidence_age_hours_raw or 'n/a'))
+        )
         countries_total = int(item.get('countries_total', 0) or 0)
         countries_with_updates = int(item.get('countries_with_updates', 0) or 0)
         countries_without_updates_count = int(item.get('countries_without_updates_count', 0) or 0)
@@ -3095,6 +3116,8 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
             f"<div class='history-coverage-gaps' style='margin-top:4px;font-size:0.8em;color:#9fb3d9;'>{html.escape(coverage_scope_detail)}</div>"
             f"<div class='history-breadth-coverage' style='margin-top:4px;font-size:0.8em;color:#9fb3d9;'><strong>{breadth_coverage_tag}</strong>: {breadth_coverage_summary}</div>"
             f"<div class='history-breadth-closure' style='margin-top:4px;font-size:0.8em;color:#9fb3d9;'><strong>{breadth_closure_status}</strong>: {breadth_closure_summary}</div>"
+            f"<div class='history-evidence-freshness' style='margin-top:4px;font-size:0.8em;color:#9fb3d9;'><strong>{evidence_freshness_status}</strong> ({evidence_age_hours}): {evidence_freshness_summary}</div>"
+            f"<div class='history-evidence-closure' style='margin-top:4px;font-size:0.8em;color:#9fb3d9;'><strong>{evidence_closure_status}</strong>: {evidence_closure_summary}</div>"
             f"<div class='history-triage-summary' style='margin-top:4px;font-size:0.8em;color:#ffd479;'><strong>{triage_tag}</strong>: {triage_summary}</div>"
             f"<div class='history-handoff-summary' style='margin-top:4px;font-size:0.8em;color:#dae2fd;'>{handoff_summary}</div>"
             f"<div class='history-share-refs' style='margin-top:4px;font-size:0.8em;'>{share_refs_text}</div>"
@@ -3179,6 +3202,10 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
                 item.get('readiness_interpretation', ''),
                 item.get('triage_tag', ''),
                 item.get('triage_summary', ''),
+                item.get('evidence_freshness_status', ''),
+                item.get('evidence_freshness_summary', ''),
+                item.get('evidence_lane_closure_status', ''),
+                item.get('evidence_lane_closure_summary', ''),
                 item.get('verification_policy', {}).get('mode', '') if isinstance(item.get('verification_policy'), dict) else '',
                 ' '.join(
                     str(value).strip()
@@ -3769,9 +3796,12 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<p>Governed slice: <strong>{html.escape(str(latest_summary.get('country_set_id', 'n/a')))}</strong> | Coverage scope: <strong>{html.escape(str(latest_summary.get('countries_with_updates', 0)))}/{html.escape(str(latest_summary.get('countries_total', 0)))}</strong> updated | Countries without updates: <strong>{html.escape(str(latest_summary.get('countries_without_updates_count', 0)))}</strong> | Combined C/E ratio: <strong>{combined_ce_ratio_text}</strong> | Governance verdict: <strong>{html.escape(governance_verdict)}</strong> | Policy gate: <strong>{html.escape(policy_gate_verdict)}</strong></p>"
         f"<p>Breadth coverage: <strong>{latest_breadth_coverage_tag}</strong> | Summary: <strong>{latest_breadth_coverage_summary}</strong></p>"
         f"<p>Breadth closure: <strong>{latest_breadth_closure_status}</strong> | Summary: <strong>{latest_breadth_closure_summary}</strong></p>"
+        f"<p>Evidence freshness: <strong>{latest_evidence_freshness_status}</strong> | Age hours: <strong>{latest_evidence_age_hours}</strong> | Summary: <strong>{latest_evidence_freshness_summary}</strong></p>"
+        f"<p>Evidence lane closure: <strong>{latest_evidence_closure_status}</strong> | Summary: <strong>{latest_evidence_closure_summary}</strong></p>"
         f"<p>Release verdict: <strong>{html.escape(release_verdict)}</strong> | Readiness interpretation: <strong>{html.escape(readiness_interpretation)}</strong> | Known gaps: <strong>{html.escape(str(known_gap_count))}</strong></p>"
         f"<p>Triage tag: <strong>{latest_triage_tag}</strong> | Triage summary: <strong>{latest_triage_summary}</strong></p>"
         f"<p>Verification mode: <strong>{html.escape(verification_mode)}</strong> | Enabled overrides: <strong>{html.escape(verification_override_text)}</strong></p>"
+        f"<p>Recorded at: <strong>{latest_recorded_at}</strong></p>"
         f"<p>Operator next action: <strong>{operator_next_action}</strong></p>"
         f"<p>Bundle root: <strong>{latest_bundle_root}</strong> | GUI index: <strong>{latest_gui_index}</strong> | Artifacts dir: <strong>{latest_artifacts_dir}</strong></p>"
         f"<p>Handoff summary: <strong>{latest_handoff_summary}</strong></p>"

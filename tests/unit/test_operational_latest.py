@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -191,6 +192,7 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
         pipeline_runner=runner,
         gui_builder=gui_builder,
         run_history_writer=run_history_writer,
+        now_provider=lambda: datetime(2026, 5, 11, 20, 0, tzinfo=timezone.utc),
     )
 
     assert runner.calls == [
@@ -284,6 +286,12 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
     }
     assert evidence_lane["latest_summary"]["triage_tag"] == "ready_green"
     assert evidence_lane["latest_summary"]["triage_summary"] == "Run is green and release-ready; suitable as the default handoff baseline."
+    assert evidence_lane["latest_summary"]["recorded_at"] == "2026-05-11T20:00:00Z"
+    assert evidence_lane["latest_summary"]["evidence_freshness_status"] == "fresh_current"
+    assert evidence_lane["latest_summary"]["evidence_freshness_summary"] == "Latest evidence is current (0.00h old)."
+    assert evidence_lane["latest_summary"]["evidence_age_hours"] == 0.0
+    assert evidence_lane["latest_summary"]["evidence_lane_closure_status"] == "evidence_lane_authoritative_green"
+    assert evidence_lane["latest_summary"]["evidence_lane_closure_summary"] == "Evidence is fresh, strictly verified, and green; this lane is authoritative for default steering and handoff."
     assert evidence_lane["latest_summary"]["evidence_links"] == {
         "bundle_index_href": str(gui_dir.resolve() / "index.html"),
         "coverage_page_href": str(gui_dir.resolve() / "coverage.html"),
@@ -327,6 +335,11 @@ def test_build_operational_latest_bundle_uses_extended_focus_complete_and_builds
     assert "Run RUN-OP-LATEST-001: bundle at" in evidence_lane["recent_runs"][0]["handoff_summary"]
     assert evidence_lane["recent_runs"][0]["triage_tag"] == "ready_green"
     assert evidence_lane["recent_runs"][0]["triage_summary"] == "Run is green and release-ready; suitable as the default handoff baseline."
+    assert evidence_lane["recent_runs"][0]["evidence_freshness_status"] == "fresh_current"
+    assert evidence_lane["recent_runs"][0]["evidence_freshness_summary"] == "Latest evidence is current (0.00h old)."
+    assert evidence_lane["recent_runs"][0]["evidence_age_hours"] == 0.0
+    assert evidence_lane["recent_runs"][0]["evidence_lane_closure_status"] == "evidence_lane_authoritative_green"
+    assert evidence_lane["recent_runs"][0]["evidence_lane_closure_summary"] == "Evidence is fresh, strictly verified, and green; this lane is authoritative for default steering and handoff."
     assert evidence_lane["recent_runs"][0]["verification_policy"] == {
         "allow_partial_success": False,
         "allow_failed_sources": False,
@@ -461,6 +474,7 @@ def test_build_operational_latest_bundle_allows_degraded_runtime_when_explicitly
         pipeline_runner=runner,
         gui_builder=gui_builder,
         run_history_writer=run_history_writer,
+        now_provider=lambda: datetime(2026, 5, 11, 20, 0, tzinfo=timezone.utc),
     )
 
     assert result["run_status"] == "partial_success"
@@ -490,6 +504,12 @@ def test_build_operational_latest_bundle_allows_degraded_runtime_when_explicitly
     }
     assert evidence_lane["latest_summary"]["triage_tag"] == "degraded_release_blocked"
     assert evidence_lane["latest_summary"]["triage_summary"] == "Runtime degraded and release blocked; review failed sources and known gaps first."
+    assert evidence_lane["latest_summary"]["recorded_at"] == "2026-05-11T20:00:00Z"
+    assert evidence_lane["latest_summary"]["evidence_freshness_status"] == "fresh_current"
+    assert evidence_lane["latest_summary"]["evidence_freshness_summary"] == "Latest evidence is current (0.00h old)."
+    assert evidence_lane["latest_summary"]["evidence_age_hours"] == 0.0
+    assert evidence_lane["latest_summary"]["evidence_lane_closure_status"] == "evidence_lane_fresh_but_override_governed"
+    assert evidence_lane["latest_summary"]["evidence_lane_closure_summary"] == "Evidence is fresh, but the latest lane relied on explicit verification overrides; use it for governed degraded inspection, not as an unqualified green baseline."
     assert evidence_lane["latest_summary"]["breadth_closure_status"] == "breadth_operationally_closed_but_runtime_degraded"
     assert evidence_lane["latest_summary"]["breadth_closure_summary"] == (
         "All countries updated and the governed breadth gate passed; breadth is operationally proven for this slice, but runtime/release still degrades due to source failures or known-gap truth."

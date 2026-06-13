@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 import json
 from pathlib import Path
 from typing import Any, Callable
@@ -40,6 +41,102 @@ def _build_bundle_handoff_summary(*, run_id: str, bundle_root: Path, share_refs:
         f"{share_refs.get('coverage_json_ref', 'coverage_json:n/a')}, and "
         f"{share_refs.get('release_gate_json_ref', 'release_gate_json:n/a')}."
     )
+
+
+def _parse_recorded_at(value: Any) -> datetime | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        return datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def _utc_now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _derive_evidence_freshness(*, recorded_at: str, now: datetime) -> dict[str, Any]:
+    parsed_recorded_at = _parse_recorded_at(recorded_at)
+    if parsed_recorded_at is None:
+        return {
+            "evidence_freshness_status": "freshness_unknown",
+            "evidence_freshness_summary": "Evidence freshness is unknown because the persisted recorded_at timestamp is missing or invalid.",
+            "evidence_age_hours": None,
+        }
+    age_hours = max(0.0, (now - parsed_recorded_at).total_seconds() / 3600.0)
+    rounded_age_hours = round(age_hours, 2)
+    if age_hours <= 24.0:
+        return {
+            "evidence_freshness_status": "fresh_current",
+            "evidence_freshness_summary": f"Latest evidence is current ({rounded_age_hours:.2f}h old).",
+            "evidence_age_hours": rounded_age_hours,
+        }
+    if age_hours <= 72.0:
+        return {
+            "evidence_freshness_status": "aging_recent",
+            "evidence_freshness_summary": f"Latest evidence is still recent but aging ({rounded_age_hours:.2f}h old); refresh soon.",
+            "evidence_age_hours": rounded_age_hours,
+        }
+    return {
+        "evidence_freshness_status": "stale_refresh_required",
+        "evidence_freshness_summary": f"Latest evidence is stale ({rounded_age_hours:.2f}h old); refresh before steering from this lane.",
+        "evidence_age_hours": rounded_age_hours,
+    }
+
+
+def _derive_evidence_lane_closure(
+    *,
+    recorded_at: str,
+    verification_policy: dict[str, Any],
+    triage_tag: str,
+    run_status: str,
+    policy_gate_verdict: str,
+    now: datetime,
+) -> dict[str, Any]:
+    freshness = _derive_evidence_freshness(recorded_at=recorded_at, now=now)
+    freshness_status = str(freshness.get("evidence_freshness_status") or "freshness_unknown")
+    verification_mode = str((verification_policy or {}).get("mode") or "unknown")
+    normalized_triage = str(triage_tag or "unknown").lower()
+    normalized_run_status = str(run_status or "unknown").lower()
+    normalized_policy_gate = str(policy_gate_verdict or "unknown").lower()
+
+    if freshness_status == "stale_refresh_required":
+        return {
+            **freshness,
+            "evidence_lane_closure_status": "evidence_lane_stale_requires_refresh",
+            "evidence_lane_closure_summary": "This evidence lane is no longer authoritative for steering because the latest persisted evidence is stale; refresh the governed run bundle first.",
+        }
+    if freshness_status == "freshness_unknown":
+        return {
+            **freshness,
+            "evidence_lane_closure_status": "evidence_lane_requires_timestamp_review",
+            "evidence_lane_closure_summary": "This evidence lane needs review before steering because freshness cannot be established from persisted timestamps.",
+        }
+    if verification_mode != "strict":
+        return {
+            **freshness,
+            "evidence_lane_closure_status": "evidence_lane_fresh_but_override_governed",
+            "evidence_lane_closure_summary": "Evidence is fresh, but the latest lane relied on explicit verification overrides; use it for governed degraded inspection, not as an unqualified green baseline.",
+        }
+    if normalized_policy_gate == "pass" and normalized_run_status in {"success", "partial_success"}:
+        if normalized_triage == "ready_green":
+            return {
+                **freshness,
+                "evidence_lane_closure_status": "evidence_lane_authoritative_green",
+                "evidence_lane_closure_summary": "Evidence is fresh, strictly verified, and green; this lane is authoritative for default steering and handoff.",
+            }
+        return {
+            **freshness,
+            "evidence_lane_closure_status": "evidence_lane_authoritative_current_truth",
+            "evidence_lane_closure_summary": "Evidence is fresh, strictly verified, and authoritative even though the current runtime/release truth is degraded or review-bound.",
+        }
+    return {
+        **freshness,
+        "evidence_lane_closure_status": "evidence_lane_requires_review",
+        "evidence_lane_closure_summary": "Evidence freshness is known, but the latest lane still requires manual review before it is used as authoritative steering truth.",
+    }
 
 
 def _derive_run_triage(*, run_status: str, governance_verdict: str, policy_gate_verdict: str, release_verdict: str, readiness_interpretation: str, known_gap_count: int, failed_source_count: int) -> dict[str, str]:
@@ -226,6 +323,7 @@ def build_operational_latest_bundle(
     pipeline_runner: Callable[..., Any] = run_governed_live_pipeline,
     gui_builder: Callable[..., Path] = _default_gui_builder,
     run_history_writer: Callable[..., None] = persist_operational_latest_run,
+    now_provider: Callable[[], datetime] = _utc_now,
 ) -> dict[str, Any]:
     result = pipeline_runner(
         repo_root=repo_root,
@@ -340,6 +438,7 @@ def build_operational_latest_bundle(
         release_verdict=release_verdict,
         failed_source_count=len(list(run_state.failed_sources)),
     )
+    now = now_provider()
     recent_runs = [
         {
             "run_id": entry.run_id,
@@ -401,10 +500,11 @@ def build_operational_latest_bundle(
         for entry in load_recent_runs(resolved_history_db, limit=10)
     ]
     if not recent_runs:
+        fallback_recorded_at = now.isoformat().replace('+00:00', 'Z')
         recent_runs = [
             {
                 "run_id": run_state.run_id,
-                "recorded_at": "pending_persisted_history",
+                "recorded_at": fallback_recorded_at,
                 "run_status": run_state.status,
                 "pilot_set": pilot_set,
                 "artifacts_dir": str(result.artifact_bundle.output_dir),
@@ -434,9 +534,34 @@ def build_operational_latest_bundle(
                 **latest_triage,
             }
         ]
+    recent_runs = [
+        {
+            **item,
+            **_derive_evidence_lane_closure(
+                recorded_at=str(item.get("recorded_at") or ""),
+                verification_policy=item.get("verification_policy", {}) if isinstance(item.get("verification_policy"), dict) else {},
+                triage_tag=str(item.get("triage_tag") or "unknown"),
+                run_status=str(item.get("run_status") or "unknown"),
+                policy_gate_verdict=str(item.get("policy_gate_verdict") or "unknown"),
+                now=now,
+            ),
+        }
+        for item in recent_runs
+    ]
+    latest_history_entry = next((item for item in recent_runs if str(item.get("run_id")) == run_state.run_id), recent_runs[0])
+    latest_recorded_at = str(latest_history_entry.get("recorded_at") or "pending_persisted_history")
+    latest_evidence_closure = _derive_evidence_lane_closure(
+        recorded_at=latest_recorded_at,
+        verification_policy=verification_policy,
+        triage_tag=str(latest_triage.get("triage_tag") or "unknown"),
+        run_status=run_state.status,
+        policy_gate_verdict=str(gate_evaluation.get("gate_verdict") or "unknown"),
+        now=now,
+    )
     evidence_lane = {
         "latest_summary": {
             "run_id": run_state.run_id,
+            "recorded_at": latest_recorded_at,
             "run_status": run_state.status,
             "pilot_set": pilot_set,
             "artifacts_dir": str(result.artifact_bundle.output_dir),
@@ -468,6 +593,7 @@ def build_operational_latest_bundle(
             **latest_breadth_posture,
             **latest_breadth_closure,
             **latest_triage,
+            **latest_evidence_closure,
         },
         "recent_runs": recent_runs,
     }
