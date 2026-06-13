@@ -10,13 +10,14 @@ Purpose: Summarize the next major SIASA package families in one page with target
 ## 1. Recommended order
 
 1. G1 – Runtime breadth and live evidence expansion
-2. G2 – Credentialed source activation and source-class closure
+2. G3 – Operational evidence-lane normalization / truthfulness support
 3. G4 – Approval-to-distribution release lifecycle closure
-4. G5 – Optional server-backed multi-user governance
+4. G2 – External credentialed-source activation follow-through (conditional trigger)
+5. G5 – Optional server-backed multi-user governance
 
 Important interpretation:
-- G3 operational evidence-lane normalization remains important, but is currently a supporting truthfulness lane rather than the largest value package.
-- G2 jumps ahead of G1 if valid ReliefWeb/UCDP credentials or equivalent provider registrations become available and materially change the reachable runtime/source breadth.
+- G2 is no longer the next default repo package family: repo-controlled closure is now materially complete because blockers, country scope, next actions, and activation-vs-evidence truth are explicit.
+- G2 jumps ahead of the queue only if valid ReliefWeb/UCDP credentials or equivalent provider registrations become available and materially change the reachable runtime/source breadth.
 
 ---
 
@@ -25,8 +26,9 @@ Important interpretation:
 | Package | Target state | Main user value | Main risks | Dependencies / gating | Relative size | Recommended next bounded package |
 | --- | --- | --- | --- | --- | --- | --- |
 | G1 – Runtime breadth and live evidence expansion | SIASA runs repeatably across broader governed MVP/P2 multi-country slices with honest degraded-mode semantics and explicit C/E usage truth under real live conditions. | Largest remaining product-reach increase; proves SIASA is operational beyond already-proven subsets. | Rate limits, source instability, false-green runtime evidence, long-running live probes. | Existing governed runtime/verifier path already in place; depends mainly on runtime stability and bounded slice choice, not on new architecture. | XL | Next broader governed live-runtime slice with fresh evidence package and explicit degraded-mode / C-E truth checks. |
-| G2 – Credentialed source activation and source-class closure | Credential-gated sources such as ReliefWeb/UCDP move from adapter-ready to live operational evidence in governed runs. | Converts repo completeness into real source breadth; directly narrows the gap between code capability and stakeholder-visible runtime value. | External credential/registration delays, provider policy changes, apparent activation without durable operational value. | Valid credentials / app registrations are the hard gate. Graceful degradation paths already exist. | L | Credential onboarding + first governed live activation slice for the highest-value blocked source class. |
-| G4 – Approval-to-distribution release lifecycle closure | SIASA does not stop at readiness/blocking assessment; it records the actual lifecycle transition from pending sign-off to approved to distributed. | Closes the management gap between “ready for decision” and “actually governed and sent”. | Governance-only progress without enough prior runtime/source breadth closure; process complexity. | Strong readiness/release package baseline already exists; best started after G1/G2 no longer dominate the value frontier. | L | Add explicit approval/distribution state model and closure artifact chain for one governed release packet path. |
+| G3 – Operational evidence-lane normalization / truthfulness support | Operators and project lead always get one authoritative, fresh, low-ambiguity evidence lane that matches the current governed runtime and release truth. | Keeps steering honest while broader runtime slices expand; reduces drift between code closure and fresh evidence. | UX-heavy progress without enough value if detached from real runtime evidence; can become report-polish work if not kept bounded. | Best when paired with G1/G4 work that needs fresh truthful handoff and review surfaces. | M | Next bounded evidence-lane truthfulness slice that reduces ambiguity in fresh run review or handoff. |
+| G4 – Approval-to-distribution release lifecycle closure | SIASA does not stop at readiness/blocking assessment; it records the actual lifecycle transition from pending sign-off to approved to distributed. | Closes the management gap between “ready for decision” and “actually governed and sent”. | Governance-only progress without enough prior runtime/source breadth closure; process complexity. | Strong readiness/release package baseline already exists; best started after G1/G3 no longer dominate the value frontier. | L | Add explicit approval/distribution state model and closure artifact chain for one governed release packet path. |
+| G2 – External credentialed-source activation follow-through | Credential-gated sources such as ReliefWeb/UCDP move from repo-ready and truthfully classified into live operational evidence once external credentials/registrations are actually provided. | Converts repo completeness into real source breadth exactly when the external dependency becomes available. | External credential/registration delays, provider policy changes, apparent activation without durable operational value. | Repo-controlled G2 closure is complete; valid credentials / app registrations are now the hard gate. | S (internal) / M (with live run) | When credentials arrive: run one governed activation slice for the highest-value blocked source class and capture explicit source-success evidence. |
 | G5 – Optional server-backed multi-user governance | SIASA evolves from strong local governed bundles to shared multi-user operation with authn/authz, persistence, and reviewer workflows. | Enables true team operation and persistent collaborative governance. | Large architecture jump, higher complexity, risk of solving for a target operating model that is not yet required. | Only justified if the target operating model explicitly requires multi-user/server-backed deployment now. | XL | Architecture decision slice: confirm operating model, scope authn/authz + persistence boundary, and decide whether to start at all. |
 
 ---
@@ -39,11 +41,11 @@ Because it is the largest remaining stakeholder-value gap:
 - it tests the system under real operational conditions
 - it provides the strongest evidence that SIASA is useful beyond curated/proven subsets
 
-### Second: G2
-Because it converts integration-ready sources into real runtime capability:
-- strong code structure alone is not enough
-- stakeholder value rises materially when credential-gated sources become truly operational
-- this can reprioritize to first place as soon as credentials exist
+### Second: G3
+Because truthful steering is now the next highest-value repo-controlled support lane:
+- broader runtime slices need fresh, low-ambiguity operator evidence
+- it reduces drift between “implemented” and “currently evidenced”
+- it stays directly useful while G2 waits on external credentials
 
 ### Third: G4
 Because the release/productization layer is already strong:
@@ -51,7 +53,13 @@ Because the release/productization layer is already strong:
 - this is more important than further summary-panel expansion
 - it becomes most valuable once runtime/source breadth is credible enough to distribute
 
-### Fourth: G5
+### Fourth: G2
+Because the repo-controlled part is now complete and the remainder is an external trigger:
+- SIASA now explicitly distinguishes configured, externally blocked, failed, and live-evidenced credential-gated sources
+- the next G2 step is not another internal ambiguity fix but actual credential onboarding plus one governed live activation run
+- this can reprioritize sharply upward as soon as credentials exist
+
+### Fifth: G5
 Because it is strategically meaningful but not yet the default need:
 - it is a major architecture uplift
 - it should follow explicit operating-model demand

@@ -85,13 +85,16 @@ Why it matters:
 Current truth:
 - code paths/adapters exist for source classes such as ReliefWeb and UCDP
 - graceful degradation exists when credentials/registration are absent
+- artifact-backed coverage evidence now distinguishes raw credential configuration from actual activation closure truth (`activated_with_live_evidence`, `configured_but_not_evidenced`, `credentialed_but_live_fetch_failed`, `external_blocker_present`)
+- for the current environment, ReliefWeb remains externally blocked by missing approved appname and UCDP is not operationally evidenced via a configured token, so the remaining blocker is external/operator-side rather than an unimplemented repo slice
 
 Remaining gap:
-- actual operational activation with valid credentials/app registrations
-- source-class closure in real evidence, not only in repo structure
+- no further meaningful repo-only G2 closure remains without external credentials/app registrations
+- the next real G2 step is operational follow-through: provide valid credentials/registration and execute one governed live run that captures source-success evidence
 
 Why it matters:
 - “adapter exists” is not equivalent to “stakeholder-visible source breadth exists in operations”
+- but after the new closure-truth surfaces, the remaining delta is now an external dependency handoff rather than an internal product-ambiguity problem
 
 ### G3. Operational evidence-lane normalization
 
@@ -143,20 +146,22 @@ Why first:
 - increases real product reach rather than only improving already-strong presentation/governance surfaces
 - best fits current SIASA maturity stage
 
-### Priority 2: Credentialed source activation and source-class closure
+### Priority 2: Operational evidence-lane normalization
 Why second:
-- converts integration-ready source classes into real operational value
-- directly narrows the gap between code completeness and runtime evidence completeness
-
-### Priority 3: Operational evidence-lane normalization
-Why third:
 - broader runs and newly activated sources need one authoritative, fresh evidence baseline
 - improves operator/project-lead truthfulness and review efficiency
+- now remains the highest-value repo-controlled support lane once G2 has been reduced to an external credential/app-registration dependency
 
-### Priority 4: Approval-to-distribution release closure
-Why fourth:
+### Priority 3: Approval-to-distribution release closure
+Why third:
 - release/demo productization is already advanced
 - the remaining useful increment is lifecycle completion, not another summary panel
+
+### Priority 4: External credentialed-source activation follow-through (triggered, not default)
+Why fourth / conditional:
+- repo-controlled G2 closure is now materially complete: blockers, next actions, country scope, and activation-vs-evidence truth are explicit
+- the next real step depends on external credential/app-registration availability rather than further internal implementation
+- jump this back upward immediately if valid ReliefWeb/UCDP credentials become available
 
 ### Priority 5: Deferred architecture uplifts
 Why last/default deferred:
@@ -777,6 +782,21 @@ Closure achieved:
 - validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/readmodels/source_coverage.py src/siasa/gui/local_app.py tests/unit/test_readmodels_country_profile.py tests/unit/test_local_gui.py` passed
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_readmodels_country_profile.py -q` passed (`4 passed in 0.12s`)
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`1 passed in 3.84s`)
+- full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`480 passed in 1024.14s`)
+
+### N1-WP-049
+Name:
+Close the repo-controlled G2 package by deriving explicit activation-closure truth from runtime evidence plus credential state, so the remaining delta is clearly external credential follow-through rather than another internal ambiguity slice.
+
+Closure achieved:
+- `src/siasa/readmodels/source_coverage.py` now enriches each `source_activation_readiness` row with `runtime_source_status`, `activation_evidence`, `closure_status`, and `closure_next_step`, derived from both credential readiness and current source runtime status
+- the same readmodel now derives a stronger `source_activation_readiness_summary` with `closure_status_counts`, explicit source buckets (`activated_with_live_evidence`, `external_blocker_present`, `credentialed_but_live_fetch_failed`, `configured_but_not_evidenced`), plus top-level `overall_closure_status` and `operator_next_step`
+- `src/siasa/gui/local_app.py` now renders G2 closure truth directly in `coverage.html`: summary rows for closure status / external blockers / pending evidence / live evidence, and detailed table columns `Runtime Source Status`, `Activation Evidence`, and `Closure Posture`
+- `tests/unit/test_readmodels_country_profile.py` now covers both the empty no-G2 case and a mixed `activated_with_live_evidence` + `external_blocker_present` case; `tests/unit/test_local_gui.py` now asserts the new closure-truth summary rows, explanatory text, and detailed table columns/values
+- steering interpretation is now explicit: in the current environment no valid `RELIEFWEB_APPNAME` is configured and no operationally evidenced UCDP token-backed run exists, so the remaining G2 delta is external/operator-side follow-through rather than a missing repo implementation slice
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/readmodels/source_coverage.py src/siasa/gui/local_app.py tests/unit/test_readmodels_country_profile.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_readmodels_country_profile.py -q` passed (`5 passed in 0.04s`)
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`1 passed in 2.65s`)
 - full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`480 passed in 1024.14s`)
 
 Fallback reprioritization rule:
