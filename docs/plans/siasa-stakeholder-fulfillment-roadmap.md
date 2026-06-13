@@ -2,7 +2,7 @@
 
 > Steering note: `docs/plans/siasa-master-steering-document.md` is now the single steering document. This roadmap remains a strategic reference, but next-step selection should be taken from the master steering document.
 >
-> Project-lead communication shortcut: `docs/plans/siasa-next-big-packages-executive-view.md` provides a one-page summary of the next large package families (currently G3/G4/G2-trigger/G5, with G1 repo-controlled breadth closure completed) and their recommended order.
+> Project-lead communication shortcut: `docs/plans/siasa-next-big-packages-executive-view.md` provides a one-page summary of the next large package families (now G4/G2-trigger/G5, with repo-controlled G1 breadth closure and G3 evidence-lane closure completed) and their recommended order.
 >
 > For Hermes: execute serially, one work package at a time, with TDD, validation, commit, and push after each completed package.
 

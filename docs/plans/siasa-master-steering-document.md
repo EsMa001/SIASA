@@ -100,15 +100,17 @@ Why it matters:
 ### G3. Operational evidence-lane normalization
 
 Current truth:
-- code exists for latest bundles, verification, scheduler, health monitoring, and digest/report artifacts
-- but planning/steering can still drift between repo capability and currently fresh operational evidence
+- the repo now has one normalized operator/project-lead evidence lane that carries runtime breadth truth, release truth, verification posture, archived evidence pivots, handoff summaries, visible-slice exports, and explicit evidence freshness / authority status
+- fresh closure evidence was captured with `RUN-OP-LATEST-G3-CLOSE-001` on `pilot_set=mvp-complete`, writing `build/run_artifacts/latest-g3-close-001` and `build/local_gui/latest-g3-close-001/index.html`
+- that fresh bundle now explicitly reports `recorded_at`, `evidence_freshness_status=fresh_current`, and `evidence_lane_closure_status=evidence_lane_fresh_but_override_governed`, so steering can distinguish fresh authoritative degraded truth from stale or timestamp-ambiguous evidence
 
 Remaining gap:
-- one normalized authoritative operator/project-lead evidence lane
-- reduced ambiguity between “implemented” and “currently evidenced in a fresh run bundle”
+- no further meaningful repo-only G3 closure remains
+- future G3 work, if any, should be probe-driven refinements on top of the now-authoritative lane rather than another open package family
 
 Why it matters:
 - a mature system needs not only code closure but fresh, reviewable, current operational evidence
+- that repo-controlled need is now materially satisfied: SIASA can show whether the latest lane is fresh, authoritative, stale, or override-governed without opening raw JSON or reconstructing time context manually
 
 ### G4. Approval-to-distribution release lifecycle closure
 
@@ -141,23 +143,18 @@ Steering status:
 
 The active serial priority order is now:
 
-### Priority 1: Operational evidence-lane normalization
+### Priority 1: Approval-to-distribution release closure
 Why first:
-- with G1 and repo-controlled G2 now materially closed, the biggest remaining repo-controlled value is truthful fresh evidence and low-ambiguity operator/project-lead steering
-- broader live-source degradation and release consequences still need one authoritative evidence lane rather than another breadth-claim package
+- G1, repo-controlled G2, and repo-controlled G3 are now materially closed
+- the largest remaining internal value is no longer another evidence-lane refinement, but actual lifecycle completion from review-ready package to governed approval/distribution outcome
 
-### Priority 2: Approval-to-distribution release closure
-Why second:
-- release/demo productization is already advanced
-- the remaining useful increment is lifecycle completion, not another summary panel
-
-### Priority 3: External credentialed-source activation follow-through (triggered, not default)
-Why third / conditional:
+### Priority 2: External credentialed-source activation follow-through (triggered, not default)
+Why second / conditional:
 - repo-controlled G2 closure is now materially complete: blockers, next actions, country scope, and activation-vs-evidence truth are explicit
 - the next real step depends on external credential/app-registration availability rather than further internal implementation
 - jump this back upward immediately if valid ReliefWeb/UCDP credentials become available
 
-### Priority 4: Deferred architecture uplifts
+### Priority 3: Deferred architecture uplifts
 Why last/default deferred:
 - multi-user/server-backed architecture is valuable only if the target operating model explicitly requires it now
 
@@ -808,17 +805,32 @@ Closure achieved:
 - targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`8 passed in 2.27s`)
 - full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`481 passed in 1003.64s`)
 
+### N1-WP-051
+Name:
+Close the repo-controlled G3 package by making evidence freshness / authority explicit in the normalized operational evidence lane and by capturing one fresh full-MVP evidence-lane closure bundle.
+
+Closure achieved:
+- fresh closure evidence was generated with `RUN-OP-LATEST-G3-CLOSE-001` on `pilot_set=mvp-complete`, writing `build/run_artifacts/latest-g3-close-001` and GUI `build/local_gui/latest-g3-close-001/index.html`
+- that fresh run produced `country_set_id=MVP-COUNTRIES-LIVE-mvp-complete-v1`, `countries_with_updates=30/30`, `policy_gate_verdict=pass`, `evidence_freshness_status=fresh_current`, and `evidence_lane_closure_status=evidence_lane_fresh_but_override_governed`, so the latest lane now distinguishes fresh authoritative degraded truth from stale or timestamp-ambiguous evidence
+- `src/siasa/runs/operational_latest.py` now stamps `recorded_at`, `evidence_freshness_status`, `evidence_freshness_summary`, `evidence_age_hours`, `evidence_lane_closure_status`, and `evidence_lane_closure_summary` into both `latest_summary` and archived `recent_runs`; the fallback path now also stamps a build-time timestamp when persisted history is unavailable
+- `src/siasa/gui/local_app.py` now renders those freshness/authority signals directly in the latest Operational Evidence Lane and in archived history evidence cells, so project lead/operators can read whether the lane is fresh, authoritative, stale, or override-governed without opening raw JSON
+- `tests/unit/test_operational_latest.py` now fixes deterministic `now_provider` coverage for both green and override-governed latest bundles and asserts the new freshness/authority fields; `tests/unit/test_local_gui.py` now asserts the rendered freshness/authority text in `runs.html`
+- steering interpretation is now explicit: the remaining repo-controlled internal frontier is no longer evidence-lane ambiguity, but release/distribution lifecycle completion, while the latest full-MVP lane truth remains fresh and honestly degraded by live source failures (`SRC-GDELT-DOC`, `SRC-GDELT-DOC-E`)
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/runs/operational_latest.py src/siasa/gui/local_app.py tests/unit/test_operational_latest.py tests/unit/test_local_gui.py` passed
+- targeted verification passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests/unit/test_operational_latest.py tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`8 passed in 2.20s`)
+- full regression passed: `PYTHONPATH=src /opt/hermes/.venv/bin/pytest tests -q` passed (`481 passed in 1016.01s`)
+
 Fallback reprioritization rule:
-- if valid source credentials/registrations become available before the next evidence-lane slice starts, reassess whether a credential-activation slice should jump ahead
+- if valid source credentials/registrations become available before the next release-lifecycle slice starts, reassess whether a credential-activation slice should jump ahead
 
 ---
 
 ## 7. Trigger for the next steering pivot
 
 Stay on the current steering path until one of these becomes true:
-- operational evidence-lane inconsistency becomes the main blocker for truthful steering and review handoff
+- approval/distribution lifecycle closure stops being the dominant remaining internal gap because a bounded G4 slice materially closes it
 - valid ReliefWeb/UCDP credentials become available and external source activation becomes the highest-value bounded next slice
-- release/distribution lifecycle closure becomes the dominant stakeholder-facing remaining gap
+- fresh runtime evidence reveals a new truthful-steering defect in the now-closed evidence lane that materially reopens G3
 - external steering explicitly prioritizes multi-user/server-backed deployment
 
 Until then, do not reopen the old AP-F/AP-N/L3/L4 planning generations as active steering sources.
@@ -853,5 +865,6 @@ SIASA now suffers from planning-generation overlap.
 Therefore the correct steering rule from now on is simple:
 - this document is the single steering document
 - the capability matrix is the detailed operational evidence companion
-- the next default work stays on runtime/source breadth expansion
-- release/distribution lifecycle closure follows after breadth/evidence normalization unless credentials change priority sooner
+- repo-controlled G1, G2, and G3 are now materially closed for the current product baseline
+- the next default work is G4 approval-to-distribution lifecycle closure
+- external credential activation can jump ahead only if valid ReliefWeb/UCDP credentials become available
