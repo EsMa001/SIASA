@@ -3216,3 +3216,71 @@ def test_build_local_mvp_site_renders_analytics_page_when_view_model_provided(tm
     index_content = (result.output_dir / 'index.html').read_text(encoding='utf-8')
     assert '🔬 Analytics' in index_content
     assert 'analytics.html' in index_content
+
+
+def test_readiness_page_shows_suppressed_gaps_section_when_suppression_active(tmp_path: Path) -> None:
+    """When known_gap_suppression_reason is set, readiness.html must render the suppressed-gaps-section
+    with the suppression reason and the suppressed gap IDs."""
+    from siasa.gui.local_app import _render_readiness
+    readiness_vm = {
+        "run_id": "RUN-TEST-SUPPRESSION-001",
+        "snapshot_id": "SNAP-001",
+        "demo_verdict": "ready",
+        "release_verdict": "ready",
+        "demo_checks": [],
+        "evidence_checks": [],
+        "artifact_checks": [],
+        "known_gaps": [],
+        "suppressed_known_gaps": ["failed_source:SRC-GDELT-DOC", "country_gap:UKR:A:source_failed_this_run"],
+        "known_gap_suppression_reason": "global_gdelt_doc_outage",
+        "report_count": 0,
+        "country_profile_count": 0,
+        "domain_detail_count": 0,
+    }
+    html_out = _render_readiness(
+        readiness_view_model=readiness_vm,
+        release_gate_view_model=None,
+        stakeholder_functional_closure_view_model=None,
+        release_readiness_index_view_model=None,
+        stakeholder_e2e_flow_coverage_view_model=None,
+        stakeholder_e2e_ui_smoke_view_model=None,
+        operator_release_summary_view_model=None,
+    )
+    assert "known-gaps-panel" in html_out
+    assert "suppressed-gaps-section" in html_out
+    assert "global_gdelt_doc_outage" in html_out
+    assert "failed_source:SRC-GDELT-DOC" in html_out
+    assert "country_gap:UKR:A:source_failed_this_run" in html_out
+    assert "Suppression active" in html_out
+
+
+def test_readiness_page_hides_suppressed_gaps_section_when_no_suppression(tmp_path: Path) -> None:
+    """When suppressed_known_gaps is empty, the suppressed-gaps-section must NOT appear."""
+    from siasa.gui.local_app import _render_readiness
+    readiness_vm = {
+        "run_id": "RUN-TEST-NO-SUPPRESSION-001",
+        "snapshot_id": "SNAP-002",
+        "demo_verdict": "ready",
+        "release_verdict": "blocked_by_known_gaps",
+        "demo_checks": [],
+        "evidence_checks": [],
+        "artifact_checks": [],
+        "known_gaps": ["failed_source:SRC-GDACS"],
+        "suppressed_known_gaps": [],
+        "known_gap_suppression_reason": None,
+        "report_count": 0,
+        "country_profile_count": 0,
+        "domain_detail_count": 0,
+    }
+    html_out = _render_readiness(
+        readiness_view_model=readiness_vm,
+        release_gate_view_model=None,
+        stakeholder_functional_closure_view_model=None,
+        release_readiness_index_view_model=None,
+        stakeholder_e2e_flow_coverage_view_model=None,
+        stakeholder_e2e_ui_smoke_view_model=None,
+        operator_release_summary_view_model=None,
+    )
+    assert "known-gaps-panel" in html_out
+    assert "suppressed-gaps-section" not in html_out
+    assert "Suppression active" not in html_out

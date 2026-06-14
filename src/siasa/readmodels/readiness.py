@@ -144,22 +144,34 @@ def _filter_known_gaps_for_large_pilot_rate_limit_outage(
     coverage = system_status_read_model.get("coverage", {})
     countries_total = coverage.get("countries_total") if isinstance(coverage, dict) else None
     failed_sources = system_status_read_model.get("failed_sources", [])
-    if countries_total != 30:
+    if not isinstance(failed_sources, list):
+        failed_sources = []
+
+    # Legacy: large-pilot (30 countries) with only SRC-GDELT-DOC failing
+    _GDELT_DOC_SOURCES = {"SRC-GDELT-DOC", "SRC-GDELT-DOC-E"}
+    failed_set = set(str(s) for s in failed_sources)
+    is_large_pilot_single_gdelt = (countries_total == 30 and failed_sources == ["SRC-GDELT-DOC"])
+    # Extended: any pilot size where *all* failed sources are GDELT-DOC variants
+    is_global_gdelt_outage = bool(failed_set) and failed_set.issubset(_GDELT_DOC_SOURCES)
+
+    if not is_large_pilot_single_gdelt and not is_global_gdelt_outage:
         return {
             "known_gaps": known_gaps,
             "suppressed_known_gaps": [],
             "suppression_reason": None,
         }
-    if not isinstance(failed_sources, list) or failed_sources != ["SRC-GDELT-DOC"]:
-        return {
-            "known_gaps": known_gaps,
-            "suppressed_known_gaps": [],
-            "suppression_reason": None,
-        }
+
+    suppression_reason = (
+        "large_pilot_global_gdelt_doc_outage"
+        if is_large_pilot_single_gdelt
+        else "global_gdelt_doc_outage"
+    )
+
+    _GDELT_DOC_SOURCE_IDS = _GDELT_DOC_SOURCES
     filtered: list[str] = []
     suppressed: list[str] = []
     for marker in known_gaps:
-        if marker == "failed_source:SRC-GDELT-DOC":
+        if marker in (f"failed_source:{s}" for s in _GDELT_DOC_SOURCE_IDS):
             suppressed.append(marker)
             continue
         if marker.startswith("country_gap:") and marker.endswith(":A:source_failed_this_run"):
@@ -169,5 +181,5 @@ def _filter_known_gaps_for_large_pilot_rate_limit_outage(
     return {
         "known_gaps": filtered,
         "suppressed_known_gaps": suppressed,
-        "suppression_reason": "large_pilot_global_gdelt_doc_outage",
+        "suppression_reason": suppression_reason,
     }

@@ -4269,8 +4269,19 @@ def _render_readiness(
         "<table><thead><tr><th>Country</th><th>Signals</th><th>Signal Types</th><th>Priority</th><th>Missing Domains</th><th>Attention Cases</th><th>Top Case</th><th>Freshness</th><th>Recommended Next Check</th><th>Hotspot Links</th></tr></thead>"
         f"<tbody>{_analyst_hotspot_rows}</tbody></table></div>"
         # === Known Gaps ===
-        "<div class='panel'><div class='panel-header'>Known Gaps Before Release</div>"
-        f"<ul>{known_gap_items}</ul></div>"
+        "<div class='panel' id='known-gaps-panel'><div class='panel-header'>Known Gaps Before Release</div>"
+        f"<ul>{known_gap_items}</ul>"
+        + (
+            "<div id='suppressed-gaps-section' style='margin-top:10px;border-top:1px solid rgba(78,222,163,.15);padding-top:10px;'>"
+            f"<p style='color:#6b7d99;font-size:12px;margin-bottom:4px;'>Suppression active: "
+            f"<span style='color:#e3b341;font-weight:600;'>{html.escape(str(readiness_view_model.get('known_gap_suppression_reason') or 'n/a'))}</span></p>"
+            "<ul style='color:#6b7d99;font-size:11px;'>"
+            + ''.join(f"<li>{html.escape(str(g))}</li>" for g in (readiness_view_model.get('suppressed_known_gaps') or []))
+            + "</ul></div>"
+            if readiness_view_model.get('suppressed_known_gaps')
+            else ""
+        )
+        + "</div>"
         "<div class='panel'><div class='panel-header'>Release Gate Blockers</div>"
         f"<ul>{_gate_blocker_items}</ul></div>"
         "<div class='panel'><div class='panel-header'>Stakeholder Functional Closure Focus Cluster</div>"
