@@ -281,9 +281,9 @@ def _gdelt_events_recent_export_count_for_country_count(country_count: int) -> i
     return _MULTI_COUNTRY_GDELT_EVENTS_RECENT_EXPORT_COUNT
 _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
     "UKR": ["A", "B", "D"],
-    "POL": ["A", "B", "D"],
+    "POL": ["A", "D"],
     "ISR": ["A", "B", "D"],
-    "TWN": ["A", "B"],
+    "TWN": ["A"],
     "RUS": ["A", "B", "D"],
     "CHN": ["A", "B", "D"],
     "IND": ["A", "B", "D"],

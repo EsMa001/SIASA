@@ -99,7 +99,7 @@ def test_build_governed_live_orchestrator_skips_world_bank_for_twn_only_runtime_
         "SRC-GDELT-DOC-E",
         "SRC-CISA-KEV",
     ]
-    assert orchestrator.country_expected_domains == {"TWN": ["A", "B"]}
+    assert orchestrator.country_expected_domains == {"TWN": ["A"]}
 
 
 
@@ -149,9 +149,9 @@ def test_build_governed_live_orchestrator_supports_representative_pilot_set() ->
     assert orchestrator.country_set_id == "MVP-COUNTRIES-LIVE-representative-v1"
     assert orchestrator.country_expected_domains == {
         "UKR": ["A", "B", "D"],
-        "POL": ["A", "B", "D"],
+        "POL": ["A", "D"],
         "ISR": ["A", "B", "D"],
-        "TWN": ["A", "B"],
+        "TWN": ["A"],
     }
     assert gdelt_doc.country_queries == {
         "UKR": "Ukraine",
@@ -224,9 +224,9 @@ def test_build_governed_live_orchestrator_supports_core_focus_initial_pilot_set(
         "UKR": ["A", "B", "D"],
         "RUS": ["A", "B", "D"],
         "CHN": ["A", "B", "D"],
-        "TWN": ["A", "B"],
+        "TWN": ["A"],
         "ISR": ["A", "B", "D"],
-        "POL": ["A", "B", "D"],
+        "POL": ["A", "D"],
     }
     assert gdelt_doc.country_queries == {
         "UKR": "Ukraine",
@@ -270,10 +270,10 @@ def test_build_governed_live_orchestrator_supports_core_focus_expanded_pilot_set
         "UKR": ["A", "B", "D"],
         "RUS": ["A", "B", "D"],
         "CHN": ["A", "B", "D"],
-        "TWN": ["A", "B"],
+        "TWN": ["A"],
         "ISR": ["A", "B", "D"],
         "IND": ["A", "B", "D"],
-        "POL": ["A", "B", "D"],
+        "POL": ["A", "D"],
     }
     assert gdelt_doc.country_queries == {
         "UKR": "Ukraine",
@@ -319,12 +319,12 @@ def test_build_governed_live_orchestrator_supports_core_focus_broader_pilot_set(
         "UKR": ["A", "B", "D"],
         "RUS": ["A", "B", "D"],
         "CHN": ["A", "B", "D"],
-        "TWN": ["A", "B"],
+        "TWN": ["A"],
         "IRN": ["A", "B", "D"],
         "ISR": ["A", "B", "D"],
         "TUR": ["A", "B", "D"],
         "IND": ["A", "B", "D"],
-        "POL": ["A", "B", "D"],
+        "POL": ["A", "D"],
     }
     assert gdelt_doc.country_queries == {
         "UKR": "Ukraine",
@@ -374,14 +374,14 @@ def test_build_governed_live_orchestrator_supports_core_focus_complete_pilot_set
         "UKR": ["A", "B", "D"],
         "RUS": ["A", "B", "D"],
         "CHN": ["A", "B", "D"],
-        "TWN": ["A", "B"],
+        "TWN": ["A"],
         "IRN": ["A", "B", "D"],
         "ISR": ["A", "B", "D"],
         "TUR": ["A", "B", "D"],
         "IND": ["A", "B", "D"],
         "PAK": ["A", "D"],
         "GEO": ["A", "D"],
-        "POL": ["A", "B", "D"],
+        "POL": ["A", "D"],
     }
     assert gdelt_doc.country_queries == {
         "UKR": "Ukraine",
@@ -494,7 +494,7 @@ def test_build_governed_live_orchestrator_supports_extended_focus_broader_pilot_
         "DEU": ["A", "B", "D"],
         "EST": ["A", "D"],
         "FIN": ["A", "D"],
-        "POL": ["A", "B", "D"],
+        "POL": ["A", "D"],
     }
     assert gdelt_doc.country_queries == {
         "USA": "United States",
@@ -777,7 +777,7 @@ def test_build_governed_live_orchestrator_supports_extended_focus_complete_pilot
         "DEU": ["A", "B", "D"],
         "EST": ["A", "D"],
         "FIN": ["A", "D"],
-        "POL": ["A", "B", "D"],
+        "POL": ["A", "D"],
         "SAU": ["A", "D"],
         "QAT": ["A", "D"],
         "EGY": ["A", "D"],
@@ -812,7 +812,7 @@ def test_build_governed_live_orchestrator_supports_focus_complete_pilot_set() ->
         "USA", "DEU", "EST", "FIN", "SAU", "QAT", "EGY", "NGA", "SDN", "MMR",
     )
     assert orchestrator.country_set_id == "MVP-COUNTRIES-LIVE-focus-complete-v1"
-    assert orchestrator.country_expected_domains["TWN"] == ["A", "B"]
+    assert orchestrator.country_expected_domains["TWN"] == ["A"]
     assert orchestrator.country_expected_domains["GEO"] == ["A", "D"]
     assert orchestrator.country_expected_domains["QAT"] == ["A", "D"]
     assert orchestrator.country_expected_domains["USA"] == ["A", "B", "D"]
