@@ -823,6 +823,23 @@ Closure achieved:
 Fallback reprioritization rule:
 - if valid source credentials/registrations become available before the next release-lifecycle slice starts, reassess whether a credential-activation slice should jump ahead
 
+### N1-WP-052
+Name:
+Close the first G4 bounded slice by implementing an explicit approval-to-distribution lifecycle record (`approval_lifecycle_record.json`) with governed states (pending_signoff / approved / approved_with_conditions / distributed / deferred / rejected), persist/load infrastructure, and direct visibility in `release_package.html`.
+
+Closure achieved:
+- Added `src/siasa/readmodels/approval_lifecycle.py` with `ApprovalLifecycleRecord` dataclass, `build_default_approval_lifecycle_record()`, `derive_lifecycle_status()`, `load_approval_lifecycle_record()`, `save_approval_lifecycle_record()`, and `build_approval_lifecycle_view_model()`; exported from `src/siasa/readmodels/__init__.py`
+- `src/siasa/runs/artifacts.py` now loads existing approval lifecycle record (or creates default pending) and emits `readmodels/approval_lifecycle_record.json` in every governed run bundle
+- `src/siasa/gui/local_app.py` now loads `readmodels/approval_lifecycle_record.json` from artifact bundles, carries `approval_lifecycle_view_model` through the payload/build path, and renders a dedicated `_render_approval_lifecycle_panel()` block at the top of `release_package.html` with lifecycle state KPI, overall status, send-permission badge, operator next action, reviewer/decision/distribution fields, and a collapsible audit trail; generated `approval_lifecycle_record.json` is also exported alongside the release package
+- `tests/unit/test_approval_lifecycle.py` (23 tests): covers default record creation, pending/approved/approved_with_conditions/distributed/deferred/rejected status derivation, save/load roundtrip, malformed-file resilience, view-model correctness
+- `tests/unit/test_run_artifacts.py`: asserts `approval_lifecycle_record.json` is present in governed run bundles
+- `tests/unit/test_local_gui.py`: asserts `approval-lifecycle-panel`, `approval-lifecycle-state`, `approval-lifecycle-overall`, `approval-lifecycle-next-action`, `G4 Approval-to-Distribution Lifecycle`, `pending_signoff`, and `awaiting_reviewer_decision` are rendered in `release_package.html`
+- targeted verification: `test_approval_lifecycle.py` (23 passed) + `test_run_artifacts.py` + `test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports` (43 passed total)
+- full regression: `pytest tests/unit -q --ignore=probe-readmodels` passed (497 passed)
+
+Steering note:
+This closes the first G4 bounded slice. The explicit lifecycle record now exists and is governed — but approval is still always `pending_signoff` until an operator actively records a decision. The next G4 slices should close: (a) a CLI/script for operator-side lifecycle transitions (approve / distribute / defer / reject with audit-trail stamping), and (b) integration of the lifecycle state into the Operational Evidence Lane so project lead can see approval/distribution status alongside runtime truth.
+
 ---
 
 ## 7. Trigger for the next steering pivot
