@@ -418,3 +418,61 @@ validation_cases:
       - governed live runtime intentionally scopes TWN to A/B and does not claim historical Domain D support
       - curated_historical_observed_outcome_not_generated_by_runtime_replay
     validation_metrics: [Domain Match, Status Match]
+
+  - case_id: VAL-UKR-2023-CHALLENGE-001
+    country_id: UKR
+    case_name: Ukraine 2023 quiet-window challenge case
+    case_type: challenge_mismatch
+    time_start: "2023-01-15"
+    time_end: "2023-01-16"
+    expected_domains: [A, B, D]
+    expected_status: S2
+    historical_observed_domains: [A]
+    historical_observed_status: S1
+    evidence_tier: curated_public_source
+    expected_signal_pattern: Moderate multi-domain pressure expected from geopolitical context; but only weak Domain A signals available in this replay window.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Prove that SIASA surfaces a mismatch when available replay evidence is weaker than the geopolitically expected status, and that this mismatch triggers attention-level handling.
+    known_limitations:
+      - replay_window_intentionally_limited_to_low_signal_period_to_test_mismatch_handling
+      - expected_status_reflects_geopolitical_context_not_replay_signal_availability
+    validation_metrics: [Status Match, Domain Match, Attention Level]
+
+  - case_id: VAL-IRN-2023-CHALLENGE-001
+    country_id: IRN
+    case_name: Iran 2023 domain-gap challenge case
+    case_type: challenge_domain_gap
+    time_start: "2023-06-01"
+    time_end: "2023-06-02"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B]
+    historical_observed_status: S3
+    evidence_tier: curated_public_source
+    expected_signal_pattern: A and B signals present and strong; Domain D macro data absent from archival replay bundle.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Prove that SIASA correctly surfaces a replay_match_with_gaps verdict when Domain D is missing from the archival bundle despite status agreement on A+B.
+    known_limitations:
+      - domain_d_macro_data_intentionally_excluded_from_replay_bundle_to_test_gap_handling
+      - status_match_depends_only_on_a_b_in_this_replay
+    validation_metrics: [Status Match, Domain Match, Missing Domain Detection]
+
+  - case_id: VAL-GEO-2023-CHALLENGE-001
+    country_id: GEO
+    case_name: Georgia 2023 weak-evidence challenge case
+    case_type: challenge_weak_evidence
+    time_start: "2023-09-01"
+    time_end: "2023-09-02"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A]
+    historical_observed_status: S1
+    evidence_tier: curated_public_source
+    expected_signal_pattern: Limited Domain A signals only; B and D absent; expected status S3 from geopolitical context, replay evidence too weak to confirm.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Prove that SIASA triggers high-attention mismatch and weak_replay_evidence tier when only minimal A-domain signals are available and B/D are missing.
+    known_limitations:
+      - replay_bundle_limited_to_two_domain_a_records_to_force_weak_evidence_tier
+      - domains_b_and_d_intentionally_absent_from_replay_bundle
+      - expected_status_reflects_geopolitical_context_not_replay_evidence_depth
+    validation_metrics: [Status Match, Evidence Tier, Attention Level]

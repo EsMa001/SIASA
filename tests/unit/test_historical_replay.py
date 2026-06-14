@@ -16,8 +16,10 @@ def test_load_historical_replay_inputs_reads_fixture_backed_cases_from_repo_yaml
         "VAL-EGY-2024-001",
         "VAL-EST-2024-001",
         "VAL-FIN-2024-001",
+        "VAL-GEO-2023-CHALLENGE-001",
         "VAL-GEO-2024-001",
         "VAL-IND-2024-001",
+        "VAL-IRN-2023-CHALLENGE-001",
         "VAL-IRN-2024-001",
         "VAL-ISR-2023-001",
         "VAL-ISR-2024-002",
@@ -33,6 +35,7 @@ def test_load_historical_replay_inputs_reads_fixture_backed_cases_from_repo_yaml
         "VAL-TUR-2024-001",
         "VAL-TWN-2024-001",
         "VAL-UKR-2022-001",
+        "VAL-UKR-2023-CHALLENGE-001",
         "VAL-USA-2024-001",
     ]
     assert replay_inputs["VAL-UKR-2022-001"].review_basis == "fixture_backed_historical_replay"
@@ -619,6 +622,79 @@ def test_build_historical_replay_reviews_executes_replay_against_fixture_backed_
             "unexpected_observed_domains": [],
             "replay_input_record_count": 4,
         },
+        # --- Challenge cases (3 new non-perfect replay scenarios) ---
+        {
+            "case_id": "VAL-UKR-2023-CHALLENGE-001",
+            "country_id": "UKR",
+            "review_basis": "fixture_backed_historical_replay",
+            "replay_input_source_ids": ["SRC-GDELT-DOC"],
+            "replay_input_country_ids": ["UKR"],
+            "archival_data_files": [],
+            "provenance_notes": "",
+            "replay_known_limitations": [],
+            "replay_source_coverage_ratio": 0.25,
+            "replay_provenance_completeness_ratio": 1.0,
+            "replay_evidence_score": 0.25,
+            "replay_evidence_tier": "weak_replay_evidence",
+            "replayed_status": "S1",
+            "expected_status": "S2",
+            "status_match": False,
+            "expected_domains": ["A", "B", "D"],
+            "replayed_domains": ["A"],
+            "domain_match_ratio": 1 / 3,
+            "review_verdict": "replay_mismatch",
+            "missing_expected_domains": ["B", "D"],
+            "unexpected_observed_domains": [],
+            "replay_input_record_count": 2,
+        },
+        {
+            "case_id": "VAL-IRN-2023-CHALLENGE-001",
+            "country_id": "IRN",
+            "review_basis": "fixture_backed_historical_replay",
+            "replay_input_source_ids": ["SRC-GDACS", "SRC-GDELT-DOC", "SRC-GDELT-EVENTS"],
+            "replay_input_country_ids": ["IRN"],
+            "archival_data_files": [],
+            "provenance_notes": "",
+            "replay_known_limitations": [],
+            "replay_source_coverage_ratio": 0.75,
+            "replay_provenance_completeness_ratio": 1.0,
+            "replay_evidence_score": 0.85,
+            "replay_evidence_tier": "strong_replay_evidence",
+            "replayed_status": "S3",
+            "expected_status": "S3",
+            "status_match": True,
+            "expected_domains": ["A", "B", "D"],
+            "replayed_domains": ["A", "B"],
+            "domain_match_ratio": 2 / 3,
+            "review_verdict": "replay_match_with_gaps",
+            "missing_expected_domains": ["D"],
+            "unexpected_observed_domains": [],
+            "replay_input_record_count": 4,
+        },
+        {
+            "case_id": "VAL-GEO-2023-CHALLENGE-001",
+            "country_id": "GEO",
+            "review_basis": "fixture_backed_historical_replay",
+            "replay_input_source_ids": ["SRC-GDELT-DOC"],
+            "replay_input_country_ids": ["GEO"],
+            "archival_data_files": [],
+            "provenance_notes": "",
+            "replay_known_limitations": [],
+            "replay_source_coverage_ratio": 0.25,
+            "replay_provenance_completeness_ratio": 1.0,
+            "replay_evidence_score": 0.25,
+            "replay_evidence_tier": "weak_replay_evidence",
+            "replayed_status": "S1",
+            "expected_status": "S3",
+            "status_match": False,
+            "expected_domains": ["A", "B", "D"],
+            "replayed_domains": ["A"],
+            "domain_match_ratio": 1 / 3,
+            "review_verdict": "replay_mismatch",
+            "missing_expected_domains": ["B", "D"],
+            "unexpected_observed_domains": [],
+            "replay_input_record_count": 2,
+        },
     ]
 
 
@@ -659,3 +735,62 @@ def test_build_historical_replay_reviews_assigns_lower_evidence_tier_when_replay
     assert reviews[0]["replay_provenance_completeness_ratio"] == 1.0
     assert reviews[0]["replay_evidence_score"] == 0.75
     assert reviews[0]["replay_evidence_tier"] == "strong_replay_evidence"
+
+
+def test_challenge_cases_produce_correct_non_perfect_verdicts_and_attention_routing() -> None:
+    """Challenge cases must produce mismatch/gap verdicts and route to attention-level handling."""
+    from siasa.readmodels.validation_backtest import build_historical_replay_summary
+
+    repo_root = Path(__file__).resolve().parents[2]
+    cases = load_validation_case_library(
+        repo_root / "vmodel" / "verification" / "validation_reference_cases.yaml"
+    )
+    replay_inputs = load_historical_replay_inputs(
+        repo_root / "vmodel" / "verification" / "validation_replay_inputs.yaml"
+    )
+    reviews = build_historical_replay_reviews(cases, replay_inputs)
+
+    # Index by case_id for easy lookup
+    by_id = {r["case_id"]: r for r in reviews}
+
+    # VAL-UKR-2023-CHALLENGE-001: replay_mismatch, weak evidence
+    ukr = by_id["VAL-UKR-2023-CHALLENGE-001"]
+    assert ukr["review_verdict"] == "replay_mismatch"
+    assert ukr["status_match"] is False
+    assert ukr["replay_evidence_tier"] == "weak_replay_evidence"
+    assert "B" in ukr["missing_expected_domains"]
+    assert "D" in ukr["missing_expected_domains"]
+    assert ukr["replayed_domains"] == ["A"]
+
+    # VAL-IRN-2023-CHALLENGE-001: replay_match_with_gaps (status match, D missing)
+    irn = by_id["VAL-IRN-2023-CHALLENGE-001"]
+    assert irn["review_verdict"] == "replay_match_with_gaps"
+    assert irn["status_match"] is True
+    assert "D" in irn["missing_expected_domains"]
+    assert irn["replay_evidence_score"] >= 0.75  # strong despite domain gap
+
+    # VAL-GEO-2023-CHALLENGE-001: replay_mismatch, weak evidence, only A domain
+    geo = by_id["VAL-GEO-2023-CHALLENGE-001"]
+    assert geo["review_verdict"] == "replay_mismatch"
+    assert geo["status_match"] is False
+    assert geo["replay_evidence_tier"] == "weak_replay_evidence"
+    assert geo["replayed_domains"] == ["A"]
+
+    # Summary must reflect non-perfect verdict mix
+    summary = build_historical_replay_summary(reviews)
+    verdict_counts = summary["review_verdict_counts"]
+    assert verdict_counts.get("replay_mismatch", 0) >= 2, "At least 2 mismatch verdicts expected"
+    assert verdict_counts.get("replay_match_with_gaps", 0) >= 1, "At least 1 match_with_gaps expected"
+
+    # Attention cases must include all 3 challenge cases
+    attention_cases = summary.get("attention_cases", [])
+    attention_ids = {a["case_id"] for a in attention_cases}
+    assert "VAL-UKR-2023-CHALLENGE-001" in attention_ids
+    assert "VAL-IRN-2023-CHALLENGE-001" in attention_ids
+    assert "VAL-GEO-2023-CHALLENGE-001" in attention_ids
+
+    # High-attention cases: the two mismatch cases
+    high_attention = [a for a in attention_cases if a["attention_level"] == "high"]
+    high_ids = {a["case_id"] for a in high_attention}
+    assert "VAL-UKR-2023-CHALLENGE-001" in high_ids
+    assert "VAL-GEO-2023-CHALLENGE-001" in high_ids

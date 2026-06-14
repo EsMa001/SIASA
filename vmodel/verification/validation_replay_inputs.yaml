@@ -1287,3 +1287,71 @@ replay_cases:
         value: 1
         provenance_source_id: SRC-GDACS
         quality_context: {freshness_hours: 6, expected_source_count: 5}
+
+  - case_id: VAL-UKR-2023-CHALLENGE-001
+    review_basis: fixture_backed_historical_replay
+    normalized_records:
+      - country_id: UKR
+        timestamp: "2023-01-15T08:00:00Z"
+        domain: A
+        signal_key: article_count
+        value: 1
+        provenance_source_id: SRC-GDELT-DOC
+        quality_context: {freshness_hours: 6}
+      - country_id: UKR
+        timestamp: "2023-01-15T08:00:00Z"
+        domain: A
+        signal_key: tone
+        value: -0.1
+        provenance_source_id: SRC-GDELT-DOC
+        quality_context: {freshness_hours: 6}
+
+  - case_id: VAL-IRN-2023-CHALLENGE-001
+    review_basis: fixture_backed_historical_replay
+    normalized_records:
+      - country_id: IRN
+        timestamp: "2023-06-01T08:00:00Z"
+        domain: A
+        signal_key: article_count
+        value: 7
+        provenance_source_id: SRC-GDELT-DOC
+        quality_context: {freshness_hours: 6}
+      - country_id: IRN
+        timestamp: "2023-06-01T08:00:00Z"
+        domain: A
+        signal_key: tone
+        value: -0.9
+        provenance_source_id: SRC-GDELT-DOC
+        quality_context: {freshness_hours: 6}
+      - country_id: IRN
+        timestamp: "2023-06-01T09:00:00Z"
+        domain: B
+        signal_key: conflict_event_count
+        value: 2
+        provenance_source_id: SRC-GDELT-EVENTS
+        quality_context: {freshness_hours: 5}
+      - country_id: IRN
+        timestamp: "2023-06-01T09:00:00Z"
+        domain: B
+        signal_key: disaster_alert_level
+        value: 1
+        provenance_source_id: SRC-GDACS
+        quality_context: {freshness_hours: 8}
+
+  - case_id: VAL-GEO-2023-CHALLENGE-001
+    review_basis: fixture_backed_historical_replay
+    normalized_records:
+      - country_id: GEO
+        timestamp: "2023-09-01T08:00:00Z"
+        domain: A
+        signal_key: article_count
+        value: 3
+        provenance_source_id: SRC-GDELT-DOC
+        quality_context: {freshness_hours: 12}
+      - country_id: GEO
+        timestamp: "2023-09-01T08:00:00Z"
+        domain: A
+        signal_key: tone
+        value: -0.5
+        provenance_source_id: SRC-GDELT-DOC
+        quality_context: {freshness_hours: 12}

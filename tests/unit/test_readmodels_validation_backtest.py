@@ -137,9 +137,12 @@ def test_reference_case_library_summary_aggregates_case_types_countries_and_time
     summary = build_reference_case_library_summary(cases)
 
     assert summary == {
-        "case_count": 23,
+        "case_count": 26,
         "countries_covered": ["CHN", "DEU", "EGY", "EST", "FIN", "GEO", "IND", "IRN", "ISR", "MMR", "NGA", "PAK", "POL", "QAT", "RUS", "SAU", "SDN", "TUR", "TWN", "UKR", "USA"],
         "case_type_counts": {
+            "challenge_domain_gap": 1,
+            "challenge_mismatch": 1,
+            "challenge_weak_evidence": 1,
             "disinformation_spike": 1,
             "hybrid_pressure": 3,
             "military_escalation": 1,
@@ -157,20 +160,20 @@ def test_historical_reference_review_summary_scores_curated_case_alignment_and_e
     summary = build_historical_reference_review_summary(cases)
 
     assert summary == {
-        "case_count": 23,
+        "case_count": 26,
         "countries_covered": ["CHN", "DEU", "EGY", "EST", "FIN", "GEO", "IND", "IRN", "ISR", "MMR", "NGA", "PAK", "POL", "QAT", "RUS", "SAU", "SDN", "TUR", "TWN", "UKR", "USA"],
         "review_verdict_counts": {
             "historical_alignment_confirmed": 20,
-            "historical_alignment_mismatch": 1,
-            "historical_alignment_with_gaps": 2,
+            "historical_alignment_mismatch": 3,
+            "historical_alignment_with_gaps": 3,
         },
         "evidence_tier_counts": {
             "corroborated_multi_source": 19,
-            "curated_public_source": 1,
+            "curated_public_source": 4,
             "provisional": 1,
             "verified_multi_source": 2,
         },
-        "average_evidence_score": 0.79,
+        "average_evidence_score": 0.77,
     }
 
 
@@ -453,55 +456,76 @@ def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> 
         "VAL-PAK-2024-001",
         "VAL-GEO-2024-001",
         "VAL-TWN-2024-001",
+        "VAL-UKR-2023-CHALLENGE-001",
+        "VAL-IRN-2023-CHALLENGE-001",
+        "VAL-GEO-2023-CHALLENGE-001",
     ]
     assert summary == {
-        "case_count": 23,
+        "case_count": 26,
         "countries_covered": ["CHN", "DEU", "EGY", "EST", "FIN", "GEO", "IND", "IRN", "ISR", "MMR", "NGA", "PAK", "POL", "QAT", "RUS", "SAU", "SDN", "TUR", "TWN", "UKR", "USA"],
         "review_verdict_counts": {
             "replay_match": 21,
-            "replay_match_with_gaps": 1,
-            "replay_mismatch": 1,
+            "replay_match_with_gaps": 2,
+            "replay_mismatch": 3,
         },
-        "status_match_count": 22,
-        "average_domain_match_ratio": 0.96,
-        "average_replay_evidence_score": 0.96,
-        "average_replay_source_coverage_ratio": 0.96,
+        "status_match_count": 23,
+        "average_domain_match_ratio": 0.9,
+        "average_replay_evidence_score": 0.9,
+        "average_replay_source_coverage_ratio": 0.89,
         "average_replay_provenance_completeness_ratio": 1.0,
-        "replay_input_record_total": 171,
-        "archival_data_file_count": 23,
+        "replay_input_record_total": 179,
+        "archival_data_file_count": 26,
         "replay_evidence_tier_counts": {
-            "strong_replay_evidence": 1,
+            "strong_replay_evidence": 2,
             "verified_replay_evidence": 21,
-            "weak_replay_evidence": 1,
+            "weak_replay_evidence": 3,
         },
         "replay_input_source_coverage_counts": {
-            "SRC-GDACS": 22,
-            "SRC-GDELT-DOC": 23,
-            "SRC-GDELT-EVENTS": 22,
+            "SRC-GDACS": 23,
+            "SRC-GDELT-DOC": 26,
+            "SRC-GDELT-EVENTS": 23,
             "WB-INDICATORS": 20,
         },
         "review_basis_counts": {
-            "provider_backed_archival_replay": 23,
+            "provider_backed_archival_replay": 26,
         },
-        "attention_case_count": 2,
+        "attention_case_count": 5,
         "attention_level_counts": {
-            "high": 1,
-            "medium": 1,
+            "high": 3,
+            "medium": 2,
         },
         "attention_reason_counts": {
-            "domain_coverage_gap": 1,
-            "status_mismatch_and_domain_gap": 1,
+            "domain_coverage_gap": 2,
+            "status_mismatch_and_domain_gap": 3,
         },
         "attention_owner_counts": {
-            "runtime/source coverage": 1,
-            "validation governance": 1,
+            "runtime/source coverage": 2,
+            "validation governance": 3,
         },
         "attention_country_summary": [
+            {
+                "country_id": "GEO",
+                "attention_case_count": 1,
+                "highest_attention_level": "high",
+                "case_ids": ["VAL-GEO-2023-CHALLENGE-001"],
+            },
             {
                 "country_id": "ISR",
                 "attention_case_count": 1,
                 "highest_attention_level": "high",
                 "case_ids": ["VAL-ISR-2024-002"],
+            },
+            {
+                "country_id": "UKR",
+                "attention_case_count": 1,
+                "highest_attention_level": "high",
+                "case_ids": ["VAL-UKR-2023-CHALLENGE-001"],
+            },
+            {
+                "country_id": "IRN",
+                "attention_case_count": 1,
+                "highest_attention_level": "medium",
+                "case_ids": ["VAL-IRN-2023-CHALLENGE-001"],
             },
             {
                 "country_id": "POL",
@@ -511,6 +535,19 @@ def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> 
             },
         ],
         "attention_cases": [
+            {
+                "case_id": "VAL-GEO-2023-CHALLENGE-001",
+                "country_id": "GEO",
+                "review_verdict": "replay_mismatch",
+                "attention_level": "high",
+                "attention_reason": "status_mismatch_and_domain_gap",
+                "owner_hint": "validation governance",
+                "replay_evidence_tier": "weak_replay_evidence",
+                "replay_source_coverage_ratio": 0.25,
+                "missing_expected_domains": ["B", "D"],
+                "unexpected_observed_domains": [],
+                "suggested_next_action": "Review reference-case expectation alignment and archival replay provenance before using this case as a strong validation signal.",
+            },
             {
                 "case_id": "VAL-ISR-2024-002",
                 "country_id": "ISR",
@@ -523,6 +560,32 @@ def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> 
                 "missing_expected_domains": ["B", "D"],
                 "unexpected_observed_domains": [],
                 "suggested_next_action": "Review reference-case expectation alignment and archival replay provenance before using this case as a strong validation signal.",
+            },
+            {
+                "case_id": "VAL-UKR-2023-CHALLENGE-001",
+                "country_id": "UKR",
+                "review_verdict": "replay_mismatch",
+                "attention_level": "high",
+                "attention_reason": "status_mismatch_and_domain_gap",
+                "owner_hint": "validation governance",
+                "replay_evidence_tier": "weak_replay_evidence",
+                "replay_source_coverage_ratio": 0.25,
+                "missing_expected_domains": ["B", "D"],
+                "unexpected_observed_domains": [],
+                "suggested_next_action": "Review reference-case expectation alignment and archival replay provenance before using this case as a strong validation signal.",
+            },
+            {
+                "case_id": "VAL-IRN-2023-CHALLENGE-001",
+                "country_id": "IRN",
+                "review_verdict": "replay_match_with_gaps",
+                "attention_level": "medium",
+                "attention_reason": "domain_coverage_gap",
+                "owner_hint": "runtime/source coverage",
+                "replay_evidence_tier": "strong_replay_evidence",
+                "replay_source_coverage_ratio": 0.75,
+                "missing_expected_domains": ["D"],
+                "unexpected_observed_domains": [],
+                "suggested_next_action": "Review missing expected domains and source coverage before treating this replay as fully representative.",
             },
             {
                 "case_id": "VAL-POL-2024-002",
