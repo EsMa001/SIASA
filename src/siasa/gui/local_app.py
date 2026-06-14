@@ -2945,7 +2945,7 @@ def _render_reports(report_catalog: dict[str, Any], *, nav_prefix: str = '', ava
 
 
 
-def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_model: dict[str, Any] | None = None, *, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
+def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_model: dict[str, Any] | None = None, *, approval_lifecycle_view_model: dict[str, Any] | None = None, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
     def _render_evidence_link(label: str, href: Any) -> str:
         href_text = str(href or '').strip()
         if not href_text:
@@ -3807,7 +3807,15 @@ def _render_runs(system_status_read_model: dict[str, Any], repo_closure_view_mod
         f"<p>Triage tag: <strong>{latest_triage_tag}</strong> | Triage summary: <strong>{latest_triage_summary}</strong></p>"
         f"<p>Verification mode: <strong>{html.escape(verification_mode)}</strong> | Enabled overrides: <strong>{html.escape(verification_override_text)}</strong></p>"
         f"<p>Recorded at: <strong>{latest_recorded_at}</strong></p>"
-        f"<p>Operator next action: <strong>{operator_next_action}</strong></p>"
+        + (
+            f"<p>G4 Approval lifecycle: <strong id='approval-lifecycle-lane-state'>{html.escape(str(approval_lifecycle_view_model.get('lifecycle_state', 'n/a')))}</strong>"
+            f" | Overall: <strong id='approval-lifecycle-lane-overall'>{html.escape(str((approval_lifecycle_view_model.get('lifecycle_status') or {}).get('overall', 'n/a')))}</strong>"
+            f" | Send allowed: <strong>{html.escape(str((approval_lifecycle_view_model.get('lifecycle_status') or {}).get('external_send_allowed', False)))}</strong>"
+            f" | Next action: <strong id='approval-lifecycle-lane-next-action'>{html.escape(str((approval_lifecycle_view_model.get('lifecycle_status') or {}).get('operator_next_action', 'n/a')))}</strong></p>"
+            if approval_lifecycle_view_model else
+            "<p>G4 Approval lifecycle: <strong id='approval-lifecycle-lane-state'>no record present</strong></p>"
+        )
+        + f"<p>Operator next action: <strong>{operator_next_action}</strong></p>"
         f"<p>Bundle root: <strong>{latest_bundle_root}</strong> | GUI index: <strong>{latest_gui_index}</strong> | Artifacts dir: <strong>{latest_artifacts_dir}</strong></p>"
         f"<p>Handoff summary: <strong>{latest_handoff_summary}</strong></p>"
         f"<details><summary>Latest bundle evidence links</summary><ul>{latest_evidence_link_items}</ul></details>"
@@ -7028,7 +7036,7 @@ def build_local_mvp_site(
 
     if 'runs.html' in available_pages:
         runs_file = output_dir / 'runs.html'
-        runs_file.write_text(_render_runs(system_status_read_model, repo_closure_view_model, nav_prefix='', available_pages=available_pages), encoding='utf-8')
+        runs_file.write_text(_render_runs(system_status_read_model, repo_closure_view_model, approval_lifecycle_view_model=approval_lifecycle_view_model, nav_prefix='', available_pages=available_pages), encoding='utf-8')
         generated_files.append(runs_file)
     system_status_json_file = output_dir / 'system_status.json'
     system_status_json_file.write_text(json.dumps(system_status_read_model, indent=2, sort_keys=True), encoding='utf-8')

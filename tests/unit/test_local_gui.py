@@ -950,6 +950,14 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
         repo_closure_view_model=repo_closure_view,
         annotations_view_model=annotations_view,
         stakeholder_functional_closure_view_model=stakeholder_functional_closure_view,
+        approval_lifecycle_view_model={
+            'lifecycle_state': 'pending_signoff',
+            'lifecycle_status': {
+                'overall': 'awaiting_reviewer_decision',
+                'external_send_allowed': False,
+                'operator_next_action': 'Obtain explicit reviewer sign-off.',
+            },
+        },
     )
 
     assert (pages.output_dir / "index.html").exists()
@@ -1414,6 +1422,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Repo Closure Summary" in runs_html
     assert "governance-and-run-controls" in runs_html
     assert "reporting-and-export" in runs_html
+    # G4: Approval lifecycle in Evidence Lane
+    assert "approval-lifecycle-lane-state" in runs_html
+    assert "approval-lifecycle-lane-overall" in runs_html
+    assert "approval-lifecycle-lane-next-action" in runs_html
+    assert "G4 Approval lifecycle" in runs_html
 
     trends_html = (pages.output_dir / "trends.html").read_text()
     assert "Yearly Trend Page" in trends_html

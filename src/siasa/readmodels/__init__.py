@@ -7,6 +7,9 @@ from .approval_lifecycle import (
     derive_lifecycle_status,
     load_approval_lifecycle_record,
     save_approval_lifecycle_record,
+    transition_lifecycle_record,
+    LifecycleTransitionError,
+    ALLOWED_TRANSITIONS,
 )
 from .annotations import build_annotations_view_model
 from .country_profile import build_country_profile_read_model

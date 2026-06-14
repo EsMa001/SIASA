@@ -165,6 +165,112 @@ def save_approval_lifecycle_record(record: ApprovalLifecycleRecord, artifact_pat
     )
 
 
+# ---------------------------------------------------------------------------
+# Lifecycle transition helpers
+# ---------------------------------------------------------------------------
+
+class LifecycleTransitionError(ValueError):
+    """Raised when a requested lifecycle transition is not permitted."""
+
+
+# Allowed transitions: {current_state: [allowed_next_states]}
+ALLOWED_TRANSITIONS: dict[str, list[str]] = {
+    'pending_signoff': ['approved', 'approved_with_conditions', 'deferred', 'rejected'],
+    'approved': ['distributed', 'deferred', 'rejected'],
+    'approved_with_conditions': ['approved', 'distributed', 'deferred', 'rejected'],
+    'distributed': [],   # terminal
+    'deferred': ['pending_signoff', 'rejected'],
+    'rejected': ['pending_signoff'],  # allow re-initiation
+}
+
+
+def transition_lifecycle_record(
+    record: ApprovalLifecycleRecord,
+    action: str,
+    actor: str = 'operator',
+    reviewer_id: str = '',
+    reviewer_role: str = '',
+    rationale: str = '',
+    conditions: list | None = None,
+    recipients: list | None = None,
+    bundle_artifacts: list | None = None,
+    distribution_note: str = '',
+) -> ApprovalLifecycleRecord:
+    """
+    Apply a lifecycle transition to a record and return the updated record.
+
+    action must be one of DISPOSITION_OPTIONS or 'distribute'.
+    Raises LifecycleTransitionError if the transition is not allowed.
+    """
+    action_to_state = {
+        'approve': 'approved',
+        'approve_with_conditions': 'approved_with_conditions',
+        'defer': 'deferred',
+        'reject': 'rejected',
+        'distribute': 'distributed',
+    }
+    if action not in action_to_state:
+        raise LifecycleTransitionError(
+            f"Unknown action '{action}'. Must be one of: {list(action_to_state)}"
+        )
+
+    target_state = action_to_state[action]
+    current_state = record.lifecycle_state
+    allowed = ALLOWED_TRANSITIONS.get(current_state, [])
+
+    if target_state not in allowed:
+        raise LifecycleTransitionError(
+            f"Transition '{current_state}' -> '{target_state}' is not allowed. "
+            f"Allowed from '{current_state}': {allowed}"
+        )
+
+    now = datetime.now(UTC).isoformat()
+
+    # Apply state
+    record.lifecycle_state = target_state
+    record.decision_status = target_state
+    record.last_updated_utc = now
+
+    # Apply reviewer identity if provided
+    if reviewer_id:
+        record.reviewer_id = reviewer_id
+    if reviewer_role:
+        record.reviewer_role = reviewer_role
+
+    # Action-specific fields
+    if action in ('approve', 'approve_with_conditions'):
+        record.disposition = action
+        record.decision_date_utc = now
+        record.approval_rationale = rationale
+        if conditions is not None:
+            record.approval_conditions = conditions
+    elif action == 'defer':
+        record.disposition = 'defer'
+        record.approval_rationale = rationale
+    elif action == 'reject':
+        record.disposition = 'reject'
+        record.approval_rationale = rationale
+    elif action == 'distribute':
+        record.distributed = True
+        record.distribution_date_utc = now
+        if recipients is not None:
+            record.distribution_recipients = recipients
+        if bundle_artifacts is not None:
+            record.distribution_bundle_artifacts = bundle_artifacts
+        if distribution_note:
+            record.distribution_record_note = distribution_note
+
+    # Append audit trail entry
+    record.audit_trail.append({
+        'timestamp_utc': now,
+        'action': action,
+        'actor': actor,
+        'note': rationale or distribution_note or f'Lifecycle transition: {current_state} -> {target_state}',
+    })
+
+    return record
+
+
 def build_approval_lifecycle_view_model(
     record: Optional[ApprovalLifecycleRecord],
     package_run_id: str = '',
