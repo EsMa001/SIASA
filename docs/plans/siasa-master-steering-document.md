@@ -143,20 +143,36 @@ Steering status:
 
 The active serial priority order is now:
 
-### Priority 1: Approval-to-distribution release closure
-Why first:
-- G1, repo-controlled G2, and repo-controlled G3 are now materially closed
-- the largest remaining internal value is no longer another evidence-lane refinement, but actual lifecycle completion from review-ready package to governed approval/distribution outcome
+### Priority 1 (materially closed): G4 Approval-to-distribution release lifecycle
+Status: repo-controlled closed.
+- WP-001: approval lifecycle record + artifact emission + GUI panel in release_package.html — Done
+- WP-002: transition CLI (approve/approve_with_conditions/defer/reject/distribute) + Evidence-Lane in runs.html — Done
+- Operator can now execute `python scripts/lifecycle_transition.py approve --record-path ...` and see the result in both release_package.html and runs.html
+- No further default G4 slice is currently required
 
 ### Priority 2: External credentialed-source activation follow-through (triggered, not default)
-Why second / conditional:
-- repo-controlled G2 closure is now materially complete: blockers, next actions, country scope, and activation-vs-evidence truth are explicit
+Why conditional:
+- repo-controlled G2 closure is materially complete: blockers, next actions, country scope, and activation-vs-evidence truth are explicit
 - the next real step depends on external credential/app-registration availability rather than further internal implementation
 - jump this back upward immediately if valid ReliefWeb/UCDP credentials become available
 
-### Priority 3: Deferred architecture uplifts
+### Priority 3: Deferred architecture uplifts (G5)
 Why last/default deferred:
 - multi-user/server-backed architecture is valuable only if the target operating model explicitly requires it now
+- no current external steering demand for G5
+
+### Default next work (post-G4 closure)
+With G1, G2 (repo-controlled), G3, and G4 all materially closed, the program frontier has shifted.
+
+The remaining substantive internal next-step candidates are:
+1. G4 follow-through hardening if live operational use reveals gaps (probe-driven, not speculative)
+2. Broader runtime/source breadth expansion if a new country cluster or source class becomes the priority
+3. G5 architecture decision only if multi-user deployment is now required by external steering
+4. Validation realism depth (broader non-perfect historical replay portfolios) if interpretation quality is the bottleneck
+
+Decision rule for next package selection:
+- If no external trigger (credentials, operating-model change, new country demand) exists, the next default internal package should be the one with the highest stakeholder-visible impact from the candidates above
+- Prefer probe-driven packages over speculative breadth expansion
 
 ---
 
@@ -880,6 +896,6 @@ SIASA now suffers from planning-generation overlap.
 Therefore the correct steering rule from now on is simple:
 - this document is the single steering document
 - the capability matrix is the detailed operational evidence companion
-- repo-controlled G1, G2, and G3 are now materially closed for the current product baseline
-- the next default work is G4 approval-to-distribution lifecycle closure
+- repo-controlled G1, G2, G3, and G4 are now materially closed for the current product baseline
+- the next default work is selected from: G4 follow-through (probe-driven), broader runtime breadth, G5 architecture decision (only if operating model demands it), or validation realism depth
 - external credential activation can jump ahead only if valid ReliefWeb/UCDP credentials become available
