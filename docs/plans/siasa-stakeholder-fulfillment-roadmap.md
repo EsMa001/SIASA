@@ -573,5 +573,6 @@ Current rationale:
 - runtime support now includes `SAU`, `QAT`, `EGY`, `NGA`, `SDN`, and `MMR` with governed mappings, expected domains, pilot-set semantics, and regression coverage
 - the validation realism snapshot is now explicit in the GUI: non-perfect portfolio cases are surfaced with a dedicated KPI and snapshot table instead of remaining buried in the detail table
 - with this tranche now closed without known gaps, the next package should move to runtime/source breadth expansion (or the next highest-value governed breadth package called out by the matrix)
+- VAL-WP-001 validation realism depth is now closed: the curated governed replay portfolio was extended from 23 to 26 cases by adding 3 challenge cases (`VAL-UKR-2023-CHALLENGE-001`, `VAL-IRN-2023-CHALLENGE-001`, `VAL-GEO-2023-CHALLENGE-001`) that explicitly exercise weak-evidence and domain-gap replay outcomes; attention case count rose from 2 to 5 (3 high + 2 medium), attention-country summary now covers GEO, ISR, UKR, IRN, POL; new case_types `challenge_mismatch`, `challenge_domain_gap`, `challenge_weak_evidence` are now first-class in the reference-case library; all tests pass (519 total); commit `96cb36a`
 
 After that, proceed with the strongest remaining breadth package indicated by the capability matrix.
