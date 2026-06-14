@@ -5072,6 +5072,46 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         "</tr>"
         for case in reference_case_library
     ) or "<tr><td colspan='6' style='color:#6b7d99;'>No curated reference cases recorded.</td></tr>"
+    # --- Challenge-Case Type Summary Panel ---
+    _CHALLENGE_TYPE_DESCRIPTIONS: dict[str, str] = {
+        'challenge_mismatch': 'Status mismatch with weak domain coverage — expected and observed status diverge with only partial source backing.',
+        'challenge_domain_gap': 'Replay match but with missing expected domains — source coverage is incomplete for one or more governed domains.',
+        'challenge_weak_evidence': 'Weak replay evidence only — archival coverage is thin (single-domain, low-signal), reducing interpretation confidence.',
+    }
+    _CHALLENGE_TYPE_OPERATOR_HINTS: dict[str, str] = {
+        'challenge_mismatch': 'Review reference-case expectation alignment and archival provenance before using as a strong validation signal.',
+        'challenge_domain_gap': 'Review missing expected domains and source coverage before treating this replay as fully representative.',
+        'challenge_weak_evidence': 'Expand archival source coverage or treat as indicative only — not suitable for strong validation claims.',
+    }
+    case_type_counts: dict[str, int] = dict(reference_case_library_summary.get('case_type_counts') or {})
+    challenge_type_counts = {k: v for k, v in case_type_counts.items() if k.startswith('challenge_')}
+    challenge_panel_rows = ''.join(
+        f"<tr id='challenge-type-row-{html.escape(ct)}'>"
+        f"<td><span class='badge badge-orange' style='font-size:11px;'>{html.escape(ct)}</span></td>"
+        f"<td style='text-align:center;font-weight:600;color:#dae2fd;'>{html.escape(str(cnt))}</td>"
+        f"<td style='color:#b9c7e0;font-size:12px;'>{html.escape(_CHALLENGE_TYPE_DESCRIPTIONS.get(ct, ct))}</td>"
+        f"<td style='color:#6b7d99;font-size:11px;'>{html.escape(_CHALLENGE_TYPE_OPERATOR_HINTS.get(ct, ''))}</td>"
+        "</tr>"
+        for ct, cnt in sorted(challenge_type_counts.items())
+    ) or "<tr><td colspan='4' style='color:#6b7d99;'>No challenge case types in the current library.</td></tr>"
+    challenge_panel_total = sum(challenge_type_counts.values())
+    challenge_case_panel = (
+        "<div class='panel' id='challenge-case-type-panel'>"
+        "<div class='panel-header'>Challenge-Case Type Summary "
+        f"<span class='badge badge-orange' style='margin-left:8px;'>{challenge_panel_total} challenge case{'s' if challenge_panel_total != 1 else ''}</span>"
+        "</div>"
+        "<p style='color:#b9c7e0;font-size:12px;margin-bottom:10px;'>"
+        "Challenge cases explicitly exercise non-perfect replay outcomes. "
+        "They validate that the attention-routing and evidence-scoring layers behave correctly under weak-evidence, "
+        "domain-gap, and status-mismatch conditions — not only under ideal full-coverage replays."
+        "</p>"
+        "<div class='table-container'><table id='challenge-case-type-table'>"
+        "<thead><tr><th>Type</th><th>Count</th><th>Description</th><th>Operator hint</th></tr></thead>"
+        f"<tbody>{challenge_panel_rows}</tbody>"
+        "</table></div>"
+        "</div>"
+    ) if challenge_type_counts else ''
+
     ref_lib_time = reference_case_library_summary.get('time_range') or {}
     ref_lib_panel = (
         "<details><summary>Curated Reference Case Library "
@@ -5551,6 +5591,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         + goal_panel
         + portfolio_panel
         + realism_panel
+        + challenge_case_panel
         + ref_lib_panel
         + hist_ref_panel
         + replay_summary_panel
