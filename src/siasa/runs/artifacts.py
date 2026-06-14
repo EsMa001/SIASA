@@ -15,6 +15,11 @@ from siasa.readmodels.annotations import build_annotations_view_model
 from siasa.readmodels.country_profile import build_country_profile_read_model
 from siasa.readmodels.domain_detail import build_domain_detail_read_model
 from siasa.readmodels.readiness import build_readiness_view_model
+from siasa.readmodels.approval_lifecycle import (
+    build_default_approval_lifecycle_record,
+    build_approval_lifecycle_view_model,
+    load_approval_lifecycle_record,
+)
 from siasa.readmodels.release_demo_package import build_release_demo_package_view_model
 from siasa.readmodels.release_evidence import build_repo_release_gate_assessment
 from siasa.readmodels.release_gate import build_release_gate_view_model
@@ -513,6 +518,19 @@ def write_run_artifacts(
         )
     )
     readmodel_paths.append(release_gate_path)
+
+    # G4: Approval lifecycle record - load existing or create default pending record
+    approval_lifecycle_path = readmodels_dir / "approval_lifecycle_record.json"
+    existing_record = load_approval_lifecycle_record(approval_lifecycle_path)
+    if existing_record is None:
+        existing_record = build_default_approval_lifecycle_record(
+            package_run_id=run_state.run_id if run_state is not None else '',
+        )
+    approval_lifecycle_vm = build_approval_lifecycle_view_model(existing_record)
+    approval_lifecycle_path.write_text(
+        json.dumps(approval_lifecycle_vm, indent=2, sort_keys=True)
+    )
+    readmodel_paths.append(approval_lifecycle_path)
 
     release_assessment = build_repo_release_gate_assessment(repo_root=Path(__file__).resolve().parents[3])
     release_evidence_assessment_path = readmodels_dir / "release_evidence_assessment.json"

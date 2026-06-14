@@ -1908,6 +1908,10 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
     release_demo_package_view_path = readmodels_dir / 'release_demo_package.json'
     if release_demo_package_view_path.exists():
         release_demo_package_view_model = _load_json(release_demo_package_view_path)
+    approval_lifecycle_view_model = None
+    approval_lifecycle_view_path = readmodels_dir / 'approval_lifecycle_record.json'
+    if approval_lifecycle_view_path.exists():
+        approval_lifecycle_view_model = _load_json(approval_lifecycle_view_path)
     release_failure_drill_report_view_model = None
     release_gate_view_model = None
     release_gate_view_path = readmodels_dir / 'release_gate.json'
@@ -2020,6 +2024,7 @@ def load_site_payload_from_artifacts(artifacts_dir: Path) -> SitePayload:
         'annotations_view_model': annotations_view_model,
         'readiness_view_model': readiness_view_model,
         'release_demo_package_view_model': release_demo_package_view_model,
+        'approval_lifecycle_view_model': approval_lifecycle_view_model,
         'release_failure_drill_report_view_model': release_failure_drill_report_view_model,
         'release_gate_view_model': release_gate_view_model,
         'stakeholder_functional_closure_view_model': stakeholder_functional_closure_view_model,
@@ -6762,6 +6767,119 @@ def _render_release_failure_drill_body(release_failure_drill_report_view_model: 
     )
 
 
+def _render_approval_lifecycle_panel(vm: dict | None) -> str:
+    """Render the G4 Approval-to-Distribution Lifecycle panel for release_package.html."""
+    if vm is None:
+        # Default: show pending state without data
+        vm = {
+            'lifecycle_state': 'pending_signoff',
+            'decision_status': 'pending_signoff',
+            'reviewer_role': 'project_lead',
+            'reviewer_id': '',
+            'decision_date_utc': '',
+            'disposition': '',
+            'approval_conditions': [],
+            'distributed': False,
+            'distribution_date_utc': '',
+            'distribution_recipients': [],
+            'distribution_bundle_artifacts': [],
+            'distribution_record_note': '',
+            'created_at_utc': '',
+            'last_updated_utc': '',
+            'audit_trail': [],
+            'lifecycle_status': {
+                'lifecycle_state': 'pending_signoff',
+                'overall': 'awaiting_reviewer_decision',
+                'external_send_allowed': False,
+                'operator_next_action': 'Obtain explicit reviewer sign-off before distribution.',
+                'approved': False,
+                'distributed': False,
+                'has_conditions': False,
+                'has_distribution_recipients': False,
+                'audit_entry_count': 0,
+            },
+        }
+
+    ls = vm.get('lifecycle_status', {})
+    state = vm.get('lifecycle_state', 'pending_signoff')
+    overall = ls.get('overall', 'awaiting_reviewer_decision')
+    send_allowed = ls.get('external_send_allowed', False)
+    next_action = ls.get('operator_next_action', '')
+
+    state_colors = {
+        'pending_signoff': '#e67e22',
+        'approved': '#27ae60',
+        'approved_with_conditions': '#f39c12',
+        'distributed': '#2980b9',
+        'deferred': '#7f8c8d',
+        'rejected': '#c0392b',
+    }
+    color = state_colors.get(state, '#7f8c8d')
+
+    send_badge = (
+        '<span style="color:#27ae60;font-weight:bold">✓ External send allowed</span>'
+        if send_allowed
+        else '<span style="color:#c0392b;font-weight:bold">✗ External send not yet allowed</span>'
+    )
+
+    conditions_html = ''
+    conditions = vm.get('approval_conditions', [])
+    if conditions:
+        items = ''.join(f'<li>{c}</li>' for c in conditions)
+        conditions_html = f'<ul style="margin:4px 0 0 16px">{items}</ul>'
+
+    recipients = vm.get('distribution_recipients', [])
+    recipients_html = (
+        ', '.join(recipients) if recipients else '<em>None recorded</em>'
+    )
+
+    audit = vm.get('audit_trail', [])
+    audit_rows = ''.join(
+        f'<tr><td style="padding:2px 8px;color:#888">{e.get("timestamp_utc","")[:19]}</td>'
+        f'<td style="padding:2px 8px">{e.get("action","")}</td>'
+        f'<td style="padding:2px 8px;color:#888">{e.get("actor","")}</td>'
+        f'<td style="padding:2px 8px">{e.get("note","")}</td></tr>'
+        for e in audit
+    ) or '<tr><td colspan="4" style="padding:4px 8px;color:#888">No audit entries yet.</td></tr>'
+
+    return f'''<section id="approval-lifecycle-panel" style="background:#1a1a2e;border:2px solid {color};border-radius:8px;padding:20px;margin-bottom:24px">
+<h2 style="color:{color};margin-top:0">🔏 G4 Approval-to-Distribution Lifecycle</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+  <div>
+    <div class="kpi-card" id="approval-lifecycle-state" style="background:#16213e;border-radius:6px;padding:12px">
+      <div style="font-size:0.8em;color:#aaa">Lifecycle State</div>
+      <div style="font-size:1.4em;font-weight:bold;color:{color}">{state}</div>
+    </div>
+  </div>
+  <div>
+    <div class="kpi-card" id="approval-lifecycle-overall" style="background:#16213e;border-radius:6px;padding:12px">
+      <div style="font-size:0.8em;color:#aaa">Overall Status</div>
+      <div style="font-size:1.1em;font-weight:bold;color:#ccc">{overall}</div>
+    </div>
+  </div>
+</div>
+<table style="width:100%;border-collapse:collapse;margin-bottom:16px">
+  <tr><td style="padding:4px 8px;color:#aaa;width:200px">Send permission</td><td style="padding:4px 8px">{send_badge}</td></tr>
+  <tr><td style="padding:4px 8px;color:#aaa">Operator next action</td><td id="approval-lifecycle-next-action" style="padding:4px 8px;color:#fff">{next_action}</td></tr>
+  <tr><td style="padding:4px 8px;color:#aaa">Reviewer role</td><td style="padding:4px 8px">{vm.get("reviewer_role","")}</td></tr>
+  <tr><td style="padding:4px 8px;color:#aaa">Reviewer</td><td style="padding:4px 8px">{vm.get("reviewer_id","") or "<em>Not yet recorded</em>"}</td></tr>
+  <tr><td style="padding:4px 8px;color:#aaa">Decision date</td><td style="padding:4px 8px">{vm.get("decision_date_utc","") or "<em>Not yet recorded</em>"}</td></tr>
+  <tr><td style="padding:4px 8px;color:#aaa">Disposition</td><td style="padding:4px 8px">{vm.get("disposition","") or "<em>Not yet recorded</em>"}</td></tr>
+  <tr><td style="padding:4px 8px;color:#aaa">Distributed</td><td style="padding:4px 8px">{"Yes" if vm.get("distributed") else "No"}</td></tr>
+  <tr><td style="padding:4px 8px;color:#aaa">Distribution date</td><td style="padding:4px 8px">{vm.get("distribution_date_utc","") or "<em>Not yet recorded</em>"}</td></tr>
+  <tr><td style="padding:4px 8px;color:#aaa">Recipients</td><td style="padding:4px 8px">{recipients_html}</td></tr>
+</table>
+{conditions_html}
+<details style="margin-top:12px"><summary style="cursor:pointer;color:#aaa">Audit Trail ({len(audit)} entries)</summary>
+<table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:0.85em">
+  <tr style="color:#aaa"><th style="padding:2px 8px;text-align:left">Timestamp</th><th style="padding:2px 8px;text-align:left">Action</th><th style="padding:2px 8px;text-align:left">Actor</th><th style="padding:2px 8px;text-align:left">Note</th></tr>
+  {audit_rows}
+</table>
+</details>
+</section>
+'''
+
+
 def build_local_mvp_site(
     *,
     output_dir: Path,
@@ -6777,6 +6895,7 @@ def build_local_mvp_site(
     validation_view_model: dict[str, Any] | None = None,
     readiness_view_model: dict[str, Any] | None = None,
     release_demo_package_view_model: dict[str, Any] | None = None,
+    approval_lifecycle_view_model: dict[str, Any] | None = None,
     release_failure_drill_report_view_model: dict[str, Any] | None = None,
     release_gate_view_model: dict[str, Any] | None = None,
     stakeholder_functional_closure_view_model: dict[str, Any] | None = None,
@@ -7038,13 +7157,22 @@ def build_local_mvp_site(
     generated_files.append(readiness_json_file)
     release_demo_package_file = output_dir / 'release_package.html'
     release_demo_package_file.write_text(
-        _page('Release / Demo Package', render_release_demo_package_body(release_demo_package_view_model), nav_prefix='', available_pages=available_pages),
+        _page(
+            'Release / Demo Package',
+            _render_approval_lifecycle_panel(approval_lifecycle_view_model) + render_release_demo_package_body(release_demo_package_view_model),
+            nav_prefix='',
+            available_pages=available_pages,
+        ),
         encoding='utf-8',
     )
     generated_files.append(release_demo_package_file)
     release_demo_package_json_file = output_dir / 'release_demo_package.json'
     release_demo_package_json_file.write_text(json.dumps(release_demo_package_view_model, indent=2, sort_keys=True), encoding='utf-8')
     generated_files.append(release_demo_package_json_file)
+    if approval_lifecycle_view_model is not None:
+        approval_lifecycle_json_file = output_dir / 'approval_lifecycle_record.json'
+        approval_lifecycle_json_file.write_text(json.dumps(approval_lifecycle_view_model, indent=2, sort_keys=True), encoding='utf-8')
+        generated_files.append(approval_lifecycle_json_file)
     if release_failure_drill_report_view_model is not None:
         release_failure_drill_file = output_dir / 'release_failure_drill.html'
         release_failure_drill_file.write_text(

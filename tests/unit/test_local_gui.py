@@ -1624,6 +1624,15 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "blocked" in (pages.output_dir / "release_package.html").read_text()
     assert "Resolve the blocking package issue before any external distribution." in (pages.output_dir / "release_package.html").read_text()
     assert "Evidence bundle" in (pages.output_dir / "release_package.html").read_text()
+    # G4: Approval lifecycle panel assertions
+    release_package_html = (pages.output_dir / "release_package.html").read_text()
+    assert "approval-lifecycle-panel" in release_package_html
+    assert "approval-lifecycle-state" in release_package_html
+    assert "approval-lifecycle-overall" in release_package_html
+    assert "approval-lifecycle-next-action" in release_package_html
+    assert "G4 Approval-to-Distribution Lifecycle" in release_package_html
+    assert "pending_signoff" in release_package_html
+    assert "awaiting_reviewer_decision" in release_package_html
     assert "stakeholder_e2e_flows_covered" in readiness_html
     assert "Stakeholder E2E Flow Coverage (AP-04/AP-05)" in readiness_html
     assert "Stakeholder E2E UI Smoke Coverage (AP-07/AP-08)" in readiness_html
