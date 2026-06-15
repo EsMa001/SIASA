@@ -4706,6 +4706,16 @@ def _render_attention_case_cards(attention_cases: list[dict[str, Any]]) -> str:
             except (TypeError, ValueError):
                 src_cov_html = f"<span class='kpi-sub'>Source coverage: {html.escape(str(src_coverage))}</span>"
 
+        coverage_gap_link_html = ""
+        if missing:
+            coverage_gap_anchor = f"coverage.html#country-gap-{_slugify_anchor_token(country_raw)}"
+            coverage_gap_link_html = (
+                f"<a id='attention-case-coverage-link-{html.escape(_slugify_anchor_token(case_id_raw))}' "
+                f"href='{html.escape(coverage_gap_anchor)}' "
+                f"style='font-size:11px;color:#4edea3;margin-left:12px;text-decoration:none;'"
+                f">↗ Coverage gap ({html.escape(country_raw)})</a>"
+            )
+
         card_search_text = ' '.join(
             [
                 country_raw,
@@ -4748,6 +4758,7 @@ def _render_attention_case_cards(attention_cases: list[dict[str, Any]]) -> str:
             f"<span class='kpi-label'>Suggested action:</span> "
             f"<span style='color:#dae2fd;font-size:12px;'>{next_action}</span>"
             f"{src_cov_html}"
+            f"{coverage_gap_link_html}"
             "</div>"
             "</div>"
         )

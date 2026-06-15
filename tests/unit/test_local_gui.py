@@ -1560,6 +1560,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Weak evidence" in validation_html
     assert "data-case-id=" in validation_html
     assert "data-country-id=" in validation_html
+    # VAL-WP-006: coverage-gap direct link on attention cards with missing domains
+    assert "attention-case-coverage-link-" in validation_html
+    assert "coverage.html#country-gap-" in validation_html
+    assert "↗ Coverage gap (" in validation_html
     assert "attention_level" in validation_html or "Attention" in validation_html  # was: "Attention Level"
     assert "owner_hint" in validation_html or "Follow-up" in validation_html  # was: "Follow-up Owner"
     assert "validation governance" in validation_html
