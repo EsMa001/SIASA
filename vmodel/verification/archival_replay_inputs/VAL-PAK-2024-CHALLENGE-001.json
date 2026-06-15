@@ -1,0 +1,26 @@
+{
+  "normalized_records": [
+    {
+      "country_id": "PAK",
+      "timestamp": "2024-07-01T08:00:00Z",
+      "domain": "A",
+      "signal_key": "article_count",
+      "value": 2,
+      "provenance_source_id": "SRC-GDELT-DOC",
+      "quality_context": {
+        "freshness_hours": 6
+      }
+    },
+    {
+      "country_id": "PAK",
+      "timestamp": "2024-07-01T08:00:00Z",
+      "domain": "A",
+      "signal_key": "tone",
+      "value": -0.3,
+      "provenance_source_id": "SRC-GDELT-DOC",
+      "quality_context": {
+        "freshness_hours": 6
+      }
+    }
+  ]
+}

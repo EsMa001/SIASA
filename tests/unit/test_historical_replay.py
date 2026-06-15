@@ -12,6 +12,7 @@ def test_load_historical_replay_inputs_reads_fixture_backed_cases_from_repo_yaml
 
     assert sorted(replay_inputs) == [
         "VAL-CHN-2024-001",
+        "VAL-CHN-2024-CHALLENGE-001",
         "VAL-DEU-2024-001",
         "VAL-EGY-2024-001",
         "VAL-EST-2024-001",
@@ -26,10 +27,12 @@ def test_load_historical_replay_inputs_reads_fixture_backed_cases_from_repo_yaml
         "VAL-MMR-2024-001",
         "VAL-NGA-2024-001",
         "VAL-PAK-2024-001",
+        "VAL-PAK-2024-CHALLENGE-001",
         "VAL-POL-2023-001",
         "VAL-POL-2024-002",
         "VAL-QAT-2024-001",
         "VAL-RUS-2024-001",
+        "VAL-RUS-2024-CHALLENGE-001",
         "VAL-SAU-2024-001",
         "VAL-SDN-2024-001",
         "VAL-TUR-2024-001",
@@ -695,6 +698,78 @@ def test_build_historical_replay_reviews_executes_replay_against_fixture_backed_
             "unexpected_observed_domains": [],
             "replay_input_record_count": 2,
         },
+        {
+            "case_id": "VAL-RUS-2024-CHALLENGE-001",
+            "country_id": "RUS",
+            "review_basis": "fixture_backed_historical_replay",
+            "replay_input_source_ids": ["SRC-GDELT-DOC"],
+            "replay_input_country_ids": ["RUS"],
+            "archival_data_files": [],
+            "provenance_notes": "",
+            "replay_known_limitations": [],
+            "replay_source_coverage_ratio": 0.25,
+            "replay_provenance_completeness_ratio": 1.0,
+            "replay_evidence_score": 0.25,
+            "replay_evidence_tier": "weak_replay_evidence",
+            "replayed_status": "S1",
+            "expected_status": "S3",
+            "status_match": False,
+            "expected_domains": ["A", "B", "D"],
+            "replayed_domains": ["A"],
+            "domain_match_ratio": 1 / 3,
+            "review_verdict": "replay_mismatch",
+            "missing_expected_domains": ["B", "D"],
+            "unexpected_observed_domains": [],
+            "replay_input_record_count": 2,
+        },
+        {
+            "case_id": "VAL-CHN-2024-CHALLENGE-001",
+            "country_id": "CHN",
+            "review_basis": "fixture_backed_historical_replay",
+            "replay_input_source_ids": ["SRC-GDACS", "SRC-GDELT-DOC", "SRC-GDELT-EVENTS"],
+            "replay_input_country_ids": ["CHN"],
+            "archival_data_files": [],
+            "provenance_notes": "",
+            "replay_known_limitations": [],
+            "replay_source_coverage_ratio": 0.75,
+            "replay_provenance_completeness_ratio": 1.0,
+            "replay_evidence_score": 0.85,
+            "replay_evidence_tier": "strong_replay_evidence",
+            "replayed_status": "S3",
+            "expected_status": "S3",
+            "status_match": True,
+            "expected_domains": ["A", "B", "D"],
+            "replayed_domains": ["A", "B"],
+            "domain_match_ratio": 2 / 3,
+            "review_verdict": "replay_match_with_gaps",
+            "missing_expected_domains": ["D"],
+            "unexpected_observed_domains": [],
+            "replay_input_record_count": 4,
+        },
+        {
+            "case_id": "VAL-PAK-2024-CHALLENGE-001",
+            "country_id": "PAK",
+            "review_basis": "fixture_backed_historical_replay",
+            "replay_input_source_ids": ["SRC-GDELT-DOC"],
+            "replay_input_country_ids": ["PAK"],
+            "archival_data_files": [],
+            "provenance_notes": "",
+            "replay_known_limitations": [],
+            "replay_source_coverage_ratio": 0.25,
+            "replay_provenance_completeness_ratio": 1.0,
+            "replay_evidence_score": 0.25,
+            "replay_evidence_tier": "weak_replay_evidence",
+            "replayed_status": "S1",
+            "expected_status": "S3",
+            "status_match": False,
+            "expected_domains": ["A", "B", "D"],
+            "replayed_domains": ["A"],
+            "domain_match_ratio": 1 / 3,
+            "review_verdict": "replay_mismatch",
+            "missing_expected_domains": ["B", "D"],
+            "unexpected_observed_domains": [],
+            "replay_input_record_count": 2,
+        },
     ]
 
 
@@ -776,21 +851,51 @@ def test_challenge_cases_produce_correct_non_perfect_verdicts_and_attention_rout
     assert geo["replay_evidence_tier"] == "weak_replay_evidence"
     assert geo["replayed_domains"] == ["A"]
 
+    # VAL-RUS-2024-CHALLENGE-001: replay_mismatch, weak evidence, only A domain
+    rus = by_id["VAL-RUS-2024-CHALLENGE-001"]
+    assert rus["review_verdict"] == "replay_mismatch"
+    assert rus["status_match"] is False
+    assert rus["replay_evidence_tier"] == "weak_replay_evidence"
+    assert rus["replayed_domains"] == ["A"]
+    assert "B" in rus["missing_expected_domains"]
+    assert "D" in rus["missing_expected_domains"]
+
+    # VAL-CHN-2024-CHALLENGE-001: replay_match_with_gaps (status match, D missing)
+    chn = by_id["VAL-CHN-2024-CHALLENGE-001"]
+    assert chn["review_verdict"] == "replay_match_with_gaps"
+    assert chn["status_match"] is True
+    assert "D" in chn["missing_expected_domains"]
+    assert chn["replay_evidence_score"] >= 0.75
+
+    # VAL-PAK-2024-CHALLENGE-001: replay_mismatch, weak evidence, only A domain
+    pak = by_id["VAL-PAK-2024-CHALLENGE-001"]
+    assert pak["review_verdict"] == "replay_mismatch"
+    assert pak["status_match"] is False
+    assert pak["replay_evidence_tier"] == "weak_replay_evidence"
+    assert pak["replayed_domains"] == ["A"]
+    assert "B" in pak["missing_expected_domains"]
+    assert "D" in pak["missing_expected_domains"]
+
     # Summary must reflect non-perfect verdict mix
     summary = build_historical_replay_summary(reviews)
     verdict_counts = summary["review_verdict_counts"]
     assert verdict_counts.get("replay_mismatch", 0) >= 2, "At least 2 mismatch verdicts expected"
     assert verdict_counts.get("replay_match_with_gaps", 0) >= 1, "At least 1 match_with_gaps expected"
 
-    # Attention cases must include all 3 challenge cases
+    # Attention cases must include all 6 challenge cases
     attention_cases = summary.get("attention_cases", [])
     attention_ids = {a["case_id"] for a in attention_cases}
     assert "VAL-UKR-2023-CHALLENGE-001" in attention_ids
     assert "VAL-IRN-2023-CHALLENGE-001" in attention_ids
     assert "VAL-GEO-2023-CHALLENGE-001" in attention_ids
+    assert "VAL-RUS-2024-CHALLENGE-001" in attention_ids
+    assert "VAL-CHN-2024-CHALLENGE-001" in attention_ids
+    assert "VAL-PAK-2024-CHALLENGE-001" in attention_ids
 
-    # High-attention cases: the two mismatch cases
+    # High-attention cases: mismatch cases
     high_attention = [a for a in attention_cases if a["attention_level"] == "high"]
     high_ids = {a["case_id"] for a in high_attention}
     assert "VAL-UKR-2023-CHALLENGE-001" in high_ids
     assert "VAL-GEO-2023-CHALLENGE-001" in high_ids
+    assert "VAL-RUS-2024-CHALLENGE-001" in high_ids
+    assert "VAL-PAK-2024-CHALLENGE-001" in high_ids

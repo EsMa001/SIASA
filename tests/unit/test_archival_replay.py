@@ -38,6 +38,9 @@ def test_load_archival_replay_manifest_reads_provider_backed_case_entries() -> N
         "VAL-UKR-2023-CHALLENGE-001",
         "VAL-IRN-2023-CHALLENGE-001",
         "VAL-GEO-2023-CHALLENGE-001",
+        "VAL-RUS-2024-CHALLENGE-001",
+        "VAL-CHN-2024-CHALLENGE-001",
+        "VAL-PAK-2024-CHALLENGE-001",
     ]
     assert manifest[0].review_basis == "provider_backed_archival_replay"
     assert manifest[0].storage_mode == "archival_normalized_records"
@@ -106,6 +109,7 @@ def test_load_governed_historical_replay_inputs_prefers_archival_provider_backed
 
     assert sorted(replay_inputs) == [
         "VAL-CHN-2024-001",
+        "VAL-CHN-2024-CHALLENGE-001",
         "VAL-DEU-2024-001",
         "VAL-EGY-2024-001",
         "VAL-EST-2024-001",
@@ -120,10 +124,12 @@ def test_load_governed_historical_replay_inputs_prefers_archival_provider_backed
         "VAL-MMR-2024-001",
         "VAL-NGA-2024-001",
         "VAL-PAK-2024-001",
+        "VAL-PAK-2024-CHALLENGE-001",
         "VAL-POL-2023-001",
         "VAL-POL-2024-002",
         "VAL-QAT-2024-001",
         "VAL-RUS-2024-001",
+        "VAL-RUS-2024-CHALLENGE-001",
         "VAL-SAU-2024-001",
         "VAL-SDN-2024-001",
         "VAL-TUR-2024-001",

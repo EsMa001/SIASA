@@ -1,0 +1,48 @@
+{
+  "normalized_records": [
+    {
+      "country_id": "CHN",
+      "timestamp": "2024-05-01T08:00:00Z",
+      "domain": "A",
+      "signal_key": "article_count",
+      "value": 9,
+      "provenance_source_id": "SRC-GDELT-DOC",
+      "quality_context": {
+        "freshness_hours": 6
+      }
+    },
+    {
+      "country_id": "CHN",
+      "timestamp": "2024-05-01T08:00:00Z",
+      "domain": "A",
+      "signal_key": "tone",
+      "value": -0.7,
+      "provenance_source_id": "SRC-GDELT-DOC",
+      "quality_context": {
+        "freshness_hours": 6
+      }
+    },
+    {
+      "country_id": "CHN",
+      "timestamp": "2024-05-01T08:00:00Z",
+      "domain": "B",
+      "signal_key": "event_count",
+      "value": 4,
+      "provenance_source_id": "SRC-GDELT-EVENTS",
+      "quality_context": {
+        "freshness_hours": 6
+      }
+    },
+    {
+      "country_id": "CHN",
+      "timestamp": "2024-05-01T08:00:00Z",
+      "domain": "B",
+      "signal_key": "fatality_count",
+      "value": 0,
+      "provenance_source_id": "SRC-GDACS",
+      "quality_context": {
+        "freshness_hours": 12
+      }
+    }
+  ]
+}

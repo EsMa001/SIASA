@@ -476,3 +476,62 @@ validation_cases:
       - domains_b_and_d_intentionally_absent_from_replay_bundle
       - expected_status_reflects_geopolitical_context_not_replay_evidence_depth
     validation_metrics: [Status Match, Evidence Tier, Attention Level]
+
+  - case_id: VAL-RUS-2024-CHALLENGE-001
+    country_id: RUS
+    case_name: Russia 2024 narrative-gap challenge case
+    case_type: challenge_mismatch
+    time_start: "2024-03-01"
+    time_end: "2024-03-02"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A]
+    historical_observed_status: S1
+    evidence_tier: curated_public_source
+    expected_signal_pattern: High geopolitical pressure expected; only sparse Domain A narrative signals available in replay bundle; B and D absent due to access constraints.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Prove that SIASA triggers high-attention mismatch when only weak Domain A signals are available and B/D are absent, reflecting real access-constrained replay conditions for Russia.
+    known_limitations:
+      - replay_bundle_limited_to_domain_a_signals_to_simulate_access_constrained_replay
+      - domains_b_and_d_intentionally_absent_from_replay_bundle
+      - expected_status_reflects_geopolitical_context_not_replay_signal_availability
+    validation_metrics: [Status Match, Evidence Tier, Attention Level]
+
+  - case_id: VAL-CHN-2024-CHALLENGE-001
+    country_id: CHN
+    case_name: China 2024 structural-gap challenge case
+    case_type: challenge_domain_gap
+    time_start: "2024-05-01"
+    time_end: "2024-05-02"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B]
+    historical_observed_status: S3
+    evidence_tier: curated_public_source
+    expected_signal_pattern: A and B signals present; Domain D macro-economic indicators absent from archival replay bundle due to data-access gap.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Prove that SIASA surfaces a domain-gap replay_match_with_gaps verdict when A and B are covered but D is missing, and routes this to medium-attention domain_coverage_gap handling.
+    known_limitations:
+      - domain_d_intentionally_excluded_to_force_domain_gap_detection
+      - not_representative_of_actual_china_signal_depth
+    validation_metrics: [Status Match, Domain Match, Attention Level]
+
+  - case_id: VAL-PAK-2024-CHALLENGE-001
+    country_id: PAK
+    case_name: Pakistan 2024 fragility-signal challenge case
+    case_type: challenge_weak_evidence
+    time_start: "2024-07-01"
+    time_end: "2024-07-02"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A]
+    historical_observed_status: S1
+    evidence_tier: curated_public_source
+    expected_signal_pattern: High fragility and political instability expected; only sparse Domain A signals in replay window; B and D absent due to source limitations in the replay bundle.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Prove that SIASA triggers high-attention mismatch and weak_replay_evidence tier when only minimal A signals are available, reflecting fragile-state replay limitations.
+    known_limitations:
+      - replay_bundle_limited_to_two_domain_a_records_to_force_weak_evidence_tier
+      - domains_b_and_d_intentionally_absent_from_replay_bundle
+      - expected_status_reflects_fragility_context_not_replay_signal_availability
+    validation_metrics: [Status Match, Evidence Tier, Attention Level]
