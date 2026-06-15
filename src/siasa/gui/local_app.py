@@ -4725,6 +4725,8 @@ def _render_attention_case_cards(attention_cases: list[dict[str, Any]]) -> str:
             f" data-attention-reason='{html.escape(reason_raw.lower())}'"
             f" data-review-verdict='{html.escape(verdict_raw.lower())}'"
             f" data-replay-tier='{html.escape(tier_raw.lower())}'"
+            f" data-case-id='{html.escape(case_id_raw.lower())}'"
+            f" data-country-id='{html.escape(country_raw.lower())}'"
             f" data-card-search-text='{html.escape(card_search_text)}'"
             " style='border-left:3px solid rgba(255,180,171,.5);'>"
             "<div style='display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:10px;'>"
@@ -5256,6 +5258,8 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
   const verdictBreakdownNode=document.getElementById('replay-attention-visible-verdict-breakdown');
   const linkStatusNode=document.getElementById('replay-attention-link-status');
   const attentionPanelNode=document.getElementById('replay-attention-panel');
+  const sortSelect=document.getElementById('replay-attention-sort');
+  const activePresetNode=document.getElementById('replay-attention-active-preset');
   const cards=Array.from(document.querySelectorAll('.replay-attention-card'));
   const hashPrefix='ra=';
 
@@ -5281,6 +5285,8 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
       verdict: ((verdictFilter&&verdictFilter.value)||'all').toLowerCase(),
       tier: ((tierFilter&&tierFilter.value)||'all').toLowerCase(),
       text: ((textFilter&&textFilter.value)||'').trim(),
+      sort: ((sortSelect&&sortSelect.value)||'default').toLowerCase(),
+      preset: ((activePresetNode&&activePresetNode.dataset.activePreset)||'none').toLowerCase(),
     };
   }
 
@@ -5303,7 +5309,47 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
     if(state.verdict && state.verdict!=='all'){params.set('ra_verdict', state.verdict);}
     if(state.tier && state.tier!=='all'){params.set('ra_tier', state.tier);}
     if(state.text){params.set('ra_text', state.text);}
+    if(state.sort && state.sort!=='default'){params.set('ra_sort', state.sort);}
+    if(state.preset && state.preset!=='none'){params.set('ra_preset', state.preset);}
     return params.toString();
+  }
+
+  function sortReplayAttentionCards(sortMode){
+    const container=cards.length>0?cards[0].parentElement:null;
+    if(!container||sortMode==='default'){return;}
+    const sortKey={
+      'level-first': (c)=>`${c.dataset.attentionLevel||'z'}|${c.dataset.caseId||''}`,
+      'case-id': (c)=>c.dataset.caseId||'',
+      'country': (c)=>`${c.dataset.countryId||''}|${c.dataset.caseId||''}`,
+      'tier': (c)=>`${c.dataset.replayTier||'z'}|${c.dataset.caseId||''}`,
+    }[sortMode];
+    if(!sortKey){return;}
+    const sorted=[...cards].sort((a,b)=>sortKey(a)<sortKey(b)?-1:sortKey(a)>sortKey(b)?1:0);
+    sorted.forEach((c)=>container.appendChild(c));
+  }
+
+  function applyReplayAttentionPreset(presetName){
+    if(activePresetNode){activePresetNode.dataset.activePreset=presetName;}
+    if(presetName==='high-attention'){
+      if(levelFilter){levelFilter.value='high';}
+      if(verdictFilter){verdictFilter.value='all';}
+      if(tierFilter){tierFilter.value='all';}
+    } else if(presetName==='mismatches-only'){
+      if(verdictFilter){verdictFilter.value='replay_mismatch';}
+      if(levelFilter){levelFilter.value='all';}
+    } else if(presetName==='weak-evidence'){
+      if(tierFilter){tierFilter.value='weak';}
+      if(levelFilter){levelFilter.value='all';}
+    } else {
+      if(levelFilter){levelFilter.value='all';}
+      if(ownerFilter){ownerFilter.value='all';}
+      if(reasonFilter){reasonFilter.value='all';}
+      if(verdictFilter){verdictFilter.value='all';}
+      if(tierFilter){tierFilter.value='all';}
+      if(textFilter){textFilter.value='';}
+      if(sortSelect){sortSelect.value='default';}
+    }
+    applyReplayAttentionFilters();
   }
 
   function persistReplayAttentionStateToHash(state){
@@ -5328,12 +5374,16 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
     const verdict=params.get('ra_verdict');
     const tier=params.get('ra_tier');
     const text=params.get('ra_text');
+    const sort=params.get('ra_sort');
+    const preset=params.get('ra_preset');
     if(levelFilter && level){levelFilter.value=level;}
     if(ownerFilter && owner){ownerFilter.value=owner;}
     if(reasonFilter && reason){reasonFilter.value=reason;}
     if(verdictFilter && verdict){verdictFilter.value=verdict;}
     if(tierFilter && tier){tierFilter.value=tier;}
     if(textFilter && text!==null){textFilter.value=text;}
+    if(sortSelect && sort){sortSelect.value=sort;}
+    if(activePresetNode && preset){activePresetNode.dataset.activePreset=preset;}
   }
 
   function setReplayAttentionLinkStatus(message){
@@ -5415,6 +5465,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
       verdictBreakdownNode.textContent=breakdown || 'none';
     }
     applyReplayAttentionFocusState(state, matchingCards);
+    sortReplayAttentionCards(state.sort);
     if(persistHash){
       persistReplayAttentionStateToHash(state);
     }
@@ -5427,6 +5478,8 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
     if(verdictFilter){verdictFilter.value='all';}
     if(tierFilter){tierFilter.value='all';}
     if(textFilter){textFilter.value='';}
+    if(sortSelect){sortSelect.value='default';}
+    if(activePresetNode){activePresetNode.dataset.activePreset='none';}
     applyReplayAttentionFilters();
   }
 
@@ -5436,6 +5489,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
   if(verdictFilter){verdictFilter.addEventListener('change', applyReplayAttentionFilters);}
   if(tierFilter){tierFilter.addEventListener('change', applyReplayAttentionFilters);}
   if(textFilter){textFilter.addEventListener('input', applyReplayAttentionFilters);}
+  if(sortSelect){sortSelect.addEventListener('change', applyReplayAttentionFilters);}
   if(resetButton){resetButton.addEventListener('click', resetReplayAttentionFilters);}
   if(copyLinkButton){copyLinkButton.addEventListener('click', copyReplayAttentionFilterLink);}
   applyReplayAttentionStateFromHash();
@@ -5458,8 +5512,24 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         f"<select id='replay-attention-tier-filter'><option value='all'>All tiers</option>{attention_tier_options}</select>"
         "<label for='replay-attention-text-filter'>Search</label>"
         "<input id='replay-attention-text-filter' type='text' placeholder='country, case, action...'/>"
+        "<label for='replay-attention-sort'>Sort</label>"
+        "<select id='replay-attention-sort'>"
+        "<option value='default'>Default order</option>"
+        "<option value='level-first'>Level first</option>"
+        "<option value='case-id'>Case ID</option>"
+        "<option value='country'>Country</option>"
+        "<option value='tier'>Evidence tier</option>"
+        "</select>"
         "<button id='replay-attention-reset' type='button'>Reset</button>"
         "<button id='replay-attention-copy-link' type='button'>Copy Link</button>"
+        "</div>"
+        "<div style='display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;'>"
+        "<span style='font-size:11px;color:#6b7d99;align-self:center;'>Presets:</span>"
+        "<button type='button' onclick='applyReplayAttentionPreset(\"high-attention\")' id='replay-attention-preset-high' style='font-size:11px;padding:3px 8px;'>High attention only</button>"
+        "<button type='button' onclick='applyReplayAttentionPreset(\"mismatches-only\")' id='replay-attention-preset-mismatches' style='font-size:11px;padding:3px 8px;'>Mismatches only</button>"
+        "<button type='button' onclick='applyReplayAttentionPreset(\"weak-evidence\")' id='replay-attention-preset-weak' style='font-size:11px;padding:3px 8px;'>Weak evidence</button>"
+        "<button type='button' onclick='applyReplayAttentionPreset(\"none\")' id='replay-attention-preset-reset' style='font-size:11px;padding:3px 8px;color:#6b7d99;'>Clear preset</button>"
+        "<span id='replay-attention-active-preset' data-active-preset='none' style='display:none;'></span>"
         "</div>"
         "<p style='font-size:11px;color:#6b7d99;margin-bottom:10px;font-family:Space Grotesk,monospace;'>"
         "Visible attention cases: <strong id='replay-attention-visible-count'>0</strong> | "

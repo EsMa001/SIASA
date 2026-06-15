@@ -1543,6 +1543,23 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "id='attention-case-" in validation_html
     assert "hashPrefix='ra='" in validation_html
     assert "suggested_next_action" in validation_html or "Suggested action" in validation_html
+    # VAL-WP-005: sort + preset controls
+    assert "replay-attention-sort" in validation_html
+    assert "sortReplayAttentionCards" in validation_html
+    assert "applyReplayAttentionPreset" in validation_html
+    assert "replay-attention-preset-high" in validation_html
+    assert "replay-attention-preset-mismatches" in validation_html
+    assert "replay-attention-preset-weak" in validation_html
+    assert "replay-attention-preset-reset" in validation_html
+    assert "replay-attention-active-preset" in validation_html
+    assert "ra_sort" in validation_html
+    assert "ra_preset" in validation_html
+    assert "level-first" in validation_html
+    assert "High attention only" in validation_html
+    assert "Mismatches only" in validation_html
+    assert "Weak evidence" in validation_html
+    assert "data-case-id=" in validation_html
+    assert "data-country-id=" in validation_html
     assert "attention_level" in validation_html or "Attention" in validation_html  # was: "Attention Level"
     assert "owner_hint" in validation_html or "Follow-up" in validation_html  # was: "Follow-up Owner"
     assert "validation governance" in validation_html
