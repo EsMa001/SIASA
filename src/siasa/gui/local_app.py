@@ -5442,10 +5442,10 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
     visibleCards.forEach((card,idx)=>{
       const caseId=card.dataset.caseId||'?';
       const countryId=card.dataset.countryId||'?';
-      const level=card.dataset.level||'?';
-      const verdict=card.dataset.verdict||'?';
-      const tier=card.dataset.tier||'?';
-      const owner=card.dataset.owner||'?';
+      const level=card.dataset.attentionLevel||'?';
+      const verdict=card.dataset.reviewVerdict||'?';
+      const tier=card.dataset.replayTier||'?';
+      const owner=card.dataset.attentionOwner||'?';
       lines.push(`[${idx+1}] case=${caseId} | country=${countryId} | level=${level} | verdict=${verdict} | tier=${tier} | owner=${owner}`);
     });
     const summaryText=lines.join('\n');
