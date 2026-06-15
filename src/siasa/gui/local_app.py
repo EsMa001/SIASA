@@ -5419,6 +5419,47 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
     }
   }
 
+  function setSummaryStatus(message){
+    const summaryStatusNode=document.getElementById('replay-attention-summary-status');
+    if(summaryStatusNode){ summaryStatusNode.textContent=message; }
+  }
+
+  async function copyReplayAttentionVisibleSummary(){
+    const visibleCards=cards.filter((c)=>c.style.display!=='none');
+    const visibleCount=visibleCards.length;
+    const state=getReplayAttentionState();
+    const encoded=serializeReplayAttentionState(state);
+    const baseUrl=`${window.location.origin}${window.location.pathname}${window.location.search}`;
+    const shareUrl=encoded ? `${baseUrl}#${hashPrefix}${encoded}` : baseUrl;
+    const verdictBreakdownNode=document.getElementById('replay-attention-visible-verdict-breakdown');
+    const verdictText=verdictBreakdownNode ? verdictBreakdownNode.textContent : 'n/a';
+    const activeStateNode=document.getElementById('replay-attention-active-state');
+    const filterText=activeStateNode ? activeStateNode.textContent : 'default';
+    const lines=['=== Replay Attention Summary ==='];
+    lines.push(`visible_cases=${visibleCount} | filter=${filterText} | verdict_mix=${verdictText}`);
+    lines.push(`share_link=${shareUrl}`);
+    lines.push('');
+    visibleCards.forEach((card,idx)=>{
+      const caseId=card.dataset.caseId||'?';
+      const countryId=card.dataset.countryId||'?';
+      const level=card.dataset.level||'?';
+      const verdict=card.dataset.verdict||'?';
+      const tier=card.dataset.tier||'?';
+      const owner=card.dataset.owner||'?';
+      lines.push(`[${idx+1}] case=${caseId} | country=${countryId} | level=${level} | verdict=${verdict} | tier=${tier} | owner=${owner}`);
+    });
+    const summaryText=lines.join('\n');
+    try {
+      if(!navigator.clipboard||!navigator.clipboard.writeText){
+        throw new Error('clipboard API unavailable');
+      }
+      await navigator.clipboard.writeText(summaryText);
+      setSummaryStatus(`Summary copied (${visibleCount} cases).`);
+    } catch(error){
+      setSummaryStatus('Summary copy failed.');
+    }
+  }
+
   function applyReplayAttentionFocusState(state, matchingCards){
     const focusActive=hasReplayAttentionFocus(state);
     cards.forEach((card)=>card.classList.remove('replay-attention-focus-active'));
@@ -5533,6 +5574,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         "</select>"
         "<button id='replay-attention-reset' type='button'>Reset</button>"
         "<button id='replay-attention-copy-link' type='button'>Copy Link</button>"
+        "<button id='replay-attention-copy-summary' type='button' onclick='copyReplayAttentionVisibleSummary()'>Copy Summary</button>"
         "</div>"
         "<div style='display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;'>"
         "<span style='font-size:11px;color:#6b7d99;align-self:center;'>Presets:</span>"
@@ -5547,7 +5589,8 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         "Focus targets: <strong id='replay-attention-focus-target-count'>0</strong> | "
         "<span id='replay-attention-active-state'>Active: default</span> | "
         "Visible verdict mix: <span id='replay-attention-visible-verdict-breakdown'>none</span> | "
-        "Link status: <span id='replay-attention-link-status'>ready</span>"
+        "Link status: <span id='replay-attention-link-status'>ready</span> | "
+        "Summary: <span id='replay-attention-summary-status'>ready</span>"
         "</p>"
         f"{attention_cards}"
         f"{attention_filter_script}"

@@ -1517,6 +1517,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "replay-attention-text-filter" in validation_html
     assert "replay-attention-reset" in validation_html
     assert "replay-attention-copy-link" in validation_html
+    assert "replay-attention-copy-summary" in validation_html
+    assert "replay-attention-summary-status" in validation_html
+    assert "copyReplayAttentionVisibleSummary" in validation_html
     assert "replay-attention-visible-count" in validation_html
     assert "replay-attention-focus-target-count" in validation_html
     assert "replay-attention-active-state" in validation_html
