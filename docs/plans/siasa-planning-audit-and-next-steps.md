@@ -1,6 +1,8 @@
 # SIASA Planning Audit and Next Steps
 
 > Steering note: this document is now a supporting planning-hygiene artifact. `docs/plans/siasa-master-steering-document.md` is the single steering document.
+>
+> Status note: keep this file as a historical consolidation/reference layer. It remains useful for explaining plan-generation overlap, but its own recommended serial sequence must not override the newer master steering document.
 
 Created: 2026-06-04
 Purpose: Consolidate the current status of all planning documents, identify which plans are still active versus historical, and define the next serial program sequence for the remaining open stakeholder-fulfillment gaps.
@@ -47,16 +49,20 @@ Current limitation:
 - The document still contains older phase descriptions in section 4 that are now historical rather than executable next-step truth.
 
 #### C) `docs/plans/siasa-planning-audit-and-next-steps.md`
-Status: ACTIVE / NEW CONSOLIDATION LAYER
+Status: SUPPORTING / HISTORICAL PLANNING-HYGIENE REFERENCE
 
 Why it exists:
-- The repo now has multiple generations of plans.
-- A consolidation layer is needed so future work does not accidentally follow obsolete “next recommendation” sections.
+- The repo accumulated multiple generations of plans.
+- A consolidation layer was needed so future work would not accidentally follow obsolete “next recommendation” sections.
 
-How it should be used:
+How it should be used now:
 - planning-document hygiene
 - deciding which plan is authoritative for which purpose
-- defining the next serial execution sequence from the current baseline
+- explaining why older plan generations are no longer steering-authoritative
+
+Current limitation:
+- its own recommended serial sequence reflects an earlier post-audit baseline and is now superseded by the newer `siasa-master-steering-document.md`
+- keep it as reference context, not as the live next-step source
 
 #### D) `docs/plans/siasa-next-big-packages-executive-view.md`
 Status: ACTIVE / PROJECT-LEAD COMMUNICATION LAYER

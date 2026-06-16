@@ -14,7 +14,13 @@ Tech stack: Python 3.11+, pytest, static HTML GUI generator, governed YAML V-mod
 
 ---
 
-## 1. Current state matrix: what exists vs what is still missing
+## 1. Historical transition-state matrix: what existed vs what was still missing at the roadmap pivot
+
+Important interpretation:
+- this section is intentionally retained as a historical transition snapshot from the period before the later G1/G2/G3/G4 closure waves and the newer validation/analyst-depth packages
+- it must not be used as current repo truth for next-step selection or capability status
+- for current operational truth use `docs/plans/siasa-project-lead-capability-matrix.md`
+- for current next-step steering use `docs/plans/siasa-master-steering-document.md`
 
 For project-lead steering, use `docs/plans/siasa-project-lead-capability-matrix.md` as the operational companion to this roadmap. The roadmap stays strategic; the capability matrix tracks what is Done / Partial / Weak / Missing with evidence and work-package linkage.
 
