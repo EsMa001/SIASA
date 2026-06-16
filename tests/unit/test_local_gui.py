@@ -1520,6 +1520,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "replay-attention-copy-summary" in validation_html
     assert "replay-attention-summary-status" in validation_html
     assert "copyReplayAttentionVisibleSummary" in validation_html
+    assert "clearReplayAttentionCopyStatuses" in validation_html
+    assert "setReplayAttentionLinkStatus('ready');" in validation_html
+    assert "setSummaryStatus('ready');" in validation_html
+    assert "clearReplayAttentionCopyStatuses();" in validation_html
     assert "replay-attention-visible-count" in validation_html
     assert "replay-attention-focus-target-count" in validation_html
     assert "replay-attention-active-state" in validation_html

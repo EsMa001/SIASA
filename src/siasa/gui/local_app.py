@@ -5424,6 +5424,11 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
     if(summaryStatusNode){ summaryStatusNode.textContent=message; }
   }
 
+  function clearReplayAttentionCopyStatuses(){
+    setReplayAttentionLinkStatus('ready');
+    setSummaryStatus('ready');
+  }
+
   async function copyReplayAttentionVisibleSummary(){
     const visibleCards=cards.filter((c)=>c.style.display!=='none');
     const visibleCount=visibleCards.length;
@@ -5478,6 +5483,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
   function applyReplayAttentionFilters(options){
     const settings=options||{};
     const persistHash=settings.persistHash!==false;
+    clearReplayAttentionCopyStatuses();
     const state=getReplayAttentionState();
     const level=state.level;
     const owner=state.owner;
