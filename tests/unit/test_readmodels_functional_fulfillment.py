@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from siasa.readmodels.functional_fulfillment import (
     estimate_functional_fulfillment_from_statuses,
     extract_capability_statuses_from_matrix_markdown,
@@ -37,3 +39,22 @@ def test_estimate_functional_fulfillment_rejects_unknown_status() -> None:
         assert "Unsupported capability statuses" in str(exc)
     else:
         raise AssertionError("Expected unsupported status to raise ValueError")
+
+
+def test_capability_matrix_steering_view_does_not_overclaim_replay_attention_follow_ons() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    matrix_markdown = (repo_root / "docs/plans/siasa-project-lead-capability-matrix.md").read_text(encoding="utf-8")
+    master_markdown = (repo_root / "docs/plans/siasa-master-steering-document.md").read_text(encoding="utf-8")
+
+    assert "### N1-WP-055" in master_markdown
+    assert "VAL-WP-012 replay-attention visible-slice CSV export" in matrix_markdown
+
+    stale_overclaims = [
+        "P1 validation interpretation extension: replay-attention export naming metadata",
+        "P1 validation interpretation extension: replay-attention copy-to-clipboard CSV",
+        "P1 validation interpretation extension: replay-attention visible severity breakdown",
+        "P1 validation interpretation extension: enriched replay-attention CSV export with handoff evidence fields",
+        "P1 validation interpretation extension: replay-attention advanced triage presets for weak-evidence and mismatch slices",
+    ]
+    for claim in stale_overclaims:
+        assert claim not in matrix_markdown
