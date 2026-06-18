@@ -5263,10 +5263,12 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
   const textFilter=document.getElementById('replay-attention-text-filter');
   const resetButton=document.getElementById('replay-attention-reset');
   const copyLinkButton=document.getElementById('replay-attention-copy-link');
+  const exportJsonButton=document.getElementById('replay-attention-export-json');
   const visibleCountNode=document.getElementById('replay-attention-visible-count');
   const focusTargetCountNode=document.getElementById('replay-attention-focus-target-count');
   const activeStateNode=document.getElementById('replay-attention-active-state');
   const verdictBreakdownNode=document.getElementById('replay-attention-visible-verdict-breakdown');
+  const visiblePayloadNode=document.getElementById('replay-attention-visible-payload');
   const linkStatusNode=document.getElementById('replay-attention-link-status');
   const attentionPanelNode=document.getElementById('replay-attention-panel');
   const sortSelect=document.getElementById('replay-attention-sort');
@@ -5424,13 +5426,70 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
     if(summaryStatusNode){ summaryStatusNode.textContent=message; }
   }
 
+  function getReplayAttentionVisibleCards(){
+    if(cards.length===0){
+      return [];
+    }
+    const container=cards[0].parentElement;
+    if(!container){
+      return cards.filter((c)=>c.style.display!=='none');
+    }
+    return Array.from(container.querySelectorAll('.replay-attention-card')).filter((c)=>c.style.display!=='none');
+  }
+
+  function buildReplayAttentionVisiblePayload(visibleCards){
+    const attentionLevelCounts={};
+    const verdictCounts={};
+    const countrySet=new Set();
+    const rows=visibleCards.map((card)=>{
+      const level=card.dataset.attentionLevel||'n/a';
+      const verdict=card.dataset.reviewVerdict||'n/a';
+      const countryId=card.dataset.countryId||'n/a';
+      attentionLevelCounts[level]=(attentionLevelCounts[level]||0)+1;
+      verdictCounts[verdict]=(verdictCounts[verdict]||0)+1;
+      countrySet.add(countryId);
+      return {
+        case_id: card.dataset.caseId||'n/a',
+        country_id: countryId,
+        attention_level: level,
+        review_verdict: verdict,
+        replay_tier: card.dataset.replayTier||'n/a',
+        attention_owner: card.dataset.attentionOwner||'n/a',
+        attention_reason: card.dataset.attentionReason||'n/a',
+      };
+    });
+    return {
+      visible_cases: visibleCards.length,
+      case_ids: rows.map((row)=>row.case_id),
+      countries: Array.from(countrySet).sort(),
+      attention_level_counts: Object.fromEntries(Object.entries(attentionLevelCounts).sort((a,b)=>a[0].localeCompare(b[0]))),
+      verdict_counts: Object.fromEntries(Object.entries(verdictCounts).sort((a,b)=>a[0].localeCompare(b[0]))),
+      rows,
+    };
+  }
+
+  async function exportReplayAttentionVisiblePayload(){
+    const visibleCards=getReplayAttentionVisibleCards();
+    const payload=buildReplayAttentionVisiblePayload(visibleCards);
+    const blob=new Blob([JSON.stringify(payload, null, 2)], {type:'application/json;charset=utf-8'});
+    const downloadUrl=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=downloadUrl;
+    link.download='replay_attention_visible_slice.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(downloadUrl);
+    setSummaryStatus(`Visible JSON exported (${visibleCards.length} cases).`);
+  }
+
   function clearReplayAttentionCopyStatuses(){
     setReplayAttentionLinkStatus('ready');
     setSummaryStatus('ready');
   }
 
   async function copyReplayAttentionVisibleSummary(){
-    const visibleCards=cards.filter((c)=>c.style.display!=='none');
+    const visibleCards=getReplayAttentionVisibleCards();
     const visibleCount=visibleCards.length;
     const state=getReplayAttentionState();
     const encoded=serializeReplayAttentionState(state);
@@ -5524,6 +5583,10 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
     }
     applyReplayAttentionFocusState(state, matchingCards);
     sortReplayAttentionCards(state.sort);
+    if(visiblePayloadNode){
+      const payload=buildReplayAttentionVisiblePayload(getReplayAttentionVisibleCards());
+      visiblePayloadNode.textContent=JSON.stringify(payload, null, 2);
+    }
     if(persistHash){
       persistReplayAttentionStateToHash(state);
     }
@@ -5550,6 +5613,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
   if(sortSelect){sortSelect.addEventListener('change', applyReplayAttentionFilters);}
   if(resetButton){resetButton.addEventListener('click', resetReplayAttentionFilters);}
   if(copyLinkButton){copyLinkButton.addEventListener('click', copyReplayAttentionFilterLink);}
+  if(exportJsonButton){exportJsonButton.addEventListener('click', exportReplayAttentionVisiblePayload);}
   applyReplayAttentionStateFromHash();
   applyReplayAttentionFilters({persistHash:false});
 })();
@@ -5581,6 +5645,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         "<button id='replay-attention-reset' type='button'>Reset</button>"
         "<button id='replay-attention-copy-link' type='button'>Copy Link</button>"
         "<button id='replay-attention-copy-summary' type='button' onclick='copyReplayAttentionVisibleSummary()'>Copy Summary</button>"
+        "<button id='replay-attention-export-json' type='button'>Export visible JSON</button>"
         "</div>"
         "<div style='display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;'>"
         "<span style='font-size:11px;color:#6b7d99;align-self:center;'>Presets:</span>"
@@ -5598,6 +5663,12 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         "Link status: <span id='replay-attention-link-status'>ready</span> | "
         "Summary: <span id='replay-attention-summary-status'>ready</span>"
         "</p>"
+        "<details style='margin-bottom:10px;'>"
+        "<summary>Visible slice payload</summary>"
+        "<pre id='replay-attention-visible-payload' style='white-space:pre-wrap;color:#8b9ab8;font-size:11px;'>"
+        "{\"visible_cases\":0,\"case_ids\":[],\"attention_level_counts\":{},\"verdict_counts\":{},\"countries\":[],\"rows\":[]}</pre>"
+        "<p style='font-size:11px;color:#6b7d99;margin-top:6px;'>Export filename: <code>replay_attention_visible_slice.json</code></p>"
+        "</details>"
         f"{attention_cards}"
         f"{attention_filter_script}"
         "</div>"
