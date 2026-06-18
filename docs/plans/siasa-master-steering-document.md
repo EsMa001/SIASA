@@ -164,11 +164,14 @@ Why last/default deferred:
 ### Default next work (post-G4 closure)
 With G1, G2 (repo-controlled), G3, and G4 all materially closed, the program frontier has shifted.
 
+Current default internal track:
+- validation realism depth / analyst handoff refinement on top of the now-closed replay-attention watchlist baseline
+
 The remaining substantive internal next-step candidates are:
 1. G4 follow-through hardening if live operational use reveals gaps (probe-driven, not speculative)
 2. Broader runtime/source breadth expansion if a new country cluster or source class becomes the priority
 3. G5 architecture decision only if multi-user deployment is now required by external steering
-4. Validation realism depth (broader non-perfect historical replay portfolios) if interpretation quality is the bottleneck
+4. Validation realism depth (broader non-perfect historical replay portfolios and stronger analyst handoff/export surfaces) if interpretation quality is the bottleneck
 
 Decision rule for next package selection:
 - If no external trigger (credentials, operating-model change, new country demand) exists, the next default internal package should be the one with the highest stakeholder-visible impact from the candidates above
@@ -853,6 +856,20 @@ Closure achieved:
 
 Steering note:
 G4 lifecycle record (WP-001) and transitions (WP-002) are now repo-closed. The operator can now run `scripts/lifecycle_transition.py approve --record-path ...` and the result is immediately visible in runs.html. Remaining G4 scope: optional notification/export hooks, wider CLI/workflow integration if needed, or closing G4 as materially complete and moving to the next program track.
+
+### N1-WP-054
+Name:
+Advance validation realism depth by adding machine-readable visible-slice export for the Replay Attention Watchlist so analysts can hand off the currently filtered attention set as deterministic JSON instead of only prose summary text.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now renders `replay-attention-export-json` and an inspection payload surface `replay-attention-visible-payload` in `validation.html`, extending the replay-attention controls beyond copy-link + copy-summary
+- Added `getReplayAttentionVisibleCards()`, `buildReplayAttentionVisiblePayload(...)`, and `exportReplayAttentionVisiblePayload()` so the current visible card slice is exported in DOM order to `replay_attention_visible_slice.json`
+- The payload now exposes deterministic top-level fields `visible_cases`, `case_ids`, `countries`, `attention_level_counts`, `verdict_counts`, and row-level entries containing `case_id`, `country_id`, `attention_level`, `review_verdict`, `replay_tier`, `attention_owner`, and `attention_reason`
+- `applyReplayAttentionFilters()` now refreshes the on-page payload preview from the currently visible slice after filtering/sorting, keeping export content causally aligned with what the analyst sees
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/gui/local_app.py tests/unit/test_local_gui.py` passed; targeted `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`1 passed in 2.63s`); focused regression `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_local_gui.py -q` passed (`21 passed in 107.46s`); full regression `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests -q` passed (`529 passed in 331.69s`)
+
+Steering note:
+This package confirms the current default internal track is validation realism depth / analyst handoff refinement rather than another repo-controlled G1/G2/G3/G4 closure slice. The next bounded default should stay in this validation-handoff family unless a new external trigger reprioritizes breadth, credentials, or operating model.
 
 ---
 
