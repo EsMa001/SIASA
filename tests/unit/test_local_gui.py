@@ -1519,11 +1519,14 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "replay-attention-copy-link" in validation_html
     assert "replay-attention-copy-summary" in validation_html
     assert "replay-attention-export-json" in validation_html
+    assert "replay-attention-export-csv" in validation_html
     assert "replay-attention-visible-payload" in validation_html
     assert "replay-attention-summary-status" in validation_html
     assert "copyReplayAttentionVisibleSummary" in validation_html
     assert "buildReplayAttentionVisiblePayload" in validation_html
     assert "exportReplayAttentionVisiblePayload" in validation_html
+    assert "buildReplayAttentionVisibleCsv" in validation_html
+    assert "exportReplayAttentionVisibleCsv" in validation_html
     assert "clearReplayAttentionCopyStatuses" in validation_html
     assert "setReplayAttentionLinkStatus('ready');" in validation_html
     assert "setSummaryStatus('ready');" in validation_html
@@ -1569,6 +1572,13 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "visible_cases" in validation_html
     assert "attention_level_counts" in validation_html
     assert "case_ids" in validation_html
+    assert "filter_state" in validation_html
+    assert "share_link" in validation_html
+    assert "active_state" in validation_html
+    assert "sort_mode" in validation_html
+    assert "active_preset" in validation_html
+    assert "replay_attention_visible_slice.csv" in validation_html
+    assert "text/csv;charset=utf-8" in validation_html
     assert "level-first" in validation_html
     assert "High attention only" in validation_html
     assert "Mismatches only" in validation_html

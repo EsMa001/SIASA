@@ -5264,6 +5264,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
   const resetButton=document.getElementById('replay-attention-reset');
   const copyLinkButton=document.getElementById('replay-attention-copy-link');
   const exportJsonButton=document.getElementById('replay-attention-export-json');
+  const exportCsvButton=document.getElementById('replay-attention-export-csv');
   const visibleCountNode=document.getElementById('replay-attention-visible-count');
   const focusTargetCountNode=document.getElementById('replay-attention-focus-target-count');
   const activeStateNode=document.getElementById('replay-attention-active-state');
@@ -5407,9 +5408,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
 
   async function copyReplayAttentionFilterLink(){
     const state=getReplayAttentionState();
-    const encoded=serializeReplayAttentionState(state);
-    const baseUrl=`${window.location.origin}${window.location.pathname}${window.location.search}`;
-    const shareUrl=encoded ? `${baseUrl}#${hashPrefix}${encoded}` : baseUrl;
+    const shareUrl=buildReplayAttentionShareUrl(state);
     try {
       if(!navigator.clipboard||!navigator.clipboard.writeText){
         throw new Error('clipboard API unavailable');
@@ -5437,7 +5436,14 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
     return Array.from(container.querySelectorAll('.replay-attention-card')).filter((c)=>c.style.display!=='none');
   }
 
+  function buildReplayAttentionShareUrl(state){
+    const encoded=serializeReplayAttentionState(state);
+    const baseUrl=`${window.location.origin}${window.location.pathname}${window.location.search}`;
+    return encoded ? `${baseUrl}#${hashPrefix}${encoded}` : baseUrl;
+  }
+
   function buildReplayAttentionVisiblePayload(visibleCards){
+    const state=getReplayAttentionState();
     const attentionLevelCounts={};
     const verdictCounts={};
     const countrySet=new Set();
@@ -5458,12 +5464,26 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         attention_reason: card.dataset.attentionReason||'n/a',
       };
     });
+    const sortedAttentionLevelCounts=Object.fromEntries(Object.entries(attentionLevelCounts).sort((a,b)=>a[0].localeCompare(b[0])));
+    const sortedVerdictCounts=Object.fromEntries(Object.entries(verdictCounts).sort((a,b)=>a[0].localeCompare(b[0])));
     return {
       visible_cases: visibleCards.length,
       case_ids: rows.map((row)=>row.case_id),
       countries: Array.from(countrySet).sort(),
-      attention_level_counts: Object.fromEntries(Object.entries(attentionLevelCounts).sort((a,b)=>a[0].localeCompare(b[0]))),
-      verdict_counts: Object.fromEntries(Object.entries(verdictCounts).sort((a,b)=>a[0].localeCompare(b[0]))),
+      attention_level_counts: sortedAttentionLevelCounts,
+      verdict_counts: sortedVerdictCounts,
+      active_state: activeStateNode ? (activeStateNode.textContent||'Active: default') : 'Active: default',
+      sort_mode: state.sort||'default',
+      active_preset: state.preset||'none',
+      share_link: buildReplayAttentionShareUrl(state),
+      filter_state: {
+        level: state.level||'all',
+        owner: state.owner||'all',
+        reason: state.reason||'all',
+        verdict: state.verdict||'all',
+        tier: state.tier||'all',
+        text: state.text||'',
+      },
       rows,
     };
   }
@@ -5483,6 +5503,37 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
     setSummaryStatus(`Visible JSON exported (${visibleCards.length} cases).`);
   }
 
+  function buildReplayAttentionVisibleCsv(visibleCards){
+    const header=['case_id','country_id','attention_level','review_verdict','replay_tier','attention_owner','attention_reason'];
+    const rows=visibleCards.map((card)=>[
+      card.dataset.caseId||'n/a',
+      card.dataset.countryId||'n/a',
+      card.dataset.attentionLevel||'n/a',
+      card.dataset.reviewVerdict||'n/a',
+      card.dataset.replayTier||'n/a',
+      card.dataset.attentionOwner||'n/a',
+      card.dataset.attentionReason||'n/a',
+    ]);
+    return [header, ...rows]
+      .map((row)=>row.map((value)=>`"${String(value).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+  }
+
+  async function exportReplayAttentionVisibleCsv(){
+    const visibleCards=getReplayAttentionVisibleCards();
+    const exportText=buildReplayAttentionVisibleCsv(visibleCards);
+    const blob=new Blob([exportText], {type:'text/csv;charset=utf-8'});
+    const downloadUrl=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=downloadUrl;
+    link.download='replay_attention_visible_slice.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(downloadUrl);
+    setSummaryStatus(`Visible CSV exported (${visibleCards.length} cases).`);
+  }
+
   function clearReplayAttentionCopyStatuses(){
     setReplayAttentionLinkStatus('ready');
     setSummaryStatus('ready');
@@ -5492,9 +5543,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
     const visibleCards=getReplayAttentionVisibleCards();
     const visibleCount=visibleCards.length;
     const state=getReplayAttentionState();
-    const encoded=serializeReplayAttentionState(state);
-    const baseUrl=`${window.location.origin}${window.location.pathname}${window.location.search}`;
-    const shareUrl=encoded ? `${baseUrl}#${hashPrefix}${encoded}` : baseUrl;
+    const shareUrl=buildReplayAttentionShareUrl(state);
     const verdictBreakdownNode=document.getElementById('replay-attention-visible-verdict-breakdown');
     const verdictText=verdictBreakdownNode ? verdictBreakdownNode.textContent : 'n/a';
     const activeStateNode=document.getElementById('replay-attention-active-state');
@@ -5614,6 +5663,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
   if(resetButton){resetButton.addEventListener('click', resetReplayAttentionFilters);}
   if(copyLinkButton){copyLinkButton.addEventListener('click', copyReplayAttentionFilterLink);}
   if(exportJsonButton){exportJsonButton.addEventListener('click', exportReplayAttentionVisiblePayload);}
+  if(exportCsvButton){exportCsvButton.addEventListener('click', exportReplayAttentionVisibleCsv);}
   applyReplayAttentionStateFromHash();
   applyReplayAttentionFilters({persistHash:false});
 })();
@@ -5646,6 +5696,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         "<button id='replay-attention-copy-link' type='button'>Copy Link</button>"
         "<button id='replay-attention-copy-summary' type='button' onclick='copyReplayAttentionVisibleSummary()'>Copy Summary</button>"
         "<button id='replay-attention-export-json' type='button'>Export visible JSON</button>"
+        "<button id='replay-attention-export-csv' type='button'>Export visible CSV</button>"
         "</div>"
         "<div style='display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;'>"
         "<span style='font-size:11px;color:#6b7d99;align-self:center;'>Presets:</span>"
