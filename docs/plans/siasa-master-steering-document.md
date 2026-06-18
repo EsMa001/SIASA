@@ -871,6 +871,20 @@ Closure achieved:
 Steering note:
 This package confirms the current default internal track is validation realism depth / analyst handoff refinement rather than another repo-controlled G1/G2/G3/G4 closure slice. The next bounded default should stay in this validation-handoff family unless a new external trigger reprioritizes breadth, credentials, or operating model.
 
+### N1-WP-055
+Name:
+Strengthen replay-attention analyst handoff by making the visible-slice JSON export state-carrying and by adding deterministic CSV export for the same currently visible card slice.
+
+Closure achieved:
+- `src/siasa/gui/local_app.py` now enriches `buildReplayAttentionVisiblePayload(...)` with `active_state`, `sort_mode`, `active_preset`, `share_link`, and a structured `filter_state` object so exported handoff payloads carry the exact active review posture, not only the visible rows
+- Added `buildReplayAttentionShareUrl(state)` so copy-link, copy-summary, and JSON export reuse one deterministic replay-attention state URL builder
+- Added `buildReplayAttentionVisibleCsv(...)` and `exportReplayAttentionVisibleCsv()`; `validation.html` now renders `replay-attention-export-csv`, and the current visible slice downloads as `replay_attention_visible_slice.csv` with MIME type `text/csv;charset=utf-8`
+- CSV rows stay aligned with the visible card order and carry deterministic fields `case_id`, `country_id`, `attention_level`, `review_verdict`, `replay_tier`, `attention_owner`, and `attention_reason`
+- validation evidence: `PYTHONPATH=src /opt/hermes/.venv/bin/python -m py_compile src/siasa/gui/local_app.py tests/unit/test_local_gui.py` passed; targeted `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_local_gui.py::test_build_local_mvp_site_creates_required_mvp_pages_and_exports -q` passed (`1 passed in 2.41s`); focused regression `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_local_gui.py -q` passed (`21 passed in 105.01s`); full regression `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests -q` passed (`529 passed in 335.90s`)
+
+Steering note:
+The replay-attention watchlist now supports both machine-readable JSON and spreadsheet-friendly CSV handoff while preserving the active analyst review context. The next bounded default should move from export surfaces toward stronger validation-to-action closure or deeper challenge-case realism, not another generic export-only slice.
+
 ---
 
 ## 7. Trigger for the next steering pivot
