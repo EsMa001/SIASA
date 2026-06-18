@@ -885,6 +885,19 @@ Closure achieved:
 Steering note:
 The replay-attention watchlist now supports both machine-readable JSON and spreadsheet-friendly CSV handoff while preserving the active analyst review context. The next bounded default should move from export surfaces toward stronger validation-to-action closure or deeper challenge-case realism, not another generic export-only slice.
 
+### N1-WP-056
+Name:
+Re-sync the capability-matrix steering ledger with the master-steering baseline after replay-attention export follow-ons so planning truth does not overclaim analyst-handoff features that the repo has not actually implemented.
+
+Closure achieved:
+- `docs/plans/siasa-project-lead-capability-matrix.md` no longer claims unsupported replay-attention follow-ons for filename-metadata export naming, clipboard CSV, visible severity breakdown, enriched handoff CSV columns, or weak-evidence/mismatch advanced presets
+- Added a regression guard in `tests/unit/test_readmodels_functional_fulfillment.py` that cross-checks the capability matrix against the current master-steering baseline through `N1-WP-055` / `VAL-WP-012`, preventing those stale replay-attention overclaims from silently reappearing
+- steering interpretation is now re-aligned: the evidence ledger truthfully stops at the implemented replay-attention baseline (JSON export, state-carrying payload, CSV export, validation-to-annotation handoff, and existing verdict/tier filters) instead of implying extra export-only closure that the repo does not yet provide
+- validation evidence: targeted `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_readmodels_functional_fulfillment.py::test_capability_matrix_steering_view_does_not_overclaim_replay_attention_follow_ons -q` passed; focused regression `PYTHONPATH=src /opt/hermes/.venv/bin/python -m pytest tests/unit/test_readmodels_functional_fulfillment.py -q` passed
+
+Steering note:
+This was a planning-governance hygiene tranche, not a new product-surface expansion. With steering truth repaired, the next bounded default should return to the active internal track: validation-to-action refinement or deeper challenge-case realism.
+
 ---
 
 ## 7. Trigger for the next steering pivot
