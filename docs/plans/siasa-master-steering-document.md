@@ -944,6 +944,23 @@ This closes the next analyst-execution-context gap after N1-WP-058: management/r
 
 ---
 
+### N1-WP-060
+Name:
+Harden the fallback-built reviewer/demo walkthrough so guided review steps preserve exact contextual Validation/Coverage navigation even when no prebuilt analyst-briefing view model is available.
+
+Closure achieved:
+- Updated fallback item reconstruction in `src/siasa/readmodels/release_demo_package.py` so `country_gap`, `validation_attention`, `traceability_risk`, `operability_cluster`, and `stale_priority` items emit contextual `target_href`s instead of generic page references
+- Added `validation_focus_href` synthesis from the active validation view model so guided review step `C3-04` keeps a focused replay-attention/validation landing target even when the historical replay attention watchlist is absent
+- Confirmed exported `release_demo_package.json` now carries the focused fallback-path reviewer sequence, including `validation.html#ra=...` for the validation posture step
+- Added RED/GREEN coverage in `tests/unit/test_local_gui.py` for fallback-path `review_sequence` and exported package href persistence; targeted regression passed (`2 passed in 2.43s`); focused GUI regression passed (`23 passed in 100.65s`); full regression `534 passed in 332.78s`
+- GUI evidence is visible in `build/local_gui/_val_wp016_reviewer_flow_context/release_demo_package.json`
+- Commit: `commit pending`
+
+Steering note:
+This closes the remaining fallback-path reviewer-execution-context gap after N1-WP-059: reviewer/demo walkthroughs now preserve exact navigation focus even when assembled from the leaner fallback evidence path.
+
+---
+
 ## 7. Trigger for the next steering pivot
 
 Stay on the current steering path until one of these becomes true:

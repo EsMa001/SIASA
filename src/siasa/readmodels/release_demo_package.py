@@ -3,6 +3,7 @@ from __future__ import annotations
 import html
 from datetime import UTC, datetime
 from typing import Any
+from urllib.parse import quote_plus
 
 
 def _as_dict_list(value: Any) -> list[dict[str, Any]]:
@@ -45,6 +46,49 @@ def _render_nav_link(*, href: str | None, label: str, css_class: str, available_
     if not _is_safe_internal_navigation_href(href) or page_name not in available_pages:
         return html.escape(label)
     return f"<a class='{css_class}' href='{html.escape(href)}'>{html.escape(label)}</a>"
+
+
+
+def _coverage_prefill_href(*, country_id: str, focus_section: str, missing_domains: list[str] | None = None) -> str:
+    query_parts = [
+        f"focus_country={quote_plus(country_id)}",
+        f"focus_section={quote_plus(focus_section)}",
+    ]
+    if missing_domains:
+        query_parts.append(f"missing_domains={quote_plus(','.join(str(item) for item in missing_domains if str(item)))}")
+    anchor_target = 'stale-priority' if focus_section == 'stale_priority' else 'country-gap'
+    return f"coverage.html?{'&'.join(query_parts)}#{anchor_target}-{country_id}"
+
+
+
+def _validation_prefill_href(*, country_id: str, case_id: str, attention_reason: str) -> str:
+    hash_parts = [
+        f"ra_reason={quote_plus(attention_reason)}",
+        f"ra_text={quote_plus(f'{country_id} {case_id}')}",
+    ]
+    return f"validation.html#ra={'&'.join(hash_parts)}"
+
+
+
+def _annotation_prefill_href(*, attention_case: dict[str, Any]) -> str:
+    query_parts = [
+        "scope=country",
+        "annotation_type=review_note",
+        f"country_id={quote_plus(str(attention_case.get('country_id', '')))}",
+        f"case_id={quote_plus(str(attention_case.get('case_id', '')))}",
+        f"attention_reason={quote_plus(str(attention_case.get('attention_reason', '')))}",
+        f"owner_hint={quote_plus(str(attention_case.get('owner_hint', '')))}",
+        f"suggested_next_action={quote_plus(str(attention_case.get('suggested_next_action', '')))}",
+        f"attention_level={quote_plus(str(attention_case.get('attention_level', '')))}",
+        f"replay_evidence_tier={quote_plus(str(attention_case.get('replay_evidence_tier', '')))}",
+        f"review_verdict={quote_plus(str(attention_case.get('review_verdict', '')))}",
+        f"replay_evidence_score={quote_plus(str(attention_case.get('replay_evidence_score', '')))}",
+        f"domain_match_ratio={quote_plus(str(attention_case.get('domain_match_ratio', '')))}",
+        f"missing_expected_domains={quote_plus(','.join(str(domain) for domain in attention_case.get('missing_expected_domains', [])))}",
+        f"unexpected_observed_domains={quote_plus(','.join(str(domain) for domain in attention_case.get('unexpected_observed_domains', [])))}",
+        f"linked_item={quote_plus(str(attention_case.get('case_id', '')))}",
+    ]
+    return f"annotations.html?{'&'.join(query_parts)}"
 
 
 
@@ -101,18 +145,22 @@ def build_release_demo_package_view_model(
                     ),
                     'evidence_source': 'release_evidence_assessment.json',
                     'target_page': 'readiness.html',
+                    'target_href': 'readiness.html',
                 }
             )
         if country_gap_rows:
             top_gap = country_gap_rows[0]
+            gap_country = str(top_gap.get('country_id', 'UNKNOWN'))
+            missing_domains = [str(domain) for domain in top_gap.get('missing_domains', []) if str(domain)]
             source_items.append(
                 {
                     'category': 'country_gap',
-                    'title': f"Country gap: {top_gap.get('country_id', 'UNKNOWN')} missing {', '.join(str(domain) for domain in top_gap.get('missing_domains', [])) or 'unknown domains'}",
-                    'why_it_matters': f"Country coverage is incomplete for {top_gap.get('country_id', 'UNKNOWN')}.",
+                    'title': f"Country gap: {gap_country} missing {', '.join(missing_domains) or 'unknown domains'}",
+                    'why_it_matters': f"Country coverage is incomplete for {gap_country}.",
                     'recommended_next_check': 'Inspect coverage.html and the country/domain gap details.',
                     'evidence_source': 'system_status.json country_coverage_visibility.country_gap_rows',
                     'target_page': 'coverage.html',
+                    'target_href': _coverage_prefill_href(country_id=gap_country, focus_section='country_gap', missing_domains=missing_domains),
                 }
             )
         validation_summary = validation_view_model.get('historical_replay_summary', {}) if isinstance(validation_view_model, dict) else {}
@@ -127,6 +175,13 @@ def build_release_demo_package_view_model(
                     'recommended_next_check': str(top_case.get('suggested_next_action', 'Review validation evidence.')),
                     'evidence_source': 'validation_backtest.json historical_replay_summary.attention_cases',
                     'target_page': 'validation.html',
+                    'target_href': _validation_prefill_href(
+                        country_id=str(top_case.get('country_id', 'unknown')),
+                        case_id=str(top_case.get('case_id', 'unknown')),
+                        attention_reason=str(top_case.get('attention_reason', 'validation_attention')),
+                    ),
+                    'action_label': 'Create Annotation Draft',
+                    'action_href': _annotation_prefill_href(attention_case=top_case),
                 }
             )
         traceability_missing_mappings = int(traceability_summary.get('missing_requirement_mapping_count', 0) or 0)
@@ -154,6 +209,7 @@ def build_release_demo_package_view_model(
                     'recommended_next_check': 'Inspect traceability.html and repo closure slice details.',
                     'evidence_source': 'traceability_lineage.json + repo_closure.json',
                     'target_page': 'traceability.html',
+                    'target_href': 'traceability.html',
                 }
             )
         operator_operability_status = str(operator_operability_cluster_view_model.get('cluster_status', 'unknown')).lower()
@@ -167,18 +223,21 @@ def build_release_demo_package_view_model(
                     'recommended_next_check': str(operator_operability_cluster_view_model.get('operator_next_action') or 'Review readiness and operability cluster details.'),
                     'evidence_source': 'release_evidence_assessment.json operator_operability_cluster',
                     'target_page': 'readiness.html',
+                    'target_href': 'readiness.html',
                 }
             )
         if stale_priority_watchlist:
             top_stale = stale_priority_watchlist[0]
+            stale_country = str(top_stale.get('country_id', 'UNKNOWN'))
             source_items.append(
                 {
                     'category': 'stale_priority',
-                    'title': f"Stale priority: {top_stale.get('country_id', 'UNKNOWN')}",
+                    'title': f"Stale priority: {stale_country}",
                     'why_it_matters': f"Priority {top_stale.get('priority', 'n/a')} country has {top_stale.get('freshness_hours', 'n/a')} stale hours.",
                     'recommended_next_check': 'Inspect stale coverage priority queue and remediation watchlist.',
                     'evidence_source': 'system_status.json country_coverage_visibility.stale_priority_watchlist',
                     'target_page': 'coverage.html',
+                    'target_href': _coverage_prefill_href(country_id=stale_country, focus_section='stale_priority'),
                 }
             )
         if operator_stale_remediation_action_plan_view_model:
@@ -210,6 +269,24 @@ def build_release_demo_package_view_model(
         ]
     for rank, item in enumerate(source_items, start=1):
         item['rank'] = rank
+
+    def _first_source_item_for(*categories: str) -> dict[str, Any]:
+        return next(
+            (item for item in source_items if str(item.get('category', '')) in categories),
+            {},
+        )
+
+    top_coverage_item = _first_source_item_for('country_gap', 'stale_priority')
+    top_validation_item = _first_source_item_for('validation_attention')
+    top_traceability_item = _first_source_item_for('traceability_risk')
+    top_validation_case = next(
+        (
+            item
+            for item in _as_dict_list((validation_view_model.get('historical_replay_summary', {}) or {}).get('attention_cases', []))
+            if isinstance(item, dict)
+        ),
+        {},
+    )
 
     priority_rows = ''.join(
         '<tr>'
@@ -247,6 +324,28 @@ def build_release_demo_package_view_model(
         ('Source pages', ', '.join(sorted(page for page in {item.get('target_page', '') for item in source_items} if page))),
         ('Available pages', str(len(available_pages))),
     ]
+    validation_focus_href = str(
+        top_validation_item.get('target_href')
+        or (
+            _validation_prefill_href(
+                country_id=str(top_validation_case.get('country_id', 'unknown')),
+                case_id=str(top_validation_case.get('case_id', 'unknown')),
+                attention_reason=str(top_validation_case.get('attention_reason') or top_validation_case.get('reason') or 'validation_attention'),
+            )
+            if top_validation_case
+            else ''
+        )
+        or (
+            _validation_prefill_href(
+                country_id=str(validation_view_model.get('country_id', 'unknown')),
+                case_id=str(validation_view_model.get('case_id', 'unknown')),
+                attention_reason='validation_attention',
+            )
+            if validation_view_model.get('case_id')
+            else ''
+        )
+        or 'validation.html'
+    )
     review_sequence = [
         {
             'step_id': 'C3-01',
@@ -273,35 +372,35 @@ def build_release_demo_package_view_model(
         {
             'step_id': 'C3-03',
             'phase': 'Coverage posture',
-            'page_label': _page_label('coverage.html'),
-            'page_name': 'coverage.html',
+            'page_label': _page_label(_safe_navigation_page_name(str(top_coverage_item.get('target_href') or 'coverage.html'))),
+            'page_name': _safe_navigation_page_name(str(top_coverage_item.get('target_href') or 'coverage.html')),
             'objective': 'Check whether geographic/source coverage gaps undermine stakeholder confidence.',
             'reviewer_question': 'Do coverage gaps or stale-priority queues change the interpretation of the current package?',
             'expected_signal': 'country gaps and stale-priority cues are explicit and bounded',
-            'available': 'coverage.html' in available_pages,
-            'href': 'coverage.html' if 'coverage.html' in available_pages else '',
+            'available': _safe_navigation_page_name(str(top_coverage_item.get('target_href') or 'coverage.html')) in available_pages,
+            'href': str(top_coverage_item.get('target_href') or 'coverage.html') if _safe_navigation_page_name(str(top_coverage_item.get('target_href') or 'coverage.html')) in available_pages else '',
         },
         {
             'step_id': 'C3-04',
             'phase': 'Validation posture',
-            'page_label': _page_label('validation.html'),
-            'page_name': 'validation.html',
+            'page_label': _page_label(_safe_navigation_page_name(validation_focus_href)),
+            'page_name': _safe_navigation_page_name(validation_focus_href),
             'objective': 'Verify whether replay-attention evidence supports or weakens the current storyline.',
             'reviewer_question': 'Which replay-attention slice most directly challenges the current package conclusion?',
             'expected_signal': 'attention cases, verdict mix, and replay evidence tier stay visible',
-            'available': 'validation.html' in available_pages,
-            'href': 'validation.html' if 'validation.html' in available_pages else '',
+            'available': _safe_navigation_page_name(validation_focus_href) in available_pages,
+            'href': validation_focus_href if _safe_navigation_page_name(validation_focus_href) in available_pages else '',
         },
         {
             'step_id': 'C3-05',
             'phase': 'Traceability posture',
-            'page_label': _page_label('traceability.html'),
-            'page_name': 'traceability.html',
+            'page_label': _page_label(_safe_navigation_page_name(str(top_traceability_item.get('target_href') or 'traceability.html'))),
+            'page_name': _safe_navigation_page_name(str(top_traceability_item.get('target_href') or 'traceability.html')),
             'objective': 'Confirm that the stakeholder narrative is still anchored in traceable governed evidence.',
             'reviewer_question': 'Are there traceability or closure-at-risk signals that would block sign-off?',
             'expected_signal': 'lineage, repo closure, and mapping-health evidence are reviewable',
-            'available': 'traceability.html' in available_pages,
-            'href': 'traceability.html' if 'traceability.html' in available_pages else '',
+            'available': _safe_navigation_page_name(str(top_traceability_item.get('target_href') or 'traceability.html')) in available_pages,
+            'href': str(top_traceability_item.get('target_href') or 'traceability.html') if _safe_navigation_page_name(str(top_traceability_item.get('target_href') or 'traceability.html')) in available_pages else '',
         },
         {
             'step_id': 'C3-06',
@@ -338,6 +437,7 @@ def build_release_demo_package_view_model(
         '</tr>'
         for label, value in evidence_items
     )
+
     package_status = 'ready' if release_green and not any(item.get('category') == 'release_blocker' for item in source_items) else ('attention' if source_items else 'ready')
     if any(item.get('category') == 'release_blocker' for item in source_items) or not release_green:
         package_status = 'blocked'
@@ -397,6 +497,7 @@ def build_release_demo_package_view_model(
         'start_here': {
             'page_name': review_sequence[0].get('page_name', 'readiness.html'),
             'page_label': review_sequence[0].get('page_label', _page_label('readiness.html')),
+            'href': review_sequence[0].get('href', 'readiness.html'),
             'reason': 'Confirm gate posture before sharing the rest of the package externally.',
         },
         'external_share_summary': {
@@ -630,7 +731,7 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         '<tr>'
         f"<td>{html.escape(str(item.get('step_id', '')))}</td>"
         f"<td>{html.escape(str(item.get('phase', '')))}</td>"
-        f"<td>{html.escape(str(item.get('page_label', '')))}</td>"
+        f"<td>{_render_nav_link(href=item.get('href') or item.get('page_name'), label=str(item.get('page_label', '')), css_class='analyst-briefing-target-link', available_pages=available_pages)}</td>"
         f"<td>{html.escape(str(item.get('objective', '')))}</td>"
         f"<td>{html.escape(str(item.get('reviewer_question', '')))}</td>"
         f"<td>{html.escape(str(item.get('expected_signal', '')))}</td>"
@@ -669,6 +770,7 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     cover_sheet_start_here = dict(stakeholder_cover_sheet.get('start_here', {})) if isinstance(stakeholder_cover_sheet.get('start_here'), dict) else {}
     cover_sheet_start_here_label = html.escape(str(cover_sheet_start_here.get('page_label', 'n/a')))
     cover_sheet_start_here_page = html.escape(str(cover_sheet_start_here.get('page_name', 'n/a')))
+    cover_sheet_start_here_href = str(cover_sheet_start_here.get('href') or cover_sheet_start_here.get('page_name') or '').strip()
     cover_sheet_start_here_reason = html.escape(str(cover_sheet_start_here.get('reason', 'n/a')))
     external_share_summary = dict(stakeholder_cover_sheet.get('external_share_summary', {})) if isinstance(stakeholder_cover_sheet.get('external_share_summary'), dict) else {}
     external_share_summary_html = ''.join(
@@ -830,7 +932,7 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<p><strong>Audience</strong>: {cover_sheet_audience}</p>"
         f"<p><strong>Requested decision</strong>: {cover_sheet_requested_decision}</p>"
         f"<div><strong>Top 3 caveats</strong><ul>{cover_sheet_top_caveats}</ul></div>"
-        f"<p><strong>Start here</strong>: {cover_sheet_start_here_label} ({cover_sheet_start_here_page})</p>"
+        f"<p><strong>Start here</strong>: {_render_nav_link(href=cover_sheet_start_here_href, label=str(cover_sheet_start_here.get('page_label', 'n/a')), css_class='analyst-briefing-target-link', available_pages=available_pages)} ({cover_sheet_start_here_page})</p>"
         f"<p>{cover_sheet_start_here_reason}</p>"
         f"<div><strong>External-share summary</strong><ul>{external_share_summary_html}</ul></div>"
         "</section>"

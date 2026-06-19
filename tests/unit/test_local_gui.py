@@ -1699,6 +1699,10 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert release_demo_package_json["primary_item_action_href"] is None
     assert "target_href" in release_demo_package_json["priority_items"][0]
     assert release_demo_package_json["priority_items"][0]["target_href"] == "coverage.html?focus_country=UKR&focus_section=country_gap&missing_domains=D#country-gap-UKR"
+    assert release_demo_package_json["review_sequence"][1]["href"] == "coverage.html?focus_country=UKR&focus_section=country_gap&missing_domains=D#country-gap-UKR"
+    assert release_demo_package_json["review_sequence"][1]["page_name"] == "coverage.html"
+    assert release_demo_package_json["review_sequence"][3]["href"].startswith("validation.html#ra=")
+    assert release_demo_package_json["stakeholder_cover_sheet"]["start_here"]["href"] == "readiness.html"
     assert "Prioritized items" in (pages.output_dir / "release_package.html").read_text()
     assert "Demo sequence" in (pages.output_dir / "release_package.html").read_text()
     assert "Guided review sequence" in (pages.output_dir / "release_package.html").read_text()
@@ -1757,6 +1761,9 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "blocked" in (pages.output_dir / "release_package.html").read_text()
     assert "Resolve the blocking package issue before any external distribution." in (pages.output_dir / "release_package.html").read_text()
     assert "href='traceability.html'" in (pages.output_dir / "release_package.html").read_text()
+    assert "coverage.html?focus_country=UKR&amp;focus_section=country_gap&amp;missing_domains=D#country-gap-UKR" in (pages.output_dir / "release_package.html").read_text()
+    assert "validation.html#ra=" in (pages.output_dir / "release_package.html").read_text()
+    assert "href='readiness.html'" in (pages.output_dir / "release_package.html").read_text()
     assert "analyst-briefing-target-link" in (pages.output_dir / "release_package.html").read_text()
     assert "Evidence bundle" in (pages.output_dir / "release_package.html").read_text()
     # G4: Approval lifecycle panel assertions
