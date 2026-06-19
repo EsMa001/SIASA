@@ -2,7 +2,7 @@
 
 > Steering note: `docs/plans/siasa-master-steering-document.md` is now the single steering document. This roadmap remains a strategic reference, but next-step selection should be taken from the master steering document.
 >
-> Project-lead communication shortcut: `docs/plans/siasa-next-big-packages-executive-view.md` provides a one-page summary of the next large package families (now G4/G2-trigger/G5, with repo-controlled G1 breadth closure and G3 evidence-lane closure completed) and their recommended order.
+> Project-lead communication shortcut: `docs/plans/siasa-next-big-packages-executive-view.md` provides a one-page summary of the current frontier: validation realism depth / analyst handoff refinement as the default internal track, G2 credential-trigger follow-through as the main external unlock, and G5 as the deferred architecture option. Repo-controlled G1/G2/G3/G4 closure remains completed.
 >
 > For Hermes: execute serially, one work package at a time, with TDD, validation, commit, and push after each completed package.
 
@@ -139,7 +139,7 @@ Interpretation:
 - AP-25 is now closed: stale-remediation closure breaches are translated into an explicit operator action plan (`operator_stale_remediation_action_plan`) with deterministic next-up/queued actions, action categories, and closure checks such as `priority_score > 0` and `unresolved_age_hours <= 72.0`.
 - AP-26 is now closed: release evidence now emits `operator_blocker_causality`, separating primary root causes from derived release effects and surfacing the causal chain directly in markdown evidence and readiness GUI.
 - AP-27 is now closed: stakeholder-flow and browser governance gates are now consolidated into one operator-facing `operator_operability_cluster`, so path health is readable as one coherent operability package in evidence and readiness GUI.
-- next serial planning focus should now be chosen after AP-27 closure review.
+- next serial planning focus is no longer blocked on AP-27 review: per `docs/plans/siasa-master-steering-document.md`, the default internal next track is validation realism depth / analyst handoff refinement unless an external trigger (credentials, new runtime breadth demand, or operating-model change) reprioritizes the queue.
 - the current validation view is now richer than a single-country runtime-support check because the artifact carries a multi-case portfolio summary, a curated repo-backed reference-case library now broadened from 4 to 21 countries / 23 cases (`UKR`, `RUS`, `CHN`, `IND`, `IRN`, `ISR`, `TUR`, `USA`, `DEU`, `EST`, `FIN`, `SAU`, `QAT`, `EGY`, `NGA`, `SDN`, `MMR`, `POL`, `PAK`, `GEO`, `TWN`), historical reference-review / evidence-scoring outputs, a governed provider-backed archival replay layer across that broadened library, explicit archival provenance/accountability metadata, replay evidence score/tier interpretation, first governed challenge cases with partial and mismatch replay outcomes, a replay attention layer that summarizes non-perfect cases by level/reason/owner/country concentration instead of leaving only raw review rows, and interactive scoping controls on the historical replay detail table (country/verdict/basis/text + visible counts)
 
 ## 3b. Updated planning horizon

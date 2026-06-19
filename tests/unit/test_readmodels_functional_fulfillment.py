@@ -58,3 +58,23 @@ def test_capability_matrix_steering_view_does_not_overclaim_replay_attention_fol
     ]
     for claim in stale_overclaims:
         assert claim not in matrix_markdown
+
+
+def test_roadmap_and_executive_view_stay_aligned_with_master_default_next_track() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    master_markdown = (repo_root / "docs/plans/siasa-master-steering-document.md").read_text(encoding="utf-8")
+    roadmap_markdown = (repo_root / "docs/plans/siasa-stakeholder-fulfillment-roadmap.md").read_text(encoding="utf-8")
+    executive_markdown = (repo_root / "docs/plans/siasa-next-big-packages-executive-view.md").read_text(encoding="utf-8")
+
+    expected_track = "validation realism depth / analyst handoff refinement"
+
+    assert expected_track in master_markdown
+    assert expected_track in roadmap_markdown.lower()
+    assert expected_track in executive_markdown.lower()
+
+    stale_frontier_phrases = [
+        "next serial planning focus should now be chosen after AP-27 closure review",
+        "next large package families (now G4/G2-trigger/G5",
+    ]
+    for phrase in stale_frontier_phrases:
+        assert phrase not in roadmap_markdown
