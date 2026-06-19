@@ -137,12 +137,12 @@ def test_reference_case_library_summary_aggregates_case_types_countries_and_time
     summary = build_reference_case_library_summary(cases)
 
     assert summary == {
-        "case_count": 29,
+        "case_count": 32,
         "countries_covered": ["CHN", "DEU", "EGY", "EST", "FIN", "GEO", "IND", "IRN", "ISR", "MMR", "NGA", "PAK", "POL", "QAT", "RUS", "SAU", "SDN", "TUR", "TWN", "UKR", "USA"],
         "case_type_counts": {
-            "challenge_domain_gap": 2,
-            "challenge_mismatch": 2,
-            "challenge_weak_evidence": 2,
+            "challenge_domain_gap": 3,
+            "challenge_mismatch": 3,
+            "challenge_weak_evidence": 3,
             "disinformation_spike": 1,
             "hybrid_pressure": 3,
             "military_escalation": 1,
@@ -160,21 +160,41 @@ def test_historical_reference_review_summary_scores_curated_case_alignment_and_e
     summary = build_historical_reference_review_summary(cases)
 
     assert summary == {
-        "case_count": 29,
+        "case_count": 32,
         "countries_covered": ["CHN", "DEU", "EGY", "EST", "FIN", "GEO", "IND", "IRN", "ISR", "MMR", "NGA", "PAK", "POL", "QAT", "RUS", "SAU", "SDN", "TUR", "TWN", "UKR", "USA"],
         "review_verdict_counts": {
             "historical_alignment_confirmed": 20,
-            "historical_alignment_mismatch": 5,
-            "historical_alignment_with_gaps": 4,
+            "historical_alignment_mismatch": 7,
+            "historical_alignment_with_gaps": 5,
         },
         "evidence_tier_counts": {
             "corroborated_multi_source": 19,
-            "curated_public_source": 7,
+            "curated_public_source": 10,
             "provisional": 1,
             "verified_multi_source": 2,
         },
-        "average_evidence_score": 0.75,
+        "average_evidence_score": 0.74,
     }
+
+
+def test_validation_reference_library_includes_extended_focus_challenge_cases_for_usa_deu_egy() -> None:
+    cases = load_validation_case_library(
+        Path(__file__).resolve().parents[2] / "vmodel" / "verification" / "validation_reference_cases.yaml"
+    )
+
+    challenge_ids = sorted(case.case_id for case in cases if "CHALLENGE" in case.case_id)
+
+    assert challenge_ids == [
+        "VAL-CHN-2024-CHALLENGE-001",
+        "VAL-DEU-2024-CHALLENGE-001",
+        "VAL-EGY-2024-CHALLENGE-001",
+        "VAL-GEO-2023-CHALLENGE-001",
+        "VAL-IRN-2023-CHALLENGE-001",
+        "VAL-PAK-2024-CHALLENGE-001",
+        "VAL-RUS-2024-CHALLENGE-001",
+        "VAL-UKR-2023-CHALLENGE-001",
+        "VAL-USA-2024-CHALLENGE-001",
+    ]
 
 
 def test_historical_replay_summary_marks_status_only_mismatch_without_domain_gap_distinctly() -> None:
@@ -462,60 +482,79 @@ def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> 
         "VAL-RUS-2024-CHALLENGE-001",
         "VAL-CHN-2024-CHALLENGE-001",
         "VAL-PAK-2024-CHALLENGE-001",
+        "VAL-USA-2024-CHALLENGE-001",
+        "VAL-DEU-2024-CHALLENGE-001",
+        "VAL-EGY-2024-CHALLENGE-001",
     ]
     assert summary == {
-        "case_count": 29,
+        "case_count": 32,
         "countries_covered": ["CHN", "DEU", "EGY", "EST", "FIN", "GEO", "IND", "IRN", "ISR", "MMR", "NGA", "PAK", "POL", "QAT", "RUS", "SAU", "SDN", "TUR", "TWN", "UKR", "USA"],
         "review_verdict_counts": {
             "replay_match": 21,
-            "replay_match_with_gaps": 3,
-            "replay_mismatch": 5,
+            "replay_match_with_gaps": 4,
+            "replay_mismatch": 7,
         },
-        "status_match_count": 24,
-        "average_domain_match_ratio": 0.85,
-        "average_replay_evidence_score": 0.86,
-        "average_replay_source_coverage_ratio": 0.84,
+        "status_match_count": 25,
+        "average_domain_match_ratio": 0.81,
+        "average_replay_evidence_score": 0.82,
+        "average_replay_source_coverage_ratio": 0.8,
         "average_replay_provenance_completeness_ratio": 1.0,
-        "replay_input_record_total": 187,
-        "archival_data_file_count": 29,
+        "replay_input_record_total": 195,
+        "archival_data_file_count": 32,
         "replay_evidence_tier_counts": {
-            "strong_replay_evidence": 3,
+            "strong_replay_evidence": 4,
             "verified_replay_evidence": 21,
-            "weak_replay_evidence": 5,
+            "weak_replay_evidence": 7,
         },
         "replay_input_source_coverage_counts": {
-            "SRC-GDACS": 24,
-            "SRC-GDELT-DOC": 29,
-            "SRC-GDELT-EVENTS": 24,
+            "SRC-GDACS": 25,
+            "SRC-GDELT-DOC": 32,
+            "SRC-GDELT-EVENTS": 25,
             "WB-INDICATORS": 20,
         },
         "review_basis_counts": {
-            "provider_backed_archival_replay": 29,
+            "provider_backed_archival_replay": 32,
         },
-        "attention_case_count": 8,
+        "attention_case_count": 11,
         "attention_level_counts": {
-            "high": 5,
-            "medium": 3,
+            "high": 7,
+            "medium": 4,
         },
         "attention_reason_counts": {
-            "domain_coverage_gap": 3,
-            "status_mismatch_and_domain_gap": 5,
+            "domain_coverage_gap": 4,
+            "status_mismatch_and_domain_gap": 7,
         },
         "attention_owner_counts": {
-            "runtime/source coverage": 3,
-            "validation governance": 5,
+            "runtime/source coverage": 4,
+            "validation governance": 7,
         },
         "attention_country_summary": [
+            {"country_id": "EGY", "attention_case_count": 1, "highest_attention_level": "high", "case_ids": ["VAL-EGY-2024-CHALLENGE-001"]},
             {"country_id": "GEO", "attention_case_count": 1, "highest_attention_level": "high", "case_ids": ["VAL-GEO-2023-CHALLENGE-001"]},
             {"country_id": "ISR", "attention_case_count": 1, "highest_attention_level": "high", "case_ids": ["VAL-ISR-2024-002"]},
             {"country_id": "PAK", "attention_case_count": 1, "highest_attention_level": "high", "case_ids": ["VAL-PAK-2024-CHALLENGE-001"]},
             {"country_id": "RUS", "attention_case_count": 1, "highest_attention_level": "high", "case_ids": ["VAL-RUS-2024-CHALLENGE-001"]},
             {"country_id": "UKR", "attention_case_count": 1, "highest_attention_level": "high", "case_ids": ["VAL-UKR-2023-CHALLENGE-001"]},
+            {"country_id": "USA", "attention_case_count": 1, "highest_attention_level": "high", "case_ids": ["VAL-USA-2024-CHALLENGE-001"]},
             {"country_id": "CHN", "attention_case_count": 1, "highest_attention_level": "medium", "case_ids": ["VAL-CHN-2024-CHALLENGE-001"]},
+            {"country_id": "DEU", "attention_case_count": 1, "highest_attention_level": "medium", "case_ids": ["VAL-DEU-2024-CHALLENGE-001"]},
             {"country_id": "IRN", "attention_case_count": 1, "highest_attention_level": "medium", "case_ids": ["VAL-IRN-2023-CHALLENGE-001"]},
             {"country_id": "POL", "attention_case_count": 1, "highest_attention_level": "medium", "case_ids": ["VAL-POL-2024-002"]},
         ],
         "attention_cases": [
+            {
+                "case_id": "VAL-EGY-2024-CHALLENGE-001",
+                "country_id": "EGY",
+                "review_verdict": "replay_mismatch",
+                "attention_level": "high",
+                "attention_reason": "status_mismatch_and_domain_gap",
+                "owner_hint": "validation governance",
+                "replay_evidence_tier": "weak_replay_evidence",
+                "replay_source_coverage_ratio": 0.25,
+                "missing_expected_domains": ["B", "D"],
+                "unexpected_observed_domains": [],
+                "suggested_next_action": "Review reference-case expectation alignment and archival replay provenance before using this case as a strong validation signal.",
+            },
             {
                 "case_id": "VAL-GEO-2023-CHALLENGE-001",
                 "country_id": "GEO",
@@ -582,8 +621,34 @@ def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> 
                 "suggested_next_action": "Review reference-case expectation alignment and archival replay provenance before using this case as a strong validation signal.",
             },
             {
+                "case_id": "VAL-USA-2024-CHALLENGE-001",
+                "country_id": "USA",
+                "review_verdict": "replay_mismatch",
+                "attention_level": "high",
+                "attention_reason": "status_mismatch_and_domain_gap",
+                "owner_hint": "validation governance",
+                "replay_evidence_tier": "weak_replay_evidence",
+                "replay_source_coverage_ratio": 0.25,
+                "missing_expected_domains": ["B", "D"],
+                "unexpected_observed_domains": [],
+                "suggested_next_action": "Review reference-case expectation alignment and archival replay provenance before using this case as a strong validation signal.",
+            },
+            {
                 "case_id": "VAL-CHN-2024-CHALLENGE-001",
                 "country_id": "CHN",
+                "review_verdict": "replay_match_with_gaps",
+                "attention_level": "medium",
+                "attention_reason": "domain_coverage_gap",
+                "owner_hint": "runtime/source coverage",
+                "replay_evidence_tier": "strong_replay_evidence",
+                "replay_source_coverage_ratio": 0.75,
+                "missing_expected_domains": ["D"],
+                "unexpected_observed_domains": [],
+                "suggested_next_action": "Review missing expected domains and source coverage before treating this replay as fully representative.",
+            },
+            {
+                "case_id": "VAL-DEU-2024-CHALLENGE-001",
+                "country_id": "DEU",
                 "review_verdict": "replay_match_with_gaps",
                 "attention_level": "medium",
                 "attention_reason": "domain_coverage_gap",

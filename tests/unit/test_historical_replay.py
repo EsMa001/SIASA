@@ -14,7 +14,9 @@ def test_load_historical_replay_inputs_reads_fixture_backed_cases_from_repo_yaml
         "VAL-CHN-2024-001",
         "VAL-CHN-2024-CHALLENGE-001",
         "VAL-DEU-2024-001",
+        "VAL-DEU-2024-CHALLENGE-001",
         "VAL-EGY-2024-001",
+        "VAL-EGY-2024-CHALLENGE-001",
         "VAL-EST-2024-001",
         "VAL-FIN-2024-001",
         "VAL-GEO-2023-CHALLENGE-001",
@@ -40,6 +42,7 @@ def test_load_historical_replay_inputs_reads_fixture_backed_cases_from_repo_yaml
         "VAL-UKR-2022-001",
         "VAL-UKR-2023-CHALLENGE-001",
         "VAL-USA-2024-001",
+        "VAL-USA-2024-CHALLENGE-001",
     ]
     assert replay_inputs["VAL-UKR-2022-001"].review_basis == "fixture_backed_historical_replay"
     assert len(replay_inputs["VAL-UKR-2022-001"].normalized_records) == 8
@@ -770,6 +773,78 @@ def test_build_historical_replay_reviews_executes_replay_against_fixture_backed_
             "unexpected_observed_domains": [],
             "replay_input_record_count": 2,
         },
+        {
+            "case_id": "VAL-USA-2024-CHALLENGE-001",
+            "country_id": "USA",
+            "review_basis": "fixture_backed_historical_replay",
+            "replay_input_source_ids": ["SRC-GDELT-DOC"],
+            "replay_input_country_ids": ["USA"],
+            "archival_data_files": [],
+            "provenance_notes": "",
+            "replay_known_limitations": [],
+            "replay_source_coverage_ratio": 0.25,
+            "replay_provenance_completeness_ratio": 1.0,
+            "replay_evidence_score": 0.25,
+            "replay_evidence_tier": "weak_replay_evidence",
+            "replayed_status": "S1",
+            "expected_status": "S3",
+            "status_match": False,
+            "expected_domains": ["A", "B", "D"],
+            "replayed_domains": ["A"],
+            "domain_match_ratio": 1 / 3,
+            "review_verdict": "replay_mismatch",
+            "missing_expected_domains": ["B", "D"],
+            "unexpected_observed_domains": [],
+            "replay_input_record_count": 2,
+        },
+        {
+            "case_id": "VAL-DEU-2024-CHALLENGE-001",
+            "country_id": "DEU",
+            "review_basis": "fixture_backed_historical_replay",
+            "replay_input_source_ids": ["SRC-GDACS", "SRC-GDELT-DOC", "SRC-GDELT-EVENTS"],
+            "replay_input_country_ids": ["DEU"],
+            "archival_data_files": [],
+            "provenance_notes": "",
+            "replay_known_limitations": [],
+            "replay_source_coverage_ratio": 0.75,
+            "replay_provenance_completeness_ratio": 1.0,
+            "replay_evidence_score": 0.85,
+            "replay_evidence_tier": "strong_replay_evidence",
+            "replayed_status": "S3",
+            "expected_status": "S3",
+            "status_match": True,
+            "expected_domains": ["A", "B", "D"],
+            "replayed_domains": ["A", "B"],
+            "domain_match_ratio": 2 / 3,
+            "review_verdict": "replay_match_with_gaps",
+            "missing_expected_domains": ["D"],
+            "unexpected_observed_domains": [],
+            "replay_input_record_count": 4,
+        },
+        {
+            "case_id": "VAL-EGY-2024-CHALLENGE-001",
+            "country_id": "EGY",
+            "review_basis": "fixture_backed_historical_replay",
+            "replay_input_source_ids": ["SRC-GDELT-DOC"],
+            "replay_input_country_ids": ["EGY"],
+            "archival_data_files": [],
+            "provenance_notes": "",
+            "replay_known_limitations": [],
+            "replay_source_coverage_ratio": 0.25,
+            "replay_provenance_completeness_ratio": 1.0,
+            "replay_evidence_score": 0.25,
+            "replay_evidence_tier": "weak_replay_evidence",
+            "replayed_status": "S1",
+            "expected_status": "S3",
+            "status_match": False,
+            "expected_domains": ["A", "B", "D"],
+            "replayed_domains": ["A"],
+            "domain_match_ratio": 1 / 3,
+            "review_verdict": "replay_mismatch",
+            "missing_expected_domains": ["B", "D"],
+            "unexpected_observed_domains": [],
+            "replay_input_record_count": 2,
+        },
     ]
 
 
@@ -876,13 +951,38 @@ def test_challenge_cases_produce_correct_non_perfect_verdicts_and_attention_rout
     assert "B" in pak["missing_expected_domains"]
     assert "D" in pak["missing_expected_domains"]
 
+    # VAL-USA-2024-CHALLENGE-001: replay_mismatch, weak evidence, only A domain
+    usa = by_id["VAL-USA-2024-CHALLENGE-001"]
+    assert usa["review_verdict"] == "replay_mismatch"
+    assert usa["status_match"] is False
+    assert usa["replay_evidence_tier"] == "weak_replay_evidence"
+    assert usa["replayed_domains"] == ["A"]
+    assert "B" in usa["missing_expected_domains"]
+    assert "D" in usa["missing_expected_domains"]
+
+    # VAL-DEU-2024-CHALLENGE-001: replay_match_with_gaps (status match, D missing)
+    deu = by_id["VAL-DEU-2024-CHALLENGE-001"]
+    assert deu["review_verdict"] == "replay_match_with_gaps"
+    assert deu["status_match"] is True
+    assert "D" in deu["missing_expected_domains"]
+    assert deu["replay_evidence_score"] >= 0.75
+
+    # VAL-EGY-2024-CHALLENGE-001: replay_mismatch, weak evidence, only A domain
+    egy = by_id["VAL-EGY-2024-CHALLENGE-001"]
+    assert egy["review_verdict"] == "replay_mismatch"
+    assert egy["status_match"] is False
+    assert egy["replay_evidence_tier"] == "weak_replay_evidence"
+    assert egy["replayed_domains"] == ["A"]
+    assert "B" in egy["missing_expected_domains"]
+    assert "D" in egy["missing_expected_domains"]
+
     # Summary must reflect non-perfect verdict mix
     summary = build_historical_replay_summary(reviews)
     verdict_counts = summary["review_verdict_counts"]
     assert verdict_counts.get("replay_mismatch", 0) >= 2, "At least 2 mismatch verdicts expected"
     assert verdict_counts.get("replay_match_with_gaps", 0) >= 1, "At least 1 match_with_gaps expected"
 
-    # Attention cases must include all 6 challenge cases
+    # Attention cases must include all 9 challenge cases / non-perfect challenge slices
     attention_cases = summary.get("attention_cases", [])
     attention_ids = {a["case_id"] for a in attention_cases}
     assert "VAL-UKR-2023-CHALLENGE-001" in attention_ids
@@ -891,6 +991,9 @@ def test_challenge_cases_produce_correct_non_perfect_verdicts_and_attention_rout
     assert "VAL-RUS-2024-CHALLENGE-001" in attention_ids
     assert "VAL-CHN-2024-CHALLENGE-001" in attention_ids
     assert "VAL-PAK-2024-CHALLENGE-001" in attention_ids
+    assert "VAL-USA-2024-CHALLENGE-001" in attention_ids
+    assert "VAL-DEU-2024-CHALLENGE-001" in attention_ids
+    assert "VAL-EGY-2024-CHALLENGE-001" in attention_ids
 
     # High-attention cases: mismatch cases
     high_attention = [a for a in attention_cases if a["attention_level"] == "high"]
@@ -899,3 +1002,5 @@ def test_challenge_cases_produce_correct_non_perfect_verdicts_and_attention_rout
     assert "VAL-GEO-2023-CHALLENGE-001" in high_ids
     assert "VAL-RUS-2024-CHALLENGE-001" in high_ids
     assert "VAL-PAK-2024-CHALLENGE-001" in high_ids
+    assert "VAL-USA-2024-CHALLENGE-001" in high_ids
+    assert "VAL-EGY-2024-CHALLENGE-001" in high_ids

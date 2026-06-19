@@ -898,6 +898,20 @@ Closure achieved:
 Steering note:
 This was a planning-governance hygiene tranche, not a new product-surface expansion. With steering truth repaired, the next bounded default should return to the active internal track: validation-to-action refinement or deeper challenge-case realism.
 
+### N1-WP-057
+Name:
+Deepen challenge-case realism in the active validation track by extending the governed archival replay portfolio with three non-perfect extended-focus cases (`USA`, `DEU`, `EGY`) that preserve the mismatch/domain-gap/weak-evidence archetype balance while broadening challenge coverage beyond the earlier core-focus-heavy set.
+
+Closure achieved:
+- Added `VAL-USA-2024-CHALLENGE-001`, `VAL-DEU-2024-CHALLENGE-001`, and `VAL-EGY-2024-CHALLENGE-001` to `vmodel/verification/validation_reference_cases.yaml`, `validation_replay_inputs.yaml`, and `validation_archival_replay_manifest.yaml`, plus governed archival JSON bundles under `vmodel/verification/archival_replay_inputs/`
+- Updated `tests/unit/test_archival_replay.py`, `tests/unit/test_historical_replay.py`, and `tests/unit/test_readmodels_validation_backtest.py` with exact live-computed 32-case snapshots/aggregates; targeted validation regression passed (`23 passed`) and full regression passed (`532 passed in 336.42s`)
+- The governed validation portfolio now stands at `case_count=32` with balanced challenge types (`challenge_mismatch=3`, `challenge_domain_gap=3`, `challenge_weak_evidence=3`), `historical_alignment_mismatch=7`, `historical_alignment_with_gaps=5`, and `attention_case_count=11`
+- Representative live probe evidence was refreshed via `RUN-LIVE-VAL-WP013-001`: `run_status=partial_success`, `failed_sources=[SRC-GDELT-DOC-E]`, `known_gaps=[]`, `release_verdict=ready`; the updated GUI evidence is visible in `build/local_gui/_val_wp013_probe_1/validation.html`
+- Commit: `1f3b3fa`
+
+Steering note:
+This keeps the program on the intended default internal track: validation realism depth / analyst handoff refinement. The next bounded default should now prefer either (a) stronger validation-to-action closure on top of the richer 32-case portfolio or (b) another challenge-case realism slice only if it adds a new archetype rather than just more of the same.
+
 ---
 
 ## 7. Trigger for the next steering pivot

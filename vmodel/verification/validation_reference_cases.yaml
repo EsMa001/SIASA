@@ -535,3 +535,62 @@ validation_cases:
       - domains_b_and_d_intentionally_absent_from_replay_bundle
       - expected_status_reflects_fragility_context_not_replay_signal_availability
     validation_metrics: [Status Match, Evidence Tier, Attention Level]
+
+  - case_id: VAL-USA-2024-CHALLENGE-001
+    country_id: USA
+    case_name: United States 2024 low-signal mismatch challenge case
+    case_type: challenge_mismatch
+    time_start: "2024-08-20"
+    time_end: "2024-08-21"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A]
+    historical_observed_status: S1
+    evidence_tier: curated_public_source
+    expected_signal_pattern: Broad multi-domain strategic pressure expected; replay window intentionally preserves only sparse Domain A narrative traces while B and D are absent.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Prove that SIASA still raises a high-attention mismatch when an extended-focus country only has thin Domain A replay evidence although the geopolitical context suggests a stronger A/B/D posture.
+    known_limitations:
+      - replay_bundle_limited_to_domain_a_signals_to_test_mismatch_handling_in_extended_focus_lane
+      - domains_b_and_d_intentionally_absent_from_replay_bundle
+      - expected_status_reflects_context_not_replay_signal_availability
+    validation_metrics: [Status Match, Evidence Tier, Attention Level]
+
+  - case_id: VAL-DEU-2024-CHALLENGE-001
+    country_id: DEU
+    case_name: Germany 2024 domain-gap challenge case
+    case_type: challenge_domain_gap
+    time_start: "2024-09-18"
+    time_end: "2024-09-19"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B]
+    historical_observed_status: S3
+    evidence_tier: curated_public_source
+    expected_signal_pattern: Information and event signals remain present, but Domain D macro indicators are intentionally absent from the replay bundle to test medium-attention gap routing in the European extended-focus lane.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Prove that SIASA surfaces a replay_match_with_gaps verdict for an extended-focus country when A and B align but D is missing from the archival replay bundle.
+    known_limitations:
+      - domain_d_intentionally_excluded_to_force_domain_gap_detection
+      - status_match_depends_on_a_b_only_in_this_replay_window
+    validation_metrics: [Status Match, Domain Match, Missing Domain Detection]
+
+  - case_id: VAL-EGY-2024-CHALLENGE-001
+    country_id: EGY
+    case_name: Egypt 2024 weak-evidence challenge case
+    case_type: challenge_weak_evidence
+    time_start: "2024-09-12"
+    time_end: "2024-09-13"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A]
+    historical_observed_status: S1
+    evidence_tier: curated_public_source
+    expected_signal_pattern: Canal-corridor and spillover pressure context suggests stronger multi-domain strain, but replay evidence is intentionally reduced to two weak Domain A signals.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Prove that SIASA routes an extended-focus weak-evidence case into high-attention mismatch handling when B and D are absent and the replay window is intentionally sparse.
+    known_limitations:
+      - replay_bundle_limited_to_two_domain_a_records_to_force_weak_evidence_tier
+      - domains_b_and_d_intentionally_absent_from_replay_bundle
+      - expected_status_reflects_context_not_replay_signal_availability
+    validation_metrics: [Status Match, Evidence Tier, Attention Level]

@@ -1423,3 +1423,71 @@ replay_cases:
         value: -0.3
         provenance_source_id: SRC-GDELT-DOC
         quality_context: {freshness_hours: 6}
+
+  - case_id: VAL-USA-2024-CHALLENGE-001
+    review_basis: fixture_backed_historical_replay
+    normalized_records:
+      - country_id: USA
+        timestamp: "2024-08-20T08:00:00Z"
+        domain: A
+        signal_key: article_count
+        value: 2
+        provenance_source_id: SRC-GDELT-DOC
+        quality_context: {freshness_hours: 6}
+      - country_id: USA
+        timestamp: "2024-08-20T08:00:00Z"
+        domain: A
+        signal_key: tone
+        value: -0.2
+        provenance_source_id: SRC-GDELT-DOC
+        quality_context: {freshness_hours: 6}
+
+  - case_id: VAL-DEU-2024-CHALLENGE-001
+    review_basis: fixture_backed_historical_replay
+    normalized_records:
+      - country_id: DEU
+        timestamp: "2024-09-18T08:00:00Z"
+        domain: A
+        signal_key: article_count
+        value: 8
+        provenance_source_id: SRC-GDELT-DOC
+        quality_context: {freshness_hours: 6}
+      - country_id: DEU
+        timestamp: "2024-09-18T08:00:00Z"
+        domain: A
+        signal_key: tone
+        value: -0.6
+        provenance_source_id: SRC-GDELT-DOC
+        quality_context: {freshness_hours: 6}
+      - country_id: DEU
+        timestamp: "2024-09-18T09:00:00Z"
+        domain: B
+        signal_key: event_count
+        value: 3
+        provenance_source_id: SRC-GDELT-EVENTS
+        quality_context: {freshness_hours: 6}
+      - country_id: DEU
+        timestamp: "2024-09-18T09:00:00Z"
+        domain: B
+        signal_key: fatality_count
+        value: 0
+        provenance_source_id: SRC-GDACS
+        quality_context: {freshness_hours: 12}
+
+  - case_id: VAL-EGY-2024-CHALLENGE-001
+    review_basis: fixture_backed_historical_replay
+    normalized_records:
+      - country_id: EGY
+        timestamp: "2024-09-12T08:00:00Z"
+        domain: A
+        signal_key: article_count
+        value: 3
+        provenance_source_id: SRC-GDELT-DOC
+        quality_context: {freshness_hours: 8}
+      - country_id: EGY
+        timestamp: "2024-09-12T08:00:00Z"
+        domain: A
+        signal_key: tone
+        value: -0.4
+        provenance_source_id: SRC-GDELT-DOC
+        quality_context: {freshness_hours: 8}

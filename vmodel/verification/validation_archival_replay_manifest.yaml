@@ -269,3 +269,35 @@ archival_replay_cases:
     known_limitations:
       - minimal_records_by_design_to_test_weak_evidence_tier
       - domains_b_and_d_absent_from_replay_bundle
+
+  - case_id: VAL-USA-2024-CHALLENGE-001
+    review_basis: provider_backed_archival_replay
+    storage_mode: archival_normalized_records
+    data_files:
+      - archival_replay_inputs/VAL-USA-2024-CHALLENGE-001.json
+    archival_sources: [SRC-GDELT-DOC]
+    provenance_notes: Intentionally limited to two Domain A records to simulate a low-signal replay window for the United States; B and D absent to force mismatch and weak-context handling.
+    known_limitations:
+      - replay_bundle_sparse_by_design_to_test_mismatch_handling_in_extended_focus_lane
+      - not_representative_of_actual_united_states_signal_depth
+
+  - case_id: VAL-DEU-2024-CHALLENGE-001
+    review_basis: provider_backed_archival_replay
+    storage_mode: archival_normalized_records
+    data_files:
+      - archival_replay_inputs/VAL-DEU-2024-CHALLENGE-001.json
+    archival_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS]
+    provenance_notes: A and B domain records present; Domain D intentionally absent from archival bundle to force replay_match_with_gaps and medium-attention domain-gap routing for Germany.
+    known_limitations:
+      - domain_d_intentionally_excluded_to_force_domain_gap
+
+  - case_id: VAL-EGY-2024-CHALLENGE-001
+    review_basis: provider_backed_archival_replay
+    storage_mode: archival_normalized_records
+    data_files:
+      - archival_replay_inputs/VAL-EGY-2024-CHALLENGE-001.json
+    archival_sources: [SRC-GDELT-DOC]
+    provenance_notes: Only two Domain A records; B and D absent. Designed to produce weak_replay_evidence tier and high-attention mismatch for Egypt corridor-pressure context.
+    known_limitations:
+      - minimal_records_by_design_to_test_weak_evidence_tier
+      - domains_b_and_d_absent_from_replay_bundle
