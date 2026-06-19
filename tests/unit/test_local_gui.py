@@ -1702,7 +1702,8 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert release_demo_package_json["review_sequence"][1]["href"] == "coverage.html?focus_country=UKR&focus_section=country_gap&missing_domains=D#country-gap-UKR"
     assert release_demo_package_json["review_sequence"][1]["page_name"] == "coverage.html"
     assert release_demo_package_json["review_sequence"][3]["href"].startswith("validation.html#ra=")
-    assert release_demo_package_json["stakeholder_cover_sheet"]["start_here"]["href"] == "readiness.html"
+    assert release_demo_package_json["stakeholder_cover_sheet"]["start_here"]["href"] == "coverage.html?focus_country=UKR&focus_section=country_gap&missing_domains=D#country-gap-UKR"
+    assert release_demo_package_json["stakeholder_cover_sheet"]["start_here"]["page_name"] == "coverage.html"
     assert "Prioritized items" in (pages.output_dir / "release_package.html").read_text()
     assert "Demo sequence" in (pages.output_dir / "release_package.html").read_text()
     assert "Guided review sequence" in (pages.output_dir / "release_package.html").read_text()

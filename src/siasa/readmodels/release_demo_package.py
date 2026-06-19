@@ -495,10 +495,10 @@ def build_release_demo_package_view_model(
         ),
         'top_3_caveats': (top_blockers + explicit_limitations)[:3] or ['No explicit caveats recorded.'],
         'start_here': {
-            'page_name': review_sequence[0].get('page_name', 'readiness.html'),
-            'page_label': review_sequence[0].get('page_label', _page_label('readiness.html')),
-            'href': review_sequence[0].get('href', 'readiness.html'),
-            'reason': 'Confirm gate posture before sharing the rest of the package externally.',
+            'page_name': _safe_navigation_page_name(str(source_items[0].get('target_href') or source_items[0].get('target_page', review_sequence[0].get('page_name', 'readiness.html')))),
+            'page_label': _page_label(_safe_navigation_page_name(str(source_items[0].get('target_href') or source_items[0].get('target_page', review_sequence[0].get('page_name', 'readiness.html'))))),
+            'href': str(source_items[0].get('target_href') or source_items[0].get('target_page', review_sequence[0].get('href', 'readiness.html'))),
+            'reason': str(source_items[0].get('recommended_next_check') or 'Inspect the highest-priority current review item first.'),
         },
         'external_share_summary': {
             'recommendation': executive_decision_summary['recommendation'],
