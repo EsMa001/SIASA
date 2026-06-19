@@ -927,6 +927,21 @@ Closure achieved:
 Steering note:
 This closes the next bounded validation-to-action slice on top of the 32-case portfolio: analysts no longer need to manually reconstruct which Validation/Coverage state or annotation handoff belongs to the primary briefing item. The next bounded default should now prefer either another actionability-tightening slice around analyst execution context or a new challenge-case realism archetype if it adds genuinely new validation stress.
 
+### N1-WP-059
+Name:
+Carry the new analyst-briefing execution context through the release/demo handoff package so reviewer-facing release guidance preserves exact focused navigation instead of degrading back to static page labels.
+
+Closure achieved:
+- Updated `src/siasa/readmodels/release_demo_package.py` so release/demo package view models now preserve `primary_item_target_href`, `primary_item_action_href`, and row-level `target_href` / `action_href`
+- Guided review step `C3-02` now follows contextual hrefs when available rather than falling back to plain `target_page`
+- `render_release_demo_package_body(...)` now renders safe-gated `analyst-briefing-target-link` anchors in the package summary and prioritized-item table, plus action links when present, instead of only static page-name text
+- Added RED/GREEN coverage in `tests/unit/test_local_gui.py` for `release_demo_package.json` contextual href persistence and `release_package.html` link rendering; targeted regression passed (`2 passed in 2.43s`); focused GUI regression passed (`23 passed in 104.73s`); full regression `534 passed in 339.32s`
+- GUI evidence is visible in `build/local_gui/_val_wp015_release_handoff_links_demo/release_package.html`
+- Commit: `commit pending`
+
+Steering note:
+This closes the next analyst-execution-context gap after N1-WP-058: management/reviewer handoff now preserves the exact review navigation target instead of forcing manual reconstruction from static page labels. The next bounded default should prefer either a similarly small actionability-tightening slice around reviewer execution context or, if materially higher value emerges, a genuinely new challenge-case realism archetype.
+
 ---
 
 ## 7. Trigger for the next steering pivot

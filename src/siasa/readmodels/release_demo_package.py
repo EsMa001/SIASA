@@ -26,6 +26,28 @@ def _page_label(page_name: str) -> str:
     }.get(page_name, page_name.replace('.html', '').replace('_', ' ').title())
 
 
+
+def _safe_navigation_page_name(href: str) -> str:
+    return str(href).split('?', 1)[0].split('#', 1)[0]
+
+
+
+def _is_safe_internal_navigation_href(href: str) -> bool:
+    return bool(href) and href.endswith('.html') or bool(href) and '.html?' in href or bool(href) and '.html#' in href
+
+
+
+def _render_nav_link(*, href: str | None, label: str, css_class: str, available_pages: set[str]) -> str:
+    href = str(href or '').strip()
+    if not href:
+        return html.escape(label)
+    page_name = _safe_navigation_page_name(href)
+    if not _is_safe_internal_navigation_href(href) or page_name not in available_pages:
+        return html.escape(label)
+    return f"<a class='{css_class}' href='{html.escape(href)}'>{html.escape(label)}</a>"
+
+
+
 def build_release_demo_package_view_model(
     *,
     readiness_view_model: dict[str, Any],
@@ -240,13 +262,13 @@ def build_release_demo_package_view_model(
         {
             'step_id': 'C3-02',
             'phase': 'Primary focus',
-            'page_label': _page_label(source_items[0].get('target_page', 'readiness.html')),
-            'page_name': str(source_items[0].get('target_page', 'readiness.html')),
+            'page_label': _page_label(_safe_navigation_page_name(str(source_items[0].get('target_href') or source_items[0].get('target_page', 'readiness.html')))),
+            'page_name': _safe_navigation_page_name(str(source_items[0].get('target_href') or source_items[0].get('target_page', 'readiness.html'))),
             'objective': 'Inspect the highest-priority current review item first.',
             'reviewer_question': str(source_items[0].get('recommended_next_check', 'Inspect the primary review item.')),
             'expected_signal': str(source_items[0].get('title', 'n/a')),
-            'available': str(source_items[0].get('target_page', '')) in available_pages,
-            'href': str(source_items[0].get('target_page', '')) if str(source_items[0].get('target_page', '')) in available_pages else '',
+            'available': _safe_navigation_page_name(str(source_items[0].get('target_href') or source_items[0].get('target_page', ''))) in available_pages,
+            'href': str(source_items[0].get('target_href') or source_items[0].get('target_page', '')) if _safe_navigation_page_name(str(source_items[0].get('target_href') or source_items[0].get('target_page', ''))) in available_pages else '',
         },
         {
             'step_id': 'C3-03',
@@ -518,8 +540,11 @@ def build_release_demo_package_view_model(
         'primary_item_title': source_items[0].get('title', 'n/a'),
         'primary_item_category': source_items[0].get('category', 'n/a'),
         'primary_item_target_page': source_items[0].get('target_page', 'n/a'),
+        'primary_item_target_href': source_items[0].get('target_href') or source_items[0].get('target_page'),
         'primary_item_next_check': source_items[0].get('recommended_next_check', 'n/a'),
         'primary_item_evidence_source': source_items[0].get('evidence_source', 'n/a'),
+        'primary_item_action_label': source_items[0].get('action_label'),
+        'primary_item_action_href': source_items[0].get('action_href'),
         'priority_items': source_items,
         'demo_sequence': [
             {
@@ -542,6 +567,7 @@ def build_release_demo_package_view_model(
         'decision_packet_seed': decision_packet_seed,
         'decision_packet_send_readiness': decision_packet_send_readiness,
         'evidence_items': [{'label': label, 'value': value} for label, value in evidence_items],
+        'available_pages': sorted(available_pages),
         'priority_target_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
         'source_item_pages': sorted({str(item.get('target_page', '')) for item in source_items if item.get('target_page')}),
         'readiness_view_model': {
@@ -553,6 +579,16 @@ def build_release_demo_package_view_model(
 
 
 def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
+    available_pages = {
+        _safe_navigation_page_name(str(item))
+        for item in view_model.get('available_pages', [])
+        if str(item)
+    }
+    available_pages.update(
+        _safe_navigation_page_name(str(item.get('page_name', '')))
+        for item in _as_dict_list(view_model.get('demo_sequence'))
+        if item.get('available')
+    )
     priority_items = _as_dict_list(view_model.get('priority_items'))
     if not priority_items:
         priority_items = [{
@@ -562,6 +598,7 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
             'why_it_matters': 'No blocking evidence remains in the current package.',
             'recommended_next_check': 'Proceed with the demo sequence.',
             'target_page': 'readiness.html',
+            'target_href': 'readiness.html',
             'evidence_source': 'readiness.json',
         }]
     priority_rows = ''.join(
@@ -571,7 +608,10 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<td>{html.escape(str(item.get('title', '')))}</td>"
         f"<td>{html.escape(str(item.get('why_it_matters', '')))}</td>"
         f"<td>{html.escape(str(item.get('recommended_next_check', '')))}</td>"
-        f"<td>{html.escape(str(item.get('target_page', '')))}</td>"
+        f"<td>{' | '.join(part for part in [
+            _render_nav_link(href=item.get('target_href') or item.get('target_page'), label=str(item.get('target_page', '')), css_class='analyst-briefing-target-link', available_pages=available_pages),
+            (_render_nav_link(href=item.get('action_href'), label=str(item.get('action_label', 'Open action')), css_class='analyst-briefing-action-link', available_pages=available_pages) if item.get('action_href') and item.get('action_label') else ''),
+        ] if part)}</td>"
         f"<td>{html.escape(str(item.get('evidence_source', '')))}</td>"
         '</tr>'
         for item in priority_items
@@ -708,8 +748,28 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     primary_focus = html.escape(str(view_model.get('primary_item_title', 'n/a')))
     primary_next_check = html.escape(str(view_model.get('primary_item_next_check', 'n/a')))
     primary_target_page = html.escape(str(view_model.get('primary_item_target_page', 'n/a')))
+    primary_target_href = str(view_model.get('primary_item_target_href') or view_model.get('primary_item_target_page') or '').strip()
+    primary_action_label = str(view_model.get('primary_item_action_label') or '').strip()
+    primary_action_href = str(view_model.get('primary_item_action_href') or '').strip()
     package_name = html.escape(str(view_model.get('package_name', 'Release / Demo Package')))
     generated_at = html.escape(str(view_model.get('generated_at_utc', 'n/a')))
+
+    primary_target_link = _render_nav_link(
+        href=primary_target_href,
+        label=str(view_model.get('primary_item_target_page', 'n/a')),
+        css_class='analyst-briefing-target-link',
+        available_pages=available_pages,
+    )
+    primary_action_link = (
+        _render_nav_link(
+            href=primary_action_href,
+            label=primary_action_label,
+            css_class='analyst-briefing-action-link',
+            available_pages=available_pages,
+        )
+        if primary_action_href and primary_action_label
+        else ''
+    )
 
     return (
         "<section class='panel'>"
@@ -717,7 +777,9 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<p><strong>Package status:</strong> {status} · <strong>Release verdict:</strong> {release_verdict} · <strong>Demo verdict:</strong> {demo_verdict} · <strong>Gate verdict:</strong> {gate_verdict}</p>"
         f"<p><strong>Primary focus:</strong> {primary_focus}</p>"
         f"<p><strong>Next check:</strong> {primary_next_check}</p>"
-        f"<p><strong>Primary target page:</strong> {primary_target_page}</p>"
+        f"<p><strong>Primary target page:</strong> {primary_target_link}"
+        + (f" | {primary_action_link}" if primary_action_link else "")
+        + "</p>"
         f"<p><strong>Generated:</strong> {generated_at}</p>"
         "</section>"
         "<section class='panel'>"
