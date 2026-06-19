@@ -907,7 +907,7 @@ Closure achieved:
 - Updated `tests/unit/test_archival_replay.py`, `tests/unit/test_historical_replay.py`, and `tests/unit/test_readmodels_validation_backtest.py` with exact live-computed 32-case snapshots/aggregates; targeted validation regression passed (`23 passed`) and full regression passed (`532 passed in 336.42s`)
 - The governed validation portfolio now stands at `case_count=32` with balanced challenge types (`challenge_mismatch=3`, `challenge_domain_gap=3`, `challenge_weak_evidence=3`), `historical_alignment_mismatch=7`, `historical_alignment_with_gaps=5`, and `attention_case_count=11`
 - Representative live probe evidence was refreshed via `RUN-LIVE-VAL-WP013-001`: `run_status=partial_success`, `failed_sources=[SRC-GDELT-DOC-E]`, `known_gaps=[]`, `release_verdict=ready`; the updated GUI evidence is visible in `build/local_gui/_val_wp013_probe_1/validation.html`
-- Commit: `1f3b3fa`
+- Commit: `061ca70`
 
 Steering note:
 This keeps the program on the intended default internal track: validation realism depth / analyst handoff refinement. The next bounded default should now prefer either (a) stronger validation-to-action closure on top of the richer 32-case portfolio or (b) another challenge-case realism slice only if it adds a new archetype rather than just more of the same.
