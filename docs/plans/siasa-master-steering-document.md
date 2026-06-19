@@ -922,7 +922,7 @@ Closure achieved:
 - `_render_readiness(...)` now renders safe-gated `analyst-briefing-target-link` and `analyst-briefing-action-link` anchors in both the primary-focus summary and the analyst-briefing table instead of only static page-name text
 - Added RED/GREEN coverage in `tests/unit/test_local_gui.py` for contextual briefing links and readiness rendering; focused GUI regression passed (`23 passed in 108.20s`); full regression `534 passed in 345.76s`
 - GUI evidence is visible in `build/local_gui/_val_wp014_briefing_links/readiness.html`
-- Commit: `commit pending`
+- Commit: `ad7dc96`
 
 Steering note:
 This closes the next bounded validation-to-action slice on top of the 32-case portfolio: analysts no longer need to manually reconstruct which Validation/Coverage state or annotation handoff belongs to the primary briefing item. The next bounded default should now prefer either another actionability-tightening slice around analyst execution context or a new challenge-case realism archetype if it adds genuinely new validation stress.
