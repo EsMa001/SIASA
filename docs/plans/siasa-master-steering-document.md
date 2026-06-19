@@ -954,7 +954,7 @@ Closure achieved:
 - Confirmed exported `release_demo_package.json` now carries the focused fallback-path reviewer sequence, including `validation.html#ra=...` for the validation posture step
 - Added RED/GREEN coverage in `tests/unit/test_local_gui.py` for fallback-path `review_sequence` and exported package href persistence; targeted regression passed (`2 passed in 2.43s`); focused GUI regression passed (`23 passed in 100.65s`); full regression `534 passed in 332.78s`
 - GUI evidence is visible in `build/local_gui/_val_wp016_reviewer_flow_context/release_demo_package.json`
-- Commit: `commit pending`
+- Commit: `80c7a58`
 
 Steering note:
 This closes the remaining fallback-path reviewer-execution-context gap after N1-WP-059: reviewer/demo walkthroughs now preserve exact navigation focus even when assembled from the leaner fallback evidence path.
