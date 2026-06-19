@@ -874,6 +874,33 @@ def _validation_prefill_href(*, country_id: str, case_id: str, attention_reason:
 
 
 
+def _annotation_prefill_href(*, attention_case: dict[str, Any]) -> str:
+    query_parts = [
+        "scope=country",
+        "annotation_type=review_note",
+        f"country_id={quote_plus(str(attention_case.get('country_id', '')))}",
+        f"case_id={quote_plus(str(attention_case.get('case_id', '')))}",
+        f"attention_reason={quote_plus(str(attention_case.get('attention_reason', '')))}",
+        f"owner_hint={quote_plus(str(attention_case.get('owner_hint', '')))}",
+        f"suggested_next_action={quote_plus(str(attention_case.get('suggested_next_action', '')))}",
+        f"attention_level={quote_plus(str(attention_case.get('attention_level', '')))}",
+        f"replay_evidence_tier={quote_plus(str(attention_case.get('replay_evidence_tier', '')))}",
+        f"review_verdict={quote_plus(str(attention_case.get('review_verdict', '')))}",
+        f"replay_evidence_score={quote_plus(str(attention_case.get('replay_evidence_score', '')))}",
+        f"domain_match_ratio={quote_plus(str(attention_case.get('domain_match_ratio', '')))}",
+        f"missing_expected_domains={quote_plus(','.join(str(domain) for domain in attention_case.get('missing_expected_domains', [])))}",
+        f"unexpected_observed_domains={quote_plus(','.join(str(domain) for domain in attention_case.get('unexpected_observed_domains', [])))}",
+        f"linked_item={quote_plus(str(attention_case.get('case_id', '')))}",
+    ]
+    return f"annotations.html?{'&'.join(query_parts)}"
+
+
+
+def _is_safe_internal_navigation_href(href: str) -> bool:
+    return bool(re.fullmatch(r"[A-Za-z0-9_-]+\.html(?:\?[A-Za-z0-9%&=+,_:;./-]*)?(?:#[A-Za-z0-9%&=+,_:;./-]*)?", href))
+
+
+
 def _coverage_focus_row_attrs(*, country_id: str, focus_section: str, missing_domains: list[str] | None = None) -> str:
     attrs = [
         "class='coverage-focus-target'",
@@ -1032,7 +1059,18 @@ def _build_analyst_briefing_view_model(
     repo_closure_view_model = repo_closure_view_model or {}
     visibility = _country_coverage_visibility_rows(system_status_read_model)
 
-    def _append_item(*, category: str, title: str, why_it_matters: str, recommended_next_check: str, evidence_source: str, target_page: str) -> None:
+    def _append_item(
+        *,
+        category: str,
+        title: str,
+        why_it_matters: str,
+        recommended_next_check: str,
+        evidence_source: str,
+        target_page: str,
+        target_href: str | None = None,
+        action_label: str | None = None,
+        action_href: str | None = None,
+    ) -> None:
         items.append(
             {
                 'category': category,
@@ -1041,6 +1079,9 @@ def _build_analyst_briefing_view_model(
                 'recommended_next_check': recommended_next_check,
                 'evidence_source': evidence_source,
                 'target_page': target_page,
+                'target_href': target_href,
+                'action_label': action_label,
+                'action_href': action_href,
             }
         )
 
@@ -1057,6 +1098,7 @@ def _build_analyst_briefing_view_model(
             recommended_next_check=str(operator_blocker_causality_view_model.get('operator_next_action') or operator_release_summary_view_model.get('operator_next_action') or 'Inspect release blockers.'),
             evidence_source='release_evidence_assessment.json',
             target_page='readiness.html',
+            target_href='readiness.html',
         )
 
     country_gap_rows = [row for row in visibility.get('country_gap_rows', []) if isinstance(row, dict)]
@@ -1071,6 +1113,11 @@ def _build_analyst_briefing_view_model(
             recommended_next_check='Inspect country/domain gap details and source diagnostics in Coverage.',
             evidence_source='system_status.json country_coverage_visibility.country_gap_rows',
             target_page='coverage.html',
+            target_href=_coverage_prefill_href(
+                country_id=gap_country,
+                focus_section='country_gap',
+                missing_domains=missing_domains,
+            ),
         )
 
     historical_replay_summary = validation_view_model.get('historical_replay_summary', {})
@@ -1084,6 +1131,13 @@ def _build_analyst_briefing_view_model(
             recommended_next_check=str(top_case.get('suggested_next_action', 'Review validation evidence.')),
             evidence_source='validation_backtest.json historical_replay_summary.attention_cases',
             target_page='validation.html',
+            target_href=_validation_prefill_href(
+                country_id=str(top_case.get('country_id', 'unknown')),
+                case_id=str(top_case.get('case_id', 'unknown')),
+                attention_reason=str(top_case.get('attention_reason', 'validation_attention')),
+            ),
+            action_label='Create Annotation Draft',
+            action_href=_annotation_prefill_href(attention_case=top_case),
         )
 
     traceability_summary = traceability_view_model.get('summary', {}) if isinstance(traceability_view_model, dict) else {}
@@ -1112,6 +1166,7 @@ def _build_analyst_briefing_view_model(
             recommended_next_check='Inspect traceability.html and repo closure slice details.',
             evidence_source='traceability_lineage.json + repo_closure.json',
             target_page='traceability.html',
+            target_href='traceability.html',
         )
 
     operator_operability_status = str(operator_operability_cluster_view_model.get('cluster_status', 'unknown')).lower()
@@ -1129,6 +1184,7 @@ def _build_analyst_briefing_view_model(
             ),
             evidence_source='release_evidence_assessment.json operator_operability_cluster',
             target_page='readiness.html',
+            target_href='readiness.html',
         )
 
     stale_priority_watchlist = [row for row in visibility.get('stale_priority_watchlist', []) if isinstance(row, dict)]
@@ -1141,6 +1197,10 @@ def _build_analyst_briefing_view_model(
             recommended_next_check='Inspect stale coverage priority queue and remediation watchlist.',
             evidence_source='system_status.json country_coverage_visibility.stale_priority_watchlist',
             target_page='coverage.html',
+            target_href=_coverage_prefill_href(
+                country_id=str(top_stale.get('country_id', 'UNKNOWN')),
+                focus_section='stale_priority',
+            ),
         )
 
     if operator_stale_remediation_action_plan_view_model:
@@ -1154,6 +1214,7 @@ def _build_analyst_briefing_view_model(
                 recommended_next_check=str(operator_stale_remediation_action_plan_view_model.get('operator_next_action') or 'Review stale remediation action plan.'),
                 evidence_source='release_failure_drill_report.json operator_stale_remediation_action_plan',
                 target_page='readiness.html',
+                target_href='readiness.html',
             )
 
     for rank, item in enumerate(items, start=1):
@@ -1179,8 +1240,11 @@ def _build_analyst_briefing_view_model(
         'primary_item_title': top_item.get('title', 'n/a'),
         'primary_item_category': top_item.get('category', 'n/a'),
         'primary_item_target_page': top_item.get('target_page', 'n/a'),
+        'primary_item_target_href': top_item.get('target_href'),
         'primary_item_next_check': top_item.get('recommended_next_check', 'n/a'),
         'primary_item_evidence_source': top_item.get('evidence_source', 'n/a'),
+        'primary_item_action_label': top_item.get('action_label'),
+        'primary_item_action_href': top_item.get('action_href'),
         'target_page_counts': target_page_counts,
         'country_hotspot_matrix': _build_analyst_country_hotspot_matrix(
             system_status_read_model=system_status_read_model,
@@ -4162,6 +4226,16 @@ def _render_readiness(
 
     _analyst_briefing = analyst_briefing_view_model or {}
     _analyst_briefing_items = [item for item in _analyst_briefing.get('items', []) if isinstance(item, dict)]
+
+    def _render_analyst_briefing_link(*, href: str | None, label: str, css_class: str) -> str:
+        href = str(href or '').strip()
+        page_name = href.split('?', 1)[0].split('#', 1)[0]
+        if not href or not _is_safe_internal_navigation_href(href):
+            return html.escape(label)
+        if available_pages is not None and page_name not in available_pages:
+            return html.escape(label)
+        return f"<a class='{css_class}' href='{html.escape(href)}'>{html.escape(label)}</a>"
+
     _analyst_briefing_rows = ''.join(
         "<tr>"
         f"<td>{html.escape(str(item.get('rank', 'n/a')))}</td>"
@@ -4169,7 +4243,22 @@ def _render_readiness(
         f"<td>{html.escape(str(item.get('title', 'n/a')))}</td>"
         f"<td>{html.escape(str(item.get('why_it_matters', 'n/a')))}</td>"
         f"<td>{html.escape(str(item.get('recommended_next_check', 'n/a')))}</td>"
-        f"<td>{html.escape(str(item.get('target_page', 'n/a')))}</td>"
+        f"<td>{' | '.join(part for part in [
+            _render_analyst_briefing_link(
+                href=item.get('target_href'),
+                label=str(item.get('target_page', 'n/a')),
+                css_class='analyst-briefing-target-link',
+            ),
+            (
+                _render_analyst_briefing_link(
+                    href=item.get('action_href'),
+                    label=str(item.get('action_label', 'Open action')),
+                    css_class='analyst-briefing-action-link',
+                )
+                if item.get('action_href') and item.get('action_label')
+                else ''
+            ),
+        ] if part) or html.escape(str(item.get('target_page', 'n/a')))}</td>"
         "</tr>"
         for item in _analyst_briefing_items
     ) or "<tr><td colspan='6'>No analyst briefing items currently prioritized.</td></tr>"
@@ -4261,7 +4350,13 @@ def _render_readiness(
         f"<tbody>{_operator_stale_closure_rows}</tbody></table></div>"
         "<div class='panel'><div class='panel-header'>Analyst Briefing — What matters now?</div>"
         f"<p>Prioritized items: <strong>{html.escape(str(_analyst_briefing.get('item_count', 0)))}</strong> | release blockers: {html.escape(str(_analyst_briefing.get('release_blocker_count', 0)))} | country gaps: {html.escape(str(_analyst_briefing.get('country_gap_count', 0)))} | validation attention: {html.escape(str(_analyst_briefing.get('validation_attention_count', 0)))} | traceability risk: {html.escape(str(_analyst_briefing.get('traceability_risk_count', 0)))} | operability cluster: {html.escape(str(_analyst_briefing.get('operability_cluster_count', 0)))} | stale priorities: {html.escape(str(_analyst_briefing.get('stale_priority_count', 0)))} | stale remediation actions: {html.escape(str(_analyst_briefing.get('stale_remediation_action_plan_count', 0)))}</p>"
-        f"<p>Primary focus: <strong>{html.escape(str(_analyst_briefing.get('primary_item_title', 'n/a')))}</strong> → {html.escape(str(_analyst_briefing.get('primary_item_target_page', 'n/a')))} | next check: {html.escape(str(_analyst_briefing.get('primary_item_next_check', 'n/a')))} | evidence: {html.escape(str(_analyst_briefing.get('primary_item_evidence_source', 'n/a')))}</p>"
+        f"<p>Primary focus: <strong>{html.escape(str(_analyst_briefing.get('primary_item_title', 'n/a')))}</strong> → {_render_analyst_briefing_link(href=_analyst_briefing.get('primary_item_target_href'), label=str(_analyst_briefing.get('primary_item_target_page', 'n/a')), css_class='analyst-briefing-target-link')} | next check: {html.escape(str(_analyst_briefing.get('primary_item_next_check', 'n/a')))} | evidence: {html.escape(str(_analyst_briefing.get('primary_item_evidence_source', 'n/a')))}"
+        + (
+            f" | {_render_analyst_briefing_link(href=_analyst_briefing.get('primary_item_action_href'), label=str(_analyst_briefing.get('primary_item_action_label', 'Open action')), css_class='analyst-briefing-action-link')}"
+            if _analyst_briefing.get('primary_item_action_href') and _analyst_briefing.get('primary_item_action_label')
+            else ""
+        )
+        + "</p>"
         "<table><thead><tr><th>Rank</th><th>Category</th><th>Title</th><th>Why it matters</th><th>Recommended next check</th><th>Target page</th></tr></thead>"
         f"<tbody>{_analyst_briefing_rows}</tbody></table></div>"
         "<div class='panel'><div class='panel-header'>Analyst Hotspot Matrix — cross-signal convergence</div>"

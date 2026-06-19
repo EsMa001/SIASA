@@ -206,6 +206,66 @@ def test_build_analyst_briefing_view_model_adds_country_hotspot_matrix() -> None
 
 
 
+def test_build_analyst_briefing_view_model_adds_contextual_target_and_action_links() -> None:
+    briefing = local_app._build_analyst_briefing_view_model(
+        readiness_view_model={"release_verdict": "ready", "run_id": "RUN-TEST-003"},
+        release_gate_view_model={"gate_verdict": "go"},
+        system_status_read_model={
+            "country_coverage_visibility": {
+                "country_gap_rows": [
+                    {
+                        "country_id": "POL",
+                        "priority": "P1",
+                        "missing_domains": ["B", "D"],
+                    }
+                ],
+                "stale_priority_watchlist": [
+                    {
+                        "priority_rank": 1,
+                        "country_id": "UKR",
+                        "priority": "P1",
+                        "freshness_hours": 180.0,
+                        "source_depth_band": "deep",
+                    }
+                ],
+            }
+        },
+        validation_view_model={
+            "historical_replay_summary": {
+                "attention_cases": [
+                    {
+                        "country_id": "POL",
+                        "case_id": "VAL-POL-2024-001",
+                        "attention_reason": "status_mismatch",
+                        "suggested_next_action": "Review POL replay alignment.",
+                        "owner_hint": "analyst",
+                        "attention_level": "high",
+                        "review_verdict": "fail",
+                        "replay_evidence_tier": "verified",
+                        "replay_evidence_score": 0.42,
+                        "domain_match_ratio": 0.33,
+                        "missing_expected_domains": ["B", "D"],
+                        "unexpected_observed_domains": ["E"],
+                    }
+                ]
+            }
+        },
+    )
+
+    assert briefing["items"][0]["category"] == "country_gap"
+    assert briefing["items"][0]["target_href"] == "coverage.html?focus_country=POL&focus_section=country_gap&missing_domains=B%2CD#country-gap-POL"
+    assert briefing["items"][0]["action_href"] is None
+    assert briefing["items"][1]["category"] == "validation_attention"
+    assert briefing["items"][1]["target_href"] == "validation.html#ra=ra_reason=status_mismatch&ra_text=POL+VAL-POL-2024-001"
+    assert briefing["items"][1]["action_label"] == "Create Annotation Draft"
+    assert "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001" in briefing["items"][1]["action_href"]
+    assert "missing_expected_domains=B%2CD" in briefing["items"][1]["action_href"]
+    assert "unexpected_observed_domains=E" in briefing["items"][1]["action_href"]
+    assert briefing["items"][2]["category"] == "stale_priority"
+    assert briefing["items"][2]["target_href"] == "coverage.html?focus_country=UKR&focus_section=stale_priority#stale-priority-UKR"
+
+
+
 def test_source_depth_band_matches_artifact_thresholds() -> None:
     assert local_app._source_depth_band(1) == "minimal"
     assert local_app._source_depth_band(2) == "moderate"
@@ -3330,3 +3390,63 @@ def test_readiness_page_hides_suppressed_gaps_section_when_no_suppression(tmp_pa
     assert "known-gaps-panel" in html_out
     assert "suppressed-gaps-section" not in html_out
     assert "Suppression active" not in html_out
+
+
+
+def test_readiness_page_renders_contextual_analyst_briefing_links() -> None:
+    from siasa.gui.local_app import _render_readiness
+
+    html_out = _render_readiness(
+        readiness_view_model={
+            "run_id": "RUN-TEST-BRIEFING-001",
+            "snapshot_id": "SNAP-BRIEFING-001",
+            "demo_verdict": "ready",
+            "release_verdict": "ready",
+            "demo_checks": [],
+            "evidence_checks": [],
+            "artifact_checks": [],
+            "known_gaps": [],
+            "report_count": 0,
+            "country_profile_count": 0,
+            "domain_detail_count": 0,
+        },
+        analyst_briefing_view_model={
+            "item_count": 1,
+            "release_blocker_count": 0,
+            "country_gap_count": 0,
+            "validation_attention_count": 1,
+            "traceability_risk_count": 0,
+            "operability_cluster_count": 0,
+            "stale_priority_count": 0,
+            "stale_remediation_action_plan_count": 0,
+            "primary_item_title": "Validation attention: VAL-POL-2024-001",
+            "primary_item_target_page": "validation.html",
+            "primary_item_target_href": "validation.html#ra=ra_reason=status_mismatch&ra_text=POL+VAL-POL-2024-001",
+            "primary_item_next_check": "Review POL replay alignment.",
+            "primary_item_evidence_source": "validation_backtest.json historical_replay_summary.attention_cases",
+            "primary_item_action_label": "Create Annotation Draft",
+            "primary_item_action_href": "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001",
+            "country_hotspot_matrix": {"row_count": 0, "multi_signal_country_count": 0, "rows": []},
+            "items": [
+                {
+                    "rank": 1,
+                    "category": "validation_attention",
+                    "title": "Validation attention: VAL-POL-2024-001",
+                    "why_it_matters": "POL needs review because status_mismatch.",
+                    "recommended_next_check": "Review POL replay alignment.",
+                    "evidence_source": "validation_backtest.json historical_replay_summary.attention_cases",
+                    "target_page": "validation.html",
+                    "target_href": "validation.html#ra=ra_reason=status_mismatch&ra_text=POL+VAL-POL-2024-001",
+                    "action_label": "Create Annotation Draft",
+                    "action_href": "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001",
+                }
+            ],
+        },
+        available_pages={"validation.html", "annotations.html"},
+    )
+
+    assert "class='analyst-briefing-target-link'" in html_out
+    assert "validation.html#ra=ra_reason=status_mismatch&amp;ra_text=POL+VAL-POL-2024-001" in html_out
+    assert "class='analyst-briefing-action-link'" in html_out
+    assert "Create Annotation Draft</a>" in html_out
+    assert "annotations.html?scope=country&amp;annotation_type=review_note&amp;country_id=POL&amp;case_id=VAL-POL-2024-001" in html_out

@@ -912,6 +912,21 @@ Closure achieved:
 Steering note:
 This keeps the program on the intended default internal track: validation realism depth / analyst handoff refinement. The next bounded default should now prefer either (a) stronger validation-to-action closure on top of the richer 32-case portfolio or (b) another challenge-case realism slice only if it adds a new archetype rather than just more of the same.
 
+### N1-WP-058
+Name:
+Turn the readiness-facing analyst briefing into a context-carrying validation-to-action surface by attaching deterministic deep links for prioritized items and a direct prefilled annotation-draft handoff for validation-attention rows.
+
+Closure achieved:
+- Updated `src/siasa/gui/local_app.py` with reusable helpers `_annotation_prefill_href(...)` and `_is_safe_internal_navigation_href(...)`, then extended `_build_analyst_briefing_view_model(...)` so prioritized `country_gap`, `stale_priority`, `validation_attention`, `traceability_risk`, `operability_cluster`, and `stale_remediation_action_plan` rows now emit deterministic `target_href`
+- Validation-attention briefing rows now additionally emit `action_label=Create Annotation Draft` plus a context-preserving `action_href` to `annotations.html`, carrying the same replay-attention prefill semantics already used from `validation.html`
+- `_render_readiness(...)` now renders safe-gated `analyst-briefing-target-link` and `analyst-briefing-action-link` anchors in both the primary-focus summary and the analyst-briefing table instead of only static page-name text
+- Added RED/GREEN coverage in `tests/unit/test_local_gui.py` for contextual briefing links and readiness rendering; focused GUI regression passed (`23 passed in 108.20s`); full regression `534 passed in 345.76s`
+- GUI evidence is visible in `build/local_gui/_val_wp014_briefing_links/readiness.html`
+- Commit: `commit pending`
+
+Steering note:
+This closes the next bounded validation-to-action slice on top of the 32-case portfolio: analysts no longer need to manually reconstruct which Validation/Coverage state or annotation handoff belongs to the primary briefing item. The next bounded default should now prefer either another actionability-tightening slice around analyst execution context or a new challenge-case realism archetype if it adds genuinely new validation stress.
+
 ---
 
 ## 7. Trigger for the next steering pivot
