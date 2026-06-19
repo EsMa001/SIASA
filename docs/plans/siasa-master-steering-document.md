@@ -937,7 +937,7 @@ Closure achieved:
 - `render_release_demo_package_body(...)` now renders safe-gated `analyst-briefing-target-link` anchors in the package summary and prioritized-item table, plus action links when present, instead of only static page-name text
 - Added RED/GREEN coverage in `tests/unit/test_local_gui.py` for `release_demo_package.json` contextual href persistence and `release_package.html` link rendering; targeted regression passed (`2 passed in 2.43s`); focused GUI regression passed (`23 passed in 104.73s`); full regression `534 passed in 339.32s`
 - GUI evidence is visible in `build/local_gui/_val_wp015_release_handoff_links_demo/release_package.html`
-- Commit: `commit pending`
+- Commit: `e5d3d05`
 
 Steering note:
 This closes the next analyst-execution-context gap after N1-WP-058: management/reviewer handoff now preserves the exact review navigation target instead of forcing manual reconstruction from static page labels. The next bounded default should prefer either a similarly small actionability-tightening slice around reviewer execution context or, if materially higher value emerges, a genuinely new challenge-case realism archetype.
