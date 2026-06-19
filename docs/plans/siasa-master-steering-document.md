@@ -970,7 +970,7 @@ Closure achieved:
 - Confirmed the cover-sheet start point now stays aligned with the same contextual focus already preserved in `primary_item_target_href` and guided step `C3-02`
 - Added RED/GREEN coverage in `tests/unit/test_local_gui.py` proving the exported fallback-path `release_demo_package.json` points `start_here` to the contextual country-gap href; targeted regression passed (`2 passed in 2.64s`); focused GUI regression passed (`23 passed in 106.06s`); full regression `534 passed in 336.64s`
 - GUI evidence is visible in `build/local_gui/_val_wp017_cover_sheet_start_here_context/release_package.html`
-- Commit: `commit pending`
+- Commit: `695fa9c`
 
 Steering note:
 This closes the remaining stakeholder-cover-sheet handoff gap after N1-WP-060: the external package summary now starts at the same exact slice the reviewer package already identifies as most important, reducing one more manual navigation step in external review.
