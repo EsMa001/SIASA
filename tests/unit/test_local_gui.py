@@ -8,6 +8,10 @@ from pathlib import Path
 
 from siasa.gui import local_app
 from siasa.gui.local_app import build_local_mvp_site
+from siasa.readmodels.release_demo_package import (
+    build_release_demo_package_view_model,
+    render_release_demo_package_body,
+)
 from siasa.readmodels.release_evidence import build_release_failure_drill_report
 
 
@@ -3462,5 +3466,49 @@ def test_readiness_page_renders_contextual_analyst_briefing_links() -> None:
     assert "class='analyst-briefing-target-link'" in html_out
     assert "validation.html#ra=ra_reason=status_mismatch&amp;ra_text=POL+VAL-POL-2024-001" in html_out
     assert "class='analyst-briefing-action-link'" in html_out
+    assert "Create Annotation Draft</a>" in html_out
+    assert "annotations.html?scope=country&amp;annotation_type=review_note&amp;country_id=POL&amp;case_id=VAL-POL-2024-001" in html_out
+
+
+def test_release_demo_package_preserves_action_links_in_review_sequence_and_cover_sheet() -> None:
+    view_model = build_release_demo_package_view_model(
+        readiness_view_model={"release_verdict": "ready", "demo_verdict": "ready"},
+        release_gate_view_model={"gate_verdict": "go"},
+        validation_view_model={
+            "historical_replay_summary": {
+                "attention_cases": [
+                    {
+                        "country_id": "POL",
+                        "case_id": "VAL-POL-2024-001",
+                        "attention_reason": "status_mismatch",
+                        "suggested_next_action": "Review POL replay alignment.",
+                        "review_verdict": "warning",
+                        "replay_tier": "strong",
+                    }
+                ]
+            }
+        },
+        available_pages={"readiness.html", "validation.html", "annotations.html", "reports.html"},
+    )
+
+    assert view_model["primary_item_action_label"] == "Create Annotation Draft"
+    assert view_model["primary_item_action_href"].startswith(
+        "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001"
+    )
+    assert view_model["review_sequence"][1]["action_label"] == "Create Annotation Draft"
+    assert view_model["review_sequence"][1]["action_href"].startswith(
+        "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001"
+    )
+    assert view_model["review_sequence"][3]["action_label"] == "Create Annotation Draft"
+    assert view_model["review_sequence"][3]["action_href"].startswith(
+        "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001"
+    )
+    assert view_model["stakeholder_cover_sheet"]["start_here"]["action_label"] == "Create Annotation Draft"
+    assert view_model["stakeholder_cover_sheet"]["start_here"]["action_href"].startswith(
+        "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001"
+    )
+
+    html_out = render_release_demo_package_body(view_model)
+    assert "Page / action" in html_out
     assert "Create Annotation Draft</a>" in html_out
     assert "annotations.html?scope=country&amp;annotation_type=review_note&amp;country_id=POL&amp;case_id=VAL-POL-2024-001" in html_out

@@ -368,6 +368,8 @@ def build_release_demo_package_view_model(
             'expected_signal': str(source_items[0].get('title', 'n/a')),
             'available': _safe_navigation_page_name(str(source_items[0].get('target_href') or source_items[0].get('target_page', ''))) in available_pages,
             'href': str(source_items[0].get('target_href') or source_items[0].get('target_page', '')) if _safe_navigation_page_name(str(source_items[0].get('target_href') or source_items[0].get('target_page', ''))) in available_pages else '',
+            'action_label': source_items[0].get('action_label'),
+            'action_href': source_items[0].get('action_href') if _safe_navigation_page_name(str(source_items[0].get('action_href') or '')) in available_pages else '',
         },
         {
             'step_id': 'C3-03',
@@ -390,6 +392,8 @@ def build_release_demo_package_view_model(
             'expected_signal': 'attention cases, verdict mix, and replay evidence tier stay visible',
             'available': _safe_navigation_page_name(validation_focus_href) in available_pages,
             'href': validation_focus_href if _safe_navigation_page_name(validation_focus_href) in available_pages else '',
+            'action_label': top_validation_item.get('action_label'),
+            'action_href': str(top_validation_item.get('action_href') or '') if _safe_navigation_page_name(str(top_validation_item.get('action_href') or '')) in available_pages else '',
         },
         {
             'step_id': 'C3-05',
@@ -499,6 +503,8 @@ def build_release_demo_package_view_model(
             'page_label': _page_label(_safe_navigation_page_name(str(source_items[0].get('target_href') or source_items[0].get('target_page', review_sequence[0].get('page_name', 'readiness.html'))))),
             'href': str(source_items[0].get('target_href') or source_items[0].get('target_page', review_sequence[0].get('href', 'readiness.html'))),
             'reason': str(source_items[0].get('recommended_next_check') or 'Inspect the highest-priority current review item first.'),
+            'action_label': source_items[0].get('action_label'),
+            'action_href': source_items[0].get('action_href') or '',
         },
         'external_share_summary': {
             'recommendation': executive_decision_summary['recommendation'],
@@ -731,7 +737,10 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         '<tr>'
         f"<td>{html.escape(str(item.get('step_id', '')))}</td>"
         f"<td>{html.escape(str(item.get('phase', '')))}</td>"
-        f"<td>{_render_nav_link(href=item.get('href') or item.get('page_name'), label=str(item.get('page_label', '')), css_class='analyst-briefing-target-link', available_pages=available_pages)}</td>"
+        f"<td>{' | '.join(part for part in [
+            _render_nav_link(href=item.get('href') or item.get('page_name'), label=str(item.get('page_label', '')), css_class='analyst-briefing-target-link', available_pages=available_pages),
+            (_render_nav_link(href=item.get('action_href'), label=str(item.get('action_label', 'Open action')), css_class='analyst-briefing-action-link', available_pages=available_pages) if item.get('action_href') and item.get('action_label') else ''),
+        ] if part)}</td>"
         f"<td>{html.escape(str(item.get('objective', '')))}</td>"
         f"<td>{html.escape(str(item.get('reviewer_question', '')))}</td>"
         f"<td>{html.escape(str(item.get('expected_signal', '')))}</td>"
@@ -772,6 +781,8 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     cover_sheet_start_here_page = html.escape(str(cover_sheet_start_here.get('page_name', 'n/a')))
     cover_sheet_start_here_href = str(cover_sheet_start_here.get('href') or cover_sheet_start_here.get('page_name') or '').strip()
     cover_sheet_start_here_reason = html.escape(str(cover_sheet_start_here.get('reason', 'n/a')))
+    cover_sheet_start_here_action_label = str(cover_sheet_start_here.get('action_label') or '').strip()
+    cover_sheet_start_here_action_href = str(cover_sheet_start_here.get('action_href') or '').strip()
     external_share_summary = dict(stakeholder_cover_sheet.get('external_share_summary', {})) if isinstance(stakeholder_cover_sheet.get('external_share_summary'), dict) else {}
     external_share_summary_html = ''.join(
         f"<li><strong>{html.escape(str(key).replace('_', ' ').title())}</strong>: {html.escape(str(value))}</li>"
@@ -898,7 +909,7 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Guided review sequence</div>"
-        "<div class='table-wrap'><table><thead><tr><th>Step</th><th>Phase</th><th>Page</th><th>Objective</th><th>Reviewer question</th><th>Expected signal</th><th>Available</th></tr></thead><tbody>"
+        "<div class='table-wrap'><table><thead><tr><th>Step</th><th>Phase</th><th>Page / action</th><th>Objective</th><th>Reviewer question</th><th>Expected signal</th><th>Available</th></tr></thead><tbody>"
         f"{review_rows}"
         "</tbody></table></div>"
         "</section>"
@@ -932,7 +943,19 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<p><strong>Audience</strong>: {cover_sheet_audience}</p>"
         f"<p><strong>Requested decision</strong>: {cover_sheet_requested_decision}</p>"
         f"<div><strong>Top 3 caveats</strong><ul>{cover_sheet_top_caveats}</ul></div>"
-        f"<p><strong>Start here</strong>: {_render_nav_link(href=cover_sheet_start_here_href, label=str(cover_sheet_start_here.get('page_label', 'n/a')), css_class='analyst-briefing-target-link', available_pages=available_pages)} ({cover_sheet_start_here_page})</p>"
+        f"<p><strong>Start here</strong>: {_render_nav_link(href=cover_sheet_start_here_href, label=str(cover_sheet_start_here.get('page_label', 'n/a')), css_class='analyst-briefing-target-link', available_pages=available_pages)} ({cover_sheet_start_here_page})"
+        + (
+            " | "
+            + _render_nav_link(
+                href=cover_sheet_start_here_action_href,
+                label=cover_sheet_start_here_action_label,
+                css_class='analyst-briefing-action-link',
+                available_pages=available_pages,
+            )
+            if cover_sheet_start_here_action_href and cover_sheet_start_here_action_label
+            else ""
+        )
+        + "</p>"
         f"<p>{cover_sheet_start_here_reason}</p>"
         f"<div><strong>External-share summary</strong><ul>{external_share_summary_html}</ul></div>"
         "</section>"
