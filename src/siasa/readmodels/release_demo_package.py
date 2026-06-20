@@ -461,11 +461,15 @@ def build_release_demo_package_view_model(
         'canonical_handoff_artifact': canonical_handoff_artifact,
         'secondary_artifacts': share_now,
         'share_now': share_now,
+        'primary_follow_up_action_label': source_items[0].get('action_label'),
+        'primary_follow_up_action_href': source_items[0].get('action_href'),
         'decision_log_seed': {
             'package_status': package_status,
             'recommendation': executive_decision_summary['recommendation'],
             'primary_focus': source_items[0].get('title', 'n/a'),
             'next_check': source_items[0].get('recommended_next_check', 'n/a'),
+            'primary_follow_up_action_label': source_items[0].get('action_label') or '',
+            'primary_follow_up_action_href': source_items[0].get('action_href') or '',
         },
     }
     review_signoff_scaffold = {
@@ -513,6 +517,8 @@ def build_release_demo_package_view_model(
             'canonical_artifact': reviewer_handoff_summary['canonical_handoff_artifact'],
             'supporting_artifacts': reviewer_handoff_summary['share_now'],
             'primary_focus': source_items[0].get('title', 'n/a'),
+            'primary_follow_up_action_label': source_items[0].get('action_label') or '',
+            'primary_follow_up_action_href': source_items[0].get('action_href') or '',
         },
     }
     reviewer_handoff_summary['decision_log_seed'].update(
@@ -529,6 +535,8 @@ def build_release_demo_package_view_model(
             'requested_decision': stakeholder_cover_sheet['requested_decision'],
             'recommendation': executive_decision_summary['recommendation'],
             'decision_status': approval_state['decision_status'],
+            'primary_follow_up_action_label': source_items[0].get('action_label') or '',
+            'primary_follow_up_action_href': source_items[0].get('action_href') or '',
         },
         'distribution_bundle': reviewer_handoff_summary['share_now'],
         'decision_entry_template': {
@@ -538,6 +546,8 @@ def build_release_demo_package_view_model(
             'requested_decision': stakeholder_cover_sheet['requested_decision'],
             'primary_focus': source_items[0].get('title', 'n/a'),
             'canonical_artifact': reviewer_handoff_summary['canonical_handoff_artifact'],
+            'primary_follow_up_action_label': source_items[0].get('action_label') or '',
+            'primary_follow_up_action_href': source_items[0].get('action_href') or '',
         },
     }
     reviewer_disposition_standard = {
@@ -581,8 +591,12 @@ def build_release_demo_package_view_model(
             'selected_disposition': reviewer_disposition_standard['selected_disposition'],
             'decision_status': approval_state['decision_status'],
             'primary_focus': source_items[0].get('title', 'n/a'),
+            'primary_follow_up_action_label': source_items[0].get('action_label') or '',
+            'primary_follow_up_action_href': source_items[0].get('action_href') or '',
         },
         'share_now_packet': reviewer_handoff_summary['share_now'],
+        'primary_follow_up_action_label': source_items[0].get('action_label'),
+        'primary_follow_up_action_href': source_items[0].get('action_href'),
         'decision_packet_note': 'Export-ready seed for management/stakeholder forwarding; validate latest evidence before external send.',
     }
     decision_packet_send_readiness = {
@@ -760,6 +774,18 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     handoff_next_reviewer = html.escape(str(handoff_summary.get('next_reviewer_role', 'n/a')))
     handoff_canonical_artifact = html.escape(str(handoff_summary.get('canonical_handoff_artifact', 'n/a')))
     handoff_share_now = ''.join(f"<li>{html.escape(str(item))}</li>" for item in handoff_summary.get('share_now', [])) or '<li>none</li>'
+    handoff_primary_action_label = str(handoff_summary.get('primary_follow_up_action_label') or '').strip()
+    handoff_primary_action_href = str(handoff_summary.get('primary_follow_up_action_href') or '').strip()
+    handoff_primary_action_link = (
+        _render_nav_link(
+            href=handoff_primary_action_href,
+            label=handoff_primary_action_label,
+            css_class='analyst-briefing-action-link',
+            available_pages=available_pages,
+        )
+        if handoff_primary_action_href and handoff_primary_action_label
+        else ''
+    )
     decision_log_seed = dict(handoff_summary.get('decision_log_seed', {})) if isinstance(handoff_summary.get('decision_log_seed'), dict) else {}
     decision_log_seed_html = ''.join(
         f"<li><strong>{html.escape(str(key))}</strong>: {html.escape(str(value))}</li>"
@@ -833,6 +859,18 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     share_now_packet_html = ''.join(
         f"<li>{html.escape(str(item))}</li>" for item in decision_packet_seed.get('share_now_packet', [])
     ) or '<li>none</li>'
+    decision_packet_primary_action_label = str(decision_packet_seed.get('primary_follow_up_action_label') or '').strip()
+    decision_packet_primary_action_href = str(decision_packet_seed.get('primary_follow_up_action_href') or '').strip()
+    decision_packet_primary_action_link = (
+        _render_nav_link(
+            href=decision_packet_primary_action_href,
+            label=decision_packet_primary_action_label,
+            css_class='analyst-briefing-action-link',
+            available_pages=available_pages,
+        )
+        if decision_packet_primary_action_href and decision_packet_primary_action_label
+        else ''
+    )
     decision_packet_note = html.escape(str(decision_packet_seed.get('decision_packet_note', 'n/a')))
     decision_packet_send_readiness = dict(view_model.get('decision_packet_send_readiness', {})) if isinstance(view_model.get('decision_packet_send_readiness'), dict) else {}
     packet_send_readiness = html.escape(str(decision_packet_send_readiness.get('overall_send_readiness', 'n/a')))
@@ -926,9 +964,10 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         "<div class='panel-header'>Reviewer handoff and export summary</div>"
         f"<p><strong>Next reviewer role</strong>: {handoff_next_reviewer}</p>"
         f"<p><strong>Canonical handoff artifact</strong>: {handoff_canonical_artifact}</p>"
-        f"<div><strong>Share/export now</strong><ul>{handoff_share_now}</ul></div>"
-        f"<div><strong>Decision log seed</strong><ul>{decision_log_seed_html}</ul></div>"
-        "</section>"
+        + (f"<p><strong>Primary follow-up action</strong>: {handoff_primary_action_link}</p>" if handoff_primary_action_link else "")
+        + f"<div><strong>Share/export now</strong><ul>{handoff_share_now}</ul></div>"
+        + f"<div><strong>Decision log seed</strong><ul>{decision_log_seed_html}</ul></div>"
+        + "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Review sign-off scaffold</div>"
         f"<p><strong>Reviewer / approver</strong>: {signoff_reviewer_role}</p>"
@@ -985,8 +1024,9 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<p><strong>Packet headline</strong>: {packet_headline}</p>"
         f"<div><strong>Decision snapshot</strong><ul>{decision_snapshot_html}</ul></div>"
         f"<div><strong>Share now packet</strong><ul>{share_now_packet_html}</ul></div>"
-        f"<p><strong>Decision packet note</strong>: {decision_packet_note}</p>"
-        "</section>"
+        + (f"<p><strong>Primary follow-up action</strong>: {decision_packet_primary_action_link}</p>" if decision_packet_primary_action_link else "")
+        + f"<p><strong>Decision packet note</strong>: {decision_packet_note}</p>"
+        + "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Decision packet send-readiness checklist</div>"
         f"<p><strong>Overall send readiness</strong>: {packet_send_readiness}</p>"

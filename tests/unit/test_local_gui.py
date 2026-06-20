@@ -3507,8 +3507,21 @@ def test_release_demo_package_preserves_action_links_in_review_sequence_and_cove
     assert view_model["stakeholder_cover_sheet"]["start_here"]["action_href"].startswith(
         "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001"
     )
+    assert view_model["reviewer_handoff_summary"]["primary_follow_up_action_label"] == "Create Annotation Draft"
+    assert view_model["reviewer_handoff_summary"]["primary_follow_up_action_href"].startswith(
+        "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001"
+    )
+    assert view_model["reviewer_handoff_summary"]["decision_log_seed"]["primary_follow_up_action_label"] == "Create Annotation Draft"
+    assert view_model["stakeholder_cover_sheet"]["external_share_summary"]["primary_follow_up_action_label"] == "Create Annotation Draft"
+    assert view_model["decision_log_export_summary"]["requested_decision_linkage"]["primary_follow_up_action_label"] == "Create Annotation Draft"
+    assert view_model["decision_log_export_summary"]["decision_entry_template"]["primary_follow_up_action_label"] == "Create Annotation Draft"
+    assert view_model["decision_packet_seed"]["primary_follow_up_action_label"] == "Create Annotation Draft"
+    assert view_model["decision_packet_seed"]["primary_follow_up_action_href"].startswith(
+        "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001"
+    )
 
     html_out = render_release_demo_package_body(view_model)
     assert "Page / action" in html_out
+    assert "Primary follow-up action" in html_out
     assert "Create Annotation Draft</a>" in html_out
     assert "annotations.html?scope=country&amp;annotation_type=review_note&amp;country_id=POL&amp;case_id=VAL-POL-2024-001" in html_out
