@@ -977,6 +977,22 @@ This closes the remaining stakeholder-cover-sheet handoff gap after N1-WP-060: t
 
 ---
 
+### N1-WP-062
+Name:
+Preserve direct next-action handoff inside the release/demo package by carrying validation-derived action links through the guided review sequence and stakeholder cover sheet, not only through the primary-focus summary and prioritized-item table.
+
+Closure achieved:
+- Updated `src/siasa/readmodels/release_demo_package.py` so guided review steps `C3-02` and `C3-04` now preserve `action_label` / `action_href` when the active primary or validation-focus item already carries a direct action such as `Create Annotation Draft`
+- `stakeholder_cover_sheet.start_here` now carries the same action metadata in addition to contextual navigation metadata, keeping the external handoff aligned with the actionable validation slice
+- `render_release_demo_package_body(...)` now renders those direct action links in both the `Guided review sequence` table (`Page / action`) and the cover-sheet `Start here` line instead of leaving actionability only in earlier summary blocks
+- Added RED/GREEN coverage in `tests/unit/test_local_gui.py` for exported `release_demo_package.json` action-link persistence and rendered `release_package.html` action links; targeted regression passed (`1 passed in 1.33s`); focused GUI regression passed (`24 passed in 103.53s`); full regression passed (`535 passed in 335.77s`)
+- Commit: `148dd8b`
+
+Steering note:
+This keeps the program on the current validation realism / analyst-handoff track and closes the next reviewer-execution-context gap after N1-WP-061: the release package now preserves not only where to inspect next, but also the direct follow-up action when the active validation slice already implies one.
+
+---
+
 ## 7. Trigger for the next steering pivot
 
 Stay on the current steering path until one of these becomes true:
