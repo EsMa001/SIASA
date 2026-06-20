@@ -1086,6 +1086,22 @@ This closes the next bounded validation-to-action slice on top of the richer 35-
 
 ---
 
+### N1-WP-069
+Name:
+Turn replay-attention action handoff into deterministic annotation decision scaffolding by auto-selecting annotation type and explicit decision posture from the validation attention reason, so overcall, coverage, and weak-evidence cases do not all collapse into the same generic review note.
+
+Closure achieved:
+- Added `_annotation_type_and_decision_posture(...)` in both `src/siasa/gui/local_app.py` and `src/siasa/readmodels/release_demo_package.py` so replay-attention action links now deterministically map `status_overcall` to `false_positive_note`, coverage/weak-evidence paths to `source_quality_note`, and pure bounded mismatch paths to `review_note`
+- Updated validation-page replay-attention action links to reuse `_annotation_prefill_href(...)` instead of a duplicated hard-coded query string, keeping the deterministic annotation-type / decision-posture mapping aligned across validation, analyst briefing, and release-package handoff surfaces
+- Extended the annotation workflow query parser/rendering in `src/siasa/gui/local_app.py` so `decisionPosture` is parsed from query parameters, surfaced in the replay-attention prefill summary, added to generated annotation text, and combined with annotation-type tagging for more deterministic draft semantics
+- Updated `tests/unit/test_local_gui.py` with assertions for false-positive handoff propagation (`annotation_type=false_positive_note`), decision-posture query propagation, and annotation-workflow parser/rendering coverage; validation evidence: targeted regressions passed (`3 passed in 3.44s`), focused GUI regression passed (`25 passed in 104.80s`), full regression passed (`537 passed in 344.53s`)
+- Commit: `1434d0e`
+
+Steering note:
+This closes the next bounded decision-scaffolding slice after VAL-WP-023: the action path now preserves not only comparison context, but also a deterministic initial annotation posture that distinguishes false-positive review from source-quality review and generic bounded mismatch review. The next bounded default should now prefer either (a) a further validation-to-action slice that uses this posture to drive downstream reviewer-decision scaffolds, or (b) a materially different new challenge archetype.
+
+---
+
 ## 7. Trigger for the next steering pivot
 
 Stay on the current steering path until one of these becomes true:
