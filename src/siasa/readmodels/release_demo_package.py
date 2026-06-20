@@ -810,9 +810,22 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     cover_sheet_start_here_action_label = str(cover_sheet_start_here.get('action_label') or '').strip()
     cover_sheet_start_here_action_href = str(cover_sheet_start_here.get('action_href') or '').strip()
     external_share_summary = dict(stakeholder_cover_sheet.get('external_share_summary', {})) if isinstance(stakeholder_cover_sheet.get('external_share_summary'), dict) else {}
+    external_share_action_label = str(external_share_summary.get('primary_follow_up_action_label') or '').strip()
+    external_share_action_href = str(external_share_summary.get('primary_follow_up_action_href') or '').strip()
+    external_share_action_link = (
+        _render_nav_link(
+            href=external_share_action_href,
+            label=external_share_action_label,
+            css_class='analyst-briefing-action-link',
+            available_pages=available_pages,
+        )
+        if external_share_action_href and external_share_action_label
+        else ''
+    )
     external_share_summary_html = ''.join(
         f"<li><strong>{html.escape(str(key).replace('_', ' ').title())}</strong>: {html.escape(str(value))}</li>"
         for key, value in external_share_summary.items()
+        if key not in {'primary_follow_up_action_label', 'primary_follow_up_action_href'}
     ) or '<li>none</li>'
     decision_log_export_summary = dict(view_model.get('decision_log_export_summary', {})) if isinstance(view_model.get('decision_log_export_summary'), dict) else {}
     approval_state = dict(decision_log_export_summary.get('approval_state', {})) if isinstance(decision_log_export_summary.get('approval_state'), dict) else {}
@@ -821,17 +834,43 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         for key, value in approval_state.items()
     ) or '<li>none</li>'
     requested_decision_linkage = dict(decision_log_export_summary.get('requested_decision_linkage', {})) if isinstance(decision_log_export_summary.get('requested_decision_linkage'), dict) else {}
+    requested_decision_action_label = str(requested_decision_linkage.get('primary_follow_up_action_label') or '').strip()
+    requested_decision_action_href = str(requested_decision_linkage.get('primary_follow_up_action_href') or '').strip()
+    requested_decision_action_link = (
+        _render_nav_link(
+            href=requested_decision_action_href,
+            label=requested_decision_action_label,
+            css_class='analyst-briefing-action-link',
+            available_pages=available_pages,
+        )
+        if requested_decision_action_href and requested_decision_action_label
+        else ''
+    )
     requested_decision_linkage_html = ''.join(
         f"<li><strong>{html.escape(str(key).replace('_', ' ').title())}</strong>: {html.escape(str(value))}</li>"
         for key, value in requested_decision_linkage.items()
+        if key not in {'primary_follow_up_action_label', 'primary_follow_up_action_href'}
     ) or '<li>none</li>'
     distribution_bundle_html = ''.join(
         f"<li>{html.escape(str(item))}</li>" for item in decision_log_export_summary.get('distribution_bundle', [])
     ) or '<li>none</li>'
     decision_entry_template = dict(decision_log_export_summary.get('decision_entry_template', {})) if isinstance(decision_log_export_summary.get('decision_entry_template'), dict) else {}
+    decision_entry_action_label = str(decision_entry_template.get('primary_follow_up_action_label') or '').strip()
+    decision_entry_action_href = str(decision_entry_template.get('primary_follow_up_action_href') or '').strip()
+    decision_entry_action_link = (
+        _render_nav_link(
+            href=decision_entry_action_href,
+            label=decision_entry_action_label,
+            css_class='analyst-briefing-action-link',
+            available_pages=available_pages,
+        )
+        if decision_entry_action_href and decision_entry_action_label
+        else ''
+    )
     decision_entry_template_html = ''.join(
         f"<li><strong>{html.escape(str(key).replace('_', ' ').title())}</strong>: {html.escape(str(value))}</li>"
         for key, value in decision_entry_template.items()
+        if key not in {'primary_follow_up_action_label', 'primary_follow_up_action_href'}
     ) or '<li>none</li>'
     reviewer_disposition_standard = dict(view_model.get('reviewer_disposition_standard', {})) if isinstance(view_model.get('reviewer_disposition_standard'), dict) else {}
     disposition_options_html = ''.join(
@@ -996,15 +1035,18 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         )
         + "</p>"
         f"<p>{cover_sheet_start_here_reason}</p>"
-        f"<div><strong>External-share summary</strong><ul>{external_share_summary_html}</ul></div>"
-        "</section>"
+        + f"<div><strong>External-share summary</strong><ul>{external_share_summary_html}</ul></div>"
+        + (f"<p><strong>Primary follow-up action</strong>: {external_share_action_link}</p>" if external_share_action_link else "")
+        + "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Decision log export summary</div>"
         f"<div><strong>Approval state</strong><ul>{approval_state_html}</ul></div>"
-        f"<div><strong>Requested decision linkage</strong><ul>{requested_decision_linkage_html}</ul></div>"
-        f"<div><strong>Distribution bundle</strong><ul>{distribution_bundle_html}</ul></div>"
-        f"<div><strong>Decision entry template</strong><ul>{decision_entry_template_html}</ul></div>"
-        "</section>"
+        + f"<div><strong>Requested decision linkage</strong><ul>{requested_decision_linkage_html}</ul></div>"
+        + (f"<p><strong>Primary follow-up action</strong>: {requested_decision_action_link}</p>" if requested_decision_action_link else "")
+        + f"<div><strong>Distribution bundle</strong><ul>{distribution_bundle_html}</ul></div>"
+        + f"<div><strong>Decision entry template</strong><ul>{decision_entry_template_html}</ul></div>"
+        + (f"<p><strong>Decision-entry follow-up action</strong>: {decision_entry_action_link}</p>" if decision_entry_action_link else "")
+        + "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Reviewer disposition standard</div>"
         f"<div><strong>Disposition options</strong><ul>{disposition_options_html}</ul></div>"
