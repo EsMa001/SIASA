@@ -7530,6 +7530,7 @@ def build_local_mvp_site(
             traceability_view_model=traceability_view_model,
             repo_closure_view_model=repo_closure_view_model,
             analyst_briefing_view_model=analyst_briefing_view_model,
+            approval_lifecycle_view_model=approval_lifecycle_view_model,
             available_pages=available_pages,
         )
 

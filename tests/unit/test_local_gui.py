@@ -3544,3 +3544,66 @@ def test_release_demo_package_preserves_action_links_in_review_sequence_and_cove
     assert html_out.count("Primary follow-up action") >= 5
     assert html_out.count("Create Annotation Draft</a>") >= 7
     assert "annotations.html?scope=country&amp;annotation_type=review_note&amp;country_id=POL&amp;case_id=VAL-POL-2024-001" in html_out
+
+
+def test_release_demo_package_uses_actual_approval_lifecycle_state_when_present() -> None:
+    view_model = build_release_demo_package_view_model(
+        readiness_view_model={"release_verdict": "ready", "demo_verdict": "ready"},
+        release_gate_view_model={"gate_verdict": "go"},
+        validation_view_model={
+            "historical_replay_summary": {
+                "attention_cases": [
+                    {
+                        "country_id": "POL",
+                        "case_id": "VAL-POL-2024-001",
+                        "attention_reason": "status_mismatch",
+                        "suggested_next_action": "Review POL replay alignment.",
+                        "review_verdict": "warning",
+                        "replay_tier": "strong",
+                    }
+                ]
+            }
+        },
+        approval_lifecycle_view_model={
+            "lifecycle_state": "distributed",
+            "decision_status": "distributed",
+            "reviewer_role": "project_lead",
+            "decision_date_utc": "2026-06-20T12:00:00+00:00",
+            "distributed": True,
+            "distribution_date_utc": "2026-06-20T12:30:00+00:00",
+            "distribution_recipients": ["ops@example.com", "stakeholder@example.com"],
+            "distribution_bundle_artifacts": ["release_package.html", "distribution_note.md"],
+            "distribution_record_note": "Sent via governed stakeholder mailout.",
+            "lifecycle_status": {
+                "overall": "lifecycle_complete",
+                "external_send_allowed": True,
+                "operator_next_action": "Archive this package.",
+            },
+        },
+        available_pages={"readiness.html", "validation.html", "annotations.html", "reports.html", "release_package.html"},
+    )
+
+    assert view_model["review_signoff_scaffold"]["decision_status"] == "distributed"
+    assert view_model["review_signoff_scaffold"]["signoff_readiness"] == "distribution_completed"
+    assert view_model["approval_state"]["lifecycle_state"] == "distributed"
+    assert view_model["approval_state"]["distributed"] is True
+    assert view_model["approval_state"]["distribution_recipients"] == ["ops@example.com", "stakeholder@example.com"]
+    assert view_model["reviewer_handoff_summary"]["next_reviewer_role"] == "project_lead"
+    assert view_model["reviewer_handoff_summary"]["share_now"] == ["release_package.html", "distribution_note.md"]
+    assert view_model["stakeholder_cover_sheet"]["requested_decision"].startswith("Package distribution is already recorded")
+    assert view_model["stakeholder_cover_sheet"]["external_share_summary"]["distribution_recipients"] == ["ops@example.com", "stakeholder@example.com"]
+    assert view_model["stakeholder_cover_sheet"]["external_share_summary"]["distribution_note"] == "Sent via governed stakeholder mailout."
+    assert view_model["decision_packet_send_readiness"]["overall_send_readiness"] == "already_distributed"
+    assert view_model["decision_packet_send_readiness"]["external_send_allowed"] is True
+    assert view_model["decision_packet_send_readiness"]["next_unblocker"].startswith("Distribution outcome already recorded")
+    assert any(
+        item["item_id"] == "distribution_record_captured" and item["status"] == "pass"
+        for item in view_model["decision_packet_send_readiness"]["checklist_items"]
+    )
+
+    html_out = render_release_demo_package_body(view_model)
+    assert "distribution_completed" in html_out
+    assert "ops@example.com" in html_out
+    assert "stakeholder@example.com" in html_out
+    assert "already_distributed" in html_out
+    assert "distribution_record_captured" in html_out

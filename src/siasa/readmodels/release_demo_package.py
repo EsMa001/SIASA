@@ -105,6 +105,7 @@ def build_release_demo_package_view_model(
     traceability_view_model: dict[str, Any] | None = None,
     repo_closure_view_model: dict[str, Any] | None = None,
     analyst_briefing_view_model: dict[str, Any] | None = None,
+    approval_lifecycle_view_model: dict[str, Any] | None = None,
     available_pages: set[str] | None = None,
 ) -> dict[str, Any]:
     release_gate_view_model = release_gate_view_model or {}
@@ -117,6 +118,7 @@ def build_release_demo_package_view_model(
     traceability_view_model = traceability_view_model or {}
     repo_closure_view_model = repo_closure_view_model or {}
     analyst_briefing_view_model = analyst_briefing_view_model or {}
+    approval_lifecycle_view_model = approval_lifecycle_view_model or {}
     available_pages = set(available_pages or set())
 
     release_verdict = str(readiness_view_model.get('release_verdict', 'unknown'))
@@ -454,10 +456,40 @@ def build_release_demo_package_view_model(
         'strongest_evidence_points': strongest_evidence_points,
         'explicit_limitations': explicit_limitations,
     }
+    lifecycle_status = approval_lifecycle_view_model.get('lifecycle_status', {}) if isinstance(approval_lifecycle_view_model, dict) else {}
+    lifecycle_decision_status = str(approval_lifecycle_view_model.get('decision_status') or 'pending_signoff')
+    lifecycle_state = str(approval_lifecycle_view_model.get('lifecycle_state') or lifecycle_decision_status)
+    lifecycle_reviewer_role = str(
+        approval_lifecycle_view_model.get('reviewer_role')
+        or ('management' if package_status in {'ready', 'attention'} else 'operator')
+    )
+    lifecycle_distributed = bool(approval_lifecycle_view_model.get('distributed', False))
+    lifecycle_distribution_recipients = [
+        str(item) for item in approval_lifecycle_view_model.get('distribution_recipients', []) if str(item)
+    ] if isinstance(approval_lifecycle_view_model.get('distribution_recipients', []), list) else []
+    lifecycle_distribution_bundle_artifacts = [
+        str(item) for item in approval_lifecycle_view_model.get('distribution_bundle_artifacts', []) if str(item)
+    ] if isinstance(approval_lifecycle_view_model.get('distribution_bundle_artifacts', []), list) else []
+    lifecycle_distribution_note = str(approval_lifecycle_view_model.get('distribution_record_note') or '').strip()
+    signoff_readiness = (
+        'distribution_completed'
+        if lifecycle_distributed or lifecycle_state == 'distributed'
+        else (
+            'decision_recorded'
+            if lifecycle_decision_status in {'approved', 'approved_with_conditions'}
+            else (
+                'review_deferred'
+                if lifecycle_decision_status == 'deferred'
+                else ('review_rejected' if lifecycle_decision_status == 'rejected' else ('ready_for_review' if package_status in {'ready', 'attention'} else 'blocked_for_signoff'))
+            )
+        )
+    )
     canonical_handoff_artifact = 'release_package.html'
-    share_now = [item for item in ['release_package.html', 'release_demo_package.json', 'reports.html'] if item in available_pages or item.endswith('.json')]
+    share_now = lifecycle_distribution_bundle_artifacts or [
+        item for item in ['release_package.html', 'release_demo_package.json', 'reports.html'] if item in available_pages or item.endswith('.json')
+    ]
     reviewer_handoff_summary = {
-        'next_reviewer_role': 'management' if package_status in {'ready', 'attention'} else 'operator',
+        'next_reviewer_role': lifecycle_reviewer_role,
         'canonical_handoff_artifact': canonical_handoff_artifact,
         'secondary_artifacts': share_now,
         'share_now': share_now,
@@ -474,8 +506,8 @@ def build_release_demo_package_view_model(
     }
     review_signoff_scaffold = {
         'reviewer_role': reviewer_handoff_summary['next_reviewer_role'],
-        'decision_status': 'pending_signoff',
-        'decision_date_utc': '',
+        'decision_status': lifecycle_decision_status,
+        'decision_date_utc': str(approval_lifecycle_view_model.get('decision_date_utc') or ''),
         'bounded_rationale': [
             f"Recommendation={executive_decision_summary['recommendation']}",
             f"Confidence={executive_decision_summary['decision_confidence']}",
@@ -483,25 +515,53 @@ def build_release_demo_package_view_model(
         ],
         'follow_up_actions': [
             str(source_items[0].get('recommended_next_check', 'Review the primary package item.')),
-            'Record reviewer decision and date before external distribution.',
+            (
+                'Distribution already recorded; verify recipients and archive the lifecycle outcome.'
+                if lifecycle_distributed or lifecycle_state == 'distributed'
+                else (
+                    'Resolve approval conditions, then proceed with controlled distribution.'
+                    if lifecycle_decision_status == 'approved_with_conditions'
+                    else (
+                        'Re-open review once deferred conditions are resolved.'
+                        if lifecycle_decision_status == 'deferred'
+                        else (
+                            'Address rejection rationale before re-initiating review.'
+                            if lifecycle_decision_status == 'rejected'
+                            else 'Record reviewer decision and date before external distribution.'
+                        )
+                    )
+                )
+            ),
         ],
         'primary_follow_up_action_label': source_items[0].get('action_label'),
         'primary_follow_up_action_href': source_items[0].get('action_href'),
-        'signoff_readiness': 'ready_for_review' if package_status in {'ready', 'attention'} else 'blocked_for_signoff',
+        'signoff_readiness': signoff_readiness,
     }
     approval_state = {
         'package_status': package_status,
         'recommendation': executive_decision_summary['recommendation'],
+        'lifecycle_state': lifecycle_state,
         'decision_status': review_signoff_scaffold['decision_status'],
         'signoff_readiness': review_signoff_scaffold['signoff_readiness'],
         'reviewer_role': review_signoff_scaffold['reviewer_role'],
+        'distributed': lifecycle_distributed,
+        'distribution_date_utc': str(approval_lifecycle_view_model.get('distribution_date_utc') or ''),
+        'distribution_recipients': lifecycle_distribution_recipients,
     }
     stakeholder_cover_sheet = {
         'audience': 'management / external stakeholder reviewer',
         'requested_decision': (
-            'Approve external review handoff and proceed with stakeholder walkthrough.'
-            if package_status in {'ready', 'attention'}
-            else 'Do not distribute externally until the blocking package issue is resolved.'
+            'Package distribution is already recorded; confirm the governed recipients and archive outcome evidence.'
+            if lifecycle_distributed or lifecycle_state == 'distributed'
+            else (
+                'Resolve explicit approval conditions before stakeholder distribution proceeds.'
+                if lifecycle_decision_status == 'approved_with_conditions'
+                else (
+                    'Approve external review handoff and proceed with stakeholder walkthrough.'
+                    if package_status in {'ready', 'attention'}
+                    else 'Do not distribute externally until the blocking package issue is resolved.'
+                )
+            )
         ),
         'top_3_caveats': (top_blockers + explicit_limitations)[:3] or ['No explicit caveats recorded.'],
         'start_here': {
@@ -518,6 +578,8 @@ def build_release_demo_package_view_model(
             'decision_status': approval_state['decision_status'],
             'canonical_artifact': reviewer_handoff_summary['canonical_handoff_artifact'],
             'supporting_artifacts': reviewer_handoff_summary['share_now'],
+            'distribution_recipients': lifecycle_distribution_recipients,
+            'distribution_note': lifecycle_distribution_note,
             'primary_focus': source_items[0].get('title', 'n/a'),
             'primary_follow_up_action_label': source_items[0].get('action_label') or '',
             'primary_follow_up_action_href': source_items[0].get('action_href') or '',
@@ -555,8 +617,17 @@ def build_release_demo_package_view_model(
     reviewer_disposition_standard = {
         'disposition_options': ['approve', 'approve_with_conditions', 'defer', 'reject'],
         'selected_disposition': (
-            'approve' if package_status == 'ready'
-            else ('approve_with_conditions' if package_status == 'attention' else 'defer')
+            'approve'
+            if lifecycle_decision_status in {'approved', 'distributed'}
+            else (
+                'approve_with_conditions'
+                if lifecycle_decision_status == 'approved_with_conditions'
+                else (
+                    'defer'
+                    if lifecycle_decision_status == 'deferred'
+                    else ('reject' if lifecycle_decision_status == 'rejected' else ('approve' if package_status == 'ready' else ('approve_with_conditions' if package_status == 'attention' else 'defer')))
+                )
+            )
         ),
         'disposition_rationale_bounds': [
             'State the decision in one of the standard disposition categories only.',
@@ -605,18 +676,30 @@ def build_release_demo_package_view_model(
     }
     decision_packet_send_readiness = {
         'overall_send_readiness': (
-            'ready_to_send'
-            if package_status == 'ready' and approval_state['decision_status'] == 'approved'
-            else ('internal_review_only' if package_status in {'ready', 'attention'} else 'blocked')
-        ),
-        'external_send_allowed': package_status == 'ready' and approval_state['decision_status'] == 'approved',
-        'next_unblocker': (
-            'Capture explicit reviewer approval in the sign-off scaffold before external send.'
-            if package_status in {'ready', 'attention'} and approval_state['decision_status'] != 'approved'
+            'already_distributed'
+            if lifecycle_distributed or lifecycle_state == 'distributed'
             else (
-                'Resolve the blocking package issue before any external distribution.'
-                if package_status == 'blocked'
-                else 'Packet may be distributed externally.'
+                'ready_to_send'
+                if package_status == 'ready' and approval_state['decision_status'] == 'approved'
+                else ('internal_review_only' if package_status in {'ready', 'attention'} else 'blocked')
+            )
+        ),
+        'external_send_allowed': (
+            lifecycle_distributed
+            or lifecycle_state == 'distributed'
+            or (package_status == 'ready' and approval_state['decision_status'] == 'approved')
+        ),
+        'next_unblocker': (
+            'Distribution outcome already recorded; archive the packet and confirm recipient traceability.'
+            if lifecycle_distributed or lifecycle_state == 'distributed'
+            else (
+                'Capture explicit reviewer approval in the sign-off scaffold before external send.'
+                if package_status in {'ready', 'attention'} and approval_state['decision_status'] != 'approved'
+                else (
+                    'Resolve the blocking package issue before any external distribution.'
+                    if package_status == 'blocked'
+                    else 'Packet may be distributed externally.'
+                )
             )
         ),
         'checklist_items': [
@@ -629,7 +712,7 @@ def build_release_demo_package_view_model(
             {
                 'item_id': 'reviewer_signoff_captured',
                 'label': 'Reviewer sign-off is captured',
-                'status': 'pass' if approval_state['decision_status'] == 'approved' else 'pending',
+                'status': 'pass' if approval_state['decision_status'] in {'approved', 'approved_with_conditions', 'distributed'} else 'pending',
                 'reason': f"decision_status={approval_state['decision_status']}",
             },
             {
@@ -643,6 +726,16 @@ def build_release_demo_package_view_model(
                 'label': 'Distribution bundle is prepared',
                 'status': 'pass' if bool(reviewer_handoff_summary['share_now']) else 'block',
                 'reason': ', '.join(reviewer_handoff_summary['share_now']) or 'none',
+            },
+            {
+                'item_id': 'distribution_record_captured',
+                'label': 'Distribution outcome is recorded when already sent',
+                'status': 'pass' if not lifecycle_distributed or bool(lifecycle_distribution_recipients) else 'pending',
+                'reason': (
+                    ', '.join(lifecycle_distribution_recipients)
+                    if lifecycle_distribution_recipients
+                    else ('not_distributed' if not lifecycle_distributed else 'distribution recipients missing')
+                ),
             },
             {
                 'item_id': 'decision_scope_bounded',
@@ -685,6 +778,7 @@ def build_release_demo_package_view_model(
         'executive_decision_summary': executive_decision_summary,
         'reviewer_handoff_summary': reviewer_handoff_summary,
         'review_signoff_scaffold': review_signoff_scaffold,
+        'approval_state': approval_state,
         'stakeholder_cover_sheet': stakeholder_cover_sheet,
         'decision_log_export_summary': decision_log_export_summary,
         'reviewer_disposition_standard': reviewer_disposition_standard,

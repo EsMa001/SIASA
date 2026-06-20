@@ -461,6 +461,19 @@ def write_run_artifacts(
     )
     readmodel_paths.append(readiness_path)
 
+    # G4: Approval lifecycle record - load existing or create default pending record
+    approval_lifecycle_path = readmodels_dir / "approval_lifecycle_record.json"
+    existing_record = load_approval_lifecycle_record(approval_lifecycle_path)
+    if existing_record is None:
+        existing_record = build_default_approval_lifecycle_record(
+            package_run_id=run_state.run_id if run_state is not None else '',
+        )
+    approval_lifecycle_vm = build_approval_lifecycle_view_model(existing_record)
+    approval_lifecycle_path.write_text(
+        json.dumps(approval_lifecycle_vm, indent=2, sort_keys=True)
+    )
+    readmodel_paths.append(approval_lifecycle_path)
+
     release_demo_package_path = readmodels_dir / "release_demo_package.json"
     release_demo_package_path.write_text(
         json.dumps(
@@ -478,6 +491,7 @@ def write_run_artifacts(
                 validation_view_model=validation_view_model,
                 traceability_view_model=json.loads(traceability_path.read_text()),
                 repo_closure_view_model=json.loads(repo_closure_path.read_text()),
+                approval_lifecycle_view_model=approval_lifecycle_vm,
                 available_pages=readiness_available_pages,
             ),
             indent=2,
@@ -518,19 +532,6 @@ def write_run_artifacts(
         )
     )
     readmodel_paths.append(release_gate_path)
-
-    # G4: Approval lifecycle record - load existing or create default pending record
-    approval_lifecycle_path = readmodels_dir / "approval_lifecycle_record.json"
-    existing_record = load_approval_lifecycle_record(approval_lifecycle_path)
-    if existing_record is None:
-        existing_record = build_default_approval_lifecycle_record(
-            package_run_id=run_state.run_id if run_state is not None else '',
-        )
-    approval_lifecycle_vm = build_approval_lifecycle_view_model(existing_record)
-    approval_lifecycle_path.write_text(
-        json.dumps(approval_lifecycle_vm, indent=2, sort_keys=True)
-    )
-    readmodel_paths.append(approval_lifecycle_path)
 
     release_assessment = build_repo_release_gate_assessment(repo_root=Path(__file__).resolve().parents[3])
     release_evidence_assessment_path = readmodels_dir / "release_evidence_assessment.json"
