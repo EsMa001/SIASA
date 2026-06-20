@@ -874,15 +874,40 @@ def _validation_prefill_href(*, country_id: str, case_id: str, attention_reason:
 
 
 
+def _annotation_type_and_decision_posture(*, attention_case: dict[str, Any]) -> tuple[str, str]:
+    attention_reason = str(attention_case.get('attention_reason', '') or '').strip().lower()
+    if attention_reason == 'status_overcall':
+        return (
+            'false_positive_note',
+            'Treat as potential false-positive over-escalation until bounded expectation alignment is reviewed.',
+        )
+    if attention_reason in {'domain_coverage_gap', 'weak_replay_evidence'}:
+        return (
+            'source_quality_note',
+            'Treat as source-quality or coverage issue before escalating this case.',
+        )
+    if attention_reason == 'status_mismatch_and_domain_gap':
+        return (
+            'source_quality_note',
+            'Review expectation alignment and source coverage together before treating this case as a strong signal.',
+        )
+    return (
+        'review_note',
+        'Review bounded validation expectation alignment before accepting or rejecting this signal.',
+    )
+
+
 def _annotation_prefill_href(*, attention_case: dict[str, Any]) -> str:
+    annotation_type, decision_posture = _annotation_type_and_decision_posture(attention_case=attention_case)
     query_parts = [
         "scope=country",
-        "annotation_type=review_note",
+        f"annotation_type={quote_plus(annotation_type)}",
         f"country_id={quote_plus(str(attention_case.get('country_id', '')))}",
         f"case_id={quote_plus(str(attention_case.get('case_id', '')))}",
         f"attention_reason={quote_plus(str(attention_case.get('attention_reason', '')))}",
         f"owner_hint={quote_plus(str(attention_case.get('owner_hint', '')))}",
         f"suggested_next_action={quote_plus(str(attention_case.get('suggested_next_action', '')))}",
+        f"decision_posture={quote_plus(decision_posture)}",
         f"attention_level={quote_plus(str(attention_case.get('attention_level', '')))}",
         f"replay_evidence_tier={quote_plus(str(attention_case.get('replay_evidence_tier', '')))}",
         f"review_verdict={quote_plus(str(attention_case.get('review_verdict', '')))}",
@@ -5036,7 +5061,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         f"<td>{html.escape('missing=' + (', '.join(str(domain) for domain in item.get('missing_expected_domains', [])) or 'none') + '; unexpected=' + (', '.join(str(domain) for domain in item.get('unexpected_observed_domains', [])) or 'none'))}</td>"
         f"<td>{html.escape(str(item.get('suggested_next_action', 'n/a')))}</td>"
         + (
-            f"<td><a class='replay-attention-create-annotation' href='annotations.html?scope=country&annotation_type=review_note&country_id={quote_plus(str(item.get('country_id', '')))}&case_id={quote_plus(str(item.get('case_id', '')))}&attention_reason={quote_plus(str(item.get('attention_reason', '')))}&owner_hint={quote_plus(str(item.get('owner_hint', '')))}&suggested_next_action={quote_plus(str(item.get('suggested_next_action', '')))}&attention_level={quote_plus(str(item.get('attention_level', '')))}&replay_evidence_tier={quote_plus(str(item.get('replay_evidence_tier', '')))}&review_verdict={quote_plus(str(item.get('review_verdict', '')))}&replay_evidence_score={quote_plus(str(item.get('replay_evidence_score', '')))}&domain_match_ratio={quote_plus(str(item.get('domain_match_ratio', '')))}&missing_expected_domains={quote_plus(','.join(str(domain) for domain in item.get('missing_expected_domains', [])))}&unexpected_observed_domains={quote_plus(','.join(str(domain) for domain in item.get('unexpected_observed_domains', [])))}&linked_item={quote_plus(str(item.get('case_id', '')))}'>Create Annotation Draft</a></td>"
+            f"<td><a class='replay-attention-create-annotation' href='{html.escape(_annotation_prefill_href(attention_case=item), quote=True)}'>Create Annotation Draft</a></td>"
             if can_create_annotation_drafts
             else "<td>Annotation workflow unavailable for this role</td>"
         )
@@ -6246,7 +6271,7 @@ function setWorkflowStatus(message){ document.getElementById('annotation-workflo
 function renderReplayAttentionPrefillSummary(context, validation){
   const summaryElement = document.getElementById('replay-attention-prefill-summary');
   if (!summaryElement) { return; }
-  const hasReplayContext = Boolean(context && (context.caseId || context.countryId || context.attentionReason || context.ownerHint || context.suggestedNextAction || context.attentionLevel || context.replayEvidenceTier || context.reviewVerdict || context.expectedStatus || context.replayedStatus));
+  const hasReplayContext = Boolean(context && (context.caseId || context.countryId || context.attentionReason || context.ownerHint || context.suggestedNextAction || context.decisionPosture || context.attentionLevel || context.replayEvidenceTier || context.reviewVerdict || context.expectedStatus || context.replayedStatus));
   if (!hasReplayContext) {
     summaryElement.textContent = 'No replay-attention query parameters detected.';
     return;
@@ -6261,6 +6286,7 @@ function renderReplayAttentionPrefillSummary(context, validation){
     `Reason: ${context.attentionReason || 'n/a'}`,
     `Owner hint: ${context.ownerHint || 'n/a'}`,
     `Suggested next action: ${context.suggestedNextAction || 'n/a'}`,
+    `Decision posture: ${context.decisionPosture || 'n/a'}`,
     `Attention level: ${context.attentionLevel || 'n/a'}`,
     `Replay evidence tier: ${context.replayEvidenceTier || 'n/a'}`,
     `Review verdict: ${context.reviewVerdict || 'n/a'}`,
@@ -6308,6 +6334,7 @@ function collectReplayAttentionPrefillContextFromQuery(){
     attentionReason: (params.get('attention_reason') || '').trim(),
     ownerHint: (params.get('owner_hint') || '').trim(),
     suggestedNextAction: (params.get('suggested_next_action') || '').trim(),
+    decisionPosture: (params.get('decision_posture') || '').trim(),
     attentionLevel: (params.get('attention_level') || '').trim().toLowerCase(),
     replayEvidenceTier: (params.get('replay_evidence_tier') || '').trim().toLowerCase(),
     reviewVerdict: (params.get('review_verdict') || '').trim().toLowerCase(),
@@ -6320,7 +6347,7 @@ function collectReplayAttentionPrefillContextFromQuery(){
   };
 }
 function validateReplayAttentionPrefillContext(context){
-  const hasReplayContext = Boolean(context.caseId || context.countryId || context.attentionReason || context.ownerHint || context.suggestedNextAction || context.attentionLevel || context.replayEvidenceTier || context.reviewVerdict || context.expectedStatus || context.replayedStatus);
+  const hasReplayContext = Boolean(context.caseId || context.countryId || context.attentionReason || context.ownerHint || context.suggestedNextAction || context.decisionPosture || context.attentionLevel || context.replayEvidenceTier || context.reviewVerdict || context.expectedStatus || context.replayedStatus);
   if (!hasReplayContext) { return { hasReplayContext: false, missing: [] }; }
   const required = ['countryId', 'caseId', 'attentionReason', 'ownerHint', 'suggestedNextAction', 'attentionLevel', 'replayEvidenceTier', 'reviewVerdict'];
   const missing = required.filter((key) => !String(context[key] || '').trim());
@@ -6336,6 +6363,7 @@ function prefillAnnotationFromQuery(){
   const attentionReason = context.attentionReason;
   const ownerHint = context.ownerHint;
   const suggestedNextAction = context.suggestedNextAction;
+  const decisionPosture = context.decisionPosture;
   const attentionLevel = context.attentionLevel;
   const replayEvidenceTier = context.replayEvidenceTier;
   const reviewVerdict = context.reviewVerdict;
@@ -6373,6 +6401,7 @@ function prefillAnnotationFromQuery(){
   }
   const tagParts = ['replay_attention'];
   if (attentionReason) { tagParts.push(attentionReason); }
+  if (annotationType) { tagParts.push(annotationType); }
   if (replayEvidenceTier) { tagParts.push(replayEvidenceTier); }
   if (reviewVerdict) { tagParts.push(reviewVerdict); }
   if (expectedStatus) { tagParts.push(`expected_${expectedStatus.toLowerCase()}`); }
@@ -6403,6 +6432,7 @@ function prefillAnnotationFromQuery(){
       `Reason: ${attentionReason || 'n/a'}.`,
       `Owner: ${ownerHint || 'n/a'}.`,
       `Suggested next action: ${suggestedNextAction || 'n/a'}.`,
+      `Decision posture: ${decisionPosture || 'n/a'}.`,
     ].join(' ') + statusSummary + evidenceSummary;
     document.getElementById('annotation-text-input').value = summary;
   }

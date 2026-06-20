@@ -240,7 +240,7 @@ def test_build_analyst_briefing_view_model_adds_contextual_target_and_action_lin
                     {
                         "country_id": "POL",
                         "case_id": "VAL-POL-2024-001",
-                        "attention_reason": "status_mismatch",
+                        "attention_reason": "status_overcall",
                         "suggested_next_action": "Review POL replay alignment.",
                         "owner_hint": "analyst",
                         "attention_level": "high",
@@ -262,9 +262,10 @@ def test_build_analyst_briefing_view_model_adds_contextual_target_and_action_lin
     assert briefing["items"][0]["target_href"] == "coverage.html?focus_country=POL&focus_section=country_gap&missing_domains=B%2CD#country-gap-POL"
     assert briefing["items"][0]["action_href"] is None
     assert briefing["items"][1]["category"] == "validation_attention"
-    assert briefing["items"][1]["target_href"] == "validation.html#ra=ra_reason=status_mismatch&ra_text=POL+VAL-POL-2024-001"
+    assert briefing["items"][1]["target_href"] == "validation.html#ra=ra_reason=status_overcall&ra_text=POL+VAL-POL-2024-001"
     assert briefing["items"][1]["action_label"] == "Create Annotation Draft"
-    assert "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001" in briefing["items"][1]["action_href"]
+    assert "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001" in briefing["items"][1]["action_href"]
+    assert "decision_posture=Treat+as+potential+false-positive+over-escalation+until+bounded+expectation+alignment+is+reviewed." in briefing["items"][1]["action_href"]
     assert "expected_status=S1" in briefing["items"][1]["action_href"]
     assert "replayed_status=S3" in briefing["items"][1]["action_href"]
     assert "missing_expected_domains=B%2CD" in briefing["items"][1]["action_href"]
@@ -1834,12 +1835,15 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "prefillAnnotationFromQuery" in annotations_html
     assert "renderReplayAttentionPrefillSummary" in annotations_html
     assert "collectReplayAttentionPrefillContextFromQuery" in annotations_html
+    assert "annotationType: params.get('annotation_type') || ''" in annotations_html
     assert "countryId: (params.get('country_id') || '').trim()" in annotations_html
     assert "caseId: (params.get('case_id') || '').trim()" in annotations_html
     assert "attentionReason: (params.get('attention_reason') || '').trim()" in annotations_html
     assert "ownerHint: (params.get('owner_hint') || '').trim()" in annotations_html
     assert "suggestedNextAction: (params.get('suggested_next_action') || '').trim()" in annotations_html
+    assert "decisionPosture: (params.get('decision_posture') || '').trim()" in annotations_html
     assert "attentionLevel: (params.get('attention_level') || '').trim().toLowerCase()" in annotations_html
+
     assert "validateReplayAttentionPrefillContext" in annotations_html
     assert "replayEvidenceTier: (params.get('replay_evidence_tier') || '').trim().toLowerCase()" in annotations_html
     assert "reviewVerdict: (params.get('review_verdict') || '').trim().toLowerCase()" in annotations_html
@@ -1851,10 +1855,12 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "unexpectedObservedDomains: (params.get('unexpected_observed_domains') || '').trim()" in annotations_html
     assert "Replay-attention prefill missing fields:" in annotations_html
     assert "Prefilled replay-attention workflow for" in annotations_html
+    assert "Decision posture:" in annotations_html
     assert "severityByAttentionLevel" in annotations_html
     assert "confidenceByReplayTier" in annotations_html
     assert "reviewStatusByVerdict" in annotations_html
     assert "document.getElementById('annotation-review-status-input').value = reviewStatusByVerdict[reviewVerdict];" in annotations_html
+    assert "if (annotationType) { tagParts.push(annotationType); }" in annotations_html
     assert "verified_replay_evidence" in annotations_html
     assert "strong_replay_evidence" in annotations_html
     assert "weak_replay_evidence" in annotations_html
@@ -1862,6 +1868,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "expected_status=" in annotations_html
     assert "replayed_status=" in annotations_html
     assert "Status comparison: expected=${expectedStatus || 'n/a'}, replayed=${replayedStatus || 'n/a'}." in annotations_html
+    assert "Decision posture: ${decisionPosture || 'n/a'}." in annotations_html
     assert "domain_match_ratio=" in annotations_html
     assert "missing_expected_domains=" in annotations_html
     assert "unexpected_observed_domains=" in annotations_html
@@ -3450,24 +3457,24 @@ def test_readiness_page_renders_contextual_analyst_briefing_links() -> None:
             "stale_remediation_action_plan_count": 0,
             "primary_item_title": "Validation attention: VAL-POL-2024-001",
             "primary_item_target_page": "validation.html",
-            "primary_item_target_href": "validation.html#ra=ra_reason=status_mismatch&ra_text=POL+VAL-POL-2024-001",
+            "primary_item_target_href": "validation.html#ra=ra_reason=status_overcall&ra_text=POL+VAL-POL-2024-001",
             "primary_item_next_check": "Review POL replay alignment.",
             "primary_item_evidence_source": "validation_backtest.json historical_replay_summary.attention_cases",
             "primary_item_action_label": "Create Annotation Draft",
-            "primary_item_action_href": "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001",
+            "primary_item_action_href": "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001&decision_posture=Treat+as+potential+false-positive+over-escalation+until+bounded+expectation+alignment+is+reviewed.",
             "country_hotspot_matrix": {"row_count": 0, "multi_signal_country_count": 0, "rows": []},
             "items": [
                 {
                     "rank": 1,
                     "category": "validation_attention",
                     "title": "Validation attention: VAL-POL-2024-001",
-                    "why_it_matters": "POL needs review because status_mismatch.",
+                    "why_it_matters": "POL needs review because status_overcall.",
                     "recommended_next_check": "Review POL replay alignment.",
                     "evidence_source": "validation_backtest.json historical_replay_summary.attention_cases",
                     "target_page": "validation.html",
-                    "target_href": "validation.html#ra=ra_reason=status_mismatch&ra_text=POL+VAL-POL-2024-001",
+                    "target_href": "validation.html#ra=ra_reason=status_overcall&ra_text=POL+VAL-POL-2024-001",
                     "action_label": "Create Annotation Draft",
-                    "action_href": "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001",
+                    "action_href": "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001&decision_posture=Treat+as+potential+false-positive+over-escalation+until+bounded+expectation+alignment+is+reviewed.",
                 }
             ],
         },
@@ -3475,10 +3482,10 @@ def test_readiness_page_renders_contextual_analyst_briefing_links() -> None:
     )
 
     assert "class='analyst-briefing-target-link'" in html_out
-    assert "validation.html#ra=ra_reason=status_mismatch&amp;ra_text=POL+VAL-POL-2024-001" in html_out
+    assert "validation.html#ra=ra_reason=status_overcall&amp;ra_text=POL+VAL-POL-2024-001" in html_out
     assert "class='analyst-briefing-action-link'" in html_out
     assert "Create Annotation Draft</a>" in html_out
-    assert "annotations.html?scope=country&amp;annotation_type=review_note&amp;country_id=POL&amp;case_id=VAL-POL-2024-001" in html_out
+    assert "annotations.html?scope=country&amp;annotation_type=false_positive_note&amp;country_id=POL&amp;case_id=VAL-POL-2024-001&amp;decision_posture=Treat+as+potential+false-positive+over-escalation+until+bounded+expectation+alignment+is+reviewed." in html_out
 
 
 def test_release_demo_package_preserves_action_links_in_review_sequence_and_cover_sheet() -> None:
@@ -3506,50 +3513,51 @@ def test_release_demo_package_preserves_action_links_in_review_sequence_and_cove
 
     assert view_model["primary_item_action_label"] == "Create Annotation Draft"
     assert view_model["primary_item_action_href"].startswith(
-        "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001"
+        "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001"
     )
     assert "expected_status=S1" in view_model["primary_item_action_href"]
     assert "replayed_status=S3" in view_model["primary_item_action_href"]
+    assert "decision_posture=Treat+as+potential+false-positive+over-escalation+until+bounded+expectation+alignment+is+reviewed." in view_model["primary_item_action_href"]
     assert view_model["review_sequence"][1]["action_label"] == "Create Annotation Draft"
     assert view_model["review_sequence"][1]["action_href"].startswith(
-        "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001"
+        "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001"
     )
     assert view_model["review_sequence"][3]["action_label"] == "Create Annotation Draft"
     assert view_model["review_sequence"][3]["action_href"].startswith(
-        "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001"
+        "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001"
     )
     assert view_model["stakeholder_cover_sheet"]["start_here"]["action_label"] == "Create Annotation Draft"
     assert view_model["stakeholder_cover_sheet"]["start_here"]["action_href"].startswith(
-        "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001"
+        "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001"
     )
     assert view_model["reviewer_handoff_summary"]["primary_follow_up_action_label"] == "Create Annotation Draft"
     assert view_model["reviewer_handoff_summary"]["primary_follow_up_action_href"].startswith(
-        "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001"
+        "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001"
     )
     assert view_model["reviewer_handoff_summary"]["decision_log_seed"]["primary_follow_up_action_label"] == "Create Annotation Draft"
     assert view_model["review_signoff_scaffold"]["primary_follow_up_action_label"] == "Create Annotation Draft"
     assert view_model["review_signoff_scaffold"]["primary_follow_up_action_href"].startswith(
-        "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001"
+        "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001"
     )
     assert view_model["disposition_action_routing"]["primary_follow_up_action_label"] == "Create Annotation Draft"
     assert view_model["disposition_action_routing"]["primary_follow_up_action_href"].startswith(
-        "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001"
+        "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001"
     )
     assert view_model["stakeholder_cover_sheet"]["external_share_summary"]["primary_follow_up_action_label"] == "Create Annotation Draft"
     assert view_model["stakeholder_cover_sheet"]["external_share_summary"]["primary_follow_up_action_href"].startswith(
-        "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001"
+        "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001"
     )
     assert view_model["decision_log_export_summary"]["requested_decision_linkage"]["primary_follow_up_action_label"] == "Create Annotation Draft"
     assert view_model["decision_log_export_summary"]["requested_decision_linkage"]["primary_follow_up_action_href"].startswith(
-        "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001"
+        "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001"
     )
     assert view_model["decision_log_export_summary"]["decision_entry_template"]["primary_follow_up_action_label"] == "Create Annotation Draft"
     assert view_model["decision_log_export_summary"]["decision_entry_template"]["primary_follow_up_action_href"].startswith(
-        "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001"
+        "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001"
     )
     assert view_model["decision_packet_seed"]["primary_follow_up_action_label"] == "Create Annotation Draft"
     assert view_model["decision_packet_seed"]["primary_follow_up_action_href"].startswith(
-        "annotations.html?scope=country&annotation_type=review_note&country_id=POL&case_id=VAL-POL-2024-001"
+        "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001"
     )
 
     html_out = render_release_demo_package_body(view_model)
@@ -3558,7 +3566,8 @@ def test_release_demo_package_preserves_action_links_in_review_sequence_and_cove
     assert "Decision-entry follow-up action" in html_out
     assert html_out.count("Primary follow-up action") >= 5
     assert html_out.count("Create Annotation Draft</a>") >= 7
-    assert "annotations.html?scope=country&amp;annotation_type=review_note&amp;country_id=POL&amp;case_id=VAL-POL-2024-001" in html_out
+    assert "annotations.html?scope=country&amp;annotation_type=false_positive_note&amp;country_id=POL&amp;case_id=VAL-POL-2024-001" in html_out
+    assert "decision_posture=Treat+as+potential+false-positive+over-escalation+until+bounded+expectation+alignment+is+reviewed." in html_out
     assert "expected_status=S1" in html_out
     assert "replayed_status=S3" in html_out
 
