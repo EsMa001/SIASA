@@ -84,6 +84,8 @@ def _annotation_prefill_href(*, attention_case: dict[str, Any]) -> str:
         f"review_verdict={quote_plus(str(attention_case.get('review_verdict', '')))}",
         f"replay_evidence_score={quote_plus(str(attention_case.get('replay_evidence_score', '')))}",
         f"domain_match_ratio={quote_plus(str(attention_case.get('domain_match_ratio', '')))}",
+        f"expected_status={quote_plus(str(attention_case.get('expected_status', '')))}",
+        f"replayed_status={quote_plus(str(attention_case.get('replayed_status', '')))}",
         f"missing_expected_domains={quote_plus(','.join(str(domain) for domain in attention_case.get('missing_expected_domains', [])))}",
         f"unexpected_observed_domains={quote_plus(','.join(str(domain) for domain in attention_case.get('unexpected_observed_domains', [])))}",
         f"linked_item={quote_plus(str(attention_case.get('case_id', '')))}",
