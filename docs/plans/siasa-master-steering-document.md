@@ -993,6 +993,21 @@ This keeps the program on the current validation realism / analyst-handoff track
 
 ---
 
+### N1-WP-063
+Name:
+Propagate the active validation-derived follow-up action through the downstream release/export summary surfaces so reviewer handoff, external-share summary, decision-log export, and decision-packet seed stay actionable instead of preserving navigation context only.
+
+Closure achieved:
+- Updated `src/siasa/readmodels/release_demo_package.py` so `reviewer_handoff_summary`, `decision_log_seed`, `stakeholder_cover_sheet.external_share_summary`, `decision_log_export_summary`, and `decision_packet_seed` now preserve `primary_follow_up_action_label` / `primary_follow_up_action_href` whenever the active primary item already carries a direct action such as `Create Annotation Draft`
+- `render_release_demo_package_body(...)` now renders `Primary follow-up action` directly in the `Reviewer handoff and export summary` and `Decision packet seed` panels, so downstream management/export views no longer lose the actionable follow-up context already visible in guided-review and cover-sheet paths
+- Added RED/GREEN coverage in `tests/unit/test_local_gui.py` for machine-readable action propagation across these summary/export structures and for rendered `release_package.html` action-link visibility; targeted regression passed (`1 passed in 1.60s`); focused GUI regression passed (`24 passed in 108.96s`); full regression passed (`535 passed in 341.10s`)
+- Commit: `eaa81a8`
+
+Steering note:
+This closes the next release/export actionability gap after N1-WP-062: downstream reviewer and stakeholder packet summaries now preserve not only the contextual slice and navigation target, but also the direct follow-up action for that slice.
+
+---
+
 ## 7. Trigger for the next steering pivot
 
 Stay on the current steering path until one of these becomes true:
