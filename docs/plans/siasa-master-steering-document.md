@@ -1023,6 +1023,21 @@ This closes the next downstream export-visibility gap after N1-WP-063: the relea
 
 ---
 
+### N1-WP-065
+Name:
+Make the same propagated validation follow-up action directly visible in the remaining review-governance panels (`Review sign-off scaffold` and `Disposition-aware action routing`) so operator/reviewer execution context stays consistent across all release-package decision surfaces.
+
+Closure achieved:
+- Updated `src/siasa/readmodels/release_demo_package.py` so `review_signoff_scaffold` and `disposition_action_routing` now both preserve `primary_follow_up_action_label` / `primary_follow_up_action_href` whenever the active primary item already carries a direct action such as `Create Annotation Draft`
+- `render_release_demo_package_body(...)` now renders explicit safe-gated `Primary follow-up action` links in both the `Review sign-off scaffold` and `Disposition-aware action routing` panels instead of leaving those governance views with only prose follow-up bullets
+- Added RED/GREEN coverage in `tests/unit/test_local_gui.py` for machine-readable propagation into these structures plus increased rendered action-link visibility/multiplicity (`Primary follow-up action` count, repeated `Create Annotation Draft` links); targeted regression passed (`1 passed in 0.67s`); focused GUI regression passed (`24 passed in 113.61s`); full regression passed (`535 passed in 349.26s`)
+- Commit: `47b08dd`
+
+Steering note:
+This closes the next remaining release-governance action-visibility gap after N1-WP-064: sign-off and disposition-routing panels now preserve the same executable follow-up action already visible in review, cover-sheet, export, and packet surfaces.
+
+---
+
 ## 7. Trigger for the next steering pivot
 
 Stay on the current steering path until one of these becomes true:
