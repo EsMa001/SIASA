@@ -122,7 +122,7 @@ def _safe_sortable_ratio(value: object) -> float:
 
 
 def _attention_owner_hint(attention_reason: str) -> str:
-    if attention_reason in {"status_mismatch", "status_mismatch_and_domain_gap"}:
+    if attention_reason in {"status_mismatch", "status_mismatch_and_domain_gap", "status_overcall"}:
         return "validation governance"
     if attention_reason == "domain_coverage_gap":
         return "runtime/source coverage"
@@ -133,6 +133,10 @@ def _attention_owner_hint(attention_reason: str) -> str:
 
 def _attention_level_rank(attention_level: str) -> int:
     return {"high": 0, "medium": 1, "low": 2}.get(attention_level, 9)
+
+
+def _status_rank(status: str) -> int:
+    return {"S0": 0, "S1": 1, "S2": 2, "S3": 3, "S4": 4, "S5": 5, "S6": 6}.get(str(status).upper(), -1)
 
 
 def _attention_country_summary(attention_cases: list[dict[str, object]]) -> list[dict[str, object]]:
@@ -206,6 +210,9 @@ def _replay_attention_cases(historical_replay_reviews: list[dict[str, object]]) 
             unexpected_observed_domains = _coerce_string_list(review.get("unexpected_observed_domains"))
             has_domain_gap = bool(missing_expected_domains or unexpected_observed_domains)
             attention_level = "high"
+            expected_status = str(review.get("expected_status", ""))
+            replayed_status = str(review.get("replayed_status", ""))
+            is_status_overcall = _status_rank(replayed_status) > _status_rank(expected_status)
             if has_domain_gap:
                 attention_reason = "status_mismatch_and_domain_gap"
                 if missing_expected_domains and unexpected_observed_domains:
@@ -220,6 +227,11 @@ def _replay_attention_cases(historical_replay_reviews: list[dict[str, object]]) 
                     suggested_next_action = (
                         "Review reference-case expectation alignment and archival replay provenance before using this case as a strong validation signal."
                     )
+            elif is_status_overcall:
+                attention_reason = "status_overcall"
+                suggested_next_action = (
+                    "Review why replay evidence escalates above the bounded reference expectation before treating this case as a credible high-severity signal."
+                )
             else:
                 attention_reason = "status_mismatch"
                 suggested_next_action = (

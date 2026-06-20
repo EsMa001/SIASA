@@ -594,3 +594,60 @@ validation_cases:
       - domains_b_and_d_intentionally_absent_from_replay_bundle
       - expected_status_reflects_context_not_replay_signal_availability
     validation_metrics: [Status Match, Evidence Tier, Attention Level]
+
+  - case_id: VAL-CHE-2024-CHALLENGE-001
+    country_id: CHE
+    case_name: Switzerland 2024 bounded-overcall challenge case
+    case_type: challenge_overcall
+    time_start: "2024-10-03"
+    time_end: "2024-10-04"
+    expected_domains: [A, B, D]
+    expected_status: S1
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: curated_public_source
+    expected_signal_pattern: A bounded low-intensity control/reference posture is expected, but the replay bundle intentionally contains a denser cross-domain signal mix that escalates above the bounded reference expectation.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Prove that SIASA can distinguish a false-positive or over-sensitive replay escalation from the intended bounded reference expectation and route it as a high-attention validation issue.
+    known_limitations:
+      - replay_bundle_intentionally_reuses a denser multi-domain signal profile to test overcall detection in the control/reference lane
+      - expected_status_is_bounded_by_reference_case_design_not_by_replay_signal_density
+    validation_metrics: [Status Match, Domain Match, Attention Level]
+
+  - case_id: VAL-NLD-2024-CHALLENGE-001
+    country_id: NLD
+    case_name: Netherlands 2024 bounded-overcall challenge case
+    case_type: challenge_overcall
+    time_start: "2024-10-10"
+    time_end: "2024-10-11"
+    expected_domains: [A, B, D]
+    expected_status: S1
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: curated_public_source
+    expected_signal_pattern: The reference expectation remains bounded and low-intensity, but the replay bundle intentionally carries a full A/B/D signal mix strong enough to overcall the scenario.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Prove that SIASA flags when replay evidence escalates above a bounded control/reference expectation even though domain coverage itself looks complete.
+    known_limitations:
+      - replay_bundle_intentionally_dense_to_test overcall handling rather than source sparsity or domain gaps
+      - expected_status_is_bounded_by_reference_case_design_not_by_replay_signal_density
+    validation_metrics: [Status Match, Domain Match, Attention Level]
+
+  - case_id: VAL-CAN-2024-CHALLENGE-001
+    country_id: CAN
+    case_name: Canada 2024 bounded-overcall challenge case
+    case_type: challenge_overcall
+    time_start: "2024-10-16"
+    time_end: "2024-10-17"
+    expected_domains: [A, B, D]
+    expected_status: S1
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: curated_public_source
+    expected_signal_pattern: A calm control/reference expectation is bounded at S1, while the replay bundle intentionally introduces enough A/B/D signal density to create an overcall condition.
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    validation_goal: Prove that SIASA routes control/reference over-escalation as a distinct high-attention challenge instead of treating every mismatch as under-detection only.
+    known_limitations:
+      - replay_bundle_intentionally_dense_to exercise overcall detection in a control/reference country
+      - expected_status_is_bounded_by_reference_case_design_not_by_replay_signal_density
+    validation_metrics: [Status Match, Domain Match, Attention Level]

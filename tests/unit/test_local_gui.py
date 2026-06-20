@@ -537,6 +537,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
             "case_type_counts": {
                 "challenge_mismatch": 1,
                 "challenge_domain_gap": 1,
+                "challenge_overcall": 1,
                 "disinformation_spike": 1,
                 "hybrid_pressure": 1,
                 "military_escalation": 1,
@@ -1572,6 +1573,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Challenge-Case Type Summary" in validation_html
     assert "challenge_mismatch" in validation_html
     assert "challenge_domain_gap" in validation_html
+    assert "challenge_overcall" in validation_html
     assert "challenge-case-type-table" in validation_html
     assert "challenge cases" in validation_html
     assert "non-perfect replay outcomes" in validation_html

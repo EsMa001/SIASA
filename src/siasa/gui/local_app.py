@@ -5196,11 +5196,13 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         'challenge_mismatch': 'Status mismatch with weak domain coverage — expected and observed status diverge with only partial source backing.',
         'challenge_domain_gap': 'Replay match but with missing expected domains — source coverage is incomplete for one or more governed domains.',
         'challenge_weak_evidence': 'Weak replay evidence only — archival coverage is thin (single-domain, low-signal), reducing interpretation confidence.',
+        'challenge_overcall': 'Replay evidence escalates above the bounded reference expectation — the case is useful for catching false-positive severity interpretation or over-sensitive replay windows.',
     }
-    _CHALLENGE_TYPE_OPERATOR_HINTS: dict[str, str] = {
+    challenge_operator_hints = {
         'challenge_mismatch': 'Review reference-case expectation alignment and archival provenance before using as a strong validation signal.',
         'challenge_domain_gap': 'Review missing expected domains and source coverage before treating this replay as fully representative.',
         'challenge_weak_evidence': 'Expand archival source coverage or treat as indicative only — not suitable for strong validation claims.',
+        'challenge_overcall': 'Review why replay evidence over-escalates above the bounded reference expectation before using this replay as a strong alerting exemplar.',
     }
     case_type_counts: dict[str, int] = dict(reference_case_library_summary.get('case_type_counts') or {})
     challenge_type_counts = {k: v for k, v in case_type_counts.items() if k.startswith('challenge_')}
@@ -5209,7 +5211,7 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
         f"<td><span class='badge badge-orange' style='font-size:11px;'>{html.escape(ct)}</span></td>"
         f"<td style='text-align:center;font-weight:600;color:#dae2fd;'>{html.escape(str(cnt))}</td>"
         f"<td style='color:#b9c7e0;font-size:12px;'>{html.escape(_CHALLENGE_TYPE_DESCRIPTIONS.get(ct, ct))}</td>"
-        f"<td style='color:#6b7d99;font-size:11px;'>{html.escape(_CHALLENGE_TYPE_OPERATOR_HINTS.get(ct, ''))}</td>"
+        f"<td style='color:#6b7d99;font-size:11px;'>{html.escape(challenge_operator_hints.get(ct, ''))}</td>"
         "</tr>"
         for ct, cnt in sorted(challenge_type_counts.items())
     ) or "<tr><td colspan='4' style='color:#6b7d99;'>No challenge case types in the current library.</td></tr>"

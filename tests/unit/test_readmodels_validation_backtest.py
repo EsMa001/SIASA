@@ -137,11 +137,12 @@ def test_reference_case_library_summary_aggregates_case_types_countries_and_time
     summary = build_reference_case_library_summary(cases)
 
     assert summary == {
-        "case_count": 32,
-        "countries_covered": ["CHN", "DEU", "EGY", "EST", "FIN", "GEO", "IND", "IRN", "ISR", "MMR", "NGA", "PAK", "POL", "QAT", "RUS", "SAU", "SDN", "TUR", "TWN", "UKR", "USA"],
+        "case_count": 35,
+        "countries_covered": ["CAN", "CHE", "CHN", "DEU", "EGY", "EST", "FIN", "GEO", "IND", "IRN", "ISR", "MMR", "NGA", "NLD", "PAK", "POL", "QAT", "RUS", "SAU", "SDN", "TUR", "TWN", "UKR", "USA"],
         "case_type_counts": {
             "challenge_domain_gap": 3,
             "challenge_mismatch": 3,
+            "challenge_overcall": 3,
             "challenge_weak_evidence": 3,
             "disinformation_spike": 1,
             "hybrid_pressure": 3,
@@ -160,20 +161,20 @@ def test_historical_reference_review_summary_scores_curated_case_alignment_and_e
     summary = build_historical_reference_review_summary(cases)
 
     assert summary == {
-        "case_count": 32,
-        "countries_covered": ["CHN", "DEU", "EGY", "EST", "FIN", "GEO", "IND", "IRN", "ISR", "MMR", "NGA", "PAK", "POL", "QAT", "RUS", "SAU", "SDN", "TUR", "TWN", "UKR", "USA"],
+        "case_count": 35,
+        "countries_covered": ["CAN", "CHE", "CHN", "DEU", "EGY", "EST", "FIN", "GEO", "IND", "IRN", "ISR", "MMR", "NGA", "NLD", "PAK", "POL", "QAT", "RUS", "SAU", "SDN", "TUR", "TWN", "UKR", "USA"],
         "review_verdict_counts": {
             "historical_alignment_confirmed": 20,
-            "historical_alignment_mismatch": 7,
+            "historical_alignment_mismatch": 10,
             "historical_alignment_with_gaps": 5,
         },
         "evidence_tier_counts": {
             "corroborated_multi_source": 19,
-            "curated_public_source": 10,
+            "curated_public_source": 13,
             "provisional": 1,
             "verified_multi_source": 2,
         },
-        "average_evidence_score": 0.74,
+        "average_evidence_score": 0.73,
     }
 
 
@@ -185,11 +186,14 @@ def test_validation_reference_library_includes_extended_focus_challenge_cases_fo
     challenge_ids = sorted(case.case_id for case in cases if "CHALLENGE" in case.case_id)
 
     assert challenge_ids == [
+        "VAL-CAN-2024-CHALLENGE-001",
+        "VAL-CHE-2024-CHALLENGE-001",
         "VAL-CHN-2024-CHALLENGE-001",
         "VAL-DEU-2024-CHALLENGE-001",
         "VAL-EGY-2024-CHALLENGE-001",
         "VAL-GEO-2023-CHALLENGE-001",
         "VAL-IRN-2023-CHALLENGE-001",
+        "VAL-NLD-2024-CHALLENGE-001",
         "VAL-PAK-2024-CHALLENGE-001",
         "VAL-RUS-2024-CHALLENGE-001",
         "VAL-UKR-2023-CHALLENGE-001",
@@ -233,6 +237,48 @@ def test_historical_replay_summary_marks_status_only_mismatch_without_domain_gap
             "missing_expected_domains": [],
             "unexpected_observed_domains": [],
             "suggested_next_action": "Review reference-case expectation alignment before using this case as a strong validation signal.",
+        }
+    ]
+
+
+def test_historical_replay_summary_marks_status_overcall_without_domain_gap_distinctly() -> None:
+    summary = build_historical_replay_summary(
+        [
+            {
+                "case_id": "VAL-TST-OVERCALL-001",
+                "country_id": "CHE",
+                "review_verdict": "replay_mismatch",
+                "status_match": False,
+                "expected_status": "S1",
+                "replayed_status": "S3",
+                "missing_expected_domains": [],
+                "unexpected_observed_domains": [],
+                "replay_evidence_tier": "partial_replay_evidence",
+                "replay_source_coverage_ratio": 1.0,
+                "replay_provenance_completeness_ratio": 1.0,
+                "replay_evidence_score": 0.6,
+                "domain_match_ratio": 1.0,
+                "review_basis": "provider_backed_archival_replay",
+                "replay_input_source_ids": ["SRC-GDELT-DOC", "SRC-GDELT-EVENTS", "SRC-GDACS", "WB-INDICATORS"],
+                "replay_input_record_count": 8,
+                "archival_data_files": ["archival_replay_inputs/VAL-TST-OVERCALL-001.json"],
+            }
+        ]
+    )
+
+    assert summary["attention_cases"] == [
+        {
+            "case_id": "VAL-TST-OVERCALL-001",
+            "country_id": "CHE",
+            "review_verdict": "replay_mismatch",
+            "attention_level": "high",
+            "attention_reason": "status_overcall",
+            "owner_hint": "validation governance",
+            "replay_evidence_tier": "partial_replay_evidence",
+            "replay_source_coverage_ratio": 1.0,
+            "missing_expected_domains": [],
+            "unexpected_observed_domains": [],
+            "suggested_next_action": "Review why replay evidence escalates above the bounded reference expectation before treating this case as a credible high-severity signal.",
         }
     ]
 
@@ -485,53 +531,61 @@ def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> 
         "VAL-USA-2024-CHALLENGE-001",
         "VAL-DEU-2024-CHALLENGE-001",
         "VAL-EGY-2024-CHALLENGE-001",
+        "VAL-CHE-2024-CHALLENGE-001",
+        "VAL-NLD-2024-CHALLENGE-001",
+        "VAL-CAN-2024-CHALLENGE-001",
     ]
     assert summary == {
-        "case_count": 32,
-        "countries_covered": ["CHN", "DEU", "EGY", "EST", "FIN", "GEO", "IND", "IRN", "ISR", "MMR", "NGA", "PAK", "POL", "QAT", "RUS", "SAU", "SDN", "TUR", "TWN", "UKR", "USA"],
+        "case_count": 35,
+        "countries_covered": ["CAN", "CHE", "CHN", "DEU", "EGY", "EST", "FIN", "GEO", "IND", "IRN", "ISR", "MMR", "NGA", "NLD", "PAK", "POL", "QAT", "RUS", "SAU", "SDN", "TUR", "TWN", "UKR", "USA"],
         "review_verdict_counts": {
             "replay_match": 21,
             "replay_match_with_gaps": 4,
-            "replay_mismatch": 7,
+            "replay_mismatch": 10,
         },
         "status_match_count": 25,
-        "average_domain_match_ratio": 0.81,
-        "average_replay_evidence_score": 0.82,
-        "average_replay_source_coverage_ratio": 0.8,
+        "average_domain_match_ratio": 0.83,
+        "average_replay_evidence_score": 0.8,
+        "average_replay_source_coverage_ratio": 0.82,
         "average_replay_provenance_completeness_ratio": 1.0,
-        "replay_input_record_total": 195,
-        "archival_data_file_count": 32,
+        "replay_input_record_total": 219,
+        "archival_data_file_count": 35,
         "replay_evidence_tier_counts": {
+            "partial_replay_evidence": 3,
             "strong_replay_evidence": 4,
             "verified_replay_evidence": 21,
             "weak_replay_evidence": 7,
         },
         "replay_input_source_coverage_counts": {
-            "SRC-GDACS": 25,
-            "SRC-GDELT-DOC": 32,
-            "SRC-GDELT-EVENTS": 25,
-            "WB-INDICATORS": 20,
+            "SRC-GDACS": 28,
+            "SRC-GDELT-DOC": 35,
+            "SRC-GDELT-EVENTS": 28,
+            "WB-INDICATORS": 23,
         },
         "review_basis_counts": {
-            "provider_backed_archival_replay": 32,
+            "provider_backed_archival_replay": 35,
         },
-        "attention_case_count": 11,
+        "attention_case_count": 14,
         "attention_level_counts": {
-            "high": 7,
+            "high": 10,
             "medium": 4,
         },
         "attention_reason_counts": {
             "domain_coverage_gap": 4,
             "status_mismatch_and_domain_gap": 7,
+            "status_overcall": 3,
         },
         "attention_owner_counts": {
             "runtime/source coverage": 4,
-            "validation governance": 7,
+            "validation governance": 10,
         },
         "attention_country_summary": [
+            {"country_id": "CAN", "attention_case_count": 1, "highest_attention_level": "high", "case_ids": ["VAL-CAN-2024-CHALLENGE-001"]},
+            {"country_id": "CHE", "attention_case_count": 1, "highest_attention_level": "high", "case_ids": ["VAL-CHE-2024-CHALLENGE-001"]},
             {"country_id": "EGY", "attention_case_count": 1, "highest_attention_level": "high", "case_ids": ["VAL-EGY-2024-CHALLENGE-001"]},
             {"country_id": "GEO", "attention_case_count": 1, "highest_attention_level": "high", "case_ids": ["VAL-GEO-2023-CHALLENGE-001"]},
             {"country_id": "ISR", "attention_case_count": 1, "highest_attention_level": "high", "case_ids": ["VAL-ISR-2024-002"]},
+            {"country_id": "NLD", "attention_case_count": 1, "highest_attention_level": "high", "case_ids": ["VAL-NLD-2024-CHALLENGE-001"]},
             {"country_id": "PAK", "attention_case_count": 1, "highest_attention_level": "high", "case_ids": ["VAL-PAK-2024-CHALLENGE-001"]},
             {"country_id": "RUS", "attention_case_count": 1, "highest_attention_level": "high", "case_ids": ["VAL-RUS-2024-CHALLENGE-001"]},
             {"country_id": "UKR", "attention_case_count": 1, "highest_attention_level": "high", "case_ids": ["VAL-UKR-2023-CHALLENGE-001"]},
@@ -632,6 +686,45 @@ def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> 
                 "missing_expected_domains": ["B", "D"],
                 "unexpected_observed_domains": [],
                 "suggested_next_action": "Review reference-case expectation alignment and archival replay provenance before using this case as a strong validation signal.",
+            },
+            {
+                "case_id": "VAL-CAN-2024-CHALLENGE-001",
+                "country_id": "CAN",
+                "review_verdict": "replay_mismatch",
+                "attention_level": "high",
+                "attention_reason": "status_overcall",
+                "owner_hint": "validation governance",
+                "replay_evidence_tier": "partial_replay_evidence",
+                "replay_source_coverage_ratio": 1.0,
+                "missing_expected_domains": [],
+                "unexpected_observed_domains": [],
+                "suggested_next_action": "Review why replay evidence escalates above the bounded reference expectation before treating this case as a credible high-severity signal.",
+            },
+            {
+                "case_id": "VAL-CHE-2024-CHALLENGE-001",
+                "country_id": "CHE",
+                "review_verdict": "replay_mismatch",
+                "attention_level": "high",
+                "attention_reason": "status_overcall",
+                "owner_hint": "validation governance",
+                "replay_evidence_tier": "partial_replay_evidence",
+                "replay_source_coverage_ratio": 1.0,
+                "missing_expected_domains": [],
+                "unexpected_observed_domains": [],
+                "suggested_next_action": "Review why replay evidence escalates above the bounded reference expectation before treating this case as a credible high-severity signal.",
+            },
+            {
+                "case_id": "VAL-NLD-2024-CHALLENGE-001",
+                "country_id": "NLD",
+                "review_verdict": "replay_mismatch",
+                "attention_level": "high",
+                "attention_reason": "status_overcall",
+                "owner_hint": "validation governance",
+                "replay_evidence_tier": "partial_replay_evidence",
+                "replay_source_coverage_ratio": 1.0,
+                "missing_expected_domains": [],
+                "unexpected_observed_domains": [],
+                "suggested_next_action": "Review why replay evidence escalates above the bounded reference expectation before treating this case as a credible high-severity signal.",
             },
             {
                 "case_id": "VAL-CHN-2024-CHALLENGE-001",

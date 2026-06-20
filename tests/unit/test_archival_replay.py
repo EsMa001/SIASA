@@ -44,6 +44,9 @@ def test_load_archival_replay_manifest_reads_provider_backed_case_entries() -> N
         "VAL-USA-2024-CHALLENGE-001",
         "VAL-DEU-2024-CHALLENGE-001",
         "VAL-EGY-2024-CHALLENGE-001",
+        "VAL-CHE-2024-CHALLENGE-001",
+        "VAL-NLD-2024-CHALLENGE-001",
+        "VAL-CAN-2024-CHALLENGE-001",
     ]
     assert manifest[0].review_basis == "provider_backed_archival_replay"
     assert manifest[0].storage_mode == "archival_normalized_records"
@@ -111,6 +114,8 @@ def test_load_governed_historical_replay_inputs_prefers_archival_provider_backed
     replay_inputs = load_governed_historical_replay_inputs(repo_root)
 
     assert sorted(replay_inputs) == [
+        "VAL-CAN-2024-CHALLENGE-001",
+        "VAL-CHE-2024-CHALLENGE-001",
         "VAL-CHN-2024-001",
         "VAL-CHN-2024-CHALLENGE-001",
         "VAL-DEU-2024-001",
@@ -128,6 +133,7 @@ def test_load_governed_historical_replay_inputs_prefers_archival_provider_backed
         "VAL-ISR-2024-002",
         "VAL-MMR-2024-001",
         "VAL-NGA-2024-001",
+        "VAL-NLD-2024-CHALLENGE-001",
         "VAL-PAK-2024-001",
         "VAL-PAK-2024-CHALLENGE-001",
         "VAL-POL-2023-001",

@@ -301,3 +301,36 @@ archival_replay_cases:
     known_limitations:
       - minimal_records_by_design_to_test_weak_evidence_tier
       - domains_b_and_d_absent_from_replay_bundle
+
+  - case_id: VAL-CHE-2024-CHALLENGE-001
+    review_basis: provider_backed_archival_replay
+    storage_mode: archival_normalized_records
+    data_files:
+      - archival_replay_inputs/VAL-CHE-2024-CHALLENGE-001.json
+    archival_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    provenance_notes: Full A/B/D replay bundle intentionally over-escalates above a bounded Swiss control/reference expectation to test false-positive severity detection.
+    known_limitations:
+      - replay_bundle_intentionally_dense_to_test_overcall_detection
+      - expected_status_is_bounded_by_reference_case_design
+
+  - case_id: VAL-NLD-2024-CHALLENGE-001
+    review_basis: provider_backed_archival_replay
+    storage_mode: archival_normalized_records
+    data_files:
+      - archival_replay_inputs/VAL-NLD-2024-CHALLENGE-001.json
+    archival_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    provenance_notes: Full A/B/D replay bundle intentionally over-escalates above a bounded Dutch control/reference expectation to test false-positive severity detection.
+    known_limitations:
+      - replay_bundle_intentionally_dense_to_test_overcall_detection
+      - expected_status_is_bounded_by_reference_case_design
+
+  - case_id: VAL-CAN-2024-CHALLENGE-001
+    review_basis: provider_backed_archival_replay
+    storage_mode: archival_normalized_records
+    data_files:
+      - archival_replay_inputs/VAL-CAN-2024-CHALLENGE-001.json
+    archival_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    provenance_notes: Full A/B/D replay bundle intentionally over-escalates above a bounded Canadian control/reference expectation to test false-positive severity detection.
+    known_limitations:
+      - replay_bundle_intentionally_dense_to_test_overcall_detection
+      - expected_status_is_bounded_by_reference_case_design
