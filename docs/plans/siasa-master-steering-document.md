@@ -1038,6 +1038,22 @@ This closes the next remaining release-governance action-visibility gap after N1
 
 ---
 
+### N1-WP-066
+Name:
+After explicit project-lead reprioritization toward the next larger themes, close the remaining G4 release-package truth gap by propagating the actual persisted approval/distribution lifecycle state into the release packet itself instead of showing it only in the separate lifecycle panel while downstream sign-off/send surfaces stay on synthetic `pending_signoff` defaults.
+
+Closure achieved:
+- Updated `src/siasa/readmodels/release_demo_package.py` so `build_release_demo_package_view_model(...)` now accepts `approval_lifecycle_view_model` and propagates the real lifecycle state into `review_signoff_scaffold`, top-level `approval_state`, stakeholder requested-decision/export summary, reviewer disposition routing, and decision-packet send-readiness
+- Lifecycle-aware packet governance now distinguishes `already_distributed` from merely `ready_to_send`, carries real `distribution_recipients` / `distribution_note`, and adds a recipient-aware `distribution_record_captured` checklist item so external-send truth stays aligned with recorded lifecycle outcome
+- Updated `src/siasa/runs/artifacts.py` to load/create `approval_lifecycle_record.json` before building `release_demo_package.json` and pass the real lifecycle model through; updated `src/siasa/gui/local_app.py` so generated GUI release-package outputs receive the same lifecycle-aware packet view model
+- Added focused regression coverage in `tests/unit/test_local_gui.py` for distributed-state propagation/rendering while keeping `tests/unit/test_lifecycle_transition.py` green; validation evidence: `py_compile` passed; targeted release-package tests passed (`2 passed in 0.07s`); focused regressions passed (`tests/unit/test_run_artifacts.py -q`: `19 passed in 117.38s`, `tests/unit/test_local_gui.py -q`: `25 passed in 107.07s`); full regression passed (`536 passed in 355.94s`)
+- Commit: `07c50be`
+
+Steering note:
+This is the first consciously reprioritized “next larger theme” tranche after the VAL-only micro-slice loop. It keeps the change bounded, but moves to release/demo operability hardening where repo truth still had a meaningful gap: once an approval/distribution outcome exists, the release packet now reflects that real lifecycle state across sign-off, share/export, and send-readiness surfaces instead of forcing manual reconciliation.
+
+---
+
 ## 7. Trigger for the next steering pivot
 
 Stay on the current steering path until one of these becomes true:
