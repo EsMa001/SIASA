@@ -1054,6 +1054,22 @@ This is the first consciously reprioritized “next larger theme” tranche afte
 
 ---
 
+### N1-WP-067
+Name:
+Return to the default validation-realism track by introducing a genuinely new challenge-case archetype for replay over-escalation / false-positive severity in bounded control/reference countries, instead of only extending the existing undercall / weak-evidence / domain-gap patterns.
+
+Closure achieved:
+- Updated `src/siasa/readmodels/validation_backtest.py` so replay mismatches now classify `status_overcall` when `replayed_status` exceeds the bounded `expected_status` without a domain gap, preserving a distinct analyst reason from generic `status_mismatch`
+- Extended `src/siasa/gui/local_app.py` challenge-case type guidance with `challenge_overcall`, making the new archetype explicit in the validation GUI alongside the prior challenge taxonomy
+- Added three new governed challenge cases `VAL-CHE-2024-CHALLENGE-001`, `VAL-NLD-2024-CHALLENGE-001`, and `VAL-CAN-2024-CHALLENGE-001` across `validation_reference_cases.yaml`, `validation_replay_inputs.yaml`, `validation_archival_replay_manifest.yaml`, and `vmodel/verification/archival_replay_inputs/*.json`; the governed portfolio now expands from 32 to 35 cases and adds the first control/reference overcall lane
+- Updated `tests/unit/test_readmodels_validation_backtest.py`, `tests/unit/test_historical_replay.py`, `tests/unit/test_archival_replay.py`, and `tests/unit/test_local_gui.py` with exact snapshot/aggregate expectations for the new archetype and the expanded portfolio; validation evidence: targeted validation regressions passed (`24 passed in 1.06s`), focused GUI regression passed (`25 passed in 106.41s`), full regression passed (`537 passed in 342.60s`)
+- Commit: `ddf16ec`
+
+Steering note:
+This closes the next higher-value validation-realism slice after the G4 follow-through pivot: SIASA can now distinguish false-positive replay escalation against bounded reference expectations, not only missing-signal undercall and domain-gap patterns. The next bounded validation default should now prefer either (a) another genuinely new challenge archetype only if it adds materially different analyst stress, or (b) a stronger validation-to-action closure slice that uses the richer 35-case portfolio.
+
+---
+
 ## 7. Trigger for the next steering pivot
 
 Stay on the current steering path until one of these becomes true:
