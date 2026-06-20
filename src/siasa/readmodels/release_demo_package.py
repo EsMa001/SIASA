@@ -485,6 +485,8 @@ def build_release_demo_package_view_model(
             str(source_items[0].get('recommended_next_check', 'Review the primary package item.')),
             'Record reviewer decision and date before external distribution.',
         ],
+        'primary_follow_up_action_label': source_items[0].get('action_label'),
+        'primary_follow_up_action_href': source_items[0].get('action_href'),
         'signoff_readiness': 'ready_for_review' if package_status in {'ready', 'attention'} else 'blocked_for_signoff',
     }
     approval_state = {
@@ -573,6 +575,8 @@ def build_release_demo_package_view_model(
                 else ['Hold external distribution.', 'Re-run the highest-priority follow-up check before review resumes.']
             )
         ),
+        'primary_follow_up_action_label': source_items[0].get('action_label'),
+        'primary_follow_up_action_href': source_items[0].get('action_href'),
         'escalation_handoff_route': (
             'management -> stakeholder distribution'
             if reviewer_disposition_standard['selected_disposition'] == 'approve'
@@ -798,6 +802,18 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     signoff_readiness = html.escape(str(signoff_scaffold.get('signoff_readiness', 'n/a')))
     signoff_rationale = ''.join(f"<li>{html.escape(str(item))}</li>" for item in signoff_scaffold.get('bounded_rationale', [])) or '<li>none</li>'
     signoff_followups = ''.join(f"<li>{html.escape(str(item))}</li>" for item in signoff_scaffold.get('follow_up_actions', [])) or '<li>none</li>'
+    signoff_action_label = str(signoff_scaffold.get('primary_follow_up_action_label') or '').strip()
+    signoff_action_href = str(signoff_scaffold.get('primary_follow_up_action_href') or '').strip()
+    signoff_action_link = (
+        _render_nav_link(
+            href=signoff_action_href,
+            label=signoff_action_label,
+            css_class='analyst-briefing-action-link',
+            available_pages=available_pages,
+        )
+        if signoff_action_href and signoff_action_label
+        else ''
+    )
     stakeholder_cover_sheet = dict(view_model.get('stakeholder_cover_sheet', {})) if isinstance(view_model.get('stakeholder_cover_sheet'), dict) else {}
     cover_sheet_audience = html.escape(str(stakeholder_cover_sheet.get('audience', 'n/a')))
     cover_sheet_requested_decision = html.escape(str(stakeholder_cover_sheet.get('requested_decision', 'n/a')))
@@ -886,6 +902,18 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     primary_action_bundle_html = ''.join(
         f"<li>{html.escape(str(item))}</li>" for item in disposition_action_routing.get('primary_action_bundle', [])
     ) or '<li>none</li>'
+    routing_action_label = str(disposition_action_routing.get('primary_follow_up_action_label') or '').strip()
+    routing_action_href = str(disposition_action_routing.get('primary_follow_up_action_href') or '').strip()
+    routing_action_link = (
+        _render_nav_link(
+            href=routing_action_href,
+            label=routing_action_label,
+            css_class='analyst-briefing-action-link',
+            available_pages=available_pages,
+        )
+        if routing_action_href and routing_action_label
+        else ''
+    )
     escalation_handoff_route = html.escape(str(disposition_action_routing.get('escalation_handoff_route', 'n/a')))
     action_owner = html.escape(str(disposition_action_routing.get('action_owner', 'n/a')))
     decision_packet_seed = dict(view_model.get('decision_packet_seed', {})) if isinstance(view_model.get('decision_packet_seed'), dict) else {}
@@ -1015,7 +1043,8 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<p><strong>Sign-off readiness</strong>: {signoff_readiness}</p>"
         f"<div><strong>Bounded rationale</strong><ul>{signoff_rationale}</ul></div>"
         f"<div><strong>Follow-up actions</strong><ul>{signoff_followups}</ul></div>"
-        "</section>"
+        + (f"<p><strong>Primary follow-up action</strong>: {signoff_action_link}</p>" if signoff_action_link else "")
+        + "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Stakeholder cover sheet</div>"
         f"<p><strong>Audience</strong>: {cover_sheet_audience}</p>"
@@ -1058,9 +1087,10 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         "<div class='panel-header'>Disposition-aware action routing</div>"
         f"<p><strong>Route trigger</strong>: {route_trigger}</p>"
         f"<div><strong>Primary action bundle</strong><ul>{primary_action_bundle_html}</ul></div>"
-        f"<p><strong>Escalation / handoff route</strong>: {escalation_handoff_route}</p>"
-        f"<p><strong>Action owner</strong>: {action_owner}</p>"
-        "</section>"
+        + (f"<p><strong>Primary follow-up action</strong>: {routing_action_link}</p>" if routing_action_link else "")
+        + f"<p><strong>Escalation / handoff route</strong>: {escalation_handoff_route}</p>"
+        + f"<p><strong>Action owner</strong>: {action_owner}</p>"
+        + "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Decision packet seed</div>"
         f"<p><strong>Packet headline</strong>: {packet_headline}</p>"
