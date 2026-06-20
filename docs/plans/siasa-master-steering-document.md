@@ -1008,6 +1008,21 @@ This closes the next release/export actionability gap after N1-WP-062: downstrea
 
 ---
 
+### N1-WP-064
+Name:
+Make the propagated validation follow-up action directly visible as clickable links inside the export-oriented release-package summary panels instead of leaving those downstream summaries with raw href text or action metadata visible only in JSON.
+
+Closure achieved:
+- Updated `src/siasa/readmodels/release_demo_package.py` so `stakeholder_cover_sheet.external_share_summary`, `decision_log_export_summary.requested_decision_linkage`, and `decision_log_export_summary.decision_entry_template` now render their propagated `primary_follow_up_action_*` fields as safe-gated clickable action links in `release_package.html`
+- The generic list renderers for those summary structures now suppress duplicated raw href-string rows for `primary_follow_up_action_href` / `primary_follow_up_action_label`, preventing noisy export panels while preserving machine-readable metadata in the JSON payload
+- Added RED/GREEN coverage in `tests/unit/test_local_gui.py` for propagated href presence plus rendered action-link visibility/multiplicity (`Primary follow-up action`, `Decision-entry follow-up action`, repeated `Create Annotation Draft` links); targeted regression passed (`1 passed in 0.61s`); focused GUI regression passed (`24 passed in 104.71s`); full regression passed (`535 passed in 338.78s`)
+- Commit: `e2e760a`
+
+Steering note:
+This closes the next downstream export-visibility gap after N1-WP-063: the release package’s export-facing summaries no longer hide the follow-up action in raw metadata, but surface it directly as executable reviewer/stakeholder links.
+
+---
+
 ## 7. Trigger for the next steering pivot
 
 Stay on the current steering path until one of these becomes true:
