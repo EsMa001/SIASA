@@ -1070,6 +1070,22 @@ This closes the next higher-value validation-realism slice after the G4 follow-t
 
 ---
 
+### N1-WP-068
+Name:
+Strengthen the validation-to-action handoff by preserving replay status-comparison context (`expected_status` vs `replayed_status`) inside annotation-draft prefill links and downstream release-package action links, so analysts and reviewers do not lose the exact overcall/mismatch posture when moving from validation attention into action execution.
+
+Closure achieved:
+- Extended `_annotation_prefill_href(...)` in both `src/siasa/gui/local_app.py` and `src/siasa/readmodels/release_demo_package.py` so replay-attention action links now carry `expected_status` and `replayed_status` alongside the existing evidence-tier, score, and domain-gap context
+- Extended the annotation workflow query parser / prefill summary in `src/siasa/gui/local_app.py` so `expectedStatus` and `replayedStatus` are parsed, surfaced in the replay-attention summary, and treated as part of replay-context presence detection
+- Updated annotation-draft prefill materialization so generated tags and text now retain explicit status-comparison semantics (`expected_sX`, `replayed_sY`, plus a rendered `Status comparison: expected=..., replayed=...`) instead of collapsing the action handoff to generic mismatch metadata
+- Updated `tests/unit/test_local_gui.py` with assertions for analyst-briefing action href propagation, release-package action-link propagation, and annotation-workflow parser/rendering coverage; validation evidence: targeted regressions passed (`3 passed in 2.60s`), focused GUI regression passed (`25 passed in 106.90s`), full regression passed (`537 passed in 342.88s`)
+- Commit: `1892ba8`
+
+Steering note:
+This closes the next bounded validation-to-action slice on top of the richer 35-case portfolio: the analyst/reviewer action path now preserves not only why a case is attention-worthy, but also the exact bounded status comparison that triggered the overcall/mismatch concern. The next bounded default should now prefer either (a) another materially different challenge archetype only if it adds new analyst stress, or (b) a follow-on actionability slice that turns this richer replay comparison context into still more deterministic annotation/reviewer decision scaffolding.
+
+---
+
 ## 7. Trigger for the next steering pivot
 
 Stay on the current steering path until one of these becomes true:
