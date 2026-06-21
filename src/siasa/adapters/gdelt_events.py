@@ -3,7 +3,6 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from email.utils import parsedate_to_datetime
 import io
 import zipfile
 from time import sleep
@@ -11,6 +10,7 @@ from typing import Callable
 from urllib.request import urlopen
 
 from .base import FetchResult, SourceAdapter
+from .retry_utils import _retry_delay_seconds, is_retryable_error
 
 
 FetchText = Callable[[str], str]
@@ -19,40 +19,19 @@ NowProvider = Callable[[], datetime]
 SleepFn = Callable[[float], None]
 
 
-def _default_fetch_text(url: str) -> str:
-    with urlopen(url, timeout=30) as response:
+def _default_fetch_text(url: str, timeout_seconds: float = 30.0) -> str:
+    with urlopen(url, timeout=timeout_seconds) as response:
         return response.read().decode("utf-8")
 
 
-def _default_fetch_bytes(url: str) -> bytes:
-    with urlopen(url, timeout=30) as response:
+def _default_fetch_bytes(url: str, timeout_seconds: float = 30.0) -> bytes:
+    with urlopen(url, timeout=timeout_seconds) as response:
         return response.read()
 
 
 def _utc_now() -> datetime:
     return datetime.now(UTC)
 
-
-
-def _retry_delay_seconds(exc: Exception, default_delay: float, now: datetime) -> float:
-    code = getattr(exc, 'code', None)
-    if code == 429:
-        headers = getattr(exc, 'headers', None)
-        if headers is not None:
-            retry_after = headers.get('Retry-After') if hasattr(headers, 'get') else None
-            if retry_after is not None:
-                try:
-                    return max(default_delay, float(retry_after))
-                except (TypeError, ValueError):
-                    try:
-                        retry_at = parsedate_to_datetime(str(retry_after))
-                    except (TypeError, ValueError, IndexError, OverflowError):
-                        return default_delay
-                    if retry_at.tzinfo is None:
-                        retry_at = retry_at.replace(tzinfo=UTC)
-                    seconds_until_retry = max(0.0, (retry_at - now).total_seconds())
-                    return max(default_delay, seconds_until_retry)
-    return default_delay
 
 
 @dataclass
@@ -64,6 +43,7 @@ class GDELTEventsAdapter(SourceAdapter):
     max_retries: int = 3
     retry_backoff_seconds: float = 1.0
     max_retry_delay_seconds: float = 60.0
+    request_timeout_seconds: float = 30.0
     fetch_text: FetchText = _default_fetch_text
     fetch_bytes: FetchBytes = _default_fetch_bytes
     now_provider: NowProvider = _utc_now
