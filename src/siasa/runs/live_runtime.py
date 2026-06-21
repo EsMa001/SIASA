@@ -70,6 +70,71 @@ _SUPPORTED_LIVE_PILOT_COUNTRIES = {
     "NZL": {"gdelt_query": "New Zealand", "gdelt_code": "NZ"},
     "PRT": {"gdelt_query": "Portugal", "gdelt_code": "PO"},
     "IRL": {"gdelt_query": "Ireland", "gdelt_code": "EI"},
+    # --- Latin America ---
+    "BRA": {"gdelt_query": "Brazil", "gdelt_code": "BR"},
+    "MEX": {"gdelt_query": "Mexico", "gdelt_code": "MX"},
+    "COL": {"gdelt_query": "Colombia", "gdelt_code": "CO"},
+    "ARG": {"gdelt_query": "Argentina", "gdelt_code": "AR"},
+    "VEN": {"gdelt_query": "Venezuela", "gdelt_code": "VE"},
+    "CHL": {"gdelt_query": "Chile", "gdelt_code": "CI"},
+    "PER": {"gdelt_query": "Peru", "gdelt_code": "PE"},
+    "ECU": {"gdelt_query": "Ecuador", "gdelt_code": "EC"},
+    "BOL": {"gdelt_query": "Bolivia", "gdelt_code": "BL"},
+    "CUB": {"gdelt_query": "Cuba", "gdelt_code": "CU"},
+    # --- Southeast Asia ---
+    "THA": {"gdelt_query": "Thailand", "gdelt_code": "TH"},
+    "VNM": {"gdelt_query": "Vietnam", "gdelt_code": "VM"},
+    "PHL": {"gdelt_query": "Philippines", "gdelt_code": "RP"},
+    "IDN": {"gdelt_query": "Indonesia", "gdelt_code": "ID"},
+    "MYS": {"gdelt_query": "Malaysia", "gdelt_code": "MY"},
+    "SGP": {"gdelt_query": "Singapore", "gdelt_code": "SN"},
+    "KHM": {"gdelt_query": "Cambodia", "gdelt_code": "CB"},
+    "LAO": {"gdelt_query": "Laos", "gdelt_code": "LA"},
+    # --- Africa (additional) ---
+    "ZAF": {"gdelt_query": "South Africa", "gdelt_code": "SF"},
+    "KEN": {"gdelt_query": "Kenya", "gdelt_code": "KE"},
+    "ETH": {"gdelt_query": "Ethiopia", "gdelt_code": "ET"},
+    "TZA": {"gdelt_query": "Tanzania", "gdelt_code": "TZ"},
+    "COD": {"gdelt_query": "Congo", "gdelt_code": "CG"},
+    "MOZ": {"gdelt_query": "Mozambique", "gdelt_code": "MZ"},
+    "SOM": {"gdelt_query": "Somalia", "gdelt_code": "SO"},
+    "LBY": {"gdelt_query": "Libya", "gdelt_code": "LY"},
+    "MAR": {"gdelt_query": "Morocco", "gdelt_code": "MO"},
+    "DZA": {"gdelt_query": "Algeria", "gdelt_code": "AG"},
+    "TUN": {"gdelt_query": "Tunisia", "gdelt_code": "TS"},
+    "GHA": {"gdelt_query": "Ghana", "gdelt_code": "GH"},
+    "CMR": {"gdelt_query": "Cameroon", "gdelt_code": "CM"},
+    "AGO": {"gdelt_query": "Angola", "gdelt_code": "AO"},
+    "ZWE": {"gdelt_query": "Zimbabwe", "gdelt_code": "ZI"},
+    # --- Middle East (additional) ---
+    "IRQ": {"gdelt_query": "Iraq", "gdelt_code": "IZ"},
+    "SYR": {"gdelt_query": "Syria", "gdelt_code": "SY"},
+    "YEM": {"gdelt_query": "Yemen", "gdelt_code": "YM"},
+    "JOR": {"gdelt_query": "Jordan", "gdelt_code": "JO"},
+    "LBN": {"gdelt_query": "Lebanon", "gdelt_code": "LE"},
+    "AFG": {"gdelt_query": "Afghanistan", "gdelt_code": "AF"},
+    # --- Europe (additional) ---
+    "FRA": {"gdelt_query": "France", "gdelt_code": "FR"},
+    "GBR": {"gdelt_query": "United Kingdom", "gdelt_code": "UK"},
+    "ITA": {"gdelt_query": "Italy", "gdelt_code": "IT"},
+    "ESP": {"gdelt_query": "Spain", "gdelt_code": "SP"},
+    "GRC": {"gdelt_query": "Greece", "gdelt_code": "GR"},
+    "ROU": {"gdelt_query": "Romania", "gdelt_code": "RO"},
+    "BGR": {"gdelt_query": "Bulgaria", "gdelt_code": "BU"},
+    "SRB": {"gdelt_query": "Serbia", "gdelt_code": "RI"},
+    "HUN": {"gdelt_query": "Hungary", "gdelt_code": "HU"},
+    "CZE": {"gdelt_query": "Czech Republic", "gdelt_code": "EZ"},
+    "AUT": {"gdelt_query": "Austria", "gdelt_code": "AU"},
+    "BEL": {"gdelt_query": "Belgium", "gdelt_code": "BE"},
+    "DNK": {"gdelt_query": "Denmark", "gdelt_code": "DA"},
+    # --- Central Asia ---
+    "KAZ": {"gdelt_query": "Kazakhstan", "gdelt_code": "KZ"},
+    "UZB": {"gdelt_query": "Uzbekistan", "gdelt_code": "UZ"},
+    # --- East Asia (additional) ---
+    "JPN": {"gdelt_query": "Japan", "gdelt_code": "JA"},
+    "KOR": {"gdelt_query": "South Korea", "gdelt_code": "KS"},
+    "PRK": {"gdelt_query": "North Korea", "gdelt_code": "KN"},
+    "MNG": {"gdelt_query": "Mongolia", "gdelt_code": "MG"},
 }
 
 _REPRESENTATIVE_LIVE_PILOT_SET = ("UKR", "POL", "ISR", "TWN")
@@ -194,6 +259,38 @@ _MVP_COMPLETE_LIVE_PILOT_SET = (
     "CAN",
     "AUS",
 )
+_LATAM_FOCUS_LIVE_PILOT_SET = (
+    "BRA", "MEX", "COL", "ARG", "VEN", "CHL", "PER", "ECU", "BOL", "CUB",
+)
+_AFRICA_EXTENDED_LIVE_PILOT_SET = (
+    # existing Africa countries
+    "EGY", "NGA", "SDN",
+    # new Africa countries
+    "ZAF", "KEN", "ETH", "TZA", "COD", "MOZ", "SOM", "LBY", "MAR", "DZA",
+    "TUN", "GHA", "CMR", "AGO", "ZWE",
+)
+_EUROPE_EXTENDED_LIVE_PILOT_SET = (
+    # existing European countries
+    "UKR", "POL", "DEU", "EST", "FIN", "CHE", "NLD", "SWE", "NOR", "PRT", "IRL",
+    # new European countries
+    "FRA", "GBR", "ITA", "ESP", "GRC", "ROU", "BGR", "SRB", "HUN", "CZE",
+    "AUT", "BEL", "DNK",
+)
+_ASIA_EXTENDED_LIVE_PILOT_SET = (
+    # existing Asian countries
+    "TWN", "CHN", "IND", "IRN", "TUR", "PAK", "GEO", "MMR",
+    # new Southeast Asia
+    "THA", "VNM", "PHL", "IDN", "MYS", "SGP", "KHM", "LAO",
+    # new Middle East
+    "IRQ", "SYR", "YEM", "JOR", "LBN", "AFG",
+    # new Central Asia
+    "KAZ", "UZB",
+    # new East Asia
+    "JPN", "KOR", "PRK", "MNG",
+    # existing Middle East
+    "ISR", "SAU", "QAT",
+)
+_GLOBAL_BROAD_LIVE_PILOT_SET = tuple(sorted(_SUPPORTED_LIVE_PILOT_COUNTRIES.keys()))
 _WORLD_BANK_SUPPORTED_LIVE_COUNTRIES = (
     "UKR",
     "POL",
@@ -310,6 +407,71 @@ _GOVERNED_LIVE_DOMAINS_BY_COUNTRY = {
     "NZL": ["A", "D"],
     "PRT": ["A", "D"],
     "IRL": ["A", "B", "D"],
+    # --- Latin America ---
+    "BRA": ["A", "B", "D"],
+    "MEX": ["A", "B", "D"],
+    "COL": ["A", "D"],
+    "ARG": ["A", "D"],
+    "VEN": ["A", "D"],
+    "CHL": ["A", "D"],
+    "PER": ["A", "D"],
+    "ECU": ["A", "D"],
+    "BOL": ["A", "D"],
+    "CUB": ["A", "D"],
+    # --- Southeast Asia ---
+    "THA": ["A", "D"],
+    "VNM": ["A", "D"],
+    "PHL": ["A", "D"],
+    "IDN": ["A", "D"],
+    "MYS": ["A", "D"],
+    "SGP": ["A", "D"],
+    "KHM": ["A", "D"],
+    "LAO": ["A", "D"],
+    # --- Africa (additional) ---
+    "ZAF": ["A", "B", "D"],
+    "KEN": ["A", "D"],
+    "ETH": ["A", "D"],
+    "TZA": ["A", "D"],
+    "COD": ["A", "D"],
+    "MOZ": ["A", "D"],
+    "SOM": ["A", "D"],
+    "LBY": ["A", "D"],
+    "MAR": ["A", "D"],
+    "DZA": ["A", "D"],
+    "TUN": ["A", "D"],
+    "GHA": ["A", "D"],
+    "CMR": ["A", "D"],
+    "AGO": ["A", "D"],
+    "ZWE": ["A", "D"],
+    # --- Middle East (additional) ---
+    "IRQ": ["A", "B", "D"],
+    "SYR": ["A", "D"],
+    "YEM": ["A", "D"],
+    "JOR": ["A", "D"],
+    "LBN": ["A", "D"],
+    "AFG": ["A", "D"],
+    # --- Europe (additional) ---
+    "FRA": ["A", "B", "D"],
+    "GBR": ["A", "B", "D"],
+    "ITA": ["A", "B", "D"],
+    "ESP": ["A", "B", "D"],
+    "GRC": ["A", "D"],
+    "ROU": ["A", "D"],
+    "BGR": ["A", "D"],
+    "SRB": ["A", "D"],
+    "HUN": ["A", "D"],
+    "CZE": ["A", "D"],
+    "AUT": ["A", "D"],
+    "BEL": ["A", "D"],
+    "DNK": ["A", "D"],
+    # --- Central Asia ---
+    "KAZ": ["A", "D"],
+    "UZB": ["A", "D"],
+    # --- East Asia (additional) ---
+    "JPN": ["A", "B", "D"],
+    "KOR": ["A", "B", "D"],
+    "PRK": ["A", "D"],
+    "MNG": ["A", "D"],
 }
 _NAMED_LIVE_PILOT_SETS = {
     "representative": _REPRESENTATIVE_LIVE_PILOT_SET,
@@ -328,6 +490,11 @@ _NAMED_LIVE_PILOT_SETS = {
     "extended-focus-complete": _EXTENDED_FOCUS_COMPLETE_LIVE_PILOT_SET,
     "focus-complete": _FOCUS_COMPLETE_LIVE_PILOT_SET,
     "mvp-complete": _MVP_COMPLETE_LIVE_PILOT_SET,
+    "latam-focus": _LATAM_FOCUS_LIVE_PILOT_SET,
+    "africa-extended": _AFRICA_EXTENDED_LIVE_PILOT_SET,
+    "europe-extended": _EUROPE_EXTENDED_LIVE_PILOT_SET,
+    "asia-extended": _ASIA_EXTENDED_LIVE_PILOT_SET,
+    "global-broad": _GLOBAL_BROAD_LIVE_PILOT_SET,
 }
 
 _VALIDATION_REFERENCE_CASE_LIBRARY_PATH = (
@@ -1054,7 +1221,8 @@ def main(argv: list[str] | None = None) -> int:
         dest="country_ids",
         help=(
             "Governed live pilot country ISO3. Repeat for multi-country runs; "
-            "supported: UKR, POL, ISR, TWN, RUS, CHN, IND, IRN, TUR, PAK, GEO, USA, DEU, EST, FIN, SAU, QAT, EGY, NGA, SDN, MMR, CHE, NLD, SWE, NOR, CAN, AUS, NZL, PRT, IRL."
+            "supported: see _SUPPORTED_LIVE_PILOT_COUNTRIES (95 countries across all regions). "
+            "Use --pilot-set global-broad for all."
         ),
     )
     parser.add_argument(
@@ -1077,7 +1245,12 @@ def main(argv: list[str] | None = None) -> int:
             "'control-reference-complete' expands to NOR,CHE,SWE,NLD,IRL,PRT,NZL,CAN,AUS; "
             "'extended-focus-complete' expands to USA,DEU,EST,FIN,POL,SAU,QAT,EGY,NGA,SDN,MMR; "
             "'focus-complete' expands to UKR,RUS,CHN,TWN,IRN,ISR,TUR,IND,PAK,GEO,POL,USA,DEU,EST,FIN,SAU,QAT,EGY,NGA,SDN,MMR; "
-            "'mvp-complete' expands to UKR,RUS,CHN,TWN,IRN,ISR,TUR,IND,PAK,GEO,POL,USA,DEU,EST,FIN,SAU,QAT,EGY,NGA,SDN,MMR,NOR,CHE,SWE,NLD,IRL,PRT,NZL,CAN,AUS."
+            "'mvp-complete' expands to UKR,RUS,CHN,TWN,IRN,ISR,TUR,IND,PAK,GEO,POL,USA,DEU,EST,FIN,SAU,QAT,EGY,NGA,SDN,MMR,NOR,CHE,SWE,NLD,IRL,PRT,NZL,CAN,AUS; "
+            "'latam-focus' expands to BRA,MEX,COL,ARG,VEN,CHL,PER,ECU,BOL,CUB; "
+            "'africa-extended' expands to EGY,NGA,SDN + 15 new African countries; "
+            "'europe-extended' expands to 11 existing + 13 new European countries; "
+            "'asia-extended' expands to existing + 20 new Asian countries; "
+            "'global-broad' expands to ALL supported countries."
         ),
     )
     parser.add_argument(
