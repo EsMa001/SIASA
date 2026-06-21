@@ -1,7 +1,7 @@
 prioritization:
 - Priorität: MVP-Must
   Bedeutung: Zwingend erforderlich für MVP v1
-  Beispiele / Scope: Länderzentriert; 30 Länder; A/B/D Core; D0-D5; S0-S6; GUI; Daily Run; Traceability; Governance; Validierung
+  Beispiele / Scope: Länderzentriert; 88 Länder (30 MVP-Kern + 58 Breiten-Ausbau); A/B/D Core; D0-D5; S0-S6; GUI; Daily Run; Traceability; Governance; Validierung
 - Priorität: MVP-Should
   Bedeutung: Sehr sinnvoll, aber nicht blockierend
   Beispiele / Scope: Lineage rudimentär; Informations-Epidemiologie einfach; C/E selektiv; Backtest-GUI; Docker; erste Tests
