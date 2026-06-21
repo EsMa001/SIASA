@@ -196,6 +196,7 @@ def build_release_demo_package_view_model(
         attention_cases = [item for item in validation_summary.get('attention_cases', []) if isinstance(item, dict)] if isinstance(validation_summary, dict) else []
         if attention_cases:
             top_case = attention_cases[0]
+            annotation_type, decision_posture = _annotation_type_and_decision_posture(attention_case=top_case)
             source_items.append(
                 {
                     'category': 'validation_attention',
@@ -211,6 +212,8 @@ def build_release_demo_package_view_model(
                     ),
                     'action_label': 'Create Annotation Draft',
                     'action_href': _annotation_prefill_href(attention_case=top_case),
+                    'action_annotation_type': annotation_type,
+                    'action_decision_posture': decision_posture,
                 }
             )
         traceability_missing_mappings = int(traceability_summary.get('missing_requirement_mapping_count', 0) or 0)
@@ -516,12 +519,14 @@ def build_release_demo_package_view_model(
         item for item in ['release_package.html', 'release_demo_package.json', 'reports.html'] if item in available_pages or item.endswith('.json')
     ]
     reviewer_handoff_summary = {
-        'next_reviewer_role': lifecycle_reviewer_role,
+        'next_reviewer_role': 'project_lead' if package_status in {'ready', 'attention'} else 'operator',
         'canonical_handoff_artifact': canonical_handoff_artifact,
         'secondary_artifacts': share_now,
         'share_now': share_now,
         'primary_follow_up_action_label': source_items[0].get('action_label'),
         'primary_follow_up_action_href': source_items[0].get('action_href'),
+        'primary_follow_up_action_annotation_type': source_items[0].get('action_annotation_type') or '',
+        'primary_follow_up_action_decision_posture': source_items[0].get('action_decision_posture') or '',
         'decision_log_seed': {
             'package_status': package_status,
             'recommendation': executive_decision_summary['recommendation'],
@@ -529,6 +534,8 @@ def build_release_demo_package_view_model(
             'next_check': source_items[0].get('recommended_next_check', 'n/a'),
             'primary_follow_up_action_label': source_items[0].get('action_label') or '',
             'primary_follow_up_action_href': source_items[0].get('action_href') or '',
+            'primary_follow_up_action_annotation_type': source_items[0].get('action_annotation_type') or '',
+            'primary_follow_up_action_decision_posture': source_items[0].get('action_decision_posture') or '',
         },
     }
     review_signoff_scaffold = {
@@ -562,6 +569,8 @@ def build_release_demo_package_view_model(
         ],
         'primary_follow_up_action_label': source_items[0].get('action_label'),
         'primary_follow_up_action_href': source_items[0].get('action_href'),
+        'primary_follow_up_action_annotation_type': source_items[0].get('action_annotation_type') or '',
+        'primary_follow_up_action_decision_posture': source_items[0].get('action_decision_posture') or '',
         'signoff_readiness': signoff_readiness,
     }
     approval_state = {
@@ -610,6 +619,8 @@ def build_release_demo_package_view_model(
             'primary_focus': source_items[0].get('title', 'n/a'),
             'primary_follow_up_action_label': source_items[0].get('action_label') or '',
             'primary_follow_up_action_href': source_items[0].get('action_href') or '',
+            'primary_follow_up_action_annotation_type': source_items[0].get('action_annotation_type') or '',
+            'primary_follow_up_action_decision_posture': source_items[0].get('action_decision_posture') or '',
         },
     }
     reviewer_handoff_summary['decision_log_seed'].update(
@@ -628,6 +639,8 @@ def build_release_demo_package_view_model(
             'decision_status': approval_state['decision_status'],
             'primary_follow_up_action_label': source_items[0].get('action_label') or '',
             'primary_follow_up_action_href': source_items[0].get('action_href') or '',
+            'primary_follow_up_action_annotation_type': source_items[0].get('action_annotation_type') or '',
+            'primary_follow_up_action_decision_posture': source_items[0].get('action_decision_posture') or '',
         },
         'distribution_bundle': reviewer_handoff_summary['share_now'],
         'decision_entry_template': {
@@ -639,6 +652,8 @@ def build_release_demo_package_view_model(
             'canonical_artifact': reviewer_handoff_summary['canonical_handoff_artifact'],
             'primary_follow_up_action_label': source_items[0].get('action_label') or '',
             'primary_follow_up_action_href': source_items[0].get('action_href') or '',
+            'primary_follow_up_action_annotation_type': source_items[0].get('action_annotation_type') or '',
+            'primary_follow_up_action_decision_posture': source_items[0].get('action_decision_posture') or '',
         },
     }
     reviewer_disposition_standard = {
@@ -675,6 +690,8 @@ def build_release_demo_package_view_model(
         ),
         'primary_follow_up_action_label': source_items[0].get('action_label'),
         'primary_follow_up_action_href': source_items[0].get('action_href'),
+        'primary_follow_up_action_annotation_type': source_items[0].get('action_annotation_type') or '',
+        'primary_follow_up_action_decision_posture': source_items[0].get('action_decision_posture') or '',
         'escalation_handoff_route': (
             'management -> stakeholder distribution'
             if reviewer_disposition_standard['selected_disposition'] == 'approve'
@@ -695,10 +712,14 @@ def build_release_demo_package_view_model(
             'primary_focus': source_items[0].get('title', 'n/a'),
             'primary_follow_up_action_label': source_items[0].get('action_label') or '',
             'primary_follow_up_action_href': source_items[0].get('action_href') or '',
+            'primary_follow_up_action_annotation_type': source_items[0].get('action_annotation_type') or '',
+            'primary_follow_up_action_decision_posture': source_items[0].get('action_decision_posture') or '',
         },
         'share_now_packet': reviewer_handoff_summary['share_now'],
         'primary_follow_up_action_label': source_items[0].get('action_label'),
         'primary_follow_up_action_href': source_items[0].get('action_href'),
+        'primary_follow_up_action_annotation_type': source_items[0].get('action_annotation_type') or '',
+        'primary_follow_up_action_decision_posture': source_items[0].get('action_decision_posture') or '',
         'decision_packet_note': 'Export-ready seed for management/stakeholder forwarding; validate latest evidence before external send.',
     }
     decision_packet_send_readiness = {
@@ -790,6 +811,8 @@ def build_release_demo_package_view_model(
         'primary_item_evidence_source': source_items[0].get('evidence_source', 'n/a'),
         'primary_item_action_label': source_items[0].get('action_label'),
         'primary_item_action_href': source_items[0].get('action_href'),
+        'primary_item_action_annotation_type': source_items[0].get('action_annotation_type') or '',
+        'primary_item_action_decision_posture': source_items[0].get('action_decision_posture') or '',
         'priority_items': source_items,
         'demo_sequence': [
             {
@@ -925,6 +948,8 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     signoff_followups = ''.join(f"<li>{html.escape(str(item))}</li>" for item in signoff_scaffold.get('follow_up_actions', [])) or '<li>none</li>'
     signoff_action_label = str(signoff_scaffold.get('primary_follow_up_action_label') or '').strip()
     signoff_action_href = str(signoff_scaffold.get('primary_follow_up_action_href') or '').strip()
+    signoff_action_annotation_type = html.escape(str(signoff_scaffold.get('primary_follow_up_action_annotation_type', '')))
+    signoff_action_decision_posture = html.escape(str(signoff_scaffold.get('primary_follow_up_action_decision_posture', '')))
     signoff_action_link = (
         _render_nav_link(
             href=signoff_action_href,
@@ -949,6 +974,8 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     external_share_summary = dict(stakeholder_cover_sheet.get('external_share_summary', {})) if isinstance(stakeholder_cover_sheet.get('external_share_summary'), dict) else {}
     external_share_action_label = str(external_share_summary.get('primary_follow_up_action_label') or '').strip()
     external_share_action_href = str(external_share_summary.get('primary_follow_up_action_href') or '').strip()
+    external_share_action_annotation_type = html.escape(str(external_share_summary.get('primary_follow_up_action_annotation_type', '')))
+    external_share_action_decision_posture = html.escape(str(external_share_summary.get('primary_follow_up_action_decision_posture', '')))
     external_share_action_link = (
         _render_nav_link(
             href=external_share_action_href,
@@ -962,7 +989,12 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     external_share_summary_html = ''.join(
         f"<li><strong>{html.escape(str(key).replace('_', ' ').title())}</strong>: {html.escape(str(value))}</li>"
         for key, value in external_share_summary.items()
-        if key not in {'primary_follow_up_action_label', 'primary_follow_up_action_href'}
+        if key not in {
+            'primary_follow_up_action_label',
+            'primary_follow_up_action_href',
+            'primary_follow_up_action_annotation_type',
+            'primary_follow_up_action_decision_posture',
+        }
     ) or '<li>none</li>'
     decision_log_export_summary = dict(view_model.get('decision_log_export_summary', {})) if isinstance(view_model.get('decision_log_export_summary'), dict) else {}
     approval_state = dict(decision_log_export_summary.get('approval_state', {})) if isinstance(decision_log_export_summary.get('approval_state'), dict) else {}
@@ -973,6 +1005,8 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     requested_decision_linkage = dict(decision_log_export_summary.get('requested_decision_linkage', {})) if isinstance(decision_log_export_summary.get('requested_decision_linkage'), dict) else {}
     requested_decision_action_label = str(requested_decision_linkage.get('primary_follow_up_action_label') or '').strip()
     requested_decision_action_href = str(requested_decision_linkage.get('primary_follow_up_action_href') or '').strip()
+    requested_decision_action_annotation_type = html.escape(str(requested_decision_linkage.get('primary_follow_up_action_annotation_type', '')))
+    requested_decision_action_decision_posture = html.escape(str(requested_decision_linkage.get('primary_follow_up_action_decision_posture', '')))
     requested_decision_action_link = (
         _render_nav_link(
             href=requested_decision_action_href,
@@ -986,7 +1020,12 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     requested_decision_linkage_html = ''.join(
         f"<li><strong>{html.escape(str(key).replace('_', ' ').title())}</strong>: {html.escape(str(value))}</li>"
         for key, value in requested_decision_linkage.items()
-        if key not in {'primary_follow_up_action_label', 'primary_follow_up_action_href'}
+        if key not in {
+            'primary_follow_up_action_label',
+            'primary_follow_up_action_href',
+            'primary_follow_up_action_annotation_type',
+            'primary_follow_up_action_decision_posture',
+        }
     ) or '<li>none</li>'
     distribution_bundle_html = ''.join(
         f"<li>{html.escape(str(item))}</li>" for item in decision_log_export_summary.get('distribution_bundle', [])
@@ -994,6 +1033,8 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     decision_entry_template = dict(decision_log_export_summary.get('decision_entry_template', {})) if isinstance(decision_log_export_summary.get('decision_entry_template'), dict) else {}
     decision_entry_action_label = str(decision_entry_template.get('primary_follow_up_action_label') or '').strip()
     decision_entry_action_href = str(decision_entry_template.get('primary_follow_up_action_href') or '').strip()
+    decision_entry_action_annotation_type = html.escape(str(decision_entry_template.get('primary_follow_up_action_annotation_type', '')))
+    decision_entry_action_decision_posture = html.escape(str(decision_entry_template.get('primary_follow_up_action_decision_posture', '')))
     decision_entry_action_link = (
         _render_nav_link(
             href=decision_entry_action_href,
@@ -1007,7 +1048,12 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     decision_entry_template_html = ''.join(
         f"<li><strong>{html.escape(str(key).replace('_', ' ').title())}</strong>: {html.escape(str(value))}</li>"
         for key, value in decision_entry_template.items()
-        if key not in {'primary_follow_up_action_label', 'primary_follow_up_action_href'}
+        if key not in {
+            'primary_follow_up_action_label',
+            'primary_follow_up_action_href',
+            'primary_follow_up_action_annotation_type',
+            'primary_follow_up_action_decision_posture',
+        }
     ) or '<li>none</li>'
     reviewer_disposition_standard = dict(view_model.get('reviewer_disposition_standard', {})) if isinstance(view_model.get('reviewer_disposition_standard'), dict) else {}
     disposition_options_html = ''.join(
@@ -1025,6 +1071,8 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     ) or '<li>none</li>'
     routing_action_label = str(disposition_action_routing.get('primary_follow_up_action_label') or '').strip()
     routing_action_href = str(disposition_action_routing.get('primary_follow_up_action_href') or '').strip()
+    routing_action_annotation_type = html.escape(str(disposition_action_routing.get('primary_follow_up_action_annotation_type', '')))
+    routing_action_decision_posture = html.escape(str(disposition_action_routing.get('primary_follow_up_action_decision_posture', '')))
     routing_action_link = (
         _render_nav_link(
             href=routing_action_href,
@@ -1049,6 +1097,8 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     ) or '<li>none</li>'
     decision_packet_primary_action_label = str(decision_packet_seed.get('primary_follow_up_action_label') or '').strip()
     decision_packet_primary_action_href = str(decision_packet_seed.get('primary_follow_up_action_href') or '').strip()
+    decision_packet_primary_action_annotation_type = html.escape(str(decision_packet_seed.get('primary_follow_up_action_annotation_type', '')))
+    decision_packet_primary_action_decision_posture = html.escape(str(decision_packet_seed.get('primary_follow_up_action_decision_posture', '')))
     decision_packet_primary_action_link = (
         _render_nav_link(
             href=decision_packet_primary_action_href,
@@ -1090,6 +1140,8 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     primary_target_href = str(view_model.get('primary_item_target_href') or view_model.get('primary_item_target_page') or '').strip()
     primary_action_label = str(view_model.get('primary_item_action_label') or '').strip()
     primary_action_href = str(view_model.get('primary_item_action_href') or '').strip()
+    primary_action_annotation_type = html.escape(str(view_model.get('primary_item_action_annotation_type', '')))
+    primary_action_decision_posture = html.escape(str(view_model.get('primary_item_action_decision_posture', '')))
     package_name = html.escape(str(view_model.get('package_name', 'Release / Demo Package')))
     generated_at = html.escape(str(view_model.get('generated_at_utc', 'n/a')))
 
@@ -1117,9 +1169,11 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<p><strong>Primary focus:</strong> {primary_focus}</p>"
         f"<p><strong>Next check:</strong> {primary_next_check}</p>"
         f"<p><strong>Primary target page:</strong> {primary_target_link}"
-        + (f" | {primary_action_link}" if primary_action_link else "")
+        + (f" · <strong>Primary action:</strong> {primary_action_link}" if primary_action_link else "")
         + "</p>"
-        f"<p><strong>Generated:</strong> {generated_at}</p>"
+        + (f"<p><strong>Follow-up annotation type:</strong> {primary_action_annotation_type}</p>" if primary_action_annotation_type else "")
+        + (f"<p><strong>Follow-up decision posture:</strong> {primary_action_decision_posture}</p>" if primary_action_decision_posture else "")
+        + f"<p><strong>Generated:</strong> {generated_at}</p>"
         "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Prioritized items</div>"
@@ -1165,6 +1219,8 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<div><strong>Bounded rationale</strong><ul>{signoff_rationale}</ul></div>"
         f"<div><strong>Follow-up actions</strong><ul>{signoff_followups}</ul></div>"
         + (f"<p><strong>Primary follow-up action</strong>: {signoff_action_link}</p>" if signoff_action_link else "")
+        + (f"<p><strong>Follow-up annotation type</strong>: {signoff_action_annotation_type}</p>" if signoff_action_annotation_type else "")
+        + (f"<p><strong>Follow-up decision posture</strong>: {signoff_action_decision_posture}</p>" if signoff_action_decision_posture else "")
         + "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Stakeholder cover sheet</div>"
@@ -1187,15 +1243,21 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<p>{cover_sheet_start_here_reason}</p>"
         + f"<div><strong>External-share summary</strong><ul>{external_share_summary_html}</ul></div>"
         + (f"<p><strong>Primary follow-up action</strong>: {external_share_action_link}</p>" if external_share_action_link else "")
+        + (f"<p><strong>Follow-up annotation type</strong>: {external_share_action_annotation_type}</p>" if external_share_action_annotation_type else "")
+        + (f"<p><strong>Follow-up decision posture</strong>: {external_share_action_decision_posture}</p>" if external_share_action_decision_posture else "")
         + "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Decision log export summary</div>"
         f"<div><strong>Approval state</strong><ul>{approval_state_html}</ul></div>"
         + f"<div><strong>Requested decision linkage</strong><ul>{requested_decision_linkage_html}</ul></div>"
         + (f"<p><strong>Primary follow-up action</strong>: {requested_decision_action_link}</p>" if requested_decision_action_link else "")
+        + (f"<p><strong>Follow-up annotation type</strong>: {requested_decision_action_annotation_type}</p>" if requested_decision_action_annotation_type else "")
+        + (f"<p><strong>Follow-up decision posture</strong>: {requested_decision_action_decision_posture}</p>" if requested_decision_action_decision_posture else "")
         + f"<div><strong>Distribution bundle</strong><ul>{distribution_bundle_html}</ul></div>"
         + f"<div><strong>Decision entry template</strong><ul>{decision_entry_template_html}</ul></div>"
         + (f"<p><strong>Decision-entry follow-up action</strong>: {decision_entry_action_link}</p>" if decision_entry_action_link else "")
+        + (f"<p><strong>Follow-up annotation type</strong>: {decision_entry_action_annotation_type}</p>" if decision_entry_action_annotation_type else "")
+        + (f"<p><strong>Follow-up decision posture</strong>: {decision_entry_action_decision_posture}</p>" if decision_entry_action_decision_posture else "")
         + "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Reviewer disposition standard</div>"
@@ -1209,6 +1271,8 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<p><strong>Route trigger</strong>: {route_trigger}</p>"
         f"<div><strong>Primary action bundle</strong><ul>{primary_action_bundle_html}</ul></div>"
         + (f"<p><strong>Primary follow-up action</strong>: {routing_action_link}</p>" if routing_action_link else "")
+        + (f"<p><strong>Follow-up annotation type</strong>: {routing_action_annotation_type}</p>" if routing_action_annotation_type else "")
+        + (f"<p><strong>Follow-up decision posture</strong>: {routing_action_decision_posture}</p>" if routing_action_decision_posture else "")
         + f"<p><strong>Escalation / handoff route</strong>: {escalation_handoff_route}</p>"
         + f"<p><strong>Action owner</strong>: {action_owner}</p>"
         + "</section>"
@@ -1218,6 +1282,8 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<div><strong>Decision snapshot</strong><ul>{decision_snapshot_html}</ul></div>"
         f"<div><strong>Share now packet</strong><ul>{share_now_packet_html}</ul></div>"
         + (f"<p><strong>Primary follow-up action</strong>: {decision_packet_primary_action_link}</p>" if decision_packet_primary_action_link else "")
+        + (f"<p><strong>Follow-up annotation type</strong>: {decision_packet_primary_action_annotation_type}</p>" if decision_packet_primary_action_annotation_type else "")
+        + (f"<p><strong>Follow-up decision posture</strong>: {decision_packet_primary_action_decision_posture}</p>" if decision_packet_primary_action_decision_posture else "")
         + f"<p><strong>Decision packet note</strong>: {decision_packet_note}</p>"
         + "</section>"
         "<section class='panel'>"

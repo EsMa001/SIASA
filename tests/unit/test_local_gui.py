@@ -3515,6 +3515,11 @@ def test_release_demo_package_preserves_action_links_in_review_sequence_and_cove
     assert view_model["primary_item_action_href"].startswith(
         "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001"
     )
+    assert view_model["primary_item_action_annotation_type"] == "false_positive_note"
+    assert (
+        view_model["primary_item_action_decision_posture"]
+        == "Treat as potential false-positive over-escalation until bounded expectation alignment is reviewed."
+    )
     assert "expected_status=S1" in view_model["primary_item_action_href"]
     assert "replayed_status=S3" in view_model["primary_item_action_href"]
     assert "decision_posture=Treat+as+potential+false-positive+over-escalation+until+bounded+expectation+alignment+is+reviewed." in view_model["primary_item_action_href"]
@@ -3536,26 +3541,65 @@ def test_release_demo_package_preserves_action_links_in_review_sequence_and_cove
     )
     assert view_model["reviewer_handoff_summary"]["decision_log_seed"]["primary_follow_up_action_label"] == "Create Annotation Draft"
     assert view_model["review_signoff_scaffold"]["primary_follow_up_action_label"] == "Create Annotation Draft"
+    assert view_model["review_signoff_scaffold"]["primary_follow_up_action_annotation_type"] == "false_positive_note"
+    assert (
+        view_model["review_signoff_scaffold"]["primary_follow_up_action_decision_posture"]
+        == "Treat as potential false-positive over-escalation until bounded expectation alignment is reviewed."
+    )
     assert view_model["review_signoff_scaffold"]["primary_follow_up_action_href"].startswith(
         "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001"
     )
     assert view_model["disposition_action_routing"]["primary_follow_up_action_label"] == "Create Annotation Draft"
+    assert view_model["disposition_action_routing"]["primary_follow_up_action_annotation_type"] == "false_positive_note"
+    assert (
+        view_model["disposition_action_routing"]["primary_follow_up_action_decision_posture"]
+        == "Treat as potential false-positive over-escalation until bounded expectation alignment is reviewed."
+    )
     assert view_model["disposition_action_routing"]["primary_follow_up_action_href"].startswith(
         "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001"
     )
     assert view_model["stakeholder_cover_sheet"]["external_share_summary"]["primary_follow_up_action_label"] == "Create Annotation Draft"
+    assert (
+        view_model["stakeholder_cover_sheet"]["external_share_summary"]["primary_follow_up_action_annotation_type"]
+        == "false_positive_note"
+    )
+    assert (
+        view_model["stakeholder_cover_sheet"]["external_share_summary"]["primary_follow_up_action_decision_posture"]
+        == "Treat as potential false-positive over-escalation until bounded expectation alignment is reviewed."
+    )
     assert view_model["stakeholder_cover_sheet"]["external_share_summary"]["primary_follow_up_action_href"].startswith(
         "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001"
     )
     assert view_model["decision_log_export_summary"]["requested_decision_linkage"]["primary_follow_up_action_label"] == "Create Annotation Draft"
+    assert (
+        view_model["decision_log_export_summary"]["requested_decision_linkage"]["primary_follow_up_action_annotation_type"]
+        == "false_positive_note"
+    )
+    assert (
+        view_model["decision_log_export_summary"]["requested_decision_linkage"]["primary_follow_up_action_decision_posture"]
+        == "Treat as potential false-positive over-escalation until bounded expectation alignment is reviewed."
+    )
     assert view_model["decision_log_export_summary"]["requested_decision_linkage"]["primary_follow_up_action_href"].startswith(
         "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001"
     )
     assert view_model["decision_log_export_summary"]["decision_entry_template"]["primary_follow_up_action_label"] == "Create Annotation Draft"
+    assert (
+        view_model["decision_log_export_summary"]["decision_entry_template"]["primary_follow_up_action_annotation_type"]
+        == "false_positive_note"
+    )
+    assert (
+        view_model["decision_log_export_summary"]["decision_entry_template"]["primary_follow_up_action_decision_posture"]
+        == "Treat as potential false-positive over-escalation until bounded expectation alignment is reviewed."
+    )
     assert view_model["decision_log_export_summary"]["decision_entry_template"]["primary_follow_up_action_href"].startswith(
         "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001"
     )
     assert view_model["decision_packet_seed"]["primary_follow_up_action_label"] == "Create Annotation Draft"
+    assert view_model["decision_packet_seed"]["primary_follow_up_action_annotation_type"] == "false_positive_note"
+    assert (
+        view_model["decision_packet_seed"]["primary_follow_up_action_decision_posture"]
+        == "Treat as potential false-positive over-escalation until bounded expectation alignment is reviewed."
+    )
     assert view_model["decision_packet_seed"]["primary_follow_up_action_href"].startswith(
         "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001"
     )
@@ -3563,9 +3607,13 @@ def test_release_demo_package_preserves_action_links_in_review_sequence_and_cove
     html_out = render_release_demo_package_body(view_model)
     assert "Page / action" in html_out
     assert "Primary follow-up action" in html_out
+    assert "Follow-up annotation type" in html_out
+    assert "Follow-up decision posture" in html_out
     assert "Decision-entry follow-up action" in html_out
     assert html_out.count("Primary follow-up action") >= 5
     assert html_out.count("Create Annotation Draft</a>") >= 7
+    assert "false_positive_note" in html_out
+    assert "Treat as potential false-positive over-escalation until bounded expectation alignment is reviewed." in html_out
     assert "annotations.html?scope=country&amp;annotation_type=false_positive_note&amp;country_id=POL&amp;case_id=VAL-POL-2024-001" in html_out
     assert "decision_posture=Treat+as+potential+false-positive+over-escalation+until+bounded+expectation+alignment+is+reviewed." in html_out
     assert "expected_status=S1" in html_out

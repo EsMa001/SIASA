@@ -1102,6 +1102,21 @@ This closes the next bounded decision-scaffolding slice after VAL-WP-023: the ac
 
 ---
 
+### N1-WP-070
+Name:
+Make the new validation-derived follow-up annotation semantics reviewer-visible in downstream release-package decision/export panels by propagating annotation type and decision posture alongside the existing follow-up action links, instead of hiding that meaning only in query strings.
+
+Closure achieved:
+- Updated `src/siasa/readmodels/release_demo_package.py` so validation-attention source items now persist `action_annotation_type` and `action_decision_posture`, and the release/demo package propagates them through `primary_item_*`, `reviewer_handoff_summary`, `review_signoff_scaffold`, `stakeholder_cover_sheet.external_share_summary`, `decision_log_export_summary`, `disposition_action_routing`, and `decision_packet_seed`
+- Updated `render_release_demo_package_body(...)` so `release_package.html` now renders explicit `Follow-up annotation type` and `Follow-up decision posture` lines in the package overview plus the downstream signoff/export/routing/packet panels, instead of forcing reviewers to infer semantics from URL query parameters alone
+- Added RED/GREEN coverage in `tests/unit/test_local_gui.py` for machine-readable semantic propagation and rendered wording visibility; validation evidence: targeted regression passed (`1 passed in 0.06s`), focused release-package GUI regression passed (`2 passed, 23 deselected in 0.07s`), adjacent artifact regression passed (`19 passed in 123.25s`), full regression passed (`537 passed in 344.75s`)
+- Commit: `b595165`
+
+Steering note:
+This closes the next bounded reviewer-decision-scaffolding slice after N1-WP-069: downstream release-package consumers now see not only the next action link, but also the intended annotation semantics and decision posture for that action. The next bounded default should now prefer either (a) another validation-to-action closure slice that converts these semantics into still more explicit reviewer decision templates/checklists, or (b) a materially different new challenge archetype if it adds genuinely new analyst stress.
+
+---
+
 ## 7. Trigger for the next steering pivot
 
 Stay on the current steering path until one of these becomes true:
