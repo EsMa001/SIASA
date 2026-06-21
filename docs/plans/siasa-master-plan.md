@@ -87,15 +87,16 @@ Regeln:
 | AP-02 | Runtime-Breite: governed MVP-Slice (30 Länder) | Erledigt | – | MVP-Must | `G1`, Roadmap `P0/P2`, `Step A` |
 | AP-03 | Operationale Evidenz-Spur | Erledigt | – | MVP-Should | `G3`, `N1-WP-003..010` |
 | AP-04 | Release-Lifecycle: Freigabe → Distribution | Erledigt | – | MVP-Should | `G4 WP-001/002/003`, `Step C` (`C-1..C-12`) |
-| AP-05 | Validierungs-Realismus & Analyst-Handoff | In Arbeit | **P1** | MVP-Should | `VAL-WP-001..026`, `N1-WP-011..071`, `Step B` |
-| AP-06 | Externe credential-gated Quellen-Aktivierung | Blockiert | **P4** | MVP-Should | `G2`, `P0-WP-001`, ReliefWeb/UCDP |
-| AP-07 | Quellen-Robustheit & Degradations-Wahrheit | Offen | **P2** | MVP-Should | `G1`-Rest, `SRC-GDELT-DOC/-E` |
-| AP-08 | Breiten-Ausbau über mvp-complete hinaus | Offen | **P3** | MVP-Could | Roadmap §5, Source-Origin/Epidemiologie |
-| AP-09 | Server-gestützte Multi-User-Governance | Zurückgestellt | **P5** | Post-MVP | `G5` |
+| AP-05 | Validierungs-Realismus & Analyst-Handoff | Erledigt | – | MVP-Should | `VAL-WP-001..026`, `N1-WP-011..071`, `Step B` |
+| AP-06 | Externe credential-gated Quellen-Aktivierung | Blockiert | **P3** | MVP-Should | `G2`, `P0-WP-001`, ReliefWeb/UCDP |
+| AP-07 | Quellen-Robustheit & Degradations-Wahrheit | Offen | **P1** | MVP-Should | `G1`-Rest, `SRC-GDELT-DOC/-E` |
+| AP-08 | Breiten-Ausbau über mvp-complete hinaus | Offen | **P2** | MVP-Could | Roadmap §5, Source-Origin/Epidemiologie |
+| AP-09 | Server-gestützte Multi-User-Governance | Zurückgestellt | **P4** | Post-MVP | `G5` |
 
 Gesamtbild: Das Fundament und alle repo-seitig steuerbaren Gap-Familien (`G1`, `G2`, `G3`, `G4`) sind
-**materiell geschlossen** (Capability-Matrix: `17/17 Done`, `100.0%`). Die verbleibende Arbeit ist
-Tiefe (Validierungs-Realismus), externe Aktivierung, Robustheit, Breite und – zurückgestellt – Multi-User.
+**materiell geschlossen** (Capability-Matrix: `17/17 Done`, `100.0%`). AP-05 (Validierungs-Realismus &
+Analyst-Handoff) ist ebenfalls erledigt. Die verbleibende Arbeit ist
+externe Aktivierung, Robustheit, Breite und – zurückgestellt – Multi-User.
 
 ---
 
@@ -106,11 +107,10 @@ Tiefe (Validierungs-Realismus), externe Aktivierung, Robustheit, Breite und – 
 
 | Rang | AP-ID | Großes Arbeitspaket | Status | Klasse | Auslöser / Bedingung |
 | --- | --- | --- | --- | --- | --- |
-| **P1** | AP-05 | Validierungs-Realismus & Analyst-Handoff | In Arbeit | MVP-Should | Default-Track (kein externer Auslöser nötig) |
-| **P2** | AP-07 | Quellen-Robustheit & Degradations-Wahrheit | Offen | MVP-Should | probe-getrieben: nur bei konkretem neuen Failure-Mode |
-| **P3** | AP-08 | Breiten-Ausbau über mvp-complete hinaus | Offen | MVP-Could | neue Länder-/Quellen-Cluster-Nachfrage |
-| **P4** | AP-06 | Externe Quellen-Aktivierung (G2) | Blockiert | MVP-Should | **springt auf P1**, sobald gültige ReliefWeb/UCDP-Credentials vorliegen |
-| **P5** | AP-09 | Multi-User-Governance (G5) | Zurückgestellt | Post-MVP | nur wenn Operating-Model Multi-User explizit fordert |
+| **P1** | AP-07 | Quellen-Robustheit & Degradations-Wahrheit | Offen | MVP-Should | probe-getrieben: nur bei konkretem neuen Failure-Mode |
+| **P2** | AP-08 | Breiten-Ausbau über mvp-complete hinaus | Offen | MVP-Could | neue Länder-/Quellen-Cluster-Nachfrage |
+| **P3** | AP-06 | Externe Quellen-Aktivierung (G2) | Blockiert | MVP-Should | **springt auf P1**, sobald gültige ReliefWeb/UCDP-Credentials vorliegen |
+| **P4** | AP-09 | Multi-User-Governance (G5) | Zurückgestellt | Post-MVP | nur wenn Operating-Model Multi-User explizit fordert |
 
 ### So steuerst du die Reihenfolge
 
@@ -119,19 +119,17 @@ Tiefe (Validierungs-Realismus), externe Aktivierung, Robustheit, Breite und – 
    Abschnitt ist die maßgebliche Reihenfolge.
 3. Die Spalte „Auslöser / Bedingung" sagt, wann ein blockiertes/zurückgestelltes Paket automatisch nach oben
    rückt (z. B. AP-06 bei verfügbaren Credentials).
-4. Abgeschlossene Pakete (AP-01..AP-04) haben keinen Rang und stehen nur in Abschnitt 2 und 4.
+4. Abgeschlossene Pakete (AP-01..AP-05) haben keinen Rang und stehen nur in Abschnitt 2 und 4.
 
 ### Begründung der Default-Reihenfolge
 
-- **AP-05 zuerst (P1):** Mit geschlossenem `G1/G2/G3/G4`-Fundament ist die Vertiefung der Validierungs-Realität
-  und des Analyst-Handoffs der höchste interne Wert (baut auf der abgeschlossenen Replay-Attention-Basis auf).
-- **AP-07 (P2):** Robustheit bleibt gezielt und probe-getrieben – nur anfassen, wenn eine Breiten-Probe einen
+- **AP-07 zuerst (P1):** Robustheit bleibt gezielt und probe-getrieben – nur anfassen, wenn eine Breiten-Probe einen
   konkreten neuen Fehlermodus zeigt (keine spekulative Retry-Erweiterung).
-- **AP-08 (P3):** Breiten-Ausbau erhöht echte Produktreichweite, ist aber erst nach klarer Nachfrage nach neuen
+- **AP-08 (P2):** Breiten-Ausbau erhöht echte Produktreichweite, ist aber erst nach klarer Nachfrage nach neuen
   Clustern sinnvoll.
-- **AP-06 (P4, bedingt):** Repo-seitig fertig; der einzige offene Hebel ist extern (Credentials). Sobald
+- **AP-06 (P3, bedingt):** Repo-seitig fertig; der einzige offene Hebel ist extern (Credentials). Sobald
   Credentials da sind, ist dies das wertvollste gebündelte Paket und springt auf P1.
-- **AP-09 (P5, zurückgestellt):** Großer Architektursprung; nur bei explizitem Bedarf am Ziel-Betriebsmodell.
+- **AP-09 (P4, zurückgestellt):** Großer Architektursprung; nur bei explizitem Bedarf am Ziel-Betriebsmodell.
 
 ---
 
@@ -188,7 +186,7 @@ Herkunft: `G4 WP-001/002/003`; `Step C` Produktisierung (`C-1..C-12`).
 
 ### 4.B Offene / laufende / zurückgestellte Arbeitspakete (AP-05 … AP-09)
 
-#### AP-05 — Validierungs-Realismus & Analyst-Handoff · Status: In Arbeit · Rang: P1 · Klasse: MVP-Should
+#### AP-05 — Validierungs-Realismus & Analyst-Handoff · Status: Erledigt · Klasse: MVP-Should
 Kanonischer Track-Name (Legacy/EN): **validation realism depth / analyst handoff refinement**.
 Herkunft: `VAL-WP-001..026`, `N1-WP-011..071`, Roadmap `Step B` (`B-1..B-6`).
 Ziel: Non-perfekten Replay-Realismus vertiefen und den deterministischen Analyst-Handoff
@@ -202,7 +200,7 @@ wieder zu öffnen.
 | AP-05.3 | Kontext-tragende Deep-Links Briefing → Coverage/Validation/Annotation | Erledigt | `VAL-WP-014/015/016/017` |
 | AP-05.4 | Annotation-Decision-Scaffolding (Typ + Decision-Posture deterministisch) | Erledigt | `N1-WP-069/070/071` |
 | AP-05.5 | Reviewer-Decision-Templates in Sign-off/Routing/Send-Readiness | Erledigt | `N1-WP-071` |
-| AP-05.6 | **Nächster Default:** tiefere non-perfekte Replay-Portfolios bzw. Decision-Log-/Approval-Condition-Auto-Seeds | Offen | nächstes bounded Slice |
+| AP-05.6 | Decision-Log-/Approval-Condition-Auto-Seeds | Erledigt | Decision-log auto-seeds in release package |
 
 DoD nächstes Slice: ein gebündeltes Validierungs-/Handoff-Slice; gezielte RED/GREEN-Tests; Full-Suite grün;
 ein reales Probe-Bundle; Master-Plan + Capability-Matrix aktualisiert; Commit/Push.
@@ -255,11 +253,11 @@ explizitem Bedarf am Ziel-Betriebsmodell.
 
 | # | Lücke | Betroffenes AP | Art | Nächster Schritt |
 | --- | --- | --- | --- | --- |
-| L1 | Tiefe des non-perfekten Replay-Realismus / Decision-Auto-Seeds | AP-05.6 | intern, offen | nächstes bounded Validierungs-Slice (P1) |
+| L1 | ~~Tiefe des non-perfekten Replay-Realismus / Decision-Auto-Seeds~~ | AP-05.6 | geschlossen | AP-05 erledigt; Decision-log auto-seeds implementiert |
 | L2 | ReliefWeb/UCDP nur repo-ready, nicht live aktiviert | AP-06.1/.2 | **extern blockiert** | Credentials beschaffen → AP-06 auf P1 |
-| L3 | GDELT-Provider-Degradation & Release-Konsequenz | AP-07.1 | intern, probe-getrieben | bei konkretem Befund härten (P2) |
-| L4 | Breite über die governed 30-Länder hinaus | AP-08.1 | intern, offen | bei Cluster-Nachfrage je Slice ausbauen (P3) |
-| L5 | Multi-User/Server-Governance | AP-09 | strategisch | nur bei Operating-Model-Bedarf (P5, zurückgestellt) |
+| L3 | GDELT-Provider-Degradation & Release-Konsequenz | AP-07.1 | intern, probe-getrieben | bei konkretem Befund härten (P1) |
+| L4 | Breite über die governed 30-Länder hinaus | AP-08.1 | intern, offen | bei Cluster-Nachfrage je Slice ausbauen (P2) |
+| L5 | Multi-User/Server-Governance | AP-09 | strategisch | nur bei Operating-Model-Bedarf (P4, zurückgestellt) |
 
 Pivot-Auslöser (wann die Priorisierung neu bewertet wird):
 - gültige ReliefWeb/UCDP-Credentials werden verfügbar → AP-06 hoch;
