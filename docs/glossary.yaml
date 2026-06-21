@@ -1,0 +1,620 @@
+# SIASA Terminologie-Glossar
+# Maschinenlesbar; Quelle für einheitliche Begriffs-Nutzung in Planungs- und Code-Artefakten.
+# Pflegeregel: Bei neuen Begriffen/Konzepten hier ergänzen; bei Widersprüchen Glossar als Referenz verwenden.
+
+terms:
+
+  # ── Projektsteuerung ──────────────────────────────────────────────────
+
+  - term_de: "Arbeitspaket"
+    term_en: "work package"
+    abbreviation: "AP"
+    definition_de: "Gebündeltes, abgrenzbares Stück planbarer Arbeit mit eigener Identität (AP-NN), Status und Akzeptanzkriterien."
+    code_identifiers: []
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Projektsteuerung"
+
+  - term_de: "Blockiert"
+    term_en: "blocked"
+    abbreviation: ""
+    definition_de: "Status eines Arbeitspakets, das repo-seitig fertig ist und auf einen externen Auslöser wartet (z. B. Credentials)."
+    code_identifiers: []
+    used_in:
+      - "siasa-master-plan.md"
+    category: "Projektsteuerung"
+
+  - term_de: "Capability-Matrix"
+    term_en: "capability matrix"
+    abbreviation: ""
+    definition_de: "Detailliertes operationales Evidenz-/Status-Ledger, das stakeholder-sichtbare Fähigkeiten auf Repo-Evidenz, Test-Evidenz und Arbeitspakete abbildet."
+    code_identifiers:
+      - "functional_fulfillment"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Projektsteuerung"
+
+  - term_de: "Definition of Done"
+    term_en: "definition of done"
+    abbreviation: "DoD"
+    definition_de: "Globale Abnahmekriterien: Implementierung + Traceability + Tests + grüne Checks + Doku-Update + Konsistenzprüfung."
+    code_identifiers: []
+    used_in:
+      - "siasa-master-plan.md"
+      - "AGENTS.md"
+    category: "Projektsteuerung"
+
+  - term_de: "Erledigt"
+    term_en: "done"
+    abbreviation: ""
+    definition_de: "Status eines Arbeitspakets: implementiert, getestet, evidenzbelegt und abgeschlossen."
+    code_identifiers: []
+    used_in:
+      - "siasa-master-plan.md"
+    category: "Projektsteuerung"
+
+  - term_de: "Klasse (MVP)"
+    term_en: "MVP class"
+    abbreviation: ""
+    definition_de: "Governed Priorisierungsklasse aus prioritization.yaml: MVP-Must, MVP-Should, MVP-Could, Post-MVP, Out-of-Scope."
+    code_identifiers:
+      - "prioritization.yaml"
+    used_in:
+      - "siasa-master-plan.md"
+    category: "Projektsteuerung"
+
+  - term_de: "Offen"
+    term_en: "open"
+    abbreviation: ""
+    definition_de: "Status eines Arbeitspakets: geplant, aber noch nicht begonnen."
+    code_identifiers: []
+    used_in:
+      - "siasa-master-plan.md"
+    category: "Projektsteuerung"
+
+  - term_de: "Rang / Priorität"
+    term_en: "rank / priority"
+    abbreviation: "P1–P5"
+    definition_de: "Steuerbare Bearbeitungsreihenfolge offener Arbeitspakete. P1 = höchste Priorität."
+    code_identifiers: []
+    used_in:
+      - "siasa-master-plan.md"
+    category: "Projektsteuerung"
+
+  - term_de: "Teilarbeitspaket"
+    term_en: "sub-work-package"
+    abbreviation: "TAP"
+    definition_de: "Untergeordnetes Arbeitspaket (AP-NN.M) innerhalb eines großen Arbeitspakets; eigener Status und eigene Evidenz."
+    code_identifiers: []
+    used_in:
+      - "siasa-master-plan.md"
+    category: "Projektsteuerung"
+
+  - term_de: "Zurückgestellt"
+    term_en: "deferred"
+    abbreviation: ""
+    definition_de: "Status eines Arbeitspakets: bewusst aufgeschoben; wird nur bei expliziter Umpriorisierung aktiviert."
+    code_identifiers: []
+    used_in:
+      - "siasa-master-plan.md"
+    category: "Projektsteuerung"
+
+  # ── Architektur ────────────────────────────────────────────────────────
+
+  - term_de: "Domain A/B/C/D/E"
+    term_en: "domain A/B/C/D/E"
+    abbreviation: ""
+    definition_de: "Fünf analytische Domänen des SIASA-Modells: A = politische Stabilität, B = Sicherheit/Konflikt, C = humanitäre Lage, D = Wirtschaft/Entwicklung, E = Informationsraum/Cyber."
+    code_identifiers:
+      - "domain_a"
+      - "domain_b"
+      - "domain_c"
+      - "domain_d"
+      - "domain_e"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+      - "AGENTS.md"
+    category: "Architektur"
+
+  - term_de: "Governed"
+    term_en: "governed"
+    abbreviation: ""
+    definition_de: "Im V-Modell verbindlich festgelegte und versionierte Artefakte (z. B. governed YAML, governed Pilot-Sets). Änderungen erfordern explizite Steuerung."
+    code_identifiers: []
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Architektur"
+
+  - term_de: "Kernpipeline"
+    term_en: "core pipeline"
+    abbreviation: ""
+    definition_de: "Die durchgängige Verarbeitungskette von Quell-Adapter über Normalisierung, Feature-Berechnung, Scoring, Snapshot bis Report-Erzeugung."
+    code_identifiers:
+      - "orchestrator.py"
+    used_in:
+      - "siasa-master-plan.md"
+    category: "Architektur"
+
+  - term_de: "Schichtentrennung"
+    term_en: "layer separation"
+    abbreviation: ""
+    definition_de: "Architekturprinzip: Source-Katalog, Rohdaten, normalisierte Daten, Features, Domain-Status, Multi-Domain-Status, Snapshots, Annotationen und Reports sind strikt getrennt."
+    code_identifiers: []
+    used_in:
+      - "AGENTS.md"
+    category: "Architektur"
+
+  - term_de: "V-Modell"
+    term_en: "V-model"
+    abbreviation: ""
+    definition_de: "Projektstruktur mit Requirements, Architektur, Methoden, Verifikation und Traceability unter vmodel/."
+    code_identifiers:
+      - "vmodel/"
+    used_in:
+      - "siasa-master-plan.md"
+      - "AGENTS.md"
+    category: "Architektur"
+
+  # ── Datenmodell ────────────────────────────────────────────────────────
+
+  - term_de: "Anomalie-Engine"
+    term_en: "anomaly engine"
+    abbreviation: ""
+    definition_de: "Berechnungsmodul, das Abweichungen von der Baseline erkennt und einen Anomalie-Score pro Land/Domäne erzeugt."
+    code_identifiers:
+      - "baselines.py"
+      - "domain_status.py"
+    used_in:
+      - "siasa-master-plan.md"
+    category: "Datenmodell"
+
+  - term_de: "Baseline-Engine"
+    term_en: "baseline engine"
+    abbreviation: ""
+    definition_de: "Berechnet historische Referenzwerte (Baselines) für Feature-Zeitreihen, gegen die aktuelle Werte verglichen werden."
+    code_identifiers:
+      - "baselines.py"
+    used_in:
+      - "siasa-master-plan.md"
+    category: "Datenmodell"
+
+  - term_de: "D0–D5 (Domain-Status)"
+    term_en: "D0–D5 (domain status)"
+    abbreviation: ""
+    definition_de: "Sechsstufiges Status-Modell pro Domäne: D0 = keine Daten, D1 = normal, D2 = leicht erhöht, D3 = erhöht, D4 = kritisch, D5 = widersprüchlich."
+    code_identifiers:
+      - "domain_status.py"
+    used_in:
+      - "siasa-master-plan.md"
+      - "AGENTS.md"
+    category: "Datenmodell"
+
+  - term_de: "Feature-Berechnung"
+    term_en: "feature computation"
+    abbreviation: ""
+    definition_de: "Ableitung analytischer Kennzahlen (Features) aus normalisierten Quelldaten, gruppiert nach Domänen A/B/C/D/E."
+    code_identifiers:
+      - "features/"
+      - "domain_a.py"
+      - "domain_d.py"
+      - "domain_e.py"
+    used_in:
+      - "siasa-master-plan.md"
+    category: "Datenmodell"
+
+  - term_de: "S0–S6 (Multi-Domain-Status)"
+    term_en: "S0–S6 (multi-domain status)"
+    abbreviation: ""
+    definition_de: "Siebenstufiges aggregiertes Status-Modell über alle Domänen: S0 = keine Daten, S1 = stabil, S2 = leicht, S3 = mittel, S4 = erhöht, S5 = kritisch, S6 = akute Krise."
+    code_identifiers:
+      - "multi_domain_status.py"
+    used_in:
+      - "siasa-master-plan.md"
+      - "AGENTS.md"
+    category: "Datenmodell"
+
+  - term_de: "Snapshot"
+    term_en: "snapshot"
+    abbreviation: ""
+    definition_de: "Zeitpunktbezogener, versionierter Zustandsabzug aller Scoring-Ergebnisse, Quellstatus und Metadaten für ein Land."
+    code_identifiers:
+      - "artifacts.py"
+    used_in:
+      - "siasa-master-plan.md"
+    category: "Datenmodell"
+
+  - term_de: "Status-Engine"
+    term_en: "status engine"
+    abbreviation: ""
+    definition_de: "Berechnet den Domain-Status (D0–D5) und Multi-Domain-Status (S0–S6) aus Features, Anomalien und Datensuffizienz."
+    code_identifiers:
+      - "domain_status.py"
+      - "multi_domain_status.py"
+    used_in:
+      - "siasa-master-plan.md"
+    category: "Datenmodell"
+
+  # ── Quellen ────────────────────────────────────────────────────────────
+
+  - term_de: "Degradation"
+    term_en: "degradation"
+    abbreviation: ""
+    definition_de: "Teilweiser oder vollständiger Ausfall einer externen Quelle zur Laufzeit; wird als expliziter Quellstatus abgebildet und in Readiness/Release-Wahrheit propagiert."
+    code_identifiers:
+      - "failed_sources"
+      - "partial_success"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Quellen"
+
+  - term_de: "Frische / Freshness"
+    term_en: "freshness"
+    abbreviation: ""
+    definition_de: "Aktualitätsmaß einer Datenquelle oder eines Bundles. Konfigurierbar pro Domäne/Quelle in freshness_config.yaml."
+    code_identifiers:
+      - "freshness_config.py"
+      - "evidence_freshness_status"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Quellen"
+
+  - term_de: "Pilot-Set"
+    term_en: "pilot set"
+    abbreviation: ""
+    definition_de: "Benannte, governed Teilmenge von Ländern für Laufzeitläufe (z. B. core-focus-initial, focus-complete, mvp-complete, control-reference-complete)."
+    code_identifiers:
+      - "pilot_set"
+      - "country_set_id"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Quellen"
+
+  - term_de: "Source-Adapter"
+    term_en: "source adapter"
+    abbreviation: ""
+    definition_de: "Modulare Anbindung einer externen Datenquelle an die Pipeline (z. B. GDELTDocAdapter, UCDPAdapter, UNHCRPopulationAdapter). Jeder Adapter gehört zu genau einer Domäne."
+    code_identifiers:
+      - "adapters/"
+      - "SourceAdapter"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Quellen"
+
+  - term_de: "Quellautorität / Authority"
+    term_en: "authority"
+    abbreviation: ""
+    definition_de: "Governance-Status einer Evidenz-Spur: fresh, stale, oder override-governed."
+    code_identifiers:
+      - "evidence_lane_closure_status"
+    used_in:
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Quellen"
+
+  - term_de: "Quellabdeckung / Source Coverage"
+    term_en: "source coverage"
+    abbreviation: ""
+    definition_de: "Maß für die Abdeckung eines Landes durch verfügbare Datenquellen; Teil des Readiness-Profils."
+    code_identifiers:
+      - "source_coverage.py"
+      - "source_coverage.json"
+    used_in:
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Quellen"
+
+  # ── Validierung ────────────────────────────────────────────────────────
+
+  - term_de: "Backtest"
+    term_en: "backtest"
+    abbreviation: ""
+    definition_de: "Automatisierter Vergleich aktueller Scoring-Ergebnisse gegen historische Baselines; erkennt Regressionen (Score-Drops > 10 %) und Status-Änderungen."
+    code_identifiers:
+      - "backtesting.py"
+      - "validation_backtest.json"
+    used_in:
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Validierung"
+
+  - term_de: "Challenge-Case"
+    term_en: "challenge case"
+    abbreviation: ""
+    definition_de: "Kuratierter Validierungsfall mit schwacher Evidenz, Mismatch oder Domain-Lücke; Teil des Challenge-Case-Portfolios."
+    code_identifiers:
+      - "validation_reference_cases.yaml"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Validierung"
+
+  - term_de: "Replay"
+    term_en: "replay"
+    abbreviation: ""
+    definition_de: "Erneute Auswertung historisch archivierter Daten zur Überprüfung der Reproduzierbarkeit und Konsistenz von Scoring-Ergebnissen."
+    code_identifiers:
+      - "archival_replay.py"
+      - "historical_replay.py"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Validierung"
+
+  - term_de: "Replay-Attention-Watchlist"
+    term_en: "replay attention watchlist"
+    abbreviation: ""
+    definition_de: "Sortierte, filterbare Übersicht der Replay-Fälle mit nicht-perfekten Ergebnissen (Mismatch, schwache Evidenz); unterstützt Presets, Suche und shareable Hash-Links."
+    code_identifiers:
+      - "replay-attention-panel"
+      - "replay-attention-card"
+    used_in:
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Validierung"
+
+  - term_de: "Validierung"
+    term_en: "validation"
+    abbreviation: ""
+    definition_de: "Überprüfung der Korrektheit und Aussagekraft von Scoring-Ergebnissen anhand von Referenzfällen, Replay und Backtests."
+    code_identifiers:
+      - "validation/"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Validierung"
+
+  # ── Governance ─────────────────────────────────────────────────────────
+
+  - term_de: "Annotation"
+    term_en: "annotation"
+    abbreviation: ""
+    definition_de: "Maschinenlesbare, menschengeschriebene Bewertungsnotiz zu einem Land/Domäne/Fall mit Typ, Schweregrad, Tags und Review-Status."
+    code_identifiers:
+      - "annotations/"
+      - "annotations.html"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Governance"
+
+  - term_de: "Evidenz"
+    term_en: "evidence"
+    abbreviation: ""
+    definition_de: "Nachweisbare Belege für Status und Korrektheit: Produkt-/Runtime-Evidenz, Verifikations-Evidenz und Commit-Evidenz müssen gemeinsam vorliegen."
+    code_identifiers:
+      - "release_evidence.py"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Governance"
+
+  - term_de: "Policy-Gate"
+    term_en: "policy gate"
+    abbreviation: ""
+    definition_de: "Automatische Prüfinstanz, die einen Lauf anhand definierter Schwellwerte (z. B. C/E-Abdeckung, Source-Failures) als pass/fail einstuft."
+    code_identifiers:
+      - "live_probe_policy_gate.py"
+      - "policy_gate_verdict"
+    used_in:
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Governance"
+
+  - term_de: "Traceability"
+    term_en: "traceability"
+    abbreviation: ""
+    definition_de: "Nachvollziehbarkeit der Kette von Stakeholder-Anforderungen über System-/Softwareanforderungen bis zu Tests und Evidenz."
+    code_identifiers:
+      - "traceability/"
+      - "trace_links.yaml"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+      - "AGENTS.md"
+    category: "Governance"
+
+  - term_de: "Traceability-Präfixe"
+    term_en: "traceability prefixes"
+    abbreviation: "StR/SyR/SwR/DDS/TC/ATC"
+    definition_de: "Identifikations-Präfixe für Artefakte: StR = Stakeholder-Anforderung, SyR = Systemanforderung, SwR = Softwareanforderung, DDS = Design-Entscheidung, TC = Testfall, ATC = Abnahmetestfall."
+    code_identifiers: []
+    used_in:
+      - "AGENTS.md"
+    category: "Governance"
+
+  # ── GUI/UX ─────────────────────────────────────────────────────────────
+
+  - term_de: "Analyst-Cockpit"
+    term_en: "analyst cockpit"
+    abbreviation: ""
+    definition_de: "Interaktive GUI-Oberfläche mit Explorations-, Vergleichs-, Hotspot- und Validierungsfunktionen inkl. View-State-Persistence und Share-Links."
+    code_identifiers:
+      - "local_app.py"
+      - "analyst_briefing.json"
+    used_in:
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "GUI/UX"
+
+  - term_de: "Decision-Posture"
+    term_en: "decision posture"
+    abbreviation: ""
+    definition_de: "Deterministische Haltungsempfehlung in der Annotation (z. B. monitor, investigate, escalate) basierend auf Typ und Schweregrad."
+    code_identifiers: []
+    used_in:
+      - "siasa-master-plan.md"
+    category: "GUI/UX"
+
+  - term_de: "Decision-Scaffold"
+    term_en: "decision scaffold"
+    abbreviation: ""
+    definition_de: "Strukturiertes Entscheidungs-Gerüst im Annotationsworkflow: Typ, Decision-Posture und Vorausfüllung werden deterministisch abgeleitet."
+    code_identifiers: []
+    used_in:
+      - "siasa-master-plan.md"
+    category: "GUI/UX"
+
+  - term_de: "Deep-Link"
+    term_en: "deep link"
+    abbreviation: ""
+    definition_de: "Kontexttragende Verknüpfung von einer GUI-Seite zur anderen (z. B. Briefing → Coverage/Validation) mit vorausgefüllten Filtern und Hash-State."
+    code_identifiers:
+      - "coverage_prefill_href"
+      - "validation_prefill_href"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "GUI/UX"
+
+  - term_de: "Hotspot-Matrix"
+    term_en: "hotspot matrix"
+    abbreviation: ""
+    definition_de: "Länderübergreifende Konvergenzmatrix, die Coverage-Lücken, Validierungs-Attention und Stale-Priority-Cues in einer Übersicht bündelt."
+    code_identifiers:
+      - "country_hotspot_matrix"
+    used_in:
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "GUI/UX"
+
+  - term_de: "Watchlist"
+    term_en: "watchlist"
+    abbreviation: ""
+    definition_de: "Filterbare, sortierbare Übersichtsliste (z. B. Replay-Attention-Watchlist, Stale-Priority-Watchlist) mit Export- und Share-Funktionen."
+    code_identifiers:
+      - "stale_priority_watchlist"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "GUI/UX"
+
+  # ── Runtime ────────────────────────────────────────────────────────────
+
+  - term_de: "Breiten-Abdeckung / Breadth-Coverage"
+    term_en: "breadth coverage"
+    abbreviation: ""
+    definition_de: "Maß für die Anzahl und Vollständigkeit der von einem Lauf abgedeckten Länder (full, partial, breadth_full_slice_updated)."
+    code_identifiers:
+      - "breadth_coverage_tag"
+      - "breadth_full_slice_updated"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Runtime"
+
+  - term_de: "Laufzeit-Lauf / Run"
+    term_en: "run"
+    abbreviation: ""
+    definition_de: "Ein vollständiger Durchlauf der Pipeline für ein definiertes Pilot-Set; erzeugt Bundle-Artefakte und wird in der Run-Historie persistiert."
+    code_identifiers:
+      - "live_runtime.py"
+      - "operational_latest.py"
+    used_in:
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Runtime"
+
+  - term_de: "Operationale Evidenz-Spur"
+    term_en: "operational evidence lane"
+    abbreviation: ""
+    definition_de: "Normalisierte Operator-Evidenzspur mit Frische, Autorität, Governance-Verdikt und Handoff-Zusammenfassung pro Lauf."
+    code_identifiers:
+      - "operational_evidence_lane.json"
+      - "operational_latest.py"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Runtime"
+
+  - term_de: "Readiness"
+    term_en: "readiness"
+    abbreviation: ""
+    definition_de: "Bereitschaftsgrad eines Bundles für Release/Freigabe; basiert auf Known-Gaps, Release-Verdikt und Gate-Status."
+    code_identifiers:
+      - "readiness.json"
+      - "readiness.py"
+      - "release_verdict"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Runtime"
+
+  - term_de: "Runtime-Breite"
+    term_en: "runtime breadth"
+    abbreviation: ""
+    definition_de: "Umfang der zur Laufzeit tatsächlich abgedeckten Länder und Quellen; wird governed erweitert über Pilot-Sets."
+    code_identifiers:
+      - "countries_with_updates"
+    used_in:
+      - "siasa-master-plan.md"
+    category: "Runtime"
+
+  # ── Release/Lifecycle ──────────────────────────────────────────────────
+
+  - term_de: "Approval-Lifecycle"
+    term_en: "approval lifecycle"
+    abbreviation: ""
+    definition_de: "Zustandsmodell für Freigabe/Verteilung eines Release-Pakets: pending_signoff → approved / approved_with_conditions / deferred / rejected → distributed."
+    code_identifiers:
+      - "approval_lifecycle.py"
+      - "approval_lifecycle_record.json"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Release/Lifecycle"
+
+  - term_de: "Auto-Seed"
+    term_en: "auto-seed"
+    abbreviation: ""
+    definition_de: "Automatisch erzeugte Vorbelegung im Decision-Log oder Release-Paket, die aus Laufergebnissen und Annotationen abgeleitet wird."
+    code_identifiers:
+      - "decision_log_seed"
+    used_in:
+      - "siasa-master-plan.md"
+    category: "Release/Lifecycle"
+
+  - term_de: "Decision-Log"
+    term_en: "decision log"
+    abbreviation: ""
+    definition_de: "Maschinenlesbares Entscheidungsprotokoll im Release-Paket: Approval-State, Requested Decision, Distribution-Bundle und Entry-Template."
+    code_identifiers:
+      - "decision_log_export_summary"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Release/Lifecycle"
+
+  - term_de: "Release-Package"
+    term_en: "release package"
+    abbreviation: ""
+    definition_de: "Kuratiertes Bündel aus Readiness, Gate-Verdikt, Traceability, Validierungs- und Operability-Signalen für Stakeholder-Review und Freigabe."
+    code_identifiers:
+      - "release_demo_package.py"
+      - "release_demo_package.json"
+      - "release_package.html"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Release/Lifecycle"
+
+  - term_de: "Send-Readiness"
+    term_en: "send readiness"
+    abbreviation: ""
+    definition_de: "Prüfung, ob ein Release-Paket extern versendet werden darf; umfasst Checkliste, External-Send-Allowed-Flag und nächsten Unblocker."
+    code_identifiers:
+      - "decision_packet_send_readiness"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Release/Lifecycle"
+
+  - term_de: "Sign-off"
+    term_en: "sign-off"
+    abbreviation: ""
+    definition_de: "Formale Freigabe-Erfassung im Release-Paket mit Reviewer-Rolle, Decision-Status, Datum, Rationale und Follow-up-Aktionen."
+    code_identifiers:
+      - "review_signoff_scaffold"
+    used_in:
+      - "siasa-master-plan.md"
+      - "siasa-capability-fulfillment-matrix.md"
+    category: "Release/Lifecycle"
