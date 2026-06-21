@@ -1117,6 +1117,22 @@ This closes the next bounded reviewer-decision-scaffolding slice after N1-WP-069
 
 ---
 
+### N1-WP-071
+Name:
+Convert the now-visible validation-derived follow-up semantics into explicit reviewer decision templates/checklists inside release-package signoff, routing, and send-readiness surfaces so disposition logic is not reconstructed manually from raw semantics.
+
+Closure achieved:
+- Updated `src/siasa/readmodels/release_demo_package.py` with `_build_follow_up_decision_template(...)` and `_render_follow_up_decision_template_html(...)`; release-package view models now derive deterministic reviewer scaffolds (`decision_focus`, `recommended_disposition`, `reviewer_prompt`, checklist) from the follow-up annotation semantics
+- Propagated the template into `review_signoff_scaffold`, `disposition_action_routing`, and `decision_packet_send_readiness`, and added a false-positive-specific send-readiness checklist gate `follow_up_false_positive_rationale_recorded` when the active follow-up action is a false-positive review path
+- Updated `release_package.html` so the affected panels now render a dedicated `Follow-up decision template` block with decision focus, recommended disposition, reviewer prompt, and checklist instead of requiring reviewers to infer disposition logic from annotation semantics alone
+- Added RED/GREEN coverage in `tests/unit/test_local_gui.py`; RED targeted failure confirmed (`KeyError: 'follow_up_decision_template'`), GREEN targeted regression passed (`1 passed in 0.07s`), focused release-package GUI regression passed (`2 passed, 23 deselected in 0.06s`), adjacent artifact regression passed (`19 passed in 116.58s`), full regression passed (`537 passed in 338.26s`)
+- Commit: `49fd9f7`
+
+Steering note:
+This closes the next bounded reviewer-decision-template slice after N1-WP-070: release-package reviewers now receive an explicit disposition-oriented decision scaffold derived from the validation handoff semantics. The next bounded default should now prefer either (a) another validation-to-action closure slice that materializes these templates into still tighter decision-log / approval-condition auto-seeds, or (b) a materially different new challenge archetype if it adds genuinely new analyst stress.
+
+---
+
 ## 7. Trigger for the next steering pivot
 
 Stay on the current steering path until one of these becomes true:
