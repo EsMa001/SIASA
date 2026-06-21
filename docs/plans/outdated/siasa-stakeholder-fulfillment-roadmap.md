@@ -1,5 +1,8 @@
 # SIASA Stakeholder-Fulfillment Roadmap
 
+> ⚠️ ABGELÖST / SUPERSEDED (2026-06-21): Konsolidiert in `docs/plans/siasa-master-plan.md`
+> und nach `outdated/` verschoben. Nur noch historische Referenz.
+
 > Steering note: `docs/plans/siasa-master-steering-document.md` is now the single steering document. This roadmap remains a strategic reference, but next-step selection should be taken from the master steering document.
 >
 > Project-lead communication shortcut: `docs/plans/siasa-next-big-packages-executive-view.md` provides a one-page summary of the current frontier: validation realism depth / analyst handoff refinement as the default internal track, G2 credential-trigger follow-through as the main external unlock, and G5 as the deferred architecture option. Repo-controlled G1/G2/G3/G4 closure remains completed.

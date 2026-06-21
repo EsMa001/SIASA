@@ -1,5 +1,9 @@
 # SIASA Master Steering Document
 
+> ⚠️ ABGELÖST / SUPERSEDED (2026-06-21): Konsolidiert in `docs/plans/siasa-master-plan.md`
+> (zentrales Planungsdokument) und nach `outdated/` verschoben. Nur noch historische Referenz –
+> **nicht** für die Auswahl des nächsten Arbeitspakets verwenden.
+
 > For Hermes: this is the single steering document for forward program control. Update it after every completed serial work package. Use it as the primary source for (1) current program truth, (2) remaining substantive stakeholder gaps, and (3) next serial package selection. Use the capability matrix as the detailed operational evidence companion, not as a second competing steering narrative.
 
 Created: 2026-06-04

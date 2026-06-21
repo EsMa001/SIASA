@@ -1,5 +1,8 @@
 # SIASA Planning Audit and Next Steps
 
+> ⚠️ ABGELÖST / SUPERSEDED (2026-06-21): Aufgabe erfüllt; Konsolidierung in
+> `docs/plans/siasa-master-plan.md`, Datei nach `outdated/` verschoben. Nur noch historische Referenz.
+
 > Steering note: this document is now a supporting planning-hygiene artifact. `docs/plans/siasa-master-steering-document.md` is the single steering document.
 >
 > Status note: keep this file as a historical consolidation/reference layer. It remains useful for explaining plan-generation overlap, but its own recommended serial sequence must not override the newer master steering document.
