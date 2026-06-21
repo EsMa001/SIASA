@@ -93,6 +93,60 @@ def _annotation_type_and_decision_posture(*, attention_case: dict[str, Any]) -> 
     )
 
 
+def _build_follow_up_decision_template(*, annotation_type: str, decision_posture: str) -> dict[str, Any]:
+    annotation_type = str(annotation_type or '').strip().lower()
+    decision_posture = str(decision_posture or '').strip()
+    if annotation_type == 'false_positive_note':
+        return {
+            'decision_focus': 'false_positive_review',
+            'recommended_disposition': 'defer',
+            'reviewer_prompt': 'Confirm bounded expectation misalignment before approving or distributing this signal.',
+            'checklist': [
+                'Compare expected vs replayed status and record why the replay may be overstated.',
+                'Confirm whether the available evidence supports a false-positive interpretation instead of escalation.',
+                'Record explicit reviewer rationale before any external distribution decision.',
+            ],
+        }
+    if annotation_type == 'source_quality_note':
+        return {
+            'decision_focus': 'source_quality_review',
+            'recommended_disposition': 'approve_with_conditions',
+            'reviewer_prompt': 'Confirm whether coverage or evidence-quality remediation is required before treating this signal as distribution-ready.',
+            'checklist': [
+                'Verify whether missing domains or weak evidence materially change the signal interpretation.',
+                'Record the required remediation or compensating reviewer condition explicitly.',
+                'Keep distribution gated until the evidence-quality condition is bounded.',
+            ],
+        }
+    return {
+        'decision_focus': 'bounded_alignment_review',
+        'recommended_disposition': 'approve_with_conditions',
+        'reviewer_prompt': 'Confirm bounded expectation alignment and capture any residual reviewer condition before distribution.',
+        'checklist': [
+            'Review the bounded expectation and replay evidence together.',
+            'Record any remaining reviewer caveat explicitly in the decision log.',
+            'Proceed only when the interpretation is bounded for stakeholder handoff.',
+        ],
+    }
+
+
+def _render_follow_up_decision_template_html(template: dict[str, Any]) -> str:
+    if not isinstance(template, dict) or not template:
+        return ''
+    checklist_html = ''.join(
+        f"<li>{html.escape(str(item))}</li>"
+        for item in template.get('checklist', [])
+    ) or '<li>none</li>'
+    return (
+        "<div><strong>Follow-up decision template</strong><ul>"
+        f"<li><strong>Decision focus</strong>: {html.escape(str(template.get('decision_focus', 'n/a')))}</li>"
+        f"<li><strong>Recommended disposition</strong>: {html.escape(str(template.get('recommended_disposition', 'n/a')))}</li>"
+        f"<li><strong>Reviewer prompt</strong>: {html.escape(str(template.get('reviewer_prompt', 'n/a')))}</li>"
+        f"<li><strong>Checklist</strong><ul>{checklist_html}</ul></li>"
+        "</ul></div>"
+    )
+
+
 def _annotation_prefill_href(*, attention_case: dict[str, Any]) -> str:
     annotation_type, decision_posture = _annotation_type_and_decision_posture(attention_case=attention_case)
     query_parts = [
@@ -514,10 +568,14 @@ def build_release_demo_package_view_model(
             )
         )
     )
-    canonical_handoff_artifact = 'release_package.html'
+    canonical_handoff_artifact = 'release_package.html' if 'release_package.html' in available_pages else 'reports.html'
     share_now = lifecycle_distribution_bundle_artifacts or [
         item for item in ['release_package.html', 'release_demo_package.json', 'reports.html'] if item in available_pages or item.endswith('.json')
     ]
+    follow_up_decision_template = _build_follow_up_decision_template(
+        annotation_type=str(source_items[0].get('action_annotation_type') or ''),
+        decision_posture=str(source_items[0].get('action_decision_posture') or ''),
+    )
     reviewer_handoff_summary = {
         'next_reviewer_role': 'project_lead' if package_status in {'ready', 'attention'} else 'operator',
         'canonical_handoff_artifact': canonical_handoff_artifact,
@@ -571,6 +629,7 @@ def build_release_demo_package_view_model(
         'primary_follow_up_action_href': source_items[0].get('action_href'),
         'primary_follow_up_action_annotation_type': source_items[0].get('action_annotation_type') or '',
         'primary_follow_up_action_decision_posture': source_items[0].get('action_decision_posture') or '',
+        'follow_up_decision_template': follow_up_decision_template,
         'signoff_readiness': signoff_readiness,
     }
     approval_state = {
@@ -692,6 +751,7 @@ def build_release_demo_package_view_model(
         'primary_follow_up_action_href': source_items[0].get('action_href'),
         'primary_follow_up_action_annotation_type': source_items[0].get('action_annotation_type') or '',
         'primary_follow_up_action_decision_posture': source_items[0].get('action_decision_posture') or '',
+        'follow_up_decision_template': follow_up_decision_template,
         'escalation_handoff_route': (
             'management -> stakeholder distribution'
             if reviewer_disposition_standard['selected_disposition'] == 'approve'
@@ -750,6 +810,7 @@ def build_release_demo_package_view_model(
                 )
             )
         ),
+        'follow_up_decision_template': follow_up_decision_template,
         'checklist_items': [
             {
                 'item_id': 'gate_posture_green',
@@ -790,6 +851,20 @@ def build_release_demo_package_view_model(
                 'label': 'Decision scope and caveats are bounded',
                 'status': 'pass' if bool(executive_decision_summary['explicit_limitations']) else 'pending',
                 'reason': '; '.join(executive_decision_summary['explicit_limitations']) or 'none',
+            },
+            {
+                'item_id': 'follow_up_false_positive_rationale_recorded',
+                'label': 'False-positive follow-up rationale is explicitly recorded before send',
+                'status': (
+                    'pending'
+                    if follow_up_decision_template.get('decision_focus') == 'false_positive_review' and not lifecycle_distributed
+                    else ('pass' if follow_up_decision_template.get('decision_focus') == 'false_positive_review' else 'n/a')
+                ),
+                'reason': (
+                    str(follow_up_decision_template.get('reviewer_prompt', ''))
+                    if follow_up_decision_template.get('decision_focus') == 'false_positive_review'
+                    else 'not_applicable'
+                ),
             },
         ],
     }
@@ -950,6 +1025,9 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     signoff_action_href = str(signoff_scaffold.get('primary_follow_up_action_href') or '').strip()
     signoff_action_annotation_type = html.escape(str(signoff_scaffold.get('primary_follow_up_action_annotation_type', '')))
     signoff_action_decision_posture = html.escape(str(signoff_scaffold.get('primary_follow_up_action_decision_posture', '')))
+    signoff_decision_template_html = _render_follow_up_decision_template_html(
+        dict(signoff_scaffold.get('follow_up_decision_template', {})) if isinstance(signoff_scaffold.get('follow_up_decision_template'), dict) else {}
+    )
     signoff_action_link = (
         _render_nav_link(
             href=signoff_action_href,
@@ -1073,6 +1151,9 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     routing_action_href = str(disposition_action_routing.get('primary_follow_up_action_href') or '').strip()
     routing_action_annotation_type = html.escape(str(disposition_action_routing.get('primary_follow_up_action_annotation_type', '')))
     routing_action_decision_posture = html.escape(str(disposition_action_routing.get('primary_follow_up_action_decision_posture', '')))
+    routing_decision_template_html = _render_follow_up_decision_template_html(
+        dict(disposition_action_routing.get('follow_up_decision_template', {})) if isinstance(disposition_action_routing.get('follow_up_decision_template'), dict) else {}
+    )
     routing_action_link = (
         _render_nav_link(
             href=routing_action_href,
@@ -1114,6 +1195,9 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     packet_send_readiness = html.escape(str(decision_packet_send_readiness.get('overall_send_readiness', 'n/a')))
     packet_external_send_allowed = html.escape('yes' if bool(decision_packet_send_readiness.get('external_send_allowed')) else 'no')
     packet_next_unblocker = html.escape(str(decision_packet_send_readiness.get('next_unblocker', 'n/a')))
+    packet_follow_up_decision_template_html = _render_follow_up_decision_template_html(
+        dict(decision_packet_send_readiness.get('follow_up_decision_template', {})) if isinstance(decision_packet_send_readiness.get('follow_up_decision_template'), dict) else {}
+    )
     packet_send_checklist_rows = ''.join(
         '<tr>'
         f"<td>{html.escape(str(item.get('item_id', '')))}</td>"
@@ -1221,6 +1305,7 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         + (f"<p><strong>Primary follow-up action</strong>: {signoff_action_link}</p>" if signoff_action_link else "")
         + (f"<p><strong>Follow-up annotation type</strong>: {signoff_action_annotation_type}</p>" if signoff_action_annotation_type else "")
         + (f"<p><strong>Follow-up decision posture</strong>: {signoff_action_decision_posture}</p>" if signoff_action_decision_posture else "")
+        + signoff_decision_template_html
         + "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Stakeholder cover sheet</div>"
@@ -1273,6 +1358,7 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         + (f"<p><strong>Primary follow-up action</strong>: {routing_action_link}</p>" if routing_action_link else "")
         + (f"<p><strong>Follow-up annotation type</strong>: {routing_action_annotation_type}</p>" if routing_action_annotation_type else "")
         + (f"<p><strong>Follow-up decision posture</strong>: {routing_action_decision_posture}</p>" if routing_action_decision_posture else "")
+        + routing_decision_template_html
         + f"<p><strong>Escalation / handoff route</strong>: {escalation_handoff_route}</p>"
         + f"<p><strong>Action owner</strong>: {action_owner}</p>"
         + "</section>"
@@ -1291,7 +1377,8 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         f"<p><strong>Overall send readiness</strong>: {packet_send_readiness}</p>"
         f"<p><strong>External send allowed</strong>: {packet_external_send_allowed}</p>"
         f"<p><strong>Next unblocker</strong>: {packet_next_unblocker}</p>"
-        "<div class='table-wrap'><table><thead><tr><th>Item ID</th><th>Checklist item</th><th>Status</th><th>Reason</th></tr></thead><tbody>"
+        + packet_follow_up_decision_template_html
+        + "<div class='table-wrap'><table><thead><tr><th>Item ID</th><th>Checklist item</th><th>Status</th><th>Reason</th></tr></thead><tbody>"
         f"{packet_send_checklist_rows}"
         "</tbody></table></div>"
         "</section>"

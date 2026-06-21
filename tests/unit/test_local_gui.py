@@ -3549,6 +3549,12 @@ def test_release_demo_package_preserves_action_links_in_review_sequence_and_cove
     assert view_model["review_signoff_scaffold"]["primary_follow_up_action_href"].startswith(
         "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001"
     )
+    assert view_model["review_signoff_scaffold"]["follow_up_decision_template"]["decision_focus"] == "false_positive_review"
+    assert view_model["review_signoff_scaffold"]["follow_up_decision_template"]["recommended_disposition"] == "defer"
+    assert (
+        view_model["review_signoff_scaffold"]["follow_up_decision_template"]["reviewer_prompt"]
+        == "Confirm bounded expectation misalignment before approving or distributing this signal."
+    )
     assert view_model["disposition_action_routing"]["primary_follow_up_action_label"] == "Create Annotation Draft"
     assert view_model["disposition_action_routing"]["primary_follow_up_action_annotation_type"] == "false_positive_note"
     assert (
@@ -3557,6 +3563,15 @@ def test_release_demo_package_preserves_action_links_in_review_sequence_and_cove
     )
     assert view_model["disposition_action_routing"]["primary_follow_up_action_href"].startswith(
         "annotations.html?scope=country&annotation_type=false_positive_note&country_id=POL&case_id=VAL-POL-2024-001"
+    )
+    assert view_model["disposition_action_routing"]["follow_up_decision_template"]["decision_focus"] == "false_positive_review"
+    assert view_model["disposition_action_routing"]["follow_up_decision_template"]["recommended_disposition"] == "defer"
+    assert view_model["decision_packet_send_readiness"]["follow_up_decision_template"]["decision_focus"] == "false_positive_review"
+    assert view_model["decision_packet_send_readiness"]["follow_up_decision_template"]["recommended_disposition"] == "defer"
+    assert any(
+        item["item_id"] == "follow_up_false_positive_rationale_recorded"
+        and item["status"] == "pending"
+        for item in view_model["decision_packet_send_readiness"]["checklist_items"]
     )
     assert view_model["stakeholder_cover_sheet"]["external_share_summary"]["primary_follow_up_action_label"] == "Create Annotation Draft"
     assert (
@@ -3609,6 +3624,10 @@ def test_release_demo_package_preserves_action_links_in_review_sequence_and_cove
     assert "Primary follow-up action" in html_out
     assert "Follow-up annotation type" in html_out
     assert "Follow-up decision posture" in html_out
+    assert "Follow-up decision template" in html_out
+    assert "Recommended disposition" in html_out
+    assert "false_positive_review" in html_out
+    assert "Confirm bounded expectation misalignment before approving or distributing this signal." in html_out
     assert "Decision-entry follow-up action" in html_out
     assert html_out.count("Primary follow-up action") >= 5
     assert html_out.count("Create Annotation Draft</a>") >= 7
