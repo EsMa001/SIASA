@@ -11,7 +11,7 @@ Governed Source-of-Truth für die formalen Fundament-Arbeitspakete (`WP-001..WP-
 
 Evidenz-/Status-Begleiter (Detail-Ledger):
 
-- `docs/plans/siasa-project-lead-capability-matrix.md`
+- `docs/plans/siasa-capability-fulfillment-matrix.md`
 
 Historische Erst-Planung (archiviert):
 

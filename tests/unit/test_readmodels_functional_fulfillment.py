@@ -43,7 +43,7 @@ def test_estimate_functional_fulfillment_rejects_unknown_status() -> None:
 
 def test_capability_matrix_steering_view_does_not_overclaim_replay_attention_follow_ons() -> None:
     repo_root = Path(__file__).resolve().parents[2]
-    matrix_markdown = (repo_root / "docs/plans/siasa-project-lead-capability-matrix.md").read_text(encoding="utf-8")
+    matrix_markdown = (repo_root / "docs/plans/siasa-capability-fulfillment-matrix.md").read_text(encoding="utf-8")
     plan_markdown = (repo_root / "docs/plans/siasa-master-plan.md").read_text(encoding="utf-8")
 
     # The central master plan is the single steering source and names the validation epic.

@@ -674,7 +674,7 @@ def build_repo_release_gate_assessment(
     capability_fulfillment_percent = capability_fulfillment_percent_override
     capability_fulfillment_source = "override"
     if capability_fulfillment_percent is None:
-        matrix_path = repo_root / "docs" / "plans" / "siasa-project-lead-capability-matrix.md"
+        matrix_path = repo_root / "docs" / "plans" / "siasa-capability-fulfillment-matrix.md"
         if matrix_path.exists():
             matrix_text = matrix_path.read_text(encoding="utf-8")
             statuses = extract_capability_statuses_from_matrix_markdown(matrix_text)

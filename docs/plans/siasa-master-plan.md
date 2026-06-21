@@ -4,7 +4,7 @@
 > Planungsgenerationen (Master-Steering, Roadmap, Executive-View, Audit, Gap-Pläne, Level-Pläne).
 > Diese sind nach `docs/plans/outdated/` archiviert und dienen nur noch als historische Referenz.
 >
-> **Evidenz-/Nachweis-Begleiter:** `docs/plans/siasa-project-lead-capability-matrix.md`
+> **Evidenz-/Nachweis-Begleiter:** `docs/plans/siasa-capability-fulfillment-matrix.md`
 > (detailliertes Status-/Test-/Probe-Ledger; wird von Produktionscode gelesen und bleibt aktiv).
 
 Stand: 2026-06-21
@@ -27,7 +27,7 @@ Dokument-Hierarchie (Ebenen der Planungsdokumente):
 | Ebene | Dokument | Rolle |
 | --- | --- | --- |
 | L0 – Planung/Steuerung | `docs/plans/siasa-master-plan.md` (dieses Dokument) | Einzige Planungsquelle: Arbeitspakete, Priorität, Status |
-| L1 – Evidenz/Nachweis | `docs/plans/siasa-project-lead-capability-matrix.md` | Detail-Ledger mit Test-/Probe-Evidenz (read-only Begleiter) |
+| L1 – Evidenz/Nachweis | `docs/plans/siasa-capability-fulfillment-matrix.md` | Detail-Ledger mit Test-/Probe-Evidenz (read-only Begleiter) |
 | L2 – Historie | `docs/plans/outdated/**` | Frühere Planungsgenerationen, nur Referenz/Traceability |
 | L3 – Governed Source-of-Truth | `vmodel/project/*.yaml` | Verbindliche Requirements-/WP-/Prioritäts-Artefakte |
 
@@ -289,7 +289,7 @@ Sie bleiben als historische Referenz/Traceability erhalten, sind aber **nicht** 
 | `siasa-p0-wp-001-source-access-assessment.md` | Source-Access-Constraints | AP-06 (Constraints übernommen) |
 | `siasa-p0-wp-002c-domain-b-source-selection.md` | Domain-B-Source-Selection-Notiz | AP-06 (Historie) |
 
-Weiterhin aktiv (nicht abgelöst): `docs/plans/siasa-project-lead-capability-matrix.md` als Evidenz-Begleiter
+Weiterhin aktiv (nicht abgelöst): `docs/plans/siasa-capability-fulfillment-matrix.md` als Evidenz-Begleiter
 (von `src/siasa/readmodels/release_evidence.py` gelesen).
 
 ---
