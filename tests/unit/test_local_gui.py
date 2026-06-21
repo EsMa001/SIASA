@@ -3639,6 +3639,54 @@ def test_release_demo_package_preserves_action_links_in_review_sequence_and_cove
     assert "replayed_status=S3" in html_out
 
 
+def test_release_demo_package_decision_log_auto_seed() -> None:
+    view_model = build_release_demo_package_view_model(
+        readiness_view_model={"release_verdict": "ready", "demo_verdict": "ready"},
+        release_gate_view_model={"gate_verdict": "go"},
+        validation_view_model={
+            "historical_replay_summary": {
+                "attention_cases": [
+                    {
+                        "country_id": "POL",
+                        "case_id": "VAL-POL-2024-001",
+                        "attention_reason": "status_overcall",
+                        "suggested_next_action": "Review POL replay alignment.",
+                        "review_verdict": "warning",
+                        "replay_tier": "strong",
+                        "expected_status": "S1",
+                        "replayed_status": "S3",
+                    }
+                ]
+            }
+        },
+        available_pages={"readiness.html", "validation.html", "annotations.html", "reports.html"},
+    )
+
+    # -- machine-readable auto-seed in reviewer_handoff_summary.decision_log_seed --
+    auto_seed = view_model["reviewer_handoff_summary"]["decision_log_seed"]["decision_log_auto_seed"]
+    assert auto_seed["decision_focus"] == "false_positive_review"
+    assert auto_seed["recommended_disposition"] == "defer"
+    assert auto_seed["reviewer_prompt"] == "Confirm bounded expectation misalignment before approving or distributing this signal."
+    assert auto_seed["primary_focus"].startswith("Validation attention")
+    assert auto_seed["annotation_type"] == "false_positive_note"
+    assert "false-positive" in auto_seed["decision_posture"].lower()
+    assert "pre_filled_rationale" in auto_seed
+    assert "Compare expected vs replayed status" in auto_seed["pre_filled_rationale"]
+    assert isinstance(auto_seed["pre_filled_conditions"], list)
+    assert len(auto_seed["pre_filled_conditions"]) >= 1
+
+    # -- machine-readable auto-seed in decision_packet_seed --
+    packet_auto_seed = view_model["decision_packet_seed"]["decision_log_auto_seed"]
+    assert packet_auto_seed["decision_focus"] == "false_positive_review"
+    assert packet_auto_seed["recommended_disposition"] == "defer"
+
+    # -- rendered HTML --
+    html_out = render_release_demo_package_body(view_model)
+    assert "Decision-log auto-seed" in html_out
+    assert "Pre-filled rationale" in html_out
+    assert "Pre-filled conditions" in html_out
+
+
 def test_release_demo_package_uses_actual_approval_lifecycle_state_when_present() -> None:
     view_model = build_release_demo_package_view_model(
         readiness_view_model={"release_verdict": "ready", "demo_verdict": "ready"},

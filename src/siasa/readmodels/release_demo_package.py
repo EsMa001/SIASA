@@ -576,6 +576,20 @@ def build_release_demo_package_view_model(
         annotation_type=str(source_items[0].get('action_annotation_type') or ''),
         decision_posture=str(source_items[0].get('action_decision_posture') or ''),
     )
+    _fut_checklist = follow_up_decision_template.get('checklist', [])
+    decision_log_auto_seed = {
+        'decision_focus': follow_up_decision_template.get('decision_focus', 'n/a'),
+        'recommended_disposition': follow_up_decision_template.get('recommended_disposition', 'n/a'),
+        'reviewer_prompt': follow_up_decision_template.get('reviewer_prompt', 'n/a'),
+        'primary_focus': source_items[0].get('title', 'n/a'),
+        'annotation_type': str(source_items[0].get('action_annotation_type') or ''),
+        'decision_posture': str(source_items[0].get('action_decision_posture') or ''),
+        'pre_filled_rationale': (
+            str(follow_up_decision_template.get('reviewer_prompt', ''))
+            + (' — ' + str(_fut_checklist[0]) if _fut_checklist else '')
+        ),
+        'pre_filled_conditions': [str(item) for item in _fut_checklist[1:]] if len(_fut_checklist) > 1 else [],
+    }
     reviewer_handoff_summary = {
         'next_reviewer_role': 'project_lead' if package_status in {'ready', 'attention'} else 'operator',
         'canonical_handoff_artifact': canonical_handoff_artifact,
@@ -594,6 +608,7 @@ def build_release_demo_package_view_model(
             'primary_follow_up_action_href': source_items[0].get('action_href') or '',
             'primary_follow_up_action_annotation_type': source_items[0].get('action_annotation_type') or '',
             'primary_follow_up_action_decision_posture': source_items[0].get('action_decision_posture') or '',
+            'decision_log_auto_seed': decision_log_auto_seed,
         },
     }
     review_signoff_scaffold = {
@@ -781,6 +796,7 @@ def build_release_demo_package_view_model(
         'primary_follow_up_action_annotation_type': source_items[0].get('action_annotation_type') or '',
         'primary_follow_up_action_decision_posture': source_items[0].get('action_decision_posture') or '',
         'decision_packet_note': 'Export-ready seed for management/stakeholder forwarding; validate latest evidence before external send.',
+        'decision_log_auto_seed': decision_log_auto_seed,
     }
     decision_packet_send_readiness = {
         'overall_send_readiness': (
@@ -1013,7 +1029,23 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
     decision_log_seed_html = ''.join(
         f"<li><strong>{html.escape(str(key))}</strong>: {html.escape(str(value))}</li>"
         for key, value in decision_log_seed.items()
+        if key != 'decision_log_auto_seed'
     ) or '<li>none</li>'
+    handoff_auto_seed = dict(decision_log_seed.get('decision_log_auto_seed', {})) if isinstance(decision_log_seed.get('decision_log_auto_seed'), dict) else {}
+    handoff_auto_seed_html = ''
+    if handoff_auto_seed:
+        _has_conditions = ''.join(
+            f"<li>{html.escape(str(c))}</li>" for c in handoff_auto_seed.get('pre_filled_conditions', [])
+        )
+        handoff_auto_seed_html = (
+            "<div><strong>Decision-log auto-seed</strong><ul>"
+            f"<li><strong>Decision focus</strong>: {html.escape(str(handoff_auto_seed.get('decision_focus', 'n/a')))}</li>"
+            f"<li><strong>Recommended disposition</strong>: {html.escape(str(handoff_auto_seed.get('recommended_disposition', 'n/a')))}</li>"
+            f"<li><strong>Annotation type</strong>: {html.escape(str(handoff_auto_seed.get('annotation_type', '')))}</li>"
+            f"<li><strong>Pre-filled rationale</strong>: {html.escape(str(handoff_auto_seed.get('pre_filled_rationale', '')))}</li>"
+            f"<li><strong>Pre-filled conditions</strong><ul>{_has_conditions or '<li>none</li>'}</ul></li>"
+            "</ul></div>"
+        )
     signoff_scaffold = dict(view_model.get('review_signoff_scaffold', {})) if isinstance(view_model.get('review_signoff_scaffold'), dict) else {}
     signoff_reviewer_role = html.escape(str(signoff_scaffold.get('reviewer_role', 'n/a')))
     signoff_decision_status = html.escape(str(signoff_scaffold.get('decision_status', 'n/a')))
@@ -1191,6 +1223,21 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         else ''
     )
     decision_packet_note = html.escape(str(decision_packet_seed.get('decision_packet_note', 'n/a')))
+    packet_auto_seed = dict(decision_packet_seed.get('decision_log_auto_seed', {})) if isinstance(decision_packet_seed.get('decision_log_auto_seed'), dict) else {}
+    packet_auto_seed_html = ''
+    if packet_auto_seed:
+        _pac_conditions = ''.join(
+            f"<li>{html.escape(str(c))}</li>" for c in packet_auto_seed.get('pre_filled_conditions', [])
+        )
+        packet_auto_seed_html = (
+            "<div><strong>Decision-log auto-seed</strong><ul>"
+            f"<li><strong>Decision focus</strong>: {html.escape(str(packet_auto_seed.get('decision_focus', 'n/a')))}</li>"
+            f"<li><strong>Recommended disposition</strong>: {html.escape(str(packet_auto_seed.get('recommended_disposition', 'n/a')))}</li>"
+            f"<li><strong>Annotation type</strong>: {html.escape(str(packet_auto_seed.get('annotation_type', '')))}</li>"
+            f"<li><strong>Pre-filled rationale</strong>: {html.escape(str(packet_auto_seed.get('pre_filled_rationale', '')))}</li>"
+            f"<li><strong>Pre-filled conditions</strong><ul>{_pac_conditions or '<li>none</li>'}</ul></li>"
+            "</ul></div>"
+        )
     decision_packet_send_readiness = dict(view_model.get('decision_packet_send_readiness', {})) if isinstance(view_model.get('decision_packet_send_readiness'), dict) else {}
     packet_send_readiness = html.escape(str(decision_packet_send_readiness.get('overall_send_readiness', 'n/a')))
     packet_external_send_allowed = html.escape('yes' if bool(decision_packet_send_readiness.get('external_send_allowed')) else 'no')
@@ -1293,6 +1340,7 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         + (f"<p><strong>Primary follow-up action</strong>: {handoff_primary_action_link}</p>" if handoff_primary_action_link else "")
         + f"<div><strong>Share/export now</strong><ul>{handoff_share_now}</ul></div>"
         + f"<div><strong>Decision log seed</strong><ul>{decision_log_seed_html}</ul></div>"
+        + handoff_auto_seed_html
         + "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Review sign-off scaffold</div>"
@@ -1371,6 +1419,7 @@ def render_release_demo_package_body(view_model: dict[str, Any]) -> str:
         + (f"<p><strong>Follow-up annotation type</strong>: {decision_packet_primary_action_annotation_type}</p>" if decision_packet_primary_action_annotation_type else "")
         + (f"<p><strong>Follow-up decision posture</strong>: {decision_packet_primary_action_decision_posture}</p>" if decision_packet_primary_action_decision_posture else "")
         + f"<p><strong>Decision packet note</strong>: {decision_packet_note}</p>"
+        + packet_auto_seed_html
         + "</section>"
         "<section class='panel'>"
         "<div class='panel-header'>Decision packet send-readiness checklist</div>"
