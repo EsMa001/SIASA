@@ -1,5 +1,8 @@
 # SIASA Executive View: Next Big Packages
 
+> ⚠️ ABGELÖST / SUPERSEDED (2026-06-21): Konsolidiert in `docs/plans/siasa-master-plan.md`
+> und nach `outdated/` verschoben. Nur noch historische Referenz.
+
 > Steering note: `docs/plans/siasa-master-steering-document.md` remains the single steering document. This file is a compact project-lead communication layer for the next large package families.
 
 Created: 2026-06-11

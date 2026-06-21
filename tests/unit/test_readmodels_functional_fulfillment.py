@@ -44,11 +44,16 @@ def test_estimate_functional_fulfillment_rejects_unknown_status() -> None:
 def test_capability_matrix_steering_view_does_not_overclaim_replay_attention_follow_ons() -> None:
     repo_root = Path(__file__).resolve().parents[2]
     matrix_markdown = (repo_root / "docs/plans/siasa-project-lead-capability-matrix.md").read_text(encoding="utf-8")
-    master_markdown = (repo_root / "docs/plans/siasa-master-steering-document.md").read_text(encoding="utf-8")
+    plan_markdown = (repo_root / "docs/plans/siasa-master-plan.md").read_text(encoding="utf-8")
 
-    assert "### N1-WP-055" in master_markdown
+    # The central master plan is the single steering source and names the validation epic.
+    assert "AP-05" in plan_markdown
+    assert "validation realism depth / analyst handoff refinement" in plan_markdown.lower()
+
+    # The evidence companion still carries the concrete replay-attention evidence line ...
     assert "VAL-WP-012 replay-attention visible-slice CSV export" in matrix_markdown
 
+    # ... without reintroducing stale "next interpretation extension" overclaims.
     stale_overclaims = [
         "P1 validation interpretation extension: replay-attention export naming metadata",
         "P1 validation interpretation extension: replay-attention copy-to-clipboard CSV",
@@ -60,21 +65,16 @@ def test_capability_matrix_steering_view_does_not_overclaim_replay_attention_fol
         assert claim not in matrix_markdown
 
 
-def test_roadmap_and_executive_view_stay_aligned_with_master_default_next_track() -> None:
+def test_central_plan_declares_default_next_track_and_avoids_stale_frontier() -> None:
     repo_root = Path(__file__).resolve().parents[2]
-    master_markdown = (repo_root / "docs/plans/siasa-master-steering-document.md").read_text(encoding="utf-8")
-    roadmap_markdown = (repo_root / "docs/plans/siasa-stakeholder-fulfillment-roadmap.md").read_text(encoding="utf-8")
-    executive_markdown = (repo_root / "docs/plans/siasa-next-big-packages-executive-view.md").read_text(encoding="utf-8")
+    plan_markdown = (repo_root / "docs/plans/siasa-master-plan.md").read_text(encoding="utf-8")
 
     expected_track = "validation realism depth / analyst handoff refinement"
-
-    assert expected_track in master_markdown
-    assert expected_track in roadmap_markdown.lower()
-    assert expected_track in executive_markdown.lower()
+    assert expected_track in plan_markdown.lower()
 
     stale_frontier_phrases = [
         "next serial planning focus should now be chosen after AP-27 closure review",
         "next large package families (now G4/G2-trigger/G5",
     ]
     for phrase in stale_frontier_phrases:
-        assert phrase not in roadmap_markdown
+        assert phrase not in plan_markdown

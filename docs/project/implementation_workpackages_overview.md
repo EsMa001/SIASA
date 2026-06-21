@@ -1,5 +1,18 @@
 # Implementation Work Packages
 
-The initial prioritized implementation plan is available at:
-- `docs/plans/siasa-initial-implementation-workpackages.md`
+Das zentrale, gesteuerte Planungsdokument (große Arbeitspakete + Teilarbeitspakete, priorisiert und
+steuerbar) ist die **einzige Planungsquelle**:
+
+- `docs/plans/siasa-master-plan.md`
+
+Governed Source-of-Truth für die formalen Fundament-Arbeitspakete (`WP-001..WP-008`, mit SwR-/TC-Traceability):
+
 - `vmodel/project/implementation_workpackages.yaml`
+
+Evidenz-/Status-Begleiter (Detail-Ledger):
+
+- `docs/plans/siasa-project-lead-capability-matrix.md`
+
+Historische Erst-Planung (archiviert):
+
+- `docs/plans/outdated/siasa-initial-implementation-workpackages.md`

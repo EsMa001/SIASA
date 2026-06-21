@@ -1,6 +1,6 @@
 # SIASA Project-Lead Capability Matrix
 
-> Steering note: `docs/plans/siasa-master-steering-document.md` is the single steering document. Use this matrix as the detailed operational evidence/status companion.
+> Steering note: `docs/plans/siasa-master-plan.md` is the single planning/steering document. Use this matrix as the detailed operational evidence/status companion. (Earlier steering generations were consolidated into the master plan and moved to `docs/plans/outdated/`.)
 >
 > For Hermes: maintain this document after every completed serial work package. Update capability status only when there is repo evidence, verification evidence, and a committed package that materially changes stakeholder-visible functionality.
 
