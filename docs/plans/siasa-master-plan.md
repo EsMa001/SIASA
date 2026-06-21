@@ -88,17 +88,17 @@ Regeln:
 | AP-03 | Operationale Evidenz-Spur | Erledigt | – | MVP-Should | `G3`, `N1-WP-003..010` |
 | AP-04 | Release-Lifecycle: Freigabe → Distribution | Erledigt | – | MVP-Should | `G4 WP-001/002/003`, `Step C` (`C-1..C-12`) |
 | AP-05 | Validierungs-Realismus & Analyst-Handoff | Erledigt | – | MVP-Should | `VAL-WP-001..026`, `N1-WP-011..071`, `Step B` |
-| AP-06 | Externe credential-gated Quellen-Aktivierung | Blockiert | **P4** | MVP-Should | `G2`, `P0-WP-001`, ReliefWeb/UCDP |
-| AP-07 | Quellen-Robustheit & Degradations-Wahrheit | Offen | **P1** | MVP-Should | `G1`-Rest, `SRC-GDELT-DOC/-E` |
-| AP-08 | Breiten-Ausbau über mvp-complete hinaus | Offen | **P2** | MVP-Could | Roadmap §5, Source-Origin/Epidemiologie |
-| AP-09 | Server-gestützte Multi-User-Governance | Zurückgestellt | **P5** | Post-MVP | `G5` |
+| AP-06 | Externe credential-gated Quellen-Aktivierung | Blockiert | **P3** | MVP-Should | `G2`, `P0-WP-001`, ReliefWeb/UCDP |
+| AP-07 | Quellen-Robustheit & Degradations-Wahrheit | Erledigt | – | MVP-Should | `G1`-Rest, `SRC-GDELT-DOC/-E` |
+| AP-08 | Breiten-Ausbau über mvp-complete hinaus | Offen | **P1** | MVP-Could | Roadmap §5, Source-Origin/Epidemiologie |
+| AP-09 | Server-gestützte Multi-User-Governance | Zurückgestellt | **P4** | Post-MVP | `G5` |
 | AP-10 | Terminologie-Glossar & Begriffs-Normalisierung | Erledigt | – | MVP-Should | neu (kein Legacy) |
-| AP-11 | Free-API-Quellen-Verbreiterung (D/E/C/A) | Offen | **P3** | MVP-Could | public-apis-Analyse; freie APIs ohne Credential-Blocker |
+| AP-11 | Free-API-Quellen-Verbreiterung (D/E/C/A) | Offen | **P2** | MVP-Could | public-apis-Analyse; freie APIs ohne Credential-Blocker |
 
 Gesamtbild: Das Fundament und alle repo-seitig steuerbaren Gap-Familien (`G1`, `G2`, `G3`, `G4`) sind
-**materiell geschlossen** (Capability-Matrix: `17/17 Done`, `100.0%`). AP-05 (Validierungs-Realismus &
-Analyst-Handoff) und AP-10 (Terminologie-Glossar) sind ebenfalls erledigt. Die verbleibende Arbeit ist
-externe Aktivierung, Robustheit, Breite und – zurückgestellt – Multi-User.
+**materiell geschlossen** (Capability-Matrix: `17/17 Done`, `100.0%`). AP-05 (Validierungs-Realismus),
+AP-07 (Quellen-Robustheit) und AP-10 (Terminologie-Glossar) sind ebenfalls erledigt. Die verbleibende
+Arbeit ist Breiten-Ausbau, freie Quellen-Verbreiterung, externe Aktivierung und – zurückgestellt – Multi-User.
 
 ---
 
@@ -109,11 +109,10 @@ externe Aktivierung, Robustheit, Breite und – zurückgestellt – Multi-User.
 
 | Rang | AP-ID | Großes Arbeitspaket | Status | Klasse | Auslöser / Bedingung |
 | --- | --- | --- | --- | --- | --- |
-| **P1** | AP-07 | Quellen-Robustheit & Degradations-Wahrheit | Offen | MVP-Should | probe-getrieben: nur bei konkretem neuen Failure-Mode |
-| **P2** | AP-08 | Breiten-Ausbau über mvp-complete hinaus | Offen | MVP-Could | neue Länder-/Quellen-Cluster-Nachfrage |
-| **P3** | AP-11 | Free-API-Quellen-Verbreiterung (D/E/C/A) | Offen | MVP-Could | freie APIs aus public-apis-Analyse; kein Credential-Blocker |
-| **P4** | AP-06 | Externe Quellen-Aktivierung (G2) | Blockiert | MVP-Should | **springt auf P1**, sobald gültige ReliefWeb/UCDP-Credentials vorliegen |
-| **P5** | AP-09 | Multi-User-Governance (G5) | Zurückgestellt | Post-MVP | nur wenn Operating-Model Multi-User explizit fordert |
+| **P1** | AP-08 | Breiten-Ausbau über mvp-complete hinaus | Offen | MVP-Could | neue Länder-/Quellen-Cluster-Nachfrage |
+| **P2** | AP-11 | Free-API-Quellen-Verbreiterung (D/E/C/A) | Offen | MVP-Could | freie APIs aus public-apis-Analyse; kein Credential-Blocker |
+| **P3** | AP-06 | Externe Quellen-Aktivierung (G2) | Blockiert | MVP-Should | **springt auf P1**, sobald gültige ReliefWeb/UCDP-Credentials vorliegen |
+| **P4** | AP-09 | Multi-User-Governance (G5) | Zurückgestellt | Post-MVP | nur wenn Operating-Model Multi-User explizit fordert |
 
 ### So steuerst du die Reihenfolge
 
@@ -126,15 +125,13 @@ externe Aktivierung, Robustheit, Breite und – zurückgestellt – Multi-User.
 
 ### Begründung der Default-Reihenfolge
 
-- **AP-07 zuerst (P1):** Robustheit bleibt gezielt und probe-getrieben – nur anfassen, wenn eine Breiten-Probe einen
-  konkreten neuen Fehlermodus zeigt (keine spekulative Retry-Erweiterung).
-- **AP-08 (P2):** Breiten-Ausbau erhöht echte Produktreichweite, ist aber erst nach klarer Nachfrage nach neuen
+- **AP-08 zuerst (P1):** Breiten-Ausbau erhöht echte Produktreichweite, ist aber erst nach klarer Nachfrage nach neuen
   Clustern sinnvoll.
-- **AP-11 (P3):** Freie APIs ohne Credential-Blocker schließen Domain-D/E/C/A-Lücken schrittweise; jeder
+- **AP-11 (P2):** Freie APIs ohne Credential-Blocker schließen Domain-D/E/C/A-Lücken schrittweise; jeder
   Adapter ist eigenständig wertvoll und hat kein externes Blockier-Risiko.
-- **AP-06 (P4, bedingt):** Repo-seitig fertig; der einzige offene Hebel ist extern (Credentials). Sobald
+- **AP-06 (P3, bedingt):** Repo-seitig fertig; der einzige offene Hebel ist extern (Credentials). Sobald
   Credentials da sind, ist dies das wertvollste gebündelte Paket und springt auf P1.
-- **AP-09 (P5, zurückgestellt):** Großer Architektursprung; nur bei explizitem Bedarf am Ziel-Betriebsmodell.
+- **AP-09 (P4, zurückgestellt):** Großer Architektursprung; nur bei explizitem Bedarf am Ziel-Betriebsmodell.
 
 ---
 
@@ -210,7 +207,7 @@ wieder zu öffnen.
 DoD nächstes Slice: ein gebündeltes Validierungs-/Handoff-Slice; gezielte RED/GREEN-Tests; Full-Suite grün;
 ein reales Probe-Bundle; Master-Plan + Capability-Matrix aktualisiert; Commit/Push.
 
-#### AP-06 — Externe credential-gated Quellen-Aktivierung · Status: Blockiert (extern) · Rang: P4 · Klasse: MVP-Should
+#### AP-06 — Externe credential-gated Quellen-Aktivierung · Status: Blockiert (extern) · Rang: P3 · Klasse: MVP-Should
 Herkunft: `G2`, `P0-WP-001` (Source-Access-Assessment, archiviert unter `outdated/`), `P0-WP-002c`.
 Repo-seitig geschlossen: Adapter + graceful Degradation + Aktivierungs-/Evidenz-Wahrheit
 (`activated_with_live_evidence`, `configured_but_not_evidenced`, `credentialed_but_live_fetch_failed`,
@@ -225,16 +222,16 @@ Repo-seitig geschlossen: Adapter + graceful Degradation + Aktivierungs-/Evidenz-
 Auslöser-Regel: Sobald gültige Credentials vorliegen → AP-06 auf P1 ziehen, einen governed Aktivierungslauf
 fahren und explizite Source-Success-Evidenz erfassen.
 
-#### AP-07 — Quellen-Robustheit & Degradations-Wahrheit · Status: Offen · Rang: P1 · Klasse: MVP-Should
+#### AP-07 — Quellen-Robustheit & Degradations-Wahrheit · Status: Erledigt · Klasse: MVP-Should
 Herkunft: `G1`-Rest (das einzige verbliebene Delta der Runtime-Breite). Es geht **nicht** um fehlende
 governed Breite, sondern um Provider-Degradations-Wahrheit und deren Release-/Readiness-Konsequenz.
 
 | TAP | Inhalt | Status | Hinweis |
 | --- | --- | --- | --- |
-| AP-07.1 | `SRC-GDELT-DOC` / `SRC-GDELT-DOC-E` Degradationswahrheit + Release-Konsequenz härten | Offen | probe-getrieben |
-| AP-07.2 | Retry-/Partial-Success-Profile bei neuem Failure-Mode nachschärfen | Offen | nur bei konkretem Befund, keine spekulative Erweiterung |
+| AP-07.1 | `SRC-GDELT-DOC` / `SRC-GDELT-DOC-E` Degradationswahrheit + Release-Konsequenz härten | Erledigt | Per-Country-Fault-Isolation, Malformed-Article-Skip, Degraded-Countries-Diagnostik; `69ca9fc` |
+| AP-07.2 | Retry-/Partial-Success-Profile bei neuem Failure-Mode nachschärfen | Erledigt | Shared `retry_utils.py`, `is_retryable_error()` (429/5xx/Timeout/Connection), konfigurierbarer Timeout; `69ca9fc` |
 
-#### AP-08 — Breiten-Ausbau über mvp-complete hinaus · Status: Offen · Rang: P2 · Klasse: MVP-Could
+#### AP-08 — Breiten-Ausbau über mvp-complete hinaus · Status: Offen · Rang: P1 · Klasse: MVP-Could
 Herkunft: Roadmap §5 (Control/Reference-Restslices), Source-Origin/Epidemiologie-Groundwork (`P4`).
 
 | TAP | Inhalt | Status | Hinweis |
@@ -242,7 +239,7 @@ Herkunft: Roadmap §5 (Control/Reference-Restslices), Source-Origin/Epidemiologi
 | AP-08.1 | Nächster Länder-Cluster / restliche control-reference-Slices | Offen | governed Mapping + Tests + Probe je Slice |
 | AP-08.2 | Source-Origin-Inferenz / Informations-Epidemiologie ausbauen | Offen | Groundwork in Traceability-View vorhanden; bewusst später |
 
-#### AP-09 — Server-gestützte Multi-User-Governance · Status: Zurückgestellt · Rang: P5 · Klasse: Post-MVP
+#### AP-09 — Server-gestützte Multi-User-Governance · Status: Zurückgestellt · Rang: P4 · Klasse: Post-MVP
 Herkunft: `G5`. Heutiger lokaler/statischer governed-Bundle-UX ist materiell stark; Multi-User nur bei
 explizitem Bedarf am Ziel-Betriebsmodell.
 
@@ -266,7 +263,7 @@ mit klarer Definition, englischem Äquivalent und Zuordnung zu Code-Identifiern.
 | AP-10.4 | Terminologie in Capability-Matrix normalisieren | Erledigt | Matrix bewusst englisch (wird von Code gelesen); konsistent |
 | AP-10.5 | Code-Docstrings und Kommentare auf Glossar-Begriffe prüfen und ggf. ergänzen | Erledigt | 67 Code-Identifier in Glossar gemappt |
 
-#### AP-11 — Free-API-Quellen-Verbreiterung (D/E/C/A) · Status: Offen · Rang: P3 · Klasse: MVP-Could
+#### AP-11 — Free-API-Quellen-Verbreiterung (D/E/C/A) · Status: Offen · Rang: P2 · Klasse: MVP-Could
 Herkunft: Analyse des `public-apis/public-apis`-Repos (544 APIs, 51 Kategorien), abgeglichen gegen
 SIASA-Domain-Coverage-Lücken und bestehenden Quellkatalog (`vmodel/project/data_sources.yaml`).
 Ziel: Schrittweise Verbreiterung der Domain-Coverage durch freie, authfreie oder apiKey-basierte
@@ -297,9 +294,9 @@ Priorisierung der TAPs nach Domain-Lückengröße:
 | --- | --- | --- | --- | --- |
 | L1 | ~~Tiefe des non-perfekten Replay-Realismus / Decision-Auto-Seeds~~ | AP-05.6 | geschlossen | AP-05 erledigt; Decision-log auto-seeds implementiert |
 | L2 | ReliefWeb/UCDP nur repo-ready, nicht live aktiviert | AP-06.1/.2 | **extern blockiert** | Credentials beschaffen → AP-06 auf P1 |
-| L3 | GDELT-Provider-Degradation & Release-Konsequenz | AP-07.1 | intern, probe-getrieben | bei konkretem Befund härten (P1) |
-| L4 | Breite über die governed 30-Länder hinaus | AP-08.1 | intern, offen | bei Cluster-Nachfrage je Slice ausbauen (P2) |
-| L5 | Multi-User/Server-Governance | AP-09 | strategisch | nur bei Operating-Model-Bedarf (P5, zurückgestellt) |
+| L3 | ~~GDELT-Provider-Degradation & Release-Konsequenz~~ | AP-07 | geschlossen | Per-Country-Fault-Isolation + shared retry_utils; `69ca9fc` |
+| L4 | Breite über die governed 30-Länder hinaus | AP-08.1 | intern, offen | bei Cluster-Nachfrage je Slice ausbauen (P1) |
+| L5 | Multi-User/Server-Governance | AP-09 | strategisch | nur bei Operating-Model-Bedarf (P4, zurückgestellt) |
 | L6 | ~~Uneinheitliche/unklare Terminologie über Planungs- und Code-Artefakte~~ | AP-10 | geschlossen | Glossar mit 55 Termen erstellt; Artefakte konsistent |
 | L7 | Domain-D/E/C/A-Coverage dünn — wenige Quellen, keine Diversifikation | AP-11 | intern, offen | Free-API-Adapter schrittweise ergänzen (P3) |
 
