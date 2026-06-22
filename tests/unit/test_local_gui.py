@@ -3844,3 +3844,97 @@ def test_build_local_mvp_site_generates_sources_html(tmp_path: Path) -> None:
     assert 'Source Catalog' in content
     assert 'source-card-SRC-GDELT-DOC' in content
     assert str(sources_file) in [str(f) for f in result.generated_files]
+
+
+# ── AP-12.4: About / Glossary / Project Description Tests ────────────────────
+
+
+def test_render_about_contains_project_description() -> None:
+    """About page contains project description and architecture diagram."""
+    from siasa.gui.local_app import _render_about
+
+    html_out = _render_about(available_pages={'about.html', 'sources.html', 'traceability.html'})
+
+    assert 'About SIASA' in html_out
+    assert 'Situational Awareness System' in html_out
+    assert 'Pipeline Architecture' in html_out
+    assert 'Sources' in html_out  # Architecture box mentions sources
+    assert 'Normalization' in html_out
+
+
+def test_render_about_contains_domain_table() -> None:
+    """About page shows the 5 analytical domains."""
+    from siasa.gui.local_app import _render_about
+
+    html_out = _render_about(available_pages={'about.html'})
+
+    for domain_label in ['Narrative', 'Security', 'Humanitarian', 'Economy', 'Cyber']:
+        assert domain_label in html_out
+
+
+def test_render_about_contains_vmodel_diagram() -> None:
+    """About page has V-Model traceability section."""
+    from siasa.gui.local_app import _render_about
+
+    html_out = _render_about(available_pages={'about.html'})
+
+    assert 'V-Model Traceability' in html_out
+    assert 'Stakeholder Requirements' in html_out
+    assert 'Software Requirements' in html_out
+    assert 'SwR-054' in html_out
+    assert 'trace_links.yaml' in html_out
+
+
+def test_render_about_loads_glossary_terms() -> None:
+    """About page loads and displays glossary terms from YAML."""
+    from siasa.gui.local_app import _render_about
+
+    html_out = _render_about(available_pages={'about.html'})
+
+    # Should have glossary section with terms
+    assert 'Glossary' in html_out
+    assert 'glossary-row' in html_out
+    assert 'glossary-search' in html_out
+    assert 'glossary-filter-btn' in html_out
+    # Check a few known terms
+    assert 'Arbeitspaket' in html_out
+    assert 'work package' in html_out
+    assert 'Projektsteuerung' in html_out
+
+
+def test_render_about_glossary_has_category_filters() -> None:
+    """Glossary section has filter buttons per category."""
+    from siasa.gui.local_app import _render_about
+
+    html_out = _render_about(available_pages={'about.html'})
+
+    # Known categories
+    for cat in ['Projektsteuerung', 'Datenmodell', 'Quellen', 'Runtime', 'Governance']:
+        assert cat in html_out
+
+
+def test_render_about_cross_links_to_sources_and_traceability() -> None:
+    """About page links to sources.html and traceability.html when available."""
+    from siasa.gui.local_app import _render_about
+
+    html_with_links = _render_about(available_pages={'about.html', 'sources.html', 'traceability.html'})
+    assert 'sources.html' in html_with_links
+    assert 'traceability.html' in html_with_links
+
+    html_without = _render_about(available_pages={'about.html'})
+    # Should not contain broken links
+    assert "View full source catalog" not in html_without
+
+
+def test_build_local_mvp_site_generates_about_html(tmp_path: Path) -> None:
+    """build_local_mvp_site produces about.html."""
+    from siasa.gui.local_app import build_local_mvp_site
+
+    result = build_local_mvp_site(output_dir=tmp_path)
+
+    about_file = tmp_path / 'about.html'
+    assert about_file.exists(), "about.html not generated"
+    content = about_file.read_text()
+    assert 'About SIASA' in content
+    assert 'Glossary' in content
+    assert str(about_file) in [str(f) for f in result.generated_files]

@@ -50,6 +50,7 @@ def _page(title: str, body: str, *, nav_prefix: str = '', available_pages: set[s
         ('runs.html', '⚙ System'),
         ('readiness.html', '🚦 Readiness'),
         ('sources.html', '📡 Sources'),
+        ('about.html', 'ℹ About'),
     ]
     nav_html = ''.join(
         f"<a href='{html.escape(nav_prefix + href)}'>{html.escape(label)}</a>"
@@ -7712,6 +7713,264 @@ def _render_sources(*, nav_prefix: str = '', available_pages: set[str] | None = 
     return _page("Source Catalog", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
+# ── AP-12.4: About / Glossary / Project Description Page ─────────────────────
+
+def _load_glossary_terms(glossary_path: Path | None = None) -> list[dict[str, Any]]:
+    """Load glossary terms from YAML. Returns list of term dicts."""
+    import yaml
+    if glossary_path is None:
+        glossary_path = Path(__file__).resolve().parents[3] / "docs" / "glossary.yaml"
+    if not glossary_path.exists():
+        return []
+    with open(glossary_path, encoding="utf-8") as f:
+        data = yaml.safe_load(f) or {}
+    return data.get("terms", [])
+
+
+def _render_about(
+    *,
+    glossary_path: Path | None = None,
+    nav_prefix: str = '',
+    available_pages: set[str] | None = None,
+) -> str:
+    """Render the about.html page with project description, glossary, and V-Model overview (AP-12.4)."""
+    terms = _load_glossary_terms(glossary_path)
+
+    # Group terms by category
+    categories: dict[str, list[dict[str, Any]]] = {}
+    for term in terms:
+        cat = term.get("category", "Sonstige")
+        categories.setdefault(cat, []).append(term)
+
+    # Category summary
+    cat_summary_rows = ""
+    for cat_name in sorted(categories):
+        count = len(categories[cat_name])
+        cat_summary_rows += (
+            f"<tr><td style='padding:4px 12px 4px 0;color:#e8edf5;'>{html.escape(cat_name)}</td>"
+            f"<td style='color:#4edea3;'>{count}</td></tr>"
+        )
+
+    # Glossary table rows
+    glossary_rows = ""
+    for term in terms:
+        abbr = term.get("abbreviation", "")
+        code_ids = ", ".join(str(c) for c in term.get("code_identifiers", []) if c) or "–"
+        cat = term.get("category", "–")
+        search_text = " ".join([
+            term.get("term_de", ""),
+            term.get("term_en", ""),
+            term.get("definition_de", ""),
+            abbr,
+        ]).lower()
+        glossary_rows += (
+            f"<tr class='glossary-row' data-category='{html.escape(cat)}' "
+            f"data-search-text='{html.escape(search_text)}'>"
+            f"<td style='padding:6px 8px;color:#4edea3;font-weight:600;white-space:nowrap;'>{html.escape(term.get('term_de', ''))}</td>"
+            f"<td style='padding:6px 8px;color:#b0c4de;font-style:italic;'>{html.escape(term.get('term_en', ''))}</td>"
+            f"<td style='padding:6px 8px;color:#e0c080;font-family:monospace;font-size:11px;'>{html.escape(abbr) if abbr else '–'}</td>"
+            f"<td style='padding:6px 8px;color:#e8edf5;font-size:12px;'>{html.escape(term.get('definition_de', ''))}</td>"
+            f"<td style='padding:6px 8px;color:#6b7d99;font-size:11px;'>{html.escape(cat)}</td>"
+            f"<td style='padding:6px 8px;color:#6b7d99;font-size:11px;font-family:monospace;'>{html.escape(code_ids)}</td>"
+            f"</tr>"
+        )
+
+    # Source landscape summary
+    active_sources = sum(1 for s in _SOURCE_CATALOG if s["status"] == "active")
+    gated_sources = sum(1 for s in _SOURCE_CATALOG if s["status"] == "credential-gated")
+
+    body = f"""
+<section style="max-width:1100px;margin:0 auto;">
+
+<h1 style="color:#e8edf5;font-size:22px;">ℹ About SIASA</h1>
+
+<!-- Project Description -->
+<div style="background:#141e33;border:1px solid #263050;border-radius:8px;padding:20px;margin-bottom:20px;">
+<h2 style="color:#e8edf5;font-size:18px;margin-top:0;">What is SIASA?</h2>
+<p style="color:#b0c4de;font-size:13px;line-height:1.6;">
+  <strong style="color:#e8edf5;">SIASA (Situational Awareness System)</strong> is a governed intelligence pipeline
+  that aggregates, normalizes, and analyzes open-source data from multiple providers to produce
+  country-level situational awareness assessments across five analytical domains.
+</p>
+<p style="color:#b0c4de;font-size:13px;line-height:1.6;">
+  The system is designed for analysts and decision-makers who need a transparent, traceable,
+  and reproducible picture of country-level risks and developments — from media narratives
+  and conflict events to economic indicators, humanitarian signals, and cyber threats.
+</p>
+
+<h3 style="color:#e8edf5;font-size:15px;">Architecture Overview</h3>
+<div style="background:#0d1520;border-radius:6px;padding:16px;font-family:monospace;font-size:12px;color:#b0c4de;line-height:1.8;overflow-x:auto;">
+<pre style="margin:0;">
+┌─────────────────────────────────────────────────────────────────┐
+│                    SIASA Pipeline Architecture                   │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ┌──────────┐   ┌──────────────┐   ┌────────────┐   ┌────────┐ │
+│  │ Sources   │──▶│ Normalization│──▶│ Features   │──▶│Scoring │ │
+│  │ (11 APIs) │   │ Service      │   │ Calculation│   │Engine  │ │
+│  └──────────┘   └──────────────┘   └────────────┘   └───┬────┘ │
+│                                                           │      │
+│  ┌──────────┐   ┌──────────────┐   ┌────────────┐   ┌───▼────┐ │
+│  │ Anomaly  │◀──│ Baseline     │   │ Domain     │◀──│Data    │ │
+│  │ Detection│   │ Engine       │   │ Status     │   │Suffic. │ │
+│  └────┬─────┘   └──────────────┘   └─────┬──────┘   └────────┘ │
+│       │                                    │                      │
+│  ┌────▼─────────────────────────────────▼──────┐                │
+│  │          Country Profile (per country)        │                │
+│  │  Domains A│B│C│D│E → Status D0-D5 / S0-S6   │                │
+│  └─────────────────────┬────────────────────────┘                │
+│                         │                                         │
+│  ┌──────────┐   ┌──────▼───────┐   ┌────────────────────────┐  │
+│  │Governance│◀──│ Live Runtime │──▶│ Operational Evidence   │  │
+│  │Gates     │   │ Orchestrator │   │ Lane + History         │  │
+│  └──────────┘   └──────────────┘   └────────────────────────┘  │
+│                                                                   │
+│  ┌─────────────────────────────────────────────────────────────┐│
+│  │                    Static GUI (HTML/JS/SVG)                  ││
+│  │  Overview│Coverage│Trends│Events│Comparison│Analytics│...    ││
+│  └─────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────┘
+</pre>
+</div>
+
+<h3 style="color:#e8edf5;font-size:15px;margin-top:16px;">Analytical Domains</h3>
+<table style="width:100%;border-collapse:collapse;font-size:13px;">
+  <tr style="border-bottom:1px solid #263050;">
+    <th style="text-align:left;padding:6px;color:#6b7d99;">Domain</th>
+    <th style="text-align:left;padding:6px;color:#6b7d99;">Label</th>
+    <th style="text-align:left;padding:6px;color:#6b7d99;">What it measures</th>
+  </tr>
+  <tr><td style="padding:6px;color:#4edea3;font-weight:700;font-size:16px;">A</td>
+      <td style="color:#e8edf5;">Narrative &amp; Media</td>
+      <td style="color:#b0c4de;">Media tone, article volume, source diversity, thematic framing</td></tr>
+  <tr><td style="padding:6px;color:#4edea3;font-weight:700;font-size:16px;">B</td>
+      <td style="color:#e8edf5;">Security &amp; Conflict</td>
+      <td style="color:#b0c4de;">Geopolitical events, conflict intensity, natural disaster alerts</td></tr>
+  <tr><td style="padding:6px;color:#4edea3;font-weight:700;font-size:16px;">C</td>
+      <td style="color:#e8edf5;">Humanitarian</td>
+      <td style="color:#b0c4de;">Refugee flows, displacement, INFORM risk scores, humanitarian reports</td></tr>
+  <tr><td style="padding:6px;color:#4edea3;font-weight:700;font-size:16px;">D</td>
+      <td style="color:#e8edf5;">Economy</td>
+      <td style="color:#b0c4de;">GDP growth, inflation, FDI, exchange rates, current account</td></tr>
+  <tr><td style="padding:6px;color:#4edea3;font-weight:700;font-size:16px;">E</td>
+      <td style="color:#e8edf5;">Cyber &amp; InfoOps</td>
+      <td style="color:#b0c4de;">Known exploited vulnerabilities, internet censorship scores</td></tr>
+</table>
+
+<h3 style="color:#e8edf5;font-size:15px;margin-top:16px;">Source Landscape</h3>
+<p style="color:#b0c4de;font-size:13px;">
+  <strong style="color:#4edea3;">{active_sources}</strong> active sources |
+  <strong style="color:#f0a040;">{gated_sources}</strong> credential-gated |
+  <strong style="color:#e8edf5;">{active_sources + gated_sources}</strong> total adapters
+  {"— <a href='sources.html' style='color:#4edea3;'>View full source catalog →</a>" if available_pages and 'sources.html' in available_pages else ""}
+</p>
+</div>
+
+<!-- V-Model Traceability -->
+<div style="background:#141e33;border:1px solid #263050;border-radius:8px;padding:20px;margin-bottom:20px;">
+<h2 style="color:#e8edf5;font-size:18px;margin-top:0;">V-Model Traceability</h2>
+<p style="color:#b0c4de;font-size:13px;line-height:1.6;">
+  SIASA follows a requirements-driven V-Model approach. Every feature is traceable
+  from stakeholder need down to verified code:
+</p>
+<div style="background:#0d1520;border-radius:6px;padding:16px;font-family:monospace;font-size:12px;color:#b0c4de;line-height:1.8;text-align:center;">
+<pre style="margin:0;">
+Stakeholder Requirements (StR)     ←→     Acceptance / Live Probes
+         │                                          ▲
+         ▼                                          │
+   System Requirements (SyR)       ←→     Integration Tests
+         │                                          ▲
+         ▼                                          │
+  Software Requirements (SwR-054)  ←→     Unit Tests (TC-SwR-*)
+         │                                          ▲
+         ▼                                          │
+    Implementation (adapters,      ←→     Code Review + CI
+    engines, readmodels, GUI)
+</pre>
+</div>
+<p style="color:#b0c4de;font-size:12px;margin-top:8px;">
+  <strong style="color:#e8edf5;">54 Software Requirements</strong> traced through
+  <code style="color:#4edea3;">trace_links.yaml</code> and
+  <code style="color:#4edea3;">implementation_file_links.yaml</code>.
+  {"<a href='traceability.html' style='color:#4edea3;'>View traceability details →</a>" if available_pages and 'traceability.html' in available_pages else ""}
+</p>
+</div>
+
+<!-- Glossary -->
+<div style="background:#141e33;border:1px solid #263050;border-radius:8px;padding:20px;margin-bottom:20px;">
+<h2 style="color:#e8edf5;font-size:18px;margin-top:0;">📖 Glossary ({len(terms)} terms, {len(categories)} categories)</h2>
+
+<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+  <button class="glossary-filter-btn" data-filter="all"
+    style="background:#263050;color:#4edea3;border:1px solid #4edea3;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:12px;">
+    All ({len(terms)})</button>
+  {"".join(
+      f'''<button class="glossary-filter-btn" data-filter="{html.escape(cat)}"
+        style="background:#1c2740;color:#6b7d99;border:1px solid #263050;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:12px;">
+        {html.escape(cat)} ({len(terms_list)})</button>'''
+      for cat, terms_list in sorted(categories.items())
+  )}
+</div>
+
+<div style="margin-bottom:12px;">
+  <input id="glossary-search" type="text" placeholder="Search glossary..."
+    style="width:100%;max-width:400px;padding:6px 12px;background:#1c2740;border:1px solid #263050;
+    border-radius:4px;color:#e8edf5;font-size:13px;outline:none;">
+</div>
+
+<h3 style="color:#e8edf5;font-size:14px;margin-bottom:8px;">Categories</h3>
+<table style="border-collapse:collapse;margin-bottom:16px;font-size:13px;">
+  {cat_summary_rows}
+</table>
+
+<div style="overflow-x:auto;">
+<table id="glossary-table" style="width:100%;border-collapse:collapse;font-size:13px;">
+  <tr style="border-bottom:1px solid #263050;">
+    <th style="text-align:left;padding:6px 8px;color:#6b7d99;white-space:nowrap;">Term (DE)</th>
+    <th style="text-align:left;padding:6px 8px;color:#6b7d99;white-space:nowrap;">Term (EN)</th>
+    <th style="text-align:left;padding:6px 8px;color:#6b7d99;">Abbr.</th>
+    <th style="text-align:left;padding:6px 8px;color:#6b7d99;">Definition</th>
+    <th style="text-align:left;padding:6px 8px;color:#6b7d99;">Category</th>
+    <th style="text-align:left;padding:6px 8px;color:#6b7d99;">Code IDs</th>
+  </tr>
+  {glossary_rows}
+</table>
+</div>
+</div>
+
+</section>
+
+<script>
+(function(){{
+  // Glossary category filter
+  document.querySelectorAll('.glossary-filter-btn').forEach(function(btn){{
+    btn.addEventListener('click', function(){{
+      document.querySelectorAll('.glossary-filter-btn').forEach(function(b){{
+        b.style.background='#1c2740'; b.style.color='#6b7d99'; b.style.borderColor='#263050';
+      }});
+      btn.style.background='#263050'; btn.style.color='#4edea3'; btn.style.borderColor='#4edea3';
+      var filter = btn.dataset.filter;
+      document.querySelectorAll('.glossary-row').forEach(function(row){{
+        row.style.display = (filter==='all' || row.dataset.category===filter) ? '' : 'none';
+      }});
+    }});
+  }});
+  // Glossary search
+  var searchInput = document.getElementById('glossary-search');
+  if(searchInput){{
+    searchInput.addEventListener('input', function(){{
+      var q = searchInput.value.toLowerCase();
+      document.querySelectorAll('.glossary-row').forEach(function(row){{
+        row.style.display = (row.dataset.searchText||'').indexOf(q) >= 0 ? '' : 'none';
+      }});
+    }});
+  }}
+}})();
+</script>"""
+
+    return _page("About SIASA", body, nav_prefix=nav_prefix, available_pages=available_pages)
+
+
 def build_local_mvp_site(
     *,
     output_dir: Path,
@@ -7775,6 +8034,7 @@ def build_local_mvp_site(
         'readiness.html',
         'release_package.html',
         'sources.html',
+        'about.html',
     }
 
     if normalized_role == 'viewer':
@@ -7993,6 +8253,13 @@ def build_local_mvp_site(
         encoding='utf-8',
     )
     generated_files.append(sources_file)
+    # AP-12.4: About / Glossary / Project Description page
+    about_file = output_dir / 'about.html'
+    about_file.write_text(
+        _render_about(nav_prefix='', available_pages=available_pages),
+        encoding='utf-8',
+    )
+    generated_files.append(about_file)
     readiness_json_file = output_dir / 'readiness.json'
     readiness_json_file.write_text(json.dumps(readiness_view_model, indent=2, sort_keys=True), encoding='utf-8')
     generated_files.append(readiness_json_file)
