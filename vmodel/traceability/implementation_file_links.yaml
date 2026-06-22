@@ -70,6 +70,9 @@ implementation_slices:
       - SwR-006
       - SwR-007
       - SwR-008
+      - SwR-052
+      - SwR-053
+      - SwR-054
     implementation_map:
       SwR-001:
         code_paths:
@@ -120,17 +123,38 @@ implementation_slices:
           - src/siasa/data/raw_models.py
         test_paths:
           - tests/unit/test_data_models.py
+      SwR-052:
+        code_paths:
+          - src/siasa/adapters/frankfurter.py
+        test_paths:
+          - tests/unit/test_frankfurter_adapter.py
+      SwR-053:
+        code_paths:
+          - src/siasa/adapters/voidly.py
+        test_paths:
+          - tests/unit/test_voidly_adapter.py
+      SwR-054:
+        code_paths:
+          - src/siasa/adapters/hdx_inform.py
+        test_paths:
+          - tests/unit/test_hdx_inform_adapter.py
     known_code_paths:
       - src/siasa/catalog/models.py
       - src/siasa/catalog/loaders.py
       - src/siasa/adapters/base.py
       - src/siasa/adapters/fetch_metadata.py
+      - src/siasa/adapters/frankfurter.py
+      - src/siasa/adapters/voidly.py
+      - src/siasa/adapters/hdx_inform.py
       - src/siasa/data/raw_models.py
       - src/siasa/runs/run_state.py
       - src/siasa/runs/orchestrator.py
     known_test_paths:
       - tests/unit/test_catalog_models.py
       - tests/unit/test_adapter_base.py
+      - tests/unit/test_frankfurter_adapter.py
+      - tests/unit/test_voidly_adapter.py
+      - tests/unit/test_hdx_inform_adapter.py
       - tests/unit/test_data_models.py
       - tests/unit/test_run_state.py
       - tests/unit/test_run_orchestrator.py

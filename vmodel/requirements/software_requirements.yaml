@@ -5,7 +5,7 @@ metadata:
   - vmodel/architecture/system_architecture.md
   created_at_utc: '2026-05-11T14:25:30.979384+00:00'
   status: draft_baseline_derived
-  software_requirement_count: 51
+  software_requirement_count: 54
 software_requirements:
 - id: SwR-001
   title: Source catalog record schema
@@ -495,3 +495,35 @@ software_requirements:
   - DDS-003
   - DDS-009
   verification_method: software_specification_review
+- id: SwR-052
+  title: Frankfurter ECB exchange rate adapter
+  statement: The software shall provide a source adapter for ECB reference exchange rates via the Frankfurter API (api.frankfurter.dev) that maps ISO-3 country codes to currencies, fetches latest USD-based rates in a single API call, includes retry with exponential backoff, and degrades gracefully on network or API failures.
+  status: accepted
+  derives_from:
+  - SyR-007
+  - SyR-010
+  allocated_to_design:
+  - DDS-002
+  verification_method: unit_test
+- id: SwR-053
+  title: Voidly internet censorship score adapter
+  statement: The software shall provide a source adapter for internet censorship scores via the Voidly Atlas API (api.voidly.ai) that fetches country-level censorship scores with confidence and sample counts, maps ISO-2 response codes to ISO-3, filters to requested countries, includes retry with exponential backoff, and degrades gracefully on network or API failures.
+  status: accepted
+  derives_from:
+  - SyR-007
+  - SyR-010
+  - SyR-017
+  allocated_to_design:
+  - DDS-002
+  verification_method: unit_test
+- id: SwR-054
+  title: HDX INFORM Risk Index adapter
+  statement: The software shall provide a source adapter for the INFORM Risk Index via HDX CSV download (data.humdata.org) that parses country-level humanitarian risk indicators including the INFORM composite score and sub-dimensions, filters to target countries and key indicators, includes retry with exponential backoff, and degrades gracefully on network or parse failures.
+  status: accepted
+  derives_from:
+  - SyR-007
+  - SyR-010
+  - SyR-017
+  allocated_to_design:
+  - DDS-002
+  verification_method: unit_test

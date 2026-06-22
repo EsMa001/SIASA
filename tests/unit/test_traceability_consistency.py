@@ -355,7 +355,7 @@ def test_build_requirement_closure_report_for_catalog_and_ingestion_foundation_s
     report = build_requirement_closure_report(repo_root=repo_root, slice_id="catalog-and-ingestion-foundation")
 
     assert report["slice_id"] == "catalog-and-ingestion-foundation"
-    assert report["summary"] == {"closed": 8, "at_risk": 0}
+    assert report["summary"] == {"closed": 11, "at_risk": 0}
     assert [item["requirement_id"] for item in report["requirements"]] == [
         "SwR-001",
         "SwR-002",
@@ -365,6 +365,9 @@ def test_build_requirement_closure_report_for_catalog_and_ingestion_foundation_s
         "SwR-006",
         "SwR-007",
         "SwR-008",
+        "SwR-052",
+        "SwR-053",
+        "SwR-054",
     ]
     assert report["requirements"][0]["verifying_test_specs"] == ["TC-SwR-001-001"]
     assert "src/siasa/catalog/loaders.py" in report["requirements"][0]["code_paths"]
@@ -456,8 +459,8 @@ def test_build_repo_closure_report_aggregates_all_governed_slices() -> None:
 
     assert report["summary"] == {
         "slice_count": 9,
-        "requirement_count": 51,
-        "closed": 51,
+        "requirement_count": 54,
+        "closed": 54,
         "at_risk": 0,
     }
     assert report["slice_ids"] == [
@@ -485,8 +488,8 @@ def test_build_traceability_integrity_report_is_globally_clean() -> None:
     report = build_traceability_integrity_report(repo_root=repo_root)
 
     assert report["summary"] == {
-        "requirement_count": 51,
-        "mapped_requirement_count": 51,
+        "requirement_count": 54,
+        "mapped_requirement_count": 54,
         "missing_requirement_mapping_count": 0,
         "orphan_mapped_requirement_count": 0,
         "slice_count": 9,
@@ -498,8 +501,8 @@ def test_build_traceability_integrity_report_is_globally_clean() -> None:
     assert report["unhealthy_slices"] == []
     assert report["repo_closure"]["summary"] == {
         "slice_count": 9,
-        "requirement_count": 51,
-        "closed": 51,
+        "requirement_count": 54,
+        "closed": 54,
         "at_risk": 0,
     }
 

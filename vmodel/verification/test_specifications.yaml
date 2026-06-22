@@ -1110,3 +1110,36 @@ test_specifications:
   preconditions:
   - Derived software requirements and software architecture are available.
   expected_result: The software shall preserve explicit layer separation across raw data, normalized data, features, status or score outputs, and report or export artifacts.
+- id: TC-SwR-052-001
+  requirement_ids:
+  - SwR-052
+  title: Verify Frankfurter ECB exchange rate adapter
+  level: software
+  method: unit_test
+  status: specified
+  preconditions:
+  - FrankfurterAdapter class exists in src/siasa/adapters/frankfurter.py.
+  expected_result: The adapter fetches ECB rates, maps ISO-3 to currencies, handles retries, degrades gracefully on failure, and produces records with country_id, signal_key, value, currency, period, and quality_flag fields.
+  test_file: tests/unit/test_frankfurter_adapter.py
+- id: TC-SwR-053-001
+  requirement_ids:
+  - SwR-053
+  title: Verify Voidly internet censorship score adapter
+  level: software
+  method: unit_test
+  status: specified
+  preconditions:
+  - VoidlyAdapter class exists in src/siasa/adapters/voidly.py.
+  expected_result: The adapter fetches censorship scores, maps ISO-2 to ISO-3, filters to requested countries, handles retries, degrades gracefully on failure, and produces records with country_id, signal_key, value, confidence, samples, and quality_flag fields.
+  test_file: tests/unit/test_voidly_adapter.py
+- id: TC-SwR-054-001
+  requirement_ids:
+  - SwR-054
+  title: Verify HDX INFORM Risk Index adapter
+  level: software
+  method: unit_test
+  status: specified
+  preconditions:
+  - HDXInformRiskAdapter class exists in src/siasa/adapters/hdx_inform.py.
+  expected_result: The adapter downloads INFORM Risk Index CSV, parses target indicators, filters to requested countries, handles retries, degrades gracefully on failure, and produces records with country_id, signal_key, value, indicator_name, period, and quality_flag fields.
+  test_file: tests/unit/test_hdx_inform_adapter.py
