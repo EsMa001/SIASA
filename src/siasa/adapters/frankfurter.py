@@ -13,7 +13,7 @@ from datetime import UTC, datetime, timedelta
 from time import sleep
 from typing import Any, Callable
 import json
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 from .base import FetchResult, SourceAdapter
 
@@ -24,7 +24,8 @@ SleepFn = Callable[[float], None]
 
 
 def _default_fetch_json(url: str) -> object:
-    with urlopen(url, timeout=30) as response:
+    req = Request(url, headers={"User-Agent": "SIASA/1.0"})
+    with urlopen(req, timeout=30) as response:
         return json.load(response)
 
 

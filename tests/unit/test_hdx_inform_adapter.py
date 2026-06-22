@@ -44,13 +44,13 @@ def _fixed_now() -> datetime:
 
 
 def _make_csv(rows: list[dict]) -> str:
-    """Build a CSV string from row dicts."""
-    header = "CountryName,Iso3,ValidityYear,IndicatorName,IndicatorScore,Unit\n"
+    """Build a CSV string from row dicts (trends format)."""
+    header = "CountryName,Iso3,GNAYear,IndicatorId,FullName,IndicatorScore\n"
     lines = []
     for r in rows:
         lines.append(
             f"{r.get('name','')},{r.get('iso3','')},{r.get('year','2025')},"
-            f"{r.get('indicator','')},{r.get('score','')},{r.get('unit','0-10')}\n"
+            f"{r.get('indicator_id','')},{r.get('full_name', r.get('indicator',''))},{r.get('score','')}\n"
         )
     return header + "".join(lines)
 
@@ -59,9 +59,9 @@ def _make_csv(rows: list[dict]) -> str:
 
 def test_hdx_inform_fetch_success_single_country() -> None:
     csv = _make_csv([
-        {"name": "Ukraine", "iso3": "UKR", "indicator": "INFORM Risk", "score": "5.2"},
-        {"name": "Ukraine", "iso3": "UKR", "indicator": "Vulnerability", "score": "4.8"},
-        {"name": "Poland", "iso3": "POL", "indicator": "INFORM Risk", "score": "2.1"},
+        {"name": "Ukraine", "iso3": "UKR", "indicator_id": "INFORM", "full_name": "INFORM Risk Index", "score": "5.2"},
+        {"name": "Ukraine", "iso3": "UKR", "indicator_id": "VU", "full_name": "Vulnerability Index", "score": "4.8"},
+        {"name": "Poland", "iso3": "POL", "indicator_id": "INFORM", "full_name": "INFORM Risk Index", "score": "2.1"},
     ])
     fetcher = StubFetcher(response=csv)
     adapter = HDXInformRiskAdapter(
@@ -84,9 +84,9 @@ def test_hdx_inform_fetch_success_single_country() -> None:
 
 def test_hdx_inform_multiple_countries() -> None:
     csv = _make_csv([
-        {"name": "Ukraine", "iso3": "UKR", "indicator": "INFORM Risk", "score": "5.2"},
-        {"name": "Poland", "iso3": "POL", "indicator": "INFORM Risk", "score": "2.1"},
-        {"name": "Germany", "iso3": "DEU", "indicator": "INFORM Risk", "score": "1.5"},
+        {"name": "Ukraine", "iso3": "UKR", "indicator_id": "INFORM", "full_name": "INFORM Risk Index", "score": "5.2"},
+        {"name": "Poland", "iso3": "POL", "indicator_id": "INFORM", "full_name": "INFORM Risk Index", "score": "2.1"},
+        {"name": "Germany", "iso3": "DEU", "indicator_id": "INFORM", "full_name": "INFORM Risk Index", "score": "1.5"},
     ])
     fetcher = StubFetcher(response=csv)
     adapter = HDXInformRiskAdapter(
@@ -105,8 +105,8 @@ def test_hdx_inform_multiple_countries() -> None:
 
 def test_hdx_inform_filters_unrequested_countries() -> None:
     csv = _make_csv([
-        {"name": "Ukraine", "iso3": "UKR", "indicator": "INFORM Risk", "score": "5.2"},
-        {"name": "Poland", "iso3": "POL", "indicator": "INFORM Risk", "score": "2.1"},
+        {"name": "Ukraine", "iso3": "UKR", "indicator_id": "INFORM", "full_name": "INFORM Risk Index", "score": "5.2"},
+        {"name": "Poland", "iso3": "POL", "indicator_id": "INFORM", "full_name": "INFORM Risk Index", "score": "2.1"},
     ])
     fetcher = StubFetcher(response=csv)
     adapter = HDXInformRiskAdapter(
@@ -124,9 +124,9 @@ def test_hdx_inform_filters_unrequested_countries() -> None:
 
 def test_hdx_inform_filters_non_target_indicators() -> None:
     csv = _make_csv([
-        {"name": "Ukraine", "iso3": "UKR", "indicator": "INFORM Risk", "score": "5.2"},
-        {"name": "Ukraine", "iso3": "UKR", "indicator": "Drought affected", "score": "886000"},
-        {"name": "Ukraine", "iso3": "UKR", "indicator": "SFM Indicator E-1 Score", "score": "6.8"},
+        {"name": "Ukraine", "iso3": "UKR", "indicator_id": "INFORM", "full_name": "INFORM Risk Index", "score": "5.2"},
+        {"name": "Ukraine", "iso3": "UKR", "indicator_id": "DROUGHT", "full_name": "Drought affected", "score": "886000"},
+        {"name": "Ukraine", "iso3": "UKR", "indicator_id": "SFM-E1", "full_name": "SFM Indicator E-1 Score", "score": "6.8"},
     ])
     fetcher = StubFetcher(response=csv)
     adapter = HDXInformRiskAdapter(
@@ -142,9 +142,9 @@ def test_hdx_inform_filters_non_target_indicators() -> None:
     assert result.records[0]["signal_key"] == "inform_risk"
 
 
-def test_hdx_inform_case_insensitive_indicator_matching() -> None:
+def test_hdx_inform_exact_indicator_id_matching() -> None:
     csv = _make_csv([
-        {"name": "Ukraine", "iso3": "UKR", "indicator": "inform risk", "score": "5.2"},
+        {"name": "Ukraine", "iso3": "UKR", "indicator_id": "INFORM", "full_name": "INFORM Risk Index", "score": "5.2"},
     ])
     fetcher = StubFetcher(response=csv)
     adapter = HDXInformRiskAdapter(
@@ -161,9 +161,9 @@ def test_hdx_inform_case_insensitive_indicator_matching() -> None:
 
 def test_hdx_inform_skips_invalid_scores() -> None:
     csv = _make_csv([
-        {"name": "Ukraine", "iso3": "UKR", "indicator": "INFORM Risk", "score": "n/a"},
-        {"name": "Ukraine", "iso3": "UKR", "indicator": "Vulnerability", "score": ""},
-        {"name": "Ukraine", "iso3": "UKR", "indicator": "Hazard & Exposure", "score": "3.5"},
+        {"name": "Ukraine", "iso3": "UKR", "indicator_id": "INFORM", "full_name": "INFORM Risk Index", "score": "n/a"},
+        {"name": "Ukraine", "iso3": "UKR", "indicator_id": "VU", "full_name": "Vulnerability Index", "score": ""},
+        {"name": "Ukraine", "iso3": "UKR", "indicator_id": "HA", "full_name": "Hazard & Exposure Index", "score": "3.5"},
     ])
     fetcher = StubFetcher(response=csv)
     adapter = HDXInformRiskAdapter(
@@ -198,7 +198,7 @@ def test_hdx_inform_network_error_returns_failed() -> None:
 
 def test_hdx_inform_retry_on_transient_error() -> None:
     csv = _make_csv([
-        {"name": "Ukraine", "iso3": "UKR", "indicator": "INFORM Risk", "score": "5.2"},
+        {"name": "Ukraine", "iso3": "UKR", "indicator_id": "INFORM", "full_name": "INFORM Risk Index", "score": "5.2"},
     ])
     fetcher = SequenceFetcher([
         ConnectionError("transient"),
@@ -239,7 +239,7 @@ def test_hdx_inform_empty_csv_returns_empty() -> None:
 
 def test_hdx_inform_record_schema() -> None:
     csv = _make_csv([
-        {"name": "Ukraine", "iso3": "UKR", "year": "2025", "indicator": "INFORM Risk", "score": "5.2"},
+        {"name": "Ukraine", "iso3": "UKR", "year": "2025", "indicator_id": "INFORM", "full_name": "INFORM Risk Index", "score": "5.2"},
     ])
     fetcher = StubFetcher(response=csv)
     adapter = HDXInformRiskAdapter(
@@ -264,7 +264,7 @@ def test_hdx_inform_record_schema() -> None:
 
 def test_target_indicators_has_core_set() -> None:
     """Ensure at minimum the composite risk + 3 dimensions are targeted."""
-    assert "INFORM Risk" in _TARGET_INDICATORS
-    assert "Hazard & Exposure" in _TARGET_INDICATORS
-    assert "Vulnerability" in _TARGET_INDICATORS
-    assert "Lack of Coping Capacity" in _TARGET_INDICATORS
+    assert "INFORM" in _TARGET_INDICATORS
+    assert "HA" in _TARGET_INDICATORS
+    assert "VU" in _TARGET_INDICATORS
+    assert "CC" in _TARGET_INDICATORS

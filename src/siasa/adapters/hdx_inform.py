@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from time import sleep
 from typing import Any, Callable
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 from .base import FetchResult, SourceAdapter
 
@@ -25,7 +25,8 @@ SleepFn = Callable[[float], None]
 
 
 def _default_fetch_text(url: str) -> str:
-    with urlopen(url, timeout=60) as response:
+    req = Request(url, headers={"User-Agent": "SIASA/1.0"})
+    with urlopen(req, timeout=60) as response:
         return response.read().decode("utf-8")
 
 
@@ -33,18 +34,12 @@ def _utc_now() -> datetime:
     return datetime.now(UTC)
 
 
-# Key INFORM indicators to extract (from the full ~80+ indicator set)
+# Key INFORM indicators to extract (by IndicatorId from trends CSV)
 _TARGET_INDICATORS: dict[str, str] = {
-    "INFORM Risk": "inform_risk",
-    "Hazard & Exposure": "hazard_exposure",
-    "Vulnerability": "vulnerability",
-    "Lack of Coping Capacity": "lack_coping_capacity",
-    "Natural": "hazard_natural",
-    "Human": "hazard_human",
-    "Socio-Economic Vulnerability": "vulnerability_socioeconomic",
-    "Vulnerable Groups": "vulnerability_groups",
-    "Institutional": "coping_institutional",
-    "Infrastructure": "coping_infrastructure",
+    "INFORM": "inform_risk",
+    "HA": "hazard_exposure",
+    "VU": "vulnerability",
+    "CC": "lack_coping_capacity",
 }
 
 
@@ -60,7 +55,7 @@ class HDXInformRiskAdapter(SourceAdapter):
     domain: str = "C"
     csv_url: str = (
         "https://data.humdata.org/dataset/f5ec2ee7-8a1b-49b4-864b-70bdb582a022/"
-        "resource/7467184f-ac86-4b4a-895c-27c8ad7179ee/download/inform_risk_index.csv"
+        "resource/b1d4a203-ef6e-44f7-9895-17c127aeaaee/download/inform_risk_index_trends.csv"
     )
     fetch_text: FetchText = _default_fetch_text
     now_provider: NowProvider = _utc_now
@@ -91,23 +86,24 @@ class HDXInformRiskAdapter(SourceAdapter):
             )
 
     def _parse_csv(self, csv_text: str) -> list[dict[str, Any]]:
-        """Parse INFORM Risk CSV into SIASA records.
+        """Parse INFORM Risk trends CSV into SIASA records.
 
-        CSV columns: CountryName, Iso3, ValidityYear, IndicatorName, IndicatorScore, Unit
+        CSV columns: CountryName, Iso3, GNAYear, IndicatorId, FullName, IndicatorScore
+        Only the latest year per country/indicator is kept.
         """
         target_iso3 = set(self.country_ids)
-        target_indicators_lower = {k.lower(): v for k, v in self.target_indicators.items()}
 
         reader = csv.DictReader(io.StringIO(csv_text))
-        records: list[dict[str, Any]] = []
+        # Collect all rows, then keep only latest year per country+indicator
+        raw: dict[tuple[str, str], dict[str, Any]] = {}
 
         for row in reader:
             iso3 = (row.get("Iso3") or "").strip().upper()
             if iso3 not in target_iso3:
                 continue
 
-            indicator_name = (row.get("IndicatorName") or "").strip()
-            signal_key = target_indicators_lower.get(indicator_name.lower())
+            indicator_id = (row.get("IndicatorId") or "").strip()
+            signal_key = self.target_indicators.get(indicator_id)
             if signal_key is None:
                 continue
 
@@ -120,21 +116,26 @@ class HDXInformRiskAdapter(SourceAdapter):
             except (ValueError, TypeError):
                 continue
 
-            year = (row.get("ValidityYear") or "").strip()
+            year = (row.get("GNAYear") or row.get("ValidityYear") or "").strip()
+            full_name = (row.get("FullName") or row.get("IndicatorName") or indicator_id).strip()
+            key = (iso3, indicator_id)
 
-            records.append({
-                "country_id": iso3,
-                "period": year,
-                "signal_key": signal_key,
-                "value": score,
-                "indicator_name": indicator_name,
-                "expected_source_count": 1,
-                "freshness_hours": self.annual_freshness_hours,
-                "freshness_horizon_hours": self.annual_freshness_hours,
-                "quality_flag": "hdx_inform_risk_index",
-            })
+            # Keep latest year (highest year string)
+            existing = raw.get(key)
+            if existing is None or year > existing.get("period", ""):
+                raw[key] = {
+                    "country_id": iso3,
+                    "period": year,
+                    "signal_key": signal_key,
+                    "value": score,
+                    "indicator_name": full_name,
+                    "expected_source_count": 1,
+                    "freshness_hours": self.annual_freshness_hours,
+                    "freshness_horizon_hours": self.annual_freshness_hours,
+                    "quality_flag": "hdx_inform_risk_index",
+                }
 
-        records.sort(key=lambda r: (r["country_id"], r["signal_key"]))
+        records = sorted(raw.values(), key=lambda r: (r["country_id"], r["signal_key"]))
         return records
 
     def _fetch_with_retry(self, url: str) -> str:

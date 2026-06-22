@@ -25,6 +25,7 @@ SleepFn = Callable[[float], None]
 
 def _default_fetch_json(url: str, headers: dict[str, str] | None = None) -> object:
     req = Request(url)
+    req.add_header("User-Agent", "SIASA/1.0")
     if headers:
         for k, v in headers.items():
             req.add_header(k, v)
