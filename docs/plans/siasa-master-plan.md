@@ -94,13 +94,14 @@ Regeln:
 | AP-09 | Server-gestützte Multi-User-Governance | Zurückgestellt | **P2** | Post-MVP | `G5` |
 | AP-10 | Terminologie-Glossar & Begriffs-Normalisierung | Erledigt | – | MVP-Should | neu (kein Legacy) |
 | AP-11 | Free-API-Quellen-Verbreiterung (D/E/C/A) | Erledigt | – | MVP-Could | 3 Adapter live (Frankfurter/Voidly/HDX-INFORM), 4 extern blockiert, Katalog+Glossar aktuell |
+| AP-12 | UX-Transparenz & Informationstiefe | In Arbeit | **P1** | MVP-Should | neu (User-Request: Quellen-Steckbriefe, parametrierbare Zeitachsen, Methodik-Transparenz, Glossar-Seite) |
 
 Gesamtbild: Das Fundament und alle repo-seitig steuerbaren Gap-Familien (`G1`, `G2`, `G3`, `G4`) sind
 **materiell geschlossen** (Capability-Matrix: `17/17 Done`, `100.0%`). AP-05 (Validierungs-Realismus),
 AP-07 (Quellen-Robustheit), AP-08 (Breiten-Ausbau auf 88 Länder), AP-10 (Terminologie-Glossar) und
 AP-11 (Free-API-Quellen-Verbreiterung: 3 neue Adapter für Domain D/E/C) sind
-ebenfalls erledigt. Die verbleibende Arbeit ist externe Quellen-Aktivierung und –
-zurückgestellt – Multi-User.
+ebenfalls erledigt. AP-12 (UX-Transparenz) ist das aktive Arbeitspaket. Die verbleibende blockierte Arbeit ist
+externe Quellen-Aktivierung (AP-06) und – zurückgestellt – Multi-User (AP-09).
 
 ---
 
@@ -111,8 +112,9 @@ zurückgestellt – Multi-User.
 
 | Rang | AP-ID | Großes Arbeitspaket | Status | Klasse | Auslöser / Bedingung |
 | --- | --- | --- | --- | --- | --- |
-| **P1** | AP-06 | Externe Quellen-Aktivierung (G2) | Blockiert | MVP-Should | **springt auf aktiv**, sobald gültige ReliefWeb/UCDP-Credentials vorliegen |
-| **P2** | AP-09 | Multi-User-Governance (G5) | Zurückgestellt | Post-MVP | nur wenn Operating-Model Multi-User explizit fordert |
+| **P1** | AP-12 | UX-Transparenz & Informationstiefe | In Arbeit | MVP-Should | User-Request; rein repo-seitig machbar |
+| **P2** | AP-06 | Externe Quellen-Aktivierung (G2) | Blockiert | MVP-Should | **springt auf aktiv**, sobald gültige ReliefWeb/UCDP-Credentials vorliegen |
+| **P3** | AP-09 | Multi-User-Governance (G5) | Zurückgestellt | Post-MVP | nur wenn Operating-Model Multi-User explizit fordert |
 
 ### So steuerst du die Reihenfolge
 
@@ -125,9 +127,11 @@ zurückgestellt – Multi-User.
 
 ### Begründung der Default-Reihenfolge
 
-- **AP-06 zuerst (P1, bedingt):** Repo-seitig fertig; der einzige offene Hebel ist extern (Credentials). Sobald
+- **AP-12 zuerst (P1):** Direkt vom Nutzer angefordert; rein repo-seitig umsetzbar; erhöht Transparenz und
+  Informationstiefe der GUI substantiell.
+- **AP-06 (P2, bedingt):** Repo-seitig fertig; der einzige offene Hebel ist extern (Credentials). Sobald
   Credentials da sind, ist dies das wertvollste gebündelte Paket.
-- **AP-09 (P2, zurückgestellt):** Großer Architektursprung; nur bei explizitem Bedarf am Ziel-Betriebsmodell.
+- **AP-09 (P3, zurückgestellt):** Großer Architektursprung; nur bei explizitem Bedarf am Ziel-Betriebsmodell.
 
 ---
 
@@ -283,6 +287,21 @@ Priorisierung der TAPs nach Domain-Lückengröße:
 | AP-11.8 | Quellkatalog (`data_sources.yaml`) + Glossar aktualisieren | Erledigt | Katalog: 3 neue Core-Einträge; Glossar: 3 neue Terme (58 total, 10 Kategorien); `f33e46c` |
 | AP-11.9 | Runtime-Integration: neue Adapter in `live_runtime.py` verdrahten + Live-Fixes | Erledigt | Import + Adapter-Wiring + Normalisierungs-Mappings für SRC-FRANKFURTER/VOIDLY/HDX-INFORM; User-Agent-Header-Fix (403-Blocker) + HDX CSV-Format auf Trends umgestellt; Live-Probe verifiziert (alle 3 Adapter liefern echte Daten); 83 Tests grün; `edeedd9`, `12cd8c7` |
 
+#### AP-12 — UX-Transparenz & Informationstiefe · Status: In Arbeit · Rang: P1 · Klasse: MVP-Should
+Herkunft: User-Request (2026-06-22). Ziel: Die GUI wird von einem kompakten Dashboard zu einem
+vollständig transparenten Analyse-Werkzeug erweitert. Nutzer sollen jede Quelle einzeln inspizieren,
+Zeitverläufe frei parametrieren und jederzeit nachvollziehen können, welche Daten mit welchen
+Verfahren ausgewertet und kombiniert werden.
+
+| TAP | Inhalt | Status | Hinweis |
+| --- | --- | --- | --- |
+| AP-12.1 | Quellen-Katalog-Seite (`sources.html`): Steckbrief pro Quelle (Name, API, Domain, Indikatoren, Freshness, Status, Normalisierung, Beispiel-Rohdaten) | Offen | Neue Seite |
+| AP-12.2 | Parametrierbare Zeitachse: echtes Date-Range (Von/Bis), Chart-Rerendering statt Opacity, Datum-Labels auf X-Achse | Offen | Ersetzt bisherige 6M/1Y/All-Buttons |
+| AP-12.3 | Methodologie-/Pipeline-Transparenz-Seite (`methodology.html`): Datenfluss Rohdaten→Norm→Feature→Scoring→Anomalie→Status→Governance | Offen | Neue Seite |
+| AP-12.4 | Glossar- & Projektbeschreibung (`about.html`): Projektbeschreibung, durchsuchbares Glossar (58 Terme), V-Model-Erklärung, Capability-Übersicht | Offen | Neue Seite |
+| AP-12.5 | Einzelquellen-Detailansicht in Coverage/Country-Profile: aufklappbarer Bereich pro Quelle mit Rohdaten-Snippet, Normalisierung, Scoring-Beitrag | Offen | Bestehende Seiten erweitern |
+| AP-12.6 | Nav-Integration & Cross-Links: neue Seiten in Nav, Deep-Links Sources↔Coverage↔Methodology, Glossar-Tooltips | Offen | Querschnitt |
+
 ---
 
 ## 5. Offene Lücken & Blocker (Zusammenfassung)
@@ -296,6 +315,7 @@ Priorisierung der TAPs nach Domain-Lückengröße:
 | L5 | Multi-User/Server-Governance | AP-09 | strategisch | nur bei Operating-Model-Bedarf (P3, zurückgestellt) |
 | L6 | ~~Uneinheitliche/unklare Terminologie über Planungs- und Code-Artefakte~~ | AP-10 | geschlossen | Glossar mit 55 Termen erstellt; Artefakte konsistent |
 | L7 | ~~Domain-D/E/C/A-Coverage dünn~~ | AP-11 | geschlossen | 3 neue Adapter (Frankfurter/Voidly/HDX-INFORM); 4 TAPs extern blockiert (API-Key/DNS) |
+| L8 | GUI zeigt zu wenig Quellen-/Methodik-Transparenz | AP-12 | **in Arbeit** | AP-12 (P1): Quellen-Steckbriefe, parametrierbare Zeitachsen, Methodik-Seite, Glossar |
 
 Pivot-Auslöser (wann die Priorisierung neu bewertet wird):
 - gültige ReliefWeb/UCDP-Credentials werden verfügbar → AP-06 hoch;

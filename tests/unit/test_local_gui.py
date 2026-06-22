@@ -2616,7 +2616,7 @@ def test_load_site_payload_from_artifacts_falls_back_for_missing_readiness_suppo
 
     assert payload["validation_view_model"] is None
     assert payload["annotations_view_model"] == {"annotations": [], "by_scope": {}, "by_linked_item": {}}
-    assert payload["repo_closure_view_model"]["summary"] == {"slice_count": 9, "requirement_count": 51, "closed": 51, "at_risk": 0}
+    assert payload["repo_closure_view_model"]["summary"] == {"slice_count": 9, "requirement_count": 54, "closed": 54, "at_risk": 0}
     assert payload["system_status_read_model"]["operational_evidence_lane"]["latest_summary"]["country_set_id"] == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
 
     pages = build_local_mvp_site(output_dir=tmp_path / "site", **payload)
@@ -3748,3 +3748,99 @@ def test_release_demo_package_uses_actual_approval_lifecycle_state_when_present(
     assert "stakeholder@example.com" in html_out
     assert "already_distributed" in html_out
     assert "distribution_record_captured" in html_out
+
+
+# ── AP-12.1: Source Catalog Page Tests ────────────────────────────────────────
+
+
+def test_render_sources_contains_all_source_cards() -> None:
+    """All 11 source adapters appear as cards on the sources page."""
+    from siasa.gui.local_app import _render_sources, _SOURCE_CATALOG
+
+    html_out = _render_sources(available_pages={'sources.html'})
+
+    # Every source_id has a card
+    for src in _SOURCE_CATALOG:
+        assert f'source-card-{src["source_id"]}' in html_out, f"Missing card for {src['source_id']}"
+
+    # Domain overview table has all 5 domains
+    for domain in ["A", "B", "C", "D", "E"]:
+        assert f"Domain {domain}" in html_out
+
+
+def test_render_sources_shows_filter_buttons_and_search() -> None:
+    """Filter buttons and search input are present."""
+    from siasa.gui.local_app import _render_sources
+
+    html_out = _render_sources(available_pages={'sources.html'})
+
+    assert 'source-filter-btn' in html_out
+    assert 'data-filter="all"' in html_out
+    assert 'data-filter="active"' in html_out
+    assert 'data-filter="credential-gated"' in html_out
+    assert 'source-search' in html_out
+
+
+def test_render_sources_card_has_required_fields() -> None:
+    """Each source card contains key metadata fields."""
+    from siasa.gui.local_app import _render_sources
+
+    html_out = _render_sources(available_pages={'sources.html'})
+
+    # Check a few representative cards
+    assert 'api.gdeltproject.org' in html_out
+    assert 'api.frankfurter.dev' in html_out
+    assert 'api.voidly.ai' in html_out
+    assert 'data.humdata.org' in html_out
+    assert 'api.worldbank.org' in html_out
+
+    # Fields present
+    assert 'API Endpoint' in html_out
+    assert 'Provider' in html_out
+    assert 'Authentication' in html_out
+    assert 'Rate Limit' in html_out
+    assert 'Update Cadence' in html_out
+    assert 'Normalization' in html_out
+    assert 'Indicators:' in html_out
+
+
+def test_render_sources_distinguishes_active_and_gated() -> None:
+    """Active and credential-gated sources are visually distinguished."""
+    from siasa.gui.local_app import _render_sources
+
+    html_out = _render_sources(available_pages={'sources.html'})
+
+    assert 'data-status="active"' in html_out
+    assert 'data-status="credential-gated"' in html_out
+    # UCDP and ReliefWeb are credential-gated
+    assert 'SRC-UCDP-GED' in html_out
+    assert 'SRC-RELIEFWEB' in html_out
+
+
+def test_source_catalog_has_11_entries() -> None:
+    """Source catalog contains exactly 11 adapter entries."""
+    from siasa.gui.local_app import _SOURCE_CATALOG
+
+    assert len(_SOURCE_CATALOG) == 11
+    source_ids = {s["source_id"] for s in _SOURCE_CATALOG}
+    assert "SRC-GDELT-DOC" in source_ids
+    assert "SRC-FRANKFURTER" in source_ids
+    assert "SRC-VOIDLY" in source_ids
+    assert "SRC-HDX-INFORM" in source_ids
+    assert "WB-INDICATORS" in source_ids
+    assert "SRC-UCDP-GED" in source_ids
+    assert "SRC-RELIEFWEB" in source_ids
+
+
+def test_build_local_mvp_site_generates_sources_html(tmp_path: Path) -> None:
+    """build_local_mvp_site produces sources.html."""
+    from siasa.gui.local_app import build_local_mvp_site
+
+    result = build_local_mvp_site(output_dir=tmp_path)
+
+    sources_file = tmp_path / 'sources.html'
+    assert sources_file.exists(), "sources.html not generated"
+    content = sources_file.read_text()
+    assert 'Source Catalog' in content
+    assert 'source-card-SRC-GDELT-DOC' in content
+    assert str(sources_file) in [str(f) for f in result.generated_files]

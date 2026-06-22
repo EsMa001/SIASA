@@ -49,6 +49,7 @@ def _page(title: str, body: str, *, nav_prefix: str = '', available_pages: set[s
         ('reports.html', '📄 Reports'),
         ('runs.html', '⚙ System'),
         ('readiness.html', '🚦 Readiness'),
+        ('sources.html', '📡 Sources'),
     ]
     nav_html = ''.join(
         f"<a href='{html.escape(nav_prefix + href)}'>{html.escape(label)}</a>"
@@ -7334,6 +7335,383 @@ def _render_approval_lifecycle_panel(vm: dict | None) -> str:
 '''
 
 
+# ── AP-12.1: Source Catalog Page ──────────────────────────────────────────────
+
+# Static source catalog metadata. Each entry describes one adapter as a
+# "data sheet" for the sources.html page. Kept here (not in adapter modules)
+# because the GUI needs presentation-level info (human name, description,
+# update cadence, example fields) that doesn't belong in the adapter itself.
+
+_SOURCE_CATALOG: list[dict[str, Any]] = [
+    {
+        "source_id": "SRC-GDELT-DOC",
+        "name": "GDELT Document API",
+        "domain": "A",
+        "domain_label": "Narrative & Media",
+        "api_url": "https://api.gdeltproject.org/api/v2/doc/doc",
+        "provider": "GDELT Project (Georgetown University)",
+        "auth": "None (public)",
+        "rate_limit": "Soft rate-limit; 429 responses possible under heavy load",
+        "update_cadence": "Near real-time (15-minute updates)",
+        "description": "Monitors global news coverage by querying the GDELT 2.0 Document API for articles matching country-specific keywords. Captures media tone, article volume, source diversity, and thematic framing.",
+        "indicators": ["article_count", "avg_tone", "source_diversity", "domain_count", "theme_distribution"],
+        "normalization": "MAP-SRC-GDELT-DOC-v1: article counts → volume signal, tone → sentiment score, source diversity → media plurality indicator",
+        "status": "active",
+        "known_issues": "Rate-limiting (429) under concurrent multi-country queries; per-country fault isolation mitigates pipeline stalls.",
+    },
+    {
+        "source_id": "SRC-GDELT-EVENTS",
+        "name": "GDELT Events Database",
+        "domain": "B",
+        "domain_label": "Security & Conflict",
+        "api_url": "http://data.gdeltproject.org/gdeltv2/lastupdate.txt",
+        "provider": "GDELT Project (Georgetown University)",
+        "auth": "None (public)",
+        "rate_limit": "None (bulk CSV download)",
+        "update_cadence": "15-minute update cycles",
+        "description": "Ingests the GDELT 2.0 Events stream (CAMEO-coded geopolitical events) to extract conflict/cooperation signals per country. Tracks event counts, Goldstein scale averages, and actor type distributions.",
+        "indicators": ["event_count", "avg_goldstein_scale", "num_mentions", "conflict_ratio", "cooperation_ratio"],
+        "normalization": "MAP-SRC-GDELT-EVENTS-v1: Goldstein scale → stability signal, conflict ratio → security tension indicator",
+        "status": "active",
+        "known_issues": "Large CSV files; parsing latency for broad country sets.",
+    },
+    {
+        "source_id": "SRC-GDACS",
+        "name": "GDACS Natural Disasters",
+        "domain": "B",
+        "domain_label": "Security & Conflict",
+        "api_url": "https://www.gdacs.org/xml/rss.xml",
+        "provider": "UN OCHA / European Commission JRC",
+        "auth": "None (public RSS)",
+        "rate_limit": "None",
+        "update_cadence": "Real-time (event-driven RSS updates)",
+        "description": "Reads the Global Disaster Alerting Coordination System RSS feed for earthquakes, floods, cyclones, droughts, and volcanoes. Maps alerts to affected countries via geographic coordinates or explicit country tags.",
+        "indicators": ["alert_level (Green/Orange/Red)", "event_type", "severity_score", "affected_population_estimate"],
+        "normalization": "MAP-SRC-GDACS-v1: alert levels → disaster severity score, event count → natural hazard exposure",
+        "status": "active",
+        "known_issues": "RSS format; some events lack explicit country assignment (geo-coordinate fallback needed).",
+    },
+    {
+        "source_id": "WB-INDICATORS",
+        "name": "World Bank Development Indicators",
+        "domain": "D",
+        "domain_label": "Economy",
+        "api_url": "https://api.worldbank.org/v2/country",
+        "provider": "World Bank Group",
+        "auth": "None (public)",
+        "rate_limit": "None (generous academic use)",
+        "update_cadence": "Annual (GDP, inflation, FDI published with 6-12 month lag)",
+        "description": "Fetches key macroeconomic indicators from the World Bank Indicators API: GDP growth, inflation rate (CPI), foreign direct investment, and current account balance. Provides the economic backbone of Domain D.",
+        "indicators": ["NY.GDP.MKTP.KD.ZG (GDP growth %)", "FP.CPI.TOTL.ZG (Inflation %)", "BX.KLT.DINV.WD.GD.ZS (FDI % GDP)", "BN.CAB.XOKA.GD.ZS (Current account %)"],
+        "normalization": "MAP-WB-INDICATORS-v1: indicator values → economic health features with z-score normalization against regional peers",
+        "status": "active",
+        "known_issues": "Data lag (most recent year often T-1 or T-2); TimeoutError on slow network needs broad Exception catch.",
+    },
+    {
+        "source_id": "SRC-UNHCR-POP",
+        "name": "UNHCR Population Statistics",
+        "domain": "C",
+        "domain_label": "Humanitarian",
+        "api_url": "https://api.unhcr.org/population/v1/population/",
+        "provider": "UN High Commissioner for Refugees",
+        "auth": "None (public)",
+        "rate_limit": "None (academic use)",
+        "update_cadence": "Annual (mid-year population statistics)",
+        "description": "Queries UNHCR population data for refugees, asylum-seekers, IDPs, and stateless persons by country of origin. Provides humanitarian displacement signals for Domain C.",
+        "indicators": ["refugees", "asylum_seekers", "internally_displaced", "stateless_persons", "total_population_of_concern"],
+        "normalization": "MAP-SRC-UNHCR-POP-v1: population counts → humanitarian displacement intensity per capita",
+        "status": "active",
+        "known_issues": "Returns '-' for missing values; population fields sometimes strings not ints; annual data only (freshness lag expected).",
+    },
+    {
+        "source_id": "SRC-CISA-KEV",
+        "name": "CISA Known Exploited Vulnerabilities",
+        "domain": "E",
+        "domain_label": "Cyber & InfoOps",
+        "api_url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
+        "provider": "US Cybersecurity & Infrastructure Security Agency",
+        "auth": "None (public)",
+        "rate_limit": "None",
+        "update_cadence": "Event-driven (new CVEs added as exploited in the wild)",
+        "description": "Fetches the CISA Known Exploited Vulnerabilities catalog -- a curated list of CVEs confirmed to be actively exploited. Global broadcast source: same signal for all target countries, flagged with quality_flag='cisa_kev_global'.",
+        "indicators": ["kev_count", "recent_kev_count (last 30d)", "severity_distribution", "vendor_distribution"],
+        "normalization": "MAP-SRC-CISA-KEV-v1: KEV counts → active cyber threat exposure signal (global, not country-specific)",
+        "status": "active",
+        "known_issues": "Global broadcast (not country-specific); same signal to all countries.",
+    },
+    {
+        "source_id": "SRC-FRANKFURTER",
+        "name": "Frankfurter ECB Exchange Rates",
+        "domain": "D",
+        "domain_label": "Economy",
+        "api_url": "https://api.frankfurter.dev/v1",
+        "provider": "Frankfurter (open-source, ECB data)",
+        "auth": "None (public)",
+        "rate_limit": "None",
+        "update_cadence": "Daily (ECB reference rates, weekdays)",
+        "description": "Fetches daily ECB reference exchange rates for country currencies vs. USD. Covers 30+ ECB-tracked currencies. Eurozone countries map to EUR; per-country mapping via ISO3→currency lookup.",
+        "indicators": ["exchange_rate_vs_usd", "currency_code"],
+        "normalization": "MAP-SRC-FRANKFURTER-v1: exchange rates → currency stability / economic pressure signal",
+        "status": "active",
+        "known_issues": "Domain migrated from frankfurter.app to api.frankfurter.dev (301 redirect). Requires User-Agent header.",
+    },
+    {
+        "source_id": "SRC-VOIDLY",
+        "name": "Voidly Internet Censorship Atlas",
+        "domain": "E",
+        "domain_label": "Cyber & InfoOps",
+        "api_url": "https://api.voidly.ai/hydra/v1/scores",
+        "provider": "Voidly (aggregates OONI, IODA, CensoredPlanet)",
+        "auth": "Demo key (hydra_demo_key, 100 req/min)",
+        "rate_limit": "100 requests/minute",
+        "update_cadence": "Continuous (aggregated censorship measurements)",
+        "description": "Provides country-level internet censorship scores derived from OONI probe measurements, IODA internet outage detection, and CensoredPlanet remote measurement data. Single API call returns all ~50 monitored countries.",
+        "indicators": ["censorship_score (0-1)", "sample_count", "measurement_sources"],
+        "normalization": "MAP-SRC-VOIDLY-v1: censorship score → information freedom / cyber-repression signal",
+        "status": "active",
+        "known_issues": "ISO-2 country codes in response (needs ISO2→ISO3 mapping). ~50 countries covered (not all SIASA targets).",
+    },
+    {
+        "source_id": "SRC-HDX-INFORM",
+        "name": "INFORM Risk Index (via HDX)",
+        "domain": "C",
+        "domain_label": "Humanitarian",
+        "api_url": "https://data.humdata.org/dataset/inform-risk-index",
+        "provider": "OCHA / IASC / European Commission (via Humanitarian Data Exchange)",
+        "auth": "None (public CSV download)",
+        "rate_limit": "None",
+        "update_cadence": "Annual (INFORM Risk Index updated yearly)",
+        "description": "Downloads the INFORM Risk Index trends CSV from the Humanitarian Data Exchange. Covers composite risk scores, hazard exposure, vulnerability, and lack of coping capacity for 190+ countries. Uses IndicatorId-based extraction for key composite scores.",
+        "indicators": ["INFORM Risk (composite)", "Hazard & Exposure (HA)", "Vulnerability (VU)", "Lack of Coping Capacity (CC)"],
+        "normalization": "MAP-SRC-HDX-INFORM-v1: INFORM scores (0-10 scale) → humanitarian risk severity signal",
+        "status": "active",
+        "known_issues": "Uses trends CSV (not main CSV which has empty IndicatorName for composites). Annual data; dedup to latest year per country+indicator.",
+    },
+    {
+        "source_id": "SRC-UCDP-GED",
+        "name": "UCDP Georeferenced Event Dataset",
+        "domain": "B",
+        "domain_label": "Security & Conflict",
+        "api_url": "https://ucdpapi.pcr.uu.se/api/gedevents/24.1",
+        "provider": "Uppsala Conflict Data Program (Uppsala University)",
+        "auth": "API token required (free academic registration)",
+        "rate_limit": "Fair use",
+        "update_cadence": "Monthly candidate events, annual finalized dataset",
+        "description": "Georeferenced conflict events (battles, one-sided violence, non-state conflict) with fatality estimates. Academic gold standard for conflict data. Requires numeric country IDs (ISO3→UCDP mapping).",
+        "indicators": ["event_count", "fatalities_best_estimate", "conflict_type", "actor_pairs"],
+        "normalization": "MAP-SRC-UCDP-GED (not yet active): conflict events → security severity signal",
+        "status": "credential-gated",
+        "known_issues": "Requires UCDP_API_TOKEN (free registration at https://ucdp.uu.se/). Uses numeric country IDs internally.",
+    },
+    {
+        "source_id": "SRC-RELIEFWEB",
+        "name": "ReliefWeb Humanitarian Reports",
+        "domain": "C",
+        "domain_label": "Humanitarian",
+        "api_url": "https://api.reliefweb.int/v2/reports",
+        "provider": "UN OCHA",
+        "auth": "Approved appname required (since Nov 2025)",
+        "rate_limit": "Fair use with appname",
+        "update_cadence": "Real-time (reports published continuously)",
+        "description": "Searches humanitarian situation reports, assessments, and news from 15,000+ organizations worldwide. Provides narrative humanitarian context. Since Nov 2025, requires a pre-approved application name.",
+        "indicators": ["report_count", "disaster_type_distribution", "report_themes", "urgency_indicators"],
+        "normalization": "MAP-SRC-RELIEFWEB-v1 (not yet active): report volume/themes → humanitarian situation intensity",
+        "status": "credential-gated",
+        "known_issues": "Requires RELIEFWEB_APPNAME. v2 API returns 403 without approved appname; v1 returns 410 (Gone).",
+    },
+]
+
+# Domain labels for reference
+_DOMAIN_LABELS: dict[str, str] = {
+    "A": "Narrative & Media",
+    "B": "Security & Conflict",
+    "C": "Humanitarian",
+    "D": "Economy",
+    "E": "Cyber & InfoOps",
+}
+
+
+def _render_sources(*, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
+    """Render the sources.html catalog page (AP-12.1)."""
+    # Domain summary counts
+    domain_counts: dict[str, dict[str, int]] = {}
+    for src in _SOURCE_CATALOG:
+        d = src["domain"]
+        status = src["status"]
+        domain_counts.setdefault(d, {"active": 0, "credential-gated": 0})
+        if status == "active":
+            domain_counts[d]["active"] += 1
+        else:
+            domain_counts[d]["credential-gated"] += 1
+
+    # Domain overview table
+    domain_rows = ""
+    for domain_key in sorted(_DOMAIN_LABELS):
+        label = _DOMAIN_LABELS[domain_key]
+        counts = domain_counts.get(domain_key, {"active": 0, "credential-gated": 0})
+        active = counts["active"]
+        gated = counts["credential-gated"]
+        total = active + gated
+        badge = f"<span style='color:#4edea3;'>{active} active</span>"
+        if gated:
+            badge += f" + <span style='color:#f0a040;'>{gated} credential-gated</span>"
+        domain_rows += (
+            f"<tr><td style='font-weight:700;font-size:18px;color:#4edea3;'>{html.escape(domain_key)}</td>"
+            f"<td>{html.escape(label)}</td>"
+            f"<td>{total}</td>"
+            f"<td>{badge}</td></tr>"
+        )
+
+    # Source cards
+    source_cards = ""
+    for src in _SOURCE_CATALOG:
+        status_color = "#4edea3" if src["status"] == "active" else "#f0a040"
+        status_icon = "●" if src["status"] == "active" else "◐"
+        status_label = "Active" if src["status"] == "active" else "Credential-Gated"
+
+        indicators_html = "".join(
+            f"<span style='display:inline-block;background:#1c2740;border:1px solid #263050;"
+            f"border-radius:4px;padding:2px 8px;margin:2px 4px 2px 0;font-size:11px;color:#b0c4de;'>"
+            f"{html.escape(str(ind))}</span>"
+            for ind in src["indicators"]
+        )
+
+        known_issues_html = ""
+        if src.get("known_issues"):
+            known_issues_html = (
+                f"<div style='margin-top:8px;padding:8px 12px;background:#2a1a1a;border-left:3px solid #f0a040;"
+                f"border-radius:4px;font-size:12px;color:#e0c080;'>"
+                f"⚠ {html.escape(src['known_issues'])}</div>"
+            )
+
+        source_cards += f"""
+<div id="source-card-{html.escape(src['source_id'])}" class="source-card"
+     data-source-id="{html.escape(src['source_id'])}"
+     data-domain="{html.escape(src['domain'])}"
+     data-status="{html.escape(src['status'])}"
+     style="background:#141e33;border:1px solid #263050;border-radius:8px;padding:20px;margin-bottom:16px;">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+    <span style="color:{status_color};font-size:16px;">{status_icon}</span>
+    <h3 style="margin:0;color:#e8edf5;font-size:16px;">{html.escape(src['name'])}</h3>
+    <span style="margin-left:auto;font-size:11px;padding:2px 8px;border-radius:4px;
+          background:{status_color}22;color:{status_color};border:1px solid {status_color}44;">
+      {status_label}
+    </span>
+    <span style="font-size:11px;padding:2px 8px;border-radius:4px;
+          background:#4edea322;color:#4edea3;border:1px solid #4edea344;">
+      Domain {html.escape(src['domain'])} – {html.escape(src['domain_label'])}
+    </span>
+  </div>
+  <p style="color:#b0c4de;font-size:13px;margin:0 0 12px 0;">{html.escape(src['description'])}</p>
+  <table style="width:100%;font-size:12px;border-collapse:collapse;">
+    <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;width:140px;">Source ID</td>
+        <td style="color:#e8edf5;font-family:monospace;"><code>{html.escape(src['source_id'])}</code></td></tr>
+    <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;">API Endpoint</td>
+        <td><a href="{html.escape(src['api_url'])}" style="color:#4edea3;text-decoration:none;"
+            target="_blank">{html.escape(src['api_url'])}</a></td></tr>
+    <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;">Provider</td>
+        <td style="color:#e8edf5;">{html.escape(src['provider'])}</td></tr>
+    <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;">Authentication</td>
+        <td style="color:#e8edf5;">{html.escape(src['auth'])}</td></tr>
+    <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;">Rate Limit</td>
+        <td style="color:#e8edf5;">{html.escape(src['rate_limit'])}</td></tr>
+    <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;">Update Cadence</td>
+        <td style="color:#e8edf5;">{html.escape(src['update_cadence'])}</td></tr>
+    <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;">Normalization</td>
+        <td style="color:#b0c4de;font-size:11px;">{html.escape(src['normalization'])}</td></tr>
+  </table>
+  <div style="margin-top:10px;">
+    <span style="font-size:11px;color:#6b7d99;font-weight:600;">Indicators:</span><br>
+    {indicators_html}
+  </div>
+  {known_issues_html}
+</div>"""
+
+    body = f"""
+<section style="max-width:1100px;margin:0 auto;">
+<h1 style="color:#e8edf5;font-size:22px;">📡 Source Catalog</h1>
+<p style="color:#b0c4de;font-size:13px;margin-bottom:20px;">
+  Complete data sheet for every source adapter in the SIASA pipeline.
+  Each card shows the API endpoint, what data is fetched, how it is normalized
+  into SIASA features, update cadence, and known issues.
+</p>
+
+<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+  <button class="source-filter-btn" data-filter="all"
+    style="background:#263050;color:#4edea3;border:1px solid #4edea3;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:12px;">
+    All ({len(_SOURCE_CATALOG)})</button>
+  <button class="source-filter-btn" data-filter="active"
+    style="background:#1c2740;color:#6b7d99;border:1px solid #263050;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:12px;">
+    Active ({sum(1 for s in _SOURCE_CATALOG if s['status']=='active')})</button>
+  <button class="source-filter-btn" data-filter="credential-gated"
+    style="background:#1c2740;color:#6b7d99;border:1px solid #263050;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:12px;">
+    Credential-Gated ({sum(1 for s in _SOURCE_CATALOG if s['status']=='credential-gated')})</button>
+  {"".join(
+      f'''<button class="source-filter-btn" data-filter="domain-{d}"
+        style="background:#1c2740;color:#6b7d99;border:1px solid #263050;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:12px;">
+        Domain {d}</button>'''
+      for d in sorted(_DOMAIN_LABELS)
+  )}
+</div>
+
+<div style="margin-bottom:20px;">
+  <input id="source-search" type="text" placeholder="Search sources..."
+    style="width:100%;max-width:400px;padding:6px 12px;background:#1c2740;border:1px solid #263050;
+    border-radius:4px;color:#e8edf5;font-size:13px;outline:none;">
+</div>
+
+<h2 style="color:#e8edf5;font-size:16px;margin-bottom:8px;">Domain Overview</h2>
+<table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:13px;">
+  <tr style="border-bottom:1px solid #263050;">
+    <th style="text-align:left;padding:6px;color:#6b7d99;">Domain</th>
+    <th style="text-align:left;padding:6px;color:#6b7d99;">Label</th>
+    <th style="text-align:left;padding:6px;color:#6b7d99;">Sources</th>
+    <th style="text-align:left;padding:6px;color:#6b7d99;">Status</th>
+  </tr>
+  {domain_rows}
+</table>
+
+<h2 style="color:#e8edf5;font-size:16px;margin-bottom:12px;">Source Data Sheets</h2>
+<div id="source-cards-container">
+{source_cards}
+</div>
+</section>
+
+<script>
+(function(){{
+  // Filter buttons
+  document.querySelectorAll('.source-filter-btn').forEach(function(btn){{
+    btn.addEventListener('click', function(){{
+      document.querySelectorAll('.source-filter-btn').forEach(function(b){{
+        b.style.background='#1c2740'; b.style.color='#6b7d99'; b.style.borderColor='#263050';
+      }});
+      btn.style.background='#263050'; btn.style.color='#4edea3'; btn.style.borderColor='#4edea3';
+      var filter = btn.dataset.filter;
+      document.querySelectorAll('.source-card').forEach(function(card){{
+        var show = filter==='all'
+          || (filter==='active' && card.dataset.status==='active')
+          || (filter==='credential-gated' && card.dataset.status==='credential-gated')
+          || (filter.startsWith('domain-') && card.dataset.domain===filter.replace('domain-',''));
+        card.style.display = show ? '' : 'none';
+      }});
+    }});
+  }});
+  // Search
+  var searchInput = document.getElementById('source-search');
+  if(searchInput){{
+    searchInput.addEventListener('input', function(){{
+      var q = searchInput.value.toLowerCase();
+      document.querySelectorAll('.source-card').forEach(function(card){{
+        card.style.display = card.textContent.toLowerCase().indexOf(q) >= 0 ? '' : 'none';
+      }});
+    }});
+  }}
+}})();
+</script>"""
+
+    return _page("Source Catalog", body, nav_prefix=nav_prefix, available_pages=available_pages)
+
+
 def build_local_mvp_site(
     *,
     output_dir: Path,
@@ -7396,6 +7774,7 @@ def build_local_mvp_site(
         'comparison.html',
         'readiness.html',
         'release_package.html',
+        'sources.html',
     }
 
     if normalized_role == 'viewer':
@@ -7607,6 +7986,13 @@ def build_local_mvp_site(
         encoding='utf-8',
     )
     generated_files.append(readiness_file)
+    # AP-12.1: Sources catalog page
+    sources_file = output_dir / 'sources.html'
+    sources_file.write_text(
+        _render_sources(nav_prefix='', available_pages=available_pages),
+        encoding='utf-8',
+    )
+    generated_files.append(sources_file)
     readiness_json_file = output_dir / 'readiness.json'
     readiness_json_file.write_text(json.dumps(readiness_view_model, indent=2, sort_keys=True), encoding='utf-8')
     generated_files.append(readiness_json_file)
