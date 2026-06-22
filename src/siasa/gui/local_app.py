@@ -383,7 +383,7 @@ def _render_line_chart(series: list[Any], *, label_key: str, chart_label: str) -
         x, y = to_xy(i, val)
         coords.append(f"{x:.1f},{y:.1f}")
         circles.append(
-            f"<circle cx='{x:.1f}' cy='{y:.1f}' r='4' fill='#0b1326' stroke='#4edea3' stroke-width='1.5' data-idx='{i}'>"
+            f"<circle cx='{x:.1f}' cy='{y:.1f}' r='4' fill='#0b1326' stroke='#4edea3' stroke-width='1.5' data-idx='{i}' data-date='{html.escape(lbl)}'>"
             f"<title>{html.escape(lbl)}: {val:.2f}</title></circle>"
         )
         # x-axis label (every point, rotated if many)
@@ -432,7 +432,8 @@ def _render_enhanced_trend_controls_js() -> str:
     """Return client-side JS for enhanced trend chart interactions.
 
     Adds per-chart zoom/pan via wheel+drag, time-range selection buttons,
-    and multi-series toggle controls. Wired into trend page charts.
+    date-range picker (from/to), and multi-series toggle controls.
+    Wired into trend page charts.
     """
     return """\
 <script>
@@ -456,7 +457,7 @@ def _render_enhanced_trend_controls_js() -> str:
     window.addEventListener('mousemove',function(e){ if(!dragging)return; panX=psx+(e.clientX-dsx); panY=psy+(e.clientY-dsy); apply(); });
     window.addEventListener('mouseup',function(){ dragging=false; if(svg.style.cursor==='grabbing') svg.style.cursor='grab'; });
   });
-  // Time-range selection
+  // Time-range button selection (preset ranges)
   document.querySelectorAll('.trend-range-btn').forEach(function(btn){
     btn.addEventListener('click',function(){
       var parent=btn.closest('.trend-chart-block');
@@ -473,6 +474,37 @@ def _render_enhanced_trend_controls_js() -> str:
         var idx=parseInt(c.dataset.idx||'0');
         c.style.opacity=idx>=cutoff?'1':'0.15';
       });
+      // Clear date-range inputs when using preset buttons
+      var fromInput=parent.querySelector('.trend-date-from');
+      var toInput=parent.querySelector('.trend-date-to');
+      if(fromInput)fromInput.value='';
+      if(toInput)toInput.value='';
+    });
+  });
+  // AP-12.2: Date-range picker filtering
+  function applyDateRangeFilter(parent){
+    var fromInput=parent.querySelector('.trend-date-from');
+    var toInput=parent.querySelector('.trend-date-to');
+    if(!fromInput||!toInput)return;
+    var fromVal=fromInput.value;
+    var toVal=toInput.value;
+    var dataPoints=parent.querySelectorAll('circle[data-idx]');
+    dataPoints.forEach(function(c){
+      var dateStr=c.dataset.date||'';
+      var show=true;
+      if(fromVal && dateStr < fromVal) show=false;
+      if(toVal && dateStr > toVal) show=false;
+      c.style.opacity=show?'1':'0.15';
+    });
+    // Deactivate preset buttons when using date range
+    parent.querySelectorAll('.trend-range-btn').forEach(function(b){
+      b.style.color='#6b7d99'; b.style.borderColor='#263050';
+    });
+  }
+  document.querySelectorAll('.trend-date-from, .trend-date-to').forEach(function(input){
+    input.addEventListener('change',function(){
+      var parent=input.closest('.trend-chart-block');
+      if(parent)applyDateRangeFilter(parent);
     });
   });
   // Multi-series toggle
@@ -4493,6 +4525,10 @@ def _render_trends(country_profile_read_models: dict[str, dict[str, Any]], *, na
             f"<button class='trend-range-btn' data-range='6m' style='background:#1a2540;color:#6b7d99;border:1px solid #263050;padding:2px 8px;border-radius:2px;cursor:pointer;font-size:10px;font-family:Space Grotesk,monospace;'>6M</button>"
             f"<button class='trend-range-btn' data-range='1y' style='background:#1a2540;color:#6b7d99;border:1px solid #263050;padding:2px 8px;border-radius:2px;cursor:pointer;font-size:10px;font-family:Space Grotesk,monospace;'>1Y</button>"
             f"<button class='trend-range-btn' data-range='all' style='background:#1a2540;color:#4edea3;border:1px solid #4edea3;padding:2px 8px;border-radius:2px;cursor:pointer;font-size:10px;font-family:Space Grotesk,monospace;'>All</button>"
+            f"<span style='margin-left:8px;color:#6b7d99;font-size:10px;'>From:</span>"
+            f"<input class='trend-date-from' type='text' placeholder='YYYY' style='width:52px;background:#1a2540;color:#e8edf5;border:1px solid #263050;border-radius:2px;padding:1px 4px;font-size:10px;font-family:Space Grotesk,monospace;'>"
+            f"<span style='color:#6b7d99;font-size:10px;'>To:</span>"
+            f"<input class='trend-date-to' type='text' placeholder='YYYY' style='width:52px;background:#1a2540;color:#e8edf5;border:1px solid #263050;border-radius:2px;padding:1px 4px;font-size:10px;font-family:Space Grotesk,monospace;'>"
             f"</div>"
             f"{_render_line_chart(yearly, label_key='label', chart_label=f'{country_id} yearly trend')}{_render_historical_comparison_summary(yearly, label_key='label')}</div><div class='trend-event-overlay' style='display:none'><h4>Event Overlay Summary</h4><ul>{event_overlay}</ul></div></td>"
             f"<td>{html.escape(str(profile.get('multi_domain_status', 'n/a')))}</td>"

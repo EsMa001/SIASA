@@ -4121,3 +4121,58 @@ def test_coverage_source_detail_shows_catalog_info(tmp_path: Path) -> None:
     # Frankfurter detail
     assert 'ECB Exchange Rates' in coverage_html
     assert 'api.frankfurter.dev' in coverage_html
+
+
+# ── AP-12.2: Parametrizable Time Axis Tests ──────────────────────────────────
+
+
+def test_chart_circles_have_data_date_attribute() -> None:
+    """SVG chart circles include data-date attribute for date-based filtering."""
+    from siasa.gui.local_app import _render_line_chart
+
+    series = [
+        {'label': '2022', 'value': 1.0},
+        {'label': '2023', 'value': 2.0},
+        {'label': '2024', 'value': 1.5},
+    ]
+    html_out = _render_line_chart(series, label_key='label', chart_label='Test')
+
+    assert "data-date='2022'" in html_out
+    assert "data-date='2023'" in html_out
+    assert "data-date='2024'" in html_out
+
+
+def test_trend_controls_js_has_date_range_filter() -> None:
+    """Enhanced trend controls JS includes date-range picker logic."""
+    from siasa.gui.local_app import _render_enhanced_trend_controls_js
+
+    js = _render_enhanced_trend_controls_js()
+
+    assert 'trend-date-from' in js
+    assert 'trend-date-to' in js
+    assert 'applyDateRangeFilter' in js
+    assert 'data.date' in js or 'dataset.date' in js
+
+
+def test_trend_page_has_date_range_inputs(tmp_path: Path) -> None:
+    """Trend page renders From/To date input fields alongside preset buttons."""
+    from siasa.gui.local_app import build_local_mvp_site
+
+    build_local_mvp_site(
+        output_dir=tmp_path,
+        country_profile_read_models={
+            'DEU': {
+                'country_id': 'DEU',
+                'overall_status': 'S1',
+                'multi_domain_status': 'S1',
+                'time_series': [{'label': '2022', 'value': 1.0}, {'label': '2023', 'value': 1.5}],
+                'events': [],
+                'domains': {},
+            },
+        },
+    )
+
+    trends_html = (tmp_path / 'trends.html').read_text()
+    assert 'trend-date-from' in trends_html
+    assert 'trend-date-to' in trends_html
+    assert 'trend-range-btn' in trends_html  # preset buttons still there
