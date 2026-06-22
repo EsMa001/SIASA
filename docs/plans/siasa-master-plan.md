@@ -7,7 +7,7 @@
 > **Evidenz-/Nachweis-Begleiter:** `docs/plans/siasa-capability-fulfillment-matrix.md`
 > (detailliertes Status-/Test-/Probe-Ledger; wird von Produktionscode gelesen und bleibt aktiv).
 
-Stand: 2026-06-21
+Stand: 2026-06-22
 Status: Aktiv – einzige Planungsquelle für die Vorwärtssteuerung
 
 ---
@@ -259,7 +259,7 @@ mit klarer Definition, englischem Äquivalent und Zuordnung zu Code-Identifiern.
 | AP-10.4 | Terminologie in Capability-Matrix normalisieren | Erledigt | Matrix bewusst englisch (wird von Code gelesen); konsistent |
 | AP-10.5 | Code-Docstrings und Kommentare auf Glossar-Begriffe prüfen und ggf. ergänzen | Erledigt | 67 Code-Identifier in Glossar gemappt |
 
-#### AP-11 — Free-API-Quellen-Verbreiterung (D/E/C/A) · Status: Offen · Rang: P1 · Klasse: MVP-Could
+#### AP-11 — Free-API-Quellen-Verbreiterung (D/E/C/A) · Status: Erledigt · Klasse: MVP-Could
 Herkunft: Analyse des `public-apis/public-apis`-Repos (544 APIs, 51 Kategorien), abgeglichen gegen
 SIASA-Domain-Coverage-Lücken und bestehenden Quellkatalog (`vmodel/project/data_sources.yaml`).
 Ziel: Schrittweise Verbreiterung der Domain-Coverage durch freie, authfreie oder apiKey-basierte
@@ -281,7 +281,7 @@ Priorisierung der TAPs nach Domain-Lückengröße:
 | AP-11.6 | `SRC-HDX-INFORM` Adapter: INFORM Risk Index via HDX | Erledigt | Domain C; free, no auth; CSV-Download data.humdata.org; 10 Kernindikatoren; 11 Tests |
 | AP-11.7 | `SRC-NEWSAPI` oder `SRC-GNEWS` Adapter: Nachrichten-Diversifikation | Blockiert | Domain A; alle getesteten APIs erfordern Registrierung/API-Key (GNews, Currents, MediaStack, NewsAPI) |
 | AP-11.8 | Quellkatalog (`data_sources.yaml`) + Glossar aktualisieren | Erledigt | Katalog: 3 neue Core-Einträge; Glossar: 3 neue Terme (58 total, 10 Kategorien); `f33e46c` |
-| AP-11.9 | Runtime-Integration: neue Adapter in `live_runtime.py` verdrahten | Erledigt | Import + Adapter-Wiring + Normalisierungs-Mappings für SRC-FRANKFURTER/VOIDLY/HDX-INFORM; 26 Runtime-Tests grün |
+| AP-11.9 | Runtime-Integration: neue Adapter in `live_runtime.py` verdrahten + Live-Fixes | Erledigt | Import + Adapter-Wiring + Normalisierungs-Mappings für SRC-FRANKFURTER/VOIDLY/HDX-INFORM; User-Agent-Header-Fix (403-Blocker) + HDX CSV-Format auf Trends umgestellt; Live-Probe verifiziert (alle 3 Adapter liefern echte Daten); 83 Tests grün; `edeedd9`, `12cd8c7` |
 
 ---
 
