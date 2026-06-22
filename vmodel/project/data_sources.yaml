@@ -203,6 +203,13 @@ data_sources:
   Historie: mehrjährig
   Bemerkung: EU-/Euro-Kontext
 - Ebene: D
+  Quelle: Frankfurter API (ECB-Wechselkurse)
+  Status: Core
+  Signale: Tägliche ECB-Referenzkurse USD vs. 30 Währungen
+  Zugriff: frei, kein Auth, kein Rate-Limit
+  Historie: '>=20 Jahre'
+  Bemerkung: 'Adapter: SRC-FRANKFURTER; api.frankfurter.dev; AP-11.2'
+- Ebene: D
   Quelle: EIA / IEA öffentliche Daten
   Status: Extended
   Signale: Energieproduktion, Verbrauch, Öl/Gas
