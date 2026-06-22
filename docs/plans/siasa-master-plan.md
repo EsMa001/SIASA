@@ -278,8 +278,8 @@ Priorisierung der TAPs nach Domain-Lückengröße:
 | AP-11.1 | `SRC-STATISTICS-WORLD` Adapter: Statistics of the World API (440+ Indikatoren, 218 Länder, IMF+WB) | Blockiert | Domain D; API liefert leere Daten (v1+v2 `data:[]`); erst nutzbar wenn API tatsächlich Daten serviert |
 | AP-11.2 | `SRC-FRANKFURTER` Adapter: ECB-Wechselkurse (Frankfurter API) | Erledigt | Domain D; free, no auth, no rate limit; `api.frankfurter.dev`; 14 Tests |
 | AP-11.3 | `SRC-VOIDLY` Adapter: Internet-Zensur & ISP-Blocking (130 Länder) | Erledigt | Domain E; demo-key `hydra_demo_key`; `api.voidly.ai/hydra/v1/scores`; 12 Tests |
-| AP-11.4 | `SRC-OPENSANCTIONS` Adapter: Sanktionen, PEP, Kriminalität | Offen | Domain C; free, no auth; `opensanctions.org/docs/api/` |
-| AP-11.5 | `SRC-WARNELY` Adapter: Composite Travel-Safety-Scores (180 Länder) | Offen | Domain C; free, no auth; FCDO+USState+GPI+WGI; `warnely.com/developers` |
+| AP-11.4 | `SRC-OPENSANCTIONS` Adapter: Sanktionen, PEP, Kriminalität | Blockiert | Domain C; API erfordert API-Key (kein freier Zugang); Registrierung nötig |
+| AP-11.5 | `SRC-WARNELY` Adapter: Composite Travel-Safety-Scores (180 Länder) | Blockiert | Domain C; API/Domain nicht mehr erreichbar (404/DNS-Fehler) |
 | AP-11.6 | `SRC-HDX` Adapter: OCHA Humanitarian Data Exchange | Offen | Domain C; free; `data.humdata.org/` |
 | AP-11.7 | `SRC-NEWSAPI` oder `SRC-GNEWS` Adapter: Nachrichten-Diversifikation | Offen | Domain A; free apiKey; diversifiziert GDELT-Abhängigkeit |
 | AP-11.8 | Quellkatalog (`data_sources.yaml`) + Glossar aktualisieren | Offen | nach jedem neuen Adapter |
