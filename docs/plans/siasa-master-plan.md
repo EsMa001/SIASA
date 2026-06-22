@@ -300,7 +300,7 @@ Verfahren ausgewertet und kombiniert werden.
 | AP-12.3 | Methodologie-/Pipeline-Transparenz-Seite (`methodology.html`): Datenfluss Rohdaten→Norm→Feature→Scoring→Anomalie→Status→Governance | Erledigt | 10-Schritt-Pipeline, D0-D5/S0-S6 Tabellen, Algorithmen/Schwellwerte; 6 Tests; `a873331` |
 | AP-12.4 | Glossar- & Projektbeschreibung (`about.html`): Projektbeschreibung, durchsuchbares Glossar (58 Terme), V-Model-Erklärung, Capability-Übersicht | Erledigt | Architektur-Diagramm, Domain-Tabelle, V-Model, interaktives Glossar; 7 Tests; `41d9fcc` |
 | AP-12.5 | Einzelquellen-Detailansicht in Coverage/Country-Profile: aufklappbarer Bereich pro Quelle mit Rohdaten-Snippet, Normalisierung, Scoring-Beitrag | Offen | Bestehende Seiten erweitern |
-| AP-12.6 | Nav-Integration & Cross-Links: neue Seiten in Nav, Deep-Links Sources↔Coverage↔Methodology, Glossar-Tooltips | Offen | Querschnitt |
+| AP-12.6 | Nav-Integration & Cross-Links: neue Seiten in Nav, Deep-Links Sources↔Coverage↔Methodology, Glossar-Tooltips | Erledigt | Transparency-Footer auf Overview+Coverage, About→Methodology Link, alle 3 Seiten in Nav; 4 Tests; `5dde58d` |
 
 ---
 

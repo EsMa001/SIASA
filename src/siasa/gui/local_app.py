@@ -2698,16 +2698,42 @@ def _render_source_coverage(
         "</tr>"
         for source in source_coverage_read_model.get('sources', [])
     )
-    matrix_rows = ''.join(
-        "<tr>"
-        f"<td>{html.escape(str(source.get('source_id', '')))}</td>"
-        f"<td>{html.escape(_ratio_band(source.get('confidence')))}</td>"
-        f"<td>{_render_metric_meter('Confidence', source.get('confidence'), fill_color=_band_color(_ratio_band(source.get('confidence'))))}</td>"
-        f"<td>{html.escape(str(source.get('freshness_hours', 'n/a')))}</td>"
-        f"<td>{html.escape(str(source.get('status', '')))}</td>"
-        "</tr>"
-        for source in source_coverage_read_model.get('sources', [])
-    ) or "<tr><td colspan='5'>No source metrics available.</td></tr>"
+    matrix_rows = ''
+    _source_catalog_by_id = {s["source_id"]: s for s in _SOURCE_CATALOG}
+    for source in source_coverage_read_model.get('sources', []):
+        sid = str(source.get('source_id', ''))
+        band = _ratio_band(source.get('confidence'))
+        catalog_entry = _source_catalog_by_id.get(sid)
+        detail_html = ""
+        if catalog_entry:
+            detail_html = (
+                f"<tr class='source-detail-row' data-source-detail='{html.escape(sid)}' style='display:none;'>"
+                f"<td colspan='5' style='padding:8px 16px;background:#0d1520;border-left:3px solid #4edea3;'>"
+                f"<div style='font-size:12px;color:#b0c4de;line-height:1.6;'>"
+                f"<strong style='color:#e8edf5;'>{html.escape(catalog_entry.get('name', sid))}</strong>"
+                f" — {html.escape(catalog_entry.get('domain_label', ''))}<br>"
+                f"<span style='color:#6b7d99;'>Provider:</span> {html.escape(catalog_entry.get('provider', ''))}<br>"
+                f"<span style='color:#6b7d99;'>API:</span> <a href='{html.escape(catalog_entry.get('api_url', ''))}'"
+                f" style='color:#4edea3;' target='_blank'>{html.escape(catalog_entry.get('api_url', ''))}</a><br>"
+                f"<span style='color:#6b7d99;'>Auth:</span> {html.escape(catalog_entry.get('auth', ''))}<br>"
+                f"<span style='color:#6b7d99;'>Cadence:</span> {html.escape(catalog_entry.get('update_cadence', ''))}<br>"
+                f"<span style='color:#6b7d99;'>Normalization:</span> {html.escape(catalog_entry.get('normalization', ''))}<br>"
+                f"<span style='color:#6b7d99;'>Indicators:</span> {', '.join(html.escape(str(i)) for i in catalog_entry.get('indicators', []))}"
+                f"</div></td></tr>"
+            )
+        matrix_rows += (
+            f"<tr class='source-matrix-row' data-source-id='{html.escape(sid)}' "
+            f"style='cursor:pointer;' onclick=\"var d=document.querySelector('[data-source-detail=\\\"'+this.dataset.sourceId+'\\\"]');"
+            f"if(d)d.style.display=d.style.display==='none'?'':'none';\">"
+            f"<td>{html.escape(sid)} {'ℹ' if catalog_entry else ''}</td>"
+            f"<td>{html.escape(band)}</td>"
+            f"<td>{_render_metric_meter('Confidence', source.get('confidence'), fill_color=_band_color(band))}</td>"
+            f"<td>{html.escape(str(source.get('freshness_hours', 'n/a')))}</td>"
+            f"<td>{html.escape(str(source.get('status', '')))}</td>"
+            f"</tr>"
+            + detail_html
+        )
+    matrix_rows = matrix_rows or "<tr><td colspan='5'>No source metrics available.</td></tr>"
     system_status_read_model = system_status_read_model or {}
     coverage_visibility = _country_coverage_visibility_rows(system_status_read_model)
     trust_gaps = ''.join(

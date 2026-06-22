@@ -4068,3 +4068,56 @@ def test_nav_contains_all_new_pages(tmp_path: Path) -> None:
     assert '📡 Sources' in index_html
     assert 'ℹ About' in index_html
     assert '🔬 Methodology' in index_html
+
+
+# ── AP-12.5: Source Detail in Coverage Page Tests ─────────────────────────────
+
+
+def test_coverage_page_has_expandable_source_details(tmp_path: Path) -> None:
+    """Coverage page has clickable source rows with expandable detail panels."""
+    from siasa.gui.local_app import build_local_mvp_site
+
+    build_local_mvp_site(
+        output_dir=tmp_path,
+        source_coverage_read_model={
+            'sources': [
+                {'source_id': 'SRC-GDELT-DOC', 'confidence': 0.8, 'freshness_hours': 24, 'status': 'ok'},
+            ],
+            'failed_sources': [],
+            'missing_sources': [],
+            'degraded_sources': [],
+        },
+    )
+
+    coverage_html = (tmp_path / 'coverage.html').read_text()
+    assert 'source-matrix-row' in coverage_html
+    assert 'source-detail-row' in coverage_html
+    assert 'data-source-detail' in coverage_html
+
+
+def test_coverage_source_detail_shows_catalog_info(tmp_path: Path) -> None:
+    """Expandable source detail shows provider, API, normalization info from catalog."""
+    from siasa.gui.local_app import build_local_mvp_site
+
+    # Build with some source coverage data
+    build_local_mvp_site(
+        output_dir=tmp_path,
+        source_coverage_read_model={
+            'sources': [
+                {'source_id': 'SRC-GDELT-DOC', 'confidence': 0.8, 'freshness_hours': 24, 'status': 'ok'},
+                {'source_id': 'SRC-FRANKFURTER', 'confidence': 0.9, 'freshness_hours': 12, 'status': 'ok'},
+            ],
+            'failed_sources': [],
+            'missing_sources': [],
+            'degraded_sources': [],
+        },
+    )
+
+    coverage_html = (tmp_path / 'coverage.html').read_text()
+    # GDELT detail
+    assert 'GDELT Document API' in coverage_html
+    assert 'Georgetown University' in coverage_html
+    assert 'api.gdeltproject.org' in coverage_html
+    # Frankfurter detail
+    assert 'ECB Exchange Rates' in coverage_html
+    assert 'api.frankfurter.dev' in coverage_html
