@@ -244,6 +244,13 @@ data_sources:
   Zugriff: frei Demo-Key (100 req/min)
   Historie: nahe Echtzeit (OONI/IODA/CensoredPlanet)
   Bemerkung: 'Adapter: SRC-VOIDLY; api.voidly.ai; 50 Länder; AP-11.3'
+- Ebene: C
+  Quelle: INFORM Risk Index (HDX)
+  Status: Core
+  Signale: INFORM Risk, Hazard & Exposure, Vulnerability, Lack of Coping Capacity + 6 Sub-Indikatoren
+  Zugriff: frei, kein Auth, CSV-Download
+  Historie: jährlich, 190+ Länder
+  Bemerkung: 'Adapter: SRC-HDX-INFORM; data.humdata.org; AP-11.6'
 - Ebene: E
   Quelle: Cloudflare Radar / Outage Center
   Status: Selektiv P1

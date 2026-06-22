@@ -12,6 +12,7 @@ from .unhcr import UNHCRPopulationAdapter
 from .world_bank import WorldBankIndicatorsAdapter
 from .frankfurter import FrankfurterAdapter
 from .voidly import VoidlyAdapter
+from .hdx_inform import HDXInformRiskAdapter
 
 __all__ = [
     "FetchResult",
@@ -19,6 +20,7 @@ __all__ = [
     "FetchMetadataRecord",
     "CISAKEVAdapter",
     "FrankfurterAdapter",
+    "HDXInformRiskAdapter",
     "ReliefWebAdapter",
     "VoidlyAdapter",
     "WorldBankIndicatorsAdapter",
