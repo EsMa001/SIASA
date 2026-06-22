@@ -4018,3 +4018,53 @@ def test_build_local_mvp_site_generates_methodology_html(tmp_path: Path) -> None
     assert 'Methodology' in content
     assert 'methodology-step' in content
     assert str(meth_file) in [str(f) for f in result.generated_files]
+
+
+# ── AP-12.6: Nav-Integration & Cross-Links Tests ─────────────────────────────
+
+
+def test_overview_page_has_transparency_links(tmp_path: Path) -> None:
+    """Index/overview page has cross-links to sources, methodology, about."""
+    from siasa.gui.local_app import build_local_mvp_site
+
+    build_local_mvp_site(output_dir=tmp_path)
+
+    index_html = (tmp_path / 'index.html').read_text()
+    assert 'overview-transparency-links' in index_html
+    assert 'sources.html' in index_html
+    assert 'methodology.html' in index_html
+    assert 'about.html' in index_html
+
+
+def test_coverage_page_has_transparency_links(tmp_path: Path) -> None:
+    """Coverage page has cross-links to source catalog and methodology."""
+    from siasa.gui.local_app import build_local_mvp_site
+
+    build_local_mvp_site(output_dir=tmp_path)
+
+    coverage_html = (tmp_path / 'coverage.html').read_text()
+    assert 'coverage-transparency-links' in coverage_html
+    assert 'sources.html' in coverage_html
+    assert 'methodology.html' in coverage_html
+
+
+def test_about_page_cross_links_to_methodology() -> None:
+    """About page links to methodology.html when available."""
+    from siasa.gui.local_app import _render_about
+
+    html_out = _render_about(available_pages={'about.html', 'methodology.html', 'sources.html', 'traceability.html'})
+    assert 'methodology.html' in html_out
+    assert 'View full methodology' in html_out
+
+
+def test_nav_contains_all_new_pages(tmp_path: Path) -> None:
+    """Navigation bar includes sources, about, and methodology entries."""
+    from siasa.gui.local_app import build_local_mvp_site
+
+    build_local_mvp_site(output_dir=tmp_path)
+
+    # Check any generated page has nav entries for all new pages
+    index_html = (tmp_path / 'index.html').read_text()
+    assert '📡 Sources' in index_html
+    assert 'ℹ About' in index_html
+    assert '🔬 Methodology' in index_html

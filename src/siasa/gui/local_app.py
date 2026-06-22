@@ -2435,6 +2435,22 @@ def _render_index(
         "applyOverviewFilters();"
         "</script>"
     )
+    # AP-12.6: Cross-link footer to transparency pages
+    transparency_links = []
+    if available_pages and 'sources.html' in available_pages:
+        transparency_links.append("<a href='sources.html' style='color:#4edea3;text-decoration:none;'>📡 Source Catalog</a>")
+    if available_pages and 'methodology.html' in available_pages:
+        transparency_links.append("<a href='methodology.html' style='color:#4edea3;text-decoration:none;'>🔬 Methodology</a>")
+    if available_pages and 'about.html' in available_pages:
+        transparency_links.append("<a href='about.html' style='color:#4edea3;text-decoration:none;'>ℹ About SIASA</a>")
+    if transparency_links:
+        body += (
+            "<div id='overview-transparency-links' style='margin-top:16px;padding:12px 16px;"
+            "background:#141e33;border:1px solid #263050;border-radius:6px;font-size:12px;'>"
+            "<span style='color:#6b7d99;'>Transparency: </span>"
+            + " | ".join(transparency_links)
+            + "</div>"
+        )
     return _page("World Anomaly Map / Global Overview", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
@@ -2826,6 +2842,20 @@ def _render_source_coverage(
         f"<h3>Failed Sources</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in source_coverage_read_model.get('failed_sources', []))}</ul>"
         f"<h3>Missing Sources</h3><ul>{''.join(f'<li>{html.escape(str(item))}</li>' for item in source_coverage_read_model.get('missing_sources', []))}</ul>"
     )
+    # AP-12.6: Cross-links to transparency pages from Coverage
+    cov_links = []
+    if available_pages and 'sources.html' in available_pages:
+        cov_links.append("<a href='sources.html' style='color:#4edea3;text-decoration:none;'>📡 Full Source Catalog</a>")
+    if available_pages and 'methodology.html' in available_pages:
+        cov_links.append("<a href='methodology.html' style='color:#4edea3;text-decoration:none;'>🔬 Scoring Methodology</a>")
+    if cov_links:
+        body += (
+            "<div id='coverage-transparency-links' style='margin-top:16px;padding:10px 16px;"
+            "background:#141e33;border:1px solid #263050;border-radius:6px;font-size:12px;'>"
+            "<span style='color:#6b7d99;'>Learn more: </span>"
+            + " | ".join(cov_links)
+            + "</div>"
+        )
     return _page("Source / Coverage View", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
@@ -7894,6 +7924,7 @@ Stakeholder Requirements (StR)     ←→     Acceptance / Live Probes
   <code style="color:#4edea3;">trace_links.yaml</code> and
   <code style="color:#4edea3;">implementation_file_links.yaml</code>.
   {"<a href='traceability.html' style='color:#4edea3;'>View traceability details →</a>" if available_pages and 'traceability.html' in available_pages else ""}
+  {"| <a href='methodology.html' style='color:#4edea3;'>View full methodology →</a>" if available_pages and 'methodology.html' in available_pages else ""}
 </p>
 </div>
 
