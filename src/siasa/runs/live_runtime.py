@@ -9,12 +9,15 @@ from typing import Callable
 
 from siasa.adapters import (
     CISAKEVAdapter,
+    FrankfurterAdapter,
     GDACSAdapter,
     GDELTDocAdapter,
     GDELTEventsAdapter,
+    HDXInformRiskAdapter,
     ReliefWebAdapter,
     UCDPAdapter,
     UNHCRPopulationAdapter,
+    VoidlyAdapter,
     WorldBankIndicatorsAdapter,
 )
 from siasa.data.normalization_mappings import NormalizationMappingVersion
@@ -694,6 +697,24 @@ def _build_normalization_mappings() -> list[NormalizationMappingVersion]:
             version="v1",
             is_active=True,
         ),
+        NormalizationMappingVersion(
+            mapping_id="MAP-SRC-FRANKFURTER-v1",
+            source_id="SRC-FRANKFURTER",
+            version="v1",
+            is_active=True,
+        ),
+        NormalizationMappingVersion(
+            mapping_id="MAP-SRC-VOIDLY-v1",
+            source_id="SRC-VOIDLY",
+            version="v1",
+            is_active=True,
+        ),
+        NormalizationMappingVersion(
+            mapping_id="MAP-SRC-HDX-INFORM-v1",
+            source_id="SRC-HDX-INFORM",
+            version="v1",
+            is_active=True,
+        ),
     ]
 
 
@@ -996,6 +1017,12 @@ def build_governed_live_orchestrator(
             ),
             # Domain E: global structured cyber-threat context
             CISAKEVAdapter(country_ids=set(resolved_country_ids)),
+            # Domain E: internet censorship scores (Voidly Atlas)
+            VoidlyAdapter(country_ids=resolved_country_ids),
+            # Domain D: ECB exchange rates (Frankfurter API)
+            FrankfurterAdapter(country_ids=resolved_country_ids),
+            # Domain C: INFORM Risk Index (HDX CSV)
+            HDXInformRiskAdapter(country_ids=resolved_country_ids),
         ]
     )
     runtime_profile = "live-multi-country-v1" if len(resolved_country_ids) > 1 else "live-single-country-v1"

@@ -281,6 +281,7 @@ Priorisierung der TAPs nach Domain-Lückengröße:
 | AP-11.6 | `SRC-HDX-INFORM` Adapter: INFORM Risk Index via HDX | Erledigt | Domain C; free, no auth; CSV-Download data.humdata.org; 10 Kernindikatoren; 11 Tests |
 | AP-11.7 | `SRC-NEWSAPI` oder `SRC-GNEWS` Adapter: Nachrichten-Diversifikation | Blockiert | Domain A; alle getesteten APIs erfordern Registrierung/API-Key (GNews, Currents, MediaStack, NewsAPI) |
 | AP-11.8 | Quellkatalog (`data_sources.yaml`) + Glossar aktualisieren | Erledigt | Katalog: 3 neue Core-Einträge; Glossar: 3 neue Terme (58 total, 10 Kategorien); `f33e46c` |
+| AP-11.9 | Runtime-Integration: neue Adapter in `live_runtime.py` verdrahten | Erledigt | Import + Adapter-Wiring + Normalisierungs-Mappings für SRC-FRANKFURTER/VOIDLY/HDX-INFORM; 26 Runtime-Tests grün |
 
 ---
 
