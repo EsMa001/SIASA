@@ -11,6 +11,7 @@ from .ucdp import UCDPAdapter
 from .unhcr import UNHCRPopulationAdapter
 from .world_bank import WorldBankIndicatorsAdapter
 from .frankfurter import FrankfurterAdapter
+from .voidly import VoidlyAdapter
 
 __all__ = [
     "FetchResult",
@@ -19,6 +20,7 @@ __all__ = [
     "CISAKEVAdapter",
     "FrankfurterAdapter",
     "ReliefWebAdapter",
+    "VoidlyAdapter",
     "WorldBankIndicatorsAdapter",
     "GDACSAdapter",
     "GDELTDocAdapter",

@@ -238,6 +238,13 @@ data_sources:
   Historie: langjährig
   Bemerkung: nicht automatisch länderspezifisch
 - Ebene: E
+  Quelle: Voidly Atlas API (Internet-Zensur)
+  Status: Core
+  Signale: Censorship-Scores (0-1), Confidence, Samples pro Land
+  Zugriff: frei Demo-Key (100 req/min)
+  Historie: nahe Echtzeit (OONI/IODA/CensoredPlanet)
+  Bemerkung: 'Adapter: SRC-VOIDLY; api.voidly.ai; 50 Länder; AP-11.3'
+- Ebene: E
   Quelle: Cloudflare Radar / Outage Center
   Status: Selektiv P1
   Signale: Internet-Outages, Traffic-Anomalien
