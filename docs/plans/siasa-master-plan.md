@@ -88,17 +88,18 @@ Regeln:
 | AP-03 | Operationale Evidenz-Spur | Erledigt | – | MVP-Should | `G3`, `N1-WP-003..010` |
 | AP-04 | Release-Lifecycle: Freigabe → Distribution | Erledigt | – | MVP-Should | `G4 WP-001/002/003`, `Step C` (`C-1..C-12`) |
 | AP-05 | Validierungs-Realismus & Analyst-Handoff | Erledigt | – | MVP-Should | `VAL-WP-001..026`, `N1-WP-011..071`, `Step B` |
-| AP-06 | Externe credential-gated Quellen-Aktivierung | Blockiert | **P2** | MVP-Should | `G2`, `P0-WP-001`, ReliefWeb/UCDP |
+| AP-06 | Externe credential-gated Quellen-Aktivierung | Blockiert | **P1** | MVP-Should | `G2`, `P0-WP-001`, ReliefWeb/UCDP |
 | AP-07 | Quellen-Robustheit & Degradations-Wahrheit | Erledigt | – | MVP-Should | `G1`-Rest, `SRC-GDELT-DOC/-E` |
 | AP-08 | Breiten-Ausbau über mvp-complete hinaus | Erledigt | – | MVP-Could | Roadmap §5, Source-Origin/Epidemiologie |
-| AP-09 | Server-gestützte Multi-User-Governance | Zurückgestellt | **P3** | Post-MVP | `G5` |
+| AP-09 | Server-gestützte Multi-User-Governance | Zurückgestellt | **P2** | Post-MVP | `G5` |
 | AP-10 | Terminologie-Glossar & Begriffs-Normalisierung | Erledigt | – | MVP-Should | neu (kein Legacy) |
-| AP-11 | Free-API-Quellen-Verbreiterung (D/E/C/A) | In Arbeit | **P1** | MVP-Could | public-apis-Analyse; freie APIs ohne Credential-Blocker |
+| AP-11 | Free-API-Quellen-Verbreiterung (D/E/C/A) | Erledigt | – | MVP-Could | 3 Adapter live (Frankfurter/Voidly/HDX-INFORM), 4 extern blockiert, Katalog+Glossar aktuell |
 
 Gesamtbild: Das Fundament und alle repo-seitig steuerbaren Gap-Familien (`G1`, `G2`, `G3`, `G4`) sind
 **materiell geschlossen** (Capability-Matrix: `17/17 Done`, `100.0%`). AP-05 (Validierungs-Realismus),
-AP-07 (Quellen-Robustheit), AP-08 (Breiten-Ausbau auf 88 Länder) und AP-10 (Terminologie-Glossar) sind
-ebenfalls erledigt. Die verbleibende Arbeit ist freie Quellen-Verbreiterung, externe Aktivierung und –
+AP-07 (Quellen-Robustheit), AP-08 (Breiten-Ausbau auf 88 Länder), AP-10 (Terminologie-Glossar) und
+AP-11 (Free-API-Quellen-Verbreiterung: 3 neue Adapter für Domain D/E/C) sind
+ebenfalls erledigt. Die verbleibende Arbeit ist externe Quellen-Aktivierung und –
 zurückgestellt – Multi-User.
 
 ---
@@ -110,9 +111,8 @@ zurückgestellt – Multi-User.
 
 | Rang | AP-ID | Großes Arbeitspaket | Status | Klasse | Auslöser / Bedingung |
 | --- | --- | --- | --- | --- | --- |
-| **P1** | AP-11 | Free-API-Quellen-Verbreiterung (D/E/C/A) | Offen | MVP-Could | freie APIs aus public-apis-Analyse; kein Credential-Blocker |
-| **P2** | AP-06 | Externe Quellen-Aktivierung (G2) | Blockiert | MVP-Should | **springt auf P1**, sobald gültige ReliefWeb/UCDP-Credentials vorliegen |
-| **P3** | AP-09 | Multi-User-Governance (G5) | Zurückgestellt | Post-MVP | nur wenn Operating-Model Multi-User explizit fordert |
+| **P1** | AP-06 | Externe Quellen-Aktivierung (G2) | Blockiert | MVP-Should | **springt auf aktiv**, sobald gültige ReliefWeb/UCDP-Credentials vorliegen |
+| **P2** | AP-09 | Multi-User-Governance (G5) | Zurückgestellt | Post-MVP | nur wenn Operating-Model Multi-User explizit fordert |
 
 ### So steuerst du die Reihenfolge
 
@@ -125,11 +125,9 @@ zurückgestellt – Multi-User.
 
 ### Begründung der Default-Reihenfolge
 
-- **AP-11 zuerst (P1):** Freie APIs ohne Credential-Blocker schließen Domain-D/E/C/A-Lücken schrittweise; jeder
-  Adapter ist eigenständig wertvoll und hat kein externes Blockier-Risiko.
-- **AP-06 (P2, bedingt):** Repo-seitig fertig; der einzige offene Hebel ist extern (Credentials). Sobald
-  Credentials da sind, ist dies das wertvollste gebündelte Paket und springt auf P1.
-- **AP-09 (P3, zurückgestellt):** Großer Architektursprung; nur bei explizitem Bedarf am Ziel-Betriebsmodell.
+- **AP-06 zuerst (P1, bedingt):** Repo-seitig fertig; der einzige offene Hebel ist extern (Credentials). Sobald
+  Credentials da sind, ist dies das wertvollste gebündelte Paket.
+- **AP-09 (P2, zurückgestellt):** Großer Architektursprung; nur bei explizitem Bedarf am Ziel-Betriebsmodell.
 
 ---
 
@@ -281,8 +279,8 @@ Priorisierung der TAPs nach Domain-Lückengröße:
 | AP-11.4 | `SRC-OPENSANCTIONS` Adapter: Sanktionen, PEP, Kriminalität | Blockiert | Domain C; API erfordert API-Key (kein freier Zugang); Registrierung nötig |
 | AP-11.5 | `SRC-WARNELY` Adapter: Composite Travel-Safety-Scores (180 Länder) | Blockiert | Domain C; API/Domain nicht mehr erreichbar (404/DNS-Fehler) |
 | AP-11.6 | `SRC-HDX-INFORM` Adapter: INFORM Risk Index via HDX | Erledigt | Domain C; free, no auth; CSV-Download data.humdata.org; 10 Kernindikatoren; 11 Tests |
-| AP-11.7 | `SRC-NEWSAPI` oder `SRC-GNEWS` Adapter: Nachrichten-Diversifikation | Offen | Domain A; free apiKey; diversifiziert GDELT-Abhängigkeit |
-| AP-11.8 | Quellkatalog (`data_sources.yaml`) + Glossar aktualisieren | Offen | nach jedem neuen Adapter |
+| AP-11.7 | `SRC-NEWSAPI` oder `SRC-GNEWS` Adapter: Nachrichten-Diversifikation | Blockiert | Domain A; alle getesteten APIs erfordern Registrierung/API-Key (GNews, Currents, MediaStack, NewsAPI) |
+| AP-11.8 | Quellkatalog (`data_sources.yaml`) + Glossar aktualisieren | Erledigt | Katalog: 3 neue Core-Einträge; Glossar: 3 neue Terme (58 total, 10 Kategorien); `f33e46c` |
 
 ---
 
@@ -296,7 +294,7 @@ Priorisierung der TAPs nach Domain-Lückengröße:
 | L4 | ~~Breite über die governed 30-Länder hinaus~~ | AP-08.1 | geschlossen | 88 Länder, 5 regionale Pilot-Sets; `20d0e93` |
 | L5 | Multi-User/Server-Governance | AP-09 | strategisch | nur bei Operating-Model-Bedarf (P3, zurückgestellt) |
 | L6 | ~~Uneinheitliche/unklare Terminologie über Planungs- und Code-Artefakte~~ | AP-10 | geschlossen | Glossar mit 55 Termen erstellt; Artefakte konsistent |
-| L7 | Domain-D/E/C/A-Coverage dünn — wenige Quellen, keine Diversifikation | AP-11 | intern, offen | Free-API-Adapter schrittweise ergänzen (P1) |
+| L7 | ~~Domain-D/E/C/A-Coverage dünn~~ | AP-11 | geschlossen | 3 neue Adapter (Frankfurter/Voidly/HDX-INFORM); 4 TAPs extern blockiert (API-Key/DNS) |
 
 Pivot-Auslöser (wann die Priorisierung neu bewertet wird):
 - gültige ReliefWeb/UCDP-Credentials werden verfügbar → AP-06 hoch;

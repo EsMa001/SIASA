@@ -618,3 +618,44 @@ terms:
       - "siasa-master-plan.md"
       - "siasa-capability-fulfillment-matrix.md"
     category: "Release/Lifecycle"
+
+  # ── Quellen-Adapter (AP-11) ──────────────────────────────────────────
+
+  - term_de: "Frankfurter API"
+    term_en: "Frankfurter API"
+    abbreviation: "SRC-FRANKFURTER"
+    definition_de: "Freie API für tägliche EZB-Referenzkurse (USD vs. 30+ Währungen) über api.frankfurter.dev. Kein Auth, kein Rate-Limit. Domain D."
+    code_identifiers:
+      - "FrankfurterAdapter"
+      - "ecb_fx_*_per_usd"
+    used_in:
+      - "siasa-master-plan.md"
+      - "data_sources.yaml"
+    category: "Quellen/Adapter"
+
+  - term_de: "Voidly Atlas API"
+    term_en: "Voidly Atlas API"
+    abbreviation: "SRC-VOIDLY"
+    definition_de: "API für Internet-Zensur-Scores (0-1) pro Land basierend auf OONI/IODA/CensoredPlanet-Messungen. Freier Demo-Key (hydra_demo_key). Domain E."
+    code_identifiers:
+      - "VoidlyAdapter"
+      - "censorship_score"
+    used_in:
+      - "siasa-master-plan.md"
+      - "data_sources.yaml"
+    category: "Quellen/Adapter"
+
+  - term_de: "INFORM Risk Index"
+    term_en: "INFORM Risk Index"
+    abbreviation: "SRC-HDX-INFORM"
+    definition_de: "Jährlicher humanitärer Risikoindex (DRMKC/JRC) mit Composite-Score und Sub-Dimensionen (Hazard, Vulnerability, Coping Capacity) für 190+ Länder. CSV-Download via HDX. Domain C."
+    code_identifiers:
+      - "HDXInformRiskAdapter"
+      - "inform_risk"
+      - "hazard_exposure"
+      - "vulnerability"
+      - "lack_coping_capacity"
+    used_in:
+      - "siasa-master-plan.md"
+      - "data_sources.yaml"
+    category: "Quellen/Adapter"
