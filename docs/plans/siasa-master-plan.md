@@ -295,10 +295,10 @@ Verfahren ausgewertet und kombiniert werden.
 
 | TAP | Inhalt | Status | Hinweis |
 | --- | --- | --- | --- |
-| AP-12.1 | Quellen-Katalog-Seite (`sources.html`): Steckbrief pro Quelle (Name, API, Domain, Indikatoren, Freshness, Status, Normalisierung, Beispiel-Rohdaten) | Offen | Neue Seite |
+| AP-12.1 | Quellen-Katalog-Seite (`sources.html`): Steckbrief pro Quelle (Name, API, Domain, Indikatoren, Freshness, Status, Normalisierung, Beispiel-Rohdaten) | Erledigt | 11 Adapter-Karten, Filter/Suche, Domain-Übersicht; 7 Tests; `fa932e7` |
 | AP-12.2 | Parametrierbare Zeitachse: echtes Date-Range (Von/Bis), Chart-Rerendering statt Opacity, Datum-Labels auf X-Achse | Offen | Ersetzt bisherige 6M/1Y/All-Buttons |
 | AP-12.3 | Methodologie-/Pipeline-Transparenz-Seite (`methodology.html`): Datenfluss Rohdaten→Norm→Feature→Scoring→Anomalie→Status→Governance | Offen | Neue Seite |
-| AP-12.4 | Glossar- & Projektbeschreibung (`about.html`): Projektbeschreibung, durchsuchbares Glossar (58 Terme), V-Model-Erklärung, Capability-Übersicht | Offen | Neue Seite |
+| AP-12.4 | Glossar- & Projektbeschreibung (`about.html`): Projektbeschreibung, durchsuchbares Glossar (58 Terme), V-Model-Erklärung, Capability-Übersicht | Erledigt | Architektur-Diagramm, Domain-Tabelle, V-Model, interaktives Glossar; 7 Tests; `41d9fcc` |
 | AP-12.5 | Einzelquellen-Detailansicht in Coverage/Country-Profile: aufklappbarer Bereich pro Quelle mit Rohdaten-Snippet, Normalisierung, Scoring-Beitrag | Offen | Bestehende Seiten erweitern |
 | AP-12.6 | Nav-Integration & Cross-Links: neue Seiten in Nav, Deep-Links Sources↔Coverage↔Methodology, Glossar-Tooltips | Offen | Querschnitt |
 

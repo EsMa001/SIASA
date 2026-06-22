@@ -51,6 +51,7 @@ def _page(title: str, body: str, *, nav_prefix: str = '', available_pages: set[s
         ('readiness.html', '🚦 Readiness'),
         ('sources.html', '📡 Sources'),
         ('about.html', 'ℹ About'),
+        ('methodology.html', '🔬 Methodology'),
     ]
     nav_html = ''.join(
         f"<a href='{html.escape(nav_prefix + href)}'>{html.escape(label)}</a>"
@@ -7971,6 +7972,233 @@ Stakeholder Requirements (StR)     ←→     Acceptance / Live Probes
     return _page("About SIASA", body, nav_prefix=nav_prefix, available_pages=available_pages)
 
 
+# ── AP-12.3: Methodology / Pipeline Transparency Page ─────────────────────────
+
+def _render_methodology(*, nav_prefix: str = '', available_pages: set[str] | None = None) -> str:
+    """Render methodology.html showing the complete data processing pipeline (AP-12.3)."""
+    sources_link = "<a href='sources.html' style='color:#4edea3;'>Sources Catalog →</a>" if available_pages and 'sources.html' in available_pages else ""
+
+    body = f"""
+<section style="max-width:1100px;margin:0 auto;">
+<h1 style="color:#e8edf5;font-size:22px;">🔬 Methodology &amp; Pipeline Transparency</h1>
+<p style="color:#b0c4de;font-size:13px;margin-bottom:20px;">
+  This page documents the complete data processing pipeline — from raw API data
+  to final country-level assessments. Every step shows inputs, algorithms, outputs,
+  and configurable thresholds so results are fully reproducible and auditable.
+</p>
+
+<!-- Pipeline Overview -->
+<div style="background:#141e33;border:1px solid #263050;border-radius:8px;padding:20px;margin-bottom:20px;">
+<h2 style="color:#e8edf5;font-size:18px;margin-top:0;">Pipeline Overview</h2>
+<div style="background:#0d1520;border-radius:6px;padding:16px;font-family:monospace;font-size:12px;color:#b0c4de;line-height:2.0;overflow-x:auto;">
+<pre style="margin:0;">
+Step 1: Data Acquisition     → 11 source adapters fetch raw data from external APIs
+Step 2: Normalization        → Raw records mapped to unified SIASA feature schema
+Step 3: Feature Calculation  → Domain-specific indicators extracted per country
+Step 4: Data Sufficiency     → Freshness + completeness check per domain
+Step 5: Baseline Computation → Historical averages (30/90/365-day windows)
+Step 6: Anomaly Detection    → Current vs. baseline deviation scoring
+Step 7: Domain Status        → D0–D5 classification per domain per country
+Step 8: Multi-Domain Status  → S0–S6 composite country-level status
+Step 9: Governance Gates     → Policy gate verdicts for release readiness
+Step 10: GUI Rendering       → Static HTML with interactive visualizations
+</pre>
+</div>
+</div>
+
+<!-- Step 1: Data Acquisition -->
+<div class="methodology-step" style="background:#141e33;border:1px solid #263050;border-radius:8px;padding:20px;margin-bottom:16px;">
+<h2 style="color:#4edea3;font-size:16px;margin-top:0;">Step 1: Data Acquisition</h2>
+<table style="width:100%;font-size:12px;border-collapse:collapse;">
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;width:120px;vertical-align:top;">Input</td>
+      <td style="color:#e8edf5;">External API endpoints (REST/JSON, RSS/XML, CSV downloads)</td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Method</td>
+      <td style="color:#e8edf5;">Each source adapter (<code style="color:#4edea3;">SourceAdapter</code> subclass) implements <code style="color:#4edea3;">fetch(country_ids)</code> with dependency injection for testability. All HTTP requests use <code style="color:#4edea3;">User-Agent: SIASA/1.0</code>. Retry logic: exponential backoff for 429/5xx/timeout errors (<code style="color:#4edea3;">retry_utils.py</code>).</td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Output</td>
+      <td style="color:#e8edf5;"><code style="color:#4edea3;">FetchResult</code> with raw records, success/failure status, and per-country diagnostics</td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Failure Mode</td>
+      <td style="color:#e8edf5;">Graceful degradation: failed sources return <code>is_success=False</code> with diagnostics; pipeline continues with available data. Per-country fault isolation prevents one country's failure from aborting others.</td></tr>
+</table>
+<p style="color:#6b7d99;font-size:11px;margin-top:8px;">{sources_link}</p>
+</div>
+
+<!-- Step 2: Normalization -->
+<div class="methodology-step" style="background:#141e33;border:1px solid #263050;border-radius:8px;padding:20px;margin-bottom:16px;">
+<h2 style="color:#4edea3;font-size:16px;margin-top:0;">Step 2: Normalization</h2>
+<table style="width:100%;font-size:12px;border-collapse:collapse;">
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;width:120px;vertical-align:top;">Input</td>
+      <td style="color:#e8edf5;">Raw <code style="color:#4edea3;">FetchResult</code> records from each source</td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Method</td>
+      <td style="color:#e8edf5;"><code style="color:#4edea3;">NormalizationService</code> applies versioned mapping rules (<code style="color:#4edea3;">NormalizationMappingVersion</code>) to transform source-specific fields into a unified <code style="color:#4edea3;">NormalizedFeature</code> schema. Each mapping is versioned (e.g., <code>MAP-SRC-GDELT-DOC-v1</code>) for auditability.</td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Output</td>
+      <td style="color:#e8edf5;">List of <code style="color:#4edea3;">NormalizedFeature</code> objects with: <code>feature_id</code>, <code>value</code>, <code>domain</code>, <code>country_id</code>, <code>provenance_source_id</code>, <code>recorded_at</code></td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Config</td>
+      <td style="color:#e8edf5;">12 active normalization mappings defined in <code style="color:#4edea3;">live_runtime.py::_build_normalization_mappings()</code></td></tr>
+</table>
+</div>
+
+<!-- Step 3: Feature Calculation -->
+<div class="methodology-step" style="background:#141e33;border:1px solid #263050;border-radius:8px;padding:20px;margin-bottom:16px;">
+<h2 style="color:#4edea3;font-size:16px;margin-top:0;">Step 3: Feature Calculation</h2>
+<table style="width:100%;font-size:12px;border-collapse:collapse;">
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;width:120px;vertical-align:top;">Input</td>
+      <td style="color:#e8edf5;">Normalized features grouped by country + domain</td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Method</td>
+      <td style="color:#e8edf5;">Domain-specific feature extractors aggregate normalized records into per-domain indicator sets. Domain A: media tone + volume. Domain B: event counts + Goldstein scale + disaster severity. Domain C: displacement + INFORM risk. Domain D: GDP + inflation + FX rates. Domain E: KEV counts + censorship scores.</td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Output</td>
+      <td style="color:#e8edf5;">Feature vectors per country per domain, ready for scoring</td></tr>
+</table>
+</div>
+
+<!-- Step 4: Data Sufficiency -->
+<div class="methodology-step" style="background:#141e33;border:1px solid #263050;border-radius:8px;padding:20px;margin-bottom:16px;">
+<h2 style="color:#4edea3;font-size:16px;margin-top:0;">Step 4: Data Sufficiency Evaluation</h2>
+<table style="width:100%;font-size:12px;border-collapse:collapse;">
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;width:120px;vertical-align:top;">Input</td>
+      <td style="color:#e8edf5;">Feature set per domain, freshness thresholds from <code style="color:#4edea3;">freshness_config.yaml</code></td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Method</td>
+      <td style="color:#e8edf5;"><code style="color:#4edea3;">evaluate_data_sufficiency()</code> checks: (1) are features present? (2) is data fresh enough? Freshness resolution: per-source override → per-domain default → global default (168h). Returns <code>is_sufficient: bool</code> with reasons list.</td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Output</td>
+      <td style="color:#e8edf5;"><code style="color:#4edea3;">DataSufficiencyResult(is_sufficient, freshness_hours, reasons)</code></td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Thresholds</td>
+      <td style="color:#e8edf5;">Global default: 168h (7 days). Configurable per domain and per source in <code style="color:#4edea3;">vmodel/project/freshness_config.yaml</code></td></tr>
+</table>
+</div>
+
+<!-- Step 5: Baseline -->
+<div class="methodology-step" style="background:#141e33;border:1px solid #263050;border-radius:8px;padding:20px;margin-bottom:16px;">
+<h2 style="color:#4edea3;font-size:16px;margin-top:0;">Step 5: Baseline Computation</h2>
+<table style="width:100%;font-size:12px;border-collapse:collapse;">
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;width:120px;vertical-align:top;">Input</td>
+      <td style="color:#e8edf5;">Historical feature values from SQLite storage (<code style="color:#4edea3;">historical_records</code> table)</td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Method</td>
+      <td style="color:#e8edf5;"><code style="color:#4edea3;">compute_combined_baseline()</code> calculates weighted average across multiple time windows (30, 90, 365 days). Short windows react faster; long windows provide stability. Combined baseline = weighted mean of available windows.</td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Output</td>
+      <td style="color:#e8edf5;">Baseline value (float) per domain per country</td></tr>
+</table>
+</div>
+
+<!-- Step 6: Anomaly Detection -->
+<div class="methodology-step" style="background:#141e33;border:1px solid #263050;border-radius:8px;padding:20px;margin-bottom:16px;">
+<h2 style="color:#4edea3;font-size:16px;margin-top:0;">Step 6: Anomaly Detection</h2>
+<table style="width:100%;font-size:12px;border-collapse:collapse;">
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;width:120px;vertical-align:top;">Input</td>
+      <td style="color:#e8edf5;">Current feature value + baseline value</td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Method</td>
+      <td style="color:#e8edf5;"><code style="color:#4edea3;">compute_relative_anomaly(current, baseline)</code> = <code>|current - baseline| / max(|baseline|, ε)</code>. Produces a non-negative anomaly score where 0 = no deviation, &gt;1 = strong anomaly. Optional: Bayesian status computation (<code style="color:#4edea3;">compute_bayesian_status()</code>) using Gaussian likelihood over D0–D4 centers.</td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Output</td>
+      <td style="color:#e8edf5;">Anomaly score (float ≥ 0)</td></tr>
+</table>
+</div>
+
+<!-- Step 7: Domain Status -->
+<div class="methodology-step" style="background:#141e33;border:1px solid #263050;border-radius:8px;padding:20px;margin-bottom:16px;">
+<h2 style="color:#4edea3;font-size:16px;margin-top:0;">Step 7: Domain Status Classification (D0–D5)</h2>
+<table style="width:100%;font-size:12px;border-collapse:collapse;">
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;width:120px;vertical-align:top;">Input</td>
+      <td style="color:#e8edf5;">Anomaly score + data sufficiency result + contradictory signal flag</td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Method</td>
+      <td style="color:#e8edf5;"><code style="color:#4edea3;">derive_domain_status()</code> classifies each domain into one of 6 status levels</td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Output</td>
+      <td style="color:#e8edf5;"><code style="color:#4edea3;">DomainStatusResult(domain, status, anomaly_score, drivers, uncertainty_indicators)</code></td></tr>
+</table>
+<div style="margin-top:12px;">
+<table style="width:100%;font-size:12px;border-collapse:collapse;">
+  <tr style="border-bottom:1px solid #263050;">
+    <th style="text-align:left;padding:6px;color:#6b7d99;">Status</th>
+    <th style="text-align:left;padding:6px;color:#6b7d99;">Label</th>
+    <th style="text-align:left;padding:6px;color:#6b7d99;">Condition</th>
+    <th style="text-align:left;padding:6px;color:#6b7d99;">Color</th>
+  </tr>
+  <tr><td style="padding:6px;color:#6b7d99;font-weight:700;">D0</td><td style="color:#e8edf5;">Insufficient Data</td><td style="color:#b0c4de;">Data sufficiency check failed</td><td>⬜ Gray</td></tr>
+  <tr><td style="padding:6px;color:#4edea3;font-weight:700;">D1</td><td style="color:#e8edf5;">Normal</td><td style="color:#b0c4de;">anomaly_score &lt; 0.2</td><td>🟢 Green</td></tr>
+  <tr><td style="padding:6px;color:#f0e040;font-weight:700;">D2</td><td style="color:#e8edf5;">Elevated</td><td style="color:#b0c4de;">0.2 ≤ anomaly_score &lt; 0.5</td><td>🟡 Yellow</td></tr>
+  <tr><td style="padding:6px;color:#f0a040;font-weight:700;">D3</td><td style="color:#e8edf5;">High</td><td style="color:#b0c4de;">0.5 ≤ anomaly_score &lt; 1.0</td><td>🟠 Orange</td></tr>
+  <tr><td style="padding:6px;color:#e04040;font-weight:700;">D4</td><td style="color:#e8edf5;">Critical</td><td style="color:#b0c4de;">anomaly_score ≥ 1.0</td><td>🔴 Red</td></tr>
+  <tr><td style="padding:6px;color:#a040e0;font-weight:700;">D5</td><td style="color:#e8edf5;">Contradictory</td><td style="color:#b0c4de;">Contradictory signals detected</td><td>🟣 Purple</td></tr>
+</table>
+<p style="color:#6b7d99;font-size:11px;margin-top:6px;">Requirements: SwR-021, SwR-022</p>
+</div>
+</div>
+
+<!-- Step 8: Multi-Domain Status -->
+<div class="methodology-step" style="background:#141e33;border:1px solid #263050;border-radius:8px;padding:20px;margin-bottom:16px;">
+<h2 style="color:#4edea3;font-size:16px;margin-top:0;">Step 8: Multi-Domain Status (S0–S6)</h2>
+<table style="width:100%;font-size:12px;border-collapse:collapse;">
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;width:120px;vertical-align:top;">Input</td>
+      <td style="color:#e8edf5;">Domain status results (D0–D5) for all 5 domains per country</td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Method</td>
+      <td style="color:#e8edf5;">Composite aggregation: worst-case-weighted combination of domain statuses. D0 domains (insufficient data) are excluded from aggregation but flagged.</td></tr>
+</table>
+<div style="margin-top:12px;">
+<table style="width:100%;font-size:12px;border-collapse:collapse;">
+  <tr style="border-bottom:1px solid #263050;">
+    <th style="text-align:left;padding:6px;color:#6b7d99;">Status</th>
+    <th style="text-align:left;padding:6px;color:#6b7d99;">Condition</th>
+  </tr>
+  <tr><td style="padding:6px;color:#4edea3;font-weight:700;">S0</td><td style="color:#e8edf5;">All domains D1 (normal)</td></tr>
+  <tr><td style="padding:6px;color:#b0c4de;font-weight:700;">S1</td><td style="color:#e8edf5;">Some D2 (elevated), no strong signals</td></tr>
+  <tr><td style="padding:6px;color:#f0e040;font-weight:700;">S2</td><td style="color:#e8edf5;">≥1 notable domain (D2/D3/D4)</td></tr>
+  <tr><td style="padding:6px;color:#f0a040;font-weight:700;">S3</td><td style="color:#e8edf5;">≥2 notable domains or ≥1 strong (D3/D4)</td></tr>
+  <tr><td style="padding:6px;color:#e04040;font-weight:700;">S4</td><td style="color:#e8edf5;">≥1 critical domain (D4)</td></tr>
+  <tr><td style="padding:6px;color:#a040e0;font-weight:700;">S5</td><td style="color:#e8edf5;">Any domain D5 (contradictory)</td></tr>
+  <tr><td style="padding:6px;color:#6b7d99;font-weight:700;">S6</td><td style="color:#e8edf5;">≥2 domains D0 (insufficient data)</td></tr>
+</table>
+<p style="color:#6b7d99;font-size:11px;margin-top:6px;">Requirements: SwR-023, SwR-024</p>
+</div>
+</div>
+
+<!-- Step 9: Governance Gates -->
+<div class="methodology-step" style="background:#141e33;border:1px solid #263050;border-radius:8px;padding:20px;margin-bottom:16px;">
+<h2 style="color:#4edea3;font-size:16px;margin-top:0;">Step 9: Governance Gates</h2>
+<table style="width:100%;font-size:12px;border-collapse:collapse;">
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;width:120px;vertical-align:top;">Input</td>
+      <td style="color:#e8edf5;">Live probe evidence digest (source success/failure, country coverage, C/E domain presence)</td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Method</td>
+      <td style="color:#e8edf5;">Policy gate evaluates: (1) run status (success/partial/fail), (2) failed source count, (3) countries missing both C+E domains, (4) coverage breadth. Fail-closed defaults with explicit opt-in overrides (<code style="color:#4edea3;">allow_partial_success</code>, <code style="color:#4edea3;">allow_failed_sources</code>).</td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Output</td>
+      <td style="color:#e8edf5;">Gate verdict: <code style="color:#4edea3;">pass</code> / <code style="color:#f0a040;">attention</code> / <code style="color:#e04040;">fail</code></td></tr>
+</table>
+</div>
+
+<!-- Step 10: GUI -->
+<div class="methodology-step" style="background:#141e33;border:1px solid #263050;border-radius:8px;padding:20px;margin-bottom:16px;">
+<h2 style="color:#4edea3;font-size:16px;margin-top:0;">Step 10: GUI Rendering</h2>
+<table style="width:100%;font-size:12px;border-collapse:collapse;">
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;width:120px;vertical-align:top;">Input</td>
+      <td style="color:#e8edf5;">Read models (view models) built from pipeline artifacts</td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Method</td>
+      <td style="color:#e8edf5;">Static HTML generation via <code style="color:#4edea3;">build_local_mvp_site()</code>. All interactivity is client-side JavaScript (filtering, sorting, zoom/pan, share-links). No server needed — output is a self-contained folder of HTML/JSON files.</td></tr>
+  <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Output</td>
+      <td style="color:#e8edf5;">16+ HTML pages with interactive charts, maps, tables, and cross-links</td></tr>
+</table>
+</div>
+
+<!-- Additional: Uncertainty & Rules -->
+<div style="background:#141e33;border:1px solid #263050;border-radius:8px;padding:20px;margin-bottom:16px;">
+<h2 style="color:#e8edf5;font-size:16px;margin-top:0;">Cross-Cutting: Uncertainty Propagation &amp; Rule Engine</h2>
+<p style="color:#b0c4de;font-size:13px;line-height:1.6;">
+  <strong style="color:#e8edf5;">Uncertainty Propagation:</strong> Every assessment carries explicit uncertainty indicators
+  (missing domains, stale data, low sample sizes). These propagate through the pipeline and are
+  visible in the GUI as badges and warnings.
+</p>
+<p style="color:#b0c4de;font-size:13px;line-height:1.6;">
+  <strong style="color:#e8edf5;">Rule Engine:</strong> Configurable business rules (<code style="color:#4edea3;">rule_engine.py</code>)
+  can override or supplement algorithmic assessments. Rules reference specific software requirements
+  (SwR-*) for traceability. Each rule evaluation produces an audit trail.
+</p>
+<p style="color:#b0c4de;font-size:13px;line-height:1.6;">
+  <strong style="color:#e8edf5;">Cross-Domain Fusion:</strong> Evidence weights (<code style="color:#4edea3;">cross_domain_fusion.py</code>)
+  determine how much each domain contributes to the overall country status. Domains with D0 (insufficient data)
+  are down-weighted; domains with higher severity receive proportionally higher weight.
+</p>
+</div>
+
+</section>"""
+
+    return _page("Methodology & Pipeline", body, nav_prefix=nav_prefix, available_pages=available_pages)
+
+
 def build_local_mvp_site(
     *,
     output_dir: Path,
@@ -8035,6 +8263,7 @@ def build_local_mvp_site(
         'release_package.html',
         'sources.html',
         'about.html',
+        'methodology.html',
     }
 
     if normalized_role == 'viewer':
@@ -8260,6 +8489,13 @@ def build_local_mvp_site(
         encoding='utf-8',
     )
     generated_files.append(about_file)
+    # AP-12.3: Methodology / Pipeline Transparency page
+    methodology_file = output_dir / 'methodology.html'
+    methodology_file.write_text(
+        _render_methodology(nav_prefix='', available_pages=available_pages),
+        encoding='utf-8',
+    )
+    generated_files.append(methodology_file)
     readiness_json_file = output_dir / 'readiness.json'
     readiness_json_file.write_text(json.dumps(readiness_view_model, indent=2, sort_keys=True), encoding='utf-8')
     generated_files.append(readiness_json_file)

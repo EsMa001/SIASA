@@ -3938,3 +3938,83 @@ def test_build_local_mvp_site_generates_about_html(tmp_path: Path) -> None:
     assert 'About SIASA' in content
     assert 'Glossary' in content
     assert str(about_file) in [str(f) for f in result.generated_files]
+
+
+# ── AP-12.3: Methodology / Pipeline Transparency Tests ───────────────────────
+
+
+def test_render_methodology_contains_pipeline_steps() -> None:
+    """Methodology page shows all 10 pipeline steps."""
+    from siasa.gui.local_app import _render_methodology
+
+    html_out = _render_methodology(available_pages={'methodology.html', 'sources.html'})
+
+    assert 'Methodology' in html_out
+    assert 'Pipeline Overview' in html_out
+    for step in ['Data Acquisition', 'Normalization', 'Feature Calculation',
+                 'Data Sufficiency', 'Baseline', 'Anomaly Detection',
+                 'Domain Status', 'Multi-Domain Status', 'Governance Gates', 'GUI Rendering']:
+        assert step in html_out, f"Missing step: {step}"
+
+
+def test_render_methodology_shows_domain_status_table() -> None:
+    """Methodology page shows D0-D5 status classification."""
+    from siasa.gui.local_app import _render_methodology
+
+    html_out = _render_methodology(available_pages={'methodology.html'})
+
+    for status in ['D0', 'D1', 'D2', 'D3', 'D4', 'D5']:
+        assert status in html_out
+    assert 'Insufficient Data' in html_out
+    assert 'Normal' in html_out
+    assert 'Critical' in html_out
+    assert 'Contradictory' in html_out
+
+
+def test_render_methodology_shows_multi_domain_status_table() -> None:
+    """Methodology page shows S0-S6 composite status."""
+    from siasa.gui.local_app import _render_methodology
+
+    html_out = _render_methodology(available_pages={'methodology.html'})
+
+    for status in ['S0', 'S1', 'S2', 'S3', 'S4', 'S5', 'S6']:
+        assert status in html_out
+
+
+def test_render_methodology_shows_algorithm_details() -> None:
+    """Methodology page documents key algorithms and thresholds."""
+    from siasa.gui.local_app import _render_methodology
+
+    html_out = _render_methodology(available_pages={'methodology.html'})
+
+    assert 'anomaly_score' in html_out
+    assert '0.2' in html_out  # D1 threshold
+    assert '168h' in html_out  # global freshness default
+    assert 'NormalizationMappingVersion' in html_out
+    assert 'evaluate_data_sufficiency' in html_out
+    assert 'compute_relative_anomaly' in html_out
+
+
+def test_render_methodology_cross_links_to_sources() -> None:
+    """Methodology page links to sources.html when available."""
+    from siasa.gui.local_app import _render_methodology
+
+    html_with = _render_methodology(available_pages={'methodology.html', 'sources.html'})
+    assert 'sources.html' in html_with
+
+    html_without = _render_methodology(available_pages={'methodology.html'})
+    assert 'Sources Catalog' not in html_without
+
+
+def test_build_local_mvp_site_generates_methodology_html(tmp_path: Path) -> None:
+    """build_local_mvp_site produces methodology.html."""
+    from siasa.gui.local_app import build_local_mvp_site
+
+    result = build_local_mvp_site(output_dir=tmp_path)
+
+    meth_file = tmp_path / 'methodology.html'
+    assert meth_file.exists(), "methodology.html not generated"
+    content = meth_file.read_text()
+    assert 'Methodology' in content
+    assert 'methodology-step' in content
+    assert str(meth_file) in [str(f) for f in result.generated_files]
