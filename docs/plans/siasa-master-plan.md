@@ -322,7 +322,7 @@ Phase 1 — Archiv-Infrastruktur:
 
 | TAP | Inhalt | Status | Hinweis |
 | --- | --- | --- | --- |
-| AP-13.1 | Parquet-Schreiber: `archive.py` + pyarrow Dependency, Hook in Run-Pipeline | Offen | Kein Datenverlust mehr nach 168h |
+| AP-13.1 | Parquet-Schreiber: `archive.py` + pyarrow Dependency, Hook in Run-Pipeline | Erledigt | 7 Tests; ArchiveWriter mit Hive-Partitioning (source/year/month), Dual-Timestamp, Append-Semantik |
 | AP-13.2 | Country-Registry + Signal-Registry als Parquet/YAML Stammdaten | Offen | Zentrale Entitäts-Auflösung |
 | AP-13.3 | Dual-Timestamp-Schema: event_time + ingestion_time + period_start/end + granularity | Offen | Benötigt AP-13.1 |
 | AP-13.4 | DuckDB Query-Layer über Parquet-Archiv | Offen | Benötigt AP-13.1 |
