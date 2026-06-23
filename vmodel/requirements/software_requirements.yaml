@@ -319,7 +319,7 @@ software_requirements:
   verification_method: software_test
 - id: SwR-033
   title: Country profile read model
-  statement: The software shall provide a read model for the country profile view including multi-domain status, domain states, trends, drivers, and linked events.
+  statement: The software shall provide a read model for the country profile view including multi-domain status, domain states, per-domain yearly trends (separate series per domain to preserve scale comparability), combined yearly trends (legacy), drivers, and linked events.
   status: accepted
   derives_from:
   - SyR-021

@@ -1912,7 +1912,10 @@ def _annotation_index(annotations_view_model: dict[str, Any] | None) -> dict[str
 def _trend_filter_options(country_profile_read_models: dict[str, dict[str, Any]]) -> list[str]:
     labels: set[str] = set()
     for profile in country_profile_read_models.values():
+        # Collect labels from both legacy yearly and per-domain series
         labels.update(_trend_labels(profile.get('trends', {}).get('yearly', []), label_key='label'))
+        for domain_series in profile.get('trends', {}).get('yearly_by_domain', {}).values():
+            labels.update(_trend_labels(domain_series, label_key='label'))
     return sorted(labels)
 
 
@@ -4512,15 +4515,60 @@ def _render_trends(country_profile_read_models: dict[str, dict[str, Any]], *, na
         f"<option value='{html.escape(label)}'>{html.escape(label)}</option>"
         for label in trend_options
     )
+    # Collect all domains present across all countries
+    all_domains: set[str] = set()
+    for profile in country_profile_read_models.values():
+        all_domains.update(profile.get('trends', {}).get('yearly_by_domain', {}).keys())
+    domain_option_tags = ''.join(
+        f"<option value='{html.escape(d)}'>{html.escape(d)} — {html.escape(_DOMAIN_LABELS.get(d, d))}</option>"
+        for d in sorted(all_domains)
+    )
     for country_id, profile in sorted(country_profile_read_models.items()):
-        yearly = profile.get('trends', {}).get('yearly', [])
-        labels = ','.join(_trend_labels(yearly, label_key='label'))
+        yearly_by_domain = profile.get('trends', {}).get('yearly_by_domain', {})
+        yearly_legacy = profile.get('trends', {}).get('yearly', [])
+        # Collect all labels across all domains for this country
+        all_labels: set[str] = set()
+        for domain_series in yearly_by_domain.values():
+            all_labels.update(_trend_labels(domain_series, label_key='label'))
+        if not all_labels:
+            all_labels.update(_trend_labels(yearly_legacy, label_key='label'))
+        labels = ','.join(sorted(all_labels))
+        country_domains = ','.join(sorted(yearly_by_domain.keys()))
         event_ids = [str(item) for item in profile.get('linked_events', [])]
         event_overlay = ''.join(f"<li>{html.escape(event_id)}</li>" for event_id in event_ids) or "<li>none</li>"
+        # Build per-domain mini-charts
+        domain_charts_parts: list[str] = []
+        if yearly_by_domain:
+            for domain in sorted(yearly_by_domain):
+                domain_series = yearly_by_domain[domain]
+                domain_name = _DOMAIN_LABELS.get(domain, domain)
+                chart_label = f"{country_id} — Domain {domain}: {domain_name}"
+                domain_charts_parts.append(
+                    f"<div class='trend-domain-chart' data-domain='{html.escape(domain)}'>"
+                    f"<h5 style='margin:8px 0 2px;font-size:11px;color:#4edea3;font-family:Space Grotesk,monospace;'>"
+                    f"Domain {html.escape(domain)}: {html.escape(domain_name)}</h5>"
+                    f"{_render_line_chart(domain_series, label_key='label', chart_label=chart_label)}"
+                    f"{_render_historical_comparison_summary(domain_series, label_key='label')}"
+                    "</div>"
+                )
+        else:
+            # Fallback: legacy single combined chart
+            domain_charts_parts.append(
+                f"<div class='trend-domain-chart' data-domain='combined'>"
+                f"<h5 style='margin:8px 0 2px;font-size:11px;color:#4edea3;font-family:Space Grotesk,monospace;'>"
+                f"Combined (all domains)</h5>"
+                f"{_render_line_chart(yearly_legacy, label_key='label', chart_label=f'{country_id} yearly trend')}"
+                f"{_render_historical_comparison_summary(yearly_legacy, label_key='label')}"
+                "</div>"
+            )
+        domain_charts_html = ''.join(domain_charts_parts)
         rows.append(
-            f"<tr class='trend-row' data-country-id='{html.escape(country_id)}' data-trend-labels='{html.escape(labels)}' data-event-ids='{html.escape(','.join(event_ids))}'>"
+            f"<tr class='trend-row' data-country-id='{html.escape(country_id)}' "
+            f"data-trend-labels='{html.escape(labels)}' "
+            f"data-country-domains='{html.escape(country_domains)}' "
+            f"data-event-ids='{html.escape(','.join(event_ids))}'>"
             f"<td>{html.escape(country_id)}</td>"
-            f"<td><div class='trend-chart-block'><h4>Trend Chart</h4>"
+            f"<td><div class='trend-chart-block'>"
             f"<div class='trend-range-controls' style='display:flex;gap:4px;margin-bottom:4px;'>"
             f"<button class='trend-range-btn' data-range='6m' style='background:#1a2540;color:#6b7d99;border:1px solid #263050;padding:2px 8px;border-radius:2px;cursor:pointer;font-size:10px;font-family:Space Grotesk,monospace;'>6M</button>"
             f"<button class='trend-range-btn' data-range='1y' style='background:#1a2540;color:#6b7d99;border:1px solid #263050;padding:2px 8px;border-radius:2px;cursor:pointer;font-size:10px;font-family:Space Grotesk,monospace;'>1Y</button>"
@@ -4530,24 +4578,32 @@ def _render_trends(country_profile_read_models: dict[str, dict[str, Any]], *, na
             f"<span style='color:#6b7d99;font-size:10px;'>To:</span>"
             f"<input class='trend-date-to' type='text' placeholder='YYYY' style='width:52px;background:#1a2540;color:#e8edf5;border:1px solid #263050;border-radius:2px;padding:1px 4px;font-size:10px;font-family:Space Grotesk,monospace;'>"
             f"</div>"
-            f"{_render_line_chart(yearly, label_key='label', chart_label=f'{country_id} yearly trend')}{_render_historical_comparison_summary(yearly, label_key='label')}</div><div class='trend-event-overlay' style='display:none'><h4>Event Overlay Summary</h4><ul>{event_overlay}</ul></div></td>"
+            f"{domain_charts_html}"
+            "</div>"
+            f"<div class='trend-event-overlay' style='display:none'><h4>Event Overlay Summary</h4><ul>{event_overlay}</ul></div>"
+            "</td>"
             f"<td>{html.escape(str(profile.get('multi_domain_status', 'n/a')))}</td>"
             "</tr>"
         )
         country_options.append(f"<option value='{html.escape(country_id)}'>{html.escape(country_id)}</option>")
     body = (
-        "<h2>Yearly Trend Page</h2>"
+        "<h2>Yearly Trend Page — Per-Domain View</h2>"
         "<h3>Trend Controls</h3>"
-        "<label for='trend-country-filter'>Country Filter</label> "
+        "<div class='controls-bar' style='display:flex;gap:12px;flex-wrap:wrap;align-items:end;'>"
+        "<div><label for='trend-country-filter'>Country Filter</label> "
         "<select id='trend-country-filter' name='trend-country-filter'><option value='all'>All countries</option>"
-        f"{''.join(country_options)}</select> "
-        "<label for='trend-time-window'>Time Window</label> "
+        f"{''.join(country_options)}</select></div> "
+        "<div><label for='trend-domain-filter'>Domain Filter</label> "
+        "<select id='trend-domain-filter' name='trend-domain-filter'><option value='all'>All domains</option>"
+        f"{domain_option_tags}</select></div> "
+        "<div><label for='trend-time-window'>Time Window</label> "
         "<select id='trend-time-window' name='trend-time-window'><option value='all'>All labels</option>"
-        f"{trend_option_tags}</select> "
-        "<label for='trend-view-mode'>Trend View Mode</label> "
-        "<select id='trend-view-mode' name='trend-view-mode'><option value='chart'>Chart view</option><option value='events'>Event overlay view</option></select>"
+        f"{trend_option_tags}</select></div> "
+        "<div><label for='trend-view-mode'>Trend View Mode</label> "
+        "<select id='trend-view-mode' name='trend-view-mode'><option value='chart'>Chart view</option><option value='events'>Event overlay view</option></select></div>"
+        "</div>"
         "<p id='trend-filter-result'>Selected Trend Window: all labels</p>"
-        "<table id='trend-table'><thead><tr><th>Country</th><th>Yearly Trend</th><th>Current Multi-Domain Status</th></tr></thead>"
+        "<table id='trend-table'><thead><tr><th>Country</th><th>Yearly Trends by Domain</th><th>Current Multi-Domain Status</th></tr></thead>"
         f"<tbody>{''.join(rows)}</tbody></table>"
         "<script>"
         "function applyTrendViewMode(){"
@@ -4562,17 +4618,23 @@ def _render_trends(country_profile_read_models: dict[str, dict[str, Any]], *, na
         "function applyTrendFilters(){"
         "const country=document.getElementById('trend-country-filter').value;"
         "const windowValue=document.getElementById('trend-time-window').value;"
+        "const domainFilter=document.getElementById('trend-domain-filter').value;"
         "document.querySelectorAll('.trend-row').forEach((row)=>{"
         "const labels=(row.dataset.trendLabels||'').split(',').filter(Boolean);"
         "const matchesCountry=(country==='all'||row.dataset.countryId===country);"
         "const matchesWindow=(windowValue==='all'||labels.includes(windowValue));"
         "row.style.display=(matchesCountry&&matchesWindow)?'':'none';"
+        "row.querySelectorAll('.trend-domain-chart').forEach((chart)=>{"
+        "const chartDomain=chart.dataset.domain||'';"
+        "chart.style.display=(domainFilter==='all'||chartDomain===domainFilter)?'':'none';"
+        "});"
         "});"
         "applyTrendViewMode();"
-        "document.getElementById('trend-filter-result').textContent='Selected Trend Window: '+windowValue;"
+        "document.getElementById('trend-filter-result').textContent='Selected Trend Window: '+windowValue+(domainFilter!=='all'?' · Domain: '+domainFilter:'');"
         "}"
         "document.getElementById('trend-country-filter').addEventListener('change', applyTrendFilters);"
         "document.getElementById('trend-time-window').addEventListener('change', applyTrendFilters);"
+        "document.getElementById('trend-domain-filter').addEventListener('change', applyTrendFilters);"
         "document.getElementById('trend-view-mode').addEventListener('change', applyTrendViewMode);"
         "applyTrendFilters();"
         "</script>"

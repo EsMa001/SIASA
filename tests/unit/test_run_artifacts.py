@@ -225,7 +225,7 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert readiness["demo_verdict"] == "blocked"
     assert readiness["release_verdict"] == "blocked_by_known_gaps"
     assert readiness["known_gaps"] == ["validation_backtest_absent:not_configured"]
-    assert traceability_integrity["summary"]["requirement_count"] == 51
+    assert traceability_integrity["summary"]["requirement_count"] == 54
     assert stakeholder_functional_closure["focus_gap_cluster"] == {
         "stakeholder_ids": [
             "StR-001", "StR-002", "StR-004", "StR-007", "StR-024", "StR-025",
@@ -252,7 +252,7 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert event_report["payload"]["source_state"] == {"SRC-B": "success"}
     assert "REP-COVERAGE-RUN-200" in traceability["lineage_records"][0]["report_ids"]
     assert "REP-COUNTRY-UKR" in traceability["lineage_records"][0]["report_ids"]
-    assert repo_closure["summary"] == {"slice_count": 9, "requirement_count": 51, "closed": 51, "at_risk": 0}
+    assert repo_closure["summary"] == {"slice_count": 9, "requirement_count": 54, "closed": 54, "at_risk": 0}
     assert repo_closure["slice_ids"] == [
         "baseline-and-status-engines",
         "catalog-and-ingestion-foundation",
@@ -432,6 +432,18 @@ def test_daily_run_orchestrator_writes_multi_country_artifact_bundle(tmp_path: P
     assert ukr_profile["trends"]["yearly"]
     assert pol_profile["trends"]["yearly"][0]["label"]
     assert isinstance(pol_profile["trends"]["yearly"][0]["value"], float)
+    # Per-domain trend series (new: distinct series per domain)
+    assert "yearly_by_domain" in pol_profile["trends"]
+    assert "yearly_by_domain" in ukr_profile["trends"]
+    pol_domains = pol_profile["trends"]["yearly_by_domain"]
+    assert isinstance(pol_domains, dict)
+    assert len(pol_domains) > 0, "Expected at least one domain in yearly_by_domain"
+    for domain, series in pol_domains.items():
+        assert isinstance(domain, str)
+        assert len(domain) == 1, f"Domain keys should be single letters, got {domain}"
+        assert len(series) > 0
+        assert series[0]["label"]
+        assert isinstance(series[0]["value"], float)
 
 
 

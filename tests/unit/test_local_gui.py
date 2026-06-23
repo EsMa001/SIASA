@@ -306,7 +306,22 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
                     {"label": "2025-11", "value": 0.22},
                     {"label": "2025-12", "value": 0.48},
                     {"label": "2026-01", "value": 0.73},
-                ]
+                ],
+                "yearly_by_domain": {
+                    "A": [
+                        {"label": "2025-11", "value": -2.5},
+                        {"label": "2025-12", "value": -1.8},
+                        {"label": "2026-01", "value": -0.9},
+                    ],
+                    "B": [
+                        {"label": "2025-12", "value": 42.0},
+                        {"label": "2026-01", "value": 55.0},
+                    ],
+                    "D": [
+                        {"label": "2025-11", "value": 3.1},
+                        {"label": "2026-01", "value": 2.8},
+                    ],
+                },
             },
             "drivers": ["A_news_volume"],
             "linked_events": ["EVT-001"],
@@ -1502,7 +1517,12 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
 
     trends_html = (pages.output_dir / "trends.html").read_text()
     assert "Yearly Trend Page" in trends_html
-    assert "Trend Chart" in trends_html
+    # Per-domain charts instead of single combined chart
+    assert "trend-domain-chart" in trends_html
+    assert "Domain A: Narrative" in trends_html
+    assert "Domain B: Security" in trends_html
+    assert "Domain D: Economy" in trends_html
+    assert "trend-domain-filter" in trends_html
     assert "Historical Comparison Summary" in trends_html
     assert "Net Change" in trends_html
     assert "Peak Label" in trends_html

@@ -197,7 +197,10 @@ def write_run_artifacts(
         }
         country_uncertainty = _build_country_uncertainty(run_state)
         country_annotation_ids = _annotation_ids_for_item(annotation_records, country_id)
-        country_trends = {"yearly": _build_country_yearly_trend(country_id, normalized_records)}
+        country_trends = {
+            "yearly": _build_country_yearly_trend(country_id, normalized_records),
+            "yearly_by_domain": _build_country_yearly_trends_by_domain(country_id, normalized_records),
+        }
         country_context = dict(country_metadata.get(country_id, {}))
         country_source_ids = sorted({record.provenance_source_id for record in normalized_records if record.country_id == country_id})
         source_depth_band = _source_depth_band(len(country_source_ids))
@@ -769,6 +772,7 @@ def _build_country_uncertainty(run_state: RunState) -> list[str]:
 
 
 def _build_country_yearly_trend(country_id: str, normalized_records: list[NormalizedRecord]) -> list[dict[str, float | str]]:
+    """Build a combined yearly trend (legacy, kept for backward compat)."""
     series_by_label: dict[str, list[float]] = {}
     for record in normalized_records:
         if record.country_id != country_id:
@@ -782,6 +786,39 @@ def _build_country_yearly_trend(country_id: str, normalized_records: list[Normal
         {"label": label, "value": sum(values) / len(values)}
         for label, values in sorted(series_by_label.items())
     ]
+
+
+def _build_country_yearly_trends_by_domain(
+    country_id: str, normalized_records: list[NormalizedRecord]
+) -> dict[str, list[dict[str, float | str]]]:
+    """Build per-domain yearly trend series for a country.
+
+    Returns a dict keyed by domain (e.g. "A", "B", "C", "D", "E") where
+    each value is a sorted list of {"label": ..., "value": ...} dicts.
+    Values within the same domain share a comparable scale (e.g. all GDELT
+    tone scores, or all UNHCR population counts) so averaging makes sense.
+    Cross-domain averaging is avoided because it produces meaningless numbers
+    when mixing e.g. population counts with GDP growth percentages.
+    """
+    # domain -> label -> [values]
+    by_domain_label: dict[str, dict[str, list[float]]] = {}
+    for record in normalized_records:
+        if record.country_id != country_id:
+            continue
+        domain = record.domain
+        timestamp = str(record.timestamp)
+        label = timestamp[:7] if "-" in timestamp else timestamp[:4]
+        if not label or not domain:
+            continue
+        by_domain_label.setdefault(domain, {}).setdefault(label, []).append(float(record.value))
+    result: dict[str, list[dict[str, float | str]]] = {}
+    for domain in sorted(by_domain_label):
+        series = by_domain_label[domain]
+        result[domain] = [
+            {"label": label, "value": sum(values) / len(values)}
+            for label, values in sorted(series.items())
+        ]
+    return result
 
 
 
