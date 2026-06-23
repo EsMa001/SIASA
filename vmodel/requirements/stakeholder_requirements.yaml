@@ -4,7 +4,7 @@ metadata:
   imported_from_workbook: stakeholder_requirements_information_space_mvp_v0_4 (1).xlsx
   imported_sheet: Stakeholder_Reqs
   imported_at_utc: '2026-05-11T13:51:17.436352+00:00'
-  requirement_count: 668
+  requirement_count: 671
   acceptance_criteria_count: 18
 stakeholder_requirements:
 - id: StR-001
@@ -8422,4 +8422,40 @@ stakeholder_requirements:
   acceptance_criteria_refs: []
   source_workbook: stakeholder_requirements_information_space_mvp_v0_4 (1).xlsx
   source_sheet: Stakeholder_Reqs
+  open_questions: []
+- id: StR-669
+  title: Das System soll alle erfassten Daten permanent und verlustfrei archivieren
+  category: P Datenbank und tägliche Runs
+  statement: Das System soll alle erfassten und normalisierten Daten permanent und verlustfrei archivieren, unabhängig von der operativen Retention, sodass historische Zeitreihen über Jahre hinweg vollständig verfügbar bleiben.
+  status: accepted
+  source_status: aktiv
+  priority: MVP-Should
+  phase: MVP v1
+  acceptance_criteria_refs: []
+  source_workbook: user_request_2026-06-23
+  source_sheet: AP-13_ML_Training_Data_Lake
+  open_questions: []
+- id: StR-670
+  title: Das System soll aufbereitete Daten in standardisierten ML-Formaten bereitstellen
+  category: P Datenbank und tägliche Runs
+  statement: Das System soll aufbereitete Daten in standardisierten, maschinenlesbaren Formaten bereitstellen, die direkt für das Training von Zeitreihen-Modellen (PyTorch, TensorFlow, HuggingFace) nutzbar sind, einschließlich Multi-Resolution-Alignment und Anti-Leakage-Garantien.
+  status: accepted
+  source_status: aktiv
+  priority: MVP-Should
+  phase: MVP v1
+  acceptance_criteria_refs: []
+  source_workbook: user_request_2026-06-23
+  source_sheet: AP-13_ML_Training_Data_Lake
+  open_questions: []
+- id: StR-671
+  title: Das System soll Trainingsdatensätze reproduzierbar versionieren
+  category: P Datenbank und tägliche Runs
+  statement: Das System soll Archiv- und Trainingsdaten reproduzierbar versionieren, sodass jeder Trainingsdatensatz eindeutig identifizierbar, wiederherstellbar und mit seiner Herkunft (Quellen, Zeiträume, Verarbeitungsparameter) nachvollziehbar ist.
+  status: accepted
+  source_status: aktiv
+  priority: MVP-Should
+  phase: MVP v1
+  acceptance_criteria_refs: []
+  source_workbook: user_request_2026-06-23
+  source_sheet: AP-13_ML_Training_Data_Lake
   open_questions: []

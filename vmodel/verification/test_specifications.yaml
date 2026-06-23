@@ -1143,3 +1143,27 @@ test_specifications:
   - HDXInformRiskAdapter class exists in src/siasa/adapters/hdx_inform.py.
   expected_result: The adapter downloads INFORM Risk Index CSV, parses target indicators, filters to requested countries, handles retries, degrades gracefully on failure, and produces records with country_id, signal_key, value, indicator_name, period, and quality_flag fields.
   test_file: tests/unit/test_hdx_inform_adapter.py
+- id: TC-SwR-055-001
+  title: Parquet archive writer produces valid partitioned files
+  verifies: SwR-055
+  method: unit_test
+  test_file: tests/unit/test_archive.py
+  status: accepted
+- id: TC-SwR-056-001
+  title: Archive hook invoked during live runtime pipeline
+  verifies: SwR-056
+  method: unit_test
+  test_file: tests/unit/test_archive.py
+  status: accepted
+- id: TC-SwR-057-001
+  title: Country registry completeness and validation
+  verifies: SwR-057
+  method: unit_test
+  test_file: tests/unit/test_registry.py
+  status: accepted
+- id: TC-SwR-058-001
+  title: Signal registry completeness and metadata validation
+  verifies: SwR-058
+  method: unit_test
+  test_file: tests/unit/test_registry.py
+  status: accepted

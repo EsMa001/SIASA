@@ -5,7 +5,7 @@ metadata:
   - vmodel/architecture/system_architecture.md
   created_at_utc: '2026-05-11T14:25:30.979384+00:00'
   status: draft_baseline_derived
-  software_requirement_count: 54
+  software_requirement_count: 58
 software_requirements:
 - id: SwR-001
   title: Source catalog record schema
@@ -527,3 +527,39 @@ software_requirements:
   allocated_to_design:
   - DDS-002
   verification_method: unit_test
+- id: SwR-055
+  title: Parquet archive writer
+  statement: The software shall write all normalized records to Hive-partitioned Parquet files (partitioned by source_id, year, month) after each pipeline run, using pyarrow, with a schema containing record_id, source_id, country_id, domain, signal_key, value, timestamp_utc, ingestion_utc, run_id, mapping_id, freshness_hours, and quality_flag.
+  status: accepted
+  derives_from:
+  - SyR-051
+  - SyR-008
+  verification_method: unit_test
+  allocated_to: DDS-002
+- id: SwR-056
+  title: Archive writer pipeline hook
+  statement: The software shall invoke the Parquet archive writer automatically after normalization in the live runtime pipeline, ensuring no normalized record is lost regardless of the SQLite operational retention window.
+  status: accepted
+  derives_from:
+  - SyR-051
+  - SyR-009
+  verification_method: unit_test
+  allocated_to: DDS-002
+- id: SwR-057
+  title: Country registry with canonical entity resolution
+  statement: The software shall maintain a machine-readable country registry (Parquet and YAML) containing canonical ISO-3 identifiers, name variants, source-specific code mappings (GDELT, World Bank, UNHCR, UCDP), UN region/subregion, income group, and active SIASA domains, with validation functions ensuring all active countries are covered.
+  status: accepted
+  derives_from:
+  - SyR-051
+  - SyR-006
+  verification_method: unit_test
+  allocated_to: DDS-002
+- id: SwR-058
+  title: Signal registry with aggregation metadata
+  statement: The software shall maintain a machine-readable signal registry (Parquet and YAML) containing signal_key, domain, source_id, description, unit, value range, native granularity, aggregation method (sum/mean/max/last), encoding hint, and semantic direction metadata for all active signal keys.
+  status: accepted
+  derives_from:
+  - SyR-051
+  - SyR-052
+  verification_method: unit_test
+  allocated_to: DDS-002

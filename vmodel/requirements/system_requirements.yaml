@@ -1131,3 +1131,37 @@ system_requirements:
   - StR-235
   acceptance_criteria_refs: []
   verification_method: status_function_review
+- id: SyR-051
+  title: Permanent data archive with ML-optimized storage
+  category: Data lifecycle
+  statement: The system shall permanently archive all normalized records in a columnar, ML-optimized format (Parquet) with Hive-partitioning by source, year, and month, dual timestamps (event time, ingestion time, period start/end, granularity), and an embedded analytical query engine (DuckDB) for efficient time-window slicing and zero-copy Arrow output.
+  status: accepted
+  derives_from:
+  - StR-135
+  - StR-136
+  - StR-138
+  - StR-143
+  - StR-669
+  acceptance_criteria_refs: []
+  verification_method: archive_integrity_test
+- id: SyR-052
+  title: Multi-resolution ML feature engineering pipeline
+  category: Data lifecycle
+  statement: The system shall provide a feature engineering pipeline that aligns heterogeneous source granularities (15-minute to yearly) to a canonical daily resolution, builds multi-resolution feature layers (fast/slow/structural), applies point-in-time joins to prevent temporal leakage, and produces versioned ML-ready training sets with temporal train/val/test splits.
+  status: accepted
+  derives_from:
+  - StR-137
+  - StR-142
+  - StR-670
+  acceptance_criteria_refs: []
+  verification_method: feature_pipeline_test
+- id: SyR-053
+  title: Reproducible data and training set versioning
+  category: Data lifecycle
+  statement: The system shall version all archive data and training sets reproducibly using DVC (Data Version Control), with pipeline DAGs for repeatable data processing, metadata manifests documenting schema, date ranges, feature lists, and quality statistics, and git-integrated pointer files for traceability.
+  status: accepted
+  derives_from:
+  - StR-145
+  - StR-671
+  acceptance_criteria_refs: []
+  verification_method: versioning_reproducibility_test

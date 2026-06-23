@@ -1850,4 +1850,76 @@ traceability:
     relation: verifies
     target_ids:
     - SyR-050
+  # === AP-13 ML-Training Data Lake traces ===
+  - source_id: SyR-051
+    relation: derives_from
+    target_ids:
+    - StR-135
+    - StR-136
+    - StR-138
+    - StR-143
+    - StR-669
+  - source_id: SyR-052
+    relation: derives_from
+    target_ids:
+    - StR-137
+    - StR-142
+    - StR-670
+  - source_id: SyR-053
+    relation: derives_from
+    target_ids:
+    - StR-145
+    - StR-671
+  - source_id: SwR-055
+    relation: derives_from
+    target_ids:
+    - SyR-051
+    - SyR-008
+  - source_id: SwR-055
+    relation: allocated_to
+    target_ids:
+    - DDS-002
+  - source_id: SwR-056
+    relation: derives_from
+    target_ids:
+    - SyR-051
+    - SyR-009
+  - source_id: SwR-056
+    relation: allocated_to
+    target_ids:
+    - DDS-002
+  - source_id: SwR-057
+    relation: derives_from
+    target_ids:
+    - SyR-051
+    - SyR-006
+  - source_id: SwR-057
+    relation: allocated_to
+    target_ids:
+    - DDS-002
+  - source_id: SwR-058
+    relation: derives_from
+    target_ids:
+    - SyR-051
+    - SyR-052
+  - source_id: SwR-058
+    relation: allocated_to
+    target_ids:
+    - DDS-002
+  - source_id: TC-SwR-055-001
+    relation: verifies
+    target_ids:
+    - SwR-055
+  - source_id: TC-SwR-056-001
+    relation: verifies
+    target_ids:
+    - SwR-056
+  - source_id: TC-SwR-057-001
+    relation: verifies
+    target_ids:
+    - SwR-057
+  - source_id: TC-SwR-058-001
+    relation: verifies
+    target_ids:
+    - SwR-058
   waivers: []

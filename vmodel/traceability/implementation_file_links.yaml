@@ -579,3 +579,37 @@ implementation_slices:
     known_test_paths:
       - tests/unit/test_validation_cases.py
       - tests/unit/test_readmodels_validation_backtest.py
+  ml-training-data-lake:
+    requirement_ids:
+      - SwR-055
+      - SwR-056
+      - SwR-057
+      - SwR-058
+    implementation_map:
+      SwR-055:
+        code_paths:
+          - src/siasa/data/archive.py
+        test_paths:
+          - tests/unit/test_archive.py
+      SwR-056:
+        code_paths:
+          - src/siasa/runs/live_runtime.py
+          - src/siasa/data/archive.py
+        test_paths:
+          - tests/unit/test_archive.py
+      SwR-057:
+        code_paths:
+          - src/siasa/data/registry.py
+        test_paths:
+          - tests/unit/test_registry.py
+      SwR-058:
+        code_paths:
+          - src/siasa/data/registry.py
+        test_paths:
+          - tests/unit/test_registry.py
+    known_code_paths:
+      - src/siasa/data/archive.py
+      - src/siasa/data/registry.py
+    known_test_paths:
+      - tests/unit/test_archive.py
+      - tests/unit/test_registry.py
