@@ -11,10 +11,10 @@ def test_stakeholder_system_traceability_report_covers_all_active_stakeholders()
     report = build_stakeholder_system_traceability_report(repo_root=repo_root)
 
     assert report["metadata"]["work_package"] == "AP-02"
-    assert report["summary"]["active_stakeholder_requirement_count"] == 668
-    assert report["summary"]["system_requirement_count"] == 50
-    assert report["summary"]["covered_by_system_requirement_count"] == 668
-    assert report["summary"]["covered_by_traceability_count"] == 668
+    assert report["summary"]["active_stakeholder_requirement_count"] == 671
+    assert report["summary"]["system_requirement_count"] == 53
+    assert report["summary"]["covered_by_system_requirement_count"] == 671
+    assert report["summary"]["covered_by_traceability_count"] == 671
     assert report["summary"]["missing_system_requirement_mapping_count"] == 0
     assert report["summary"]["missing_traceability_mapping_count"] == 0
     assert report["summary"]["syr_trace_mismatch_count"] == 0
@@ -29,10 +29,10 @@ def test_stakeholder_system_traceability_report_covers_all_active_stakeholders()
 def test_stakeholder_system_traceability_markdown_summarizes_stop_criteria() -> None:
     report = {
         "summary": {
-            "active_stakeholder_requirement_count": 668,
-            "system_requirement_count": 50,
-            "covered_by_system_requirement_count": 668,
-            "covered_by_traceability_count": 668,
+            "active_stakeholder_requirement_count": 671,
+            "system_requirement_count": 53,
+            "covered_by_system_requirement_count": 671,
+            "covered_by_traceability_count": 671,
             "missing_system_requirement_mapping_count": 0,
             "missing_traceability_mapping_count": 0,
             "syr_trace_mismatch_count": 0,
@@ -43,6 +43,6 @@ def test_stakeholder_system_traceability_markdown_summarizes_stop_criteria() -> 
     markdown = render_stakeholder_system_traceability_markdown(report)
 
     assert "SIASA AP-02 Stakeholder-to-System Traceability Report" in markdown
-    assert "covered_by_system_requirement_count: 668" in markdown
+    assert "covered_by_system_requirement_count: 671" in markdown
     assert "all_active_stakeholders_have_system_requirement: pass" in markdown
     assert "AP-03" in markdown

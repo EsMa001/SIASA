@@ -459,8 +459,8 @@ def test_build_repo_closure_report_aggregates_all_governed_slices() -> None:
 
     assert report["summary"] == {
         "slice_count": 10,
-        "requirement_count": 65,
-        "closed": 65,
+        "requirement_count": 66,
+        "closed": 66,
         "at_risk": 0,
     }
     assert report["slice_ids"] == [
@@ -489,8 +489,8 @@ def test_build_traceability_integrity_report_is_globally_clean() -> None:
     report = build_traceability_integrity_report(repo_root=repo_root)
 
     assert report["summary"] == {
-        "requirement_count": 65,
-        "mapped_requirement_count": 65,
+        "requirement_count": 66,
+        "mapped_requirement_count": 66,
         "missing_requirement_mapping_count": 0,
         "orphan_mapped_requirement_count": 0,
         "slice_count": 10,
@@ -502,8 +502,8 @@ def test_build_traceability_integrity_report_is_globally_clean() -> None:
     assert report["unhealthy_slices"] == []
     assert report["repo_closure"]["summary"] == {
         "slice_count": 10,
-        "requirement_count": 65,
-        "closed": 65,
+        "requirement_count": 66,
+        "closed": 66,
         "at_risk": 0,
     }
 

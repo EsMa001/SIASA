@@ -592,6 +592,7 @@ implementation_slices:
       - SwR-063
       - SwR-064
       - SwR-065
+      - SwR-066
     implementation_map:
       SwR-055:
         code_paths:
@@ -652,6 +653,11 @@ implementation_slices:
           - src/siasa/features/training_builder.py
         test_paths:
           - tests/unit/test_training_builder.py
+      SwR-066:
+        code_paths:
+          - src/siasa/ml/datasets.py
+        test_paths:
+          - tests/unit/test_ml_datasets.py
     known_code_paths:
       - src/siasa/data/archive.py
       - src/siasa/data/registry.py
@@ -664,6 +670,7 @@ implementation_slices:
       - src/siasa/features/multi_resolution.py
       - src/siasa/features/pit_join.py
       - src/siasa/features/training_builder.py
+      - src/siasa/ml/datasets.py
     known_test_paths:
       - tests/unit/test_archive.py
       - tests/unit/test_registry.py
@@ -674,3 +681,4 @@ implementation_slices:
       - tests/unit/test_multi_resolution.py
       - tests/unit/test_pit_join.py
       - tests/unit/test_training_builder.py
+      - tests/unit/test_ml_datasets.py

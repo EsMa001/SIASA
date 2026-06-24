@@ -2015,4 +2015,17 @@ traceability:
     relation: verifies
     target_ids:
     - SwR-065
+  - source_id: SwR-066
+    relation: derives_from
+    target_ids:
+    - SyR-051
+    - SyR-053
+  - source_id: SwR-066
+    relation: allocated_to
+    target_ids:
+    - DDS-002
+  - source_id: TC-SwR-066-001
+    relation: verifies
+    target_ids:
+    - SwR-066
   waivers: []
