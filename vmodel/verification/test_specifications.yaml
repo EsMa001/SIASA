@@ -1209,3 +1209,10 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_pit_join.py
   status: accepted
+
+- id: TC-SwR-065-001
+  title: Training-set builder — temporal split, pivoting, normalization
+  verifies: SwR-065
+  method: unit_test
+  test_file: tests/unit/test_training_builder.py
+  status: accepted

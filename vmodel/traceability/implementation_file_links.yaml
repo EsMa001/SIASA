@@ -591,6 +591,7 @@ implementation_slices:
       - SwR-062
       - SwR-063
       - SwR-064
+      - SwR-065
     implementation_map:
       SwR-055:
         code_paths:
@@ -646,6 +647,11 @@ implementation_slices:
           - src/siasa/features/pit_join.py
         test_paths:
           - tests/unit/test_pit_join.py
+      SwR-065:
+        code_paths:
+          - src/siasa/features/training_builder.py
+        test_paths:
+          - tests/unit/test_training_builder.py
     known_code_paths:
       - src/siasa/data/archive.py
       - src/siasa/data/registry.py
@@ -657,6 +663,7 @@ implementation_slices:
       - src/siasa/features/alignment.py
       - src/siasa/features/multi_resolution.py
       - src/siasa/features/pit_join.py
+      - src/siasa/features/training_builder.py
     known_test_paths:
       - tests/unit/test_archive.py
       - tests/unit/test_registry.py
@@ -665,3 +672,5 @@ implementation_slices:
       - tests/unit/test_dvc_setup.py
       - tests/unit/test_alignment.py
       - tests/unit/test_multi_resolution.py
+      - tests/unit/test_pit_join.py
+      - tests/unit/test_training_builder.py

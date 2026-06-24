@@ -335,7 +335,7 @@ Phase 2 — Feature-Engineering:
 | AP-13.6 | Daily Alignment Pipeline: Aggregation + Forward-Fill | Erledigt | 7 Tests; DailyAligner mit SUM/MEAN/MAX/LAST, Gap-Detection; SwR-062 + TC + Traces |
 | AP-13.7 | Multi-Resolution Feature-Builder (Fast/Slow/Structural Layer) | Erledigt | 7 Tests; Fast/Slow (7d/30d rolling mean)/Structural Layer; SwR-063 + TC + Traces |
 | AP-13.8 | Point-in-Time Join Engine (Anti-Look-Ahead-Bias) | Erledigt | 10 Tests; PointInTimeJoiner mit Anti-Leakage, Staleness-Limits, NaN-Marking; SwR-064 + TC + Traces |
-| AP-13.9 | Training-Set Builder: versionierte train/val/test Splits | Offen | Benötigt AP-13.8 |
+| AP-13.9 | Training-Set Builder: versionierte train/val/test Splits | Erledigt | 8 Tests; TrainingSetBuilder mit temporalem Split, Pivotierung, Z-Score-Normalisierung; SwR-065 + TC + Traces |
 
 Phase 3 — ML-Integration:
 
