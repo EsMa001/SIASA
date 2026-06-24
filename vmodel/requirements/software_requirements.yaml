@@ -5,7 +5,7 @@ metadata:
   - vmodel/architecture/system_architecture.md
   created_at_utc: '2026-05-11T14:25:30.979384+00:00'
   status: draft_baseline_derived
-  software_requirement_count: 72
+  software_requirement_count: 73
 software_requirements:
 - id: SwR-001
   title: Source catalog record schema
@@ -696,6 +696,15 @@ software_requirements:
 - id: SwR-072
   title: Wikipedia Pageviews adapter for narrative attention signals
   statement: The software shall provide a WikipediaPageviewsAdapter that fetches daily pageview counts for configurable country-topic articles from the Wikimedia REST API, normalizes them into NormalizedRecord-compatible dicts with signal_key 'wiki_pageview_count', and supports retry logic, error handling, and injectable fetch functions for testability.
+  status: accepted
+  derives_from:
+  - SyR-006
+  - SyR-007
+  verification_method: unit_test
+  allocated_to: DDS-001
+- id: SwR-073
+  title: ECB Statistical Data Warehouse adapter for economic signals
+  statement: The software shall provide an ECBDataAdapter that fetches daily exchange rates and key interest rates from the ECB Data API (SDMX-JSON), normalizes them into NormalizedRecord-compatible dicts with signal_keys 'ecb_key_rate' and 'ecb_fx_{currency}_per_eur', and supports retry logic, SDMX-JSON parsing, and injectable fetch functions for testability.
   status: accepted
   derives_from:
   - SyR-006

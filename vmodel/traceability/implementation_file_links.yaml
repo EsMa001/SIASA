@@ -725,13 +725,21 @@ implementation_slices:
   ap-14-kostenfreie-api-quellen:
     requirement_ids:
       - SwR-072
+      - SwR-073
     implementation_map:
       SwR-072:
         code_paths:
           - src/siasa/adapters/wikipedia_pageviews.py
         test_paths:
           - tests/unit/test_adapter_wikipedia_pageviews.py
+      SwR-073:
+        code_paths:
+          - src/siasa/adapters/ecb_data.py
+        test_paths:
+          - tests/unit/test_adapter_ecb_data.py
     known_code_paths:
       - src/siasa/adapters/wikipedia_pageviews.py
+      - src/siasa/adapters/ecb_data.py
     known_test_paths:
       - tests/unit/test_adapter_wikipedia_pageviews.py
+      - tests/unit/test_adapter_ecb_data.py

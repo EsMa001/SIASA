@@ -1282,3 +1282,11 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_adapter_wikipedia_pageviews.py
   status: accepted
+
+- id: TC-SwR-073-001
+  title: ECB Data adapter — SDMX-JSON parsing, FX rates, key rate, retry
+  requirement_ids:
+  - SwR-073
+  method: unit_test
+  test_file: tests/unit/test_adapter_ecb_data.py
+  status: accepted
