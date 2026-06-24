@@ -5,7 +5,7 @@ metadata:
   - vmodel/architecture/system_architecture.md
   created_at_utc: '2026-05-11T14:25:30.979384+00:00'
   status: draft_baseline_derived
-  software_requirement_count: 65
+  software_requirement_count: 72
 software_requirements:
 - id: SwR-001
   title: Source catalog record schema
@@ -692,3 +692,13 @@ software_requirements:
   - SyR-051
   verification_method: unit_test
   allocated_to: DDS-002
+
+- id: SwR-072
+  title: Wikipedia Pageviews adapter for narrative attention signals
+  statement: The software shall provide a WikipediaPageviewsAdapter that fetches daily pageview counts for configurable country-topic articles from the Wikimedia REST API, normalizes them into NormalizedRecord-compatible dicts with signal_key 'wiki_pageview_count', and supports retry logic, error handling, and injectable fetch functions for testability.
+  status: accepted
+  derives_from:
+  - SyR-006
+  - SyR-007
+  verification_method: unit_test
+  allocated_to: DDS-001

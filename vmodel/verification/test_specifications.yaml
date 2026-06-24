@@ -1145,74 +1145,140 @@ test_specifications:
   test_file: tests/unit/test_hdx_inform_adapter.py
 - id: TC-SwR-055-001
   title: Parquet archive writer produces valid partitioned files
-  verifies: SwR-055
+  requirement_ids:
+  - SwR-055
   method: unit_test
   test_file: tests/unit/test_archive.py
   status: accepted
 - id: TC-SwR-056-001
   title: Archive hook invoked during live runtime pipeline
-  verifies: SwR-056
+  requirement_ids:
+  - SwR-056
   method: unit_test
   test_file: tests/unit/test_archive.py
   status: accepted
 - id: TC-SwR-057-001
   title: Country registry completeness and validation
-  verifies: SwR-057
+  requirement_ids:
+  - SwR-057
   method: unit_test
   test_file: tests/unit/test_registry.py
   status: accepted
 - id: TC-SwR-058-001
   title: Signal registry completeness and metadata validation
-  verifies: SwR-058
+  requirement_ids:
+  - SwR-058
   method: unit_test
   test_file: tests/unit/test_registry.py
   status: accepted
 
 - id: TC-SwR-059-001
   title: Dual-timestamp schema — period fields on NormalizedRecord and archive
-  verifies: SwR-059
+  requirement_ids:
+  - SwR-059
   method: unit_test
   test_file: tests/unit/test_dual_timestamp.py
   status: accepted
 
 - id: TC-SwR-060-001
   title: DuckDB query engine — filtering, aggregation, Arrow output
-  verifies: SwR-060
+  requirement_ids:
+  - SwR-060
   method: unit_test
   test_file: tests/unit/test_query.py
   status: accepted
 
 - id: TC-SwR-061-001
   title: DVC setup — pipeline definition, data gitignore, dependency chain
-  verifies: SwR-061
+  requirement_ids:
+  - SwR-061
   method: unit_test
   test_file: tests/unit/test_dvc_setup.py
   status: accepted
 
 - id: TC-SwR-062-001
   title: Daily alignment — SUM/MAX/LAST aggregation, gap detection
-  verifies: SwR-062
+  requirement_ids:
+  - SwR-062
   method: unit_test
   test_file: tests/unit/test_alignment.py
   status: accepted
 
 - id: TC-SwR-063-001
   title: Multi-resolution feature builder — Fast/Slow/Structural layers
-  verifies: SwR-063
+  requirement_ids:
+  - SwR-063
   method: unit_test
   test_file: tests/unit/test_multi_resolution.py
   status: accepted
 
 - id: TC-SwR-064-001
   title: Point-in-time join — anti-leakage, staleness, missing values
-  verifies: SwR-064
+  requirement_ids:
+  - SwR-064
   method: unit_test
   test_file: tests/unit/test_pit_join.py
   status: accepted
 
 - id: TC-SwR-065-001
   title: Training-set builder — temporal split, pivoting, normalization
-  verifies: SwR-065
+  requirement_ids:
+  - SwR-065
   method: unit_test
   test_file: tests/unit/test_training_builder.py
+  status: accepted
+- id: TC-SwR-066-001
+  title: PyTorch dataset — SIASATimeSeriesDataset windowing, filtering, tensors
+  requirement_ids:
+  - SwR-066
+  method: unit_test
+  test_file: tests/unit/test_ml_datasets.py
+  status: accepted
+
+- id: TC-SwR-067-001
+  title: HuggingFace export — Parquet to HF Dataset with schema and card
+  requirement_ids:
+  - SwR-067
+  method: unit_test
+  test_file: tests/unit/test_hf_export.py
+  status: accepted
+
+- id: TC-SwR-068-001
+  title: ML encoding — OneHot, Ordinal, Embedding, Pivot utilities
+  requirement_ids:
+  - SwR-068
+  method: unit_test
+  test_file: tests/unit/test_ml_encoding.py
+  status: accepted
+
+- id: TC-SwR-069-001
+  title: Retention hook — archive before SQLite cleanup
+  requirement_ids:
+  - SwR-069
+  method: unit_test
+  test_file: tests/unit/test_retention_hook.py
+  status: accepted
+
+- id: TC-SwR-070-001
+  title: Archive health — per-source counts, gap detection, structured report
+  requirement_ids:
+  - SwR-070
+  method: unit_test
+  test_file: tests/unit/test_archive_health.py
+  status: accepted
+
+- id: TC-SwR-071-001
+  title: CLI archive manager — stats, validate, compact, export subcommands
+  requirement_ids:
+  - SwR-071
+  method: unit_test
+  test_file: tests/unit/test_archive_manager.py
+  status: accepted
+
+- id: TC-SwR-072-001
+  title: Wikipedia Pageviews adapter — daily pageview fetch, normalization, retry
+  requirement_ids:
+  - SwR-072
+  method: unit_test
+  test_file: tests/unit/test_adapter_wikipedia_pageviews.py
   status: accepted

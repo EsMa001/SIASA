@@ -722,3 +722,16 @@ implementation_slices:
       - tests/unit/test_retention_hook.py
       - tests/unit/test_archive_health.py
       - tests/unit/test_archive_manager.py
+  ap-14-kostenfreie-api-quellen:
+    requirement_ids:
+      - SwR-072
+    implementation_map:
+      SwR-072:
+        code_paths:
+          - src/siasa/adapters/wikipedia_pageviews.py
+        test_paths:
+          - tests/unit/test_adapter_wikipedia_pageviews.py
+    known_code_paths:
+      - src/siasa/adapters/wikipedia_pageviews.py
+    known_test_paths:
+      - tests/unit/test_adapter_wikipedia_pageviews.py
