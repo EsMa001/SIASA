@@ -655,3 +655,13 @@ software_requirements:
   - SyR-053
   verification_method: unit_test
   allocated_to: DDS-002
+
+- id: SwR-068
+  title: ML encoding utilities for categorical SIASA features
+  statement: The software shall provide encoding utilities that convert categorical SIASA features (country_id, domain, event_type, quality_flag) into ML-ready numeric representations including one-hot encoding, ordinal encoding, and embedding-dimension lookup tables.
+  status: accepted
+  derives_from:
+  - SyR-051
+  - SyR-053
+  verification_method: unit_test
+  allocated_to: DDS-002

@@ -594,6 +594,7 @@ implementation_slices:
       - SwR-065
       - SwR-066
       - SwR-067
+      - SwR-068
     implementation_map:
       SwR-055:
         code_paths:
@@ -664,6 +665,11 @@ implementation_slices:
           - src/siasa/ml/hf_export.py
         test_paths:
           - tests/unit/test_hf_export.py
+      SwR-068:
+        code_paths:
+          - src/siasa/ml/encoding.py
+        test_paths:
+          - tests/unit/test_ml_encoding.py
     known_code_paths:
       - src/siasa/data/archive.py
       - src/siasa/data/registry.py
@@ -678,6 +684,7 @@ implementation_slices:
       - src/siasa/features/training_builder.py
       - src/siasa/ml/datasets.py
       - src/siasa/ml/hf_export.py
+      - src/siasa/ml/encoding.py
     known_test_paths:
       - tests/unit/test_archive.py
       - tests/unit/test_registry.py
@@ -690,3 +697,4 @@ implementation_slices:
       - tests/unit/test_training_builder.py
       - tests/unit/test_ml_datasets.py
       - tests/unit/test_hf_export.py
+      - tests/unit/test_ml_encoding.py
