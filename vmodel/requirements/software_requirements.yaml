@@ -5,7 +5,7 @@ metadata:
   - vmodel/architecture/system_architecture.md
   created_at_utc: '2026-05-11T14:25:30.979384+00:00'
   status: draft_baseline_derived
-  software_requirement_count: 59
+  software_requirement_count: 60
 software_requirements:
 - id: SwR-001
   title: Source catalog record schema
@@ -567,6 +567,16 @@ software_requirements:
 - id: SwR-059
   title: Dual-timestamp schema for temporal period metadata
   statement: The software shall extend NormalizedRecord and the Parquet archive schema with period_start (ISO UTC string), period_end (ISO UTC string), and granularity (enum-like string — hourly, daily, weekly, monthly, quarterly, yearly) fields. When adapters supply native temporal period boundaries, the normalization service shall propagate them into the archive. Fields default to empty string when not provided.
+  status: accepted
+  derives_from:
+  - SyR-051
+  - SyR-053
+  verification_method: unit_test
+  allocated_to: DDS-002
+
+- id: SwR-060
+  title: DuckDB analytical query engine over Parquet archive
+  statement: The software shall provide an ArchiveQueryEngine backed by DuckDB that reads Hive-partitioned Parquet archive files and supports time-window queries, country/domain/signal filtering, aggregations (count, mean, sum, min, max), and returns pyarrow.Table output for ML pipeline compatibility.
   status: accepted
   derives_from:
   - SyR-051

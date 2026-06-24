@@ -586,6 +586,7 @@ implementation_slices:
       - SwR-057
       - SwR-058
       - SwR-059
+      - SwR-060
     implementation_map:
       SwR-055:
         code_paths:
@@ -615,12 +616,19 @@ implementation_slices:
           - src/siasa/data/normalization_service.py
         test_paths:
           - tests/unit/test_dual_timestamp.py
+      SwR-060:
+        code_paths:
+          - src/siasa/data/query.py
+        test_paths:
+          - tests/unit/test_query.py
     known_code_paths:
       - src/siasa/data/archive.py
       - src/siasa/data/registry.py
       - src/siasa/data/normalized_models.py
       - src/siasa/data/normalization_service.py
+      - src/siasa/data/query.py
     known_test_paths:
       - tests/unit/test_archive.py
       - tests/unit/test_registry.py
       - tests/unit/test_dual_timestamp.py
+      - tests/unit/test_query.py

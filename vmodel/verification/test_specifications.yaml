@@ -1174,3 +1174,10 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_dual_timestamp.py
   status: accepted
+
+- id: TC-SwR-060-001
+  title: DuckDB query engine — filtering, aggregation, Arrow output
+  verifies: SwR-060
+  method: unit_test
+  test_file: tests/unit/test_query.py
+  status: accepted
