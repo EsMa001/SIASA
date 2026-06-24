@@ -1298,3 +1298,11 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_adapter_eurostat.py
   status: accepted
+
+- id: TC-SwR-075-001
+  title: NVD CVE adapter — CVE parsing, CVSS aggregation, pagination, retry
+  requirement_ids:
+  - SwR-075
+  method: unit_test
+  test_file: tests/unit/test_adapter_nvd_cve.py
+  status: accepted

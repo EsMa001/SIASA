@@ -225,7 +225,7 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert readiness["demo_verdict"] == "blocked"
     assert readiness["release_verdict"] == "blocked_by_known_gaps"
     assert readiness["known_gaps"] == ["validation_backtest_absent:not_configured"]
-    assert traceability_integrity["summary"]["requirement_count"] == 74
+    assert traceability_integrity["summary"]["requirement_count"] == 75
     assert stakeholder_functional_closure["focus_gap_cluster"] == {
         "stakeholder_ids": [
             "StR-001", "StR-002", "StR-004", "StR-007", "StR-024", "StR-025",
