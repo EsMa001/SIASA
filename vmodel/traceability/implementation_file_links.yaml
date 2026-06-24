@@ -589,6 +589,7 @@ implementation_slices:
       - SwR-060
       - SwR-061
       - SwR-062
+      - SwR-063
     implementation_map:
       SwR-055:
         code_paths:
@@ -634,6 +635,11 @@ implementation_slices:
           - src/siasa/features/alignment.py
         test_paths:
           - tests/unit/test_alignment.py
+      SwR-063:
+        code_paths:
+          - src/siasa/features/multi_resolution.py
+        test_paths:
+          - tests/unit/test_multi_resolution.py
     known_code_paths:
       - src/siasa/data/archive.py
       - src/siasa/data/registry.py
@@ -643,6 +649,7 @@ implementation_slices:
       - dvc.yaml
       - data/.gitignore
       - src/siasa/features/alignment.py
+      - src/siasa/features/multi_resolution.py
     known_test_paths:
       - tests/unit/test_archive.py
       - tests/unit/test_registry.py
@@ -650,3 +657,4 @@ implementation_slices:
       - tests/unit/test_query.py
       - tests/unit/test_dvc_setup.py
       - tests/unit/test_alignment.py
+      - tests/unit/test_multi_resolution.py

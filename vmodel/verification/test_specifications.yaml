@@ -1195,3 +1195,10 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_alignment.py
   status: accepted
+
+- id: TC-SwR-063-001
+  title: Multi-resolution feature builder — Fast/Slow/Structural layers
+  verifies: SwR-063
+  method: unit_test
+  test_file: tests/unit/test_multi_resolution.py
+  status: accepted
