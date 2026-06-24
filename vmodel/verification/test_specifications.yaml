@@ -1202,3 +1202,10 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_multi_resolution.py
   status: accepted
+
+- id: TC-SwR-064-001
+  title: Point-in-time join — anti-leakage, staleness, missing values
+  verifies: SwR-064
+  method: unit_test
+  test_file: tests/unit/test_pit_join.py
+  status: accepted

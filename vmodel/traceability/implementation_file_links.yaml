@@ -590,6 +590,7 @@ implementation_slices:
       - SwR-061
       - SwR-062
       - SwR-063
+      - SwR-064
     implementation_map:
       SwR-055:
         code_paths:
@@ -640,6 +641,11 @@ implementation_slices:
           - src/siasa/features/multi_resolution.py
         test_paths:
           - tests/unit/test_multi_resolution.py
+      SwR-064:
+        code_paths:
+          - src/siasa/features/pit_join.py
+        test_paths:
+          - tests/unit/test_pit_join.py
     known_code_paths:
       - src/siasa/data/archive.py
       - src/siasa/data/registry.py
@@ -650,6 +656,7 @@ implementation_slices:
       - data/.gitignore
       - src/siasa/features/alignment.py
       - src/siasa/features/multi_resolution.py
+      - src/siasa/features/pit_join.py
     known_test_paths:
       - tests/unit/test_archive.py
       - tests/unit/test_registry.py

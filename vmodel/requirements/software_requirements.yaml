@@ -5,7 +5,7 @@ metadata:
   - vmodel/architecture/system_architecture.md
   created_at_utc: '2026-05-11T14:25:30.979384+00:00'
   status: draft_baseline_derived
-  software_requirement_count: 63
+  software_requirement_count: 64
 software_requirements:
 - id: SwR-001
   title: Source catalog record schema
@@ -612,6 +612,16 @@ software_requirements:
   derives_from:
   - SyR-051
   - SyR-052
+  - SyR-053
+  verification_method: unit_test
+  allocated_to: DDS-002
+
+- id: SwR-064
+  title: Point-in-time join engine with anti-leakage and staleness limits
+  statement: The software shall provide a PointInTimeJoiner that assembles features at specific query dates using only past observations, enforces configurable staleness limits, and marks stale or absent values as NaN to prevent look-ahead bias in ML training data.
+  status: accepted
+  derives_from:
+  - SyR-051
   - SyR-053
   verification_method: unit_test
   allocated_to: DDS-002
