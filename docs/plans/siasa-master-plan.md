@@ -96,7 +96,7 @@ Regeln:
 | AP-11 | Free-API-Quellen-Verbreiterung (D/E/C/A) | Erledigt | – | MVP-Could | 3 Adapter live (Frankfurter/Voidly/HDX-INFORM), 4 extern blockiert, Katalog+Glossar aktuell |
 | AP-12 | UX-Transparenz & Informationstiefe | Erledigt | – | MVP-Should | neu (User-Request: Quellen-Steckbriefe, parametrierbare Zeitachsen, Methodik-Transparenz, Glossar-Seite) |
 | AP-13 | ML-Training Data Lake | Erledigt | – | MVP-Should | 15/15 TAPs: Parquet-Archiv, DuckDB Query-Layer, Feature-Engineering Pipeline, PyTorch/HuggingFace, DVC, Retention, Health, CLI |
-| AP-14 | Kostenfreie API-Quellen-Erweiterung | In Arbeit | **P1** | MVP-Should | Recherche + Integration verifizierter kostenfreier APIs (Wikipedia, ECB, Eurostat, NVD CVE); 8 TAPs in 3 Phasen |
+| AP-14 | Kostenfreie API-Quellen-Erweiterung | Erledigt | **P1** | MVP-Should | 4 Adapter (Wikipedia, ECB, Eurostat, NVD CVE) + Registry + Feature-Katalog; SwR-072..075, 91 Tests |
 
 Gesamtbild: Das Fundament und alle repo-seitig steuerbaren Gap-Familien (`G1`, `G2`, `G3`, `G4`) sind
 **materiell geschlossen** (Capability-Matrix: `17/17 Done`, `100.0%`). AP-05 (Validierungs-Realismus),
@@ -105,7 +105,7 @@ AP-11 (Free-API-Quellen-Verbreiterung: 3 neue Adapter für Domain D/E/C) und AP-
 sind erledigt. **AP-13 (ML-Training Data Lake)** ist **erledigt** (15/15 TAPs, SwR-055..071): Parquet-Archiv,
 DuckDB-Query-Engine, Feature-Engineering (Daily-Alignment, Multi-Resolution, PIT-Join, Training-Builder),
 ML-Integration (PyTorch Dataset, HuggingFace Export, Encoding), Operationalisierung (Retention-Hook,
-Health-Monitor, CLI Archive-Manager). **AP-14 (Kostenfreie API-Quellen-Erweiterung)** ist das aktive Arbeitspaket: Wikipedia Pageviews (Domain A),
+Health-Monitor, CLI Archive-Manager). **AP-14 (Kostenfreie API-Quellen-Erweiterung)** ist abgeschlossen: 4 neue Adapter (Wikipedia Pageviews Domain A, ECB Data + Eurostat Domain D, NVD CVE Domain E), Signal-Registry + Feature-Katalog erweitert.
 ECB Data (Domain D), Eurostat (Domain D) und NVD CVE (Domain E) als verifizierte kostenfreie Quellen.
 Die verbleibende blockierte Arbeit ist externe Quellen-Aktivierung (AP-06) und – zurückgestellt – Multi-User (AP-09).
 
@@ -118,7 +118,7 @@ Die verbleibende blockierte Arbeit ist externe Quellen-Aktivierung (AP-06) und �
 
 | Rang | AP-ID | Großes Arbeitspaket | Status | Klasse | Auslöser / Bedingung |
 | --- | --- | --- | --- | --- | --- |
-| **P1** | AP-14 | Kostenfreie API-Quellen-Erweiterung | In Arbeit | MVP-Should | 4 verifizierte APIs + Katalog + Runtime |
+| **P1** | AP-14 | Kostenfreie API-Quellen-Erweiterung | Erledigt | MVP-Should | 4 Adapter implementiert, Registry + Katalog aktualisiert |
 | ~~P1~~ | AP-13 | ML-Training Data Lake | **Erledigt** | MVP-Should | 15/15 TAPs abgeschlossen (SwR-055..071) |
 | **P2** | AP-06 | Externe Quellen-Aktivierung (G2) | Blockiert | MVP-Should | **springt auf aktiv**, sobald gültige ReliefWeb/UCDP-Credentials vorliegen |
 | **P3** | AP-09 | Multi-User-Governance (G5) | Zurückgestellt | Post-MVP | nur wenn Operating-Model Multi-User explizit fordert |

@@ -175,6 +175,15 @@ KNOWN_ACTIVE_SIGNAL_KEYS: set[str] = {
     "cyber_kev_recent_count", "cyber_kev_ransomware_recent", "cyber_kev_overdue_count", "cyber_kev_total",
     # Domain E — Voidly
     "censorship_score",
+    # Domain A — Wikipedia Pageviews (AP-14.1)
+    "wiki_pageview_count",
+    # Domain D — ECB (AP-14.2)
+    "ecb_key_rate", "ecb_fx_usd_per_eur", "ecb_fx_jpy_per_eur", "ecb_fx_gbp_per_eur",
+    "ecb_fx_chf_per_eur", "ecb_fx_cny_per_eur", "ecb_fx_try_per_eur", "ecb_fx_zar_per_eur",
+    # Domain D — Eurostat (AP-14.3)
+    "eurostat_hicp_inflation", "eurostat_unemployment_rate",
+    # Domain E — NVD CVE (AP-14.4)
+    "nvd_cve_count_daily", "nvd_avg_cvss_base", "nvd_critical_cve_count",
 }
 
 
@@ -207,6 +216,24 @@ _SIGNAL_REGISTRY: list[dict] = [
     {"signal_key": "cyber_kev_total", "domain": "E", "source_id": "SRC-CISA-KEV", "description": "Total known exploited vulnerabilities", "unit": "count", "native_granularity": "daily", "aggregation_method": "last"},
     # Domain E — Voidly
     {"signal_key": "censorship_score", "domain": "E", "source_id": "SRC-VOIDLY", "description": "Internet censorship score from Voidly", "unit": "score", "native_granularity": "daily", "aggregation_method": "last"},
+    # Domain A — Wikipedia Pageviews (AP-14.1)
+    {"signal_key": "wiki_pageview_count", "domain": "A", "source_id": "SRC-WIKI-PAGEVIEWS", "description": "Daily pageview count for conflict-relevant Wikipedia articles", "unit": "count", "native_granularity": "daily", "aggregation_method": "sum"},
+    # Domain D — ECB (AP-14.2)
+    {"signal_key": "ecb_key_rate", "domain": "D", "source_id": "SRC-ECB-DATA", "description": "ECB main refinancing operations rate", "unit": "percent", "native_granularity": "daily", "aggregation_method": "last"},
+    {"signal_key": "ecb_fx_usd_per_eur", "domain": "D", "source_id": "SRC-ECB-DATA", "description": "USD/EUR exchange rate from ECB", "unit": "ratio", "native_granularity": "daily", "aggregation_method": "last"},
+    {"signal_key": "ecb_fx_jpy_per_eur", "domain": "D", "source_id": "SRC-ECB-DATA", "description": "JPY/EUR exchange rate from ECB", "unit": "ratio", "native_granularity": "daily", "aggregation_method": "last"},
+    {"signal_key": "ecb_fx_gbp_per_eur", "domain": "D", "source_id": "SRC-ECB-DATA", "description": "GBP/EUR exchange rate from ECB", "unit": "ratio", "native_granularity": "daily", "aggregation_method": "last"},
+    {"signal_key": "ecb_fx_chf_per_eur", "domain": "D", "source_id": "SRC-ECB-DATA", "description": "CHF/EUR exchange rate from ECB", "unit": "ratio", "native_granularity": "daily", "aggregation_method": "last"},
+    {"signal_key": "ecb_fx_cny_per_eur", "domain": "D", "source_id": "SRC-ECB-DATA", "description": "CNY/EUR exchange rate from ECB", "unit": "ratio", "native_granularity": "daily", "aggregation_method": "last"},
+    {"signal_key": "ecb_fx_try_per_eur", "domain": "D", "source_id": "SRC-ECB-DATA", "description": "TRY/EUR exchange rate from ECB", "unit": "ratio", "native_granularity": "daily", "aggregation_method": "last"},
+    {"signal_key": "ecb_fx_zar_per_eur", "domain": "D", "source_id": "SRC-ECB-DATA", "description": "ZAR/EUR exchange rate from ECB", "unit": "ratio", "native_granularity": "daily", "aggregation_method": "last"},
+    # Domain D — Eurostat (AP-14.3)
+    {"signal_key": "eurostat_hicp_inflation", "domain": "D", "source_id": "SRC-EUROSTAT", "description": "Monthly HICP annual rate of change from Eurostat", "unit": "percent", "native_granularity": "monthly", "aggregation_method": "last"},
+    {"signal_key": "eurostat_unemployment_rate", "domain": "D", "source_id": "SRC-EUROSTAT", "description": "Monthly unemployment rate from Eurostat", "unit": "percent", "native_granularity": "monthly", "aggregation_method": "last"},
+    # Domain E — NVD CVE 2.0 (AP-14.4)
+    {"signal_key": "nvd_cve_count_daily", "domain": "E", "source_id": "SRC-NVD-CVE", "description": "Daily CVE publication count from NVD", "unit": "count", "native_granularity": "daily", "aggregation_method": "sum"},
+    {"signal_key": "nvd_avg_cvss_base", "domain": "E", "source_id": "SRC-NVD-CVE", "description": "Average CVSS base score of daily CVEs", "unit": "score", "native_granularity": "daily", "aggregation_method": "mean"},
+    {"signal_key": "nvd_critical_cve_count", "domain": "E", "source_id": "SRC-NVD-CVE", "description": "Daily count of CRITICAL severity CVEs", "unit": "count", "native_granularity": "daily", "aggregation_method": "sum"},
 ]
 
 

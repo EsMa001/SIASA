@@ -509,3 +509,45 @@ feature_catalog:
   Feature: Neue Annotation
   Bedeutung: Neue relevante Annotation vorhanden
   Priorität: Meta Extended
+- Domäne: A
+  Feature ID: A_wiki_attention
+  Feature: Wikipedia-Aufmerksamkeit
+  Bedeutung: Tägliche Wikipedia-Seitenaufrufe zu Länder-/Konfliktthemen als Proxy für öffentliches Interesse
+  Priorität: Extended
+  Signal: wiki_pageview_count (SRC-WIKI-PAGEVIEWS)
+- Domäne: D
+  Feature ID: D_ecb_key_rate
+  Feature: EZB-Leitzins
+  Bedeutung: ECB Main Refinancing Operations Rate — geldpolitischer Indikator
+  Priorität: Extended
+  Signal: ecb_key_rate (SRC-ECB-DATA)
+- Domäne: D
+  Feature ID: D_fx_rate_eur
+  Feature: Wechselkurse EUR
+  Bedeutung: Tageswechselkurse Fremdwährung/EUR der EZB — wirtschaftliche Stabilität
+  Priorität: Extended
+  Signal: ecb_fx_{currency}_per_eur (SRC-ECB-DATA)
+- Domäne: D
+  Feature ID: D_inflation_hicp
+  Feature: HICP-Inflation
+  Bedeutung: Monatliche harmonisierte Verbraucherpreisinflation nach Eurostat
+  Priorität: Core
+  Signal: eurostat_hicp_inflation (SRC-EUROSTAT)
+- Domäne: D
+  Feature ID: D_unemployment
+  Feature: Arbeitslosenquote
+  Bedeutung: Monatliche Arbeitslosenquote nach Eurostat — sozialer Stressindikator
+  Priorität: Core
+  Signal: eurostat_unemployment_rate (SRC-EUROSTAT)
+- Domäne: E
+  Feature ID: E_cve_volume
+  Feature: CVE-Tagesvolumen
+  Bedeutung: Tägliche Anzahl veröffentlichter CVEs — Cyber-Bedrohungslage
+  Priorität: Extended
+  Signal: nvd_cve_count_daily (SRC-NVD-CVE)
+- Domäne: E
+  Feature ID: E_cvss_severity
+  Feature: CVSS-Schweregrad
+  Bedeutung: Durchschnittlicher CVSS-Basiswert und Anzahl kritischer CVEs — Verwundbarkeitslandschaft
+  Priorität: Extended
+  Signal: nvd_avg_cvss_base, nvd_critical_cve_count (SRC-NVD-CVE)
