@@ -1961,4 +1961,18 @@ traceability:
     relation: verifies
     target_ids:
     - SwR-061
+  - source_id: SwR-062
+    relation: derives_from
+    target_ids:
+    - SyR-051
+    - SyR-052
+    - SyR-053
+  - source_id: SwR-062
+    relation: allocated_to
+    target_ids:
+    - DDS-002
+  - source_id: TC-SwR-062-001
+    relation: verifies
+    target_ids:
+    - SwR-062
   waivers: []

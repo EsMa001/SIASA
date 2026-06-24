@@ -332,7 +332,7 @@ Phase 2 — Feature-Engineering:
 
 | TAP | Inhalt | Status | Hinweis |
 | --- | --- | --- | --- |
-| AP-13.6 | Daily Alignment Pipeline: Aggregation + Forward-Fill | Offen | Benötigt AP-13.1, AP-13.2, AP-13.3 |
+| AP-13.6 | Daily Alignment Pipeline: Aggregation + Forward-Fill | Erledigt | 7 Tests; DailyAligner mit SUM/MEAN/MAX/LAST, Gap-Detection; SwR-062 + TC + Traces |
 | AP-13.7 | Multi-Resolution Feature-Builder (Fast/Slow/Structural Layer) | Offen | Benötigt AP-13.6 |
 | AP-13.8 | Point-in-Time Join Engine (Anti-Look-Ahead-Bias) | Offen | Benötigt AP-13.7 |
 | AP-13.9 | Training-Set Builder: versionierte train/val/test Splits | Offen | Benötigt AP-13.8 |

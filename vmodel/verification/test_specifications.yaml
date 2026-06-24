@@ -1188,3 +1188,10 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_dvc_setup.py
   status: accepted
+
+- id: TC-SwR-062-001
+  title: Daily alignment — SUM/MAX/LAST aggregation, gap detection
+  verifies: SwR-062
+  method: unit_test
+  test_file: tests/unit/test_alignment.py
+  status: accepted
