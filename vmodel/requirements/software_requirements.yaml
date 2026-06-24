@@ -645,3 +645,13 @@ software_requirements:
   - SyR-053
   verification_method: unit_test
   allocated_to: DDS-002
+
+- id: SwR-067
+  title: HuggingFace Datasets export with dataset card and schema validation
+  statement: The software shall provide an HFExporter that converts SIASA training Parquet files to HuggingFace Dataset format with automatic dataset card generation, schema preservation, and optional Hub push capability.
+  status: accepted
+  derives_from:
+  - SyR-051
+  - SyR-053
+  verification_method: unit_test
+  allocated_to: DDS-002
