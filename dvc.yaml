@@ -1,0 +1,48 @@
+# SIASA DVC Pipeline Definition (AP-13.5)
+#
+# Data pipeline: Ingest → Archive → Features → Training
+# Each stage is reproducible and tracked by DVC.
+
+stages:
+  ingest:
+    cmd: >
+      PYTHONPATH=src python -m siasa.runs.live_runtime
+      --output-dir build/run_artifacts
+    deps:
+      - src/siasa/runs/live_runtime.py
+      - src/siasa/sources/
+    outs:
+      - build/run_artifacts/latest/:
+          persist: true
+
+  archive:
+    cmd: >
+      PYTHONPATH=src python -c "
+      from siasa.data.archive import ArchiveWriter;
+      from pathlib import Path;
+      print('Archive stage: see live_runtime for integrated archival')
+      "
+    deps:
+      - src/siasa/data/archive.py
+      - build/run_artifacts/latest/
+    outs:
+      - data/archive/:
+          persist: true
+
+  features:
+    cmd: >
+      echo "Feature engineering stage — placeholder for AP-13.6+"
+    deps:
+      - data/archive/
+    outs:
+      - data/features/:
+          persist: true
+
+  training:
+    cmd: >
+      echo "Training set builder — placeholder for AP-13.9+"
+    deps:
+      - data/features/
+    outs:
+      - data/training/:
+          persist: true

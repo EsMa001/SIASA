@@ -1181,3 +1181,10 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_query.py
   status: accepted
+
+- id: TC-SwR-061-001
+  title: DVC setup — pipeline definition, data gitignore, dependency chain
+  verifies: SwR-061
+  method: unit_test
+  test_file: tests/unit/test_dvc_setup.py
+  status: accepted

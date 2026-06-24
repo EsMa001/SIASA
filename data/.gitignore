@@ -1,0 +1,4 @@
+# DVC-tracked data directories — large files tracked by DVC, not Git
+/archive/
+/features/
+/training/

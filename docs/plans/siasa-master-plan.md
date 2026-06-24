@@ -326,7 +326,7 @@ Phase 1 — Archiv-Infrastruktur:
 | AP-13.2 | Country-Registry + Signal-Registry als Parquet/YAML Stammdaten | Erledigt | 11 Tests; 88 Laender, 20 Signale, Validierungsfunktionen, KNOWN_ACTIVE_SIGNAL_KEYS |
 | AP-13.3 | Dual-Timestamp-Schema: event_time + ingestion_time + period_start/end + granularity | Erledigt | 9 Tests; NormalizedRecord + Archive Schema + Normalization Service erweitert; SwR-059 + TC + Traces |
 | AP-13.4 | DuckDB Query-Layer über Parquet-Archiv | Erledigt | 14 Tests; ArchiveQueryEngine mit DuckDB 1.5 — Filter, Aggregation, Arrow-Output; SwR-060 + TC + Traces |
-| AP-13.5 | DVC-Setup: Datenversionierung + Pipeline-Definition | Offen | Benötigt AP-13.1 |
+| AP-13.5 | DVC-Setup: Datenversionierung + Pipeline-Definition | Erledigt | 7 Tests; dvc init, 4-Stage Pipeline (ingest/archive/features/training), data/.gitignore; SwR-061 + TC + Traces |
 
 Phase 2 — Feature-Engineering:
 
