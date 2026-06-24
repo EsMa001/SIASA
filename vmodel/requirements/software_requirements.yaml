@@ -665,3 +665,12 @@ software_requirements:
   - SyR-053
   verification_method: unit_test
   allocated_to: DDS-002
+
+- id: SwR-069
+  title: Pre-cleanup archive hook for SQLite retention policy
+  statement: The software shall provide a RetentionArchiveHook that guarantees all records are archived to Parquet before SQLite retention cleanup deletes them, with verification that no data is lost during the retention cycle.
+  status: accepted
+  derives_from:
+  - SyR-051
+  verification_method: unit_test
+  allocated_to: DDS-002
