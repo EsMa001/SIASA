@@ -596,6 +596,7 @@ implementation_slices:
       - SwR-067
       - SwR-068
       - SwR-069
+      - SwR-070
     implementation_map:
       SwR-055:
         code_paths:
@@ -676,6 +677,11 @@ implementation_slices:
           - src/siasa/data/retention_hook.py
         test_paths:
           - tests/unit/test_retention_hook.py
+      SwR-070:
+        code_paths:
+          - src/siasa/data/archive_health.py
+        test_paths:
+          - tests/unit/test_archive_health.py
     known_code_paths:
       - src/siasa/data/archive.py
       - src/siasa/data/registry.py
@@ -692,6 +698,7 @@ implementation_slices:
       - src/siasa/ml/hf_export.py
       - src/siasa/ml/encoding.py
       - src/siasa/data/retention_hook.py
+      - src/siasa/data/archive_health.py
     known_test_paths:
       - tests/unit/test_archive.py
       - tests/unit/test_registry.py
@@ -706,3 +713,4 @@ implementation_slices:
       - tests/unit/test_hf_export.py
       - tests/unit/test_ml_encoding.py
       - tests/unit/test_retention_hook.py
+      - tests/unit/test_archive_health.py

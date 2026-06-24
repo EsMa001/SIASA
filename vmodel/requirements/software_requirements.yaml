@@ -674,3 +674,12 @@ software_requirements:
   - SyR-051
   verification_method: unit_test
   allocated_to: DDS-002
+
+- id: SwR-070
+  title: Archive health monitoring with per-source record counts and gap detection
+  statement: The software shall provide an ArchiveHealthMonitor that reports record counts per source, domain, and year, detects data gaps, tracks storage size, and produces a structured health report suitable for dashboard rendering.
+  status: accepted
+  derives_from:
+  - SyR-051
+  verification_method: unit_test
+  allocated_to: DDS-002
