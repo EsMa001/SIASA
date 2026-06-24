@@ -217,7 +217,7 @@ _SIGNAL_REGISTRY: list[dict] = [
     # Domain E — Voidly
     {"signal_key": "censorship_score", "domain": "E", "source_id": "SRC-VOIDLY", "description": "Internet censorship score from Voidly", "unit": "score", "native_granularity": "daily", "aggregation_method": "last"},
     # Domain A — Wikipedia Pageviews (AP-14.1)
-    {"signal_key": "wiki_pageview_count", "domain": "A", "source_id": "SRC-WIKI-PAGEVIEWS", "description": "Daily pageview count for conflict-relevant Wikipedia articles", "unit": "count", "native_granularity": "daily", "aggregation_method": "sum"},
+    {"signal_key": "wiki_pageview_count", "domain": "A", "source_id": "SRC-WIKIPEDIA-PAGEVIEWS", "description": "Daily pageview count for conflict-relevant Wikipedia articles", "unit": "count", "native_granularity": "daily", "aggregation_method": "sum"},
     # Domain D — ECB (AP-14.2)
     {"signal_key": "ecb_key_rate", "domain": "D", "source_id": "SRC-ECB-DATA", "description": "ECB main refinancing operations rate", "unit": "percent", "native_granularity": "daily", "aggregation_method": "last"},
     {"signal_key": "ecb_fx_usd_per_eur", "domain": "D", "source_id": "SRC-ECB-DATA", "description": "USD/EUR exchange rate from ECB", "unit": "ratio", "native_granularity": "daily", "aggregation_method": "last"},

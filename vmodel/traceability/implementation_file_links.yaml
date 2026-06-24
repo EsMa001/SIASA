@@ -744,7 +744,6 @@ implementation_slices:
           - src/siasa/adapters/eurostat.py
         test_paths:
           - tests/unit/test_adapter_eurostat.py
-      - tests/unit/test_adapter_nvd_cve.py
       SwR-075:
         code_paths:
           - src/siasa/adapters/nvd_cve.py
@@ -754,6 +753,9 @@ implementation_slices:
       - src/siasa/adapters/wikipedia_pageviews.py
       - src/siasa/adapters/ecb_data.py
       - src/siasa/adapters/eurostat.py
+      - src/siasa/adapters/nvd_cve.py
     known_test_paths:
       - tests/unit/test_adapter_wikipedia_pageviews.py
       - tests/unit/test_adapter_ecb_data.py
+      - tests/unit/test_adapter_eurostat.py
+      - tests/unit/test_adapter_nvd_cve.py

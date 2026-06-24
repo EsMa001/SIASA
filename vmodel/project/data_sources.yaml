@@ -293,7 +293,7 @@ data_sources:
   Signale: wiki_pageview_count (tägliche Seitenaufrufe pro Land/Thema)
   Zugriff: frei, keine Authentifizierung, keine Rate-Limits für moderate Nutzung
   Historie: ab 2015 (stündlich, täglich, monatlich)
-  Bemerkung: Proxy für öffentliches Narrativ-Interesse; SRC-WIKI-PAGEVIEWS; AP-14.1
+  Bemerkung: Proxy für öffentliches Narrativ-Interesse; SRC-WIKIPEDIA-PAGEVIEWS; AP-14.1
 - Ebene: D
   Quelle: ECB Data API (SDMX-JSON)
   Status: Live/Core
@@ -312,6 +312,6 @@ data_sources:
   Quelle: NVD CVE 2.0 API (NIST)
   Status: Live/Core
   Signale: nvd_cve_count_daily, nvd_avg_cvss_base, nvd_critical_cve_count
-  Zugriff: frei, keine Authentifizierung (Rate-Limit: 5 req/30s, mit Key 50/30s)
+  Zugriff: "frei, keine Authentifizierung (Rate-Limit: 5 req/30s, mit Key 50/30s)"
   Historie: ab 1999 (täglich)
   Bemerkung: CVSS v3.1/3.0/2.0; globale Cyber-Verwundbarkeitslandschaft; SRC-NVD-CVE; AP-14.4

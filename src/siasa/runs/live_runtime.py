@@ -720,8 +720,8 @@ def _build_normalization_mappings() -> list[NormalizationMappingVersion]:
             is_active=True,
         ),
         NormalizationMappingVersion(
-            mapping_id="MAP-SRC-WIKI-PAGEVIEWS-v1",
-            source_id="SRC-WIKI-PAGEVIEWS",
+            mapping_id="MAP-SRC-WIKIPEDIA-PAGEVIEWS-v1",
+            source_id="SRC-WIKIPEDIA-PAGEVIEWS",
             version="v1",
             is_active=True,
         ),
