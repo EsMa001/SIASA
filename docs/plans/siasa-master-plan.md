@@ -95,15 +95,16 @@ Regeln:
 | AP-10 | Terminologie-Glossar & Begriffs-Normalisierung | Erledigt | – | MVP-Should | neu (kein Legacy) |
 | AP-11 | Free-API-Quellen-Verbreiterung (D/E/C/A) | Erledigt | – | MVP-Could | 3 Adapter live (Frankfurter/Voidly/HDX-INFORM), 4 extern blockiert, Katalog+Glossar aktuell |
 | AP-12 | UX-Transparenz & Informationstiefe | Erledigt | – | MVP-Should | neu (User-Request: Quellen-Steckbriefe, parametrierbare Zeitachsen, Methodik-Transparenz, Glossar-Seite) |
-| AP-13 | ML-Training Data Lake | In Arbeit | **P1** | MVP-Should | neu (User-Request: permanentes Parquet-Archiv, DuckDB Query-Layer, Feature-Engineering Pipeline, PyTorch/HuggingFace Integration, DVC-Versionierung) |
+| AP-13 | ML-Training Data Lake | Erledigt | – | MVP-Should | 15/15 TAPs: Parquet-Archiv, DuckDB Query-Layer, Feature-Engineering Pipeline, PyTorch/HuggingFace, DVC, Retention, Health, CLI |
 
 Gesamtbild: Das Fundament und alle repo-seitig steuerbaren Gap-Familien (`G1`, `G2`, `G3`, `G4`) sind
 **materiell geschlossen** (Capability-Matrix: `17/17 Done`, `100.0%`). AP-05 (Validierungs-Realismus),
 AP-07 (Quellen-Robustheit), AP-08 (Breiten-Ausbau auf 88 Länder), AP-10 (Terminologie-Glossar),
 AP-11 (Free-API-Quellen-Verbreiterung: 3 neue Adapter für Domain D/E/C) und AP-12 (UX-Transparenz)
-sind erledigt. **AP-13 (ML-Training Data Lake)** ist das aktive Arbeitspaket: permanente Datenhaltung
-aller Adapter-Outputs als Parquet-Archiv mit DuckDB-Query-Engine, Feature-Engineering für
-ML-Training (PyTorch/HuggingFace), und DVC-Datenversionierung. Die verbleibende blockierte Arbeit ist
+sind erledigt. **AP-13 (ML-Training Data Lake)** ist **erledigt** (15/15 TAPs, SwR-055..071): Parquet-Archiv,
+DuckDB-Query-Engine, Feature-Engineering (Daily-Alignment, Multi-Resolution, PIT-Join, Training-Builder),
+ML-Integration (PyTorch Dataset, HuggingFace Export, Encoding), Operationalisierung (Retention-Hook,
+Health-Monitor, CLI Archive-Manager). Die verbleibende blockierte Arbeit ist
 externe Quellen-Aktivierung (AP-06) und – zurückgestellt – Multi-User (AP-09).
 
 ---
@@ -115,7 +116,7 @@ externe Quellen-Aktivierung (AP-06) und – zurückgestellt – Multi-User (AP-0
 
 | Rang | AP-ID | Großes Arbeitspaket | Status | Klasse | Auslöser / Bedingung |
 | --- | --- | --- | --- | --- | --- |
-| **P1** | AP-13 | ML-Training Data Lake | In Arbeit | MVP-Should | User-Request; permanente Datenhaltung + ML-Pipeline |
+| ~~P1~~ | AP-13 | ML-Training Data Lake | **Erledigt** | MVP-Should | 15/15 TAPs abgeschlossen (SwR-055..071) |
 | **P2** | AP-06 | Externe Quellen-Aktivierung (G2) | Blockiert | MVP-Should | **springt auf aktiv**, sobald gültige ReliefWeb/UCDP-Credentials vorliegen |
 | **P3** | AP-09 | Multi-User-Governance (G5) | Zurückgestellt | Post-MVP | nur wenn Operating-Model Multi-User explizit fordert |
 
@@ -305,7 +306,7 @@ Verfahren ausgewertet und kombiniert werden.
 | AP-12.5 | Einzelquellen-Detailansicht in Coverage/Country-Profile: aufklappbarer Bereich pro Quelle mit Rohdaten-Snippet, Normalisierung, Scoring-Beitrag | Erledigt | Klickbare Zeilen mit aufklappbarem Detail-Panel (Provider, API, Auth, Cadence, Normalisierung, Indikatoren); 2 Tests; `acee482` |
 | AP-12.6 | Nav-Integration & Cross-Links: neue Seiten in Nav, Deep-Links Sources↔Coverage↔Methodology, Glossar-Tooltips | Erledigt | Transparency-Footer auf Overview+Coverage, About→Methodology Link, alle 3 Seiten in Nav; 4 Tests; `5dde58d` |
 
-#### AP-13 — ML-Training Data Lake · Status: In Arbeit · Rang: P1 · Klasse: MVP-Should
+#### AP-13 — ML-Training Data Lake · Status: Erledigt · Klasse: MVP-Should
 Herkunft: User-Request (2026-06-23). Ziel: Permanente, ML-optimierte Datenhaltung aller SIASA-Domänen.
 Aktuell gehen alle operativen Daten nach 168h (7 Tage) verloren. AP-13 schafft ein Parquet-basiertes
 Langzeitarchiv mit DuckDB-Query-Layer, Multi-Resolution Feature-Engineering, und direkter
@@ -341,17 +342,17 @@ Phase 3 — ML-Integration:
 
 | TAP | Inhalt | Status | Hinweis |
 | --- | --- | --- | --- |
-| AP-13.10 | PyTorch SIASATimeSeriesDataset + DataLoader | Offen | Benötigt AP-13.9 |
-| AP-13.11 | HuggingFace Datasets Export + Dataset Card | Offen | Benötigt AP-13.9 |
-| AP-13.12 | Encoding-Utilities (Country Embeddings, Signal Pivotierung) | Offen | Benötigt AP-13.2 |
+| AP-13.10 | PyTorch SIASATimeSeriesDataset + DataLoader | Erledigt | 9 Tests; SIASATimeSeriesDataset mit Window/Horizon/Filter/Collate; SwR-066 + TC + Traces |
+| AP-13.11 | HuggingFace Datasets Export + Dataset Card | Erledigt | 7 Tests; HFExporter mit Parquet→HF, Card-Generator, Split-Export; SwR-067 + TC + Traces |
+| AP-13.12 | Encoding-Utilities (Country Embeddings, Signal Pivotierung) | Erledigt | 12 Tests; DomainOneHot, QualityOrdinal, CountryEmbedding, SignalPivot; SwR-068 + TC + Traces |
 
 Phase 4 — Operationalisierung:
 
 | TAP | Inhalt | Status | Hinweis |
 | --- | --- | --- | --- |
-| AP-13.13 | Retention-Policy Migration: Pre-Cleanup Archive-Hook | Offen | Benötigt AP-13.1 |
-| AP-13.14 | Archive Health Dashboard (`archive.html` in GUI) | Offen | Benötigt AP-13.1, AP-13.4 |
-| AP-13.15 | CLI für Archive-Management (stats, compact, validate, export) | Offen | Benötigt AP-13.1, AP-13.4 |
+| AP-13.13 | Retention-Policy Migration: Pre-Cleanup Archive-Hook | Erledigt | 6 Tests; RetentionArchiveHook mit No-Data-Loss-Garantie, Failure-Safety; SwR-069 + TC + Traces |
+| AP-13.14 | Archive Health Dashboard (`archive.html` in GUI) | Erledigt | 8 Tests; ArchiveHealthMonitor mit Gap-Detection, Source/Domain/Year-Counts; SwR-070 + TC + Traces |
+| AP-13.15 | CLI für Archive-Management (stats, compact, validate, export) | Erledigt | 7 Tests; ArchiveManager mit Stats/Validate/Compact/Export-Training; SwR-071 + TC + Traces |
 
 ---
 
@@ -367,7 +368,7 @@ Phase 4 — Operationalisierung:
 | L6 | ~~Uneinheitliche/unklare Terminologie über Planungs- und Code-Artefakte~~ | AP-10 | geschlossen | Glossar mit 55 Termen erstellt; Artefakte konsistent |
 | L7 | ~~Domain-D/E/C/A-Coverage dünn~~ | AP-11 | geschlossen | 3 neue Adapter (Frankfurter/Voidly/HDX-INFORM); 4 TAPs extern blockiert (API-Key/DNS) |
 | L8 | ~~GUI zeigt zu wenig Quellen-/Methodik-Transparenz~~ | AP-12 | geschlossen | 3 neue Seiten (Sources, About, Methodology), parametrierbare Zeitachse, aufklappbare Quellen-Details, Cross-Links; 31 Tests |
-| L9 | Keine permanente Datenhaltung — alle Records gehen nach 168h verloren; kein ML-Training möglich | AP-13 | **in Arbeit** | AP-13.1 (Parquet-Archiv) als erstes TAP; 15 TAPs in 4 Phasen |
+| L9 | Keine permanente Datenhaltung — alle Records gehen nach 168h verloren; kein ML-Training möglich | AP-13 | **geschlossen** | 15/15 TAPs erledigt: Parquet-Archiv + DuckDB + Features + ML-Integration + Ops |
 
 Pivot-Auslöser (wann die Priorisierung neu bewertet wird):
 - AP-13 Data Lake abgeschlossen → ML-Training-Workflows ermöglichen;
