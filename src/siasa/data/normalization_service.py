@@ -36,6 +36,9 @@ def normalize_records(
                 value=float(raw_record["value"]),
                 provenance_source_id=source_id,
                 quality_context=quality_context,
+                period_start=str(raw_record.get("period_start") or ""),
+                period_end=str(raw_record.get("period_end") or ""),
+                granularity=str(raw_record.get("granularity") or ""),
             )
         )
     return normalized

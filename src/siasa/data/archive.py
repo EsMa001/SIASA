@@ -1,8 +1,9 @@
-"""SIASA Data Archive — Parquet-based permanent storage (AP-13.1).
+"""SIASA Data Archive — Parquet-based permanent storage (AP-13.1, AP-13.3).
 
 Implements:
 - SwR-055: Parquet archive writer with Hive partitioning
 - SwR-056: Archive pipeline hook (invoked after normalization)
+- SwR-059: Dual-timestamp schema (period_start, period_end, granularity)
 """
 from __future__ import annotations
 
@@ -31,6 +32,9 @@ ARCHIVE_SCHEMA = pa.schema([
     pa.field("mapping_id", pa.string()),
     pa.field("freshness_hours", pa.float64()),
     pa.field("quality_flag", pa.string()),
+    pa.field("period_start", pa.string()),
+    pa.field("period_end", pa.string()),
+    pa.field("granularity", pa.string()),
 ])
 
 
@@ -85,6 +89,9 @@ class ArchiveWriter:
                 "mapping_id": rec.quality_context.get("mapping_id", ""),
                 "freshness_hours": float(rec.quality_context.get("freshness_hours", 0.0)),
                 "quality_flag": rec.quality_context.get("quality_flag", ""),
+                "period_start": rec.period_start,
+                "period_end": rec.period_end,
+                "granularity": rec.granularity,
             })
 
         total_written = 0

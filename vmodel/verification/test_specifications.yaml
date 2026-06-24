@@ -1167,3 +1167,10 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_registry.py
   status: accepted
+
+- id: TC-SwR-059-001
+  title: Dual-timestamp schema — period fields on NormalizedRecord and archive
+  verifies: SwR-059
+  method: unit_test
+  test_file: tests/unit/test_dual_timestamp.py
+  status: accepted

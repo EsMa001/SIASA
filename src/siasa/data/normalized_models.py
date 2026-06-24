@@ -14,6 +14,9 @@ class NormalizedRecord:
     value: float
     provenance_source_id: str
     quality_context: dict[str, Any] = field(default_factory=dict)
+    period_start: str = ""
+    period_end: str = ""
+    granularity: str = ""
 
     def __post_init__(self) -> None:
         if len(self.country_id) != 3:

@@ -5,7 +5,7 @@ metadata:
   - vmodel/architecture/system_architecture.md
   created_at_utc: '2026-05-11T14:25:30.979384+00:00'
   status: draft_baseline_derived
-  software_requirement_count: 58
+  software_requirement_count: 59
 software_requirements:
 - id: SwR-001
   title: Source catalog record schema
@@ -561,5 +561,15 @@ software_requirements:
   derives_from:
   - SyR-051
   - SyR-052
+  verification_method: unit_test
+  allocated_to: DDS-002
+
+- id: SwR-059
+  title: Dual-timestamp schema for temporal period metadata
+  statement: The software shall extend NormalizedRecord and the Parquet archive schema with period_start (ISO UTC string), period_end (ISO UTC string), and granularity (enum-like string — hourly, daily, weekly, monthly, quarterly, yearly) fields. When adapters supply native temporal period boundaries, the normalization service shall propagate them into the archive. Fields default to empty string when not provided.
+  status: accepted
+  derives_from:
+  - SyR-051
+  - SyR-053
   verification_method: unit_test
   allocated_to: DDS-002
