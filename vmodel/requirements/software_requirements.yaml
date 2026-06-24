@@ -683,3 +683,12 @@ software_requirements:
   - SyR-051
   verification_method: unit_test
   allocated_to: DDS-002
+
+- id: SwR-071
+  title: CLI archive manager with stats, compaction, validation, and export
+  statement: The software shall provide an ArchiveManager CLI entry point that supports --stats (archive statistics), --validate (schema and data integrity check), --compact (merge small Parquet files), and --export-training (generate versioned training set) subcommands.
+  status: accepted
+  derives_from:
+  - SyR-051
+  verification_method: unit_test
+  allocated_to: DDS-002
