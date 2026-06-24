@@ -20,6 +20,10 @@ from siasa.adapters import (
     VoidlyAdapter,
     WorldBankIndicatorsAdapter,
 )
+from siasa.adapters.wikipedia_pageviews import WikipediaPageviewsAdapter
+from siasa.adapters.ecb_data import ECBDataAdapter
+from siasa.adapters.eurostat import EurostatAdapter
+from siasa.adapters.nvd_cve import NVDCVEAdapter
 from siasa.data.normalization_mappings import NormalizationMappingVersion
 from siasa.data.normalization_service import normalize_records
 from siasa.features.domain_a import DomainAFeatureService
@@ -715,6 +719,30 @@ def _build_normalization_mappings() -> list[NormalizationMappingVersion]:
             version="v1",
             is_active=True,
         ),
+        NormalizationMappingVersion(
+            mapping_id="MAP-SRC-WIKI-PAGEVIEWS-v1",
+            source_id="SRC-WIKI-PAGEVIEWS",
+            version="v1",
+            is_active=True,
+        ),
+        NormalizationMappingVersion(
+            mapping_id="MAP-SRC-ECB-DATA-v1",
+            source_id="SRC-ECB-DATA",
+            version="v1",
+            is_active=True,
+        ),
+        NormalizationMappingVersion(
+            mapping_id="MAP-SRC-EUROSTAT-v1",
+            source_id="SRC-EUROSTAT",
+            version="v1",
+            is_active=True,
+        ),
+        NormalizationMappingVersion(
+            mapping_id="MAP-SRC-NVD-CVE-v1",
+            source_id="SRC-NVD-CVE",
+            version="v1",
+            is_active=True,
+        ),
     ]
 
 
@@ -1023,6 +1051,16 @@ def build_governed_live_orchestrator(
             FrankfurterAdapter(country_ids=resolved_country_ids),
             # Domain C: INFORM Risk Index (HDX CSV)
             HDXInformRiskAdapter(country_ids=resolved_country_ids),
+            # Domain A: Wikipedia Pageviews — narrative attention proxy (AP-14.1)
+            WikipediaPageviewsAdapter(
+                country_topics={cid: meta["gdelt_query"] for cid, meta in _SUPPORTED_LIVE_PILOT_COUNTRIES.items() if cid in resolved_country_ids},
+            ),
+            # Domain D: ECB exchange rates + key interest rate (AP-14.2)
+            ECBDataAdapter(country_ids=tuple(resolved_country_ids)),
+            # Domain D: Eurostat HICP inflation + unemployment (AP-14.3)
+            EurostatAdapter(country_ids=tuple(resolved_country_ids)),
+            # Domain E: NVD CVE vulnerability intelligence (AP-14.4)
+            NVDCVEAdapter(),
         ]
     )
     runtime_profile = "live-multi-country-v1" if len(resolved_country_ids) > 1 else "live-single-country-v1"

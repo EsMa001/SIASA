@@ -286,3 +286,32 @@ data_sources:
   Zugriff: frei
   Historie: mehrjährig prüfen
   Bemerkung: eher globale Threat Intelligence
+# --- AP-14 Kostenfreie API-Quellen (verifiziert + integriert) ---
+- Ebene: A
+  Quelle: Wikipedia Pageviews (Wikimedia REST API)
+  Status: Live/Core
+  Signale: wiki_pageview_count (tägliche Seitenaufrufe pro Land/Thema)
+  Zugriff: frei, keine Authentifizierung, keine Rate-Limits für moderate Nutzung
+  Historie: ab 2015 (stündlich, täglich, monatlich)
+  Bemerkung: Proxy für öffentliches Narrativ-Interesse; SRC-WIKI-PAGEVIEWS; AP-14.1
+- Ebene: D
+  Quelle: ECB Data API (SDMX-JSON)
+  Status: Live/Core
+  Signale: ecb_key_rate, ecb_fx_{currency}_per_eur (Wechselkurse + Leitzins)
+  Zugriff: frei, keine Authentifizierung
+  Historie: ab 1999 (täglich)
+  Bemerkung: Europäische Zentralbank; SDMX-JSON Format; SRC-ECB-DATA; AP-14.2
+- Ebene: D
+  Quelle: Eurostat JSON API
+  Status: Live/Core
+  Signale: eurostat_hicp_inflation, eurostat_unemployment_rate
+  Zugriff: frei, keine Authentifizierung
+  Historie: ab 1996 (monatlich)
+  Bemerkung: EU-27 Coverage; JSON-stat Format; SRC-EUROSTAT; AP-14.3
+- Ebene: E
+  Quelle: NVD CVE 2.0 API (NIST)
+  Status: Live/Core
+  Signale: nvd_cve_count_daily, nvd_avg_cvss_base, nvd_critical_cve_count
+  Zugriff: frei, keine Authentifizierung (Rate-Limit: 5 req/30s, mit Key 50/30s)
+  Historie: ab 1999 (täglich)
+  Bemerkung: CVSS v3.1/3.0/2.0; globale Cyber-Verwundbarkeitslandschaft; SRC-NVD-CVE; AP-14.4
