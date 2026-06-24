@@ -1290,3 +1290,11 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_adapter_ecb_data.py
   status: accepted
+
+- id: TC-SwR-074-001
+  title: Eurostat adapter — JSON-stat parsing, inflation, unemployment, country mapping
+  requirement_ids:
+  - SwR-074
+  method: unit_test
+  test_file: tests/unit/test_adapter_eurostat.py
+  status: accepted

@@ -726,6 +726,7 @@ implementation_slices:
     requirement_ids:
       - SwR-072
       - SwR-073
+      - SwR-074
     implementation_map:
       SwR-072:
         code_paths:
@@ -737,9 +738,15 @@ implementation_slices:
           - src/siasa/adapters/ecb_data.py
         test_paths:
           - tests/unit/test_adapter_ecb_data.py
+      SwR-074:
+        code_paths:
+          - src/siasa/adapters/eurostat.py
+        test_paths:
+          - tests/unit/test_adapter_eurostat.py
     known_code_paths:
       - src/siasa/adapters/wikipedia_pageviews.py
       - src/siasa/adapters/ecb_data.py
+      - src/siasa/adapters/eurostat.py
     known_test_paths:
       - tests/unit/test_adapter_wikipedia_pageviews.py
       - tests/unit/test_adapter_ecb_data.py
