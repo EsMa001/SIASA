@@ -107,7 +107,7 @@ Regeln:
 | AP-15 | Erweiterte kostenfreie API-Integration | Erledigt | – | MVP-Should | 8 Adapter, 53 Signale, Registry + Runtime verdrahtet |
 | AP-16 | Skill-Messharness (Ground-Truth-Backtest) | Offen | **P1** | Analytik-Kern | F7/F8/F9: Validierung misst keine Modellgüte |
 | AP-17 | Slow-Layer Streuung/z-Score | Erledigt | – | Analytik-Kern | F3 (teil): std_7d/30d + z-Score (`compute_zscore`, ALGO-ZSCORE-01) in `multi_resolution.py`; SwR-063 erw.; 16 Tests grün |
-| AP-18 | Reale Anomalie-Berechnung (Feature→Anomalie) | Offen | **P1** | Analytik-Kern | F1: anomaly_score ist Konstante |
+| AP-18 | Reale Anomalie-Berechnung (Feature→Anomalie) | Erledigt | – | Analytik-Kern | F1 Live-Site: ALGO-ANOM-01 (z-Score/Fenster-Records, coverage-gewichtet, gekappt), `scoring/anomaly.py`, 9 Tests; Replay-Site bewusst in AP-26 |
 | AP-19 | Unsicherheit aus echten Quellen | Offen | P4 | Analytik-Kern | F3 — Phase 4 (nach Validierung bisektierbar) |
 | AP-20 | Echte Abhängigkeitsdetektion + Zentralität | Offen | P4 | Analytik-Kern | F4 — Phase 4 |
 | AP-21 | Info-Epidemiologie mit echten Zeitstempeln | Offen | P4 | Analytik-Kern | F5 — Phase 4 |
@@ -151,7 +151,7 @@ Die verbleibende blockierte Arbeit ist externe Quellen-Aktivierung (AP-06) und �
 | Rang | Phase | AP-ID | Großes Arbeitspaket | Status | Klasse | Auslöser / Bedingung |
 | --- | --- | --- | --- | --- | --- | --- |
 | ~~P1~~ | 0 | AP-17 | Slow-Layer Streuung/z-Score | **Erledigt** | Analytik-Kern | F3: σ/z-Score geliefert (std_7d/30d, `compute_zscore`); SwR-063 erweitert |
-| **P1** | 0 | AP-18 | Reale Anomalie-Berechnung (Feature→Anomalie) | Offen | Analytik-Kern | F1: anomaly_score ist Konstante; braucht AP-17 |
+| ~~P1~~ | 0 | AP-18 | Reale Anomalie-Berechnung (Feature→Anomalie) | **Erledigt** | Analytik-Kern | F1 Live-Site geschlossen: ALGO-ANOM-01 (z-Score über Fenster-Records); Replay-Site → AP-26 |
 | **P1** | 0 | AP-25 | Fail-Loud-Policy für Analytikstufen | Offen | Governance | F10: stille Degradation untergräbt jede spätere Zahl |
 | **P1** | 0 | AP-26 | Status-Zeitreihe im Fenster-Replay | Offen | Validierung | F16: Punktstatus → tägliche Trajektorie; braucht AP-18 |
 | **P1** | 1a | AP-27 | Ground-Truth-Redesign mit Negativfällen | Offen | Validierung | F15: S0-Negative, Onset, Trajektorie, Holdout-Split (längster Pol Labels) |
@@ -421,7 +421,7 @@ Governance: Schwellenwert-Festlegungen bleiben beim Projekteigner.
 | --- | --- | --- | --- | --- | --- |
 | AP-16 | Skill-Messharness (Ground-Truth-Backtest) | 1 | F7/F8/F9 | Phase 1b (Gerüst für AP-28) | Offen |
 | AP-17 | Slow-Layer Streuung/z-Score | 1 | F3 (teil) | Phase 0 | **Erledigt** |
-| AP-18 | Reale Anomalie-Berechnung (Feature→Anomalie) | 1 | F1 | Phase 0 | Offen |
+| AP-18 | Reale Anomalie-Berechnung (Feature→Anomalie) | 1 | F1 (Live) | Phase 0 | **Erledigt** |
 | AP-19 | Unsicherheit aus echten Quellen | 2 | F3 | Phase 4 | Offen |
 | AP-20 | Echte Abhängigkeitsdetektion + Zentralität | 2 | F4 | Phase 4 | Offen |
 | AP-21 | Info-Epidemiologie mit echten Zeitstempeln | 2 | F5 | Phase 4 | Offen |
@@ -450,6 +450,9 @@ Ziel: Der Replay-Pfad erzeugt aus `NormalizedRecords` eine **deterministische t�
 `(date, status, confidence)` über das Fall-Fenster statt eines Einzel-Labels (heute kollabiert
 `_derive_country_replay_status`, `historical_replay.py:141`, alles zu einem `replayed_status`).
 **Merge-Hotspot:** ändert dieselben Funktionen additiv wie AP-31 — Felder unabhängig hinzufügen.
+**F1-Replay-Site:** AP-26 übernimmt ALGO-ANOM-01 (AP-18) für die Replay-Anomalie und ersetzt die verbliebene
+`_DOMAIN_ANOMALY_SCORES`-Konstante in `_derive_country_replay_status` (bewusst hierher verschoben, da diese Funktion
+hier ohnehin auf die PIT-Tageszeitreihe umgebaut wird; verhindert vorzeitigen S0-Kollaps der synthetischen Fixtures).
 
 | TAP | Inhalt | Status | Trace / Hinweis |
 | --- | --- | --- | --- |
@@ -558,7 +561,7 @@ verstecktes Bottleneck für AP-28/AP-32 — vorab schließen.
 | L7 | ~~Domain-D/E/C/A-Coverage dünn~~ | AP-11 | geschlossen | 3 neue Adapter (Frankfurter/Voidly/HDX-INFORM); 4 TAPs extern blockiert (API-Key/DNS) |
 | L8 | ~~GUI zeigt zu wenig Quellen-/Methodik-Transparenz~~ | AP-12 | geschlossen | 3 neue Seiten (Sources, About, Methodology), parametrierbare Zeitachse, aufklappbare Quellen-Details, Cross-Links; 31 Tests |
 | L9 | Keine permanente Datenhaltung — alle Records gehen nach 168h verloren; kein ML-Training möglich | AP-13 | **geschlossen** | 15/15 TAPs erledigt: Parquet-Archiv + DuckDB + Features + ML-Integration + Ops |
-| L10 | Modell gibt konstantes Signal (anomaly_score Konstante); Validierung misst keine Modellgüte | AP-16/17/18/25/26/28 | **offen (Phase 0+1)** | Korrektheit + Messinstrument: reale Anomalie, σ/z-Score, Fail-Loud, Status-Zeitreihe, Skill-Metrik |
+| L10 | Modell gibt konstantes Signal (anomaly_score Konstante); Validierung misst keine Modellgüte | AP-16/17/18/25/26/28 | **teilweise (AP-17, AP-18-Live erledigt)** | Rest: Fail-Loud (AP-25), Status-Zeitreihe + Replay-Anomalie (AP-26), Skill-Metrik (AP-16/28) |
 | L11 | Ground-Truth degeneriert: keine S0-Negative, kein Onset, zirkuläre Labels (F15) | AP-27 | **offen (Phase 1a)** | Label-Redesign — längster Pol; Hoheit Projekteigner |
 | L12 | „Echte" Eventdaten sind synthetisch (4–8 Hand-Records, falsch als provider-derived deklariert) (F14) | AP-29/30/31 | **offen (Phase 2)** | Echter historischer Backfill GDELT/GDACS/WB + PIT + ehrliche Origin-Kennzeichnung — größter Block |
 

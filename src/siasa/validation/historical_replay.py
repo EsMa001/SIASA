@@ -30,6 +30,11 @@ class HistoricalReplayInput:
 
 
 _FEATURE_SERVICES = (DomainAFeatureService(), DomainBFeatureService(), DomainCFeatureService(), DomainDFeatureService(), DomainEFeatureService())
+# F1 (remaining replay site): the live path uses the data-driven ALGO-ANOM-01 (AP-18,
+# src/siasa/scoring/anomaly.py). The replay path keeps this constant until AP-26 reworks
+# _derive_country_replay_status into a point-in-time daily status timeseries, where the same
+# ALGO-ANOM-01 will be wired in consistently (avoids collapsing the thin synthetic fixtures
+# to S0 before AP-26/AP-30 supply real temporal depth).
 _DOMAIN_ANOMALY_SCORES = {"A": 0.7, "B": 0.3, "C": 0.2, "D": 0.1, "E": 0.2}
 
 

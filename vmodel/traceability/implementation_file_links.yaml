@@ -359,9 +359,11 @@ implementation_slices:
           - tests/unit/test_governance_guards.py
       SwR-048:
         code_paths:
+          - src/siasa/scoring/anomaly.py
           - src/siasa/scoring/baselines.py
           - src/siasa/scoring/domain_status.py
         test_paths:
+          - tests/unit/test_anomaly.py
           - tests/unit/test_baselines.py
           - tests/unit/test_domain_status.py
       SwR-049:
@@ -406,6 +408,7 @@ implementation_slices:
       - src/siasa/reporting/manual_reports.py
       - src/siasa/scoring/baselines.py
       - src/siasa/scoring/domain_status.py
+      - src/siasa/scoring/anomaly.py
       - src/siasa/catalog/models.py
       - src/siasa/data/raw_models.py
       - src/siasa/data/normalized_models.py
@@ -421,6 +424,7 @@ implementation_slices:
       - tests/unit/test_local_gui.py
       - tests/unit/test_baselines.py
       - tests/unit/test_domain_status.py
+      - tests/unit/test_anomaly.py
       - tests/unit/test_catalog_models.py
       - tests/unit/test_data_models.py
       - tests/unit/test_features_base.py

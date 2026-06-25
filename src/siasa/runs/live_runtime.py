@@ -46,6 +46,7 @@ from siasa.readmodels.validation_backtest import (
     build_validation_portfolio_summary,
 )
 from siasa.runs.orchestrator import DailyRunOrchestrator, DailyRunResult
+from siasa.scoring.anomaly import compute_feature_driven_anomaly
 from siasa.scoring.data_sufficiency import evaluate_data_sufficiency
 from siasa.scoring.domain_status import derive_domain_status
 from siasa.scoring.multi_domain_status import derive_multi_domain_status
@@ -755,9 +756,9 @@ def _build_normalization_mappings() -> list[NormalizationMappingVersion]:
 
 
 
-def _default_domain_status_analyzer(domain: str, features):
+def _default_domain_status_analyzer(domain: str, features, records=None):
     sufficiency = evaluate_data_sufficiency(features)
-    anomaly_score = {"A": 0.7, "B": 0.3, "C": 0.2, "D": 0.1, "E": 0.2}.get(domain, 0.1)
+    anomaly_score = compute_feature_driven_anomaly(domain, records or [])
     return derive_domain_status(domain, anomaly_score=anomaly_score, sufficiency=sufficiency)
 
 

@@ -50,7 +50,7 @@ def _normalize(source_id: str, domain: str, records: list[dict[str, float]]) -> 
 
 
 
-def _domain_status_analyzer(domain: str, features):
+def _domain_status_analyzer(domain: str, features, records=None):
     sufficiency = evaluate_data_sufficiency(features)
     anomaly_score = {"A": 0.7, "B": 0.3, "D": 0.1}.get(domain, 0.1)
     return derive_domain_status(domain, anomaly_score=anomaly_score, sufficiency=sufficiency)

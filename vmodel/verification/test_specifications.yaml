@@ -1075,11 +1075,12 @@ test_specifications:
   - SwR-048
   title: Verify Relative-baseline anomaly evaluation
   level: software
-  method: software_specification_review
+  method: unit_test
   status: specified
+  test_file: tests/unit/test_anomaly.py
   preconditions:
-  - Derived software requirements and software architecture are available.
-  expected_result: The software shall evaluate signal abnormality relative to historical, country-specific, domain-specific, and source-specific baselines, not by absolute raw magnitude alone.
+  - compute_feature_driven_anomaly is available in src/siasa/scoring/anomaly.py.
+  expected_result: The domain anomaly is a coverage-weighted, upper-bounded relative deviation derived from the within-window signal z-score (ALGO-ANOM-01), not a fixed per-domain constant; varying input yields a varying, bounded value.
 - id: TC-SwR-049-001
   requirement_ids:
   - SwR-049

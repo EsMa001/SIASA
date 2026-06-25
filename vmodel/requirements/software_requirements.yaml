@@ -457,7 +457,7 @@ software_requirements:
   verification_method: software_specification_review
 - id: SwR-048
   title: Relative-baseline anomaly evaluation
-  statement: The software shall evaluate signal abnormality relative to historical, country-specific, domain-specific, and source-specific baselines, not by absolute raw magnitude alone.
+  statement: The software shall evaluate signal abnormality relative to historical, country-specific, domain-specific, and source-specific baselines, not by absolute raw magnitude alone, and shall derive each domain anomaly score from the domain's feature values as a coverage-weighted, upper-bounded relative deviation per ALGO-ANOM-01 rather than from a fixed per-domain constant.
   status: accepted
   derives_from:
   - SyR-001

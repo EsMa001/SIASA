@@ -108,6 +108,15 @@ Anomalie-Definition in σ.
 **Aufwand:** M (3–5 PT)
 **Risiko:** mittel
 
+**Status (2026-06-25):** Live-Pfad **erledigt** — ALGO-ANOM-01 in `src/siasa/scoring/anomaly.py`
+(latest-Wert je signal_key z-genormt gegen Fenster-Mittel/-Std via `compute_zscore` / ALGO-ZSCORE-01 / AP-17,
+coverage-gewichtet aggregiert, gekappt auf `ANOMALY_UPPER_BOUND=1.5`), verdrahtet in
+`_default_domain_status_analyzer` (Orchestrator reicht die Domain-Records durch). Owner-Entscheid: z-Score
+ueber Fenster-Records (Option A). Replay-Pendant (`_DOMAIN_ANOMALY_SCORES`) bewusst nach **AP-26** verschoben
+(dort PIT-Zeitreihen-Umbau) — verhindert vorzeitigen S0-Kollaps der synthetischen Replay-Fixtures (F14/F15/F16).
+Anker: SwR-048 (Statement + TC-SwR-048-001 → unit_test). Tests: `tests/unit/test_anomaly.py` (9 gruen).
+V1-Grenze: Einzel-Snapshot-Bundles liefern ehrlich ~0; echte Tiefe ab AP-26/AP-30.
+
 ---
 
 ## Tier 2 — Fortgeschrittene Module real machen

@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 Normalizer = Callable[[str, str, list[dict[str, float]]], list[NormalizedRecord]]
-DomainStatusAnalyzer = Callable[[str, list[FeatureValue]], DomainStatusResult]
+DomainStatusAnalyzer = Callable[[str, list[FeatureValue], list[NormalizedRecord]], DomainStatusResult]
 MultiDomainStatusAnalyzer = Callable[[list[DomainStatusResult], dict[str, bool] | None], MultiDomainStatusResult]
 ValidationViewModelBuilder = Callable[
     [
@@ -194,7 +194,12 @@ class DailyRunOrchestrator:
                     feature for feature in features if feature.country_id == country_id and feature.domain == domain
                 ]
                 if domain_features:
-                    per_country_statuses[domain] = self.domain_status_analyzer(domain, domain_features)
+                    domain_records = [
+                        record
+                        for record in normalized_records
+                        if record.country_id == country_id and record.domain == domain
+                    ]
+                    per_country_statuses[domain] = self.domain_status_analyzer(domain, domain_features, domain_records)
             if per_country_statuses:
                 country_domain_statuses[country_id] = per_country_statuses
 
