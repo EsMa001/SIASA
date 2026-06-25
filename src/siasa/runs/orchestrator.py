@@ -20,6 +20,7 @@ from siasa.snapshots.models import Snapshot
 from siasa.snapshots.service import create_snapshot
 from siasa.traceability.lineage import LineageRecord, build_lineage_record
 
+from .run_gate import build_analytical_completeness, record_degradation
 from .run_state import RunState, SourceExecutionResult
 
 if TYPE_CHECKING:
@@ -78,6 +79,7 @@ class DailyRunResult:
     provenance_chain_result: Any = None
     spread_paths_result: list[Any] = field(default_factory=list)
     amplification_result: list[Any] = field(default_factory=list)
+    analytical_completeness: dict[str, Any] = field(default_factory=dict)
 
 
 
@@ -264,6 +266,7 @@ class DailyRunOrchestrator:
         fusion_results: dict[str, Any] = {}
         bayesian_estimates: dict[str, dict[str, Any]] = {}
         uncertainty_budgets: dict[str, Any] = {}
+        analytical_degradations: list[dict[str, Any]] = []
 
         # (a) Rule engine evaluation
         try:
@@ -286,8 +289,9 @@ class DailyRunOrchestrator:
                 rule_evaluation_results = evaluate_rules(rules, contexts)
         except ImportError:
             logger.debug("Rule engine dependencies not available, skipping rule evaluation")
-        except Exception:
+        except Exception as exc:
             logger.exception("Rule evaluation failed, continuing with empty results")
+            record_degradation(analytical_degradations, "rule_engine", exc)
 
         # (b) Cross-domain fusion
         try:
@@ -296,8 +300,9 @@ class DailyRunOrchestrator:
                 fusion_results[cid] = fuse_domain_evidence(list(per_country_statuses.values()))
         except ImportError:
             logger.debug("Cross-domain fusion module not available, skipping")
-        except Exception:
+        except Exception as exc:
             logger.exception("Cross-domain fusion failed, continuing with empty results")
+            record_degradation(analytical_degradations, "cross_domain_fusion", exc)
 
         # (c) Probabilistic (Bayesian) scoring
         try:
@@ -310,8 +315,9 @@ class DailyRunOrchestrator:
                     )
         except ImportError:
             logger.debug("Probabilistic scoring module not available, skipping")
-        except Exception:
+        except Exception as exc:
             logger.exception("Probabilistic scoring failed, continuing with empty results")
+            record_degradation(analytical_degradations, "probabilistic", exc)
 
         # (d) Uncertainty propagation
         try:
@@ -325,8 +331,9 @@ class DailyRunOrchestrator:
                     uncertainty_budgets[cid] = propagate_uncertainty(source_uncertainties)
         except ImportError:
             logger.debug("Uncertainty propagation module not available, skipping")
-        except Exception:
+        except Exception as exc:
             logger.exception("Uncertainty propagation failed, continuing with empty results")
+            record_degradation(analytical_degradations, "uncertainty_propagation", exc)
 
         # (e) Dependency graph — source co-occurrence across countries/domains
         dependency_graph_result: Any = None
@@ -352,8 +359,9 @@ class DailyRunOrchestrator:
                 dependency_graph_result = build_dependency_graph(dep_edges)
         except ImportError:
             logger.debug("Dependency graph module not available, skipping")
-        except Exception:
+        except Exception as exc:
             logger.exception("Dependency graph failed, continuing with empty result")
+            record_degradation(analytical_degradations, "dependency_graph", exc)
 
         # (f) Provenance graph — build from lineage records after they are computed
         # NOTE: lineage_records are computed later in the pipeline; we store a builder
@@ -385,8 +393,9 @@ class DailyRunOrchestrator:
                 amplification_result = detect_amplification(observations)
         except ImportError:
             logger.debug("Info epidemiology module not available, skipping")
-        except Exception:
+        except Exception as exc:
             logger.exception("Info epidemiology failed, continuing with empty results")
+            record_degradation(analytical_degradations, "info_epidemiology", exc)
 
         snapshot_rule_versions = dict(self.rule_versions)
         for normalized_record in normalized_records:
@@ -452,8 +461,9 @@ class DailyRunOrchestrator:
                 provenance_chain_result = build_provenance_chain(unique_prov_nodes, prov_edges)
         except ImportError:
             logger.debug("Provenance graph module not available, skipping")
-        except Exception:
+        except Exception as exc:
             logger.exception("Provenance graph failed, continuing with empty result")
+            record_degradation(analytical_degradations, "provenance_graph", exc)
         artifact_bundle = None
         validation_view_model = None
         validation_artifact_reason = "not_configured"
@@ -468,6 +478,7 @@ class DailyRunOrchestrator:
                 snapshot,
             )
             validation_artifact_reason = None if validation_view_model is not None else "no_usable_input_data"
+        analytical_completeness = build_analytical_completeness(analytical_degradations)
         artifact_status = {
             "validation_backtest": {
                 "status": "present" if validation_view_model is not None else "absent",
@@ -476,6 +487,14 @@ class DailyRunOrchestrator:
             "traceability_lineage": {"status": "present", "reason": None},
             "repo_closure": {"status": "present", "reason": None},
             "annotations": {"status": "present", "reason": None},
+            "analytical_completeness": {
+                "status": analytical_completeness["status"],
+                "reason": (
+                    None
+                    if analytical_completeness["status"] == "complete"
+                    else "degraded_stages:" + ",".join(analytical_completeness["degraded_stages"])
+                ),
+            },
         }
         if self.artifacts_output_dir is not None:
             from .artifacts import write_run_artifacts
@@ -536,6 +555,7 @@ class DailyRunOrchestrator:
             provenance_chain_result=provenance_chain_result,
             spread_paths_result=spread_paths_result,
             amplification_result=amplification_result,
+            analytical_completeness=analytical_completeness,
         )
 
     def _validate_active_sources(self, run_id: str) -> FailureArtifact | None:

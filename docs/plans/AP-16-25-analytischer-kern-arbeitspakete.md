@@ -296,6 +296,16 @@ V1-Grenze: Einzel-Snapshot-Bundles liefern ehrlich ~0; echte Tiefe ab AP-26/AP-3
 **Aufwand:** S (≤2 PT)
 **Risiko:** niedrig
 
+**Status (2026-06-25):** **Erledigt** — ALGO-RUNGATE-01 in `src/siasa/runs/run_gate.py`
+(record_degradation + build_analytical_completeness). Die 7 Analytikstufen (a-g) im Orchestrator fangen
+geworfene Exceptions weiterhin ab, schreiben aber jetzt einen expliziten Degradationseintrag
+(stage/exception_type/reason), aggregiert zu einem Run-Level-Verdict `analytical_completeness`
+(complete/degraded), gespiegelt in `artifact_status["analytical_completeness"]` und in den
+Readiness-`artifact_checks` (informativ, NICHT release-blockierend — Severity bleibt Owner-Hoheit).
+ImportError-Zweige bleiben legitime Skips. Anker: SwR-044 (Statement). Tests:
+`tests/unit/test_run_gate.py` (5) + Orchestrator-Integrationstest (erzwungene Fusion-Exception →
+Degradationseintrag, Run bleibt success).
+
 ---
 
 ## Kritischer Pfad

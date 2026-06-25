@@ -176,6 +176,66 @@ def test_daily_run_orchestrator_executes_end_to_end_pipeline() -> None:
 
 
 
+def test_daily_run_orchestrator_records_explicit_degradation_when_analytical_stage_raises(monkeypatch) -> None:
+    import siasa.scoring.cross_domain_fusion as cross_domain_fusion
+
+    def _boom(*args, **kwargs):
+        raise ValueError("forced fusion failure")
+
+    monkeypatch.setattr(cross_domain_fusion, "fuse_domain_evidence", _boom)
+
+    adapters = [
+        FakeAdapter(
+            source_id="SRC-A",
+            domain="A",
+            _result=FetchResult(
+                records=[
+                    {"signal_key": "article_count", "value": 3.0, "expected_source_count": 1, "freshness_hours": 6},
+                    {"signal_key": "tone", "value": -0.2, "expected_source_count": 1, "freshness_hours": 6},
+                    {"signal_key": "topic:security", "value": 2.0, "expected_source_count": 1, "freshness_hours": 6},
+                ]
+            ),
+        ),
+        FakeAdapter(
+            source_id="SRC-B",
+            domain="B",
+            _result=FetchResult(
+                records=[
+                    {"signal_key": "conflict_event_count", "value": 4.0, "expected_source_count": 1, "freshness_hours": 12},
+                    {"signal_key": "protest_event_count", "value": 2.0, "expected_source_count": 1, "freshness_hours": 12},
+                ]
+            ),
+        ),
+    ]
+
+    orchestrator = DailyRunOrchestrator(
+        adapters=adapters,
+        normalizer=_normalize,
+        feature_services=[DomainAFeatureService(), DomainBFeatureService()],
+        domain_status_analyzer=_domain_status_analyzer,
+        multi_domain_status_analyzer=derive_multi_domain_status,
+        country_set_id="MVP-COUNTRIES-v1",
+        active_domains=["A", "B"],
+        rule_versions={"domain_status": "rules-2026-05", "multi_domain_status": "rules-2026-05"},
+        algorithm_version="alg-0.1",
+        data_version="data-0.1",
+    )
+
+    result = orchestrator.run(run_id="RUN-AP25-FAILLOUD")
+
+    # Fail-loud: the run still completes, but the swallowed exception is now an
+    # explicit degradation entry instead of a silently-empty fusion result (F10).
+    assert result.run_state.status == "success"
+    assert result.fusion_results == {}
+    completeness = result.analytical_completeness
+    assert completeness["status"] == "degraded"
+    assert "cross_domain_fusion" in completeness["degraded_stages"]
+    entry = next(e for e in completeness["entries"] if e["stage"] == "cross_domain_fusion")
+    assert entry["exception_type"] == "ValueError"
+    assert entry["reason"] == "forced fusion failure"
+
+
+
 def test_daily_run_orchestrator_continues_after_source_failure_and_marks_partial_success() -> None:
     adapters = [
         FakeAdapter(

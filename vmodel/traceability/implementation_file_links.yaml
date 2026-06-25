@@ -328,12 +328,14 @@ implementation_slices:
       SwR-044:
         code_paths:
           - src/siasa/runs/run_state.py
+          - src/siasa/runs/run_gate.py
           - src/siasa/snapshots/models.py
           - src/siasa/snapshots/service.py
           - src/siasa/runs/orchestrator.py
           - src/siasa/runs/artifacts.py
         test_paths:
           - tests/unit/test_run_state.py
+          - tests/unit/test_run_gate.py
           - tests/unit/test_run_orchestrator.py
           - tests/unit/test_run_artifacts.py
       SwR-045:
@@ -398,6 +400,7 @@ implementation_slices:
       - src/siasa/reporting/daily_snapshot.py
       - src/siasa/runs/orchestrator.py
       - src/siasa/runs/run_state.py
+      - src/siasa/runs/run_gate.py
       - src/siasa/snapshots/models.py
       - src/siasa/snapshots/service.py
       - src/siasa/runs/artifacts.py
@@ -418,6 +421,7 @@ implementation_slices:
       - tests/unit/test_reporting_daily_snapshot.py
       - tests/unit/test_run_orchestrator.py
       - tests/unit/test_run_state.py
+      - tests/unit/test_run_gate.py
       - tests/unit/test_run_artifacts.py
       - tests/unit/test_reprocessing.py
       - tests/unit/test_reprocessing_workflow.py

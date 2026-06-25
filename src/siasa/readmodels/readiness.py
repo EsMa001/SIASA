@@ -48,7 +48,7 @@ def build_readiness_view_model(
             ),
             "reason": (artifact_status.get(artifact_key, {}) or {}).get("reason"),
         }
-        for artifact_key in ["validation_backtest", "traceability_lineage", "repo_closure", "annotations"]
+        for artifact_key in ["validation_backtest", "traceability_lineage", "repo_closure", "annotations", "analytical_completeness"]
     ]
     demo_verdict = "ready" if all(check["ready"] for check in demo_checks) else "blocked"
     known_gaps = _deduplicated_strings(

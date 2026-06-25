@@ -114,7 +114,7 @@ Regeln:
 | AP-22 | Fusion in Entscheidung zurückführen + D5 | Offen | P4 | Analytik-Kern | F2/F12 — Phase 4 |
 | AP-23 | Provenance-Tiefe & In-Chain-Drift | Offen | P3 | Governance | F6: Provenance ist festes Template |
 | AP-24 | Schwellen-Governance (Magic Numbers) | Offen | P4 | Governance | F11 — Phase 4 |
-| AP-25 | Fail-Loud-Policy für Analytikstufen | Offen | **P1** | Governance | F10: stille Degradation (Phase-0-Gate) |
+| AP-25 | Fail-Loud-Policy für Analytikstufen | Erledigt | – | Governance | F10 geschlossen: ALGO-RUNGATE-01 (7 Analytikstufen → explizite Degradationseinträge in artifact_status/Readiness), `runs/run_gate.py`, 5+1 Tests |
 | AP-26 | Status-Zeitreihe im Fenster-Replay | Offen | **P1** | Validierung (Phase 0) | F16: Replay liefert Punktstatus statt Zeitreihe |
 | AP-27 | Ground-Truth-Redesign mit Negativfällen | Offen | **P1** | Validierung (Phase 1a) | F15: keine S0-Negative, kein Onset, zirkuläre Labels |
 | AP-28 | Skill-Metrik: Fehlalarmrate + No-Skill-Baseline | Offen | **P1** | Validierung (Phase 1b) | F9 real: Fehlalarm/Vorlauf/Brier messbar |
@@ -152,7 +152,7 @@ Die verbleibende blockierte Arbeit ist externe Quellen-Aktivierung (AP-06) und �
 | --- | --- | --- | --- | --- | --- | --- |
 | ~~P1~~ | 0 | AP-17 | Slow-Layer Streuung/z-Score | **Erledigt** | Analytik-Kern | F3: σ/z-Score geliefert (std_7d/30d, `compute_zscore`); SwR-063 erweitert |
 | ~~P1~~ | 0 | AP-18 | Reale Anomalie-Berechnung (Feature→Anomalie) | **Erledigt** | Analytik-Kern | F1 Live-Site geschlossen: ALGO-ANOM-01 (z-Score über Fenster-Records); Replay-Site → AP-26 |
-| **P1** | 0 | AP-25 | Fail-Loud-Policy für Analytikstufen | Offen | Governance | F10: stille Degradation untergräbt jede spätere Zahl |
+| ~~P1~~ | 0 | AP-25 | Fail-Loud-Policy für Analytikstufen | **Erledigt** | Governance | F10: stille Degradation → expliziter Degradationseintrag (ALGO-RUNGATE-01) |
 | **P1** | 0 | AP-26 | Status-Zeitreihe im Fenster-Replay | Offen | Validierung | F16: Punktstatus → tägliche Trajektorie; braucht AP-18 |
 | **P1** | 1a | AP-27 | Ground-Truth-Redesign mit Negativfällen | Offen | Validierung | F15: S0-Negative, Onset, Trajektorie, Holdout-Split (längster Pol Labels) |
 | **P1** | 1b | AP-16 | Skill-Messharness (Ground-Truth-Backtest) | Offen | Analytik-Kern | F7/F8/F9: Gerüst der Skill-Messung |
@@ -428,7 +428,7 @@ Governance: Schwellenwert-Festlegungen bleiben beim Projekteigner.
 | AP-22 | Fusion in Entscheidung zurückführen + D5 | 2 | F2/F12 | Phase 4 | Offen |
 | AP-23 | Provenance-Tiefe & In-Chain-Drift | 3 | F6 | unabhängig | Offen |
 | AP-24 | Schwellen-Governance (Magic Numbers) | 3 | F11 | Phase 4 | Offen |
-| AP-25 | Fail-Loud-Policy für Analytikstufen | 3 | F10 | Phase 0 (Gate) | Offen |
+| AP-25 | Fail-Loud-Policy für Analytikstufen | 3 | F10 | Phase 0 (Gate) | **Erledigt** |
 
 ### 4.D Validierung gegen echte Events (AP-26 … AP-32)
 
@@ -561,7 +561,7 @@ verstecktes Bottleneck für AP-28/AP-32 — vorab schließen.
 | L7 | ~~Domain-D/E/C/A-Coverage dünn~~ | AP-11 | geschlossen | 3 neue Adapter (Frankfurter/Voidly/HDX-INFORM); 4 TAPs extern blockiert (API-Key/DNS) |
 | L8 | ~~GUI zeigt zu wenig Quellen-/Methodik-Transparenz~~ | AP-12 | geschlossen | 3 neue Seiten (Sources, About, Methodology), parametrierbare Zeitachse, aufklappbare Quellen-Details, Cross-Links; 31 Tests |
 | L9 | Keine permanente Datenhaltung — alle Records gehen nach 168h verloren; kein ML-Training möglich | AP-13 | **geschlossen** | 15/15 TAPs erledigt: Parquet-Archiv + DuckDB + Features + ML-Integration + Ops |
-| L10 | Modell gibt konstantes Signal (anomaly_score Konstante); Validierung misst keine Modellgüte | AP-16/17/18/25/26/28 | **teilweise (AP-17, AP-18-Live erledigt)** | Rest: Fail-Loud (AP-25), Status-Zeitreihe + Replay-Anomalie (AP-26), Skill-Metrik (AP-16/28) |
+| L10 | Modell gibt konstantes Signal (anomaly_score Konstante); Validierung misst keine Modellgüte | AP-16/17/18/25/26/28 | **teilweise (AP-17, AP-18-Live, AP-25 erledigt)** | Rest: Status-Zeitreihe + Replay-Anomalie (AP-26), Skill-Metrik (AP-16/28) |
 | L11 | Ground-Truth degeneriert: keine S0-Negative, kein Onset, zirkuläre Labels (F15) | AP-27 | **offen (Phase 1a)** | Label-Redesign — längster Pol; Hoheit Projekteigner |
 | L12 | „Echte" Eventdaten sind synthetisch (4–8 Hand-Records, falsch als provider-derived deklariert) (F14) | AP-29/30/31 | **offen (Phase 2)** | Echter historischer Backfill GDELT/GDACS/WB + PIT + ehrliche Origin-Kennzeichnung — größter Block |
 

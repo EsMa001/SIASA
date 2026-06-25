@@ -418,7 +418,7 @@ software_requirements:
   verification_method: software_specification_review
 - id: SwR-044
   title: Partial-success run state model
-  statement: The software shall persist explicit run states including partial_success together with failed-source diagnostics and downstream visibility flags.
+  statement: The software shall persist explicit run states including partial_success together with failed-source diagnostics and downstream visibility flags, and shall record each swallowed analytical-stage exception as an explicit degradation entry aggregated into a run-level analytical-completeness verdict per ALGO-RUNGATE-01 (surfaced in artifact_status and readiness) rather than silently continuing with an empty result.
   status: accepted
   derives_from:
   - SyR-010
