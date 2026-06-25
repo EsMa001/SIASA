@@ -566,6 +566,10 @@ implementation_slices:
     requirement_ids:
       - SwR-038
       - SwR-039
+      - SwR-084
+      - SwR-085
+      - SwR-086
+      - SwR-087
     implementation_map:
       SwR-038:
         code_paths:
@@ -581,12 +585,36 @@ implementation_slices:
         test_paths:
           - tests/unit/test_validation_cases.py
           - tests/unit/test_readmodels_validation_backtest.py
+      SwR-084:
+        code_paths:
+          - src/siasa/validation/historical_replay.py
+        test_paths:
+          - tests/unit/test_historical_replay.py
+      SwR-085:
+        code_paths:
+          - src/siasa/validation/historical_replay.py
+        test_paths:
+          - tests/unit/test_historical_replay.py
+      SwR-086:
+        code_paths:
+          - src/siasa/validation/historical_replay.py
+        test_paths:
+          - tests/unit/test_historical_replay.py
+      SwR-087:
+        code_paths:
+          - src/siasa/validation/historical_replay.py
+          - src/siasa/runs/artifacts.py
+        test_paths:
+          - tests/unit/test_historical_replay.py
     known_code_paths:
       - src/siasa/validation/cases.py
       - src/siasa/readmodels/validation_backtest.py
+      - src/siasa/validation/historical_replay.py
+      - src/siasa/runs/artifacts.py
     known_test_paths:
       - tests/unit/test_validation_cases.py
       - tests/unit/test_readmodels_validation_backtest.py
+      - tests/unit/test_historical_replay.py
   ml-training-data-lake:
     requirement_ids:
       - SwR-055

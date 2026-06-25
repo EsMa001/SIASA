@@ -4,7 +4,7 @@ metadata:
   imported_from_workbook: stakeholder_requirements_information_space_mvp_v0_4 (1).xlsx
   imported_sheet: Stakeholder_Reqs
   imported_at_utc: '2026-05-11T13:51:17.436352+00:00'
-  requirement_count: 677
+  requirement_count: 681
   acceptance_criteria_count: 18
 stakeholder_requirements:
 - id: StR-001
@@ -8530,4 +8530,52 @@ stakeholder_requirements:
   acceptance_criteria_refs: []
   source_workbook: user_request_2026-06-24
   source_sheet: AP-15_Erweiterte_API_Integration
+  open_questions: []
+- id: StR-678
+  title: Das System soll im Replay je Fall eine taegliche Status-Zeitreihe ueber das Fenster erzeugen
+  category: Validierung & Backtesting
+  statement: Das System soll im Replay je Validierungsfall eine taegliche Status-Zeitreihe ueber das Fall-Fenster (Liste aus Datum, Status, Konfidenz) statt eines Einzel-Labels erzeugen, als Voraussetzung fuer Vorlaufzeit- und Trajektorienbewertung.
+  status: accepted
+  source_status: aktiv
+  priority: MVP-Should
+  phase: MVP v1
+  acceptance_criteria_refs: []
+  source_workbook: phasenplan_validierung_gegen_echte_events_2026-06-25
+  source_sheet: AP-26_Status-Zeitreihe
+  open_questions: []
+- id: StR-679
+  title: Die Replay-Status-Zeitreihe soll point-in-time-treu ohne Look-ahead sein
+  category: Validierung & Backtesting
+  statement: Die Replay-Status-Zeitreihe soll pro Tag nur die bis zum jeweiligen Stichtag verfuegbaren Daten verwenden (Point-in-Time-Schnitt, kein Look-ahead).
+  status: accepted
+  source_status: aktiv
+  priority: MVP-Should
+  phase: MVP v1
+  acceptance_criteria_refs: []
+  source_workbook: phasenplan_validierung_gegen_echte_events_2026-06-25
+  source_sheet: AP-26_Status-Zeitreihe
+  open_questions: []
+- id: StR-680
+  title: Die Replay-Status-Zeitreihe soll deterministisch und bit-gleich reproduzierbar als Artefakt vorliegen
+  category: Validierung & Backtesting
+  statement: Die Replay-Status-Zeitreihe soll als deterministisches Artefakt vorliegen, sodass zwei identische Laeufe bit-gleiche Zeitreihen-Dateien erzeugen.
+  status: accepted
+  source_status: aktiv
+  priority: MVP-Should
+  phase: MVP v1
+  acceptance_criteria_refs: []
+  source_workbook: phasenplan_validierung_gegen_echte_events_2026-06-25
+  source_sheet: AP-26_Status-Zeitreihe
+  open_questions: []
+- id: StR-681
+  title: Eine Ausnahme bei der Tages-Statusableitung soll als expliziter Degradationseintrag erscheinen
+  category: Validierung & Backtesting
+  statement: Eine Ausnahme bei der Statusableitung eines Tages soll als expliziter Degradationseintrag erscheinen statt als stiller Tagesausfall (Kopplung an die Fail-Loud-Policy).
+  status: accepted
+  source_status: aktiv
+  priority: MVP-Should
+  phase: MVP v1
+  acceptance_criteria_refs: []
+  source_workbook: phasenplan_validierung_gegen_echte_events_2026-06-25
+  source_sheet: AP-26_Status-Zeitreihe
   open_questions: []

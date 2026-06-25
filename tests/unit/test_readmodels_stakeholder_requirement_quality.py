@@ -11,11 +11,11 @@ def test_stakeholder_requirement_quality_report_closes_ap01_quality_stop_criteri
     report = build_stakeholder_requirement_quality_report(repo_root=repo_root)
 
     assert report["metadata"]["work_package"] == "AP-01"
-    assert report["summary"]["active_requirement_count"] == 677
-    assert report["summary"]["quality_closed_count"] == 677
+    assert report["summary"]["active_requirement_count"] == 681
+    assert report["summary"]["quality_closed_count"] == 681
     assert report["summary"]["quality_gap_count"] == 0
     assert report["summary"]["canonical_acceptance_source_count"] == 375
-    assert report["summary"]["ap01_policy_acceptance_source_count"] == 302
+    assert report["summary"]["ap01_policy_acceptance_source_count"] == 306
     assert report["summary"]["source_priority_tbd_count"] == 350
     assert all(report["stop_criteria"].values())
 

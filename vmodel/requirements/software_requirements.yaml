@@ -5,7 +5,7 @@ metadata:
   - vmodel/architecture/system_architecture.md
   created_at_utc: '2026-05-11T14:25:30.979384+00:00'
   status: draft_baseline_derived
-  software_requirement_count: 77
+  software_requirement_count: 87
 software_requirements:
 - id: SwR-001
   title: Source catalog record schema
@@ -811,3 +811,35 @@ software_requirements:
   - SyR-007
   verification_method: unit_test
   allocated_to: DDS-001
+- id: SwR-084
+  title: Replay window date enumeration and point-in-time record cut
+  statement: The software shall enumerate the daily dates of a validation case window and cut normalized records to those observed on or before a given as-of date (point-in-time, no look-ahead) for the historical replay path.
+  status: accepted
+  derives_from:
+  - SyR-026
+  verification_method: unit_test
+  allocated_to: DDS-010
+- id: SwR-085
+  title: Daily replay status timeseries derivation
+  statement: The software shall derive, per day in a validation case window, a point-in-time status from the data-driven anomaly per ALGO-REPLAY-TS-01, producing a deterministic list of (date, status, confidence) entries and recording a per-day exception as an explicit degradation entry.
+  status: accepted
+  derives_from:
+  - SyR-026
+  verification_method: unit_test
+  allocated_to: DDS-010
+- id: SwR-086
+  title: Replay status timeseries integration into review build
+  statement: The software shall attach the daily replay status timeseries additively to each historical replay review for both fixture-backed and governed archival paths without removing existing review fields.
+  status: accepted
+  derives_from:
+  - SyR-026
+  verification_method: unit_test
+  allocated_to: DDS-010
+- id: SwR-087
+  title: Deterministic replay status timeseries artifact
+  statement: The software shall write a deterministic per-case replay status timeseries artifact (readmodels/status_timeseries_<case>.json, sorted keys) so that two identical runs produce bit-identical files.
+  status: accepted
+  derives_from:
+  - SyR-026
+  verification_method: unit_test
+  allocated_to: DDS-010

@@ -444,6 +444,13 @@ Drei neue Befunde ergänzen F1–F13: **F14** (synthetische Eventdaten), **F15**
 > StR-693..696, ALGO-BACKFILL-01 · AP-31 = SwR-102, StR-697 · AP-32 = SwR-103..106, StR-698..701.
 > Jede ID wird nur **einmal** über alle APs vergeben; pinning auf einzelne TAPs bei Implementierung.
 
+> **Verankerungs-Stand (2026-06-25):** Die **AP-26**-Anforderungen sind in `vmodel/` verankert (Planning-Commit,
+> "#8" auf AP-26 begrenzt): StR-678..681 (covered by SyR-026), SwR-084..087 (derive SyR-026, allocated DDS-010),
+> TC-SwR-084..087-001, ALGO-REPLAY-TS-01 (in SwR-085), trace_links + implementation_file_links (validation-and-backtest-Slice).
+> Dabei wurde der **SwR-Count-Drift** behoben (`software_requirement_count` 77 → 87, real). Count-Sync verifiziert:
+> StR 677→681, SwR 83→87, TC 133→137; alle Invarianten (orphan/missing/mismatch/quality_gap/swr_without_tc) = 0.
+> AP-27..32 bleiben plan-reserviert (Verankerung je Phase). Der AP-26-**Code** folgt im nächsten Commit.
+
 #### AP-26 — Status-Zeitreihe im Fenster-Replay · Status: Offen · Klasse: Validierung
 Phase 0 · Schließt: **F16** · Abhängig von: AP-17, AP-18, AP-25 · Aufwand: M · Risiko: mittel · Trace: SwR-084..087 / StR-678..681 / ALGO-REPLAY-TS-01.
 Ziel: Der Replay-Pfad erzeugt aus `NormalizedRecords` eine **deterministische tägliche Status-Zeitreihe**

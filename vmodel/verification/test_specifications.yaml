@@ -1370,3 +1370,31 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_adapter_hdx_hapi.py
   status: accepted
+- id: TC-SwR-084-001
+  title: Verify Replay window date enumeration and point-in-time record cut
+  requirement_ids:
+  - SwR-084
+  method: unit_test
+  test_file: tests/unit/test_historical_replay.py
+  status: accepted
+- id: TC-SwR-085-001
+  title: Verify Daily replay status timeseries derivation
+  requirement_ids:
+  - SwR-085
+  method: unit_test
+  test_file: tests/unit/test_historical_replay.py
+  status: accepted
+- id: TC-SwR-086-001
+  title: Verify Replay status timeseries integration into review build
+  requirement_ids:
+  - SwR-086
+  method: unit_test
+  test_file: tests/unit/test_historical_replay.py
+  status: accepted
+- id: TC-SwR-087-001
+  title: Verify Deterministic replay status timeseries artifact
+  requirement_ids:
+  - SwR-087
+  method: unit_test
+  test_file: tests/unit/test_historical_replay.py
+  status: accepted
