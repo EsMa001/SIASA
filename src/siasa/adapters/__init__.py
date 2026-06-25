@@ -13,6 +13,14 @@ from .world_bank import WorldBankIndicatorsAdapter
 from .frankfurter import FrankfurterAdapter
 from .voidly import VoidlyAdapter
 from .hdx_inform import HDXInformRiskAdapter
+from .imf_sdmx import IMFDataMapperAdapter
+from .who_gho import WHOGHOAdapter
+from .idmc_displacement import IDMCDisplacementAdapter
+from .ioda_outages import IODAOutageAdapter
+from .ooni_censorship import OONICensorshipAdapter
+from .fewsnet import FEWSNETAdapter
+from .opensanctions import OpenSanctionsAdapter
+from .hdx_hapi import HDXHAPIAdapter
 
 __all__ = [
     "FetchResult",
@@ -29,4 +37,12 @@ __all__ = [
     "GDELTEventsAdapter",
     "UCDPAdapter",
     "UNHCRPopulationAdapter",
+    "IMFDataMapperAdapter",
+    "WHOGHOAdapter",
+    "IDMCDisplacementAdapter",
+    "IODAOutageAdapter",
+    "OONICensorshipAdapter",
+    "FEWSNETAdapter",
+    "OpenSanctionsAdapter",
+    "HDXHAPIAdapter",
 ]

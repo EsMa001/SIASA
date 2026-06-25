@@ -234,6 +234,33 @@ _SIGNAL_REGISTRY: list[dict] = [
     {"signal_key": "nvd_cve_count_daily", "domain": "E", "source_id": "SRC-NVD-CVE", "description": "Daily CVE publication count from NVD", "unit": "count", "native_granularity": "daily", "aggregation_method": "sum"},
     {"signal_key": "nvd_avg_cvss_base", "domain": "E", "source_id": "SRC-NVD-CVE", "description": "Average CVSS base score of daily CVEs", "unit": "score", "native_granularity": "daily", "aggregation_method": "mean"},
     {"signal_key": "nvd_critical_cve_count", "domain": "E", "source_id": "SRC-NVD-CVE", "description": "Daily count of CRITICAL severity CVEs", "unit": "count", "native_granularity": "daily", "aggregation_method": "sum"},
+    # Domain D — IMF DataMapper (AP-15.1)
+    {"signal_key": "imf_cpi_inflation", "domain": "D", "source_id": "SRC-IMF-SDMX", "description": "CPI-based inflation rate from IMF DataMapper", "unit": "percent", "native_granularity": "yearly", "aggregation_method": "last"},
+    {"signal_key": "imf_gdp_current_usd", "domain": "D", "source_id": "SRC-IMF-SDMX", "description": "GDP in current USD from IMF DataMapper", "unit": "usd", "native_granularity": "yearly", "aggregation_method": "last"},
+    {"signal_key": "imf_current_account_pct_gdp", "domain": "D", "source_id": "SRC-IMF-SDMX", "description": "Current account balance as percent of GDP from IMF", "unit": "percent", "native_granularity": "yearly", "aggregation_method": "last"},
+    # Domain C — WHO GHO (AP-15.2)
+    {"signal_key": "who_life_expectancy", "domain": "C", "source_id": "SRC-WHO-GHO", "description": "Life expectancy at birth from WHO GHO", "unit": "years", "native_granularity": "yearly", "aggregation_method": "last"},
+    {"signal_key": "who_under5_mortality", "domain": "C", "source_id": "SRC-WHO-GHO", "description": "Under-5 mortality rate from WHO GHO", "unit": "per_1000", "native_granularity": "yearly", "aggregation_method": "last"},
+    {"signal_key": "who_maternal_mortality_ratio", "domain": "C", "source_id": "SRC-WHO-GHO", "description": "Maternal mortality ratio from WHO GHO", "unit": "per_100000", "native_granularity": "yearly", "aggregation_method": "last"},
+    # Domain C — IDMC Displacement (AP-15.3)
+    {"signal_key": "idmc_conflict_displacement", "domain": "C", "source_id": "SRC-IDMC", "description": "Internal displacement due to conflict from IDMC", "unit": "count", "native_granularity": "yearly", "aggregation_method": "sum"},
+    {"signal_key": "idmc_disaster_displacement", "domain": "C", "source_id": "SRC-IDMC", "description": "Internal displacement due to disasters from IDMC", "unit": "count", "native_granularity": "yearly", "aggregation_method": "sum"},
+    # Domain E — IODA Outages (AP-15.4)
+    {"signal_key": "ioda_alert_count", "domain": "E", "source_id": "SRC-IODA", "description": "Internet outage alert count from IODA", "unit": "count", "native_granularity": "daily", "aggregation_method": "sum"},
+    {"signal_key": "ioda_bgp_visibility_drop", "domain": "E", "source_id": "SRC-IODA", "description": "BGP visibility drop events from IODA", "unit": "count", "native_granularity": "daily", "aggregation_method": "sum"},
+    # Domain E — OONI Censorship (AP-15.5)
+    {"signal_key": "ooni_blocked_site_count", "domain": "E", "source_id": "SRC-OONI", "description": "Count of blocked sites detected by OONI", "unit": "count", "native_granularity": "daily", "aggregation_method": "sum"},
+    {"signal_key": "ooni_censorship_incident_count", "domain": "E", "source_id": "SRC-OONI", "description": "Censorship incident count from OONI", "unit": "count", "native_granularity": "daily", "aggregation_method": "sum"},
+    # Domain C — FEWS NET (AP-15.6)
+    {"signal_key": "fewsnet_food_price_index", "domain": "C", "source_id": "SRC-FEWSNET", "description": "Food price index from FEWS NET", "unit": "index", "native_granularity": "monthly", "aggregation_method": "last"},
+    {"signal_key": "fewsnet_ipc_phase", "domain": "C", "source_id": "SRC-FEWSNET", "description": "IPC food insecurity phase classification from FEWS NET", "unit": "score", "native_granularity": "monthly", "aggregation_method": "last"},
+    # Domain B — OpenSanctions (AP-15.7)
+    {"signal_key": "opensanctions_entity_count", "domain": "B", "source_id": "SRC-OPENSANCTIONS", "description": "Total sanctioned entity count from OpenSanctions", "unit": "count", "native_granularity": "daily", "aggregation_method": "last"},
+    {"signal_key": "opensanctions_new_listings", "domain": "B", "source_id": "SRC-OPENSANCTIONS", "description": "Newly listed sanctioned entities from OpenSanctions", "unit": "count", "native_granularity": "daily", "aggregation_method": "sum"},
+    # Domain B — HDX HAPI (AP-15.8)
+    {"signal_key": "hdx_hapi_conflict_events", "domain": "B", "source_id": "SRC-HDX-HAPI", "description": "Conflict event count from HDX HAPI", "unit": "count", "native_granularity": "yearly", "aggregation_method": "sum"},
+    {"signal_key": "hdx_hapi_humanitarian_needs", "domain": "B", "source_id": "SRC-HDX-HAPI", "description": "Humanitarian needs population count from HDX HAPI", "unit": "count", "native_granularity": "yearly", "aggregation_method": "last"},
+    {"signal_key": "hdx_hapi_funding_coverage", "domain": "B", "source_id": "SRC-HDX-HAPI", "description": "Humanitarian funding coverage ratio from HDX HAPI", "unit": "ratio", "native_granularity": "yearly", "aggregation_method": "last"},
 ]
 
 

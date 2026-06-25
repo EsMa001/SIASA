@@ -12,8 +12,8 @@ def test_stakeholder_verification_coverage_report_covers_all_active_stakeholders
 
     assert report["metadata"]["work_package"] == "AP-03"
     assert report["summary"]["active_stakeholder_requirement_count"] == 166
-    assert report["summary"]["stakeholder_verification_covered_count"] == 160
-    assert report["summary"]["missing_stakeholder_verification_count"] == 6
+    assert report["summary"]["stakeholder_verification_covered_count"] == 166
+    assert report["summary"]["missing_stakeholder_verification_count"] == 0
     assert report["summary"]["system_requirement_count"] == 53
     assert report["summary"]["software_route_system_requirement_count"] == 30
     assert report["summary"]["governance_system_route_requirement_count"] == 20
@@ -29,7 +29,7 @@ def test_stakeholder_verification_coverage_report_covers_all_active_stakeholders
 def test_stakeholder_verification_coverage_markdown_summarizes_ap03_boundary() -> None:
     report = {
         "summary": {
-            "active_stakeholder_requirement_count": 671,
+            "active_stakeholder_requirement_count": 166,
             "stakeholder_verification_covered_count": 668,
             "missing_stakeholder_verification_count": 3,
             "system_requirement_count": 53,

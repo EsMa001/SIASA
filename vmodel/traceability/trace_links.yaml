@@ -91,6 +91,12 @@ traceability:
     - StR-179
     - StR-180
     - StR-181
+    - StR-672
+    - StR-673
+    - StR-674
+    - StR-675
+    - StR-676
+    - StR-677
   - source_id: TC-SyR-007-001
     relation: verifies
     target_ids:

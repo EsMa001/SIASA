@@ -24,6 +24,14 @@ from siasa.adapters.wikipedia_pageviews import WikipediaPageviewsAdapter
 from siasa.adapters.ecb_data import ECBDataAdapter
 from siasa.adapters.eurostat import EurostatAdapter
 from siasa.adapters.nvd_cve import NVDCVEAdapter
+from siasa.adapters.imf_sdmx import IMFDataMapperAdapter
+from siasa.adapters.who_gho import WHOGHOAdapter
+from siasa.adapters.idmc_displacement import IDMCDisplacementAdapter
+from siasa.adapters.ioda_outages import IODAOutageAdapter
+from siasa.adapters.ooni_censorship import OONICensorshipAdapter
+from siasa.adapters.fewsnet import FEWSNETAdapter
+from siasa.adapters.opensanctions import OpenSanctionsAdapter
+from siasa.adapters.hdx_hapi import HDXHAPIAdapter
 from siasa.data.normalization_mappings import NormalizationMappingVersion
 from siasa.data.normalization_service import normalize_records
 from siasa.features.domain_a import DomainAFeatureService
@@ -1061,6 +1069,22 @@ def build_governed_live_orchestrator(
             EurostatAdapter(country_ids=tuple(resolved_country_ids)),
             # Domain E: NVD CVE vulnerability intelligence (AP-14.4)
             NVDCVEAdapter(),
+            # Domain D: IMF macroeconomic indicators (AP-15.1)
+            IMFDataMapperAdapter(country_ids=tuple(resolved_country_ids)),
+            # Domain C: WHO health indicators (AP-15.2)
+            WHOGHOAdapter(country_ids=tuple(resolved_country_ids)),
+            # Domain C: IDMC displacement data (AP-15.3)
+            IDMCDisplacementAdapter(country_ids=tuple(resolved_country_ids)),
+            # Domain E: IODA internet outage alerts (AP-15.4)
+            IODAOutageAdapter(country_ids=tuple(resolved_country_ids)),
+            # Domain E: OONI censorship measurements (AP-15.5)
+            OONICensorshipAdapter(country_ids=tuple(resolved_country_ids)),
+            # Domain C: FEWS NET food security (AP-15.6)
+            FEWSNETAdapter(country_ids=tuple(resolved_country_ids)),
+            # Domain B: OpenSanctions entity tracking (AP-15.7)
+            OpenSanctionsAdapter(country_ids=tuple(resolved_country_ids)),
+            # Domain B: HDX HAPI humanitarian data (AP-15.8)
+            HDXHAPIAdapter(country_ids=tuple(resolved_country_ids)),
         ]
     )
     runtime_profile = "live-multi-country-v1" if len(resolved_country_ids) > 1 else "live-single-country-v1"

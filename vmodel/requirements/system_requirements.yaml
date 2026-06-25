@@ -118,6 +118,12 @@ system_requirements:
   - StR-179
   - StR-180
   - StR-181
+  - StR-672
+  - StR-673
+  - StR-674
+  - StR-675
+  - StR-676
+  - StR-677
   acceptance_criteria_refs:
   - AC-002
   - AC-011
