@@ -118,7 +118,8 @@ Die verbleibende blockierte Arbeit ist externe Quellen-Aktivierung (AP-06) und �
 
 | Rang | AP-ID | Großes Arbeitspaket | Status | Klasse | Auslöser / Bedingung |
 | --- | --- | --- | --- | --- | --- |
-| **P1** | AP-14 | Kostenfreie API-Quellen-Erweiterung | Erledigt | MVP-Should | 4 Adapter implementiert, Registry + Katalog aktualisiert |
+| **P1** | AP-15 | Erweiterte kostenfreie API-Integration | In Arbeit | MVP-Should | 8 verifizierte APIs, Domain C/D/E Staerkung |
+| ~~P1~~ | AP-14 | Kostenfreie API-Quellen-Erweiterung | Erledigt | MVP-Should | 4 Adapter implementiert, Registry + Katalog aktualisiert |
 | ~~P1~~ | AP-13 | ML-Training Data Lake | **Erledigt** | MVP-Should | 15/15 TAPs abgeschlossen (SwR-055..071) |
 | **P2** | AP-06 | Externe Quellen-Aktivierung (G2) | Blockiert | MVP-Should | **springt auf aktiv**, sobald gültige ReliefWeb/UCDP-Credentials vorliegen |
 | **P3** | AP-09 | Multi-User-Governance (G5) | Zurückgestellt | Post-MVP | nur wenn Operating-Model Multi-User explizit fordert |

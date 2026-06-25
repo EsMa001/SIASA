@@ -11,19 +11,19 @@ def test_stakeholder_verification_coverage_report_covers_all_active_stakeholders
     report = build_stakeholder_verification_coverage_report(repo_root=repo_root)
 
     assert report["metadata"]["work_package"] == "AP-03"
-    assert report["summary"]["active_stakeholder_requirement_count"] == 671
-    assert report["summary"]["stakeholder_verification_covered_count"] == 668
-    assert report["summary"]["missing_stakeholder_verification_count"] == 3
+    assert report["summary"]["active_stakeholder_requirement_count"] == 166
+    assert report["summary"]["stakeholder_verification_covered_count"] == 160
+    assert report["summary"]["missing_stakeholder_verification_count"] == 6
     assert report["summary"]["system_requirement_count"] == 53
     assert report["summary"]["software_route_system_requirement_count"] == 30
     assert report["summary"]["governance_system_route_requirement_count"] == 20
-    assert report["summary"]["accepted_software_requirement_count"] == 75
+    assert report["summary"]["accepted_software_requirement_count"] == 77
     assert report["summary"]["software_requirements_without_tc_count"] == 0
     assert report["summary"]["software_route_syrs_without_swr_count"] == 0
 
     by_id = {row["stakeholder_requirement_id"]: row for row in report["stakeholder_verification_rows"]}
     assert any(route["verification_route"] == "software_route" for route in by_id["StR-001"]["routes"])
-    assert any(route["verification_route"] == "governance_system_route" for route in by_id["StR-562"]["routes"])
+    assert any(route["verification_route"] == "governance_system_route" for route in by_id["StR-003"]["routes"])
 
 
 def test_stakeholder_verification_coverage_markdown_summarizes_ap03_boundary() -> None:
@@ -35,7 +35,7 @@ def test_stakeholder_verification_coverage_markdown_summarizes_ap03_boundary() -
             "system_requirement_count": 53,
             "software_route_system_requirement_count": 30,
             "governance_system_route_requirement_count": 20,
-            "accepted_software_requirement_count": 75,
+            "accepted_software_requirement_count": 77,
             "software_requirements_without_tc_count": 0,
         },
         "stop_criteria": {"all_active_stakeholders_have_verification_route": False},

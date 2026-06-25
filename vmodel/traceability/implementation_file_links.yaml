@@ -759,3 +759,24 @@ implementation_slices:
       - tests/unit/test_adapter_ecb_data.py
       - tests/unit/test_adapter_eurostat.py
       - tests/unit/test_adapter_nvd_cve.py
+  ap-15-erweiterte-api-integration:
+    requirement_ids:
+      - SwR-076
+      - SwR-077
+    implementation_map:
+      SwR-076:
+        code_paths:
+          - src/siasa/adapters/imf_sdmx.py
+        test_paths:
+          - tests/unit/test_adapter_imf_sdmx.py
+      SwR-077:
+        code_paths:
+          - src/siasa/adapters/who_gho.py
+        test_paths:
+          - tests/unit/test_adapter_who_gho.py
+    known_code_paths:
+      - src/siasa/adapters/imf_sdmx.py
+      - src/siasa/adapters/who_gho.py
+    known_test_paths:
+      - tests/unit/test_adapter_imf_sdmx.py
+      - tests/unit/test_adapter_who_gho.py

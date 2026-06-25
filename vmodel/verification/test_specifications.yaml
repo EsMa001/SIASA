@@ -1306,3 +1306,19 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_adapter_nvd_cve.py
   status: accepted
+
+- id: TC-SwR-076-001
+  title: IMF SDMX adapter — SDMX-JSON parsing, CPI, GDP, commodity, country mapping
+  requirement_ids:
+  - SwR-076
+  method: unit_test
+  test_file: tests/unit/test_adapter_imf_sdmx.py
+  status: accepted
+
+- id: TC-SwR-077-001
+  title: WHO GHO adapter — OData JSON parsing, life expectancy, mortality, country mapping
+  requirement_ids:
+  - SwR-077
+  method: unit_test
+  test_file: tests/unit/test_adapter_who_gho.py
+  status: accepted

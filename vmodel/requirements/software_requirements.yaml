@@ -5,7 +5,7 @@ metadata:
   - vmodel/architecture/system_architecture.md
   created_at_utc: '2026-05-11T14:25:30.979384+00:00'
   status: draft_baseline_derived
-  software_requirement_count: 75
+  software_requirement_count: 77
 software_requirements:
 - id: SwR-001
   title: Source catalog record schema
@@ -725,6 +725,26 @@ software_requirements:
 - id: SwR-075
   title: NVD CVE 2.0 adapter for cyber vulnerability signals
   statement: The software shall provide an NVDCVEAdapter that fetches daily CVE publications from the NVD CVE 2.0 API, extracts CVSS scores, aggregates daily counts by severity, and normalizes them into NormalizedRecord-compatible dicts with signal_keys 'nvd_cve_count_daily', 'nvd_avg_cvss_base', and 'nvd_critical_cve_count'.
+  status: accepted
+  derives_from:
+  - SyR-006
+  - SyR-007
+  verification_method: unit_test
+  allocated_to: DDS-001
+
+- id: SwR-076
+  title: IMF SDMX adapter for global macroeconomic signals
+  statement: The software shall provide an IMFSDMXAdapter that fetches CPI inflation, GDP growth, and commodity prices from the IMF SDMX Data API, normalizes them into NormalizedRecord-compatible dicts, and supports SDMX-JSON parsing, retry logic, and injectable fetch functions for testability.
+  status: accepted
+  derives_from:
+  - SyR-006
+  - SyR-007
+  verification_method: unit_test
+  allocated_to: DDS-001
+
+- id: SwR-077
+  title: WHO GHO adapter for health indicator signals
+  statement: The software shall provide a WHOGHOAdapter that fetches life expectancy, under-5 mortality, and maternal mortality from the WHO GHO Azure CDN API (ghoapi.azureedge.net), normalizes them into NormalizedRecord-compatible dicts with OData JSON parsing, retry logic, and injectable fetch functions for testability.
   status: accepted
   derives_from:
   - SyR-006
