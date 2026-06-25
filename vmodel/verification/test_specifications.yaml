@@ -1322,3 +1322,50 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_adapter_who_gho.py
   status: accepted
+- id: TC-SwR-078-001
+  title: IDMC displacement adapter — JSON parsing, conflict/disaster displacement, country mapping
+  requirement_ids:
+  - SwR-078
+  method: unit_test
+  test_file: tests/unit/test_adapter_idmc.py
+  status: accepted
+
+- id: TC-SwR-079-001
+  title: IODA outage adapter — alert parsing, BGP visibility, country mapping, retry
+  requirement_ids:
+  - SwR-079
+  method: unit_test
+  test_file: tests/unit/test_adapter_ioda.py
+  status: accepted
+
+- id: TC-SwR-080-001
+  title: OONI censorship adapter — aggregation parsing, blocked sites, incidents, retry
+  requirement_ids:
+  - SwR-080
+  method: unit_test
+  test_file: tests/unit/test_adapter_ooni.py
+  status: accepted
+
+- id: TC-SwR-081-001
+  title: FEWS NET adapter — market price parsing, IPC phase, food security, retry
+  requirement_ids:
+  - SwR-081
+  method: unit_test
+  test_file: tests/unit/test_adapter_fewsnet.py
+  status: accepted
+
+- id: TC-SwR-082-001
+  title: OpenSanctions adapter — entity search, count aggregation, new listings, retry
+  requirement_ids:
+  - SwR-082
+  method: unit_test
+  test_file: tests/unit/test_adapter_opensanctions.py
+  status: accepted
+
+- id: TC-SwR-083-001
+  title: HDX HAPI adapter — conflict events, humanitarian needs, funding coverage, retry
+  requirement_ids:
+  - SwR-083
+  method: unit_test
+  test_file: tests/unit/test_adapter_hdx_hapi.py
+  status: accepted

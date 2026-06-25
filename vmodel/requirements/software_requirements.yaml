@@ -751,3 +751,63 @@ software_requirements:
   - SyR-007
   verification_method: unit_test
   allocated_to: DDS-001
+
+- id: SwR-078
+  title: IDMC displacement adapter for internal displacement signals
+  statement: The software shall provide an IDMCDisplacementAdapter that fetches new internal displacements by conflict and disaster from the IDMC API (api.idmcdb.org), normalizes them into NormalizedRecord-compatible dicts with signal_keys 'idmc_new_displacements_conflict' and 'idmc_new_displacements_disaster', and supports JSON parsing, retry logic, and injectable fetch functions for testability.
+  status: accepted
+  derives_from:
+  - SyR-006
+  - SyR-007
+  verification_method: unit_test
+  allocated_to: DDS-001
+
+- id: SwR-079
+  title: IODA Internet outage adapter for connectivity signals
+  statement: The software shall provide an IODAOutageAdapter that fetches internet outage alerts and BGP visibility drops from the IODA API (api.ioda.inetintel.cc.gatech.edu/v2), normalizes them into NormalizedRecord-compatible dicts with signal_keys 'ioda_outage_alert_count' and 'ioda_bgp_visibility_drop', and supports JSON parsing, retry logic, and injectable fetch functions for testability.
+  status: accepted
+  derives_from:
+  - SyR-006
+  - SyR-007
+  verification_method: unit_test
+  allocated_to: DDS-001
+
+- id: SwR-080
+  title: OONI censorship adapter for internet censorship signals
+  statement: The software shall provide an OONICensorshipAdapter that fetches blocked site counts and censorship incident counts from the OONI API (api.ooni.io/api/v1), normalizes them into NormalizedRecord-compatible dicts with signal_keys 'ooni_blocked_site_count' and 'ooni_censorship_incident_count', and supports JSON parsing, retry logic, and injectable fetch functions for testability.
+  status: accepted
+  derives_from:
+  - SyR-006
+  - SyR-007
+  verification_method: unit_test
+  allocated_to: DDS-001
+
+- id: SwR-081
+  title: FEWS NET food security adapter for food crisis signals
+  statement: The software shall provide a FEWSNETAdapter that fetches food price indices and IPC phase classifications from the FEWS NET Data Warehouse API (fdw.fews.net/api), normalizes them into NormalizedRecord-compatible dicts with signal_keys 'fewsnet_food_price_index' and 'fewsnet_ipc_phase', and supports JSON parsing, retry logic, and injectable fetch functions for testability.
+  status: accepted
+  derives_from:
+  - SyR-006
+  - SyR-007
+  verification_method: unit_test
+  allocated_to: DDS-001
+
+- id: SwR-082
+  title: OpenSanctions adapter for sanctions entity signals
+  statement: The software shall provide an OpenSanctionsAdapter that fetches sanctions entity counts and new listings from the OpenSanctions API (api.opensanctions.org), normalizes them into NormalizedRecord-compatible dicts with signal_keys 'opensanctions_entity_count' and 'opensanctions_new_listings', and supports JSON parsing, retry logic, and injectable fetch functions for testability.
+  status: accepted
+  derives_from:
+  - SyR-006
+  - SyR-007
+  verification_method: unit_test
+  allocated_to: DDS-001
+
+- id: SwR-083
+  title: HDX HAPI humanitarian adapter for humanitarian signals
+  statement: The software shall provide an HDXHAPIAdapter that fetches conflict events, humanitarian needs, and funding coverage from the HDX HAPI API (hapi.humdata.org/api/v2), normalizes them into NormalizedRecord-compatible dicts with signal_keys 'hdx_hapi_conflict_events', 'hdx_hapi_humanitarian_needs', and 'hdx_hapi_funding_coverage', and supports JSON parsing, retry logic, and injectable fetch functions for testability.
+  status: accepted
+  derives_from:
+  - SyR-006
+  - SyR-007
+  verification_method: unit_test
+  allocated_to: DDS-001

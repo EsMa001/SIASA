@@ -17,7 +17,7 @@ def test_stakeholder_verification_coverage_report_covers_all_active_stakeholders
     assert report["summary"]["system_requirement_count"] == 53
     assert report["summary"]["software_route_system_requirement_count"] == 30
     assert report["summary"]["governance_system_route_requirement_count"] == 20
-    assert report["summary"]["accepted_software_requirement_count"] == 77
+    assert report["summary"]["accepted_software_requirement_count"] == 83
     assert report["summary"]["software_requirements_without_tc_count"] == 0
     assert report["summary"]["software_route_syrs_without_swr_count"] == 0
 
@@ -35,7 +35,7 @@ def test_stakeholder_verification_coverage_markdown_summarizes_ap03_boundary() -
             "system_requirement_count": 53,
             "software_route_system_requirement_count": 30,
             "governance_system_route_requirement_count": 20,
-            "accepted_software_requirement_count": 77,
+            "accepted_software_requirement_count": 83,
             "software_requirements_without_tc_count": 0,
         },
         "stop_criteria": {"all_active_stakeholders_have_verification_route": False},
