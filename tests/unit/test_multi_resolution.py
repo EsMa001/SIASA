@@ -127,6 +127,128 @@ def test_slow_layer_rolling_mean_7d_correctness() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Slow Layer — rolling standard deviation (AP-17, extends SwR-063)
+# ---------------------------------------------------------------------------
+
+def _slow_index(slow: pa.Table, date: str, signal: str = "conflict_event_count") -> int:
+    """Find the slow-layer row index for a (date, signal_key) pair."""
+    dates = slow.column("date").to_pylist()
+    signals = slow.column("signal_key").to_pylist()
+    for i, (d, s) in enumerate(zip(dates, signals)):
+        if d == date and s == signal:
+            return i
+    raise AssertionError(f"{date}/{signal} not found in slow layer")
+
+
+def _seed_constant_series(value: float = 5.0, days: int = 10) -> pa.Table:
+    """Daily-aligned table with a constant signal value over `days` days."""
+    dates, countries, signals, values = [], [], [], []
+    for day in range(1, days + 1):
+        dates.append(f"2026-06-{day:02d}")
+        countries.append("UKR")
+        signals.append("conflict_event_count")
+        values.append(value)
+    return pa.table({
+        "date": pa.array(dates, type=pa.string()),
+        "country_id": pa.array(countries, type=pa.string()),
+        "signal_key": pa.array(signals, type=pa.string()),
+        "value": pa.array(values, type=pa.float64()),
+    })
+
+
+def test_slow_layer_has_std_features() -> None:
+    """Slow layer must contain 7d/30d rolling standard-deviation features."""
+    result = MultiResolutionBuilder().build(aligned_table=_seed_aligned_table())
+    columns = set(result.slow_layer.column_names)
+    assert "std_7d" in columns, f"Missing std_7d in {columns}"
+    assert "std_30d" in columns, f"Missing std_30d in {columns}"
+
+
+def test_slow_layer_rolling_std_7d_correctness() -> None:
+    """7d rolling population std must be mathematically correct."""
+    result = MultiResolutionBuilder().build(aligned_table=_seed_aligned_table())
+    slow = result.slow_layer
+    std_7d = slow.column("std_7d").to_pylist()
+    # Days 1-7 values 11..17: mean 14, population variance 4.0 -> std 2.0
+    idx = _slow_index(slow, "2026-06-07")
+    assert abs(std_7d[idx] - 2.0) < 1e-9, f"Expected 2.0, got {std_7d[idx]}"
+
+
+def test_slow_layer_std_insufficient_points_is_none() -> None:
+    """Rows before the window is full must have std None (insufficient data)."""
+    result = MultiResolutionBuilder().build(aligned_table=_seed_aligned_table())
+    slow = result.slow_layer
+    std_7d = slow.column("std_7d").to_pylist()
+    # 2026-06-03 is day 3 (< 7) -> not enough points for a 7d std
+    assert std_7d[_slow_index(slow, "2026-06-03")] is None
+
+
+def test_slow_layer_rolling_std_30d_correctness() -> None:
+    """30d rolling population std must be correct on the full 30-day window."""
+    result = MultiResolutionBuilder().build(aligned_table=_seed_aligned_table())
+    slow = result.slow_layer
+    std_30d = slow.column("std_30d").to_pylist()
+    zscore_30d = slow.column("zscore_30d").to_pylist()
+    # Days 1..30 values 11..40: mean 25.5, population variance (30^2-1)/12 = 74.9167,
+    # std = 8.65544; day-30 value 40 -> z = (40-25.5)/8.65544 = 1.675 > 0
+    idx = _slow_index(slow, "2026-06-30")
+    assert abs(std_30d[idx] - 8.65544) < 1e-3, f"Expected ~8.65544, got {std_30d[idx]}"
+    assert zscore_30d[idx] is not None and zscore_30d[idx] > 0.0
+
+
+def test_slow_layer_std_30d_insufficient_is_none() -> None:
+    """Before the 30d window is full, std_30d/zscore_30d must be None."""
+    result = MultiResolutionBuilder().build(aligned_table=_seed_aligned_table())
+    slow = result.slow_layer
+    std_30d = slow.column("std_30d").to_pylist()
+    zscore_30d = slow.column("zscore_30d").to_pylist()
+    # 2026-06-29 is day 29 (< 30) -> insufficient for a 30d window
+    idx = _slow_index(slow, "2026-06-29")
+    assert std_30d[idx] is None
+    assert zscore_30d[idx] is None
+
+
+# ---------------------------------------------------------------------------
+# z-score normalization (AP-17, ALGO-ZSCORE-01)
+# ---------------------------------------------------------------------------
+
+def test_slow_layer_has_zscore_features() -> None:
+    """Slow layer must contain 7d/30d z-score columns."""
+    result = MultiResolutionBuilder().build(aligned_table=_seed_aligned_table())
+    columns = set(result.slow_layer.column_names)
+    assert "zscore_7d" in columns, f"Missing zscore_7d in {columns}"
+    assert "zscore_30d" in columns, f"Missing zscore_30d in {columns}"
+
+
+def test_zscore_constant_series_is_zero() -> None:
+    """A constant series has zero deviation -> z-score 0.0 (not None, not large)."""
+    result = MultiResolutionBuilder().build(aligned_table=_seed_constant_series())
+    slow = result.slow_layer
+    zscore_7d = slow.column("zscore_7d").to_pylist()
+    # day 7 (7d window full) on a constant series
+    assert zscore_7d[_slow_index(slow, "2026-06-07")] == 0.0
+
+
+def test_zscore_outlier_is_positive() -> None:
+    """An upward deviation produces a positive z-score."""
+    result = MultiResolutionBuilder().build(aligned_table=_seed_aligned_table())
+    slow = result.slow_layer
+    zscore_7d = slow.column("zscore_7d").to_pylist()
+    # day 7 value 17, mean 14, std 2 -> z = 1.5 > 0
+    z = zscore_7d[_slow_index(slow, "2026-06-07")]
+    assert z is not None and z > 0.0, f"Expected positive z-score, got {z}"
+
+
+def test_compute_zscore_helper() -> None:
+    """compute_zscore: None inputs -> None; zero std (constant) -> 0.0; else computed."""
+    from siasa.features.multi_resolution import compute_zscore
+    assert compute_zscore(17.0, None, None) is None
+    assert compute_zscore(17.0, 14.0, None) is None
+    assert compute_zscore(5.0, 5.0, 0.0) == 0.0
+    assert abs(compute_zscore(17.0, 14.0, 2.0) - 1.5) < 1e-9
+
+
+# ---------------------------------------------------------------------------
 # Structural Layer
 # ---------------------------------------------------------------------------
 

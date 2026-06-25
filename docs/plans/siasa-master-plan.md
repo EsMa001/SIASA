@@ -106,7 +106,7 @@ Regeln:
 | AP-14 | Kostenfreie API-Quellen-Erweiterung | Erledigt | **P1** | MVP-Should | 4 Adapter (Wikipedia, ECB, Eurostat, NVD CVE) + Registry + Feature-Katalog; SwR-072..075, 91 Tests |
 | AP-15 | Erweiterte kostenfreie API-Integration | Erledigt | – | MVP-Should | 8 Adapter, 53 Signale, Registry + Runtime verdrahtet |
 | AP-16 | Skill-Messharness (Ground-Truth-Backtest) | Offen | **P1** | Analytik-Kern | F7/F8/F9: Validierung misst keine Modellgüte |
-| AP-17 | Slow-Layer Streuung/z-Score | Offen | **P1** | Analytik-Kern | F3: σ fehlt für Anomalie-Definition |
+| AP-17 | Slow-Layer Streuung/z-Score | Erledigt | – | Analytik-Kern | F3 (teil): std_7d/30d + z-Score (`compute_zscore`, ALGO-ZSCORE-01) in `multi_resolution.py`; SwR-063 erw.; 16 Tests grün |
 | AP-18 | Reale Anomalie-Berechnung (Feature→Anomalie) | Offen | **P1** | Analytik-Kern | F1: anomaly_score ist Konstante |
 | AP-19 | Unsicherheit aus echten Quellen | Offen | P4 | Analytik-Kern | F3 — Phase 4 (nach Validierung bisektierbar) |
 | AP-20 | Echte Abhängigkeitsdetektion + Zentralität | Offen | P4 | Analytik-Kern | F4 — Phase 4 |
@@ -150,7 +150,7 @@ Die verbleibende blockierte Arbeit ist externe Quellen-Aktivierung (AP-06) und �
 
 | Rang | Phase | AP-ID | Großes Arbeitspaket | Status | Klasse | Auslöser / Bedingung |
 | --- | --- | --- | --- | --- | --- | --- |
-| **P1** | 0 | AP-17 | Slow-Layer Streuung/z-Score | Offen | Analytik-Kern | F3: σ fehlt für Anomalie-Definition |
+| ~~P1~~ | 0 | AP-17 | Slow-Layer Streuung/z-Score | **Erledigt** | Analytik-Kern | F3: σ/z-Score geliefert (std_7d/30d, `compute_zscore`); SwR-063 erweitert |
 | **P1** | 0 | AP-18 | Reale Anomalie-Berechnung (Feature→Anomalie) | Offen | Analytik-Kern | F1: anomaly_score ist Konstante; braucht AP-17 |
 | **P1** | 0 | AP-25 | Fail-Loud-Policy für Analytikstufen | Offen | Governance | F10: stille Degradation untergräbt jede spätere Zahl |
 | **P1** | 0 | AP-26 | Status-Zeitreihe im Fenster-Replay | Offen | Validierung | F16: Punktstatus → tägliche Trajektorie; braucht AP-18 |
@@ -420,7 +420,7 @@ Governance: Schwellenwert-Festlegungen bleiben beim Projekteigner.
 | AP-ID | Großes Arbeitspaket | Tier | Schließt | Phase-Einordnung | Status |
 | --- | --- | --- | --- | --- | --- |
 | AP-16 | Skill-Messharness (Ground-Truth-Backtest) | 1 | F7/F8/F9 | Phase 1b (Gerüst für AP-28) | Offen |
-| AP-17 | Slow-Layer Streuung/z-Score | 1 | F3 (teil) | Phase 0 | Offen |
+| AP-17 | Slow-Layer Streuung/z-Score | 1 | F3 (teil) | Phase 0 | **Erledigt** |
 | AP-18 | Reale Anomalie-Berechnung (Feature→Anomalie) | 1 | F1 | Phase 0 | Offen |
 | AP-19 | Unsicherheit aus echten Quellen | 2 | F3 | Phase 4 | Offen |
 | AP-20 | Echte Abhängigkeitsdetektion + Zentralität | 2 | F4 | Phase 4 | Offen |

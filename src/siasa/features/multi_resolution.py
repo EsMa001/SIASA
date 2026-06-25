@@ -3,11 +3,14 @@
 Implements:
 - SwR-063: Fast/Slow/Structural feature layers from daily-aligned data
   - Fast Layer: daily signals (pass-through from alignment)
-  - Slow Layer: rolling-window aggregates (7d, 30d mean/std)
+  - Slow Layer: rolling-window aggregates (7d, 30d mean/std) plus
+    z-score normalization (AP-17, ALGO-ZSCORE-01) as the basis for a
+    sigma-grounded anomaly definition consumed downstream (AP-18)
   - Structural Layer: yearly/structural base values (forward-filled)
 """
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Optional
 
@@ -43,26 +46,57 @@ def _classify_signals() -> tuple[set[str], set[str]]:
     return daily_keys, structural_keys
 
 
+def compute_zscore(
+    value: float,
+    mean: Optional[float],
+    std: Optional[float],
+) -> Optional[float]:
+    """z-score normalization (ALGO-ZSCORE-01): ``(value - mean) / std``.
+
+    Returns None when the rolling mean/std are unavailable (insufficient data in
+    the window). A zero rolling std (a constant window) yields 0.0 — there is no
+    deviation, which must read as "unauffaellig", not as an undefined anomaly.
+    """
+    if mean is None or std is None:
+        return None
+    if std == 0.0:
+        return 0.0
+    return (value - mean) / std
+
+
 def _compute_rolling_features(
     dates: list[str],
     values: list[float],
 ) -> dict[str, list[Optional[float]]]:
-    """Compute rolling mean for configured window sizes.
+    """Compute rolling mean, population std and z-score per window size.
 
-    Returns dict mapping column name to list of values (None for insufficient data).
+    Returns dict mapping column name (``mean_Nd`` / ``std_Nd`` / ``zscore_Nd``) to a
+    list of values, with None for rows where the window is not yet full
+    (insufficient data).
     """
     n = len(dates)
     result: dict[str, list[Optional[float]]] = {}
 
     for window in _ROLLING_WINDOWS:
         means: list[Optional[float]] = []
+        stds: list[Optional[float]] = []
+        zscores: list[Optional[float]] = []
         for i in range(n):
             if i + 1 < window:
                 means.append(None)
+                stds.append(None)
+                zscores.append(None)
             else:
                 window_vals = values[i - window + 1: i + 1]
-                means.append(sum(window_vals) / len(window_vals))
+                mean = sum(window_vals) / len(window_vals)
+                variance = sum((v - mean) ** 2 for v in window_vals) / len(window_vals)
+                std = math.sqrt(variance)
+                means.append(mean)
+                stds.append(std)
+                zscores.append(compute_zscore(values[i], mean, std))
         result[f"mean_{window}d"] = means
+        result[f"std_{window}d"] = stds
+        result[f"zscore_{window}d"] = zscores
 
     return result
 
@@ -92,6 +126,10 @@ class MultiResolutionBuilder:
                 "value": pa.array([], type=pa.float64()),
                 "mean_7d": pa.array([], type=pa.float64()),
                 "mean_30d": pa.array([], type=pa.float64()),
+                "std_7d": pa.array([], type=pa.float64()),
+                "std_30d": pa.array([], type=pa.float64()),
+                "zscore_7d": pa.array([], type=pa.float64()),
+                "zscore_30d": pa.array([], type=pa.float64()),
             })
             empty_structural = pa.table({
                 "date": pa.array([], type=pa.string()),
@@ -158,9 +196,10 @@ class MultiResolutionBuilder:
         slow_countries: list[str] = []
         slow_signals: list[str] = []
         slow_values: list[float] = []
-        slow_rolling: dict[str, list[Optional[float]]] = {
-            f"mean_{w}d": [] for w in _ROLLING_WINDOWS
-        }
+        slow_rolling: dict[str, list[Optional[float]]] = {}
+        for w in _ROLLING_WINDOWS:
+            for metric in ("mean", "std", "zscore"):
+                slow_rolling[f"{metric}_{w}d"] = []
 
         for (country_id, signal_key), entries in sorted(groups.items()):
             entries.sort(key=lambda x: x[0])  # sort by date

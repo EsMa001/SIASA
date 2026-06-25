@@ -607,7 +607,7 @@ software_requirements:
 
 - id: SwR-063
   title: Multi-resolution feature builder with Fast/Slow/Structural layers
-  statement: The software shall provide a MultiResolutionBuilder that decomposes daily-aligned data into three layers — Fast (daily signals), Slow (rolling-window aggregates with 7d/30d mean), and Structural (yearly base values) — returning typed pyarrow Tables for downstream ML pipeline consumption.
+  statement: The software shall provide a MultiResolutionBuilder that decomposes daily-aligned data into three layers — Fast (daily signals), Slow (rolling-window aggregates with 7d/30d mean, population standard deviation, and z-score normalization per ALGO-ZSCORE-01), and Structural (yearly base values) — returning typed pyarrow Tables for downstream ML pipeline consumption.
   status: accepted
   derives_from:
   - SyR-051
