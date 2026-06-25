@@ -330,7 +330,7 @@ def test_hf_export_directory_round_trip(tmp_path: Path) -> None:
     )
 
     assert (output_dir / "README.md").exists()
-    readme = (output_dir / "README.md").read_text()
+    readme = (output_dir / "README.md").read_text(encoding="utf-8")
     assert "siasa-integration-test" in readme
     assert "MIT" in readme
     assert result["num_splits"] == 3

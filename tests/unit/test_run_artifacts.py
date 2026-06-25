@@ -187,22 +187,22 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert (tmp_path / "bundle" / "exports" / "event_report" / "REP-EVENT-EVT-UKR-RUN-200.md").exists()
     assert (tmp_path / "bundle" / "exports" / "event_report" / "REP-EVENT-EVT-UKR-RUN-200.json").exists()
 
-    snapshot = json.loads((tmp_path / "bundle" / "snapshot.json").read_text())
-    world_map = json.loads((tmp_path / "bundle" / "readmodels" / "world_map.json").read_text())
-    country_profile = json.loads((tmp_path / "bundle" / "readmodels" / "country_profiles" / "UKR.json").read_text())
-    domain_detail_a = json.loads((tmp_path / "bundle" / "readmodels" / "domain_details" / "UKR__A.json").read_text())
-    system_status = json.loads((tmp_path / "bundle" / "readmodels" / "system_status.json").read_text())
-    readiness = json.loads((tmp_path / "bundle" / "readmodels" / "readiness.json").read_text())
-    traceability_integrity = json.loads((tmp_path / "bundle" / "readmodels" / "traceability_integrity.json").read_text())
-    stakeholder_functional_closure = json.loads((tmp_path / "bundle" / "readmodels" / "stakeholder_functional_closure.json").read_text())
-    release_gate = json.loads((tmp_path / "bundle" / "readmodels" / "release_gate.json").read_text())
-    traceability = json.loads((tmp_path / "bundle" / "readmodels" / "traceability_lineage.json").read_text())
-    repo_closure = json.loads((tmp_path / "bundle" / "readmodels" / "repo_closure.json").read_text())
-    annotations = json.loads((tmp_path / "bundle" / "readmodels" / "annotations.json").read_text())
-    daily_report = json.loads((tmp_path / "bundle" / "reports" / "daily_snapshot.json").read_text())
-    coverage_report = json.loads((tmp_path / "bundle" / "reports" / "coverage_report.json").read_text())
-    domain_report_a = json.loads((tmp_path / "bundle" / "reports" / "domain_report_UKR_A.json").read_text())
-    event_report = json.loads((tmp_path / "bundle" / "reports" / "event_report_EVT-UKR-RUN-200.json").read_text())
+    snapshot = json.loads((tmp_path / "bundle" / "snapshot.json").read_text(encoding="utf-8"))
+    world_map = json.loads((tmp_path / "bundle" / "readmodels" / "world_map.json").read_text(encoding="utf-8"))
+    country_profile = json.loads((tmp_path / "bundle" / "readmodels" / "country_profiles" / "UKR.json").read_text(encoding="utf-8"))
+    domain_detail_a = json.loads((tmp_path / "bundle" / "readmodels" / "domain_details" / "UKR__A.json").read_text(encoding="utf-8"))
+    system_status = json.loads((tmp_path / "bundle" / "readmodels" / "system_status.json").read_text(encoding="utf-8"))
+    readiness = json.loads((tmp_path / "bundle" / "readmodels" / "readiness.json").read_text(encoding="utf-8"))
+    traceability_integrity = json.loads((tmp_path / "bundle" / "readmodels" / "traceability_integrity.json").read_text(encoding="utf-8"))
+    stakeholder_functional_closure = json.loads((tmp_path / "bundle" / "readmodels" / "stakeholder_functional_closure.json").read_text(encoding="utf-8"))
+    release_gate = json.loads((tmp_path / "bundle" / "readmodels" / "release_gate.json").read_text(encoding="utf-8"))
+    traceability = json.loads((tmp_path / "bundle" / "readmodels" / "traceability_lineage.json").read_text(encoding="utf-8"))
+    repo_closure = json.loads((tmp_path / "bundle" / "readmodels" / "repo_closure.json").read_text(encoding="utf-8"))
+    annotations = json.loads((tmp_path / "bundle" / "readmodels" / "annotations.json").read_text(encoding="utf-8"))
+    daily_report = json.loads((tmp_path / "bundle" / "reports" / "daily_snapshot.json").read_text(encoding="utf-8"))
+    coverage_report = json.loads((tmp_path / "bundle" / "reports" / "coverage_report.json").read_text(encoding="utf-8"))
+    domain_report_a = json.loads((tmp_path / "bundle" / "reports" / "domain_report_UKR_A.json").read_text(encoding="utf-8"))
+    event_report = json.loads((tmp_path / "bundle" / "reports" / "event_report_EVT-UKR-RUN-200.json").read_text(encoding="utf-8"))
 
     assert snapshot["snapshot_id"] == "SNAP-RUN-200-v1"
     assert world_map["countries"] == [{"country_id": "UKR", "status": "S3", "active_domains": ["A", "B"], "drill_down_target": "/countries/UKR"}]
@@ -275,7 +275,7 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert daily_report["report_id"] == "REP-DAILY-SNAP-RUN-200-v1"
     assert daily_report["payload"]["snapshot_id"] == "SNAP-RUN-200-v1"
     assert daily_report["export_files"][0]["relative_path"] == "exports/daily_snapshot/REP-DAILY-SNAP-RUN-200-v1.md"
-    assert json.loads((tmp_path / "bundle" / "exports" / "daily_snapshot" / "REP-DAILY-SNAP-RUN-200-v1.json").read_text())["snapshot_id"] == "SNAP-RUN-200-v1"
+    assert json.loads((tmp_path / "bundle" / "exports" / "daily_snapshot" / "REP-DAILY-SNAP-RUN-200-v1.json").read_text(encoding="utf-8"))["snapshot_id"] == "SNAP-RUN-200-v1"
 
 
 
@@ -290,13 +290,13 @@ def test_daily_run_orchestrator_cleans_stale_artifacts_before_writing_new_bundle
     stale_domain_details.mkdir(parents=True)
     stale_reports.mkdir(parents=True)
     stale_exports.mkdir(parents=True)
-    (bundle_dir / "snapshot.json").write_text('{"snapshot_id": "STALE"}')
-    (stale_readmodels / "world_map.json").write_text('{"countries": ["STALE"]}')
-    (stale_country_profiles / "STALE.json").write_text('{"country_id": "STALE"}')
-    (stale_domain_details / "STALE__A.json").write_text('{"country_id": "STALE", "domain": "A"}')
-    (stale_reports / "old_report.json").write_text('{"report_id": "OLD"}')
-    (stale_exports / "OLD.md").write_text('stale')
-    (stale_exports / "OLD.json").write_text('{"stale": true}')
+    (bundle_dir / "snapshot.json").write_text('{"snapshot_id": "STALE"}', encoding="utf-8")
+    (stale_readmodels / "world_map.json").write_text('{"countries": ["STALE"]}', encoding="utf-8")
+    (stale_country_profiles / "STALE.json").write_text('{"country_id": "STALE"}', encoding="utf-8")
+    (stale_domain_details / "STALE__A.json").write_text('{"country_id": "STALE", "domain": "A"}', encoding="utf-8")
+    (stale_reports / "old_report.json").write_text('{"report_id": "OLD"}', encoding="utf-8")
+    (stale_exports / "OLD.md").write_text('stale', encoding="utf-8")
+    (stale_exports / "OLD.json").write_text('{"stale": true}', encoding="utf-8")
 
     orchestrator = DailyRunOrchestrator(
         adapters=[
@@ -340,7 +340,7 @@ def test_daily_run_orchestrator_cleans_stale_artifacts_before_writing_new_bundle
     assert not (stale_reports / "old_report.json").exists()
     assert not (stale_exports / "OLD.md").exists()
     assert not (stale_exports / "OLD.json").exists()
-    assert json.loads((bundle_dir / "snapshot.json").read_text())["snapshot_id"] == "SNAP-RUN-200A-v1"
+    assert json.loads((bundle_dir / "snapshot.json").read_text(encoding="utf-8"))["snapshot_id"] == "SNAP-RUN-200A-v1"
 
 
 
@@ -384,10 +384,10 @@ def test_daily_run_orchestrator_writes_multi_country_artifact_bundle(tmp_path: P
 
     result = orchestrator.run(run_id="RUN-201")
 
-    world_map = json.loads((tmp_path / "bundle-multi" / "readmodels" / "world_map.json").read_text())
-    system_status = json.loads((tmp_path / "bundle-multi" / "readmodels" / "system_status.json").read_text())
-    pol_profile = json.loads((tmp_path / "bundle-multi" / "readmodels" / "country_profiles" / "POL.json").read_text())
-    ukr_profile = json.loads((tmp_path / "bundle-multi" / "readmodels" / "country_profiles" / "UKR.json").read_text())
+    world_map = json.loads((tmp_path / "bundle-multi" / "readmodels" / "world_map.json").read_text(encoding="utf-8"))
+    system_status = json.loads((tmp_path / "bundle-multi" / "readmodels" / "system_status.json").read_text(encoding="utf-8"))
+    pol_profile = json.loads((tmp_path / "bundle-multi" / "readmodels" / "country_profiles" / "POL.json").read_text(encoding="utf-8"))
+    ukr_profile = json.loads((tmp_path / "bundle-multi" / "readmodels" / "country_profiles" / "UKR.json").read_text(encoding="utf-8"))
 
     assert result.artifact_bundle is not None
     assert [country["country_id"] for country in world_map["countries"]] == ["POL", "UKR"]
@@ -489,8 +489,8 @@ def test_daily_run_orchestrator_records_country_gap_visibility_in_system_status(
 
     result = orchestrator.run(run_id="RUN-204")
 
-    system_status = json.loads((tmp_path / "bundle-gap-visibility" / "readmodels" / "system_status.json").read_text())
-    pol_profile = json.loads((tmp_path / "bundle-gap-visibility" / "readmodels" / "country_profiles" / "POL.json").read_text())
+    system_status = json.loads((tmp_path / "bundle-gap-visibility" / "readmodels" / "system_status.json").read_text(encoding="utf-8"))
+    pol_profile = json.loads((tmp_path / "bundle-gap-visibility" / "readmodels" / "country_profiles" / "POL.json").read_text(encoding="utf-8"))
 
     assert result.artifact_bundle is not None
     assert pol_profile["domain_gap_summary"]["missing_domains"] == ["B"]
@@ -824,9 +824,9 @@ def test_daily_run_orchestrator_respects_country_specific_expected_domains(tmp_p
 
     result = orchestrator.run(run_id="RUN-204A")
 
-    world_map = json.loads((tmp_path / "bundle-country-expected-domains" / "readmodels" / "world_map.json").read_text())
-    twn_profile = json.loads((tmp_path / "bundle-country-expected-domains" / "readmodels" / "country_profiles" / "TWN.json").read_text())
-    system_status = json.loads((tmp_path / "bundle-country-expected-domains" / "readmodels" / "system_status.json").read_text())
+    world_map = json.loads((tmp_path / "bundle-country-expected-domains" / "readmodels" / "world_map.json").read_text(encoding="utf-8"))
+    twn_profile = json.loads((tmp_path / "bundle-country-expected-domains" / "readmodels" / "country_profiles" / "TWN.json").read_text(encoding="utf-8"))
+    system_status = json.loads((tmp_path / "bundle-country-expected-domains" / "readmodels" / "system_status.json").read_text(encoding="utf-8"))
 
     assert result.artifact_bundle is not None
     assert world_map["countries"] == [{"country_id": "TWN", "status": "S3", "active_domains": ["A", "B"], "drill_down_target": "/countries/TWN"}]
@@ -874,8 +874,8 @@ def test_daily_run_orchestrator_uses_country_specific_source_scope_for_gap_reaso
 
     result = orchestrator.run(run_id="RUN-205")
 
-    system_status = json.loads((tmp_path / "bundle-country-scope" / "readmodels" / "system_status.json").read_text())
-    pol_profile = json.loads((tmp_path / "bundle-country-scope" / "readmodels" / "country_profiles" / "POL.json").read_text())
+    system_status = json.loads((tmp_path / "bundle-country-scope" / "readmodels" / "system_status.json").read_text(encoding="utf-8"))
+    pol_profile = json.loads((tmp_path / "bundle-country-scope" / "readmodels" / "country_profiles" / "POL.json").read_text(encoding="utf-8"))
 
     assert result.artifact_bundle is not None
     assert pol_profile["domain_gap_summary"]["gap_details"] == [
@@ -920,7 +920,7 @@ def test_daily_run_orchestrator_marks_failed_source_gap_causes(tmp_path: Path) -
     )
 
     result = orchestrator.run(run_id="RUN-205A")
-    pol_profile = json.loads((tmp_path / "bundle-failed-source-gap" / "readmodels" / "country_profiles" / "POL.json").read_text())
+    pol_profile = json.loads((tmp_path / "bundle-failed-source-gap" / "readmodels" / "country_profiles" / "POL.json").read_text(encoding="utf-8"))
 
     assert result.artifact_bundle is not None
     assert pol_profile["domain_gap_summary"]["gap_details"] == [
@@ -963,7 +963,7 @@ def test_daily_run_orchestrator_marks_zero_record_gap_causes(tmp_path: Path) -> 
     )
 
     result = orchestrator.run(run_id="RUN-206")
-    pol_profile = json.loads((tmp_path / "bundle-zero-records" / "readmodels" / "country_profiles" / "POL.json").read_text())
+    pol_profile = json.loads((tmp_path / "bundle-zero-records" / "readmodels" / "country_profiles" / "POL.json").read_text(encoding="utf-8"))
 
     assert result.artifact_bundle is not None
     assert pol_profile["domain_gap_summary"]["gap_details"] == [
@@ -1016,7 +1016,7 @@ def test_daily_run_orchestrator_marks_filtered_record_gap_causes(tmp_path: Path)
     )
 
     result = orchestrator.run(run_id="RUN-207")
-    pol_profile = json.loads((tmp_path / "bundle-filtered-records" / "readmodels" / "country_profiles" / "POL.json").read_text())
+    pol_profile = json.loads((tmp_path / "bundle-filtered-records" / "readmodels" / "country_profiles" / "POL.json").read_text(encoding="utf-8"))
 
     assert result.artifact_bundle is not None
     assert pol_profile["domain_gap_summary"]["gap_details"] == [
@@ -1064,7 +1064,7 @@ def test_daily_run_orchestrator_marks_stale_gap_causes(tmp_path: Path) -> None:
     )
 
     result = orchestrator.run(run_id="RUN-208")
-    pol_profile = json.loads((tmp_path / "bundle-stale-records" / "readmodels" / "country_profiles" / "POL.json").read_text())
+    pol_profile = json.loads((tmp_path / "bundle-stale-records" / "readmodels" / "country_profiles" / "POL.json").read_text(encoding="utf-8"))
 
     assert result.artifact_bundle is not None
     assert pol_profile["domain_gap_summary"]["gap_details"] == [
@@ -1112,7 +1112,7 @@ def test_daily_run_orchestrator_marks_filtered_by_gate_gap_causes(tmp_path: Path
     )
 
     result = orchestrator.run(run_id="RUN-208A")
-    pol_profile = json.loads((tmp_path / "bundle-filtered-gate-records" / "readmodels" / "country_profiles" / "POL.json").read_text())
+    pol_profile = json.loads((tmp_path / "bundle-filtered-gate-records" / "readmodels" / "country_profiles" / "POL.json").read_text(encoding="utf-8"))
 
     assert result.artifact_bundle is not None
     assert pol_profile["domain_gap_summary"]["gap_details"] == [
@@ -1166,9 +1166,9 @@ def test_daily_run_orchestrator_decomposes_mixed_no_usable_input_data_by_source(
     )
 
     result = orchestrator.run(run_id="RUN-209")
-    pol_profile = json.loads((tmp_path / "bundle-mixed-no-usable-input" / "readmodels" / "country_profiles" / "POL.json").read_text())
-    system_status = json.loads((tmp_path / "bundle-mixed-no-usable-input" / "readmodels" / "system_status.json").read_text())
-    readiness = json.loads((tmp_path / "bundle-mixed-no-usable-input" / "readmodels" / "readiness.json").read_text())
+    pol_profile = json.loads((tmp_path / "bundle-mixed-no-usable-input" / "readmodels" / "country_profiles" / "POL.json").read_text(encoding="utf-8"))
+    system_status = json.loads((tmp_path / "bundle-mixed-no-usable-input" / "readmodels" / "system_status.json").read_text(encoding="utf-8"))
+    readiness = json.loads((tmp_path / "bundle-mixed-no-usable-input" / "readmodels" / "readiness.json").read_text(encoding="utf-8"))
 
     assert result.artifact_bundle is not None
     assert pol_profile["domain_gap_summary"]["gap_details"] == [
@@ -1249,10 +1249,10 @@ def test_daily_run_orchestrator_writes_country_specific_multi_country_artifact_s
 
     result = orchestrator.run(run_id="RUN-202")
 
-    pol_profile = json.loads((tmp_path / "bundle-multi-distinct" / "readmodels" / "country_profiles" / "POL.json").read_text())
-    ukr_profile = json.loads((tmp_path / "bundle-multi-distinct" / "readmodels" / "country_profiles" / "UKR.json").read_text())
-    pol_domain_a = json.loads((tmp_path / "bundle-multi-distinct" / "readmodels" / "domain_details" / "POL__A.json").read_text())
-    ukr_domain_a = json.loads((tmp_path / "bundle-multi-distinct" / "readmodels" / "domain_details" / "UKR__A.json").read_text())
+    pol_profile = json.loads((tmp_path / "bundle-multi-distinct" / "readmodels" / "country_profiles" / "POL.json").read_text(encoding="utf-8"))
+    ukr_profile = json.loads((tmp_path / "bundle-multi-distinct" / "readmodels" / "country_profiles" / "UKR.json").read_text(encoding="utf-8"))
+    pol_domain_a = json.loads((tmp_path / "bundle-multi-distinct" / "readmodels" / "domain_details" / "POL__A.json").read_text(encoding="utf-8"))
+    ukr_domain_a = json.loads((tmp_path / "bundle-multi-distinct" / "readmodels" / "domain_details" / "UKR__A.json").read_text(encoding="utf-8"))
 
     assert result.country_domain_statuses["POL"]["A"].status == "D1"
     assert result.country_domain_statuses["UKR"]["A"].status == "D4"
@@ -1340,9 +1340,9 @@ def test_daily_run_orchestrator_writes_partial_success_bundle_with_failed_source
 
     assert result.artifact_bundle is not None
 
-    source_coverage = json.loads((tmp_path / "bundle" / "readmodels" / "source_coverage.json").read_text())
-    country_profile = json.loads((tmp_path / "bundle" / "readmodels" / "country_profiles" / "UKR.json").read_text())
-    system_status = json.loads((tmp_path / "bundle" / "readmodels" / "system_status.json").read_text())
+    source_coverage = json.loads((tmp_path / "bundle" / "readmodels" / "source_coverage.json").read_text(encoding="utf-8"))
+    country_profile = json.loads((tmp_path / "bundle" / "readmodels" / "country_profiles" / "UKR.json").read_text(encoding="utf-8"))
+    system_status = json.loads((tmp_path / "bundle" / "readmodels" / "system_status.json").read_text(encoding="utf-8"))
 
     assert source_coverage["failed_sources"] == ["SRC-B"]
     assert country_profile["uncertainty"] == ["partial_success", "failed_sources:SRC-B"]
@@ -1389,7 +1389,7 @@ def test_daily_run_orchestrator_records_optional_artifact_absence_reasons(tmp_pa
 
     result = orchestrator.run(run_id="RUN-203")
 
-    system_status = json.loads((tmp_path / "bundle-absence-reasons" / "readmodels" / "system_status.json").read_text())
+    system_status = json.loads((tmp_path / "bundle-absence-reasons" / "readmodels" / "system_status.json").read_text(encoding="utf-8"))
     assert result.artifact_bundle is not None
     assert system_status["artifact_status"]["validation_backtest"] == {
         "status": "absent",

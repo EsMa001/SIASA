@@ -106,7 +106,7 @@ def write_run_artifacts(
     exports_dir.mkdir(parents=True, exist_ok=True)
 
     snapshot_path = output_dir / "snapshot.json"
-    snapshot_path.write_text(json.dumps(asdict(snapshot), indent=2, sort_keys=True))
+    snapshot_path.write_text(json.dumps(asdict(snapshot), indent=2, sort_keys=True), encoding="utf-8")
 
     country_statuses = {
         str(country_id): str(status)
@@ -127,7 +127,8 @@ def write_run_artifacts(
             ),
             indent=2,
             sort_keys=True,
-        )
+        ),
+        encoding="utf-8",
     )
 
     readmodel_paths = [world_map_path]
@@ -263,7 +264,7 @@ def write_run_artifacts(
             configured_domains=expected_domains,
         )
         country_profile_path = country_profiles_dir / f"{country_id}.json"
-        country_profile_path.write_text(json.dumps(country_profile, indent=2, sort_keys=True))
+        country_profile_path.write_text(json.dumps(country_profile, indent=2, sort_keys=True), encoding="utf-8")
         readmodel_paths.append(country_profile_path)
 
         for domain, status in sorted(country_domain_states.items()):
@@ -305,7 +306,7 @@ def write_run_artifacts(
                 annotations=domain_annotation_ids,
             )
             domain_path = domain_details_dir / f"{country_id}__{domain}.json"
-            domain_path.write_text(json.dumps(domain_read_model, indent=2, sort_keys=True))
+            domain_path.write_text(json.dumps(domain_read_model, indent=2, sort_keys=True), encoding="utf-8")
             readmodel_paths.append(domain_path)
 
             extra_reports.append(
@@ -341,7 +342,8 @@ def write_run_artifacts(
             ),
             indent=2,
             sort_keys=True,
-        )
+        ),
+        encoding="utf-8",
     )
     readmodel_paths.append(source_coverage_path)
 
@@ -385,7 +387,8 @@ def write_run_artifacts(
             ),
             indent=2,
             sort_keys=True,
-        )
+        ),
+        encoding="utf-8",
     )
     readmodel_paths.append(system_status_path)
 
@@ -395,7 +398,8 @@ def write_run_artifacts(
             {"lineage_records": [asdict(record) for record in lineage_records]},
             indent=2,
             sort_keys=True,
-        )
+        ),
+        encoding="utf-8",
     )
     readmodel_paths.append(traceability_path)
 
@@ -405,17 +409,18 @@ def write_run_artifacts(
             build_repo_closure_report(repo_root=Path(__file__).resolve().parents[3]),
             indent=2,
             sort_keys=True,
-        )
+        ),
+        encoding="utf-8",
     )
     readmodel_paths.append(repo_closure_path)
 
     annotations_path = readmodels_dir / "annotations.json"
-    annotations_path.write_text(json.dumps(build_annotations_view_model(annotation_records), indent=2, sort_keys=True))
+    annotations_path.write_text(json.dumps(build_annotations_view_model(annotation_records), indent=2, sort_keys=True), encoding="utf-8")
     readmodel_paths.append(annotations_path)
 
     if validation_view_model is not None:
         validation_path = readmodels_dir / "validation_backtest.json"
-        validation_path.write_text(json.dumps(validation_view_model, indent=2, sort_keys=True))
+        validation_path.write_text(json.dumps(validation_view_model, indent=2, sort_keys=True), encoding="utf-8")
         readmodel_paths.append(validation_path)
 
     readiness_available_pages = {
@@ -439,28 +444,29 @@ def write_run_artifacts(
     }
     readiness_view_model = build_readiness_view_model(
                 country_profile_read_models={
-                    country_file.stem: json.loads(country_file.read_text())
+                    country_file.stem: json.loads(country_file.read_text(encoding="utf-8"))
                     for country_file in sorted(country_profiles_dir.glob("*.json"))
                 },
                 domain_detail_read_models={
                     (str(read_model["country_id"]), str(read_model["domain"])): read_model
                     for read_model in (
-                        json.loads(domain_file.read_text())
+                        json.loads(domain_file.read_text(encoding="utf-8"))
                         for domain_file in sorted(domain_details_dir.glob("*.json"))
                     )
                 },
                 report_catalog=readiness_report_catalog,
-                system_status_read_model=json.loads(system_status_path.read_text()),
-                source_coverage_read_model=json.loads(source_coverage_path.read_text()),
+                system_status_read_model=json.loads(system_status_path.read_text(encoding="utf-8")),
+                source_coverage_read_model=json.loads(source_coverage_path.read_text(encoding="utf-8")),
                 validation_view_model=validation_view_model,
-                traceability_view_model=json.loads(traceability_path.read_text()),
-                annotations_view_model=json.loads(annotations_path.read_text()),
-                repo_closure_view_model=json.loads(repo_closure_path.read_text()),
+                traceability_view_model=json.loads(traceability_path.read_text(encoding="utf-8")),
+                annotations_view_model=json.loads(annotations_path.read_text(encoding="utf-8")),
+                repo_closure_view_model=json.loads(repo_closure_path.read_text(encoding="utf-8")),
                 available_pages=readiness_available_pages,
             )
     readiness_path = readmodels_dir / "readiness.json"
     readiness_path.write_text(
-        json.dumps(readiness_view_model, indent=2, sort_keys=True)
+        json.dumps(readiness_view_model, indent=2, sort_keys=True),
+        encoding="utf-8",
     )
     readmodel_paths.append(readiness_path)
 
@@ -473,7 +479,8 @@ def write_run_artifacts(
         )
     approval_lifecycle_vm = build_approval_lifecycle_view_model(existing_record)
     approval_lifecycle_path.write_text(
-        json.dumps(approval_lifecycle_vm, indent=2, sort_keys=True)
+        json.dumps(approval_lifecycle_vm, indent=2, sort_keys=True),
+        encoding="utf-8",
     )
     readmodel_paths.append(approval_lifecycle_path)
 
@@ -490,16 +497,17 @@ def write_run_artifacts(
                 operator_blocker_causality_view_model=None,
                 operator_operability_cluster_view_model=None,
                 operator_stale_remediation_action_plan_view_model=None,
-                system_status_read_model=json.loads(system_status_path.read_text()),
+                system_status_read_model=json.loads(system_status_path.read_text(encoding="utf-8")),
                 validation_view_model=validation_view_model,
-                traceability_view_model=json.loads(traceability_path.read_text()),
-                repo_closure_view_model=json.loads(repo_closure_path.read_text()),
+                traceability_view_model=json.loads(traceability_path.read_text(encoding="utf-8")),
+                repo_closure_view_model=json.loads(repo_closure_path.read_text(encoding="utf-8")),
                 approval_lifecycle_view_model=approval_lifecycle_vm,
                 available_pages=readiness_available_pages,
             ),
             indent=2,
             sort_keys=True,
-        )
+        ),
+        encoding="utf-8",
     )
     readmodel_paths.append(release_demo_package_path)
 
@@ -509,7 +517,8 @@ def write_run_artifacts(
             build_traceability_integrity_report(repo_root=Path(__file__).resolve().parents[3]),
             indent=2,
             sort_keys=True,
-        )
+        ),
+        encoding="utf-8",
     )
     readmodel_paths.append(traceability_integrity_path)
 
@@ -519,7 +528,8 @@ def write_run_artifacts(
             build_stakeholder_functional_closure_report(repo_root=Path(__file__).resolve().parents[3]),
             indent=2,
             sort_keys=True,
-        )
+        ),
+        encoding="utf-8",
     )
     readmodel_paths.append(stakeholder_functional_closure_path)
 
@@ -528,73 +538,84 @@ def write_run_artifacts(
         json.dumps(
             build_release_gate_view_model(
                 readiness_view_model=readiness_view_model,
-                traceability_integrity_report=json.loads(traceability_integrity_path.read_text()),
+                traceability_integrity_report=json.loads(traceability_integrity_path.read_text(encoding="utf-8")),
             ),
             indent=2,
             sort_keys=True,
-        )
+        ),
+        encoding="utf-8",
     )
     readmodel_paths.append(release_gate_path)
 
     release_assessment = build_repo_release_gate_assessment(repo_root=Path(__file__).resolve().parents[3])
     release_evidence_assessment_path = readmodels_dir / "release_evidence_assessment.json"
     release_evidence_assessment_path.write_text(
-        json.dumps(release_assessment, indent=2, sort_keys=True)
+        json.dumps(release_assessment, indent=2, sort_keys=True),
+        encoding="utf-8",
     )
     readmodel_paths.append(release_evidence_assessment_path)
 
     stakeholder_e2e_flow_coverage_path = readmodels_dir / "stakeholder_e2e_flow_coverage.json"
     stakeholder_e2e_flow_coverage_path.write_text(
-        json.dumps(release_assessment.get("stakeholder_e2e_flow_coverage", {}), indent=2, sort_keys=True)
+        json.dumps(release_assessment.get("stakeholder_e2e_flow_coverage", {}), indent=2, sort_keys=True),
+        encoding="utf-8",
     )
     readmodel_paths.append(stakeholder_e2e_flow_coverage_path)
 
     stakeholder_e2e_ui_smoke_path = readmodels_dir / "stakeholder_e2e_ui_smoke.json"
     stakeholder_e2e_ui_smoke_path.write_text(
-        json.dumps(release_assessment.get("stakeholder_e2e_ui_smoke", {}), indent=2, sort_keys=True)
+        json.dumps(release_assessment.get("stakeholder_e2e_ui_smoke", {}), indent=2, sort_keys=True),
+        encoding="utf-8",
     )
     readmodel_paths.append(stakeholder_e2e_ui_smoke_path)
 
     stakeholder_browser_e2e_acceptance_path = readmodels_dir / "stakeholder_browser_e2e_acceptance.json"
     stakeholder_browser_e2e_acceptance_path.write_text(
-        json.dumps(release_assessment.get("stakeholder_browser_e2e_acceptance", {}), indent=2, sort_keys=True)
+        json.dumps(release_assessment.get("stakeholder_browser_e2e_acceptance", {}), indent=2, sort_keys=True),
+        encoding="utf-8",
     )
     readmodel_paths.append(stakeholder_browser_e2e_acceptance_path)
 
     stakeholder_browser_interaction_depth_path = readmodels_dir / "stakeholder_browser_interaction_depth.json"
     stakeholder_browser_interaction_depth_path.write_text(
-        json.dumps(release_assessment.get("stakeholder_browser_interaction_depth", {}), indent=2, sort_keys=True)
+        json.dumps(release_assessment.get("stakeholder_browser_interaction_depth", {}), indent=2, sort_keys=True),
+        encoding="utf-8",
     )
     readmodel_paths.append(stakeholder_browser_interaction_depth_path)
 
     stakeholder_browser_failure_resilience_path = readmodels_dir / "stakeholder_browser_failure_resilience.json"
     stakeholder_browser_failure_resilience_path.write_text(
-        json.dumps(release_assessment.get("stakeholder_browser_failure_resilience", {}), indent=2, sort_keys=True)
+        json.dumps(release_assessment.get("stakeholder_browser_failure_resilience", {}), indent=2, sort_keys=True),
+        encoding="utf-8",
     )
     readmodel_paths.append(stakeholder_browser_failure_resilience_path)
 
     release_readiness_index_path = readmodels_dir / "release_readiness_index.json"
     release_readiness_index_path.write_text(
-        json.dumps(release_assessment.get("release_readiness_index", {}), indent=2, sort_keys=True)
+        json.dumps(release_assessment.get("release_readiness_index", {}), indent=2, sort_keys=True),
+        encoding="utf-8",
     )
     readmodel_paths.append(release_readiness_index_path)
 
     report_paths = []
     daily_report_path = reports_dir / "daily_snapshot.json"
     daily_report_path.write_text(
-        json.dumps(_serialize_report(daily_report, _write_report_exports(daily_report, exports_dir)), indent=2, sort_keys=True)
+        json.dumps(_serialize_report(daily_report, _write_report_exports(daily_report, exports_dir)), indent=2, sort_keys=True),
+        encoding="utf-8",
     )
     report_paths.append(daily_report_path)
     for country_id, report in sorted(country_reports_by_id.items()):
         report_path = reports_dir / f"country_profile_{country_id}.json"
         report_path.write_text(
-            json.dumps(_serialize_report(report, _write_report_exports(report, exports_dir)), indent=2, sort_keys=True)
+            json.dumps(_serialize_report(report, _write_report_exports(report, exports_dir)), indent=2, sort_keys=True),
+            encoding="utf-8",
         )
         report_paths.append(report_path)
     for report_filename, report in extra_reports:
         report_path = reports_dir / report_filename
         report_path.write_text(
-            json.dumps(_serialize_report(report, _write_report_exports(report, exports_dir)), indent=2, sort_keys=True)
+            json.dumps(_serialize_report(report, _write_report_exports(report, exports_dir)), indent=2, sort_keys=True),
+            encoding="utf-8",
         )
         report_paths.append(report_path)
 
@@ -635,9 +656,9 @@ def _write_report_exports(report: GeneratedReport, exports_dir: Path) -> list[di
     report_export_dir.mkdir(parents=True, exist_ok=True)
 
     markdown_path = report_export_dir / f"{report.report_id}.md"
-    markdown_path.write_text(report.markdown)
+    markdown_path.write_text(report.markdown, encoding="utf-8")
     json_path = report_export_dir / f"{report.report_id}.json"
-    json_path.write_text(json.dumps(report.json_payload, indent=2, sort_keys=True))
+    json_path.write_text(json.dumps(report.json_payload, indent=2, sort_keys=True), encoding="utf-8")
 
     return [
         {
@@ -683,13 +704,15 @@ def _write_analytics_artifacts(
     # Rule evaluations
     rule_data = [_safe_asdict(r) for r in (rule_evaluation_results or [])]
     (analytics_dir / "rule_evaluations.json").write_text(
-        json.dumps(rule_data, indent=2, sort_keys=True)
+        json.dumps(rule_data, indent=2, sort_keys=True),
+        encoding="utf-8",
     )
 
     # Cross-domain fusion
     fusion_data = {k: _safe_asdict(v) for k, v in (fusion_results or {}).items()}
     (analytics_dir / "cross_domain_fusion.json").write_text(
-        json.dumps(fusion_data, indent=2, sort_keys=True)
+        json.dumps(fusion_data, indent=2, sort_keys=True),
+        encoding="utf-8",
     )
 
     # Bayesian estimates
@@ -698,25 +721,29 @@ def _write_analytics_artifacts(
         for k, v in (bayesian_estimates or {}).items()
     }
     (analytics_dir / "bayesian_estimates.json").write_text(
-        json.dumps(bayesian_data, indent=2, sort_keys=True)
+        json.dumps(bayesian_data, indent=2, sort_keys=True),
+        encoding="utf-8",
     )
 
     # Uncertainty budgets
     uncertainty_data = {k: _safe_asdict(v) for k, v in (uncertainty_budgets or {}).items()}
     (analytics_dir / "uncertainty_budgets.json").write_text(
-        json.dumps(uncertainty_data, indent=2, sort_keys=True)
+        json.dumps(uncertainty_data, indent=2, sort_keys=True),
+        encoding="utf-8",
     )
 
     # Dependency graph
     dep_data = _safe_asdict(dependency_graph_result) if dependency_graph_result is not None else {}
     (analytics_dir / "dependency_graph.json").write_text(
-        json.dumps(dep_data, indent=2, sort_keys=True)
+        json.dumps(dep_data, indent=2, sort_keys=True),
+        encoding="utf-8",
     )
 
     # Provenance chain
     prov_data = _safe_asdict(provenance_chain_result) if provenance_chain_result is not None else {}
     (analytics_dir / "provenance_chain.json").write_text(
-        json.dumps(prov_data, indent=2, sort_keys=True)
+        json.dumps(prov_data, indent=2, sort_keys=True),
+        encoding="utf-8",
     )
 
     # Information epidemiology
@@ -725,7 +752,8 @@ def _write_analytics_artifacts(
         "amplification_events": [_safe_asdict(a) for a in (amplification_result or [])],
     }
     (analytics_dir / "info_epidemiology.json").write_text(
-        json.dumps(epi_data, indent=2, sort_keys=True)
+        json.dumps(epi_data, indent=2, sort_keys=True),
+        encoding="utf-8",
     )
 
 

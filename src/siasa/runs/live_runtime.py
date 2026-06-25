@@ -918,7 +918,7 @@ def _should_retry_pipeline_after_isolated_country_domain_b_gap(
     if not system_status_path.exists():
         return False
     try:
-        system_status = json.loads(system_status_path.read_text())
+        system_status = json.loads(system_status_path.read_text(encoding="utf-8"))
     except (OSError, ValueError, TypeError):
         return False
     coverage_visibility = system_status.get("country_coverage_visibility", {})

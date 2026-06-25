@@ -69,7 +69,7 @@ def test_dataset_card_generation(tmp_path: Path) -> None:
     exporter = HFExporter()
     card_path = exporter.write_dataset_card(tmp_path, card_info)
     assert card_path.exists()
-    content = card_path.read_text()
+    content = card_path.read_text(encoding="utf-8")
     assert "siasa-training-v1" in content
     assert "conflict_event_count" in content
     assert "MIT" in content

@@ -26,7 +26,7 @@ def test_dvc_gitignore_exists() -> None:
     """.dvc/.gitignore must exist to exclude local cache."""
     gitignore = REPO_ROOT / ".dvc" / ".gitignore"
     assert gitignore.is_file()
-    content = gitignore.read_text()
+    content = gitignore.read_text(encoding="utf-8")
     assert "/tmp" in content
     assert "/cache" in content
 
@@ -35,13 +35,13 @@ def test_dvc_yaml_exists_and_is_valid() -> None:
     """dvc.yaml must exist and be valid YAML."""
     dvc_yaml = REPO_ROOT / "dvc.yaml"
     assert dvc_yaml.is_file(), "dvc.yaml missing"
-    pipeline = yaml.safe_load(dvc_yaml.read_text())
+    pipeline = yaml.safe_load(dvc_yaml.read_text(encoding="utf-8"))
     assert "stages" in pipeline
 
 
 def test_dvc_pipeline_has_four_stages() -> None:
     """dvc.yaml must define the 4-stage pipeline: ingest, archive, features, training."""
-    pipeline = yaml.safe_load((REPO_ROOT / "dvc.yaml").read_text())
+    pipeline = yaml.safe_load((REPO_ROOT / "dvc.yaml").read_text(encoding="utf-8"))
     stages = set(pipeline["stages"].keys())
     expected = {"ingest", "archive", "features", "training"}
     assert expected.issubset(stages), f"Missing stages: {expected - stages}"
@@ -49,14 +49,14 @@ def test_dvc_pipeline_has_four_stages() -> None:
 
 def test_dvc_pipeline_stages_have_cmd() -> None:
     """Every pipeline stage must have a cmd field."""
-    pipeline = yaml.safe_load((REPO_ROOT / "dvc.yaml").read_text())
+    pipeline = yaml.safe_load((REPO_ROOT / "dvc.yaml").read_text(encoding="utf-8"))
     for stage_name, stage_config in pipeline["stages"].items():
         assert "cmd" in stage_config, f"Stage '{stage_name}' missing cmd"
 
 
 def test_dvc_pipeline_dependency_chain() -> None:
     """Pipeline stages must form a dependency chain: ingest → archive → features → training."""
-    pipeline = yaml.safe_load((REPO_ROOT / "dvc.yaml").read_text())
+    pipeline = yaml.safe_load((REPO_ROOT / "dvc.yaml").read_text(encoding="utf-8"))
     stages = pipeline["stages"]
 
     # archive depends on ingest output
@@ -79,7 +79,7 @@ def test_data_gitignore_excludes_dvc_dirs() -> None:
     """data/.gitignore must exclude DVC-tracked directories."""
     gitignore = REPO_ROOT / "data" / ".gitignore"
     assert gitignore.is_file(), "data/.gitignore missing"
-    content = gitignore.read_text()
+    content = gitignore.read_text(encoding="utf-8")
     assert "/archive/" in content
     assert "/features/" in content
     assert "/training/" in content

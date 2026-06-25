@@ -158,6 +158,6 @@ def test_write_health_status(tmp_path: Path) -> None:
     output = tmp_path / "health.json"
     write_health_status(health, output)
     assert output.exists()
-    data = json.loads(output.read_text())
+    data = json.loads(output.read_text(encoding="utf-8"))
     assert data["overall"] == "healthy"
     assert len(data["checks"]) == 1

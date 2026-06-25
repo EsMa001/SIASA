@@ -1071,7 +1071,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert (pages.output_dir / "stakeholder_e2e_ui_smoke.json").exists()
     assert (pages.output_dir / "analyst_briefing.json").exists()
 
-    index_html = (pages.output_dir / "index.html").read_text()
+    index_html = (pages.output_dir / "index.html").read_text(encoding="utf-8")
     assert "World Anomaly Map" in index_html
     # AP-F19: Dynamic role switcher
     assert "role-switcher" in index_html
@@ -1147,7 +1147,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Multi-Domain Status" in index_html
     assert "supported" in index_html
 
-    country_html = (pages.output_dir / "countries" / "UKR.html").read_text()
+    country_html = (pages.output_dir / "countries" / "UKR.html").read_text(encoding="utf-8")
     assert "Country Profile" in country_html
     assert "Trust / Uncertainty" in country_html
     assert "Coverage" in country_html
@@ -1173,7 +1173,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "../annotations.html?scope=country&amp;linked_item=UKR&amp;annotation_type=context_note" in country_html
     assert "Open Annotation Workflow for this Country" in country_html
 
-    domain_html = (pages.output_dir / "domains" / "UKR-A.html").read_text()
+    domain_html = (pages.output_dir / "domains" / "UKR-A.html").read_text(encoding="utf-8")
     assert "Domain Detail" in domain_html
     assert "delta_to_baseline" in domain_html
     assert "Time Series Chart" in domain_html
@@ -1200,7 +1200,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "../annotations.html?scope=domain&amp;linked_item=UKR%3AA&amp;annotation_type=lineage_note" in domain_html
     assert "Open Annotation Workflow for this Domain" in domain_html
 
-    coverage_html = (pages.output_dir / "coverage.html").read_text()
+    coverage_html = (pages.output_dir / "coverage.html").read_text(encoding="utf-8")
     assert "Source / Coverage View" in coverage_html
     assert "Trust Summary" in coverage_html
     assert "Source status summary keeps live, failed, degraded, and prepared-adapter access visible at a glance." in coverage_html
@@ -1274,7 +1274,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "focus_country" in coverage_html
     assert "focus_section" in coverage_html
 
-    reports_html = (pages.output_dir / "reports.html").read_text()
+    reports_html = (pages.output_dir / "reports.html").read_text(encoding="utf-8")
     assert "Report / Export View" in reports_html
     assert "REP-COVERAGE-001" in reports_html
     assert "Evidence Summary" in reports_html
@@ -1288,7 +1288,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "SRC-B" in reports_html
     assert "SNAP-RUN-200-v1" in reports_html
 
-    runs_html = (pages.output_dir / "runs.html").read_text()
+    runs_html = (pages.output_dir / "runs.html").read_text(encoding="utf-8")
     assert "System Status / Runs" in runs_html
     assert "partial_success" in runs_html
     assert "Operational Evidence Lane" in runs_html
@@ -1515,7 +1515,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "approval-lifecycle-lane-next-action" in runs_html
     assert "G4 Approval lifecycle" in runs_html
 
-    trends_html = (pages.output_dir / "trends.html").read_text()
+    trends_html = (pages.output_dir / "trends.html").read_text(encoding="utf-8")
     assert "Yearly Trend Page" in trends_html
     # Per-domain charts instead of single combined chart
     assert "trend-domain-chart" in trends_html
@@ -1537,11 +1537,11 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "data-idx=" in trends_html
     assert "_render_enhanced_trend_controls_js" or "Enhanced trend chart zoom" in trends_html
 
-    events_html = (pages.output_dir / "events.html").read_text()
+    events_html = (pages.output_dir / "events.html").read_text(encoding="utf-8")
     assert "Current Events Page" in events_html
     assert "EVT-001" in events_html
 
-    comparison_html = (pages.output_dir / "comparison.html").read_text()
+    comparison_html = (pages.output_dir / "comparison.html").read_text(encoding="utf-8")
     assert "Cross-Country Comparison" in comparison_html
     assert "Coverage / Confidence Comparison" in comparison_html
     assert "Comparison controls" in comparison_html
@@ -1558,7 +1558,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "comparison-baseline" in comparison_html
     assert "renderComparisonBaseline" in comparison_html
 
-    validation_html = (pages.output_dir / "validation.html").read_text()
+    validation_html = (pages.output_dir / "validation.html").read_text(encoding="utf-8")
     assert "Validation / Backtest" in validation_html
     assert "VAL-UKR-2022-001" in validation_html
     assert "Domain Match" in validation_html
@@ -1699,7 +1699,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "VAL-POL-2022-001" in validation_html
     assert "POL, UKR" in validation_html or "POL" in validation_html
 
-    traceability_html = (pages.output_dir / "traceability.html").read_text()
+    traceability_html = (pages.output_dir / "traceability.html").read_text(encoding="utf-8")
 
     assert "historical-replay-country-filter" in validation_html
     assert "historical-replay-verdict-filter" in validation_html
@@ -1715,15 +1715,15 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "data-search-text" in validation_html
     assert "Changed Versions" in validation_html
 
-    readiness_html = (pages.output_dir / "readiness.html").read_text()
+    readiness_html = (pages.output_dir / "readiness.html").read_text(encoding="utf-8")
     assert "Demo / Release Readiness" in readiness_html
     assert "Demo Verdict" in readiness_html
     assert "Release Verdict" in readiness_html
     assert "Gate Verdict" in readiness_html
     assert "Gate Verdict" in readiness_html
     assert "Release Readiness Index" in readiness_html
-    assert "Release / Demo Package" in (pages.output_dir / "release_package.html").read_text()
-    release_demo_package_json = json.loads((pages.output_dir / "release_demo_package.json").read_text())
+    assert "Release / Demo Package" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    release_demo_package_json = json.loads((pages.output_dir / "release_demo_package.json").read_text(encoding="utf-8"))
     assert release_demo_package_json["decision_packet_send_readiness"]["overall_send_readiness"] == "blocked"
     assert release_demo_package_json["decision_packet_send_readiness"]["external_send_allowed"] is False
     assert release_demo_package_json["primary_item_target_href"] == "coverage.html?focus_country=UKR&focus_section=country_gap&missing_domains=D#country-gap-UKR"
@@ -1735,71 +1735,71 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert release_demo_package_json["review_sequence"][3]["href"].startswith("validation.html#ra=")
     assert release_demo_package_json["stakeholder_cover_sheet"]["start_here"]["href"] == "coverage.html?focus_country=UKR&focus_section=country_gap&missing_domains=D#country-gap-UKR"
     assert release_demo_package_json["stakeholder_cover_sheet"]["start_here"]["page_name"] == "coverage.html"
-    assert "Prioritized items" in (pages.output_dir / "release_package.html").read_text()
-    assert "Demo sequence" in (pages.output_dir / "release_package.html").read_text()
-    assert "Guided review sequence" in (pages.output_dir / "release_package.html").read_text()
-    assert "Reviewer question" in (pages.output_dir / "release_package.html").read_text()
-    assert "Expected signal" in (pages.output_dir / "release_package.html").read_text()
-    assert "Gate posture" in (pages.output_dir / "release_package.html").read_text()
-    assert "Artifact handoff" in (pages.output_dir / "release_package.html").read_text()
-    assert "Executive decision summary" in (pages.output_dir / "release_package.html").read_text()
-    assert "Recommendation:" in (pages.output_dir / "release_package.html").read_text()
-    assert "Decision confidence:" in (pages.output_dir / "release_package.html").read_text()
-    assert "Strongest supporting evidence" in (pages.output_dir / "release_package.html").read_text()
-    assert "Explicit limitations" in (pages.output_dir / "release_package.html").read_text()
-    assert "Reviewer handoff and export summary" in (pages.output_dir / "release_package.html").read_text()
-    assert "Next reviewer role" in (pages.output_dir / "release_package.html").read_text()
-    assert "Canonical handoff artifact" in (pages.output_dir / "release_package.html").read_text()
-    assert "Share/export now" in (pages.output_dir / "release_package.html").read_text()
-    assert "Decision log seed" in (pages.output_dir / "release_package.html").read_text()
-    assert "Review sign-off scaffold" in (pages.output_dir / "release_package.html").read_text()
-    assert "Reviewer / approver" in (pages.output_dir / "release_package.html").read_text()
-    assert "Decision status" in (pages.output_dir / "release_package.html").read_text()
-    assert "Decision date" in (pages.output_dir / "release_package.html").read_text()
-    assert "Bounded rationale" in (pages.output_dir / "release_package.html").read_text()
-    assert "Follow-up actions" in (pages.output_dir / "release_package.html").read_text()
-    assert "Stakeholder cover sheet" in (pages.output_dir / "release_package.html").read_text()
-    assert "Audience" in (pages.output_dir / "release_package.html").read_text()
-    assert "Requested decision" in (pages.output_dir / "release_package.html").read_text()
-    assert "Top 3 caveats" in (pages.output_dir / "release_package.html").read_text()
-    assert "Start here" in (pages.output_dir / "release_package.html").read_text()
-    assert "External-share summary" in (pages.output_dir / "release_package.html").read_text()
-    assert "Decision log export summary" in (pages.output_dir / "release_package.html").read_text()
-    assert "Approval state" in (pages.output_dir / "release_package.html").read_text()
-    assert "Requested decision linkage" in (pages.output_dir / "release_package.html").read_text()
-    assert "Distribution bundle" in (pages.output_dir / "release_package.html").read_text()
-    assert "Decision entry template" in (pages.output_dir / "release_package.html").read_text()
-    assert "Reviewer disposition standard" in (pages.output_dir / "release_package.html").read_text()
-    assert "Disposition options" in (pages.output_dir / "release_package.html").read_text()
-    assert "approve_with_conditions" in (pages.output_dir / "release_package.html").read_text()
-    assert "Selected disposition" in (pages.output_dir / "release_package.html").read_text()
-    assert "Disposition rationale bounds" in (pages.output_dir / "release_package.html").read_text()
-    assert "Follow-up owner" in (pages.output_dir / "release_package.html").read_text()
-    assert "Disposition-aware action routing" in (pages.output_dir / "release_package.html").read_text()
-    assert "Route trigger" in (pages.output_dir / "release_package.html").read_text()
-    assert "Primary action bundle" in (pages.output_dir / "release_package.html").read_text()
-    assert "Escalation / handoff route" in (pages.output_dir / "release_package.html").read_text()
-    assert "Action owner" in (pages.output_dir / "release_package.html").read_text()
-    assert "Decision packet seed" in (pages.output_dir / "release_package.html").read_text()
-    assert "Packet headline" in (pages.output_dir / "release_package.html").read_text()
-    assert "Decision snapshot" in (pages.output_dir / "release_package.html").read_text()
-    assert "Share now packet" in (pages.output_dir / "release_package.html").read_text()
-    assert "Decision packet note" in (pages.output_dir / "release_package.html").read_text()
-    assert "Decision packet send-readiness checklist" in (pages.output_dir / "release_package.html").read_text()
-    assert "Overall send readiness" in (pages.output_dir / "release_package.html").read_text()
-    assert "External send allowed" in (pages.output_dir / "release_package.html").read_text()
-    assert "Next unblocker" in (pages.output_dir / "release_package.html").read_text()
-    assert "reviewer_signoff_captured" in (pages.output_dir / "release_package.html").read_text()
-    assert "blocked" in (pages.output_dir / "release_package.html").read_text()
-    assert "Resolve the blocking package issue before any external distribution." in (pages.output_dir / "release_package.html").read_text()
-    assert "href='traceability.html'" in (pages.output_dir / "release_package.html").read_text()
-    assert "coverage.html?focus_country=UKR&amp;focus_section=country_gap&amp;missing_domains=D#country-gap-UKR" in (pages.output_dir / "release_package.html").read_text()
-    assert "validation.html#ra=" in (pages.output_dir / "release_package.html").read_text()
-    assert "href='readiness.html'" in (pages.output_dir / "release_package.html").read_text()
-    assert "analyst-briefing-target-link" in (pages.output_dir / "release_package.html").read_text()
-    assert "Evidence bundle" in (pages.output_dir / "release_package.html").read_text()
+    assert "Prioritized items" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Demo sequence" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Guided review sequence" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Reviewer question" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Expected signal" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Gate posture" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Artifact handoff" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Executive decision summary" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Recommendation:" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Decision confidence:" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Strongest supporting evidence" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Explicit limitations" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Reviewer handoff and export summary" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Next reviewer role" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Canonical handoff artifact" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Share/export now" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Decision log seed" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Review sign-off scaffold" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Reviewer / approver" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Decision status" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Decision date" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Bounded rationale" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Follow-up actions" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Stakeholder cover sheet" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Audience" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Requested decision" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Top 3 caveats" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Start here" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "External-share summary" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Decision log export summary" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Approval state" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Requested decision linkage" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Distribution bundle" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Decision entry template" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Reviewer disposition standard" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Disposition options" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "approve_with_conditions" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Selected disposition" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Disposition rationale bounds" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Follow-up owner" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Disposition-aware action routing" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Route trigger" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Primary action bundle" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Escalation / handoff route" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Action owner" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Decision packet seed" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Packet headline" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Decision snapshot" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Share now packet" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Decision packet note" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Decision packet send-readiness checklist" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Overall send readiness" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "External send allowed" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Next unblocker" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "reviewer_signoff_captured" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "blocked" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Resolve the blocking package issue before any external distribution." in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "href='traceability.html'" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "coverage.html?focus_country=UKR&amp;focus_section=country_gap&amp;missing_domains=D#country-gap-UKR" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "validation.html#ra=" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "href='readiness.html'" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "analyst-briefing-target-link" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
+    assert "Evidence bundle" in (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
     # G4: Approval lifecycle panel assertions
-    release_package_html = (pages.output_dir / "release_package.html").read_text()
+    release_package_html = (pages.output_dir / "release_package.html").read_text(encoding="utf-8")
     assert "approval-lifecycle-panel" in release_package_html
     assert "approval-lifecycle-state" in release_package_html
     assert "approval-lifecycle-overall" in release_package_html
@@ -1822,7 +1822,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "Source / Coverage" in readiness_html
     assert "Validation / Backtest" in readiness_html
 
-    traceability_html = (pages.output_dir / "traceability.html").read_text()
+    traceability_html = (pages.output_dir / "traceability.html").read_text(encoding="utf-8")
     assert "Traceability / Lineage" in traceability_html
     assert "RAW-SRC-A-1" in traceability_html
     assert "REP-DAILY-RUN-200" in traceability_html
@@ -1837,7 +1837,7 @@ def test_build_local_mvp_site_creates_required_mvp_pages_and_exports() -> None:
     assert "earliest_observed_source_in_window" in traceability_html
     assert "later_observed_source_in_window" in traceability_html
 
-    annotations_html = (pages.output_dir / "annotations.html").read_text()
+    annotations_html = (pages.output_dir / "annotations.html").read_text(encoding="utf-8")
     assert "Analyst Annotations View" in annotations_html
     assert "Snapshot review pending source outage assessment." in annotations_html
     assert "UKR:A" in annotations_html
@@ -1944,7 +1944,7 @@ def test_build_local_mvp_site_suppresses_country_drill_down_links_without_genera
         },
     )
 
-    index_html = (pages.output_dir / "index.html").read_text()
+    index_html = (pages.output_dir / "index.html").read_text(encoding="utf-8")
     assert "<a href='countries/UKR.html'>UKR</a>" in index_html
     assert "countries/UKR.html" in index_html
     assert "<a href='countries/POL.html'>POL</a>" not in index_html
@@ -2008,7 +2008,7 @@ def test_build_local_mvp_site_emits_only_resolvable_internal_html_links(tmp_path
     assert (pages.output_dir / "readiness.html") in html_files
     broken_links: list[tuple[str, str]] = []
     for html_file in html_files:
-        for href in _internal_hrefs(html_file.read_text()):
+        for href in _internal_hrefs(html_file.read_text(encoding="utf-8")):
             resolved_target = html.unescape(href).split('?', 1)[0].split('#', 1)[0]
             if Path(resolved_target).suffix and not (html_file.parent / resolved_target).resolve().exists():
                 broken_links.append((html_file.relative_to(pages.output_dir).as_posix(), href))
@@ -2022,8 +2022,8 @@ def test_build_local_mvp_site_copies_report_export_files_and_renders_download_li
     export_source_dir.mkdir()
     markdown_export = export_source_dir / "daily_snapshot.md"
     json_export = export_source_dir / "daily_snapshot.json"
-    markdown_export.write_text("# Daily Snapshot\n")
-    json_export.write_text('{"snapshot_id": "SNAP-RUN-200-v1"}')
+    markdown_export.write_text("# Daily Snapshot\n", encoding="utf-8")
+    json_export.write_text('{"snapshot_id": "SNAP-RUN-200-v1"}', encoding="utf-8")
 
     repo_closure_view = {
         "summary": {"slice_count": 4, "requirement_count": 18, "closed": 18, "at_risk": 0},
@@ -2066,7 +2066,7 @@ def test_build_local_mvp_site_copies_report_export_files_and_renders_download_li
         repo_closure_view_model=repo_closure_view,
     )
 
-    reports_html = (pages.output_dir / "reports.html").read_text()
+    reports_html = (pages.output_dir / "reports.html").read_text(encoding="utf-8")
     assert "exports/daily_snapshot.md" in reports_html
     assert "exports/daily_snapshot.json" in reports_html
     assert "Evidence Summary" in reports_html
@@ -2078,10 +2078,10 @@ def test_build_local_mvp_site_copies_report_export_files_and_renders_download_li
     assert "partial_success" in reports_html
     assert "SRC-B" in reports_html
     assert "SNAP-RUN-200-v1" in reports_html
-    assert (pages.output_dir / "exports" / "daily_snapshot.md").read_text() == "# Daily Snapshot\n"
-    assert (pages.output_dir / "exports" / "daily_snapshot.json").read_text() == '{"snapshot_id": "SNAP-RUN-200-v1"}'
+    assert (pages.output_dir / "exports" / "daily_snapshot.md").read_text(encoding="utf-8") == "# Daily Snapshot\n"
+    assert (pages.output_dir / "exports" / "daily_snapshot.json").read_text(encoding="utf-8") == '{"snapshot_id": "SNAP-RUN-200-v1"}'
 
-    runs_html = (pages.output_dir / "runs.html").read_text()
+    runs_html = (pages.output_dir / "runs.html").read_text(encoding="utf-8")
     assert "Repo Closure Summary" in runs_html
     assert "governance-and-run-controls" in runs_html
     assert "reporting-and-export" in runs_html
@@ -2214,12 +2214,12 @@ def test_load_site_payload_from_artifacts_reads_persisted_json_bundle(tmp_path: 
         "by_linked_item": {"UKR": ["ANN-301"]},
     }
 
-    (artifacts_dir / "snapshot.json").write_text(json.dumps(snapshot))
-    (artifacts_dir / "readmodels" / "world_map.json").write_text(json.dumps(world_map))
-    (artifacts_dir / "readmodels" / "source_coverage.json").write_text(json.dumps(source_coverage))
-    (artifacts_dir / "readmodels" / "system_status.json").write_text(json.dumps(system_status))
-    (artifacts_dir / "readmodels" / "country_profiles" / "UKR.json").write_text(json.dumps(country_profile))
-    (artifacts_dir / "readmodels" / "domain_details" / "UKR__A.json").write_text(json.dumps(domain_detail))
+    (artifacts_dir / "snapshot.json").write_text(json.dumps(snapshot), encoding="utf-8")
+    (artifacts_dir / "readmodels" / "world_map.json").write_text(json.dumps(world_map), encoding="utf-8")
+    (artifacts_dir / "readmodels" / "source_coverage.json").write_text(json.dumps(source_coverage), encoding="utf-8")
+    (artifacts_dir / "readmodels" / "system_status.json").write_text(json.dumps(system_status), encoding="utf-8")
+    (artifacts_dir / "readmodels" / "country_profiles" / "UKR.json").write_text(json.dumps(country_profile), encoding="utf-8")
+    (artifacts_dir / "readmodels" / "domain_details" / "UKR__A.json").write_text(json.dumps(domain_detail), encoding="utf-8")
     repo_closure_view = {
         "summary": {"slice_count": 4, "requirement_count": 18, "closed": 18, "at_risk": 0},
         "slice_ids": [
@@ -2233,12 +2233,12 @@ def test_load_site_payload_from_artifacts_reads_persisted_json_bundle(tmp_path: 
             {"slice_id": "gui-readmodels-and-annotations", "summary": {"closed": 6, "at_risk": 0}},
         ],
     }
-    (artifacts_dir / "readmodels" / "validation_backtest.json").write_text(json.dumps(validation_view))
-    (artifacts_dir / "readmodels" / "traceability_lineage.json").write_text(json.dumps(traceability_view))
-    (artifacts_dir / "readmodels" / "repo_closure.json").write_text(json.dumps(repo_closure_view))
-    (artifacts_dir / "readmodels" / "annotations.json").write_text(json.dumps(annotations_view))
+    (artifacts_dir / "readmodels" / "validation_backtest.json").write_text(json.dumps(validation_view), encoding="utf-8")
+    (artifacts_dir / "readmodels" / "traceability_lineage.json").write_text(json.dumps(traceability_view), encoding="utf-8")
+    (artifacts_dir / "readmodels" / "repo_closure.json").write_text(json.dumps(repo_closure_view), encoding="utf-8")
+    (artifacts_dir / "readmodels" / "annotations.json").write_text(json.dumps(annotations_view), encoding="utf-8")
     for report_name, report_payload in reports.items():
-        (artifacts_dir / "reports" / f"{report_name}.json").write_text(json.dumps(report_payload))
+        (artifacts_dir / "reports" / f"{report_name}.json").write_text(json.dumps(report_payload), encoding="utf-8")
 
     payload = local_app.load_site_payload_from_artifacts(artifacts_dir)
 
@@ -2276,7 +2276,7 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
                 "data_version": "data-0.1",
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "world_map.json").write_text(
         json.dumps(
             {
@@ -2288,7 +2288,7 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
                 ],
             }
         )
-    )
+    , encoding="utf-8")
     for country_id, event_id, trend, domain_states, uncertainty, coverage, confidence in (
         ("POL", "EVT-POL-350", [{"label": "2026-02", "value": 0.61}], {"A": "D3"}, ["partial_signal_loss"], 0.42, 0.88),
         ("UKR", "EVT-UKR-350", [{"label": "2026-01", "value": 0.77}], {"A": "D4", "B": "D3"}, [], 0.91, 0.46),
@@ -2330,7 +2330,7 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
                     },
                 }
             )
-        )
+        , encoding="utf-8")
         (artifacts_dir / "readmodels" / "domain_details" / f"{country_id}__A.json").write_text(
             json.dumps(
                 {
@@ -2344,7 +2344,7 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
                     "uncertainty": [],
                 }
             )
-        )
+        , encoding="utf-8")
     (artifacts_dir / "readmodels" / "source_coverage.json").write_text(
         json.dumps(
             {
@@ -2356,7 +2356,7 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
                 "missing_sources": [],
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "system_status.json").write_text(
         json.dumps(
             {
@@ -2429,7 +2429,7 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
                 },
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "reports" / "daily_snapshot.json").write_text(
         json.dumps(
             {
@@ -2439,20 +2439,20 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
                 "payload": {"snapshot_id": "SNAP-RUN-350-v1", "status": "success"},
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "reports" / "country_profile_POL.json").write_text(
         json.dumps({"report_id": "REP-COUNTRY-POL", "report_type": "country_profile", "format": "json", "payload": {"country_id": "POL", "multi_domain_status": "S3"}})
-    )
+    , encoding="utf-8")
     (artifacts_dir / "reports" / "country_profile_UKR.json").write_text(
         json.dumps({"report_id": "REP-COUNTRY-UKR", "report_type": "country_profile", "format": "json", "payload": {"country_id": "UKR", "multi_domain_status": "S3"}})
-    )
+    , encoding="utf-8")
 
     payload = local_app.load_site_payload_from_artifacts(artifacts_dir)
     pages = build_local_mvp_site(output_dir=tmp_path / "site", **payload)
 
-    index_html = (pages.output_dir / "index.html").read_text()
-    trends_html = (pages.output_dir / "trends.html").read_text()
-    events_html = (pages.output_dir / "events.html").read_text()
+    index_html = (pages.output_dir / "index.html").read_text(encoding="utf-8")
+    trends_html = (pages.output_dir / "trends.html").read_text(encoding="utf-8")
+    events_html = (pages.output_dir / "events.html").read_text(encoding="utf-8")
 
     assert (pages.output_dir / "countries" / "POL.html").exists()
     assert (pages.output_dir / "countries" / "UKR.html").exists()
@@ -2511,8 +2511,8 @@ def test_build_local_mvp_site_from_multi_country_artifact_bundle(tmp_path: Path)
     assert "EVT-POL-350" in events_html and "EVT-UKR-350" in events_html
     assert "data-country-id='POL'" in events_html
     assert "function applyEventFilters()" in events_html
-    comparison_html = (pages.output_dir / "comparison.html").read_text()
-    coverage_html = (pages.output_dir / "coverage.html").read_text()
+    comparison_html = (pages.output_dir / "comparison.html").read_text(encoding="utf-8")
+    coverage_html = (pages.output_dir / "coverage.html").read_text(encoding="utf-8")
     assert "Cross-Country Comparison" in comparison_html
     assert "POL" in comparison_html and "UKR" in comparison_html
     assert "option value='low_coverage'" in comparison_html
@@ -2562,13 +2562,13 @@ def test_load_site_payload_from_artifacts_falls_back_for_missing_readiness_suppo
                 "data_version": "data-0.1",
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "world_map.json").write_text(
         json.dumps({"baseline_mode": "Combined 30/90/365", "active_domains": ["A", "B", "D"], "countries": [{"country_id": "UKR", "status": "S3", "active_domains": ["A", "B", "D"]}]})
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "source_coverage.json").write_text(
         json.dumps({"sources": [{"source_id": "SRC-A", "status": "success", "history_horizon": "3y", "freshness_hours": 6, "confidence": 0.9}], "failed_sources": [], "missing_sources": []})
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "system_status.json").write_text(
         json.dumps({
             "run_id": "RUN-320", "run_status": "success", "active_domains": ["A", "B", "D"], "coverage": {"countries_total": 1, "countries_with_updates": 1}, "failed_sources": [], "available_reports": ["REP-DAILY-SNAP-RUN-320-v1"], "snapshot_id": "SNAP-RUN-320-v1", "reprocessing_status": "idle", "last_run": "2026-05-11T18:00:00Z",
@@ -2579,7 +2579,7 @@ def test_load_site_payload_from_artifacts_falls_back_for_missing_readiness_suppo
                 "annotations": {"status": "absent", "reason": "not_yet_implemented"}
             }
         })
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "operational_evidence_lane.json").write_text(
         json.dumps({
             "latest_summary": {
@@ -2618,19 +2618,19 @@ def test_load_site_payload_from_artifacts_falls_back_for_missing_readiness_suppo
                 }
             ],
         })
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "country_profiles" / "UKR.json").write_text(
         json.dumps({"country_id": "UKR", "multi_domain_status": "S3", "domain_states": {"A": "D3"}, "trends": {"yearly": ["2026-01"]}, "drivers": ["A_news_volume"], "linked_events": [], "coverage": 0.84, "confidence": 0.73, "counter_indicators": [], "uncertainty": []})
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "domain_details" / "UKR__A.json").write_text(
         json.dumps({"country_id": "UKR", "domain": "A", "anomaly_state": "D3", "time_series": [{"timestamp": "2026-05-11", "value": 0.67}], "baseline_comparison": {"delta_to_baseline": 0.36}, "feature_values": [{"feature_id": "A_article_count", "value": 12.0, "coverage": 0.9}], "source_context": [{"source_id": "SRC-A", "freshness_hours": 6, "history_horizon": "3y", "status": "success"}], "uncertainty": []})
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "traceability_lineage.json").write_text(
         json.dumps({"lineage_records": [{"source_id": "SRC-A", "raw_record_id": "RAW-SRC-A-1", "normalized_id": "NORM-SRC-A-1", "feature_id": "A_article_count", "domain_status_id": "DST-UKR-A-RUN-320", "multi_domain_status_id": "MST-UKR-RUN-320", "snapshot_id": "SNAP-RUN-320-v1", "report_id": "REP-DAILY-SNAP-RUN-320-v1"}]})
-    )
+    , encoding="utf-8")
     (artifacts_dir / "reports" / "daily_snapshot.json").write_text(
         json.dumps({"report_id": "REP-DAILY-SNAP-RUN-320-v1", "report_type": "daily_snapshot", "format": "json", "payload": {"snapshot_id": "SNAP-RUN-320-v1", "status": "success"}})
-    )
+    , encoding="utf-8")
 
     payload = local_app.load_site_payload_from_artifacts(artifacts_dir)
 
@@ -2640,7 +2640,7 @@ def test_load_site_payload_from_artifacts_falls_back_for_missing_readiness_suppo
     assert payload["system_status_read_model"]["operational_evidence_lane"]["latest_summary"]["country_set_id"] == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
 
     pages = build_local_mvp_site(output_dir=tmp_path / "site", **payload)
-    readiness_html = (pages.output_dir / "readiness.html").read_text()
+    readiness_html = (pages.output_dir / "readiness.html").read_text(encoding="utf-8")
     assert "validation_backtest_absent:not_configured" in readiness_html
     assert "Artifact Readiness" in readiness_html
     assert "validation_backtest" in readiness_html
@@ -2672,13 +2672,13 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
                 "data_version": "data-0.1",
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "world_map.json").write_text(
         json.dumps({"baseline_mode": "Combined 30/90/365", "active_domains": ["A", "B", "D"], "countries": [{"country_id": "UKR", "status": "S3", "active_domains": ["A", "B", "D"]}]})
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "source_coverage.json").write_text(
         json.dumps({"sources": [{"source_id": "SRC-A", "status": "success", "history_horizon": "3y", "freshness_hours": 6, "confidence": 0.9}], "failed_sources": [], "missing_sources": []})
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "system_status.json").write_text(
         json.dumps({
             "run_id": "RUN-321", "run_status": "success", "active_domains": ["A", "B", "D"], "coverage": {"countries_total": 1, "countries_with_updates": 1}, "failed_sources": [], "available_reports": ["REP-DAILY-SNAP-RUN-321-v1"], "snapshot_id": "SNAP-RUN-321-v1", "reprocessing_status": "idle", "last_run": "2026-05-11T18:00:00Z",
@@ -2689,25 +2689,25 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
                 "annotations": {"status": "present", "reason": None}
             }
         })
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "country_profiles" / "UKR.json").write_text(
         json.dumps({"country_id": "UKR", "multi_domain_status": "S3", "domain_states": {"A": "D3"}, "trends": {"yearly": ["2026-01"]}, "drivers": ["A_news_volume"], "linked_events": [], "coverage": 0.84, "confidence": 0.73, "counter_indicators": [], "uncertainty": []})
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "domain_details" / "UKR__A.json").write_text(
         json.dumps({"country_id": "UKR", "domain": "A", "anomaly_state": "D3", "time_series": [{"timestamp": "2026-05-11", "value": 0.67}], "baseline_comparison": {"delta_to_baseline": 0.36}, "feature_values": [{"feature_id": "A_article_count", "value": 12.0, "coverage": 0.9}], "source_context": [{"source_id": "SRC-A", "freshness_hours": 6, "history_horizon": "3y", "status": "success"}], "uncertainty": []})
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "traceability_lineage.json").write_text(
         json.dumps({"lineage_records": [{"source_id": "SRC-A", "raw_record_id": "RAW-SRC-A-1", "normalized_id": "NORM-SRC-A-1", "feature_id": "A_article_count", "domain_status_id": "DST-UKR-A-RUN-321", "multi_domain_status_id": "MST-UKR-RUN-321", "snapshot_id": "SNAP-RUN-321-v1", "report_id": "REP-DAILY-SNAP-RUN-321-v1"}]})
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "repo_closure.json").write_text(
         json.dumps({"summary": {"slice_count": 9, "requirement_count": 45, "closed": 45, "at_risk": 0}, "slices": []})
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "annotations.json").write_text(
         json.dumps({"annotations": [], "by_scope": {}, "by_linked_item": {}})
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "validation_backtest.json").write_text(
         json.dumps({"case_id": "VAL-UKR-2022-001", "country_id": "UKR"})
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "readiness.json").write_text(
         json.dumps(
             {
@@ -2724,7 +2724,7 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
                 "domain_detail_count": 1,
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "release_gate.json").write_text(
         json.dumps(
             {
@@ -2733,10 +2733,10 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
                 "blockers": [],
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "release_failure_drill_report.json").write_text(
         json.dumps(build_release_failure_drill_report(repo_root=repo_root), indent=2, sort_keys=True)
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "stakeholder_functional_closure.json").write_text(
         json.dumps(
             {
@@ -2753,7 +2753,7 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
                 }
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "stakeholder_e2e_flow_coverage.json").write_text(
         json.dumps(
             {
@@ -2772,7 +2772,7 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
                 },
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "stakeholder_e2e_ui_smoke.json").write_text(
         json.dumps(
             {
@@ -2785,7 +2785,7 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
                 },
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "release_readiness_index.json").write_text(
         json.dumps(
             {
@@ -2798,7 +2798,7 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
                 ],
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "release_evidence_assessment.json").write_text(
         json.dumps(
             {
@@ -2829,7 +2829,7 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
                 },
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "release_failure_drill_report.json").write_text(
         json.dumps(
             {
@@ -2951,10 +2951,10 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
                 }
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "reports" / "daily_snapshot.json").write_text(
         json.dumps({"report_id": "REP-DAILY-SNAP-RUN-321-v1", "report_type": "daily_snapshot", "format": "json", "payload": {"snapshot_id": "SNAP-RUN-321-v1", "status": "success"}})
-    )
+    , encoding="utf-8")
 
     payload = local_app.load_site_payload_from_artifacts(artifacts_dir)
 
@@ -2977,9 +2977,9 @@ def test_load_site_payload_from_artifacts_uses_persisted_readiness_view_model_wh
     assert payload["operator_stale_remediation_action_plan_view_model"]["action_count"] == 2
 
     pages = build_local_mvp_site(output_dir=tmp_path / "site-with-readiness", **payload)
-    readiness_html = (pages.output_dir / "readiness.html").read_text()
-    failure_drill_html = (pages.output_dir / "release_failure_drill.html").read_text()
-    readiness_json = json.loads((pages.output_dir / "readiness.json").read_text())
+    readiness_html = (pages.output_dir / "readiness.html").read_text(encoding="utf-8")
+    failure_drill_html = (pages.output_dir / "release_failure_drill.html").read_text(encoding="utf-8")
+    readiness_json = json.loads((pages.output_dir / "readiness.json").read_text(encoding="utf-8"))
 
     assert "Prioritized items:" in readiness_html
     assert "Primary focus:" in readiness_html
@@ -3106,7 +3106,7 @@ def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bund
                 "data_version": "data-0.1",
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "world_map.json").write_text(
         json.dumps(
             {
@@ -3115,7 +3115,7 @@ def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bund
                 "countries": [{"country_id": "UKR", "status": "S3", "active_domains": ["A", "B", "D"]}],
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "country_profiles" / "UKR.json").write_text(
         json.dumps(
             {
@@ -3132,7 +3132,7 @@ def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bund
                 "annotations": [],
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "domain_details" / "UKR__A.json").write_text(
         json.dumps(
             {
@@ -3146,10 +3146,10 @@ def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bund
                 "uncertainty": [],
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "source_coverage.json").write_text(
         json.dumps({"sources": [{"source_id": "SRC-A", "status": "success", "history_horizon": "3y", "freshness_hours": 6, "confidence": 0.9}], "failed_sources": [], "missing_sources": []})
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "system_status.json").write_text(
         json.dumps(
             {
@@ -3164,7 +3164,7 @@ def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bund
                 "last_run": "2026-05-11T18:00:00Z",
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "validation_backtest.json").write_text(
         json.dumps(
             {
@@ -3184,7 +3184,7 @@ def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bund
                 "reprocessing_comparison": {"prior_snapshot_id": "SNAP-RUN-001-v1", "new_snapshot_id": "SNAP-RUN-001-v2", "changed_versions": ["rule_version"]},
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "traceability_lineage.json").write_text(
         json.dumps(
             {
@@ -3202,7 +3202,7 @@ def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bund
                 ]
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "readmodels" / "annotations.json").write_text(
         json.dumps(
             {
@@ -3225,7 +3225,7 @@ def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bund
                 "by_linked_item": {"UKR": ["ANN-401"]},
             }
         )
-    )
+    , encoding="utf-8")
     (artifacts_dir / "reports" / "daily_snapshot.json").write_text(
         json.dumps(
             {
@@ -3235,7 +3235,7 @@ def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bund
                 "payload": {"snapshot_id": "SNAP-RUN-301-v1", "status": "success"},
             }
         )
-    )
+    , encoding="utf-8")
 
     result = subprocess.run(
         [
@@ -3257,12 +3257,12 @@ def test_local_gui_module_runs_without_runtime_warning_and_can_use_artifact_bund
     assert result.returncode == 0
     assert "RuntimeWarning" not in result.stderr
     assert (tmp_path / "site" / "index.html").exists()
-    assert "SNAP-RUN-301-v1" in (tmp_path / "site" / "runs.html").read_text()
-    assert "EVT-302" in (tmp_path / "site" / "events.html").read_text()
-    assert "VAL-UKR-2022-001" in (tmp_path / "site" / "validation.html").read_text()
-    assert "RAW-SRC-A-1" in (tmp_path / "site" / "traceability.html").read_text()
-    assert "CLI verification annotation." in (tmp_path / "site" / "annotations.html").read_text()
-    assert "Demo / Release Readiness" in (tmp_path / "site" / "readiness.html").read_text()
+    assert "SNAP-RUN-301-v1" in (tmp_path / "site" / "runs.html").read_text(encoding="utf-8")
+    assert "EVT-302" in (tmp_path / "site" / "events.html").read_text(encoding="utf-8")
+    assert "VAL-UKR-2022-001" in (tmp_path / "site" / "validation.html").read_text(encoding="utf-8")
+    assert "RAW-SRC-A-1" in (tmp_path / "site" / "traceability.html").read_text(encoding="utf-8")
+    assert "CLI verification annotation." in (tmp_path / "site" / "annotations.html").read_text(encoding="utf-8")
+    assert "Demo / Release Readiness" in (tmp_path / "site" / "readiness.html").read_text(encoding="utf-8")
 
 
 def test_build_local_mvp_site_viewer_role_hides_annotation_and_ops_pages(tmp_path: Path) -> None:
@@ -3273,15 +3273,15 @@ def test_build_local_mvp_site_viewer_role_hides_annotation_and_ops_pages(tmp_pat
     assert not (pages.output_dir / "reports.html").exists()
     assert not (pages.output_dir / "runs.html").exists()
 
-    index_html = (pages.output_dir / "index.html").read_text()
+    index_html = (pages.output_dir / "index.html").read_text(encoding="utf-8")
     assert "📝 Annotations" not in index_html
     assert "📄 Reports" not in index_html
     assert "⚙ System" not in index_html
 
-    country_html = (pages.output_dir / "countries" / "UKR.html").read_text()
+    country_html = (pages.output_dir / "countries" / "UKR.html").read_text(encoding="utf-8")
     assert "Open Annotation Workflow for this Country" not in country_html
 
-    validation_html = (pages.output_dir / "validation.html").read_text()
+    validation_html = (pages.output_dir / "validation.html").read_text(encoding="utf-8")
     assert "Create Annotation Draft" not in validation_html
     assert "annotations.html?scope=country&annotation_type=review_note" not in validation_html
 
@@ -3860,7 +3860,7 @@ def test_build_local_mvp_site_generates_sources_html(tmp_path: Path) -> None:
 
     sources_file = tmp_path / 'sources.html'
     assert sources_file.exists(), "sources.html not generated"
-    content = sources_file.read_text()
+    content = sources_file.read_text(encoding="utf-8")
     assert 'Source Catalog' in content
     assert 'source-card-SRC-GDELT-DOC' in content
     assert str(sources_file) in [str(f) for f in result.generated_files]
@@ -3954,7 +3954,7 @@ def test_build_local_mvp_site_generates_about_html(tmp_path: Path) -> None:
 
     about_file = tmp_path / 'about.html'
     assert about_file.exists(), "about.html not generated"
-    content = about_file.read_text()
+    content = about_file.read_text(encoding="utf-8")
     assert 'About SIASA' in content
     assert 'Glossary' in content
     assert str(about_file) in [str(f) for f in result.generated_files]
@@ -4034,7 +4034,7 @@ def test_build_local_mvp_site_generates_methodology_html(tmp_path: Path) -> None
 
     meth_file = tmp_path / 'methodology.html'
     assert meth_file.exists(), "methodology.html not generated"
-    content = meth_file.read_text()
+    content = meth_file.read_text(encoding="utf-8")
     assert 'Methodology' in content
     assert 'methodology-step' in content
     assert str(meth_file) in [str(f) for f in result.generated_files]
@@ -4049,7 +4049,7 @@ def test_overview_page_has_transparency_links(tmp_path: Path) -> None:
 
     build_local_mvp_site(output_dir=tmp_path)
 
-    index_html = (tmp_path / 'index.html').read_text()
+    index_html = (tmp_path / 'index.html').read_text(encoding="utf-8")
     assert 'overview-transparency-links' in index_html
     assert 'sources.html' in index_html
     assert 'methodology.html' in index_html
@@ -4062,7 +4062,7 @@ def test_coverage_page_has_transparency_links(tmp_path: Path) -> None:
 
     build_local_mvp_site(output_dir=tmp_path)
 
-    coverage_html = (tmp_path / 'coverage.html').read_text()
+    coverage_html = (tmp_path / 'coverage.html').read_text(encoding="utf-8")
     assert 'coverage-transparency-links' in coverage_html
     assert 'sources.html' in coverage_html
     assert 'methodology.html' in coverage_html
@@ -4084,7 +4084,7 @@ def test_nav_contains_all_new_pages(tmp_path: Path) -> None:
     build_local_mvp_site(output_dir=tmp_path)
 
     # Check any generated page has nav entries for all new pages
-    index_html = (tmp_path / 'index.html').read_text()
+    index_html = (tmp_path / 'index.html').read_text(encoding="utf-8")
     assert '📡 Sources' in index_html
     assert 'ℹ About' in index_html
     assert '🔬 Methodology' in index_html
@@ -4109,7 +4109,7 @@ def test_coverage_page_has_expandable_source_details(tmp_path: Path) -> None:
         },
     )
 
-    coverage_html = (tmp_path / 'coverage.html').read_text()
+    coverage_html = (tmp_path / 'coverage.html').read_text(encoding="utf-8")
     assert 'source-matrix-row' in coverage_html
     assert 'source-detail-row' in coverage_html
     assert 'data-source-detail' in coverage_html
@@ -4133,7 +4133,7 @@ def test_coverage_source_detail_shows_catalog_info(tmp_path: Path) -> None:
         },
     )
 
-    coverage_html = (tmp_path / 'coverage.html').read_text()
+    coverage_html = (tmp_path / 'coverage.html').read_text(encoding="utf-8")
     # GDELT detail
     assert 'GDELT Document API' in coverage_html
     assert 'Georgetown University' in coverage_html
@@ -4192,7 +4192,7 @@ def test_trend_page_has_date_range_inputs(tmp_path: Path) -> None:
         },
     )
 
-    trends_html = (tmp_path / 'trends.html').read_text()
+    trends_html = (tmp_path / 'trends.html').read_text(encoding="utf-8")
     assert 'trend-date-from' in trends_html
     assert 'trend-date-to' in trends_html
     assert 'trend-range-btn' in trends_html  # preset buttons still there
