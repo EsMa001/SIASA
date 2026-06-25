@@ -17,6 +17,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0",
+    "pytest-xdist>=3.0",
     "dvc>=3.0",
 ]
 ml = [
@@ -31,3 +32,6 @@ siasa-live-runtime = "siasa.runs.live_runtime:main"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src", "."]
+# Parallelisierung (pytest-xdist) — kuerzt die Full-Suite drastisch.
+# Fuer enge Einzeldatei-Iteration ggf. mit "-n0" ueberschreiben.
+addopts = "-n auto"
