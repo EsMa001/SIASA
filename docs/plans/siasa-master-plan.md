@@ -7,8 +7,15 @@
 > **Evidenz-/Nachweis-Begleiter:** `docs/plans/siasa-capability-fulfillment-matrix.md`
 > (detailliertes Status-/Test-/Probe-Ledger; wird von Produktionscode gelesen und bleibt aktiv).
 
-Stand: 2026-06-23
+Stand: 2026-06-25
 Status: Aktiv – einzige Planungsquelle für die Vorwärtssteuerung
+
+> **Namespace-Hinweis (AP-IDs):** Maßgeblich für `AP-NN` ist allein dieses L0-Dokument. Der
+> L1-Evidenz-Begleiter (`siasa-capability-fulfillment-matrix.md`) führt intern eine eigene,
+> historische Zeilenkennung `AP-15..AP-27` für die abgeschlossene **Operability-/Release-Steering-Serie**.
+> Diese Ledger-Labels sind **nicht** identisch mit den hier gesteuerten Arbeitspaketen
+> (z. B. ist Master-Plan-`AP-27` = „Ground-Truth-Redesign", Ledger-`AP-27` = „Operability-Cluster").
+> Bei Doku-Pflege die Serien klar benennen, nie über die nackte Nummer referenzieren.
 
 ---
 
@@ -97,6 +104,24 @@ Regeln:
 | AP-12 | UX-Transparenz & Informationstiefe | Erledigt | – | MVP-Should | neu (User-Request: Quellen-Steckbriefe, parametrierbare Zeitachsen, Methodik-Transparenz, Glossar-Seite) |
 | AP-13 | ML-Training Data Lake | Erledigt | – | MVP-Should | 15/15 TAPs: Parquet-Archiv, DuckDB Query-Layer, Feature-Engineering Pipeline, PyTorch/HuggingFace, DVC, Retention, Health, CLI |
 | AP-14 | Kostenfreie API-Quellen-Erweiterung | Erledigt | **P1** | MVP-Should | 4 Adapter (Wikipedia, ECB, Eurostat, NVD CVE) + Registry + Feature-Katalog; SwR-072..075, 91 Tests |
+| AP-15 | Erweiterte kostenfreie API-Integration | Erledigt | – | MVP-Should | 8 Adapter, 53 Signale, Registry + Runtime verdrahtet |
+| AP-16 | Skill-Messharness (Ground-Truth-Backtest) | Offen | **P1** | Analytik-Kern | F7/F8/F9: Validierung misst keine Modellgüte |
+| AP-17 | Slow-Layer Streuung/z-Score | Offen | **P1** | Analytik-Kern | F3: σ fehlt für Anomalie-Definition |
+| AP-18 | Reale Anomalie-Berechnung (Feature→Anomalie) | Offen | **P1** | Analytik-Kern | F1: anomaly_score ist Konstante |
+| AP-19 | Unsicherheit aus echten Quellen | Offen | P4 | Analytik-Kern | F3 — Phase 4 (nach Validierung bisektierbar) |
+| AP-20 | Echte Abhängigkeitsdetektion + Zentralität | Offen | P4 | Analytik-Kern | F4 — Phase 4 |
+| AP-21 | Info-Epidemiologie mit echten Zeitstempeln | Offen | P4 | Analytik-Kern | F5 — Phase 4 |
+| AP-22 | Fusion in Entscheidung zurückführen + D5 | Offen | P4 | Analytik-Kern | F2/F12 — Phase 4 |
+| AP-23 | Provenance-Tiefe & In-Chain-Drift | Offen | P3 | Governance | F6: Provenance ist festes Template |
+| AP-24 | Schwellen-Governance (Magic Numbers) | Offen | P4 | Governance | F11 — Phase 4 |
+| AP-25 | Fail-Loud-Policy für Analytikstufen | Offen | **P1** | Governance | F10: stille Degradation (Phase-0-Gate) |
+| AP-26 | Status-Zeitreihe im Fenster-Replay | Offen | **P1** | Validierung (Phase 0) | F16: Replay liefert Punktstatus statt Zeitreihe |
+| AP-27 | Ground-Truth-Redesign mit Negativfällen | Offen | **P1** | Validierung (Phase 1a) | F15: keine S0-Negative, kein Onset, zirkuläre Labels |
+| AP-28 | Skill-Metrik: Fehlalarmrate + No-Skill-Baseline | Offen | **P1** | Validierung (Phase 1b) | F9 real: Fehlalarm/Vorlauf/Brier messbar |
+| AP-29 | Event-Set-Definition (klein, ausgewogen) | Offen | **P2** | Validierung (Phase 2a) | F14 (Vorber.): fokussiertes Positiv/Kontroll-Set |
+| AP-30 | Historischer Backfill GDELT/GDACS/WB + PIT | Offen | **P2** | Daten (Phase 2b) | F14: synthetische Fixtures durch Realdaten ersetzen |
+| AP-31 | Provenance: real-captured vs fixture | Offen | **P2** | Daten/Governance (Phase 2c) | F14: falsche „provider-derived"-Behauptung korrigieren |
+| AP-32 | End-to-End-Validierung + Skill-Report | Offen | **P3** | Validierung (Phase 3) | F7/F8 real: „gegen echte Events geprüft" belegen |
 
 Gesamtbild: Das Fundament und alle repo-seitig steuerbaren Gap-Familien (`G1`, `G2`, `G3`, `G4`) sind
 **materiell geschlossen** (Capability-Matrix: `17/17 Done`, `100.0%`). AP-05 (Validierungs-Realismus),
@@ -116,23 +141,41 @@ Die verbleibende blockierte Arbeit ist externe Quellen-Aktivierung (AP-06) und �
 > **Dies ist die Stelle, an der die Reihenfolge gesteuert wird.** Die Bearbeitungsreihenfolge ergibt sich aus
 > dem `Rang`. Empfohlener Default ist unten gesetzt – frei überschreibbar.
 
-| Rang | AP-ID | Großes Arbeitspaket | Status | Klasse | Auslöser / Bedingung |
-| --- | --- | --- | --- | --- | --- |
-| **P1** | AP-16 | Skill-Messharness (Ground-Truth-Backtest) | Offen | Analytik-Kern | F7/F8/F9: Validierung misst keine Modellguete |
-| **P1** | AP-17 | Slow-Layer Streuung/z-Score | Offen | Analytik-Kern | F3: σ fehlt fuer Anomalie-Definition |
-| **P1** | AP-18 | Reale Anomalie-Berechnung (Feature→Anomalie) | Offen | Analytik-Kern | F1: anomaly_score ist Konstante |
-| **P2** | AP-19 | Unsicherheit aus echten Quellen | Offen | Analytik-Kern | F3: Coverage-Proxy ersetzen |
-| **P2** | AP-20 | Echte Abhaengigkeitsdetektion + Zentralitaet | Offen | Analytik-Kern | F4: Ko-Okkurrenz-Graph ersetzen |
-| **P2** | AP-21 | Info-Epidemiologie mit echten Zeitstempeln | Offen | Analytik-Kern | F5: Freshness→echte Zeitstempel |
-| **P2** | AP-22 | Fusion in Entscheidung zurueckfuehren + D5 | Offen | Analytik-Kern | F2/F12: Module speisen Entscheidung nicht |
-| **P3** | AP-23 | Provenance-Tiefe & In-Chain-Drift | Offen | Governance | F6: Provenance ist festes Template |
-| **P3** | AP-24 | Schwellen-Governance (Magic Numbers) | Offen | Governance | F11: ungovernte Schwellenwerte |
-| **P3** | AP-25 | Fail-Loud-Policy fuer Analytikstufen | Offen | Governance | F10: stille Degradation |
-| ~~P1~~ | AP-15 | Erweiterte kostenfreie API-Integration | **Erledigt** | MVP-Should | 8 Adapter, 53 Signale, Registry + Runtime verdrahtet |
-| ~~P1~~ | AP-14 | Kostenfreie API-Quellen-Erweiterung | Erledigt | MVP-Should | 4 Adapter implementiert, Registry + Katalog aktualisiert |
-| ~~P1~~ | AP-13 | ML-Training Data Lake | **Erledigt** | MVP-Should | 15/15 TAPs abgeschlossen (SwR-055..071) |
-| **P2** | AP-06 | Externe Quellen-Aktivierung (G2) | Blockiert | MVP-Should | **springt auf aktiv**, sobald gültige ReliefWeb/UCDP-Credentials vorliegen |
-| **P3** | AP-09 | Multi-User-Governance (G5) | Zurückgestellt | Post-MVP | nur wenn Operating-Model Multi-User explizit fordert |
+> **Strategische Klammer (2026-06-25): „Modell gegen echte Events prüfen".** Die offenen Analytik-Pakete
+> sind in **fünf Phasen mit Gates** geordnet (Detail: `docs/plans/AP-26-32-validierung-gegen-echte-events.md`).
+> Der bestimmende Befund: Der längste Hebel ist **Daten + Labels**, nicht Code. Erst Korrektheit (Phase 0),
+> dann das Messinstrument (Phase 1), dann echte Daten (Phase 2), dann die Validierung (Phase 3); die
+> Genauigkeits-Hebel (AP-19/20/21/22/24) sind bewusst **Phase 4** — sie werden erst nach Phase 3 gegen den
+> Skill-Score bisektierbar und daher nach hinten gereiht.
+
+| Rang | Phase | AP-ID | Großes Arbeitspaket | Status | Klasse | Auslöser / Bedingung |
+| --- | --- | --- | --- | --- | --- | --- |
+| **P1** | 0 | AP-17 | Slow-Layer Streuung/z-Score | Offen | Analytik-Kern | F3: σ fehlt für Anomalie-Definition |
+| **P1** | 0 | AP-18 | Reale Anomalie-Berechnung (Feature→Anomalie) | Offen | Analytik-Kern | F1: anomaly_score ist Konstante; braucht AP-17 |
+| **P1** | 0 | AP-25 | Fail-Loud-Policy für Analytikstufen | Offen | Governance | F10: stille Degradation untergräbt jede spätere Zahl |
+| **P1** | 0 | AP-26 | Status-Zeitreihe im Fenster-Replay | Offen | Validierung | F16: Punktstatus → tägliche Trajektorie; braucht AP-18 |
+| **P1** | 1a | AP-27 | Ground-Truth-Redesign mit Negativfällen | Offen | Validierung | F15: S0-Negative, Onset, Trajektorie, Holdout-Split (längster Pol Labels) |
+| **P1** | 1b | AP-16 | Skill-Messharness (Ground-Truth-Backtest) | Offen | Analytik-Kern | F7/F8/F9: Gerüst der Skill-Messung |
+| **P1** | 1b | AP-28 | Skill-Metrik: Fehlalarmrate + No-Skill-Baseline | Offen | Validierung | F9 real; braucht AP-16, AP-26, AP-27 |
+| **P2** | 2a | AP-29 | Event-Set-Definition (klein, ausgewogen) | Offen | Validierung | F14 (Vorber.); braucht AP-27 |
+| **P2** | 2b | AP-30 | Historischer Backfill GDELT/GDACS/WB + PIT | Offen | Daten | F14: **größter Block**, hohes Risiko; braucht AP-29, AP-13 |
+| **P2** | 2c | AP-31 | Provenance: real-captured vs fixture | Offen | Daten/Governance | F14: ehrliche Kennzeichnung; braucht AP-30 |
+| **P3** | 3 | AP-32 | End-to-End-Validierung + Skill-Report | Offen | Validierung | F7/F8 real; braucht AP-26, AP-28, AP-30, AP-31 |
+| **P3** | – | AP-23 | Provenance-Tiefe & In-Chain-Drift | Offen | Governance | F6: läuft unabhängig nebenher |
+| **P4** | 4 | AP-19 | Unsicherheit aus echten Quellen | Offen | Analytik-Kern | F3: erst nach Skill-Score bisektierbar |
+| **P4** | 4 | AP-20 | Echte Abhängigkeitsdetektion + Zentralität | Offen | Analytik-Kern | F4: Phase 4 |
+| **P4** | 4 | AP-21 | Info-Epidemiologie mit echten Zeitstempeln | Offen | Analytik-Kern | F5: Phase 4 |
+| **P4** | 4 | AP-22 | Fusion in Entscheidung zurückführen + D5 | Offen | Analytik-Kern | F2/F12: Phase 4 |
+| **P4** | 4 | AP-24 | Schwellen-Governance (Magic Numbers) | Offen | Governance | F11: Phase 4 (Cuts tunen ohne Code) |
+| **P2** | – | AP-06 | Externe Quellen-Aktivierung (G2) | Blockiert | MVP-Should | **springt auf aktiv**, sobald gültige ReliefWeb/UCDP-Credentials vorliegen |
+| **P3** | – | AP-09 | Multi-User-Governance (G5) | Zurückgestellt | Post-MVP | nur wenn Operating-Model Multi-User explizit fordert |
+| ~~–~~ | – | AP-15 | Erweiterte kostenfreie API-Integration | **Erledigt** | MVP-Should | 8 Adapter, 53 Signale, Registry + Runtime verdrahtet |
+| ~~–~~ | – | AP-14 | Kostenfreie API-Quellen-Erweiterung | Erledigt | MVP-Should | 4 Adapter, Registry + Katalog |
+| ~~–~~ | – | AP-13 | ML-Training Data Lake | **Erledigt** | MVP-Should | 15/15 TAPs (SwR-055..071) |
+
+**Minimaler ehrlicher Durchstich:** AP-17 + AP-18 + AP-25 + AP-26 + AP-27 (1 Positiv + 1 Kontrolle) +
+AP-16 + AP-28 + AP-29/30/31 (genau diese 2 Fälle) + AP-32. Erst damit ist „gegen echte Events geprüft"
+keine Übertreibung.
 
 ### So steuerst du die Reihenfolge
 
@@ -368,6 +411,138 @@ Phase 4 — Operationalisierung:
 | AP-13.14 | Archive Health Dashboard (`archive.html` in GUI) | Erledigt | 8 Tests; ArchiveHealthMonitor mit Gap-Detection, Source/Domain/Year-Counts; SwR-070 + TC + Traces |
 | AP-13.15 | CLI für Archive-Management (stats, compact, validate, export) | Erledigt | 7 Tests; ArchiveManager mit Stats/Validate/Compact/Export-Training; SwR-071 + TC + Traces |
 
+### 4.C Analytik-Kern — befund-getrieben (AP-16 … AP-25)
+
+Herkunft: Externe kritische Würdigung des analytischen Kerns (2026-06-24), Befunde **F1–F13**.
+Voll-Detail (Tier, In-/Out-of-Scope, Akzeptanz, kritischer Pfad): `docs/plans/AP-16-25-analytischer-kern-arbeitspakete.md`.
+Governance: Schwellenwert-Festlegungen bleiben beim Projekteigner.
+
+| AP-ID | Großes Arbeitspaket | Tier | Schließt | Phase-Einordnung | Status |
+| --- | --- | --- | --- | --- | --- |
+| AP-16 | Skill-Messharness (Ground-Truth-Backtest) | 1 | F7/F8/F9 | Phase 1b (Gerüst für AP-28) | Offen |
+| AP-17 | Slow-Layer Streuung/z-Score | 1 | F3 (teil) | Phase 0 | Offen |
+| AP-18 | Reale Anomalie-Berechnung (Feature→Anomalie) | 1 | F1 | Phase 0 | Offen |
+| AP-19 | Unsicherheit aus echten Quellen | 2 | F3 | Phase 4 | Offen |
+| AP-20 | Echte Abhängigkeitsdetektion + Zentralität | 2 | F4 | Phase 4 | Offen |
+| AP-21 | Info-Epidemiologie mit echten Zeitstempeln | 2 | F5 | Phase 4 | Offen |
+| AP-22 | Fusion in Entscheidung zurückführen + D5 | 2 | F2/F12 | Phase 4 | Offen |
+| AP-23 | Provenance-Tiefe & In-Chain-Drift | 3 | F6 | unabhängig | Offen |
+| AP-24 | Schwellen-Governance (Magic Numbers) | 3 | F11 | Phase 4 | Offen |
+| AP-25 | Fail-Loud-Policy für Analytikstufen | 3 | F10 | Phase 0 (Gate) | Offen |
+
+### 4.D Validierung gegen echte Events (AP-26 … AP-32)
+
+Herkunft: Phasenplan „Modell gegen echte Events prüfen" (2026-06-25). Voll-Detail (In-/Out-of-Scope,
+Akzeptanz, kritischer Pfad): `docs/plans/AP-26-32-validierung-gegen-echte-events.md`. Code-fundiert
+ausgearbeitet und adversarial konsistenzgeprüft (Trace-Blöcke disjunkt, DAG azyklisch).
+Drei neue Befunde ergänzen F1–F13: **F14** (synthetische Eventdaten), **F15** (degenerierte Labels),
+**F16** (Punktstatus statt Zeitreihe).
+
+> **Trace-Allokation (disjunkt, fortlaufend ab Bestand SwR-083 / StR-677 / TC-SwR-NNN-NNN):**
+> AP-26 = SwR-084..087, StR-678..681, ALGO-REPLAY-TS-01 · AP-27 = SwR-088..090, StR-682..684 ·
+> AP-28 = SwR-091..094, StR-685..688, ALGO-SKILL-02 · AP-29 = StR-689..692 · AP-30 = SwR-095..101,
+> StR-693..696, ALGO-BACKFILL-01 · AP-31 = SwR-102, StR-697 · AP-32 = SwR-103..106, StR-698..701.
+> Jede ID wird nur **einmal** über alle APs vergeben; pinning auf einzelne TAPs bei Implementierung.
+
+#### AP-26 — Status-Zeitreihe im Fenster-Replay · Status: Offen · Klasse: Validierung
+Phase 0 · Schließt: **F16** · Abhängig von: AP-17, AP-18, AP-25 · Aufwand: M · Risiko: mittel · Trace: SwR-084..087 / StR-678..681 / ALGO-REPLAY-TS-01.
+Ziel: Der Replay-Pfad erzeugt aus `NormalizedRecords` eine **deterministische tägliche Status-Zeitreihe**
+`(date, status, confidence)` über das Fall-Fenster statt eines Einzel-Labels (heute kollabiert
+`_derive_country_replay_status`, `historical_replay.py:141`, alles zu einem `replayed_status`).
+**Merge-Hotspot:** ändert dieselben Funktionen additiv wie AP-31 — Felder unabhängig hinzufügen.
+
+| TAP | Inhalt | Status | Trace / Hinweis |
+| --- | --- | --- | --- |
+| AP-26.1 | Tages-Fensterung + PIT-Schnitt (`_replay_window_dates`, `_records_as_of` in `historical_replay.py`), kein Look-ahead | Offen | SwR-084 / TC-SwR-084-001 |
+| AP-26.2 | Tägliche Status-Ableitung `derive_country_replay_status_timeseries` (ALGO-REPLAY-TS-01) + Fail-loud-Degradationseintrag | Offen | SwR-085 / ALGO-REPLAY-TS-01 |
+| AP-26.3 | Zeitreihe additiv in `build_historical_replay_reviews` einhängen (fixture + governter Pfad) | Offen | SwR-086 |
+| AP-26.4 | Deterministisches Artefakt `readmodels/status_timeseries_<case>.json` (sort_keys) + Trace/Doku | Offen | SwR-087 / StR-678..681 |
+
+#### AP-27 — Ground-Truth-Redesign mit Negativfällen · Status: Offen · Klasse: Validierung
+Phase 1a · Schließt: **F15** · Abhängig von: — (parallel zu Phase 0) · Aufwand: M · Risiko: mittel · Trace: SwR-088..090 / StR-682..684.
+**Hoheit Projekteigner:** welche Länder/Fenster S0-Negative sind, konkrete Onset-Daten, Trajektorien-Schwellen,
+Tuning/Holdout-Zuteilung. WP liefert nur Mechanik + einen exemplarischen Negativfall.
+Ziel: Label-Set in `validation_reference_cases.yaml` (heute 35 Fälle: 30×S3, kein S0) so reparieren, dass
+Fehlalarme und Vorlaufzeit messbar werden.
+
+| TAP | Inhalt | Status | Trace / Hinweis |
+| --- | --- | --- | --- |
+| AP-27.1 | `ValidationCase` + Loader um `onset_date`/`expected_trajectory`/`dataset_split`/`case_polarity` (`cases.py`), rückwärtskompatibel | Offen | SwR-088 |
+| AP-27.2 | ≥1 echten **S0-Negativfall** + Onset/Trajektorie/Split in `validation_reference_cases.yaml` kuratieren | Offen | SwR-089 |
+| AP-27.3 | Validator `validate_reference_case_library`: Onset-im-Fenster, disjunkter Split, **Anti-Zirkularität** (`historical_observed_status` ≠ mechanisch `expected_status`) | Offen | SwR-090 |
+| AP-27.4 | Traceability (StR-682..684, SwR-088..090) + Doku (Masterplan/Matrix/Glossar) | Offen | StR-682..684 |
+
+#### AP-28 — Skill-Metrik: Fehlalarmrate + No-Skill-Baseline · Status: Offen · Klasse: Validierung
+Phase 1b · Schließt: **F9 (real)**, entschärft F7/F8 · Abhängig von: **AP-16**, AP-26, AP-27 · Aufwand: M · Risiko: mittel · Trace: SwR-091..094 / StR-685..688 / ALGO-SKILL-02.
+**AP-16-Abgrenzung (Bottleneck):** AP-16 ist „Offen"/unimplementiert. AP-28 baut das Skill-Modul
+(`src/siasa/validation/skill_metrics.py`) auf ALGO-SKILL-01 (AP-16) auf und erweitert es zu **ALGO-SKILL-02**
+(Baseline + False-Alarm). AP-16 ist hartes Vorpaket — vor AP-28 schließen.
+
+| TAP | Inhalt | Status | Trace / Hinweis |
+| --- | --- | --- | --- |
+| AP-28.1 | Skill-Klassifikation Hit/Miss/False-Alarm (`skill_metrics.py`); Fehlalarmrate nur auf S0-Negativen definiert | Offen | SwR-091 / ALGO-SKILL-02 |
+| AP-28.2 | Vorlaufzeit aus AP-26-Zeitreihe + Brier-Score auf Bayes-Posterior (`probabilistic.py`) | Offen | SwR-092 |
+| AP-28.3 | No-Skill-Baseline „immer S3" + `beats_baseline` (auf Fehlalarm UND Vorlauf) + Regressionstest | Offen | SwR-093 |
+| AP-28.4 | Artefakt `readmodels/skill_metrics.json` (deterministisch) + GUI-KPI (`_render_validation_kpi_grid`) | Offen | SwR-094 / StR-685..688 |
+
+#### AP-29 — Event-Set-Definition (klein, ausgewogen) · Status: Offen · Klasse: Validierung
+Phase 2a · Schließt: **F14 (Vorber.)** · Abhängig von: AP-27 · Aufwand: S · Risiko: niedrig · Trace: StR-689..692.
+**Hoheit Projekteigner:** welche konkreten Eskalationen/Kontrollen das Set bilden.
+Ziel: 3 Eskalationen + 3 gematchte ruhige Kontrollen, jeweils mit Fenster/Onset/Trajektorie und Quell-Zuordnung,
+verlinkt auf bestehende `case_id`.
+
+| TAP | Inhalt | Status | Trace / Hinweis |
+| --- | --- | --- | --- |
+| AP-29.1 | Selektions-/Paarungsspezifikation (3+3) — **review-basiert, kein RED/GREEN** | Offen | StR-689 |
+| AP-29.2 | Artefakt `vmodel/verification/validation_event_set.yaml` (matched pairs, `assigned_sources` ⊆ reference_sources) | Offen | StR-690 |
+| AP-29.3 | Konsistenztest gegen AP-27-Labelbibliothek (Re-use `load_validation_case_library`) | Offen | StR-691 / TC-StR-691-001 |
+| AP-29.4 | Trace (StR-689..692) + Doku (Masterplan/Matrix) | Offen | StR-692 |
+
+#### AP-30 — Historischer Backfill GDELT/GDACS/World Bank + PIT · Status: Offen · Klasse: Daten
+Phase 2b · Schließt: **F14** · Abhängig von: AP-29, **AP-13** (DailyAligner/PIT/ArchiveWriter) · Aufwand: **XL** · Risiko: **hoch** · Trace: SwR-095..101 / StR-693..696 / ALGO-BACKFILL-01.
+**Hoheit Projekteigner:** Fallauswahl (aus AP-29), Daten-Lizenz/Quellzitierung, API-Zugänge.
+Ziel: die 8-Record-Fixtures durch real erfasste, look-ahead-freie, auf Tagesauflösung alignierte Daten ersetzen.
+Die vier Adapter sind heute **live-only** (kein historisches Datumsfenster) — das ist die Kernlücke.
+
+| TAP | Inhalt | Status | Trace / Hinweis |
+| --- | --- | --- | --- |
+| AP-30.1 | Adapter um historisches Datumsfenster erweitern (GDELT DOC `startdatetime/enddatetime`, GDELT Events datierte Exports, GDACS Archiv, World Bank `date`-Range); **Live-Pfad unverändert** | Offen | SwR-095..098 |
+| AP-30.2 | Orchestrator `scripts/build_historical_backfill.py`: ziehen→`normalize_records`→`ArchiveWriter`→`DailyAligner` (ALGO-BACKFILL-01); **≥100 Records/Fall** | Offen | SwR-099 / ALGO-BACKFILL-01 |
+| AP-30.3 | PIT-Replay ohne Look-ahead (verschobener Stichtag; nicht-NaN-Feldzahl steigt monoton mit `query_date`) | Offen | SwR-100 |
+| AP-30.4 | Reale Bundles + Manifest-Governance für ≥1 Positiv- + ≥1 Kontrollfall (`_validate_archival_replay_bundle` grün, ≥100 Records) | Offen | SwR-101 / StR-693..696 |
+
+#### AP-31 — Provenance: real-captured vs fixture · Status: Offen · Klasse: Daten/Governance
+Phase 2c · Schließt: **F14** · Abhängig von: AP-30 · Aufwand: M · Risiko: niedrig · Trace: SwR-102 / StR-697.
+Ziel: die heute pauschal falsche „Provider-derived"-Behauptung in allen 35 Manifest-Einträgen korrigieren und
+ein validiertes Flag `data_origin` (`real-captured`|`fixture`) durch die Pipeline bis GUI/Report durchreichen.
+**Merge-Hotspot:** ändert dieselben Funktionen additiv wie AP-26.
+
+| TAP | Inhalt | Status | Trace / Hinweis |
+| --- | --- | --- | --- |
+| AP-31.1 | Manifest-Flag `data_origin` einführen, Loader **fail-loud** bei fehlend/ungültig | Offen | SwR-102 / TC-SwR-102-001 |
+| AP-31.2 | `provenance_notes` der Fixtures korrigieren (keine „provider-derived"-Behauptung mehr) | Offen | TC-SwR-102-002 |
+| AP-31.3 | `data_origin` durch Pipeline → Read-Model + `data_origin_counts` (Origin-Mix) | Offen | TC-SwR-102-003 |
+| AP-31.4 | GUI: Origin-Spalte + Origin-Mix (HTML-Assert: Header „Origin", colspan 12) | Offen | TC-SwR-102-004 |
+| AP-31.5 | Trace (SwR-102, StR-697) + Doku (Masterplan/Matrix) | Offen | StR-697 |
+
+#### AP-32 — End-to-End-Validierung + Skill-Report · Status: Offen · Klasse: Validierung
+Phase 3 · Schließt: **F7/F8 (real)** · Abhängig von: AP-26, AP-28, AP-30, AP-31 (AP-16/AP-27 transitiv) · Aufwand: M · Risiko: niedrig · Trace: SwR-103..106 / StR-698..701.
+Ziel: das korrigierte Modell über die realen Fenster mit PIT-Features laufen lassen und die Güte ehrlich
+beziffern — Skill-Metriken vs. No-Skill-Baseline, Fehlalarmrate auf Kontrollen, Grenzen + Origin-Mix explizit.
+Konsument/Aggregator, **erfindet keine neue Modellmechanik**.
+
+| TAP | Inhalt | Status | Trace / Hinweis |
+| --- | --- | --- | --- |
+| AP-32.1 | E2E-Lauf `src/siasa/validation/e2e_validation_run.py`: Modell über reale Fenster, Status-Zeitreihe + Positiv/Kontroll-Trennung | Offen | SwR-103 |
+| AP-32.2 | Report-Aggregation `validation_report.py`: Skill-Metriken (ALGO-SKILL-02) vs No-Skill-Baseline, `beats_baseline` | Offen | SwR-104 |
+| AP-32.3 | Ehrlicher Grenzen-/Origin-Mix-Block (kleine Fallzahl, Coverage, real vs fixture); Warnung bei reinem Fixture-Set | Offen | SwR-105 |
+| AP-32.4 | Artefakt `readmodels/validation_report.json` (deterministisch) + GUI-Sichtbarkeit | Offen | SwR-106 / StR-698..701 |
+
+**Kritischer Pfad (AP-26…32):** `AP-18 → AP-26`; parallel `AP-27 → AP-29 → AP-30 → AP-31`;
+`(AP-16, AP-26, AP-27) → AP-28`; `(AP-26, AP-28, AP-30, AP-31) → AP-32`. Längster Pfad =
+`AP-27 → AP-29 → AP-30 → AP-31 → AP-32` (enthält das XL/hoch-Risiko-Paket AP-30). AP-16 ist
+verstecktes Bottleneck für AP-28/AP-32 — vorab schließen.
+
 ---
 
 ## 5. Offene Lücken & Blocker (Zusammenfassung)
@@ -383,6 +558,9 @@ Phase 4 — Operationalisierung:
 | L7 | ~~Domain-D/E/C/A-Coverage dünn~~ | AP-11 | geschlossen | 3 neue Adapter (Frankfurter/Voidly/HDX-INFORM); 4 TAPs extern blockiert (API-Key/DNS) |
 | L8 | ~~GUI zeigt zu wenig Quellen-/Methodik-Transparenz~~ | AP-12 | geschlossen | 3 neue Seiten (Sources, About, Methodology), parametrierbare Zeitachse, aufklappbare Quellen-Details, Cross-Links; 31 Tests |
 | L9 | Keine permanente Datenhaltung — alle Records gehen nach 168h verloren; kein ML-Training möglich | AP-13 | **geschlossen** | 15/15 TAPs erledigt: Parquet-Archiv + DuckDB + Features + ML-Integration + Ops |
+| L10 | Modell gibt konstantes Signal (anomaly_score Konstante); Validierung misst keine Modellgüte | AP-16/17/18/25/26/28 | **offen (Phase 0+1)** | Korrektheit + Messinstrument: reale Anomalie, σ/z-Score, Fail-Loud, Status-Zeitreihe, Skill-Metrik |
+| L11 | Ground-Truth degeneriert: keine S0-Negative, kein Onset, zirkuläre Labels (F15) | AP-27 | **offen (Phase 1a)** | Label-Redesign — längster Pol; Hoheit Projekteigner |
+| L12 | „Echte" Eventdaten sind synthetisch (4–8 Hand-Records, falsch als provider-derived deklariert) (F14) | AP-29/30/31 | **offen (Phase 2)** | Echter historischer Backfill GDELT/GDACS/WB + PIT + ehrliche Origin-Kennzeichnung — größter Block |
 
 Pivot-Auslöser (wann die Priorisierung neu bewertet wird):
 - AP-13 Data Lake abgeschlossen → ML-Training-Workflows ermöglichen;
