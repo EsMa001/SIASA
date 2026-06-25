@@ -118,6 +118,16 @@ Die verbleibende blockierte Arbeit ist externe Quellen-Aktivierung (AP-06) und �
 
 | Rang | AP-ID | Großes Arbeitspaket | Status | Klasse | Auslöser / Bedingung |
 | --- | --- | --- | --- | --- | --- |
+| **P1** | AP-16 | Skill-Messharness (Ground-Truth-Backtest) | Offen | Analytik-Kern | F7/F8/F9: Validierung misst keine Modellguete |
+| **P1** | AP-17 | Slow-Layer Streuung/z-Score | Offen | Analytik-Kern | F3: σ fehlt fuer Anomalie-Definition |
+| **P1** | AP-18 | Reale Anomalie-Berechnung (Feature→Anomalie) | Offen | Analytik-Kern | F1: anomaly_score ist Konstante |
+| **P2** | AP-19 | Unsicherheit aus echten Quellen | Offen | Analytik-Kern | F3: Coverage-Proxy ersetzen |
+| **P2** | AP-20 | Echte Abhaengigkeitsdetektion + Zentralitaet | Offen | Analytik-Kern | F4: Ko-Okkurrenz-Graph ersetzen |
+| **P2** | AP-21 | Info-Epidemiologie mit echten Zeitstempeln | Offen | Analytik-Kern | F5: Freshness→echte Zeitstempel |
+| **P2** | AP-22 | Fusion in Entscheidung zurueckfuehren + D5 | Offen | Analytik-Kern | F2/F12: Module speisen Entscheidung nicht |
+| **P3** | AP-23 | Provenance-Tiefe & In-Chain-Drift | Offen | Governance | F6: Provenance ist festes Template |
+| **P3** | AP-24 | Schwellen-Governance (Magic Numbers) | Offen | Governance | F11: ungovernte Schwellenwerte |
+| **P3** | AP-25 | Fail-Loud-Policy fuer Analytikstufen | Offen | Governance | F10: stille Degradation |
 | ~~P1~~ | AP-15 | Erweiterte kostenfreie API-Integration | **Erledigt** | MVP-Should | 8 Adapter, 53 Signale, Registry + Runtime verdrahtet |
 | ~~P1~~ | AP-14 | Kostenfreie API-Quellen-Erweiterung | Erledigt | MVP-Should | 4 Adapter implementiert, Registry + Katalog aktualisiert |
 | ~~P1~~ | AP-13 | ML-Training Data Lake | **Erledigt** | MVP-Should | 15/15 TAPs abgeschlossen (SwR-055..071) |
