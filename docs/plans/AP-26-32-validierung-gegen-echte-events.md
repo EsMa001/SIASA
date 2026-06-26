@@ -151,6 +151,13 @@ auf Fehlalarm/Vorlauf geschlagen (beweist: Metrik misst mehr als Status-Match).
 
 ### AP-29: Event-Set-Definition (klein, ausgewogen)
 
+**Status (2026-06-26): Mechanik erledigt** (Commit `2abbd02`). Artefakt
+`vmodel/verification/validation_event_set.yaml` (gematchte Eskalations-/Kontroll-Paare → AP-27-`case_id`)
++ Konsistenztest (`test_validation_cases.py`, re-use `load_validation_case_library`). StR-689..692 unter
+SyR-026 (kein neuer SwR/TC); Count-Sync 688→692; Vollsuite 1162 passed. **1 Beispiel-Paar geseedet**
+(UKR↔CHE) — die echte 3+3-Kuratierung (welche Eskalationen/Kontrollen) bleibt Owner-Hoheit und braucht
+echte Negativ-Kontrollen (gated AP-30).
+
 **Ziel:** Konkretes, kleines Event-Set festlegen statt vieler Fixtures.
 
 **Befunde:** F14 (Vorbereitung)
