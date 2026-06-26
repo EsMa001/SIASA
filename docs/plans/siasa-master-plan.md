@@ -113,13 +113,13 @@ Regeln:
 | AP-21 | Info-Epidemiologie mit echten Zeitstempeln | Offen | P4 | Analytik-Kern | F5 — Phase 4 |
 | AP-22 | Fusion in Entscheidung zurückführen + D5 | Offen | P4 | Analytik-Kern | F2/F12 — Phase 4 |
 | AP-23 | Provenance-Tiefe & In-Chain-Drift | Offen | P3 | Governance | F6: Provenance ist festes Template |
-| AP-24 | Schwellen-Governance (Magic Numbers) | Offen | P4 | Governance | F11 — Phase 4 |
+| AP-24 | Schwellen-Governance (Magic Numbers) | Weitgehend erledigt (vorgezogen) | P2 | Governance | F11: governte `scoring_thresholds.yaml` + 7/8 Familien verdrahtet + 1. Wert (Bayes-D3→Band-Mittelpunkt) + Sensitivitäts-Tool; Rest = Owner-Policy-Werte (CI, S0–S6-Aggregation, NATO-Fusion) |
 | AP-25 | Fail-Loud-Policy für Analytikstufen | Erledigt | – | Governance | F10 geschlossen: ALGO-RUNGATE-01 (7 Analytikstufen → explizite Degradationseinträge in artifact_status/Readiness), `runs/run_gate.py`, 5+1 Tests |
 | AP-26 | Status-Zeitreihe im Fenster-Replay | Erledigt | – | Validierung (Phase 0) | F16 geschlossen: tägliche PIT-Status-Zeitreihe (ALGO-REPLAY-TS-01, data-driven via ALGO-ANOM-01), deterministisches Artefakt; Legacy-Punktstatus bleibt Konstante bis AP-30 |
 | AP-27 | Ground-Truth-Redesign mit Negativfällen | Erledigt | – | Validierung (Phase 1a) | F15-Mechanik: Schema (onset/trajectory/split/polarity), Validator (Anti-Zirkularität), 1 exemplarischer S0-Fall (CHE); volle Label-Kuratierung = Owner-Hoheit |
-| AP-28 | Skill-Metrik: Fehlalarmrate + No-Skill-Baseline | Offen | **P1** | Validierung (Phase 1b) | F9 real: Fehlalarm/Vorlauf/Brier messbar |
-| AP-29 | Event-Set-Definition (klein, ausgewogen) | Offen | **P2** | Validierung (Phase 2a) | F14 (Vorber.): fokussiertes Positiv/Kontroll-Set |
-| AP-30 | Historischer Backfill GDELT/GDACS/WB + PIT | Offen | **P2** | Daten (Phase 2b) | F14: synthetische Fixtures durch Realdaten ersetzen |
+| AP-28 | Skill-Metrik: Fehlalarmrate + No-Skill-Baseline | Erledigt | – | Validierung (Phase 1b) | F9: ALGO-SKILL-02 (Fehlalarm/Vorlauf/Brier + No-Skill-Baseline „immer S3"); Zahlen erst mit AP-30-Realdaten aussagekräftig |
+| AP-29 | Event-Set-Definition (klein, ausgewogen) | Erledigt | – | Validierung (Phase 2a) | F14: Mechanik + Kuratierung v2 (8 research-verifizierte Real-Event-Paare); finale Ratifizierung Owner-Hoheit |
+| AP-30 | Historischer Backfill GDELT/GDACS/WB + PIT | Offen | **P1** | Daten (Phase 2b) | F14 **bindender Engpass**: 30.1 Adapter-Datumsfenster datenunabhängig (jetzt) · 30.2+ realer Pull owner-gated (Fallauswahl/Lizenz/API) |
 | AP-31 | Provenance: real-captured vs fixture | Offen | **P2** | Daten/Governance (Phase 2c) | F14: falsche „provider-derived"-Behauptung korrigieren |
 | AP-32 | End-to-End-Validierung + Skill-Report | Offen | **P3** | Validierung (Phase 3) | F7/F8 real: „gegen echte Events geprüft" belegen |
 
@@ -148,6 +148,17 @@ Die verbleibende blockierte Arbeit ist externe Quellen-Aktivierung (AP-06) und �
 > Genauigkeits-Hebel (AP-19/20/21/22/24) sind bewusst **Phase 4** — sie werden erst nach Phase 3 gegen den
 > Skill-Score bisektierbar und daher nach hinten gereiht.
 
+> **Revision 2026-06-26 — Reihenfolge überarbeitet.** Phase 0+1 sind **abgeschlossen** (AP-17/18/25/26/16/27/28),
+> ebenso **AP-29** (Event-Set + research-verifizierte Kuratierung v2, 8 Paare) und — **vorgezogen** — **AP-24**
+> (Schwellen-Governance, bis auf Owner-Policy-Werte). Damit bleibt **ein** bindender Engpass: **AP-30 (echte Daten)**
+> — er macht erst die AP-28-Skill-Zahlen, die AP-24-Schwellen-Kalibrierung und die Kuratierungs-Tiefe aussagekräftig.
+> Konsequenz für die Reihenfolge:
+> 1. **AP-30 wird gesplittet:** 30.1 Adapter-Datumsfenster-Mechanik ist **datenunabhängig** und jetzt machbar
+>    (analog AP-29: Mechanik vor Realdaten); 30.2+ (realer Pull) ist **owner-gated** (Fallauswahl/Lizenz/API).
+> 2. **Datenunabhängiger Parallel-Track** füllt die Wartezeit auf Owner-Freigabe: AP-30.1, die AP-24-Owner-Policy-
+>    Werte und die Audit-Restpunkte (Verifikations-Routen SyR-051/052/053; Cluster-B-Lokalgate).
+> 3. Die Genauigkeits-Hebel (AP-19/20/21/22) bleiben **Phase 4** (erst nach echten Daten gegen den Skill-Score bisektierbar).
+
 | Rang | Phase | AP-ID | Großes Arbeitspaket | Status | Klasse | Auslöser / Bedingung |
 | --- | --- | --- | --- | --- | --- | --- |
 | ~~P1~~ | 0 | AP-17 | Slow-Layer Streuung/z-Score | **Erledigt** | Analytik-Kern | F3: σ/z-Score geliefert (std_7d/30d, `compute_zscore`); SwR-063 erweitert |
@@ -156,9 +167,9 @@ Die verbleibende blockierte Arbeit ist externe Quellen-Aktivierung (AP-06) und �
 | ~~P1~~ | 0 | AP-26 | Status-Zeitreihe im Fenster-Replay | **Erledigt** | Validierung | F16: tägliche PIT-Zeitreihe (ALGO-REPLAY-TS-01) + deterministisches Artefakt; `historical_replay.py` |
 | ~~P1~~ | 1a | AP-27 | Ground-Truth-Redesign mit Negativfällen | **Erledigt** | Validierung | F15: Schema + Validator + 1 exemplarischer S0-Fall (`cases.py`); echte Label-Kuratierung Owner-Hoheit |
 | ~~P1~~ | 1b | AP-16 | Skill-Messharness (Ground-Truth-Backtest) | **Erledigt** | Analytik-Kern | F7/F8/F9: ALGO-SKILL-01 (`validation/skill_metrics.py`) + GUI-KPI; Regressionstest grün |
-| **P1** | 1b | AP-28 | Skill-Metrik: Fehlalarmrate + No-Skill-Baseline | Offen | Validierung | F9 real; braucht AP-16, AP-26, AP-27 |
-| **P2** | 2a | AP-29 | Event-Set-Definition (klein, ausgewogen) | Offen | Validierung | F14 (Vorber.); braucht AP-27 |
-| **P2** | 2b | AP-30 | Historischer Backfill GDELT/GDACS/WB + PIT | Offen | Daten | F14: **größter Block**, hohes Risiko; braucht AP-29, AP-13 |
+| ~~P1~~ | 1b | AP-28 | Skill-Metrik: Fehlalarmrate + No-Skill-Baseline | **Erledigt** | Validierung | F9: ALGO-SKILL-02 (Fehlalarm/Vorlauf/Brier/Baseline); Zahlen erst mit AP-30 aussagekräftig |
+| ~~P2~~ | 2a | AP-29 | Event-Set-Definition (klein, ausgewogen) | **Erledigt** | Validierung | F14: Mechanik + Kuratierung v2 (8 research-verifizierte Paare); finale Ratifizierung Owner-Hoheit |
+| **P1** | 2b | AP-30 | Historischer Backfill GDELT/GDACS/WB + PIT | Offen | Daten | **bindender Engpass.** 30.1 Adapter-Datumsfenster = **datenunabhängig, JETZT** · 30.2+ realer Pull = **owner-gated** (Fallauswahl aus den 8 Paaren, Lizenz/Quellzitierung, API); braucht AP-13 |
 | **P2** | 2c | AP-31 | Provenance: real-captured vs fixture | Offen | Daten/Governance | F14: ehrliche Kennzeichnung; braucht AP-30 |
 | **P3** | 3 | AP-32 | End-to-End-Validierung + Skill-Report | Offen | Validierung | F7/F8 real; braucht AP-26, AP-28, AP-30, AP-31 |
 | **P3** | – | AP-23 | Provenance-Tiefe & In-Chain-Drift | Offen | Governance | F6: läuft unabhängig nebenher |
@@ -166,7 +177,7 @@ Die verbleibende blockierte Arbeit ist externe Quellen-Aktivierung (AP-06) und �
 | **P4** | 4 | AP-20 | Echte Abhängigkeitsdetektion + Zentralität | Offen | Analytik-Kern | F4: Phase 4 |
 | **P4** | 4 | AP-21 | Info-Epidemiologie mit echten Zeitstempeln | Offen | Analytik-Kern | F5: Phase 4 |
 | **P4** | 4 | AP-22 | Fusion in Entscheidung zurückführen + D5 | Offen | Analytik-Kern | F2/F12: Phase 4 |
-| **P4** | 4 | AP-24 | Schwellen-Governance (Magic Numbers) | Offen | Governance | F11: Phase 4 (Cuts tunen ohne Code) |
+| **P2** | – | AP-24 | Schwellen-Governance (Magic Numbers) | Weitgehend erledigt | Governance | F11: governte Config + 7/8 Familien verdrahtet + 1. Wert + Sensitivitäts-Tool (vorgezogen); Rest = **datenunabhängige** Owner-Policy-Werte (CI 90/95, S0–S6-Aggregation, NATO-Fusion) |
 | **P2** | – | AP-06 | Externe Quellen-Aktivierung (G2) | Blockiert | MVP-Should | **springt auf aktiv**, sobald gültige ReliefWeb/UCDP-Credentials vorliegen |
 | **P3** | – | AP-09 | Multi-User-Governance (G5) | Zurückgestellt | Post-MVP | nur wenn Operating-Model Multi-User explizit fordert |
 | ~~–~~ | – | AP-15 | Erweiterte kostenfreie API-Integration | **Erledigt** | MVP-Should | 8 Adapter, 53 Signale, Registry + Runtime verdrahtet |
@@ -482,7 +493,7 @@ Fehlalarme und Vorlaufzeit messbar werden.
 | AP-27.3 | Validator `validate_reference_case_library`: Onset-im-Fenster, disjunkter Split, **Anti-Zirkularität** (positiv: `historical_observed_status` ≠ `expected_status`) | **Erledigt** | SwR-090 |
 | AP-27.4 | Traceability (StR-682..684, SwR-088..090) + Count-Sync (StR 681→684, SwR 87→90, TC 137→140) | **Erledigt** | StR-682..684 |
 
-#### AP-28 — Skill-Metrik: Fehlalarmrate + No-Skill-Baseline · Status: Offen · Klasse: Validierung
+#### AP-28 — Skill-Metrik: Fehlalarmrate + No-Skill-Baseline · Status: Erledigt · Klasse: Validierung
 Phase 1b · Schließt: **F9 (real)**, entschärft F7/F8 · Abhängig von: **AP-16**, AP-26, AP-27 · Aufwand: M · Risiko: mittel · Trace: SwR-091..094 / StR-685..688 / ALGO-SKILL-02.
 **AP-16-Abgrenzung (Bottleneck):** AP-16 ist „Offen"/unimplementiert. AP-28 baut das Skill-Modul
 (`src/siasa/validation/skill_metrics.py`) auf ALGO-SKILL-01 (AP-16) auf und erweitert es zu **ALGO-SKILL-02**
@@ -495,7 +506,7 @@ Phase 1b · Schließt: **F9 (real)**, entschärft F7/F8 · Abhängig von: **AP-1
 | AP-28.3 | No-Skill-Baseline „immer S3" + `beats_baseline` (auf Fehlalarm UND Vorlauf) + Regressionstest | Offen | SwR-093 |
 | AP-28.4 | Artefakt `readmodels/skill_metrics.json` (deterministisch) + GUI-KPI (`_render_validation_kpi_grid`) | Offen | SwR-094 / StR-685..688 |
 
-#### AP-29 — Event-Set-Definition (klein, ausgewogen) · Status: Offen · Klasse: Validierung
+#### AP-29 — Event-Set-Definition (klein, ausgewogen) · Status: Erledigt (Mechanik + Kuratierung v2, 8 Paare) · Klasse: Validierung
 Phase 2a · Schließt: **F14 (Vorber.)** · Abhängig von: AP-27 · Aufwand: S · Risiko: niedrig · Trace: StR-689..692.
 **Hoheit Projekteigner:** welche konkreten Eskalationen/Kontrollen das Set bilden.
 Ziel: 3 Eskalationen + 3 gematchte ruhige Kontrollen, jeweils mit Fenster/Onset/Trajektorie und Quell-Zuordnung,

@@ -106,16 +106,24 @@ Arbeitsweise je Tranche: V-Model-Anker → RED/GREEN → targeted Tests → Full
 
 ---
 
-## 3. Offener Backlog (entspricht den Session-Tasks #1–#9; in Abhängigkeitsreihenfolge)
+## 3. Offener Backlog — **revidierte Reihenfolge (Stand 2026-06-26)**
 
-**Vorbedingung:**
-- **AP-26..32 V-Model-Verankerung + Count-Sync** (#8) — reiner Planning-Commit (StR/SyR/SwR/TC/trace_links/implementation_file_links + Stubs + ALGO-IDs governt) VOR dem ersten Code von AP-26/27. Enthält auch den SwR-Count-Drift-Fix (s.u.).
+> Maßgebliche Reihenfolge: `siasa-master-plan.md` §3. Phase 0+1 sowie AP-24 (vorgezogen) und AP-29 sind erledigt;
+> es bleibt **ein** bindender Engpass: **AP-30 (echte Daten)**. Daher: datenunabhängige 30.1-Mechanik + Parallel-
+> Track jetzt; owner-gated 30.2 realer Pull, sobald Owner freigibt.
 
-**Phase 0 (Korrektheit-Gate):** AP-17 ✅ erledigt · **AP-18** (reale Anomalie, ersetzt Konstante `live_runtime.py:760`) · AP-25 (Fail-Loud) · **AP-26** (Status-Zeitreihe im Replay, #1).
-**Phase 1 (Instrument):** AP-16 (Skill-Harness) · **AP-27** (Ground-Truth-Redesign, S0-Negative, #2) · **AP-28** (Skill-Metrik + No-Skill-Baseline, #3).
-**Phase 2 (echte Daten):** **AP-29** (Event-Set, #4) → **AP-30** (Backfill GDELT/GDACS/WB + PIT, größter Block, #5) → **AP-31** (Provenance real vs fixture, #6).
-**Phase 3:** **AP-32** (End-to-End-Validierung + Skill-Report, #7).
-**Phase 4 (nach Validierung):** AP-19/20/21/22/24.
+**✅ Erledigt:** Phase 0 (AP-17/18/25/26) · Phase 1 (AP-16/27/28) · **AP-29** (Event-Set + Kuratierung v2, 8 research-verifizierte Paare) · **AP-24** (Schwellen-Governance, vorgezogen; bis auf Owner-Policy-Werte).
+
+**▶ Jetzt — datenunabhängiger Track (kein Owner-Input nötig):**
+1. **AP-30.1** Adapter-Datumsfenster-Mechanik (GDELT/GDACS/WB historisches Fenster, Live-Pfad unverändert) — analog AP-29 Mechanik-vor-Daten.
+2. **Audit-Restpunkte** (§4): 3 Verifikations-Routen SyR-051/052/053 + Cluster-B-Lokalgate.
+3. **AP-24-Owner-Policy** (leichtgewichtig, je 1 Owner-Ja): CI 90/95 · S0–S6 geometrisches Mittel · NATO-Fusion-Mapping.
+
+**⛔ Owner-gated — kritischer Pfad (echte Daten):**
+4. **AP-30.2+** realer Backfill GDELT/GDACS/WB + PIT — braucht Fallauswahl (aus den 8 Paaren), Daten-Lizenz/Quellzitierung, API-Zugänge. **Der eigentliche Unlock.**
+5. **AP-31** Provenance real vs fixture → **AP-32** End-to-End-Validierung + Skill-Report (hier werden AP-28-Skill-Zahlen + AP-24-Schwellen + Kuratierungs-Tiefe **endlich messbar**).
+
+**Phase 4 (nach echten Daten, gegen Skill-Score bisektierbar):** AP-19/20/21/22 · AP-23 (Provenance-Tiefe, läuft unabhängig).
 
 Detail: `docs/plans/siasa-master-plan.md` (§3 Backlog, §4.C/§4.D) · `docs/plans/AP-26-32-validierung-gegen-echte-events.md` · `docs/plans/AP-16-25-analytischer-kern-arbeitspakete.md`.
 
