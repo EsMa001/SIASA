@@ -33,8 +33,10 @@ implementation_slices:
       SwR-021:
         code_paths:
           - src/siasa/scoring/domain_status.py
+          - src/siasa/scoring/scoring_thresholds.py
         test_paths:
           - tests/unit/test_domain_status.py
+          - tests/unit/test_scoring_thresholds.py
       SwR-022:
         code_paths:
           - src/siasa/scoring/domain_status.py
@@ -55,11 +57,13 @@ implementation_slices:
       - src/siasa/scoring/data_sufficiency.py
       - src/siasa/scoring/domain_status.py
       - src/siasa/scoring/multi_domain_status.py
+      - src/siasa/scoring/scoring_thresholds.py
     known_test_paths:
       - tests/unit/test_baselines.py
       - tests/unit/test_data_sufficiency.py
       - tests/unit/test_domain_status.py
       - tests/unit/test_multi_domain_status.py
+      - tests/unit/test_scoring_thresholds.py
   catalog-and-ingestion-foundation:
     requirement_ids:
       - SwR-001

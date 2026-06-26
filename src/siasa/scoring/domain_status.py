@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .data_sufficiency import DataSufficiencyResult
+from .scoring_thresholds import domain_status_cutpoints
 
 
 @dataclass(frozen=True)
@@ -23,15 +24,16 @@ def derive_domain_status(
     sufficiency: DataSufficiencyResult,
     contradictory_signals: bool = False,
 ) -> DomainStatusResult:
+    d1_max, d2_max, d3_max = domain_status_cutpoints()
     if not sufficiency.is_sufficient:
         status = "D0"
     elif contradictory_signals:
         status = "D5"
-    elif anomaly_score < 0.2:
+    elif anomaly_score < d1_max:
         status = "D1"
-    elif anomaly_score < 0.5:
+    elif anomaly_score < d2_max:
         status = "D2"
-    elif anomaly_score < 1.0:
+    elif anomaly_score < d3_max:
         status = "D3"
     else:
         status = "D4"

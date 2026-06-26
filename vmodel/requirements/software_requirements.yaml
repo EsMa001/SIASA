@@ -205,7 +205,7 @@ software_requirements:
   verification_method: software_specification_review
 - id: SwR-021
   title: Domain status rule engine
-  statement: The software shall derive domain status values D0 through D5 from domain features, baseline comparisons, and data sufficiency results.
+  statement: The software shall derive domain status values D0 through D5 from domain features, baseline comparisons, and data sufficiency results, using governed anomaly-to-status thresholds sourced from a configurable scoring-thresholds artifact (AP-24) rather than hard-coded magic numbers.
   status: accepted
   derives_from:
   - SyR-015

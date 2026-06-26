@@ -1,0 +1,74 @@
+# SIASA governed scoring thresholds (AP-24 / finding F11 — "magic numbers").
+#
+# Single governed source-of-truth for the analytical thresholds/weights. Per OECD/JRC
+# (Handbook on Constructing Composite Indicators) and INFORM, these are owner-authority
+# value judgements that must be documented and justified, not arbitrary constants.
+# Scientific basis + recommended initial defaults: docs/research/parameter-initialisierung.md
+#
+# "current" values preserve the behaviour shipped to date (behaviour-preserving migration).
+# Only the sections read by src/siasa/scoring/scoring_thresholds.py are live today; the rest
+# is a decision record for the follow-up per-family AP-24 wiring.
+metadata:
+  artifact: governed_scoring_thresholds
+  governance: owner_authority
+  research_basis: docs/research/parameter-initialisierung.md
+
+# --- LIVE: read at runtime by scoring_thresholds.py (behaviour-preserving) ---
+anomaly:
+  upper_bound: 1.5          # caps the aggregate z-score; keeps D4 reachable but bounded
+  min_series_points: 4      # min within-window observations before a signal's z-score is trusted
+domain_status:
+  d1_max: 0.2               # anomaly < d1_max -> D1
+  d2_max: 0.5               # anomaly < d2_max -> D2
+  d3_max: 1.0               # anomaly < d3_max -> D3 ; anomaly >= d3_max -> D4
+
+# --- DECISION RECORD: every threshold family (current vs science-anchored recommendation) ---
+governance_record:
+  - family: anomaly_to_status
+    wired_to_config: true
+    current: {cutpoints: [0.2, 0.5, 1.0], upper_bound: 1.5, min_series_points: 4}
+    recommended_initial: {cutpoints_in_sigma: [1.0, 2.0, 3.0], upper_bound: 3.0, min_series_points: 20}
+    rationale: "SPC sigma-multiple control limits (2-sigma warn, 3-sigma action). Current cutpoints sit far below the convention (z=1.0 -> D4 'critical' is only a ~16% tail) -> systematic over-flagging. min 4 points is too few for a stable sigma."
+    reference: "NIST/Shewhart SPC; Western Electric rules; EWMA/CUSUM"
+  - family: multi_domain_aggregation_s0_s6
+    wired_to_config: false
+    current: {rule: count_based_over_D2_D3_D4_domains}
+    recommended_initial: {aggregation: geometric_mean_equal_weights, continuous_to_ordinal: roundup_cutpoints}
+    rationale: "Aggregation choice = compensability decision. The count rule is non-compensatory; INFORM uses an equal-weight geometric mean (risk=0 if any dimension 0) for exactly this. Validate via correlation/PCA (AGENTS rule 9: no naive additive)."
+    reference: "INFORM Risk & Severity Methodology (JRC); OECD/JRC Handbook"
+  - family: data_sufficiency
+    wired_to_config: false
+    current: {minimum_coverage: 0.6, maximum_freshness_hours: 168.0, minimum_feature_count: 2}
+    recommended_initial: {minimum_coverage: 0.6, minimum_feature_count: ">=8 (couple to sigma estimation)"}
+    rationale: "Data-quality (completeness/timeliness) policy thresholds (owner authority). min_feature_count should match the sigma-estimation requirement of the anomaly family. Freshness already governed in freshness_config.yaml."
+    reference: "Data-quality standards (DAMA/ISO 8000); INFORM coverage handling"
+  - family: bayesian_status
+    wired_to_config: false
+    current: {centers: [0.0, 0.1, 0.35, 0.65, 1.0], sigma: 0.2, credible_interval: 0.8}
+    recommended_initial: {centers: "midpoints of the D-status anomaly ranges", sigma: "elicited or calibrated (0.2 over-overlaps)"}
+    rationale: "Likelihood centers should be consistent with the D-status cutpoints; sigma=0.2 at ~0.25 spacing over-overlaps -> under-discrimination. Elicit (SHELF/Cooke) or calibrate."
+    reference: "SHELF (O'Hagan 2006; Gosling 2018); Cooke's Classical Method"
+  - family: cross_domain_fusion
+    wired_to_config: false
+    current: {reliability_weights: [1.0, 0.6, 0.2], contradiction_gap: 2, confidence_floor: 0.3, confidence_per_gap: 0.15}
+    recommended_initial: {reliability_mapping: nato_admiralty_6_level}
+    rationale: "Evidence reliability weighting/discounting; map sufficiency tiers onto the NATO admiralty A-F/1-6 reliability-credibility scale. Dempster-Shafer gives a formal conflict-mass frame for contradiction."
+    reference: "NATO AJP-2.1 reliability/credibility scale; Dempster-Shafer evidence theory"
+  - family: uncertainty_propagation
+    wired_to_config: false
+    current: {ci_z: 1.645, stage_noise: {extraction: 0.10, scoring: 0.15, fusion: 0.05}}
+    recommended_initial: {ci_z: "1.645 (90%) ok; 1.96 for 95% headline", stage_noise: "document as Type-B; replace with Type-A when data exists"}
+    rationale: "GUM (JCGM 100): combine independent uncertainties in quadrature (RSS) - the current quadrature is GUM-correct. Stage-noise %s are Type-B (expert) assumptions."
+    reference: "GUM JCGM 100; Type-A/Type-B uncertainty budget"
+  - family: skill_validation_metrics
+    wired_to_config: false
+    current: {skill_weights: [0.6, 0.4], evidence_weights: [0.4, 0.3, 0.2, 0.1], tiers: [0.95, 0.75, 0.5], regression: {flag: 0.1, warn: 0.1, fail: 0.3}}
+    recommended_initial: {report: "standard verification metrics separately (Brier, BSS vs no-skill baseline, POD, FAR, AUC, lead time) instead of one weighted blend"}
+    rationale: "Forecast-verification science: skill is defined relative to a reference. Replace the ad-hoc 0.6/0.4 blend with separately-reported standard metrics (ViEWS/WMO). Couple regression thresholds to the skill-score confidence interval."
+    reference: "WMO/CAWCR forecast verification; ViEWS; ICEWS; Brier/ROC/skill scores"
+  - family: information_epidemiology
+    wired_to_config: false
+    current: {amplification_ratio: 1.5}
+    recommended_initial: {criterion: "growth-rate / R0-style (or k-sigma over the diffusion baseline)"}
+    rationale: "Replace the fixed 1.5x ratio with a growth-rate/R0 criterion, consistent with the z-score approach of the anomaly family."
+    reference: "R0 / epidemic threshold; information-diffusion models"

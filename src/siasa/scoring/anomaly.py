@@ -20,12 +20,14 @@ from __future__ import annotations
 
 from siasa.data.normalized_models import NormalizedRecord
 from siasa.features.multi_resolution import compute_zscore
+from siasa.scoring.scoring_thresholds import anomaly_min_series_points, anomaly_upper_bound
 
-# Owner-governed constants (AGENTS.md: thresholds are project-owner authority).
-ANOMALY_UPPER_BOUND = 1.5
+# Owner-governed thresholds, sourced from vmodel/project/scoring_thresholds.yaml (AP-24);
+# the loader falls back to these same values if the config is absent (behaviour-preserving).
+ANOMALY_UPPER_BOUND = anomaly_upper_bound()
 """Upper bound on the aggregate anomaly; keeps D4 (>=1.0) reachable but bounded."""
 
-_MIN_SERIES_POINTS = 4
+_MIN_SERIES_POINTS = anomaly_min_series_points()
 """Minimum within-window observations before a signal's z-score is trusted."""
 
 
