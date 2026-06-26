@@ -4,7 +4,7 @@ metadata:
   imported_from_workbook: stakeholder_requirements_information_space_mvp_v0_4 (1).xlsx
   imported_sheet: Stakeholder_Reqs
   imported_at_utc: '2026-05-11T13:51:17.436352+00:00'
-  requirement_count: 684
+  requirement_count: 688
   acceptance_criteria_count: 18
 stakeholder_requirements:
 - id: StR-001
@@ -8614,4 +8614,52 @@ stakeholder_requirements:
   acceptance_criteria_refs: []
   source_workbook: phasenplan_validierung_gegen_echte_events_2026-06-25
   source_sheet: AP-27_Ground-Truth-Redesign
+  open_questions: []
+- id: StR-685
+  title: Das Skill-Mass soll Fehlalarme als eigene Kategorie ausweisen
+  category: Validierung & Backtesting
+  statement: Das Skill-Mass soll jeden Validierungsfall als Treffer/Verfehlt/Fehlalarm klassifizieren und eine Fehlalarmrate ausweisen, die ausschliesslich auf den S0-Negativfaellen definiert ist.
+  status: accepted
+  source_status: aktiv
+  priority: MVP-Should
+  phase: MVP v1
+  acceptance_criteria_refs: []
+  source_workbook: phasenplan_validierung_gegen_echte_events_2026-06-25
+  source_sheet: AP-28_Skill-Metrik-Fehlalarm-Baseline
+  open_questions: []
+- id: StR-686
+  title: Das Skill-Mass soll Vorlaufzeit und Brier-Score messen
+  category: Validierung & Backtesting
+  statement: Das Skill-Mass soll die Vorlaufzeit vor dem Onset (aus der taeglichen Replay-Statuszeitreihe) sowie einen Brier-Score auf die probabilistische Fall-Vorhersage messen.
+  status: accepted
+  source_status: aktiv
+  priority: MVP-Should
+  phase: MVP v1
+  acceptance_criteria_refs: []
+  source_workbook: phasenplan_validierung_gegen_echte_events_2026-06-25
+  source_sheet: AP-28_Skill-Metrik-Fehlalarm-Baseline
+  open_questions: []
+- id: StR-687
+  title: Das Skill-Mass soll eine triviale No-Skill-Baseline schlagen
+  category: Validierung & Backtesting
+  statement: Das Skill-Mass soll gegen eine triviale No-Skill-Baseline (immer S3) antreten und nachweisen, dass es mehr misst als die reine Status-Trefferquote, indem es die Baseline auf Fehlalarmrate und Vorlaufzeit schlaegt; ein bewusst verschlechtertes Modell soll den Skill-Score messbar senken.
+  status: accepted
+  source_status: aktiv
+  priority: MVP-Should
+  phase: MVP v1
+  acceptance_criteria_refs: []
+  source_workbook: phasenplan_validierung_gegen_echte_events_2026-06-25
+  source_sheet: AP-28_Skill-Metrik-Fehlalarm-Baseline
+  open_questions: []
+- id: StR-688
+  title: Die erweiterten Skill-Kennzahlen sollen deterministisch ausgewiesen werden
+  category: Validierung & Backtesting
+  statement: Die erweiterten Skill-Kennzahlen (Fehlalarmrate, Vorlaufzeit, Brier-Score, Baseline-Vergleich) sollen deterministisch als Artefakt (skill_metrics.json) und in der Validierungs-GUI-KPI-Uebersicht ausgewiesen werden.
+  status: accepted
+  source_status: aktiv
+  priority: MVP-Should
+  phase: MVP v1
+  acceptance_criteria_refs: []
+  source_workbook: phasenplan_validierung_gegen_echte_events_2026-06-25
+  source_sheet: AP-28_Skill-Metrik-Fehlalarm-Baseline
   open_questions: []

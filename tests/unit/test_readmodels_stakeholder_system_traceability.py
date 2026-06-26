@@ -11,10 +11,10 @@ def test_stakeholder_system_traceability_report_covers_all_active_stakeholders()
     report = build_stakeholder_system_traceability_report(repo_root=repo_root)
 
     assert report["metadata"]["work_package"] == "AP-02"
-    assert report["summary"]["active_stakeholder_requirement_count"] == 684
+    assert report["summary"]["active_stakeholder_requirement_count"] == 688
     assert report["summary"]["system_requirement_count"] == 53
-    assert report["summary"]["covered_by_system_requirement_count"] == 684
-    assert report["summary"]["covered_by_traceability_count"] == 684
+    assert report["summary"]["covered_by_system_requirement_count"] == 688
+    assert report["summary"]["covered_by_traceability_count"] == 688
     assert report["summary"]["missing_system_requirement_mapping_count"] == 0
     assert report["summary"]["missing_traceability_mapping_count"] == 0
     assert report["summary"]["syr_trace_mismatch_count"] == 0

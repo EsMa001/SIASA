@@ -1419,3 +1419,31 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_validation_cases.py
   status: accepted
+- id: TC-SwR-091-001
+  title: Verify Skill hit/miss/false-alarm classification
+  requirement_ids:
+  - SwR-091
+  method: unit_test
+  test_file: tests/unit/test_skill_metrics.py
+  status: accepted
+- id: TC-SwR-092-001
+  title: Verify Lead time and Brier score
+  requirement_ids:
+  - SwR-092
+  method: unit_test
+  test_file: tests/unit/test_skill_metrics.py
+  status: accepted
+- id: TC-SwR-093-001
+  title: Verify No-skill baseline and beats_baseline
+  requirement_ids:
+  - SwR-093
+  method: unit_test
+  test_file: tests/unit/test_skill_metrics.py
+  status: accepted
+- id: TC-SwR-094-001
+  title: Verify Deterministic extended skill metrics artifact and KPI
+  requirement_ids:
+  - SwR-094
+  method: unit_test
+  test_file: tests/unit/test_skill_metrics.py
+  status: accepted

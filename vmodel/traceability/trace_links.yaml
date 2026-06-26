@@ -396,6 +396,10 @@ traceability:
     - StR-682
     - StR-683
     - StR-684
+    - StR-685
+    - StR-686
+    - StR-687
+    - StR-688
   - source_id: TC-SyR-026-001
     relation: verifies
     target_ids:
@@ -2343,4 +2347,52 @@ traceability:
     relation: verifies
     target_ids:
     - SwR-090
+  - source_id: SwR-091
+    relation: derives_from
+    target_ids:
+    - SyR-026
+  - source_id: SwR-091
+    relation: allocated_to
+    target_ids:
+    - DDS-010
+  - source_id: TC-SwR-091-001
+    relation: verifies
+    target_ids:
+    - SwR-091
+  - source_id: SwR-092
+    relation: derives_from
+    target_ids:
+    - SyR-026
+  - source_id: SwR-092
+    relation: allocated_to
+    target_ids:
+    - DDS-010
+  - source_id: TC-SwR-092-001
+    relation: verifies
+    target_ids:
+    - SwR-092
+  - source_id: SwR-093
+    relation: derives_from
+    target_ids:
+    - SyR-026
+  - source_id: SwR-093
+    relation: allocated_to
+    target_ids:
+    - DDS-010
+  - source_id: TC-SwR-093-001
+    relation: verifies
+    target_ids:
+    - SwR-093
+  - source_id: SwR-094
+    relation: derives_from
+    target_ids:
+    - SyR-026
+  - source_id: SwR-094
+    relation: allocated_to
+    target_ids:
+    - DDS-010
+  - source_id: TC-SwR-094-001
+    relation: verifies
+    target_ids:
+    - SwR-094
   waivers: []

@@ -336,8 +336,8 @@ def test_build_requirement_closure_report_for_validation_and_backtest_slice() ->
     report = build_requirement_closure_report(repo_root=repo_root, slice_id="validation-and-backtest")
 
     assert report["slice_id"] == "validation-and-backtest"
-    assert report["summary"] == {"closed": 9, "at_risk": 0}
-    assert [item["requirement_id"] for item in report["requirements"]] == ["SwR-038", "SwR-039", "SwR-084", "SwR-085", "SwR-086", "SwR-087", "SwR-088", "SwR-089", "SwR-090"]
+    assert report["summary"] == {"closed": 13, "at_risk": 0}
+    assert [item["requirement_id"] for item in report["requirements"]] == ["SwR-038", "SwR-039", "SwR-084", "SwR-085", "SwR-086", "SwR-087", "SwR-088", "SwR-089", "SwR-090", "SwR-091", "SwR-092", "SwR-093", "SwR-094"]
     assert report["requirements"][0]["closure_status"] == "closed"
     assert report["requirements"][0]["trace_links_present"] is True
     assert report["requirements"][0]["verifying_test_specs"] == ["TC-SwR-038-001"]
@@ -459,8 +459,8 @@ def test_build_repo_closure_report_aggregates_all_governed_slices() -> None:
 
     assert report["summary"] == {
         "slice_count": 12,
-        "requirement_count": 90,
-        "closed": 90,
+        "requirement_count": 94,
+        "closed": 94,
         "at_risk": 0,
     }
     assert report["slice_ids"] == [
@@ -484,7 +484,7 @@ def test_build_repo_closure_report_aggregates_all_governed_slices() -> None:
     assert report["slices"][10]["slice_id"] == "snapshot-and-lineage"
     assert report["slices"][10]["summary"] == {"closed": 3, "at_risk": 0}
     assert report["slices"][11]["slice_id"] == "validation-and-backtest"
-    assert report["slices"][11]["summary"] == {"closed": 9, "at_risk": 0}
+    assert report["slices"][11]["summary"] == {"closed": 13, "at_risk": 0}
 
 
 def test_build_traceability_integrity_report_is_globally_clean() -> None:
@@ -493,8 +493,8 @@ def test_build_traceability_integrity_report_is_globally_clean() -> None:
     report = build_traceability_integrity_report(repo_root=repo_root)
 
     assert report["summary"] == {
-        "requirement_count": 90,
-        "mapped_requirement_count": 90,
+        "requirement_count": 94,
+        "mapped_requirement_count": 94,
         "missing_requirement_mapping_count": 0,
         "orphan_mapped_requirement_count": 0,
         "slice_count": 12,
@@ -506,8 +506,8 @@ def test_build_traceability_integrity_report_is_globally_clean() -> None:
     assert report["unhealthy_slices"] == []
     assert report["repo_closure"]["summary"] == {
         "slice_count": 12,
-        "requirement_count": 90,
-        "closed": 90,
+        "requirement_count": 94,
+        "closed": 94,
         "at_risk": 0,
     }
 

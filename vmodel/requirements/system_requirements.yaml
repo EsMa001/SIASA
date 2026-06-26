@@ -472,6 +472,10 @@ system_requirements:
   - StR-682
   - StR-683
   - StR-684
+  - StR-685
+  - StR-686
+  - StR-687
+  - StR-688
   acceptance_criteria_refs:
   - AC-016
   verification_method: backtest_review

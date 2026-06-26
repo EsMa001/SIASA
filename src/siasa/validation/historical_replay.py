@@ -338,6 +338,11 @@ def build_historical_replay_reviews(
                 "replayed_status": replayed_status,
                 "expected_status": validation_case.expected_status,
                 "status_match": status_match,
+                "case_polarity": validation_case.case_polarity,
+                "onset_date": validation_case.onset_date,
+                "expected_trajectory": list(validation_case.expected_trajectory)
+                if validation_case.expected_trajectory
+                else None,
                 "expected_domains": list(validation_case.expected_domains),
                 "replayed_domains": replayed_domains,
                 "domain_match_ratio": comparison["domain_match_ratio"],

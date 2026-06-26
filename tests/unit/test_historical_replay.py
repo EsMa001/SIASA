@@ -86,10 +86,22 @@ def test_build_historical_replay_reviews_executes_replay_against_fixture_backed_
 
     reviews = build_historical_replay_reviews(cases, replay_inputs)
 
-    # AP-26 adds status_timeseries additively; this legacy assertion pins the
-    # pre-existing review fields, so strip the new keys before comparing.
+    # AP-26 (status_timeseries) and AP-28 (case_polarity/onset_date/expected_trajectory)
+    # add review keys additively; this legacy assertion pins the pre-existing fields,
+    # so strip the additive keys before comparing.
     reviews = [
-        {key: value for key, value in review.items() if key not in {"status_timeseries", "status_timeseries_degradations"}}
+        {
+            key: value
+            for key, value in review.items()
+            if key
+            not in {
+                "status_timeseries",
+                "status_timeseries_degradations",
+                "case_polarity",
+                "onset_date",
+                "expected_trajectory",
+            }
+        }
         for review in reviews
     ]
     assert reviews == [

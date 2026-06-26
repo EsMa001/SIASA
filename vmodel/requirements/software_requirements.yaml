@@ -5,7 +5,7 @@ metadata:
   - vmodel/architecture/system_architecture.md
   created_at_utc: '2026-05-11T14:25:30.979384+00:00'
   status: draft_baseline_derived
-  software_requirement_count: 90
+  software_requirement_count: 94
 software_requirements:
 - id: SwR-001
   title: Source catalog record schema
@@ -862,6 +862,38 @@ software_requirements:
 - id: SwR-090
   title: Reference case library ground-truth validator
   statement: The software shall validate the reference case library via validate_reference_case_library for onset within the case window, governed dataset_split and case_polarity values, and anti-circularity (a positive case historical_observed_status not mechanically equal to its expected_status).
+  status: accepted
+  derives_from:
+  - SyR-026
+  verification_method: unit_test
+  allocated_to: DDS-010
+- id: SwR-091
+  title: Skill hit/miss/false-alarm classification
+  statement: The software shall classify each reference-case replay review as hit, miss, or false_alarm and shall compute a false-alarm rate defined only over the S0 negative cases (case_polarity negative), per ALGO-SKILL-02.
+  status: accepted
+  derives_from:
+  - SyR-026
+  verification_method: unit_test
+  allocated_to: DDS-010
+- id: SwR-092
+  title: Lead time and Brier score
+  statement: The software shall compute, per ALGO-SKILL-02, the lead time before onset from the per-day replay status timeseries (first non-S0 day relative to onset_date) and a Brier score over a deterministic case-level event probability derived from the replayed status.
+  status: accepted
+  derives_from:
+  - SyR-026
+  verification_method: unit_test
+  allocated_to: DDS-010
+- id: SwR-093
+  title: No-skill baseline and beats_baseline
+  statement: The software shall compute a no-skill always-S3 baseline over the same cases and a beats_baseline flag (the model beats the baseline on false-alarm rate and lead time), such that a deliberately degraded model measurably lowers the skill score, per ALGO-SKILL-02.
+  status: accepted
+  derives_from:
+  - SyR-026
+  verification_method: unit_test
+  allocated_to: DDS-010
+- id: SwR-094
+  title: Deterministic extended skill metrics artifact and KPI
+  statement: The software shall expose the extended skill metrics (false-alarm rate, lead time, Brier score, baseline comparison) deterministically in the readmodels/skill_metrics.json artifact and surface them in the validation GUI KPI grid.
   status: accepted
   derives_from:
   - SyR-026
