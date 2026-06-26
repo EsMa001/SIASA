@@ -3,20 +3,22 @@
 # reference case_id; per-case window/onset/trajectory/reference_sources are derived from that
 # label entry (validation_reference_cases.yaml) -- not duplicated here.
 #
-# Curation v1 (2026-06-26): the first curation, produced per docs/plans/event-set-curation-procedure.md.
-# Three matched pairs of REAL, source-verified events (onsets within window) paired with
-# source-verified quiet controls. Every referenced case carries ratification_status: proposed --
-# the final ratification against primary sources, and any extension, remains owner authority.
-# The consistency test (test_validation_cases.py) enforces that every pair stays consistent with
-# the AP-27 label library (existing case, escalation positive, control S0 negative, sources subset).
+# Curation v2 (2026-06-26): expanded from v1 (3 pairs) to 8 matched pairs of REAL events, each
+# onset and each control's in-window quietness source-verified by online research (see the per-case
+# source notes in validation_reference_cases.yaml). Controls are period-matched stable comparators.
+# Every referenced case carries ratification_status: research_verified -- the research backs the
+# ratification, but the FINAL ratification against primary sources (and any further extension)
+# remains owner authority. The consistency test (test_validation_cases.py) enforces that every pair
+# stays consistent with the AP-27 label library (existing case, escalation positive, control S0
+# negative, assigned_sources subset of reference_sources).
 metadata:
   artifact: validation_event_set
   governance: owner_authority
-  target_size: "3 escalations + 3 matched quiet controls"
+  target_size: "balanced matched escalation/control pairs (expandable)"
   references: vmodel/verification/validation_reference_cases.yaml
-  curation_version: v1
-  curated_pairs: 3
-  ratification_status: proposed
+  curation_version: v2
+  curated_pairs: 8
+  ratification_status: research_verified
 event_pairs:
   - pair_id: PAIR-UKR-CHE-001
     rationale: "E.Europe interstate invasion (onset 2022-02-24) matched with a stable European quiet quarter."
@@ -35,10 +37,50 @@ event_pairs:
       case_id: VAL-OMN-2024-NEGATIVE-001
       assigned_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
   - pair_id: PAIR-SDN-GHA-001
-    rationale: "West/East African armed-conflict onset (2023-04-15) matched with a stable West African quiet quarter."
+    rationale: "African armed-conflict onset (2023-04-15) matched with a stable West African quiet quarter."
     escalation:
       case_id: VAL-SDN-2023-001
       assigned_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
     control:
       case_id: VAL-GHA-2024-NEGATIVE-001
+      assigned_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+  - pair_id: PAIR-AZE-NOR-001
+    rationale: "Caucasus military offensive (onset 2023-09-19) matched with a same-period stable European quiet quarter."
+    escalation:
+      case_id: VAL-AZE-2023-001
+      assigned_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    control:
+      case_id: VAL-NOR-2023-NEGATIVE-001
+      assigned_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+  - pair_id: PAIR-NER-BWA-001
+    rationale: "Sahel coup (onset 2023-07-26) matched with a same-period stable African quiet quarter."
+    escalation:
+      case_id: VAL-NER-2023-001
+      assigned_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    control:
+      case_id: VAL-BWA-2023-NEGATIVE-001
+      assigned_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+  - pair_id: PAIR-AFG-URY-001
+    rationale: "State collapse / fall of Kabul (onset 2021-08-15) matched with a same-period stable quiet quarter."
+    escalation:
+      case_id: VAL-AFG-2021-001
+      assigned_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    control:
+      case_id: VAL-URY-2021-NEGATIVE-001
+      assigned_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+  - pair_id: PAIR-MMR-CRI-001
+    rationale: "Military coup (onset 2021-02-01) matched with a same-period demilitarized stable quiet quarter."
+    escalation:
+      case_id: VAL-MMR-2021-001
+      assigned_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    control:
+      case_id: VAL-CRI-2021-NEGATIVE-001
+      assigned_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+  - pair_id: PAIR-SYR-JPN-001
+    rationale: "Regime collapse / fall of Assad (onset 2024-11-27) matched with a same-period stable quiet quarter."
+    escalation:
+      case_id: VAL-SYR-2024-001
+      assigned_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    control:
+      case_id: VAL-JPN-2024-NEGATIVE-001
       assigned_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]

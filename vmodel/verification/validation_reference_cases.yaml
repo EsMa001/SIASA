@@ -22,7 +22,7 @@ validation_cases:
     dataset_split: tuning
     onset_date: "2022-02-24"  # Russian full-scale invasion; en.wikipedia.org/wiki/2022_Russian_invasion_of_Ukraine
     expected_trajectory: [S0, S2, S3]
-    ratification_status: proposed
+    ratification_status: research_verified
 
   - case_id: VAL-RUS-2024-001
     country_id: RUS
@@ -355,7 +355,7 @@ validation_cases:
     dataset_split: tuning
     onset_date: "2023-10-07"  # Hamas-led attack; en.wikipedia.org/wiki/October_7_Hamas-led_attack_on_Israel
     expected_trajectory: [S0, S2, S3]
-    ratification_status: proposed
+    ratification_status: research_verified
 
   - case_id: VAL-ISR-2024-002
     country_id: ISR
@@ -685,6 +685,7 @@ validation_cases:
       - exemplary_template_owner_to_curate_real_negative_set
       - curated_historical_observed_outcome_not_generated_by_runtime_replay
     validation_metrics: [Status Match, Domain Match]
+    ratification_status: research_verified
 
   - case_id: VAL-SDN-2023-001
     country_id: SDN
@@ -708,7 +709,7 @@ validation_cases:
     dataset_split: tuning
     onset_date: "2023-04-15"  # RSF-SAF clashes erupt in Khartoum; hrw.org breaking-news 2023-04-15
     expected_trajectory: [S0, S2, S3]
-    ratification_status: proposed
+    ratification_status: research_verified
 
   - case_id: VAL-OMN-2024-NEGATIVE-001
     country_id: OMN
@@ -732,7 +733,7 @@ validation_cases:
     validation_metrics: [Status Match, Domain Match]
     reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
     onset_date: null
-    ratification_status: proposed
+    ratification_status: research_verified
 
   - case_id: VAL-GHA-2024-NEGATIVE-001
     country_id: GHA
@@ -756,4 +757,244 @@ validation_cases:
     validation_metrics: [Status Match, Domain Match]
     reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
     onset_date: null
-    ratification_status: proposed
+    ratification_status: research_verified
+
+  - case_id: VAL-AZE-2023-001
+    country_id: AZE
+    case_name: Azerbaijan 2023 Nagorno-Karabakh offensive (research-verified)
+    case_type: armed_conflict_onset
+    time_start: "2023-09-01"
+    time_end: "2023-10-15"
+    expected_domains: [A, B, C]
+    expected_status: S3
+    historical_observed_domains: [A, B, C]
+    historical_observed_status: S3
+    evidence_tier: verified_multi_source
+    expected_signal_pattern: One-day military offensive forcing capitulation and mass Armenian exodus.
+    validation_goal: Real Caucasus territorial-military escalation (conflict + humanitarian + political) for detection and lead-time evaluation.
+    known_limitations:
+      - research_verified_proposal_owner_to_ratify_against_primary_sources
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    case_polarity: positive
+    dataset_split: tuning
+    onset_date: "2023-09-19"  # Azerbaijani offensive; en.wikipedia.org/wiki/2023_Azerbaijani_offensive_in_Nagorno-Karabakh
+    expected_trajectory: [S0, S2, S3]
+    ratification_status: research_verified
+
+  - case_id: VAL-NER-2023-001
+    country_id: NER
+    case_name: Niger 2023 coup d'etat (research-verified)
+    case_type: coup
+    time_start: "2023-07-01"
+    time_end: "2023-08-31"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: verified_multi_source
+    expected_signal_pattern: Presidential guard detains the president; junta takes power; ECOWAS sanctions follow.
+    validation_goal: Real Sahel coup (political + conflict + economic sanctions) for detection and lead-time evaluation.
+    known_limitations:
+      - research_verified_proposal_owner_to_ratify_against_primary_sources
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    case_polarity: positive
+    dataset_split: tuning
+    onset_date: "2023-07-26"  # Presidential Guard detains Bazoum; en.wikipedia.org/wiki/2023_Nigerien_coup_d'etat
+    expected_trajectory: [S0, S2, S3]
+    ratification_status: research_verified
+
+  - case_id: VAL-AFG-2021-001
+    country_id: AFG
+    case_name: Afghanistan 2021 fall of Kabul (research-verified)
+    case_type: state_collapse
+    time_start: "2021-08-01"
+    time_end: "2021-09-15"
+    expected_domains: [A, B, C]
+    expected_status: S3
+    historical_observed_domains: [A, B, C]
+    historical_observed_status: S3
+    evidence_tier: verified_multi_source
+    expected_signal_pattern: Insurgent offensive captures the capital; government collapses; mass evacuation crisis.
+    validation_goal: Real state-collapse escalation (political + conflict + humanitarian) for detection and lead-time evaluation.
+    known_limitations:
+      - research_verified_proposal_owner_to_ratify_against_primary_sources
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    case_polarity: positive
+    dataset_split: tuning
+    onset_date: "2021-08-15"  # Taliban capture Kabul; en.wikipedia.org/wiki/Fall_of_Kabul_(2021)
+    expected_trajectory: [S0, S2, S3]
+    ratification_status: research_verified
+
+  - case_id: VAL-MMR-2021-001
+    country_id: MMR
+    case_name: Myanmar 2021 military coup (research-verified)
+    case_type: coup
+    time_start: "2021-02-01"
+    time_end: "2021-03-15"
+    expected_domains: [A, B, D]
+    expected_status: S3
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S3
+    evidence_tier: verified_multi_source
+    expected_signal_pattern: Military deposes the elected government; protests and crackdown; markets and FDI collapse.
+    validation_goal: Real coup escalation (political + conflict + economic) for detection and lead-time evaluation.
+    known_limitations:
+      - research_verified_proposal_owner_to_ratify_against_primary_sources
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    case_polarity: positive
+    dataset_split: tuning
+    onset_date: "2021-02-01"  # Tatmadaw detains NLD leadership; en.wikipedia.org/wiki/2021_Myanmar_coup_d'etat
+    expected_trajectory: [S0, S2, S3]
+    ratification_status: research_verified
+
+  - case_id: VAL-SYR-2024-001
+    country_id: SYR
+    case_name: Syria 2024 opposition offensive and fall of Assad (research-verified)
+    case_type: regime_collapse
+    time_start: "2024-11-27"
+    time_end: "2024-12-31"
+    expected_domains: [A, B, C]
+    expected_status: S3
+    historical_observed_domains: [A, B, C]
+    historical_observed_status: S3
+    evidence_tier: verified_multi_source
+    expected_signal_pattern: Rapid opposition offensive captures major cities; 53-year regime collapses.
+    validation_goal: Real regime-collapse escalation (political + conflict + humanitarian) for detection and lead-time evaluation.
+    known_limitations:
+      - research_verified_proposal_owner_to_ratify_against_primary_sources
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    case_polarity: positive
+    dataset_split: tuning
+    onset_date: "2024-11-27"  # HTS-led offensive begins; en.wikipedia.org/wiki/2024_Syrian_opposition_offensives
+    expected_trajectory: [S0, S2, S3]
+    ratification_status: research_verified
+
+  - case_id: VAL-NOR-2023-NEGATIVE-001
+    country_id: NOR
+    case_name: Norway 2023 Q3 quiet control (research-verified, matched to AZE-2023)
+    case_type: quiet_control
+    time_start: "2023-07-01"
+    time_end: "2023-09-30"
+    expected_domains: [A, B, D]
+    expected_status: S0
+    case_polarity: negative
+    dataset_split: holdout
+    expected_trajectory: [S0, S0, S0]
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S0
+    evidence_tier: curated_public_source
+    expected_signal_pattern: A stable European quarter should remain S0 with no escalation onset.
+    validation_goal: Matched quiet control for AZE-2023 (stable European comparator, same period).
+    known_limitations:
+      - research_verified_proposal_owner_to_ratify_against_primary_sources
+      - quiet_in_window_only_domestic_political_scandals_and_local_elections
+    validation_metrics: [Status Match, Domain Match]
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    onset_date: null
+    ratification_status: research_verified
+
+  - case_id: VAL-BWA-2023-NEGATIVE-001
+    country_id: BWA
+    case_name: Botswana 2023 Q3 quiet control (research-verified, matched to NER-2023)
+    case_type: quiet_control
+    time_start: "2023-07-01"
+    time_end: "2023-09-30"
+    expected_domains: [A, B, D]
+    expected_status: S0
+    case_polarity: negative
+    dataset_split: holdout
+    expected_trajectory: [S0, S0, S0]
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S0
+    evidence_tier: curated_public_source
+    expected_signal_pattern: A stable African quarter should remain S0 with no escalation onset.
+    validation_goal: Matched quiet control for NER-2023 (stable African comparator, same period).
+    known_limitations:
+      - research_verified_proposal_owner_to_ratify_against_primary_sources
+      - quiet_in_window_only_routine_democratic_and_civil_liberties_events
+    validation_metrics: [Status Match, Domain Match]
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    onset_date: null
+    ratification_status: research_verified
+
+  - case_id: VAL-URY-2021-NEGATIVE-001
+    country_id: URY
+    case_name: Uruguay 2021 Q3 quiet control (research-verified, matched to AFG-2021)
+    case_type: quiet_control
+    time_start: "2021-07-01"
+    time_end: "2021-09-30"
+    expected_domains: [A, B, D]
+    expected_status: S0
+    case_polarity: negative
+    dataset_split: holdout
+    expected_trajectory: [S0, S0, S0]
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S0
+    evidence_tier: curated_public_source
+    expected_signal_pattern: A stable South American quarter should remain S0 with no escalation onset.
+    validation_goal: Matched quiet control for AFG-2021 (stable comparator, same period).
+    known_limitations:
+      - research_verified_proposal_owner_to_ratify_against_primary_sources
+      - quiet_in_window_only_a_peaceful_referendum_signature_drive
+    validation_metrics: [Status Match, Domain Match]
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    onset_date: null
+    ratification_status: research_verified
+
+  - case_id: VAL-CRI-2021-NEGATIVE-001
+    country_id: CRI
+    case_name: Costa Rica 2021 Q1 quiet control (research-verified, matched to MMR-2021)
+    case_type: quiet_control
+    time_start: "2021-01-01"
+    time_end: "2021-03-31"
+    expected_domains: [A, B, D]
+    expected_status: S0
+    case_polarity: negative
+    dataset_split: holdout
+    expected_trajectory: [S0, S0, S0]
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S0
+    evidence_tier: curated_public_source
+    expected_signal_pattern: A demilitarized stable democracy should remain S0 with no escalation onset.
+    validation_goal: Matched quiet control for MMR-2021 (stable demilitarized comparator, same period).
+    known_limitations:
+      - research_verified_proposal_owner_to_ratify_against_primary_sources
+      - quiet_in_window_demilitarized_since_1949_only_minor_routine_events
+    validation_metrics: [Status Match, Domain Match]
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    onset_date: null
+    ratification_status: research_verified
+
+  - case_id: VAL-JPN-2024-NEGATIVE-001
+    country_id: JPN
+    case_name: Japan 2024 Q4 quiet control (research-verified, matched to SYR-2024)
+    case_type: quiet_control
+    time_start: "2024-10-01"
+    time_end: "2024-12-31"
+    expected_domains: [A, B, D]
+    expected_status: S0
+    case_polarity: negative
+    dataset_split: holdout
+    expected_trajectory: [S0, S0, S0]
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S0
+    evidence_tier: curated_public_source
+    expected_signal_pattern: A stable advanced democracy should remain S0 with no escalation onset.
+    validation_goal: Matched quiet control for SYR-2024 (stable comparator, same period).
+    known_limitations:
+      - research_verified_proposal_owner_to_ratify_against_primary_sources
+      - quiet_in_window_routine_pm_change_and_general_election_not_a_security_escalation
+    validation_metrics: [Status Match, Domain Match]
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    onset_date: null
+    ratification_status: research_verified

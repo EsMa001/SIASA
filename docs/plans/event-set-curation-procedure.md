@@ -69,26 +69,34 @@ Ein Eskalations-Kandidat ist zulässig, wenn er **alle** erfüllt:
 
 ---
 
-## 7. Erste Kuratierung (v1) — Ergebnis
+## 7. Kuratierung — Ergebnis (v2, 8 Paare)
 
-Status: **umgesetzt (2026-06-26)**. Alle Fakten gegen öffentliche Quellen verifiziert (Research-Workflow),
-jeder Fall `ratification_status: proposed`. AP-27-Validator: `is_valid=True`, 0 Onset-/Split-/Polarity-Verstöße,
-`s0_negative_count=3`. AP-29-Konsistenztest grün.
+Status: **umgesetzt + erweitert (2026-06-26)**. Alle Onsets und alle In-Fenster-„Ruhe"-Aussagen gegen
+öffentliche Quellen verifiziert (zwei Research-Workflows); jeder Fall `ratification_status: research_verified`
+(Quelle je Fall in `validation_reference_cases.yaml`). AP-27-Validator: `is_valid=True`, 0 Onset-/Split-/
+Polarity-Verstöße, `s0_negative_count=8`. AP-29-Konsistenztest grün.
 
-**3 gematchte Paare (real, quellenbelegt):**
+**8 gematchte Paare (real, quellenbelegt; Kontrollen periodengematcht):**
 
-| Paar | Eskalation | Onset (verifiziert) | Quelle | Gematchte Kontrolle (Q2-2024, ruhig verifiziert) |
-|---|---|---|---|---|
-| 1 | VAL-UKR-2022-001 (Invasion) | 2022-02-24 | en.wikipedia.org/wiki/2022_Russian_invasion_of_Ukraine | VAL-CHE-2024-NEGATIVE-001 (Schweiz) |
-| 2 | VAL-ISR-2023-001 (Gaza-Krieg) | 2023-10-07 | en.wikipedia.org/wiki/October_7_Hamas-led_attack_on_Israel | VAL-OMN-2024-NEGATIVE-001 (Oman, **neu**) |
-| 3 | VAL-SDN-2023-001 (RSF-SAF-Krieg, **neu**) | 2023-04-15 | hrw.org breaking-news 2023-04-15 | VAL-GHA-2024-NEGATIVE-001 (Ghana, **neu**) |
+| # | Eskalation | Onset | Gematchte Kontrolle (gleiche Periode, ruhig verifiziert) |
+|---|---|---|---|
+| 1 | UKR-2022 Invasion | 2022-02-24 | CHE 2024-Q2 (Schweiz) |
+| 2 | ISR-2023 Gaza-Krieg | 2023-10-07 | OMN 2024-Q2 (Oman) |
+| 3 | SDN-2023 RSF-SAF-Krieg | 2023-04-15 | GHA 2024-Q2 (Ghana) |
+| 4 | AZE-2023 Berg-Karabach | 2023-09-19 | NOR 2023-Q3 (Norwegen) |
+| 5 | NER-2023 Niger-Putsch | 2023-07-26 | BWA 2023-Q3 (Botswana) |
+| 6 | AFG-2021 Kabul | 2021-08-15 | URY 2021-Q3 (Uruguay) |
+| 7 | MMR-2021 Putsch | 2021-02-01 | CRI 2021-Q1 (Costa Rica) |
+| 8 | SYR-2024 Sturz Assads | 2024-11-27 | JPN 2024-Q4 (Japan) |
 
-**Kontroll-Verifikation:** alle drei Q2-2024-Fenster aktiv auf größere Eskalationen geprüft → keine im Fenster
-(Oman: Muscat-Anschlag 2024-07-15 liegt *außerhalb*; Ghana: Bawku-Eskalationen ab Okt 2024 *außerhalb*).
+**Quellen je Fall:** Onset- und Ruhe-Quellen stehen als Kommentar/`known_limitations` direkt am jeweiligen Fall
+in `validation_reference_cases.yaml` (Eskalationen: Wikipedia/HRW; Kontrollen: Freedom House / nationale Quellen).
+Jede Kontrolle wurde aktiv auf In-Fenster-Eskalationen geprüft (keine gefunden; z. B. Omans Anschlag 2024-07-15
+und Ghanas Bawku-Eskalation ab Okt 2024 liegen *außerhalb* der Fenster).
 
 **Methoden-Einschränkung (dokumentiert):** Konfliktzonen haben selten eigene „ruhige" Fenster — daher sind die
-Kontrollen **strukturell vergleichbare stabile** Länder (Europa / Golf / Westafrika), nicht dieselben Länder.
-Diese Schwäche des Matchings wird mit AP-30-Realdaten adressierbar (Vor-Onset-Fenster desselben Landes).
+Kontrollen **strukturell vergleichbare stabile Länder derselben Periode**, nicht dieselben Länder. Mit
+AP-30-Realdaten durch Vor-Onset-Fenster desselben Landes ersetzbar.
 
-**Owner-Ratifizierung offen:** Auswahl + Onsets gegen Primärquellen prüfen; ggf. Kontrollen durch dieselben
-Länder in nachweislich ruhigen Fenstern ersetzen, sobald AP-30 echte Daten liefert.
+**Owner-Ratifizierung offen:** Auswahl + Onsets + Ruhe-Aussagen gegen Primärquellen **final** ratifizieren;
+ggf. Kontrollen durch dieselben Länder in nachweislich ruhigen Fenstern ersetzen, sobald AP-30 echte Daten liefert.
