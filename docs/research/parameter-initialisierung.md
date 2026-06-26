@@ -60,6 +60,12 @@ Roll-Fenster 7/30 d; Baselines 30/90/365 d.
 - **Referenz:** NIST/Shewhart SPC, Western-Electric-Rules, EWMA/CUSUM (✓). ⚠️ Die Run-Claim, die 3σ explizit der
   SIASA-D4-Schwelle zuordnete, wurde **verworfen (0-3)** — vermutlich wegen der editorialen Zuordnung; die
   2σ/3σ-Konvention selbst ist Standard.
+- **Kalibrierungs-Befund (Fixtures, `scripts/threshold_sensitivity.py`):** Ein feiner d1_max-Sweep zeigt ein
+  **stabiles Optimum-Plateau [0.05–0.30] → skill 0.76 (25/35)**, das bei **≥0.35 schlagartig auf 0.40 (4/35)**
+  einbricht. Der aktuelle Wert **d1_max=0.20 liegt mitten im Optimum** — er ist also *nicht* zu ändern; der
+  hohe OAT-„Einfluss" rührt von Probe-Werten jenseits der Klippe. Wichtig: Die Fixture-Anomalie-Scores sind
+  **keine echten z-Scores**, daher validiert dieser Befund die σ-Multiplikator-Empfehlung **nicht** — Sweep nach
+  AP-30 (echte z-Score-Anomalien) wiederholen.
 
 ### 2 · Multi-Domain-Aggregation S0–S6 *(am stärksten belegt)*
 Aktuell: Zähl-Regeln über D2/D3/D4-Domain-Anzahl.

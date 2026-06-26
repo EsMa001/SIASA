@@ -30,6 +30,7 @@ governance_record:
     recommended_initial: {cutpoints_in_sigma: [1.0, 2.0, 3.0], upper_bound: 3.0, min_series_points: 20}
     rationale: "SPC sigma-multiple control limits (2-sigma warn, 3-sigma action). Current cutpoints sit far below the convention (z=1.0 -> D4 'critical' is only a ~16% tail) -> systematic over-flagging. min 4 points is too few for a stable sigma."
     reference: "NIST/Shewhart SPC; Western Electric rules; EWMA/CUSUM"
+    calibration_note: "Fixture calibration (scripts/threshold_sensitivity.py, fine d1_max sweep): skill_score is flat-optimal (0.76, 25/35) for d1_max in [0.05, 0.30] and collapses to 0.40 at >=0.35, so the current d1_max=0.20 sits inside the stable optimum. NB the fixture anomaly scores are not real z-scores, so this does NOT validate the sigma-multiple recommendation; re-run the sweep once AP-30 supplies real z-scored anomalies."
   - family: multi_domain_aggregation_s0_s6
     wired_to_config: false
     current: {rule: count_based_over_D2_D3_D4_domains}
