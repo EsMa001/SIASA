@@ -5,7 +5,7 @@ metadata:
   - vmodel/architecture/system_architecture.md
   created_at_utc: '2026-05-11T14:25:30.979384+00:00'
   status: draft_baseline_derived
-  software_requirement_count: 87
+  software_requirement_count: 90
 software_requirements:
 - id: SwR-001
   title: Source catalog record schema
@@ -838,6 +838,30 @@ software_requirements:
 - id: SwR-087
   title: Deterministic replay status timeseries artifact
   statement: The software shall write a deterministic per-case replay status timeseries artifact (readmodels/status_timeseries_<case>.json, sorted keys) so that two identical runs produce bit-identical files.
+  status: accepted
+  derives_from:
+  - SyR-026
+  verification_method: unit_test
+  allocated_to: DDS-010
+- id: SwR-088
+  title: Reference-case schema extension for ground-truth redesign
+  statement: The software shall extend the validation reference case schema and loader with optional onset_date, expected_trajectory, dataset_split, and case_polarity fields in a backward-compatible way so existing cases load unchanged.
+  status: accepted
+  derives_from:
+  - SyR-026
+  verification_method: unit_test
+  allocated_to: DDS-010
+- id: SwR-089
+  title: Curated S0 negative reference control
+  statement: The software shall include at least one curated S0 negative reference case (a quiet country and window) with case_polarity negative so that the false-alarm rate becomes measurable.
+  status: accepted
+  derives_from:
+  - SyR-026
+  verification_method: unit_test
+  allocated_to: DDS-010
+- id: SwR-090
+  title: Reference case library ground-truth validator
+  statement: The software shall validate the reference case library via validate_reference_case_library for onset within the case window, governed dataset_split and case_polarity values, and anti-circularity (a positive case historical_observed_status not mechanically equal to its expected_status).
   status: accepted
   derives_from:
   - SyR-026

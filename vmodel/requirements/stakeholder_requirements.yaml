@@ -4,7 +4,7 @@ metadata:
   imported_from_workbook: stakeholder_requirements_information_space_mvp_v0_4 (1).xlsx
   imported_sheet: Stakeholder_Reqs
   imported_at_utc: '2026-05-11T13:51:17.436352+00:00'
-  requirement_count: 681
+  requirement_count: 684
   acceptance_criteria_count: 18
 stakeholder_requirements:
 - id: StR-001
@@ -8578,4 +8578,40 @@ stakeholder_requirements:
   acceptance_criteria_refs: []
   source_workbook: phasenplan_validierung_gegen_echte_events_2026-06-25
   source_sheet: AP-26_Status-Zeitreihe
+  open_questions: []
+- id: StR-682
+  title: Das Validierungs-Labelset soll S0-Negativfaelle enthalten, damit Fehlalarme messbar werden
+  category: Validierung & Backtesting
+  statement: Das Validierungs-Labelset soll ruhige Laender/Fenster mit erwartetem S0 als Negativfaelle enthalten, damit die Fehlalarmrate ueberhaupt messbar wird.
+  status: accepted
+  source_status: aktiv
+  priority: MVP-Should
+  phase: MVP v1
+  acceptance_criteria_refs: []
+  source_workbook: phasenplan_validierung_gegen_echte_events_2026-06-25
+  source_sheet: AP-27_Ground-Truth-Redesign
+  open_questions: []
+- id: StR-683
+  title: Jeder Positivfall soll ein Onset-Datum und eine erwartete Trajektorie tragen
+  category: Validierung & Backtesting
+  statement: Jeder Positiv-Validierungsfall soll ein Onset-Datum und eine erwartete Vor/Nach-Trajektorie tragen, als Voraussetzung fuer die Vorlaufzeit-Messung.
+  status: accepted
+  source_status: aktiv
+  priority: MVP-Should
+  phase: MVP v1
+  acceptance_criteria_refs: []
+  source_workbook: phasenplan_validierung_gegen_echte_events_2026-06-25
+  source_sheet: AP-27_Ground-Truth-Redesign
+  open_questions: []
+- id: StR-684
+  title: Tuning- und Holdout-Faelle sollen disjunkt markiert und nicht zirkulaer gelabelt sein
+  category: Validierung & Backtesting
+  statement: Das Validierungs-Labelset soll Tuning- und Holdout-Faelle disjunkt markieren und zirkulaere Labels vermeiden (historical_observed_status nicht mechanisch gleich expected_status), um Phase-4-Ueberanpassung zu verhindern.
+  status: accepted
+  source_status: aktiv
+  priority: MVP-Should
+  phase: MVP v1
+  acceptance_criteria_refs: []
+  source_workbook: phasenplan_validierung_gegen_echte_events_2026-06-25
+  source_sheet: AP-27_Ground-Truth-Redesign
   open_questions: []

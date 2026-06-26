@@ -116,7 +116,7 @@ Regeln:
 | AP-24 | Schwellen-Governance (Magic Numbers) | Offen | P4 | Governance | F11 — Phase 4 |
 | AP-25 | Fail-Loud-Policy für Analytikstufen | Erledigt | – | Governance | F10 geschlossen: ALGO-RUNGATE-01 (7 Analytikstufen → explizite Degradationseinträge in artifact_status/Readiness), `runs/run_gate.py`, 5+1 Tests |
 | AP-26 | Status-Zeitreihe im Fenster-Replay | Erledigt | – | Validierung (Phase 0) | F16 geschlossen: tägliche PIT-Status-Zeitreihe (ALGO-REPLAY-TS-01, data-driven via ALGO-ANOM-01), deterministisches Artefakt; Legacy-Punktstatus bleibt Konstante bis AP-30 |
-| AP-27 | Ground-Truth-Redesign mit Negativfällen | Offen | **P1** | Validierung (Phase 1a) | F15: keine S0-Negative, kein Onset, zirkuläre Labels |
+| AP-27 | Ground-Truth-Redesign mit Negativfällen | Erledigt | – | Validierung (Phase 1a) | F15-Mechanik: Schema (onset/trajectory/split/polarity), Validator (Anti-Zirkularität), 1 exemplarischer S0-Fall (CHE); volle Label-Kuratierung = Owner-Hoheit |
 | AP-28 | Skill-Metrik: Fehlalarmrate + No-Skill-Baseline | Offen | **P1** | Validierung (Phase 1b) | F9 real: Fehlalarm/Vorlauf/Brier messbar |
 | AP-29 | Event-Set-Definition (klein, ausgewogen) | Offen | **P2** | Validierung (Phase 2a) | F14 (Vorber.): fokussiertes Positiv/Kontroll-Set |
 | AP-30 | Historischer Backfill GDELT/GDACS/WB + PIT | Offen | **P2** | Daten (Phase 2b) | F14: synthetische Fixtures durch Realdaten ersetzen |
@@ -154,7 +154,7 @@ Die verbleibende blockierte Arbeit ist externe Quellen-Aktivierung (AP-06) und �
 | ~~P1~~ | 0 | AP-18 | Reale Anomalie-Berechnung (Feature→Anomalie) | **Erledigt** | Analytik-Kern | F1 Live-Site geschlossen: ALGO-ANOM-01 (z-Score über Fenster-Records); Replay-Site → AP-26 |
 | ~~P1~~ | 0 | AP-25 | Fail-Loud-Policy für Analytikstufen | **Erledigt** | Governance | F10: stille Degradation → expliziter Degradationseintrag (ALGO-RUNGATE-01) |
 | ~~P1~~ | 0 | AP-26 | Status-Zeitreihe im Fenster-Replay | **Erledigt** | Validierung | F16: tägliche PIT-Zeitreihe (ALGO-REPLAY-TS-01) + deterministisches Artefakt; `historical_replay.py` |
-| **P1** | 1a | AP-27 | Ground-Truth-Redesign mit Negativfällen | Offen | Validierung | F15: S0-Negative, Onset, Trajektorie, Holdout-Split (längster Pol Labels) |
+| ~~P1~~ | 1a | AP-27 | Ground-Truth-Redesign mit Negativfällen | **Erledigt** | Validierung | F15: Schema + Validator + 1 exemplarischer S0-Fall (`cases.py`); echte Label-Kuratierung Owner-Hoheit |
 | ~~P1~~ | 1b | AP-16 | Skill-Messharness (Ground-Truth-Backtest) | **Erledigt** | Analytik-Kern | F7/F8/F9: ALGO-SKILL-01 (`validation/skill_metrics.py`) + GUI-KPI; Regressionstest grün |
 | **P1** | 1b | AP-28 | Skill-Metrik: Fehlalarmrate + No-Skill-Baseline | Offen | Validierung | F9 real; braucht AP-16, AP-26, AP-27 |
 | **P2** | 2a | AP-29 | Event-Set-Definition (klein, ausgewogen) | Offen | Validierung | F14 (Vorber.); braucht AP-27 |
@@ -468,7 +468,7 @@ hier ohnehin auf die PIT-Tageszeitreihe umgebaut wird; verhindert vorzeitigen S0
 | AP-26.3 | Zeitreihe additiv in `build_historical_replay_reviews` einhängen (Legacy-`==`-Test entkoppelt) | **Erledigt** | SwR-086 |
 | AP-26.4 | Deterministisches Artefakt `readmodels/status_timeseries_<case>.json` (sort_keys, `write_status_timeseries_artifacts`) | **Erledigt** | SwR-087 / StR-678..681 |
 
-#### AP-27 — Ground-Truth-Redesign mit Negativfällen · Status: Offen · Klasse: Validierung
+#### AP-27 — Ground-Truth-Redesign mit Negativfällen · Status: Erledigt (Mechanik; Labels Owner-Hoheit) · Klasse: Validierung
 Phase 1a · Schließt: **F15** · Abhängig von: — (parallel zu Phase 0) · Aufwand: M · Risiko: mittel · Trace: SwR-088..090 / StR-682..684.
 **Hoheit Projekteigner:** welche Länder/Fenster S0-Negative sind, konkrete Onset-Daten, Trajektorien-Schwellen,
 Tuning/Holdout-Zuteilung. WP liefert nur Mechanik + einen exemplarischen Negativfall.
@@ -477,10 +477,10 @@ Fehlalarme und Vorlaufzeit messbar werden.
 
 | TAP | Inhalt | Status | Trace / Hinweis |
 | --- | --- | --- | --- |
-| AP-27.1 | `ValidationCase` + Loader um `onset_date`/`expected_trajectory`/`dataset_split`/`case_polarity` (`cases.py`), rückwärtskompatibel | Offen | SwR-088 |
-| AP-27.2 | ≥1 echten **S0-Negativfall** + Onset/Trajektorie/Split in `validation_reference_cases.yaml` kuratieren | Offen | SwR-089 |
-| AP-27.3 | Validator `validate_reference_case_library`: Onset-im-Fenster, disjunkter Split, **Anti-Zirkularität** (`historical_observed_status` ≠ mechanisch `expected_status`) | Offen | SwR-090 |
-| AP-27.4 | Traceability (StR-682..684, SwR-088..090) + Doku (Masterplan/Matrix/Glossar) | Offen | StR-682..684 |
+| AP-27.1 | `ValidationCase` + Loader um `onset_date`/`expected_trajectory`/`dataset_split`/`case_polarity` (`cases.py`), rückwärtskompatibel | **Erledigt** | SwR-088 |
+| AP-27.2 | ≥1 **S0-Negativfall** (`VAL-CHE-2024-NEGATIVE-001`, exemplarische Vorlage) in `validation_reference_cases.yaml`; **echte Kuratierung = Owner** | **Erledigt (Beispiel)** | SwR-089 |
+| AP-27.3 | Validator `validate_reference_case_library`: Onset-im-Fenster, disjunkter Split, **Anti-Zirkularität** (positiv: `historical_observed_status` ≠ `expected_status`) | **Erledigt** | SwR-090 |
+| AP-27.4 | Traceability (StR-682..684, SwR-088..090) + Count-Sync (StR 681→684, SwR 87→90, TC 137→140) | **Erledigt** | StR-682..684 |
 
 #### AP-28 — Skill-Metrik: Fehlalarmrate + No-Skill-Baseline · Status: Offen · Klasse: Validierung
 Phase 1b · Schließt: **F9 (real)**, entschärft F7/F8 · Abhängig von: **AP-16**, AP-26, AP-27 · Aufwand: M · Risiko: mittel · Trace: SwR-091..094 / StR-685..688 / ALGO-SKILL-02.
@@ -569,7 +569,7 @@ verstecktes Bottleneck für AP-28/AP-32 — vorab schließen.
 | L8 | ~~GUI zeigt zu wenig Quellen-/Methodik-Transparenz~~ | AP-12 | geschlossen | 3 neue Seiten (Sources, About, Methodology), parametrierbare Zeitachse, aufklappbare Quellen-Details, Cross-Links; 31 Tests |
 | L9 | Keine permanente Datenhaltung — alle Records gehen nach 168h verloren; kein ML-Training möglich | AP-13 | **geschlossen** | 15/15 TAPs erledigt: Parquet-Archiv + DuckDB + Features + ML-Integration + Ops |
 | L10 | Modell gibt konstantes Signal (anomaly_score Konstante); Validierung misst keine Modellgüte | AP-16/17/18/25/26/28 | **teilweise (AP-17, AP-18-Live, AP-25, AP-26 erledigt → Phase 0 geschlossen)** | Rest: Skill-Metrik (AP-16/28, Phase 1); Replay-Punktstatus data-driven erst mit AP-30-Realdaten |
-| L11 | Ground-Truth degeneriert: keine S0-Negative, kein Onset, zirkuläre Labels (F15) | AP-27 | **offen (Phase 1a)** | Label-Redesign — längster Pol; Hoheit Projekteigner |
+| L11 | Ground-Truth degeneriert: keine S0-Negative, kein Onset, zirkuläre Labels (F15) | AP-27 | **Mechanik erledigt; Labels offen** | Schema/Validator/1 Beispiel-S0 da; echte S0-Negative + Onset-Kuratierung = Hoheit Projekteigner |
 | L12 | „Echte" Eventdaten sind synthetisch (4–8 Hand-Records, falsch als provider-derived deklariert) (F14) | AP-29/30/31 | **offen (Phase 2)** | Echter historischer Backfill GDELT/GDACS/WB + PIT + ehrliche Origin-Kennzeichnung — größter Block |
 
 Pivot-Auslöser (wann die Priorisierung neu bewertet wird):

@@ -1398,3 +1398,24 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_historical_replay.py
   status: accepted
+- id: TC-SwR-088-001
+  title: Verify Reference-case schema extension for ground-truth redesign
+  requirement_ids:
+  - SwR-088
+  method: unit_test
+  test_file: tests/unit/test_validation_cases.py
+  status: accepted
+- id: TC-SwR-089-001
+  title: Verify Curated S0 negative reference control
+  requirement_ids:
+  - SwR-089
+  method: unit_test
+  test_file: tests/unit/test_validation_cases.py
+  status: accepted
+- id: TC-SwR-090-001
+  title: Verify Reference case library ground-truth validator
+  requirement_ids:
+  - SwR-090
+  method: unit_test
+  test_file: tests/unit/test_validation_cases.py
+  status: accepted

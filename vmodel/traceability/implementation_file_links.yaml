@@ -570,6 +570,9 @@ implementation_slices:
       - SwR-085
       - SwR-086
       - SwR-087
+      - SwR-088
+      - SwR-089
+      - SwR-090
     implementation_map:
       SwR-038:
         code_paths:
@@ -608,6 +611,21 @@ implementation_slices:
           - src/siasa/runs/artifacts.py
         test_paths:
           - tests/unit/test_historical_replay.py
+      SwR-088:
+        code_paths:
+          - src/siasa/validation/cases.py
+        test_paths:
+          - tests/unit/test_validation_cases.py
+      SwR-089:
+        code_paths:
+          - src/siasa/validation/cases.py
+        test_paths:
+          - tests/unit/test_validation_cases.py
+      SwR-090:
+        code_paths:
+          - src/siasa/validation/cases.py
+        test_paths:
+          - tests/unit/test_validation_cases.py
     known_code_paths:
       - src/siasa/validation/cases.py
       - src/siasa/readmodels/validation_backtest.py
