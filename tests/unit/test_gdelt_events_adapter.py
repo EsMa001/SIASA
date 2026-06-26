@@ -51,6 +51,45 @@ class SequenceBytesFetcher:
         return response
 
 
+def _empty_export_zip() -> bytes:
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        archive.writestr("20230415000000.export.CSV", "")
+    return buffer.getvalue()
+
+
+def test_gdelt_events_adapter_selects_export_files_within_window() -> None:
+    # AP-30.1 / SwR-096: a date window selects the dated export files from the masterfilelist.
+    masterlist = "\n".join(
+        [
+            "100 hash http://data.gdeltproject.org/gdeltv2/20230415000000.export.CSV.zip",
+            "100 hash http://data.gdeltproject.org/gdeltv2/20230420000000.export.CSV.zip",
+            "100 hash http://data.gdeltproject.org/gdeltv2/20240101000000.export.CSV.zip",
+        ]
+    )
+    text = StubTextFetcher(masterlist)
+    by = SequenceBytesFetcher([_empty_export_zip(), _empty_export_zip()])
+    adapter = GDELTEventsAdapter(
+        country_codes={"UA": "UKR"},
+        fetch_text=text,
+        fetch_bytes=by,
+        date_window=(datetime(2023, 4, 1, tzinfo=UTC), datetime(2023, 5, 1, tzinfo=UTC)),
+    )
+    adapter.fetch()
+    assert text.urls[0].endswith("masterfilelist.txt")
+    assert len(by.urls) == 2  # only the two in-window exports
+    assert by.urls[0].endswith("20230415000000.export.CSV.zip")
+    assert all("2024" not in url for url in by.urls)
+
+
+def test_gdelt_events_adapter_live_path_uses_lastupdate() -> None:
+    lastupdate = "100 hash http://data.gdeltproject.org/gdeltv2/20240101000000.export.CSV.zip"
+    text = StubTextFetcher(lastupdate)
+    by = SequenceBytesFetcher([_empty_export_zip()])
+    GDELTEventsAdapter(country_codes={"UA": "UKR"}, fetch_text=text, fetch_bytes=by).fetch()
+    assert text.urls[0].endswith("lastupdate.txt")
+
+
 class FakeRateLimitError(RuntimeError):
     def __init__(self, message: str, *, retry_after: str | None = None) -> None:
         super().__init__(message)

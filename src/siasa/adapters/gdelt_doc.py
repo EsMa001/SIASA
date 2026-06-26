@@ -50,6 +50,8 @@ class GDELTDocAdapter(SourceAdapter):
     fetch_json: FetchJson | None = None
     now_provider: NowProvider = _utc_now
     retry_sleep: SleepFn = sleep
+    # AP-30.1 (SwR-095): optional historical window; None -> live path unchanged.
+    date_window: tuple[datetime, datetime] | None = None
 
     def fetch(self) -> FetchResult:
         try:
@@ -97,10 +99,17 @@ class GDELTDocAdapter(SourceAdapter):
 
     def _build_url(self, query: str) -> str:
         encoded_query = quote_plus(query)
-        return (
+        url = (
             f"{self.base_url}?query={encoded_query}&mode={self.mode}"
             f"&maxrecords={self.max_records}&format={self.output_format}"
         )
+        if self.date_window is not None:
+            start, end = self.date_window
+            url += (
+                f"&startdatetime={start.strftime('%Y%m%d%H%M%S')}"
+                f"&enddatetime={end.strftime('%Y%m%d%H%M%S')}"
+            )
+        return url
 
     def _fetch_json_with_runtime_timeout(self, url: str) -> object:
         if self.fetch_json is not None:

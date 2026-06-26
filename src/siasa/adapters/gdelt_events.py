@@ -50,6 +50,9 @@ class GDELTEventsAdapter(SourceAdapter):
     retry_sleep: SleepFn = sleep
     recent_export_count: int = 1
     export_interval_minutes: int = 15
+    # AP-30.1 (SwR-096): optional historical window; selects dated export files within it. None -> live path unchanged.
+    date_window: tuple[datetime, datetime] | None = None
+    masterfilelist_url: str = "http://data.gdeltproject.org/gdeltv2/masterfilelist.txt"
 
     def fetch(self) -> FetchResult:
         try:
@@ -78,8 +81,30 @@ class GDELTEventsAdapter(SourceAdapter):
         raise ValueError("No export zip URL found in GDELT lastupdate feed")
 
     def _discover_recent_export_urls(self) -> list[str]:
+        if self.date_window is not None:
+            return self._discover_window_export_urls()
         latest_export_url = self._discover_latest_export_url()
         return self._recent_export_urls_from_latest(latest_export_url)
+
+    def _discover_window_export_urls(self) -> list[str]:
+        start, end = self.date_window
+        payload = self.fetch_text(self.masterfilelist_url)
+        urls: list[str] = []
+        for line in payload.splitlines():
+            parts = line.strip().split()
+            if not parts or not parts[-1].endswith('.export.CSV.zip'):
+                continue
+            url = parts[-1]
+            stem = url.rsplit('/', 1)[-1].removesuffix('.export.CSV.zip')
+            try:
+                timestamp = datetime.strptime(stem, "%Y%m%d%H%M%S").replace(tzinfo=UTC)
+            except ValueError:
+                continue
+            if start <= timestamp <= end:
+                urls.append(url)
+        if not urls:
+            raise ValueError("No GDELT export files found within the requested window")
+        return urls
 
     def _recent_export_urls_from_latest(self, latest_export_url: str) -> list[str]:
         if self.recent_export_count <= 0:

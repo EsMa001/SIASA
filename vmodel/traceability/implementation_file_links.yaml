@@ -916,3 +916,40 @@ implementation_slices:
       - tests/unit/test_adapter_fewsnet.py
       - tests/unit/test_adapter_opensanctions.py
       - tests/unit/test_adapter_hdx_hapi.py
+  ap-30-historischer-backfill:
+    requirement_ids:
+      - SwR-095
+      - SwR-096
+      - SwR-097
+      - SwR-098
+    implementation_map:
+      SwR-095:
+        code_paths:
+          - src/siasa/adapters/gdelt_doc.py
+        test_paths:
+          - tests/unit/test_gdelt_doc_adapter.py
+      SwR-096:
+        code_paths:
+          - src/siasa/adapters/gdelt_events.py
+        test_paths:
+          - tests/unit/test_gdelt_events_adapter.py
+      SwR-097:
+        code_paths:
+          - src/siasa/adapters/gdacs.py
+        test_paths:
+          - tests/unit/test_gdacs_adapter.py
+      SwR-098:
+        code_paths:
+          - src/siasa/adapters/world_bank.py
+        test_paths:
+          - tests/unit/test_world_bank_adapter.py
+    known_code_paths:
+      - src/siasa/adapters/gdelt_doc.py
+      - src/siasa/adapters/gdelt_events.py
+      - src/siasa/adapters/gdacs.py
+      - src/siasa/adapters/world_bank.py
+    known_test_paths:
+      - tests/unit/test_gdelt_doc_adapter.py
+      - tests/unit/test_gdelt_events_adapter.py
+      - tests/unit/test_gdacs_adapter.py
+      - tests/unit/test_world_bank_adapter.py

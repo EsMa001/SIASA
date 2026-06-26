@@ -69,6 +69,8 @@ class WorldBankIndicatorsAdapter(SourceAdapter):
             "NE.EXP.GNFS.KD.ZG": "trade_volume_change",
         }
     )
+    # AP-30.1 (SwR-098): optional historical window (date range); None -> live path unchanged.
+    date_window: tuple[datetime, datetime] | None = None
 
     def fetch(self) -> FetchResult:
         try:
@@ -111,6 +113,12 @@ class WorldBankIndicatorsAdapter(SourceAdapter):
 
     def _build_url(self, indicator_id: str) -> str:
         countries = ";".join(self.country_ids)
+        if self.date_window is not None:
+            start, end = self.date_window
+            return (
+                f"{self.base_url}/{countries}/indicator/{indicator_id}"
+                f"?format=json&per_page={self.per_page}&date={start.year}:{end.year}"
+            )
         return (
             f"{self.base_url}/{countries}/indicator/{indicator_id}"
             f"?format=json&per_page={self.per_page}&mrv={self.mrv}"

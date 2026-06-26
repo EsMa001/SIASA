@@ -66,15 +66,27 @@ class GDACSAdapter(SourceAdapter):
     retry_backoff_seconds: float = 1.0
     max_retry_delay_seconds: float = 60.0
     retry_sleep: SleepFn = sleep
+    # AP-30.1 (SwR-097): optional historical window via the GDACS archive feed; None -> live path unchanged.
+    date_window: tuple[datetime, datetime] | None = None
+    archive_url: str = "https://www.gdacs.org/rss.aspx"
 
     def fetch(self) -> FetchResult:
         try:
-            payload = self._fetch_with_retry(self.rss_url)
+            payload = self._fetch_with_retry(self._resolve_url())
             records = self._parse_payload(payload)
             diagnostics = f"gdacs_fetch_ok countries={len(records)} records={len(records)}"
             return FetchResult(records=records, diagnostics=diagnostics, is_success=True)
         except Exception as exc:
             return FetchResult(records=[], diagnostics=f"gdacs_fetch_failed: {exc}", is_success=False)
+
+    def _resolve_url(self) -> str:
+        if self.date_window is None:
+            return self.rss_url
+        start, end = self.date_window
+        return (
+            f"{self.archive_url}?profile=ARCHIVE&fromarchive=true"
+            f"&from={start.strftime('%Y-%m-%d')}&to={end.strftime('%Y-%m-%d')}"
+        )
 
     def _fetch_with_retry(self, url: str) -> str:
         if self.max_retries < 0:

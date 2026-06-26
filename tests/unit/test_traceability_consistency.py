@@ -458,14 +458,15 @@ def test_build_repo_closure_report_aggregates_all_governed_slices() -> None:
     report = build_repo_closure_report(repo_root=repo_root)
 
     assert report["summary"] == {
-        "slice_count": 12,
-        "requirement_count": 94,
-        "closed": 94,
+        "slice_count": 13,
+        "requirement_count": 98,
+        "closed": 98,
         "at_risk": 0,
     }
     assert report["slice_ids"] == [
         "ap-14-kostenfreie-api-quellen",
         "ap-15-erweiterte-api-integration",
+        "ap-30-historischer-backfill",
         "baseline-and-status-engines",
         "catalog-and-ingestion-foundation",
         "feature-computation-foundation",
@@ -479,12 +480,14 @@ def test_build_repo_closure_report_aggregates_all_governed_slices() -> None:
     ]
     assert report["slices"][0]["slice_id"] == "ap-14-kostenfreie-api-quellen"
     assert report["slices"][0]["summary"] == {"closed": 4, "at_risk": 0}
-    assert report["slices"][2]["slice_id"] == "baseline-and-status-engines"
-    assert report["slices"][2]["summary"] == {"closed": 8, "at_risk": 0}
-    assert report["slices"][10]["slice_id"] == "snapshot-and-lineage"
-    assert report["slices"][10]["summary"] == {"closed": 3, "at_risk": 0}
-    assert report["slices"][11]["slice_id"] == "validation-and-backtest"
-    assert report["slices"][11]["summary"] == {"closed": 13, "at_risk": 0}
+    assert report["slices"][2]["slice_id"] == "ap-30-historischer-backfill"
+    assert report["slices"][2]["summary"] == {"closed": 4, "at_risk": 0}
+    assert report["slices"][3]["slice_id"] == "baseline-and-status-engines"
+    assert report["slices"][3]["summary"] == {"closed": 8, "at_risk": 0}
+    assert report["slices"][11]["slice_id"] == "snapshot-and-lineage"
+    assert report["slices"][11]["summary"] == {"closed": 3, "at_risk": 0}
+    assert report["slices"][12]["slice_id"] == "validation-and-backtest"
+    assert report["slices"][12]["summary"] == {"closed": 13, "at_risk": 0}
 
 
 def test_build_traceability_integrity_report_is_globally_clean() -> None:
@@ -493,11 +496,11 @@ def test_build_traceability_integrity_report_is_globally_clean() -> None:
     report = build_traceability_integrity_report(repo_root=repo_root)
 
     assert report["summary"] == {
-        "requirement_count": 94,
-        "mapped_requirement_count": 94,
+        "requirement_count": 98,
+        "mapped_requirement_count": 98,
         "missing_requirement_mapping_count": 0,
         "orphan_mapped_requirement_count": 0,
-        "slice_count": 12,
+        "slice_count": 13,
         "unhealthy_slice_count": 0,
         "closure_at_risk": 0,
     }
@@ -505,9 +508,9 @@ def test_build_traceability_integrity_report_is_globally_clean() -> None:
     assert report["orphan_mapped_requirements"] == []
     assert report["unhealthy_slices"] == []
     assert report["repo_closure"]["summary"] == {
-        "slice_count": 12,
-        "requirement_count": 94,
-        "closed": 94,
+        "slice_count": 13,
+        "requirement_count": 98,
+        "closed": 98,
         "at_risk": 0,
     }
 

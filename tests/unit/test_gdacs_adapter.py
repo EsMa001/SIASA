@@ -43,6 +43,25 @@ class FakeRateLimitError(RuntimeError):
         self.headers = {} if retry_after is None else {"Retry-After": retry_after}
 
 
+def test_gdacs_adapter_uses_archive_feed_when_window_given() -> None:
+    # AP-30.1 / SwR-097: an optional date window queries the GDACS archive feed.
+    stub = StubTextFetcher("<rss><channel></channel></rss>")
+    adapter = GDACSAdapter(
+        fetch_text=stub,
+        date_window=(datetime(2023, 4, 1, tzinfo=UTC), datetime(2023, 5, 15, tzinfo=UTC)),
+    )
+    adapter.fetch()
+    assert stub.urls[0] == (
+        "https://www.gdacs.org/rss.aspx?profile=ARCHIVE&fromarchive=true&from=2023-04-01&to=2023-05-15"
+    )
+
+
+def test_gdacs_adapter_live_path_uses_live_rss() -> None:
+    stub = StubTextFetcher("<rss><channel></channel></rss>")
+    GDACSAdapter(fetch_text=stub).fetch()
+    assert stub.urls[0] == "https://www.gdacs.org/xml/rss.xml"
+
+
 def _rss_item(*, iso3: str, alertlevel: str, dateadded: str, eventtype: str, eventid: str, iscurrent: str = "true") -> str:
     return f"""
     <item>

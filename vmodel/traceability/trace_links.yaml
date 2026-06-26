@@ -2399,4 +2399,56 @@ traceability:
     relation: verifies
     target_ids:
     - SwR-094
+  - source_id: SwR-095
+    relation: derives_from
+    target_ids:
+    - SyR-006
+    - SyR-007
+  - source_id: SwR-095
+    relation: allocated_to
+    target_ids:
+    - DDS-001
+  - source_id: TC-SwR-095-001
+    relation: verifies
+    target_ids:
+    - SwR-095
+  - source_id: SwR-096
+    relation: derives_from
+    target_ids:
+    - SyR-006
+    - SyR-007
+  - source_id: SwR-096
+    relation: allocated_to
+    target_ids:
+    - DDS-001
+  - source_id: TC-SwR-096-001
+    relation: verifies
+    target_ids:
+    - SwR-096
+  - source_id: SwR-097
+    relation: derives_from
+    target_ids:
+    - SyR-006
+    - SyR-007
+  - source_id: SwR-097
+    relation: allocated_to
+    target_ids:
+    - DDS-001
+  - source_id: TC-SwR-097-001
+    relation: verifies
+    target_ids:
+    - SwR-097
+  - source_id: SwR-098
+    relation: derives_from
+    target_ids:
+    - SyR-006
+    - SyR-007
+  - source_id: SwR-098
+    relation: allocated_to
+    target_ids:
+    - DDS-001
+  - source_id: TC-SwR-098-001
+    relation: verifies
+    target_ids:
+    - SwR-098
   waivers: []

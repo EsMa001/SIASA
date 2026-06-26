@@ -1447,3 +1447,31 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_skill_metrics.py
   status: accepted
+- id: TC-SwR-095-001
+  title: Verify GDELT DOC adapter historical date window
+  requirement_ids:
+  - SwR-095
+  method: unit_test
+  test_file: tests/unit/test_gdelt_doc_adapter.py
+  status: accepted
+- id: TC-SwR-096-001
+  title: Verify GDELT Events adapter historical date window
+  requirement_ids:
+  - SwR-096
+  method: unit_test
+  test_file: tests/unit/test_gdelt_events_adapter.py
+  status: accepted
+- id: TC-SwR-097-001
+  title: Verify GDACS adapter historical date window
+  requirement_ids:
+  - SwR-097
+  method: unit_test
+  test_file: tests/unit/test_gdacs_adapter.py
+  status: accepted
+- id: TC-SwR-098-001
+  title: Verify World Bank adapter historical date window
+  requirement_ids:
+  - SwR-098
+  method: unit_test
+  test_file: tests/unit/test_world_bank_adapter.py
+  status: accepted

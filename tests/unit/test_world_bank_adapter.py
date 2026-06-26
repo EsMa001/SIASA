@@ -43,6 +43,27 @@ class FakeRateLimitError(RuntimeError):
         self.headers = {} if retry_after is None else {"Retry-After": retry_after}
 
 
+def test_world_bank_adapter_uses_date_range_when_window_given() -> None:
+    # AP-30.1 / SwR-098: an optional date window switches mrv -> date=START:END.
+    payload = [{"page": 1}, []]
+    fetcher = SequenceFetcher([payload, payload])
+    adapter = WorldBankIndicatorsAdapter(
+        country_ids=("UKR",),
+        fetch_json=fetcher,
+        date_window=(datetime(2021, 1, 1, tzinfo=UTC), datetime(2024, 1, 1, tzinfo=UTC)),
+    )
+    adapter.fetch()
+    assert fetcher.urls and all("date=2021:2024" in url for url in fetcher.urls)
+    assert all("mrv=" not in url for url in fetcher.urls)
+
+
+def test_world_bank_adapter_live_path_uses_mrv() -> None:
+    payload = [{"page": 1}, []]
+    fetcher = SequenceFetcher([payload, payload])
+    WorldBankIndicatorsAdapter(country_ids=("UKR",), fetch_json=fetcher).fetch()
+    assert all("mrv=1" in url and "date=" not in url for url in fetcher.urls)
+
+
 def test_world_bank_adapter_fetch_transforms_indicator_payloads_into_domain_d_records() -> None:
     responses = {
         "https://api.worldbank.org/v2/country/UKR;POL/indicator/NY.GDP.MKTP.KD.ZG?format=json&per_page=1000&mrv=1": [

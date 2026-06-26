@@ -30,6 +30,29 @@ class FakeRateLimitError(RuntimeError):
         self.headers = {} if retry_after is None else {"Retry-After": retry_after}
 
 
+def test_gdelt_doc_adapter_appends_historical_date_window_to_url() -> None:
+    # AP-30.1 / SwR-095: an optional date window adds startdatetime/enddatetime.
+    fetcher = SequenceFetcher([{"articles": []}])
+    adapter = GDELTDocAdapter(
+        country_queries={"UKR": "ukraine"},
+        fetch_json=fetcher,
+        date_window=(datetime(2022, 2, 1, tzinfo=UTC), datetime(2022, 3, 1, tzinfo=UTC)),
+    )
+    adapter.fetch()
+    assert "query=ukraine&mode=ArtList&maxrecords=50&format=json" in fetcher.urls[0]
+    assert fetcher.urls[0].endswith("&startdatetime=20220201000000&enddatetime=20220301000000")
+
+
+def test_gdelt_doc_adapter_live_path_has_no_date_window() -> None:
+    # AP-30.1: with no window the URL is byte-for-byte the live URL.
+    fetcher = SequenceFetcher([{"articles": []}])
+    GDELTDocAdapter(country_queries={"UKR": "ukraine"}, fetch_json=fetcher).fetch()
+    assert fetcher.urls[0] == (
+        "https://api.gdeltproject.org/api/v2/doc/doc?query=ukraine&mode=ArtList&maxrecords=50&format=json"
+    )
+    assert "startdatetime" not in fetcher.urls[0]
+
+
 def test_gdelt_doc_adapter_fetch_transforms_artlist_payload_into_article_records() -> None:
     fetcher = SequenceFetcher(
         [
