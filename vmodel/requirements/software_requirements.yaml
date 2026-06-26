@@ -373,7 +373,7 @@ software_requirements:
   verification_method: software_specification_review
 - id: SwR-039
   title: Backtest comparison service
-  statement: The software shall support comparison of expected versus observed domain patterns for curated validation cases.
+  statement: The software shall support comparison of expected versus observed domain patterns for curated validation cases, and shall derive objective skill metrics (detection rate, domain match, composite skill score) from the reference-case replay reviews per ALGO-SKILL-01 so any model change is measurable.
   status: accepted
   derives_from:
   - SyR-026

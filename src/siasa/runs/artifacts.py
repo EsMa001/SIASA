@@ -462,6 +462,11 @@ def write_run_artifacts(
         readmodel_paths.extend(
             write_status_timeseries_artifacts(readmodels_dir, validation_view_model.get("historical_replay_reviews"))
         )
+        skill_metrics = validation_view_model.get("skill_metrics")
+        if isinstance(skill_metrics, dict):
+            skill_path = readmodels_dir / "skill_metrics.json"
+            skill_path.write_text(json.dumps(skill_metrics, indent=2, sort_keys=True), encoding="utf-8")
+            readmodel_paths.append(skill_path)
 
     readiness_available_pages = {
         "index.html",

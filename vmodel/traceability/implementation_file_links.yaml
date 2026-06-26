@@ -582,9 +582,11 @@ implementation_slices:
         code_paths:
           - src/siasa/validation/cases.py
           - src/siasa/readmodels/validation_backtest.py
+          - src/siasa/validation/skill_metrics.py
         test_paths:
           - tests/unit/test_validation_cases.py
           - tests/unit/test_readmodels_validation_backtest.py
+          - tests/unit/test_skill_metrics.py
       SwR-084:
         code_paths:
           - src/siasa/validation/historical_replay.py
@@ -611,10 +613,12 @@ implementation_slices:
       - src/siasa/readmodels/validation_backtest.py
       - src/siasa/validation/historical_replay.py
       - src/siasa/runs/artifacts.py
+      - src/siasa/validation/skill_metrics.py
     known_test_paths:
       - tests/unit/test_validation_cases.py
       - tests/unit/test_readmodels_validation_backtest.py
       - tests/unit/test_historical_replay.py
+      - tests/unit/test_skill_metrics.py
   ml-training-data-lake:
     requirement_ids:
       - SwR-055

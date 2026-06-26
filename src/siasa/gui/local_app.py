@@ -4895,7 +4895,9 @@ def _render_validation_kpi_grid(
     historical_replay_summary: dict[str, Any],
     historical_reference_review_summary: dict[str, Any],
     review_verdict: str,
+    skill_metrics: dict[str, Any] | None = None,
 ) -> str:
+    skill_score = (skill_metrics or {}).get('skill_score', 'n/a')
     case_count = portfolio_summary.get('case_count', 0)
     countries = portfolio_summary.get('countries_covered', [])
     portfolio_gap_case_count = len([case for case in portfolio_summary.get('cases_with_gaps', []) if isinstance(case, dict)])
@@ -4920,6 +4922,9 @@ def _render_validation_kpi_grid(
         "<div class='kpi-grid'>"
         f"<div class='kpi-card'><span class='kpi-label'>Verdict</span>"
         f"<div class='kpi-value' style='font-size:1rem;padding-top:4px'>{verdict_badge}</div></div>"
+        f"<div class='kpi-card'><span class='kpi-label'>Skill Score</span>"
+        f"<div class='kpi-value'>{html.escape(str(skill_score))}</div>"
+        f"<div class='kpi-sub'>ALGO-SKILL-01 detection vs labels</div></div>"
         f"<div class='kpi-card'><span class='kpi-label'>Cases</span>"
         f"<div class='kpi-value'>{html.escape(str(case_count))}</div>"
         f"<div class='kpi-sub'>{html.escape(', '.join(str(c) for c in countries))}</div></div>"
@@ -5257,7 +5262,8 @@ def _render_validation(validation_view_model: dict[str, Any], *, nav_prefix: str
     ) or "<li>none</li>"
     # --- KPI header ---
     kpi_grid = _render_validation_kpi_grid(
-        portfolio_summary, historical_replay_summary, historical_reference_review_summary, review_verdict
+        portfolio_summary, historical_replay_summary, historical_reference_review_summary, review_verdict,
+        validation_view_model.get('skill_metrics', {}),
     )
 
     # --- Case meta panel ---

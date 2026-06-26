@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections import Counter
 
 from siasa.validation.cases import ValidationCase, validation_case_to_dict
+from siasa.validation.skill_metrics import compute_skill_metrics
 
 
 def build_validation_portfolio_summary(validation_cases: list[dict[str, object]]) -> dict[str, object]:
@@ -508,4 +509,5 @@ def build_validation_backtest_read_model(
         read_model["historical_replay_summary"] = (
             historical_replay_summary or build_historical_replay_summary(historical_replay_reviews)
         )
+        read_model["skill_metrics"] = compute_skill_metrics(historical_replay_reviews)
     return read_model

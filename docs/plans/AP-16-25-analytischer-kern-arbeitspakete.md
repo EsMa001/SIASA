@@ -52,6 +52,15 @@ Aus kuratierten Referenzfaellen echte Guete-Kennzahlen bilden.
 **Aufwand:** M (3–5 PT)
 **Risiko:** mittel (Label-Qualitaet der Faelle bestimmt Aussagekraft)
 
+**Status (2026-06-26):** **Erledigt** — ALGO-SKILL-01 in `src/siasa/validation/skill_metrics.py`
+(`compute_skill_metrics`: Detektionsrate aus `status_match`, mittlerer Domain-Match, gewichteter
+Skill-Score in [0,1], deterministisch). Eingebettet ins Validation-Read-Model
+(`read_model["skill_metrics"]`), als `readmodels/skill_metrics.json` (sort_keys) geschrieben und als
+**Skill-Score-KPI** im GUI-Validation-View sichtbar. Regressionstest: bewusst verschlechtertes Modell
+senkt den Score (Akzeptanz 2). Anker: SwR-039 (Statement). Tests: `tests/unit/test_skill_metrics.py` (6).
+**Out-of-Scope → AP-28 (ALGO-SKILL-02):** Fehlalarmrate (braucht AP-27 S0-Negative), No-Skill-Baseline,
+Vorlaufzeit, Brier-Score.
+
 ---
 
 ### AP-17: Slow-Layer um Streuung/z-Score erweitern

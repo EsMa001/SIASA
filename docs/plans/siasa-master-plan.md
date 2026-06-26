@@ -105,7 +105,7 @@ Regeln:
 | AP-13 | ML-Training Data Lake | Erledigt | – | MVP-Should | 15/15 TAPs: Parquet-Archiv, DuckDB Query-Layer, Feature-Engineering Pipeline, PyTorch/HuggingFace, DVC, Retention, Health, CLI |
 | AP-14 | Kostenfreie API-Quellen-Erweiterung | Erledigt | **P1** | MVP-Should | 4 Adapter (Wikipedia, ECB, Eurostat, NVD CVE) + Registry + Feature-Katalog; SwR-072..075, 91 Tests |
 | AP-15 | Erweiterte kostenfreie API-Integration | Erledigt | – | MVP-Should | 8 Adapter, 53 Signale, Registry + Runtime verdrahtet |
-| AP-16 | Skill-Messharness (Ground-Truth-Backtest) | Offen | **P1** | Analytik-Kern | F7/F8/F9: Validierung misst keine Modellgüte |
+| AP-16 | Skill-Messharness (Ground-Truth-Backtest) | Erledigt | – | Analytik-Kern | F7/F8/F9: ALGO-SKILL-01 (Detektionsrate/Domain-Match/Skill-Score aus Replay-Reviews), `skill_metrics.json` + GUI-KPI; Fehlalarm/Vorlauf/Brier → AP-28 |
 | AP-17 | Slow-Layer Streuung/z-Score | Erledigt | – | Analytik-Kern | F3 (teil): std_7d/30d + z-Score (`compute_zscore`, ALGO-ZSCORE-01) in `multi_resolution.py`; SwR-063 erw.; 16 Tests grün |
 | AP-18 | Reale Anomalie-Berechnung (Feature→Anomalie) | Erledigt | – | Analytik-Kern | F1 Live-Site: ALGO-ANOM-01 (z-Score/Fenster-Records, coverage-gewichtet, gekappt), `scoring/anomaly.py`, 9 Tests; Replay-Site bewusst in AP-26 |
 | AP-19 | Unsicherheit aus echten Quellen | Offen | P4 | Analytik-Kern | F3 — Phase 4 (nach Validierung bisektierbar) |
@@ -155,7 +155,7 @@ Die verbleibende blockierte Arbeit ist externe Quellen-Aktivierung (AP-06) und �
 | ~~P1~~ | 0 | AP-25 | Fail-Loud-Policy für Analytikstufen | **Erledigt** | Governance | F10: stille Degradation → expliziter Degradationseintrag (ALGO-RUNGATE-01) |
 | ~~P1~~ | 0 | AP-26 | Status-Zeitreihe im Fenster-Replay | **Erledigt** | Validierung | F16: tägliche PIT-Zeitreihe (ALGO-REPLAY-TS-01) + deterministisches Artefakt; `historical_replay.py` |
 | **P1** | 1a | AP-27 | Ground-Truth-Redesign mit Negativfällen | Offen | Validierung | F15: S0-Negative, Onset, Trajektorie, Holdout-Split (längster Pol Labels) |
-| **P1** | 1b | AP-16 | Skill-Messharness (Ground-Truth-Backtest) | Offen | Analytik-Kern | F7/F8/F9: Gerüst der Skill-Messung |
+| ~~P1~~ | 1b | AP-16 | Skill-Messharness (Ground-Truth-Backtest) | **Erledigt** | Analytik-Kern | F7/F8/F9: ALGO-SKILL-01 (`validation/skill_metrics.py`) + GUI-KPI; Regressionstest grün |
 | **P1** | 1b | AP-28 | Skill-Metrik: Fehlalarmrate + No-Skill-Baseline | Offen | Validierung | F9 real; braucht AP-16, AP-26, AP-27 |
 | **P2** | 2a | AP-29 | Event-Set-Definition (klein, ausgewogen) | Offen | Validierung | F14 (Vorber.); braucht AP-27 |
 | **P2** | 2b | AP-30 | Historischer Backfill GDELT/GDACS/WB + PIT | Offen | Daten | F14: **größter Block**, hohes Risiko; braucht AP-29, AP-13 |
@@ -419,7 +419,7 @@ Governance: Schwellenwert-Festlegungen bleiben beim Projekteigner.
 
 | AP-ID | Großes Arbeitspaket | Tier | Schließt | Phase-Einordnung | Status |
 | --- | --- | --- | --- | --- | --- |
-| AP-16 | Skill-Messharness (Ground-Truth-Backtest) | 1 | F7/F8/F9 | Phase 1b (Gerüst für AP-28) | Offen |
+| AP-16 | Skill-Messharness (Ground-Truth-Backtest) | 1 | F7/F8/F9 | Phase 1b (Gerüst für AP-28) | **Erledigt** |
 | AP-17 | Slow-Layer Streuung/z-Score | 1 | F3 (teil) | Phase 0 | **Erledigt** |
 | AP-18 | Reale Anomalie-Berechnung (Feature→Anomalie) | 1 | F1 (Live) | Phase 0 | **Erledigt** |
 | AP-19 | Unsicherheit aus echten Quellen | 2 | F3 | Phase 4 | Offen |
