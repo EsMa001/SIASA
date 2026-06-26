@@ -1,10 +1,32 @@
-# SIASA — Session-Handoff (Stand 2026-06-25)
+# SIASA — Session-Handoff (Stand 2026-06-26)
 
 > Zweck: Diese Datei trägt den **handlungsrelevanten Kontext** einer vorherigen Claude-Code-Session
 > auf einen anderen Rechner (CLI-Sessions/Memory/Tasks synchronisieren NICHT über Geräte — nur Git tut das).
 > Auf dem anderen Rechner: `git pull` + frische `claude`-Session + diese Datei lesen.
 
 Branch: `hermes/repo-scaffold` (= Main-Branch des Projekts; Commits gehen direkt hierauf).
+
+---
+
+## 0. Update 2026-06-26 — Phase 0 (Korrektheit-Gate) abgeschlossen
+
+| Commit | Inhalt |
+|--------|--------|
+| `9d4e269` | **AP-18** reale Anomalie `ALGO-ANOM-01` (z-Score über Fenster-Records, coverage-gewichtet, gekappt) — **Live-Pfad**; Replay-Pendant bewusst nach AP-26 verschoben |
+| `44e4e74` | **AP-25** Fail-Loud `ALGO-RUNGATE-01` (7 Analytikstufen → explizite Degradationseinträge in artifact_status/Readiness, NICHT release-blockierend) |
+| `f11d56b` | **AP-26 #8** Verankerung: StR-678..681 / SwR-084..087 / TC / `ALGO-REPLAY-TS-01` + Count-Sync (StR→681, SwR→87, TC→137; alle Invarianten 0); SwR-Count-Drift behoben (77→87) |
+| `f50a9be` | **AP-26 Code** Replay-Status-Zeitreihe `ALGO-REPLAY-TS-01` (PIT-Tageszeitreihe via ALGO-ANOM-01, deterministisch, fail-loud) + per-Case-Artefakt (SwR-087) |
+
+Arbeitsweise je Tranche: V-Model-Anker → RED/GREEN → targeted Tests → Full-Suite (1132 passed, nur vorbestehende/Umgebungs-Failures) → Fresh-Eyes-Verifikation (alle PASS, 0 blocking) → scoped Commit + Push.
+
+**Owner-Entscheide (in dieser Session getroffen + dokumentiert):**
+- AP-18-Anomalie = z-Score über Fenster-Records (Option A).
+- AP-18-Replay-Site bewusst nach AP-26 verschoben; in AP-26 nutzt nur die **neue Zeitreihe** ALGO-ANOM-01, der **Legacy-Punktstatus bleibt Konstante** (`_DOMAIN_ANOMALY_SCORES`) bis AP-30 — verhindert S0-Kollaps der synthetischen Fixtures.
+- #8 nur auf **AP-26 begrenzt**; AP-27..32 bleiben plan-reserviert (Verankerung je Phase).
+
+**Bekannte Umgebungs-Failures (nicht Code-Regression, auf pristine HEAD identisch):** 5× `test_hf_export` + `test_ml_datasets` + `test_ap13_e2e` (fehlendes optionales `datasets`/`torch`); `test_storage_run_history` (Windows-Pfad-Separator); `test_validation_replay_depth_probe` (`case_count` 11≠4 wegen stale lokalem `build/`-Artefakt).
+
+**Nächste offene Baustelle: Phase 1 (Instrument)** — AP-16 (Skill-Harness-Gerüst), AP-27 (Ground-Truth-Redesign mit S0-Negativen, **Hoheit Projekteigner**), AP-28 (Skill-Metrik + No-Skill-Baseline). Detail: Masterplan §3 + §4.C/§4.D.
 
 ---
 
@@ -55,7 +77,7 @@ Detail: `docs/plans/siasa-master-plan.md` (§3 Backlog, §4.C/§4.D) · `docs/pl
 ## 4. Bekannte Fehler / Audit-Lücken (Stand V-Model-Audit 2026-06-25)
 
 **Strukturell (Traceability ist nach dem StR-Restore gesund: 677 StR, 0 verwaiste Refs, SwR→TC 83/83, Slices 12/12 closed):**
-1. **SwR-Count-Drift:** `software_requirements.yaml` metadata `software_requirement_count: 77`, real **83** (kosmetisch; Tests prüfen 83). Beim nächsten Requirements-Schritt mit-anheben (in #8 vorgesehen).
+1. **SwR-Count-Drift:** ~~metadata 77 vs real 83~~ — **behoben in #8 (`f11d56b`):** `software_requirement_count` = 87 (real 87, nach AP-26 SwR-084..087).
 2. **3 Verifikations-Routen-Lücken:** `verification stop_criteria` 3× False — **SyR-051/052/053** ohne Routen-Klassifikation/System-TC + 3 StR ohne Verifikationsroute. Nuance: SyR-051/052/053 werden von SwR-063 abgeleitet, der Klassifizierer erkennt sie aber nicht als software-route. Pre-existing AP-03-Gap.
 3. **Cluster B:** `stakeholder_e2e_ui_smoke`-Gate scheitert **lokal**, weil `build/run_artifacts/`-Bundle fehlt (gitignored) → 1 roter Test lokal (`test_release_failure_drill...detects_expected_failure_modes`). Auf CI (Bundle vorhanden) voraussichtlich grün. Fix-Option: ui_smoke-Readmodel/Test härten (fehlendes Bundle = expliziter Preflight-Skip statt stillem Gate-Fail).
 
@@ -75,4 +97,4 @@ Detail: `docs/plans/siasa-master-plan.md` (§3 Backlog, §4.C/§4.D) · `docs/pl
 ---
 
 ## 6. Empfohlener nächster Schritt
-Entweder **#8 (V-Model-Verankerung + Count-Sync)** als Planning-Commit (entsperrt AP-26/27 und behebt den SwR-Drift), **AP-18** (reale Anomalie — direkter funktionaler Hebel, baut auf AP-17 auf), oder die **3 Verifikations-Routen** (SyR-051/052/053) schließen. Mit dem Nutzer abstimmen.
+Phase 0 ist abgeschlossen (s. §0). Nächste Baustelle ist **Phase 1 (Instrument)**: zuerst **AP-16** (Skill-Messharness-Gerüst), dann **AP-27** (Ground-Truth-Redesign mit S0-Negativen — **Hoheit Projekteigner**, braucht Label-Kuratierung) und **AP-28** (Skill-Metrik + No-Skill-Baseline). Alternativ die offenen Audit-Restpunkte aus §4 (3 Verifikations-Routen SyR-051/052/053; Cluster-B `release_failure_drill`-Lokalgate). Mit dem Nutzer abstimmen — AP-27 erfordert fachliche Owner-Festlegungen.
