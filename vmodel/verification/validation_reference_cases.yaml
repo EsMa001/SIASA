@@ -16,7 +16,13 @@ validation_cases:
     known_limitations:
       - historical macro backfill still thinner than the full stakeholder target horizon
       - curated_historical_observed_outcome_not_generated_by_runtime_replay
+      - curated_proposal_v1_owner_to_ratify_against_primary_sources
     validation_metrics: [Domain Match, Status Match]
+    case_polarity: positive
+    dataset_split: tuning
+    onset_date: "2022-02-24"  # Russian full-scale invasion; en.wikipedia.org/wiki/2022_Russian_invasion_of_Ukraine
+    expected_trajectory: [S0, S2, S3]
+    ratification_status: proposed
 
   - case_id: VAL-RUS-2024-001
     country_id: RUS
@@ -343,7 +349,13 @@ validation_cases:
     known_limitations:
       - current governed pilot still uses runtime-support evaluation rather than full replay scoring
       - curated_historical_observed_outcome_not_generated_by_runtime_replay
+      - curated_proposal_v1_owner_to_ratify_against_primary_sources
     validation_metrics: [Domain Match, Status Match]
+    case_polarity: positive
+    dataset_split: tuning
+    onset_date: "2023-10-07"  # Hamas-led attack; en.wikipedia.org/wiki/October_7_Hamas-led_attack_on_Israel
+    expected_trajectory: [S0, S2, S3]
+    ratification_status: proposed
 
   - case_id: VAL-ISR-2024-002
     country_id: ISR
@@ -673,3 +685,75 @@ validation_cases:
       - exemplary_template_owner_to_curate_real_negative_set
       - curated_historical_observed_outcome_not_generated_by_runtime_replay
     validation_metrics: [Status Match, Domain Match]
+
+  - case_id: VAL-SDN-2023-001
+    country_id: SDN
+    case_name: Sudan 2023 RSF-SAF war onset (curated proposal)
+    case_type: armed_conflict_onset
+    time_start: "2023-04-01"
+    time_end: "2023-05-15"
+    expected_domains: [A, B, C]
+    expected_status: S3
+    historical_observed_domains: [A, B, C]
+    historical_observed_status: S3
+    evidence_tier: verified_multi_source
+    expected_signal_pattern: SAF-RSF power struggle erupts into armed conflict with mass displacement.
+    validation_goal: Real multi-domain armed-conflict onset (conflict + humanitarian + political) for lead-time and detection evaluation.
+    known_limitations:
+      - curated_proposal_v1_owner_to_ratify_against_primary_sources
+      - curated_historical_observed_outcome_not_generated_by_runtime_replay
+    validation_metrics: [Domain Match, Status Match]
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    case_polarity: positive
+    dataset_split: tuning
+    onset_date: "2023-04-15"  # RSF-SAF clashes erupt in Khartoum; hrw.org breaking-news 2023-04-15
+    expected_trajectory: [S0, S2, S3]
+    ratification_status: proposed
+
+  - case_id: VAL-OMN-2024-NEGATIVE-001
+    country_id: OMN
+    case_name: Oman 2024 Q2 quiet control (curated proposal, matched to ISR-2023)
+    case_type: quiet_control
+    time_start: "2024-04-01"
+    time_end: "2024-06-30"
+    expected_domains: [A, B, D]
+    expected_status: S0
+    case_polarity: negative
+    dataset_split: holdout
+    expected_trajectory: [S0, S0, S0]
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S0
+    evidence_tier: curated_public_source
+    expected_signal_pattern: A stable Gulf quarter should remain S0 across the window with no escalation onset.
+    validation_goal: Matched quiet control for the ISR-2023 escalation (stable Gulf comparator); makes the false-alarm rate measurable.
+    known_limitations:
+      - curated_proposal_v1_owner_to_ratify_against_primary_sources
+      - quiet_in_window_verified_muscat_mosque_shooting_2024-07-15_is_outside_window
+    validation_metrics: [Status Match, Domain Match]
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    onset_date: null
+    ratification_status: proposed
+
+  - case_id: VAL-GHA-2024-NEGATIVE-001
+    country_id: GHA
+    case_name: Ghana 2024 Q2 quiet control (curated proposal, matched to SDN-2023)
+    case_type: quiet_control
+    time_start: "2024-04-01"
+    time_end: "2024-06-30"
+    expected_domains: [A, B, D]
+    expected_status: S0
+    case_polarity: negative
+    dataset_split: holdout
+    expected_trajectory: [S0, S0, S0]
+    historical_observed_domains: [A, B, D]
+    historical_observed_status: S0
+    evidence_tier: curated_public_source
+    expected_signal_pattern: A stable West African quarter should remain S0 across the window with no escalation onset.
+    validation_goal: Matched quiet control for the SDN-2023 escalation (stable West African comparator); makes the false-alarm rate measurable.
+    known_limitations:
+      - curated_proposal_v1_owner_to_ratify_against_primary_sources
+      - quiet_in_window_verified_bawku_flareups_oct_2024_and_later_outside_window
+    validation_metrics: [Status Match, Domain Match]
+    reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    onset_date: null
+    ratification_status: proposed

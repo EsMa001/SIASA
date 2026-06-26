@@ -137,9 +137,10 @@ def test_reference_case_library_summary_aggregates_case_types_countries_and_time
     summary = build_reference_case_library_summary(cases)
 
     assert summary == {
-        "case_count": 36,
-        "countries_covered": ["CAN", "CHE", "CHN", "DEU", "EGY", "EST", "FIN", "GEO", "IND", "IRN", "ISR", "MMR", "NGA", "NLD", "PAK", "POL", "QAT", "RUS", "SAU", "SDN", "TUR", "TWN", "UKR", "USA"],
+        "case_count": 39,
+        "countries_covered": ["CAN", "CHE", "CHN", "DEU", "EGY", "EST", "FIN", "GEO", "GHA", "IND", "IRN", "ISR", "MMR", "NGA", "NLD", "OMN", "PAK", "POL", "QAT", "RUS", "SAU", "SDN", "TUR", "TWN", "UKR", "USA"],
         "case_type_counts": {
+            "armed_conflict_onset": 1,
             "challenge_domain_gap": 3,
             "challenge_mismatch": 3,
             "challenge_overcall": 3,
@@ -147,7 +148,7 @@ def test_reference_case_library_summary_aggregates_case_types_countries_and_time
             "disinformation_spike": 1,
             "hybrid_pressure": 3,
             "military_escalation": 1,
-            "quiet_control": 1,
+            "quiet_control": 3,
             "strategic_posturing": 18,
         },
         "time_range": {"start": "2022-02-01", "end": "2024-10-31"},
@@ -162,18 +163,18 @@ def test_historical_reference_review_summary_scores_curated_case_alignment_and_e
     summary = build_historical_reference_review_summary(cases)
 
     assert summary == {
-        "case_count": 36,
-        "countries_covered": ["CAN", "CHE", "CHN", "DEU", "EGY", "EST", "FIN", "GEO", "IND", "IRN", "ISR", "MMR", "NGA", "NLD", "PAK", "POL", "QAT", "RUS", "SAU", "SDN", "TUR", "TWN", "UKR", "USA"],
+        "case_count": 39,
+        "countries_covered": ["CAN", "CHE", "CHN", "DEU", "EGY", "EST", "FIN", "GEO", "GHA", "IND", "IRN", "ISR", "MMR", "NGA", "NLD", "OMN", "PAK", "POL", "QAT", "RUS", "SAU", "SDN", "TUR", "TWN", "UKR", "USA"],
         "review_verdict_counts": {
-            "historical_alignment_confirmed": 21,
+            "historical_alignment_confirmed": 24,
             "historical_alignment_mismatch": 10,
             "historical_alignment_with_gaps": 5,
         },
         "evidence_tier_counts": {
             "corroborated_multi_source": 19,
-            "curated_public_source": 14,
+            "curated_public_source": 16,
             "provisional": 1,
-            "verified_multi_source": 2,
+            "verified_multi_source": 3,
         },
         "average_evidence_score": 0.72,
     }

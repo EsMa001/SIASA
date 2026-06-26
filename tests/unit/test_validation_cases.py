@@ -141,9 +141,9 @@ def test_reference_library_loads_exemplary_s0_negative_and_keeps_legacy_defaults
     assert che.case_polarity == "negative"
     assert che.dataset_split == "holdout"
     assert che.expected_trajectory == ["S0", "S0", "S0"]
-    # legacy cases still load with backward-compatible defaults
-    assert by_id["VAL-UKR-2022-001"].case_polarity == "positive"
-    assert by_id["VAL-UKR-2022-001"].dataset_split == "unassigned"
+    # still-legacy cases load with backward-compatible defaults (UKR-2022 is now curated, AP-29 v1)
+    assert by_id["VAL-RUS-2024-001"].case_polarity == "positive"
+    assert by_id["VAL-RUS-2024-001"].dataset_split == "unassigned"
 
 
 def test_validator_passes_structurally_and_counts_the_s0_negative() -> None:
