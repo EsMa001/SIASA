@@ -8,6 +8,49 @@ Branch: `hermes/repo-scaffold` (= Main-Branch des Projekts; Commits gehen direkt
 
 ---
 
+## ⭐ Update 2026-06-26 (neueste) — AP-24 Schwellen-Governance vorgezogen (F11)
+
+AP-24 (Plan: Phase 4) auf Nutzer-Wunsch vorgezogen: die hartcodierten Analytik-„Magic Numbers" sind jetzt eine
+governte, wissenschaftlich begründete Single-Source-of-Truth. Grundlage: Tiefenrecherche + 2-Runden-Verifikation
+(`docs/research/parameter-initialisierung.md`).
+
+| Commit | Inhalt |
+|--------|--------|
+| `19dfe2a` | Research-Doc: zitierte Karte aller 8 Parameter-Familien (Methode/Default/Referenz) — INFORM, OECD/JRC, SPC, GUM, ViEWS, SHELF, R₀ |
+| `d6b6d65` | Governte Config `vmodel/project/scoring_thresholds.yaml` + Loader `scoring/scoring_thresholds.py` (gecacht, graceful Fallback); Anomalie + D-Status-Cutpoints verdrahtet. Anker SwR-021 |
+| `e7ec45c` | Sensitivitäts-Tool `scripts/threshold_sensitivity.py` (OAT-Sweep, rankt Schwellen nach Skill-Einfluss) |
+| `f156210` | d1_max-Fixture-Kalibrierung: Optimum-Plateau [0.05–0.30]; 0.20 gut platziert |
+| `12d6d49` | **Restliche 6 Familien verdrahtet** (Daten-Suffizienz, Bayes, Fusion, Unsicherheit, Skill/Validierung, Info-Epi) — behavior-preserving; SwR-020/022/039/047 erweitert |
+| `aa0ecae` | 2. Verifikationsrunde: SPC 3σ+WECO, GUM RSS+k, Brier-Skill-Score, SHELF, NATO-Admiralty **bestätigt**; R₀ uncertain |
+| `69b9993` | **Erster echter Wert gesetzt:** Bayes-D3-Likelihood-Zentrum 0.65 → 0.75 (Band-Mittelpunkt, SHELF) |
+
+**Stand:** 7/8 Familien live verdrahtet (lesen aus der Config, Fallback = Ist-Werte); nur die Multi-Domain-
+S0–S6-Aggregation bleibt dokumentiert (`wired_to_config: false`). Vollsuite **1154 passed**. Jede Familie hat
+`current`/`recommended_initial`/`rationale`/`reference`(/`applied`) im `governance_record`. AP-24-Akzeptanz erfüllt
+(keine literalen Schwellen mehr in den 8 Modulen außer Struktur-Konstanten; Bindungstests in `test_scoring_thresholds.py`).
+
+**Methodik der Wert-Wahl (wichtig):** Nur Werte setzen, für die die *bestätigte* Literatur eine *konkrete*,
+*datenunabhängige* Vorgabe hat. Bisher genau einer: Bayes-D3 → Band-Mittelpunkt. D4 bleibt am Schwellen-Anker 1.0;
+σ=0.2 bleibt bis Elicitation (Literatur gibt Prozess, keinen Wert). z=1.645 (Familie 6) ist bereits GUM-konform → keine Änderung nötig.
+
+**Aufgeschoben — NICHT „auf gut Glück" setzen (Gates):**
+- **An AP-30 (echte z-Score-Anomalien) gebunden:** Familie 1 D-Cutpoints → σ-Vielfache (1/2/3σ) + Bound→3σ +
+  min_series_points→~20; Familie 4 σ-Kalibrierung; Familie 3 min_features→σ-Kopplung. Heute ändern bricht die
+  Fixture-Validierung (Fixture-Scores sind keine echten z-Scores; d1_max-Sweep: ≥0.35 → Skill-Kollaps).
+  → Sobald AP-30 läuft: `scripts/threshold_sensitivity.py` neu fahren + σ-Cutpoints/σ datenbasiert setzen.
+- **Struktureller Umbau (AP-28):** Familie 7 Skill-Blend 0.6/0.4 → separate Standardmetriken (Brier, BSS vs.
+  No-Skill-Baseline, POD/FAR/AUC/Lead-Time) — bestätigt (CAWCR), aber neue Berechnung statt eines Werts.
+- **Struktureller Umbau:** Familie 8 Amplifikation 1.5× → R₀-/Wachstumsraten-Kriterium (R₀ war „uncertain").
+
+**Offene Owner-Policy-Entscheidungen (literatur-vorbereitet, brauchen nur ein Ja):**
+- **Familie 6 CI:** 90 % (z=1.645, aktuell, GUM-konform) vs. 95 % (z=1.96) — reine Konvention.
+- **Familie 2 Aggregation:** S0–S6-Zähl-Regel beibehalten (nicht-kompensatorisch, vertretbar) vs. auf
+  INFORM-artiges **geometrisches Mittel** + ROUNDUP-Cutpoints umstellen (prinzipientreuer, aber Verhaltensänderung).
+- **Familie 5 Fusion:** 3-stufige Reliabilität (1.0/0.6/0.2) auf die **NATO-Admiralty-6-Stufen** mappen
+  (bestätigt); konkrete 6 Gewichte bleiben Owner-Werturteil.
+
+---
+
 ## 0. Update 2026-06-26 — Phase 0 (Korrektheit-Gate) abgeschlossen
 
 | Commit | Inhalt |

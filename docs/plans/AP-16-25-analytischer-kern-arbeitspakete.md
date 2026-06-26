@@ -282,6 +282,14 @@ V1-Grenze: Einzel-Snapshot-Bundles liefern ehrlich ~0; echte Tiefe ab AP-26/AP-3
 **Aufwand:** M (3–5 PT)
 **Risiko:** niedrig
 
+**Status (2026-06-26): weitgehend erledigt (vorgezogen).** Governte Config `vmodel/project/scoring_thresholds.yaml`
+(neben dem bestehenden `freshness_config.yaml`; **Abweichung von „vmodel/method/"** — bewusst, gleiches
+Loader-Muster) + Loader `scoring/scoring_thresholds.py` mit Gettern; 7/8 Familien verdrahtet (behavior-preserving),
+Bindungstests in `tests/unit/test_scoring_thresholds.py`. Akzeptanz 1+2 erfuellt. Erster literatur-gegruendeter Wert
+gesetzt (Bayes-D3-Zentrum 0.65→0.75 = Band-Mittelpunkt, SHELF); restliche Wert-Aenderungen an AP-30/AP-28/Owner-Policy
+gebunden (Detail: `HANDOFF.md` §⭐ + `docs/research/parameter-initialisierung.md`). Offen: Multi-Domain-S0–S6-
+Aggregation noch dokumentiert (`wired_to_config: false`).
+
 ---
 
 ### AP-25: Fail-Loud-Policy fuer Analytikstufen
