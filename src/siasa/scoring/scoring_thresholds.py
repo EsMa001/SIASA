@@ -26,7 +26,7 @@ _DEFAULTS: dict[str, dict[str, Any]] = {
         "minimum_feature_count": 2,
     },
     "bayesian_status": {
-        "centers": {"D0": 0.0, "D1": 0.1, "D2": 0.35, "D3": 0.65, "D4": 1.0},
+        "centers": {"D0": 0.0, "D1": 0.1, "D2": 0.35, "D3": 0.75, "D4": 1.0},
         "sigma": 0.2,
         "credible_interval_tail": 0.1,
     },

@@ -97,7 +97,7 @@ def test_new_family_getters_fall_back_to_shipped_defaults(tmp_path):
     assert data_sufficiency_minimum_coverage(missing) == 0.6
     assert data_sufficiency_maximum_freshness_hours(missing) == 168.0
     assert data_sufficiency_minimum_feature_count(missing) == 2
-    assert bayesian_status_centers(missing) == {"D0": 0.0, "D1": 0.1, "D2": 0.35, "D3": 0.65, "D4": 1.0}
+    assert bayesian_status_centers(missing) == {"D0": 0.0, "D1": 0.1, "D2": 0.35, "D3": 0.75, "D4": 1.0}
     assert bayesian_status_sigma(missing) == 0.2
     assert bayesian_status_credible_interval_tail(missing) == 0.1
     assert cross_domain_reliability_weights(missing) == (1.0, 0.6, 0.2)

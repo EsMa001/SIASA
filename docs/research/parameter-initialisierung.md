@@ -95,6 +95,12 @@ Aktuell: Zentren D0=0.0/D1=0.1/D2=0.35/D3=0.65/D4=1.0; σ=0.2; 80 %-CI.
 - **Empfehlung:** Zentren **konsistent mit den D-Cutpoints** (Familie 1) als Bereichs-Mittelpunkte setzen;
   σ=0.2 bei ~0.25-Abständen → **starke Überlappung** (Unter-Diskriminierung) → elicitieren/kalibrieren.
 - **Referenz:** SHELF / Cooke / O'Hagan „Uncertain Judgements" (2006); Gosling (2018) SHELF ✓.
+- **✅ Angewandt (AP-24, erster Parameter):** D3-Zentrum **0.65 → 0.75** gesetzt (= Mittelpunkt des D3-Bandes
+  [0.5, 1.0)). D0–D2 lagen bereits auf ihren Band-Mittelpunkten; **D4 bleibt am Schwellen-Anker 1.0** (die
+  Obergrenze 1.5 ist willkürlich, ein „Mittelpunkt" dort wäre weniger prinzipientreu und würde Anomalie 1.0
+  äquidistant zu D3 machen). σ=0.2 **bleibt** bis zur Elicitation/Kalibrierung (Literatur gibt keinen festen
+  σ-Wert vor). Datenunabhängig, behebt die einzige echte Inkonsistenz und lässt den Bayes-MAP sauberer mit den
+  deterministischen D-Bändern übereinstimmen; Skill unverändert.
 
 ### 5 · Cross-Domain-Fusion
 Aktuell: Reliabilität 1.0/0.6/0.2; Kontradiktion bei Status-Gap `≥2`; Confidence `max(0.3, 1−0.15·gap)`.

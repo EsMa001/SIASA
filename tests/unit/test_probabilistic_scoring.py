@@ -15,6 +15,13 @@ def test_low_anomaly_favors_d1():
     est = compute_bayesian_status(0.1)
     assert est.map_status == "D1"
 
+def test_d3_center_is_band_midpoint():
+    # AP-24/SHELF: likelihood centers = midpoints of the D-status anomaly bands.
+    # D3 band is [0.5, 1.0); its midpoint 0.75 must map cleanly to D3.
+    est = compute_bayesian_status(0.75)
+    assert est.map_status == "D3"
+
+
 def test_confidence_interval():
     est = compute_bayesian_status(0.5)
     assert est.confidence_interval[0] in ["D0","D1","D2","D3","D4"]
