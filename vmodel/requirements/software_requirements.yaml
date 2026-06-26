@@ -195,7 +195,7 @@ software_requirements:
   verification_method: software_specification_review
 - id: SwR-020
   title: Data sufficiency evaluator
-  statement: The software shall evaluate data sufficiency before status computation and produce explicit insufficiency outcomes for inadequate inputs.
+  statement: The software shall evaluate data sufficiency before status computation and produce explicit insufficiency outcomes for inadequate inputs, using governed sufficiency thresholds (AP-24 governing minimum coverage, freshness horizon, and minimum feature count) sourced from the scoring-thresholds artifact.
   status: accepted
   derives_from:
   - SyR-014
@@ -214,7 +214,7 @@ software_requirements:
   verification_method: software_specification_review
 - id: SwR-022
   title: Domain status explanation payload
-  statement: The software shall emit drivers, uncertainty indicators, and rule references together with every domain status result.
+  statement: The software shall emit drivers, uncertainty indicators, and rule references together with every domain status result; uncertainty propagation uses governed parameters (AP-24 governing the coverage factor and per-stage Type-B noise) sourced from the scoring-thresholds artifact.
   status: accepted
   derives_from:
   - SyR-015
@@ -373,7 +373,7 @@ software_requirements:
   verification_method: software_specification_review
 - id: SwR-039
   title: Backtest comparison service
-  statement: The software shall support comparison of expected versus observed domain patterns for curated validation cases, and shall derive objective skill metrics (detection rate, domain match, composite skill score) from the reference-case replay reviews per ALGO-SKILL-01 so any model change is measurable.
+  statement: The software shall support comparison of expected versus observed domain patterns for curated validation cases, and shall derive objective skill metrics (detection rate, domain match, composite skill score) from the reference-case replay reviews per ALGO-SKILL-01 so any model change is measurable, using governed skill, replay-evidence, and regression thresholds (AP-24) sourced from the scoring-thresholds artifact.
   status: accepted
   derives_from:
   - SyR-026
@@ -447,7 +447,7 @@ software_requirements:
   verification_method: software_specification_review
 - id: SwR-047
   title: Non-deterministic and anti-naive-fusion guardrails
-  statement: The software shall prevent deterministic event-prediction outputs and shall prevent naive additive cross-domain A-E fusion-score pathways in the governed MVP baseline.
+  statement: The software shall prevent deterministic event-prediction outputs and shall prevent naive additive cross-domain A-E fusion-score pathways in the governed MVP baseline, using governed evidence-reliability and contradiction thresholds (AP-24) sourced from the scoring-thresholds artifact.
   status: accepted
   derives_from:
   - SyR-003

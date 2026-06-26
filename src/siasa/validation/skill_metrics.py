@@ -17,9 +17,10 @@ from __future__ import annotations
 
 from typing import Any
 
-# Owner-governed composite weights (AGENTS.md: thresholds are owner authority).
-_DETECTION_WEIGHT = 0.6
-_DOMAIN_MATCH_WEIGHT = 0.4
+from siasa.scoring.scoring_thresholds import skill_score_weights
+
+# Governed via vmodel/project/scoring_thresholds.yaml (AP-24); fallback = shipped values.
+_DETECTION_WEIGHT, _DOMAIN_MATCH_WEIGHT = skill_score_weights()
 
 
 def compute_skill_metrics(reviews: list[dict[str, Any]]) -> dict[str, Any]:

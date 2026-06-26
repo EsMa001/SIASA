@@ -14,6 +14,8 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
+
+from siasa.scoring.scoring_thresholds import regression_thresholds
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
@@ -66,10 +68,8 @@ class BacktestResult:
     verdict: str  # "pass", "warning", "fail"
 
 
-# Thresholds for regression detection
-_SCORE_REGRESSION_THRESHOLD = 0.1  # Score drop > 10% is a regression
-_REGRESSION_RATE_WARNING = 0.1  # >10% regression rate triggers warning
-_REGRESSION_RATE_FAIL = 0.3  # >30% regression rate triggers fail
+# Thresholds for regression detection, governed via scoring_thresholds.yaml (AP-24).
+_SCORE_REGRESSION_THRESHOLD, _REGRESSION_RATE_WARNING, _REGRESSION_RATE_FAIL = regression_thresholds()
 
 
 def run_backtest(

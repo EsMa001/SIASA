@@ -9,6 +9,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 import math
 
+from siasa.scoring.scoring_thresholds import uncertainty_ci_z, uncertainty_stage_noise
+
 @dataclass(frozen=True)
 class UncertaintyLevel:
     stage: str  # "source", "feature", "domain", "multi_domain"
@@ -42,28 +44,29 @@ def propagate_uncertainty(source_uncertainties: list[tuple[float, float]]) -> Un
     # Source level: individual uncertainties
     source_mean = sum(values) / max(n, 1)
     source_unc = math.sqrt(sum(u**2 for u in uncertainties)) / max(n, 1)
-    z90 = 1.645
+    z90 = uncertainty_ci_z()
+    extraction_noise, scoring_noise, fusion_noise = uncertainty_stage_noise()
     levels.append(UncertaintyLevel(
         "source", round(source_mean, 4), round(source_unc, 4),
         round(source_mean - z90 * source_unc, 4), round(source_mean + z90 * source_unc, 4), n,
     ))
 
     # Feature level: adds extraction noise (~10%)
-    feat_unc = math.sqrt(source_unc**2 + (0.1 * source_mean)**2)
+    feat_unc = math.sqrt(source_unc**2 + (extraction_noise * source_mean)**2)
     levels.append(UncertaintyLevel(
         "feature", round(source_mean, 4), round(feat_unc, 4),
         round(source_mean - z90 * feat_unc, 4), round(source_mean + z90 * feat_unc, 4), n,
     ))
 
     # Domain level: adds scoring model uncertainty (~15%)
-    dom_unc = math.sqrt(feat_unc**2 + (0.15 * source_mean)**2)
+    dom_unc = math.sqrt(feat_unc**2 + (scoring_noise * source_mean)**2)
     levels.append(UncertaintyLevel(
         "domain", round(source_mean, 4), round(dom_unc, 4),
         round(source_mean - z90 * dom_unc, 4), round(source_mean + z90 * dom_unc, 4), n,
     ))
 
     # Multi-domain: adds fusion uncertainty (~5%)
-    multi_unc = math.sqrt(dom_unc**2 + (0.05 * source_mean)**2)
+    multi_unc = math.sqrt(dom_unc**2 + (fusion_noise * source_mean)**2)
     levels.append(UncertaintyLevel(
         "multi_domain", round(source_mean, 4), round(multi_unc, 4),
         round(source_mean - z90 * multi_unc, 4), round(source_mean + z90 * multi_unc, 4), n,
@@ -72,9 +75,9 @@ def propagate_uncertainty(source_uncertainties: list[tuple[float, float]]) -> Un
     # Dominant stage
     stage_contributions = {
         "source": source_unc**2,
-        "feature_extraction": (0.1 * source_mean)**2,
-        "domain_scoring": (0.15 * source_mean)**2,
-        "fusion": (0.05 * source_mean)**2,
+        "feature_extraction": (extraction_noise * source_mean)**2,
+        "domain_scoring": (scoring_noise * source_mean)**2,
+        "fusion": (fusion_noise * source_mean)**2,
     }
     dominant = max(stage_contributions, key=lambda k: stage_contributions[k])
     prop_factor = multi_unc / max(source_unc, 1e-9)

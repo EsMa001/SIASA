@@ -16,7 +16,12 @@ from siasa.scoring.anomaly import compute_feature_driven_anomaly
 from siasa.scoring.data_sufficiency import evaluate_data_sufficiency
 from siasa.scoring.domain_status import derive_domain_status
 from siasa.scoring.multi_domain_status import derive_multi_domain_status
+from siasa.scoring.scoring_thresholds import replay_evidence_tiers, replay_evidence_weights
 from siasa.validation.cases import ValidationCase, compare_expected_vs_observed
+
+# Governed via vmodel/project/scoring_thresholds.yaml (AP-24); fallback = shipped values.
+_EVIDENCE_W_STATUS, _EVIDENCE_W_DOMAIN, _EVIDENCE_W_COVERAGE, _EVIDENCE_W_PROVENANCE = replay_evidence_weights()
+_TIER_VERIFIED, _TIER_STRONG, _TIER_PARTIAL = replay_evidence_tiers()
 
 
 @dataclass(frozen=True)
@@ -82,20 +87,20 @@ def _replay_evidence_score(
     replay_provenance_completeness_ratio: float,
 ) -> float:
     score = (
-        (0.4 if status_match else 0.0)
-        + (0.3 * domain_match_ratio)
-        + (0.2 * replay_source_coverage_ratio)
-        + (0.1 * replay_provenance_completeness_ratio)
+        (_EVIDENCE_W_STATUS if status_match else 0.0)
+        + (_EVIDENCE_W_DOMAIN * domain_match_ratio)
+        + (_EVIDENCE_W_COVERAGE * replay_source_coverage_ratio)
+        + (_EVIDENCE_W_PROVENANCE * replay_provenance_completeness_ratio)
     )
     return round(score, 2)
 
 
 def _replay_evidence_tier(replay_evidence_score: float) -> str:
-    if replay_evidence_score >= 0.95:
+    if replay_evidence_score >= _TIER_VERIFIED:
         return "verified_replay_evidence"
-    if replay_evidence_score >= 0.75:
+    if replay_evidence_score >= _TIER_STRONG:
         return "strong_replay_evidence"
-    if replay_evidence_score >= 0.5:
+    if replay_evidence_score >= _TIER_PARTIAL:
         return "partial_replay_evidence"
     return "weak_replay_evidence"
 

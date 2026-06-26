@@ -18,6 +18,12 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from siasa.scoring.domain_status import DomainStatusResult
+from siasa.scoring.scoring_thresholds import (
+    cross_domain_confidence_discount_per_gap,
+    cross_domain_confidence_floor,
+    cross_domain_contradiction_gap,
+    cross_domain_reliability_weights,
+)
 
 
 # Domain pairs that should be checked for contradictions
@@ -30,6 +36,12 @@ _CONTRADICTION_PAIRS = [
 
 # Status levels ordered from calm to critical
 _STATUS_SEVERITY = {"D0": -1, "D1": 0, "D2": 1, "D3": 2, "D4": 3, "D5": 4}
+
+# Governed via vmodel/project/scoring_thresholds.yaml (AP-24); fallback = shipped values.
+_RELIABILITY_SUFFICIENT, _RELIABILITY_PARTIAL, _RELIABILITY_INSUFFICIENT = cross_domain_reliability_weights()
+_CONTRADICTION_GAP = cross_domain_contradiction_gap()
+_CONFIDENCE_FLOOR = cross_domain_confidence_floor()
+_CONFIDENCE_DISCOUNT_PER_GAP = cross_domain_confidence_discount_per_gap()
 
 
 @dataclass(frozen=True)
@@ -88,7 +100,7 @@ def detect_cross_domain_contradictions(
             continue
 
         gap = abs(sev_a - sev_b)
-        if gap >= 2:
+        if gap >= _CONTRADICTION_GAP:
             higher = dom_a if sev_a > sev_b else dom_b
             lower = dom_b if sev_a > sev_b else dom_a
             contradictions.append(ContradictionResult(
@@ -120,11 +132,11 @@ def compute_evidence_weights(
 
     for result in domain_results:
         if result.sufficiency.is_sufficient:
-            raw_weights.append((result.domain, 1.0, "sufficient"))
+            raw_weights.append((result.domain, _RELIABILITY_SUFFICIENT, "sufficient"))
         elif result.status == "D0":
-            raw_weights.append((result.domain, 0.2, "insufficient"))
+            raw_weights.append((result.domain, _RELIABILITY_INSUFFICIENT, "insufficient"))
         else:
-            raw_weights.append((result.domain, 0.6, "partial"))
+            raw_weights.append((result.domain, _RELIABILITY_PARTIAL, "partial"))
 
     total = sum(w for _, w, _ in raw_weights)
     if total <= 0:
@@ -179,7 +191,7 @@ def fuse_domain_evidence(
     if contradictions:
         # Reduce confidence when contradictions exist
         max_gap = max(c.severity_gap for c in contradictions)
-        confidence = round(confidence * max(0.3, 1.0 - 0.15 * max_gap), 4)
+        confidence = round(confidence * max(_CONFIDENCE_FLOOR, 1.0 - _CONFIDENCE_DISCOUNT_PER_GAP * max_gap), 4)
 
     return FusionResult(
         fused_score=fused_score,

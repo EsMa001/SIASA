@@ -8,9 +8,17 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 import math
 
+from siasa.scoring.scoring_thresholds import (
+    bayesian_status_centers,
+    bayesian_status_credible_interval_tail,
+    bayesian_status_sigma,
+)
+
+# Governed via vmodel/project/scoring_thresholds.yaml (AP-24); fallback = shipped values.
 _STATUS_LABELS = ["D0", "D1", "D2", "D3", "D4"]
-_STATUS_ANOMALY_CENTERS = {"D0": 0.0, "D1": 0.1, "D2": 0.35, "D3": 0.65, "D4": 1.0}
-_STATUS_SIGMA = 0.2
+_STATUS_ANOMALY_CENTERS = bayesian_status_centers()
+_STATUS_SIGMA = bayesian_status_sigma()
+_CREDIBLE_INTERVAL_TAIL = bayesian_status_credible_interval_tail()
 
 @dataclass(frozen=True)
 class BayesianStatusEstimate:
@@ -45,13 +53,13 @@ def compute_bayesian_status(
     high = _STATUS_LABELS[-1]
     for s in _STATUS_LABELS:
         cumulative += posterior[s]
-        if cumulative >= 0.1:
+        if cumulative >= _CREDIBLE_INTERVAL_TAIL:
             low = s
             break
     cumulative = 0.0
     for s in reversed(_STATUS_LABELS):
         cumulative += posterior[s]
-        if cumulative >= 0.1:
+        if cumulative >= _CREDIBLE_INTERVAL_TAIL:
             high = s
             break
     return BayesianStatusEstimate(posterior=posterior, map_status=map_status, confidence=round(confidence, 4), confidence_interval=(low, high))

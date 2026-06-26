@@ -32,10 +32,22 @@ def _resolve_effective_freshness_threshold(
 
 def evaluate_data_sufficiency(
     features: list[FeatureValue],
-    minimum_coverage: float = 0.6,
-    maximum_freshness_hours: float = 168.0,
-    minimum_feature_count: int = 2,
+    minimum_coverage: float | None = None,
+    maximum_freshness_hours: float | None = None,
+    minimum_feature_count: int | None = None,
 ) -> DataSufficiencyResult:
+    from siasa.scoring.scoring_thresholds import (
+        data_sufficiency_maximum_freshness_hours,
+        data_sufficiency_minimum_coverage,
+        data_sufficiency_minimum_feature_count,
+    )
+
+    if minimum_coverage is None:
+        minimum_coverage = data_sufficiency_minimum_coverage()
+    if maximum_freshness_hours is None:
+        maximum_freshness_hours = data_sufficiency_maximum_freshness_hours()
+    if minimum_feature_count is None:
+        minimum_feature_count = data_sufficiency_minimum_feature_count()
     if len(features) < minimum_feature_count:
         return DataSufficiencyResult(False, coverage=0.0, freshness_hours=None, reasons=["too few features"])
 

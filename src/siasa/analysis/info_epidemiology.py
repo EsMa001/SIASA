@@ -7,6 +7,12 @@ Requirement trace: AP-F25, StR-040..044 (Informations-Epidemiologie)
 from __future__ import annotations
 from dataclasses import dataclass, field
 
+from siasa.scoring.scoring_thresholds import amplification_ratio
+
+# Governed via vmodel/project/scoring_thresholds.yaml (AP-24); fallback = shipped value.
+_AMPLIFICATION_RATIO = amplification_ratio()
+
+
 @dataclass(frozen=True)
 class SpreadObservation:
     source_id: str
@@ -62,7 +68,7 @@ def detect_amplification(observations: list[SpreadObservation]) -> list[Amplific
         base = sorted_obs[0].value
         for obs in sorted_obs[1:]:
             factor = obs.value / base
-            if factor > 1.5:
+            if factor > _AMPLIFICATION_RATIO:
                 events.append(AmplificationEvent(
                     signal_key=sig, source_id=obs.source_id,
                     amplification_factor=round(factor, 3),
