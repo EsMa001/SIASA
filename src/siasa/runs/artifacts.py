@@ -61,6 +61,43 @@ def _reset_artifact_output_dir(output_dir: Path) -> None:
 
 
 
+def write_status_timeseries_artifacts(readmodels_dir: Path, replay_reviews: object) -> list[Path]:
+    """SwR-087 (AP-26): write a deterministic per-case replay status-timeseries file.
+
+    For each review carrying a ``status_timeseries``, write
+    ``readmodels/status_timeseries/status_timeseries_<case>.json`` with sorted
+    keys so two identical runs produce bit-identical files. Returns the paths
+    written (empty when there are no replay reviews).
+    """
+    written: list[Path] = []
+    if not isinstance(replay_reviews, list):
+        return written
+    for review in replay_reviews:
+        if not isinstance(review, dict) or "status_timeseries" not in review:
+            continue
+        case_id = str(review.get("case_id", "")).strip()
+        if not case_id:
+            continue
+        timeseries_dir = readmodels_dir / "status_timeseries"
+        timeseries_dir.mkdir(parents=True, exist_ok=True)
+        timeseries_path = timeseries_dir / f"status_timeseries_{case_id}.json"
+        timeseries_path.write_text(
+            json.dumps(
+                {
+                    "case_id": case_id,
+                    "country_id": review.get("country_id"),
+                    "status_timeseries": review.get("status_timeseries", []),
+                    "status_timeseries_degradations": review.get("status_timeseries_degradations", []),
+                },
+                indent=2,
+                sort_keys=True,
+            ),
+            encoding="utf-8",
+        )
+        written.append(timeseries_path)
+    return written
+
+
 def write_run_artifacts(
     *,
     output_dir: Path,
@@ -422,6 +459,9 @@ def write_run_artifacts(
         validation_path = readmodels_dir / "validation_backtest.json"
         validation_path.write_text(json.dumps(validation_view_model, indent=2, sort_keys=True), encoding="utf-8")
         readmodel_paths.append(validation_path)
+        readmodel_paths.extend(
+            write_status_timeseries_artifacts(readmodels_dir, validation_view_model.get("historical_replay_reviews"))
+        )
 
     readiness_available_pages = {
         "index.html",

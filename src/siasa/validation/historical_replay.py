@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import date, timedelta
 from pathlib import Path
 
 import yaml
@@ -11,6 +12,7 @@ from siasa.features.domain_b import DomainBFeatureService
 from siasa.features.domain_c import DomainCFeatureService
 from siasa.features.domain_d import DomainDFeatureService
 from siasa.features.domain_e import DomainEFeatureService
+from siasa.scoring.anomaly import compute_feature_driven_anomaly
 from siasa.scoring.data_sufficiency import evaluate_data_sufficiency
 from siasa.scoring.domain_status import derive_domain_status
 from siasa.scoring.multi_domain_status import derive_multi_domain_status
@@ -167,6 +169,104 @@ def _derive_country_replay_status(normalized_records: list[NormalizedRecord], co
     return replayed_domains, replayed_status
 
 
+def _parse_iso_date(value: str) -> date | None:
+    text = str(value)[:10]
+    try:
+        return date.fromisoformat(text)
+    except ValueError:
+        return None
+
+
+def _replay_window_dates(time_start: str, time_end: str) -> list[str]:
+    """SwR-084: ordered inclusive daily dates of a validation-case window."""
+    start = _parse_iso_date(time_start)
+    end = _parse_iso_date(time_end)
+    if start is None or end is None or start > end:
+        return []
+    dates: list[str] = []
+    current = start
+    while current <= end:
+        dates.append(current.isoformat())
+        current += timedelta(days=1)
+    return dates
+
+
+def _records_as_of(normalized_records: list[NormalizedRecord], as_of_date: str) -> list[NormalizedRecord]:
+    """SwR-084: point-in-time cut - records observed on or before as_of_date (no look-ahead)."""
+    return [
+        record
+        for record in normalized_records
+        if str(record.timestamp)[:10] and str(record.timestamp)[:10] <= as_of_date
+    ]
+
+
+def _replay_status_as_of(normalized_records: list[NormalizedRecord], country_id: str) -> tuple[str, float]:
+    """Derive one (status, confidence) from point-in-time records via ALGO-ANOM-01 (AP-18)."""
+    features = [
+        feature
+        for service in _FEATURE_SERVICES
+        for feature in service.compute(normalized_records)
+        if feature.country_id == country_id
+    ]
+    domain_results = []
+    coverages: list[float] = []
+    for domain in sorted({feature.domain for feature in features}):
+        domain_features = [feature for feature in features if feature.domain == domain]
+        if not domain_features:
+            continue
+        domain_records = [
+            record
+            for record in normalized_records
+            if record.country_id == country_id and record.domain == domain
+        ]
+        sufficiency = evaluate_data_sufficiency(domain_features)
+        domain_results.append(
+            derive_domain_status(
+                domain,
+                anomaly_score=compute_feature_driven_anomaly(domain, domain_records),
+                sufficiency=sufficiency,
+            )
+        )
+        coverages.append(sufficiency.coverage)
+    status = derive_multi_domain_status(domain_results).status if domain_results else "S6"
+    confidence = round(sum(coverages) / len(coverages), 4) if coverages else 0.0
+    return status, confidence
+
+
+def derive_country_replay_status_timeseries(
+    normalized_records: list[NormalizedRecord],
+    country_id: str,
+    time_start: str,
+    time_end: str,
+) -> dict[str, object]:
+    """ALGO-REPLAY-TS-01 (AP-26, SwR-085): per-day point-in-time status timeseries.
+
+    For each day in [time_start, time_end] the records are cut point-in-time (no
+    look-ahead) and a (status, confidence) is derived from the data-driven anomaly
+    (ALGO-ANOM-01, AP-18). A per-day exception is recorded as an explicit
+    degradation entry (coupling AP-25 / SwR-044) rather than dropping the day
+    silently. The output is deterministic: identical inputs yield bit-identical
+    timeseries.
+    """
+    timeseries: list[dict[str, object]] = []
+    degradations: list[dict[str, object]] = []
+    for as_of_date in _replay_window_dates(time_start, time_end):
+        try:
+            as_of_records = _records_as_of(normalized_records, as_of_date)
+            status, confidence = _replay_status_as_of(as_of_records, country_id)
+            timeseries.append({"date": as_of_date, "status": status, "confidence": confidence})
+        except Exception as exc:  # noqa: BLE001 - fail-loud: record, do not drop the day
+            degradations.append(
+                {
+                    "stage": f"replay_timeseries:{as_of_date}",
+                    "status": "degraded",
+                    "exception_type": type(exc).__name__,
+                    "reason": str(exc) or type(exc).__name__,
+                }
+            )
+            timeseries.append({"date": as_of_date, "status": "S6", "confidence": 0.0})
+    return {"timeseries": timeseries, "degradations": degradations}
+
 
 def build_historical_replay_reviews(
     reference_case_library: list[ValidationCase],
@@ -180,6 +280,12 @@ def build_historical_replay_reviews(
         replayed_domains, replayed_status = _derive_country_replay_status(
             replay_input.normalized_records,
             validation_case.country_id,
+        )
+        status_timeseries_result = derive_country_replay_status_timeseries(
+            replay_input.normalized_records,
+            validation_case.country_id,
+            validation_case.time_start,
+            validation_case.time_end,
         )
         comparison = compare_expected_vs_observed(
             validation_case=validation_case,
@@ -234,6 +340,8 @@ def build_historical_replay_reviews(
                 "missing_expected_domains": missing_expected_domains,
                 "unexpected_observed_domains": unexpected_observed_domains,
                 "replay_input_record_count": len(replay_input.normalized_records),
+                "status_timeseries": status_timeseries_result["timeseries"],
+                "status_timeseries_degradations": status_timeseries_result["degradations"],
             }
         )
     return reviews

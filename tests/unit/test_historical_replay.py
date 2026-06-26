@@ -1,7 +1,15 @@
 from pathlib import Path
 
 from siasa.validation.cases import ValidationCase, load_validation_case_library
-from siasa.validation.historical_replay import HistoricalReplayInput, build_historical_replay_reviews, load_historical_replay_inputs
+from siasa.data.normalized_models import NormalizedRecord
+from siasa.validation.historical_replay import (
+    HistoricalReplayInput,
+    _records_as_of,
+    _replay_window_dates,
+    build_historical_replay_reviews,
+    derive_country_replay_status_timeseries,
+    load_historical_replay_inputs,
+)
 
 
 
@@ -78,6 +86,12 @@ def test_build_historical_replay_reviews_executes_replay_against_fixture_backed_
 
     reviews = build_historical_replay_reviews(cases, replay_inputs)
 
+    # AP-26 adds status_timeseries additively; this legacy assertion pins the
+    # pre-existing review fields, so strip the new keys before comparing.
+    reviews = [
+        {key: value for key, value in review.items() if key not in {"status_timeseries", "status_timeseries_degradations"}}
+        for review in reviews
+    ]
     assert reviews == [
         {
             "case_id": "VAL-UKR-2022-001",
@@ -1107,3 +1121,111 @@ def test_challenge_cases_produce_correct_non_perfect_verdicts_and_attention_rout
     assert "VAL-CHE-2024-CHALLENGE-001" in high_ids
     assert "VAL-NLD-2024-CHALLENGE-001" in high_ids
     assert "VAL-CAN-2024-CHALLENGE-001" in high_ids
+
+
+def _b_record(signal_key: str, value: float, day: int, *, country: str = "AAA", source: str = "SRC-B") -> NormalizedRecord:
+    return NormalizedRecord(
+        normalized_id=f"{signal_key}-{day}",
+        country_id=country,
+        timestamp=f"2026-01-{day:02d}T00:00:00Z",
+        domain="B",
+        signal_key=signal_key,
+        value=float(value),
+        provenance_source_id=source,
+        quality_context={"expected_source_count": 1},
+    )
+
+
+def test_replay_window_dates_enumerates_inclusive_daily_range() -> None:
+    assert _replay_window_dates("2026-01-01", "2026-01-03") == ["2026-01-01", "2026-01-02", "2026-01-03"]
+    assert _replay_window_dates("2026-01-05", "2026-01-05") == ["2026-01-05"]
+    assert _replay_window_dates("2026-01-05", "2026-01-01") == []  # start after end
+    assert _replay_window_dates("", "2026-01-01") == []  # invalid input
+
+
+def test_records_as_of_cuts_point_in_time_without_look_ahead() -> None:
+    records = [_b_record("conflict_event_count", 10, day) for day in (1, 2, 5)]
+    as_of = _records_as_of(records, "2026-01-02")
+    assert [r.normalized_id for r in as_of] == ["conflict_event_count-1", "conflict_event_count-2"]
+    assert all(str(r.timestamp)[:10] <= "2026-01-02" for r in as_of)  # no look-ahead
+
+
+def test_replay_status_timeseries_is_per_day_deterministic_and_varies_with_input() -> None:
+    records = (
+        [_b_record("conflict_event_count", 10, day) for day in range(1, 6)]
+        + [_b_record("conflict_event_count", 80, 6)]
+        + [_b_record("protest_event_count", 5, day) for day in range(1, 7)]
+    )
+    result = derive_country_replay_status_timeseries(records, "AAA", "2026-01-01", "2026-01-06")
+    timeseries = result["timeseries"]
+    assert [entry["date"] for entry in timeseries] == [f"2026-01-0{day}" for day in range(1, 7)]
+    assert all(set(entry) == {"date", "status", "confidence"} for entry in timeseries)
+    # acceptance 1: varying input -> the status changes traceably across the window
+    assert len({entry["status"] for entry in timeseries}) >= 2
+    assert result["degradations"] == []
+    # acceptance 2: two identical runs produce bit-identical timeseries
+    assert derive_country_replay_status_timeseries(records, "AAA", "2026-01-01", "2026-01-06") == result
+
+
+def test_replay_status_timeseries_records_explicit_degradation_on_exception(monkeypatch) -> None:
+    import siasa.validation.historical_replay as historical_replay
+
+    def _boom(*args, **kwargs):
+        raise ValueError("forced per-day failure")
+
+    monkeypatch.setattr(historical_replay, "_replay_status_as_of", _boom)
+    records = [_b_record("conflict_event_count", 10, day) for day in range(1, 4)]
+    result = derive_country_replay_status_timeseries(records, "AAA", "2026-01-01", "2026-01-02")
+    # acceptance 3: a forced per-day exception is an explicit degradation entry, not a silent drop
+    assert len(result["degradations"]) == 2
+    entry = result["degradations"][0]
+    assert entry["status"] == "degraded"
+    assert entry["exception_type"] == "ValueError"
+    assert entry["reason"] == "forced per-day failure"
+    assert [item["date"] for item in result["timeseries"]] == ["2026-01-01", "2026-01-02"]
+
+
+def test_reviews_include_additive_status_timeseries() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    cases = load_validation_case_library(repo_root / "vmodel" / "verification" / "validation_reference_cases.yaml")
+    replay_inputs = load_historical_replay_inputs(repo_root / "vmodel" / "verification" / "validation_replay_inputs.yaml")
+    reviews = build_historical_replay_reviews(cases, replay_inputs)
+    assert reviews, "expected at least one review"
+    for review in reviews:
+        assert "status_timeseries" in review
+        assert "status_timeseries_degradations" in review
+        for entry in review["status_timeseries"]:
+            assert set(entry) == {"date", "status", "confidence"}
+
+
+def test_status_timeseries_artifact_is_written_deterministically(tmp_path) -> None:
+    import json
+
+    from siasa.runs.artifacts import write_status_timeseries_artifacts
+
+    reviews = [
+        {
+            "case_id": "VAL-AAA-TS",
+            "country_id": "AAA",
+            "status_timeseries": [{"date": "2026-01-01", "status": "S0", "confidence": 1.0}],
+            "status_timeseries_degradations": [],
+        }
+    ]
+    readmodels_dir = tmp_path / "readmodels"
+    readmodels_dir.mkdir()
+
+    paths = write_status_timeseries_artifacts(readmodels_dir, reviews)
+    assert len(paths) == 1
+    artifact = readmodels_dir / "status_timeseries" / "status_timeseries_VAL-AAA-TS.json"
+    assert artifact.exists()
+
+    first_bytes = artifact.read_bytes()
+    # SwR-087 / acceptance 2: two identical runs produce a bit-identical file
+    write_status_timeseries_artifacts(readmodels_dir, reviews)
+    assert artifact.read_bytes() == first_bytes
+
+    payload = json.loads(first_bytes)
+    assert payload["case_id"] == "VAL-AAA-TS"
+    assert payload["status_timeseries"][0]["status"] == "S0"
+    # no replay reviews -> nothing written
+    assert write_status_timeseries_artifacts(readmodels_dir, None) == []

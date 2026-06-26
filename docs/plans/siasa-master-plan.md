@@ -115,7 +115,7 @@ Regeln:
 | AP-23 | Provenance-Tiefe & In-Chain-Drift | Offen | P3 | Governance | F6: Provenance ist festes Template |
 | AP-24 | Schwellen-Governance (Magic Numbers) | Offen | P4 | Governance | F11 — Phase 4 |
 | AP-25 | Fail-Loud-Policy für Analytikstufen | Erledigt | – | Governance | F10 geschlossen: ALGO-RUNGATE-01 (7 Analytikstufen → explizite Degradationseinträge in artifact_status/Readiness), `runs/run_gate.py`, 5+1 Tests |
-| AP-26 | Status-Zeitreihe im Fenster-Replay | Offen | **P1** | Validierung (Phase 0) | F16: Replay liefert Punktstatus statt Zeitreihe |
+| AP-26 | Status-Zeitreihe im Fenster-Replay | Erledigt | – | Validierung (Phase 0) | F16 geschlossen: tägliche PIT-Status-Zeitreihe (ALGO-REPLAY-TS-01, data-driven via ALGO-ANOM-01), deterministisches Artefakt; Legacy-Punktstatus bleibt Konstante bis AP-30 |
 | AP-27 | Ground-Truth-Redesign mit Negativfällen | Offen | **P1** | Validierung (Phase 1a) | F15: keine S0-Negative, kein Onset, zirkuläre Labels |
 | AP-28 | Skill-Metrik: Fehlalarmrate + No-Skill-Baseline | Offen | **P1** | Validierung (Phase 1b) | F9 real: Fehlalarm/Vorlauf/Brier messbar |
 | AP-29 | Event-Set-Definition (klein, ausgewogen) | Offen | **P2** | Validierung (Phase 2a) | F14 (Vorber.): fokussiertes Positiv/Kontroll-Set |
@@ -153,7 +153,7 @@ Die verbleibende blockierte Arbeit ist externe Quellen-Aktivierung (AP-06) und �
 | ~~P1~~ | 0 | AP-17 | Slow-Layer Streuung/z-Score | **Erledigt** | Analytik-Kern | F3: σ/z-Score geliefert (std_7d/30d, `compute_zscore`); SwR-063 erweitert |
 | ~~P1~~ | 0 | AP-18 | Reale Anomalie-Berechnung (Feature→Anomalie) | **Erledigt** | Analytik-Kern | F1 Live-Site geschlossen: ALGO-ANOM-01 (z-Score über Fenster-Records); Replay-Site → AP-26 |
 | ~~P1~~ | 0 | AP-25 | Fail-Loud-Policy für Analytikstufen | **Erledigt** | Governance | F10: stille Degradation → expliziter Degradationseintrag (ALGO-RUNGATE-01) |
-| **P1** | 0 | AP-26 | Status-Zeitreihe im Fenster-Replay | Offen | Validierung | F16: Punktstatus → tägliche Trajektorie; braucht AP-18 |
+| ~~P1~~ | 0 | AP-26 | Status-Zeitreihe im Fenster-Replay | **Erledigt** | Validierung | F16: tägliche PIT-Zeitreihe (ALGO-REPLAY-TS-01) + deterministisches Artefakt; `historical_replay.py` |
 | **P1** | 1a | AP-27 | Ground-Truth-Redesign mit Negativfällen | Offen | Validierung | F15: S0-Negative, Onset, Trajektorie, Holdout-Split (längster Pol Labels) |
 | **P1** | 1b | AP-16 | Skill-Messharness (Ground-Truth-Backtest) | Offen | Analytik-Kern | F7/F8/F9: Gerüst der Skill-Messung |
 | **P1** | 1b | AP-28 | Skill-Metrik: Fehlalarmrate + No-Skill-Baseline | Offen | Validierung | F9 real; braucht AP-16, AP-26, AP-27 |
@@ -451,7 +451,7 @@ Drei neue Befunde ergänzen F1–F13: **F14** (synthetische Eventdaten), **F15**
 > StR 677→681, SwR 83→87, TC 133→137; alle Invarianten (orphan/missing/mismatch/quality_gap/swr_without_tc) = 0.
 > AP-27..32 bleiben plan-reserviert (Verankerung je Phase). Der AP-26-**Code** folgt im nächsten Commit.
 
-#### AP-26 — Status-Zeitreihe im Fenster-Replay · Status: Offen · Klasse: Validierung
+#### AP-26 — Status-Zeitreihe im Fenster-Replay · Status: Erledigt · Klasse: Validierung
 Phase 0 · Schließt: **F16** · Abhängig von: AP-17, AP-18, AP-25 · Aufwand: M · Risiko: mittel · Trace: SwR-084..087 / StR-678..681 / ALGO-REPLAY-TS-01.
 Ziel: Der Replay-Pfad erzeugt aus `NormalizedRecords` eine **deterministische tägliche Status-Zeitreihe**
 `(date, status, confidence)` über das Fall-Fenster statt eines Einzel-Labels (heute kollabiert
@@ -463,10 +463,10 @@ hier ohnehin auf die PIT-Tageszeitreihe umgebaut wird; verhindert vorzeitigen S0
 
 | TAP | Inhalt | Status | Trace / Hinweis |
 | --- | --- | --- | --- |
-| AP-26.1 | Tages-Fensterung + PIT-Schnitt (`_replay_window_dates`, `_records_as_of` in `historical_replay.py`), kein Look-ahead | Offen | SwR-084 / TC-SwR-084-001 |
-| AP-26.2 | Tägliche Status-Ableitung `derive_country_replay_status_timeseries` (ALGO-REPLAY-TS-01) + Fail-loud-Degradationseintrag | Offen | SwR-085 / ALGO-REPLAY-TS-01 |
-| AP-26.3 | Zeitreihe additiv in `build_historical_replay_reviews` einhängen (fixture + governter Pfad) | Offen | SwR-086 |
-| AP-26.4 | Deterministisches Artefakt `readmodels/status_timeseries_<case>.json` (sort_keys) + Trace/Doku | Offen | SwR-087 / StR-678..681 |
+| AP-26.1 | Tages-Fensterung + PIT-Schnitt (`_replay_window_dates`, `_records_as_of` in `historical_replay.py`), kein Look-ahead | **Erledigt** | SwR-084 / TC-SwR-084-001 |
+| AP-26.2 | Tägliche Status-Ableitung `derive_country_replay_status_timeseries` (ALGO-REPLAY-TS-01, nutzt ALGO-ANOM-01) + Fail-loud-Degradationseintrag pro Tag | **Erledigt** | SwR-085 / ALGO-REPLAY-TS-01 |
+| AP-26.3 | Zeitreihe additiv in `build_historical_replay_reviews` einhängen (Legacy-`==`-Test entkoppelt) | **Erledigt** | SwR-086 |
+| AP-26.4 | Deterministisches Artefakt `readmodels/status_timeseries_<case>.json` (sort_keys, `write_status_timeseries_artifacts`) | **Erledigt** | SwR-087 / StR-678..681 |
 
 #### AP-27 — Ground-Truth-Redesign mit Negativfällen · Status: Offen · Klasse: Validierung
 Phase 1a · Schließt: **F15** · Abhängig von: — (parallel zu Phase 0) · Aufwand: M · Risiko: mittel · Trace: SwR-088..090 / StR-682..684.
@@ -568,7 +568,7 @@ verstecktes Bottleneck für AP-28/AP-32 — vorab schließen.
 | L7 | ~~Domain-D/E/C/A-Coverage dünn~~ | AP-11 | geschlossen | 3 neue Adapter (Frankfurter/Voidly/HDX-INFORM); 4 TAPs extern blockiert (API-Key/DNS) |
 | L8 | ~~GUI zeigt zu wenig Quellen-/Methodik-Transparenz~~ | AP-12 | geschlossen | 3 neue Seiten (Sources, About, Methodology), parametrierbare Zeitachse, aufklappbare Quellen-Details, Cross-Links; 31 Tests |
 | L9 | Keine permanente Datenhaltung — alle Records gehen nach 168h verloren; kein ML-Training möglich | AP-13 | **geschlossen** | 15/15 TAPs erledigt: Parquet-Archiv + DuckDB + Features + ML-Integration + Ops |
-| L10 | Modell gibt konstantes Signal (anomaly_score Konstante); Validierung misst keine Modellgüte | AP-16/17/18/25/26/28 | **teilweise (AP-17, AP-18-Live, AP-25 erledigt)** | Rest: Status-Zeitreihe + Replay-Anomalie (AP-26), Skill-Metrik (AP-16/28) |
+| L10 | Modell gibt konstantes Signal (anomaly_score Konstante); Validierung misst keine Modellgüte | AP-16/17/18/25/26/28 | **teilweise (AP-17, AP-18-Live, AP-25, AP-26 erledigt → Phase 0 geschlossen)** | Rest: Skill-Metrik (AP-16/28, Phase 1); Replay-Punktstatus data-driven erst mit AP-30-Realdaten |
 | L11 | Ground-Truth degeneriert: keine S0-Negative, kein Onset, zirkuläre Labels (F15) | AP-27 | **offen (Phase 1a)** | Label-Redesign — längster Pol; Hoheit Projekteigner |
 | L12 | „Echte" Eventdaten sind synthetisch (4–8 Hand-Records, falsch als provider-derived deklariert) (F14) | AP-29/30/31 | **offen (Phase 2)** | Echter historischer Backfill GDELT/GDACS/WB + PIT + ehrliche Origin-Kennzeichnung — größter Block |
 
