@@ -400,6 +400,10 @@ traceability:
     - StR-686
     - StR-687
     - StR-688
+    - StR-689
+    - StR-690
+    - StR-691
+    - StR-692
   - source_id: TC-SyR-026-001
     relation: verifies
     target_ids:

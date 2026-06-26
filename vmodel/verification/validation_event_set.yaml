@@ -1,0 +1,26 @@
+# AP-29 validation event set (Phase 2a): matched escalation/control pairs for
+# validation against real events, instead of relying on many fixtures. Each entry
+# references an AP-27 reference case_id; per-case window/onset/trajectory/reference_sources
+# are derived from that label entry (validation_reference_cases.yaml) -- not duplicated here.
+#
+# Owner authority (AP-29): WHICH concrete escalations and matched quiet controls form the
+# set (target: 3 escalations + 3 matched controls). This artifact SEEDS one exemplary pair
+# from the existing label library, which currently holds a single curated S0 negative control
+# (VAL-CHE-2024-NEGATIVE-001). The owner curates the remaining pairs once real negative
+# controls + onset dates exist (gated on AP-30 real data). The consistency test
+# (test_validation_cases.py) enforces that every pair stays consistent with the AP-27 library.
+metadata:
+  artifact: validation_event_set
+  governance: owner_authority
+  target_size: "3 escalations + 3 matched quiet controls"
+  references: vmodel/verification/validation_reference_cases.yaml
+  seeded_pairs: 1
+event_pairs:
+  - pair_id: PAIR-UKR-CHE-001
+    rationale: "Exemplary pair: a multi-domain escalation matched with a quiet S0 control."
+    escalation:
+      case_id: VAL-UKR-2022-001
+      assigned_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
+    control:
+      case_id: VAL-CHE-2024-NEGATIVE-001
+      assigned_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]

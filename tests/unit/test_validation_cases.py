@@ -169,6 +169,32 @@ def test_validator_flags_onset_outside_window_and_ungoverned_split() -> None:
     assert report["is_valid"] is False
 
 
+def test_validation_event_set_is_consistent_with_the_ap27_label_library() -> None:
+    # AP-29 / StR-689..691: every event-set pair references AP-27 labels, escalation is a
+    # positive case matched with an S0-negative control, and assigned_sources is a subset of
+    # the referenced case's reference_sources.
+    import yaml
+
+    repo_root = Path(__file__).resolve().parents[2]
+    event_set = yaml.safe_load(
+        (repo_root / "vmodel" / "verification" / "validation_event_set.yaml").read_text(encoding="utf-8")
+    )
+    cases = {case.case_id: case for case in load_validation_case_library(repo_root.joinpath(*_REFERENCE_CASES_PATH))}
+
+    pairs = event_set["event_pairs"]
+    assert pairs, "event set must define at least one matched escalation/control pair"
+    for pair in pairs:
+        escalation, control = pair["escalation"], pair["control"]
+        assert escalation["case_id"] in cases, escalation["case_id"]
+        assert control["case_id"] in cases, control["case_id"]
+        esc_case, ctrl_case = cases[escalation["case_id"]], cases[control["case_id"]]
+        assert esc_case.case_polarity == "positive"
+        assert ctrl_case.case_polarity == "negative"
+        assert ctrl_case.expected_status == "S0"  # StR-691: controls are S0 negatives
+        assert set(escalation["assigned_sources"]) <= set(esc_case.reference_sources)
+        assert set(control["assigned_sources"]) <= set(ctrl_case.reference_sources)
+
+
 def test_validator_anti_circularity_flags_positive_but_exempts_negative() -> None:
     cases = [
         _gt_case("VAL-CIRC", "S3", historical="S3"),  # positive, historical == expected -> circular

@@ -4,7 +4,7 @@ metadata:
   imported_from_workbook: stakeholder_requirements_information_space_mvp_v0_4 (1).xlsx
   imported_sheet: Stakeholder_Reqs
   imported_at_utc: '2026-05-11T13:51:17.436352+00:00'
-  requirement_count: 688
+  requirement_count: 692
   acceptance_criteria_count: 18
 stakeholder_requirements:
 - id: StR-001
@@ -8662,4 +8662,52 @@ stakeholder_requirements:
   acceptance_criteria_refs: []
   source_workbook: phasenplan_validierung_gegen_echte_events_2026-06-25
   source_sheet: AP-28_Skill-Metrik-Fehlalarm-Baseline
+  open_questions: []
+- id: StR-689
+  title: Das Validierungs-Event-Set soll gematchte Eskalations-Kontroll-Paare festlegen
+  category: Validierung & Backtesting
+  statement: Das Validierungs-Event-Set soll ein kleines, ausgewogenes Set gematchter Paare (Ziel 3 Eskalationen + 3 ruhige Kontrollen) festlegen, damit gegen reale Events statt vieler Fixtures geprueft wird.
+  status: accepted
+  source_status: aktiv
+  priority: MVP-Should
+  phase: MVP v1
+  acceptance_criteria_refs: []
+  source_workbook: phasenplan_validierung_gegen_echte_events_2026-06-25
+  source_sheet: AP-29_Event-Set-Definition
+  open_questions: []
+- id: StR-690
+  title: Jedes Event-Set-Paar soll auf einen AP-27-Labeleintrag mit Quell-Zuordnung verweisen
+  category: Validierung & Backtesting
+  statement: Jeder Eskalations- und Kontrollfall des Event-Sets soll auf einen bestehenden AP-27-case_id verweisen und eine Quell-Zuordnung (assigned_sources) tragen, die eine Teilmenge der reference_sources des referenzierten Falls ist.
+  status: accepted
+  source_status: aktiv
+  priority: MVP-Should
+  phase: MVP v1
+  acceptance_criteria_refs: []
+  source_workbook: phasenplan_validierung_gegen_echte_events_2026-06-25
+  source_sheet: AP-29_Event-Set-Definition
+  open_questions: []
+- id: StR-691
+  title: Das Event-Set soll konsistent zur AP-27-Labelbibliothek sein
+  category: Validierung & Backtesting
+  statement: Das Event-Set soll gegen die AP-27-Labelbibliothek konsistent sein - jeder referenzierte Fall existiert, Eskalationen sind Positivfaelle und Kontrollen S0-Negativfaelle, und jede Eskalation hat eine gematchte Kontrolle.
+  status: accepted
+  source_status: aktiv
+  priority: MVP-Should
+  phase: MVP v1
+  acceptance_criteria_refs: []
+  source_workbook: phasenplan_validierung_gegen_echte_events_2026-06-25
+  source_sheet: AP-29_Event-Set-Definition
+  open_questions: []
+- id: StR-692
+  title: Das Event-Set soll als versioniertes Artefakt verankert und dokumentiert sein
+  category: Validierung & Backtesting
+  statement: Das Event-Set soll als versioniertes Artefakt (validation_event_set.yaml) abgelegt, im V-Model verankert und in Masterplan/Handoff dokumentiert sein.
+  status: accepted
+  source_status: aktiv
+  priority: MVP-Should
+  phase: MVP v1
+  acceptance_criteria_refs: []
+  source_workbook: phasenplan_validierung_gegen_echte_events_2026-06-25
+  source_sheet: AP-29_Event-Set-Definition
   open_questions: []

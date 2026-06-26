@@ -11,8 +11,8 @@ def test_stakeholder_verification_coverage_report_covers_all_active_stakeholders
     report = build_stakeholder_verification_coverage_report(repo_root=repo_root)
 
     assert report["metadata"]["work_package"] == "AP-03"
-    assert report["summary"]["active_stakeholder_requirement_count"] == 688
-    assert report["summary"]["stakeholder_verification_covered_count"] == 685
+    assert report["summary"]["active_stakeholder_requirement_count"] == 692
+    assert report["summary"]["stakeholder_verification_covered_count"] == 689
     assert report["summary"]["missing_stakeholder_verification_count"] == 3
     assert report["summary"]["system_requirement_count"] == 53
     assert report["summary"]["software_route_system_requirement_count"] == 30
