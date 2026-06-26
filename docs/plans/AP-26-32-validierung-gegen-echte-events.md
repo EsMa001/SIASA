@@ -113,6 +113,12 @@ bit-gleiche Artefakte bei Wiederholung; erzwungene Ausnahme = expliziter Degrada
 
 ### AP-28: Skill-Metrik mit Fehlalarmrate + No-Skill-Baseline
 
+**Status (2026-06-26): erledigt** (Commit `749b18c`). ALGO-SKILL-02 in
+`validation/skill_metrics.py`: Fehlalarmrate (nur S0-Negative), Vorlaufzeit (AP-26-Zeitreihe +
+Onset), Brier (S-Status-Proxy), No-Skill-Baseline „immer S3" + `beats_baseline`. V-Model
+SwR-091..094/StR-685..688/ALGO-SKILL-02 + Count-Sync; Vollsuite 1161 passed. Zahlen werden erst
+mit echten Labels + AP-30 aussagekraeftig (heute 35 S3-Positive + 1 S0-Negativ-Vorlage).
+
 **Ziel:** AP-16 auf dem redesignten Labelset real machen — mit der Faehigkeit,
 Fehlalarme zu erkennen und eine triviale Baseline zu schlagen.
 
