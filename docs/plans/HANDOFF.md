@@ -26,7 +26,11 @@ Arbeitsweise je Tranche: V-Model-Anker → RED/GREEN → targeted Tests → Full
 
 **Bekannte Umgebungs-Failures (nicht Code-Regression, auf pristine HEAD identisch):** 5× `test_hf_export` + `test_ml_datasets` + `test_ap13_e2e` (fehlendes optionales `datasets`/`torch`); `test_storage_run_history` (Windows-Pfad-Separator); `test_validation_replay_depth_probe` (`case_count` 11≠4 wegen stale lokalem `build/`-Artefakt).
 
-**Nächste offene Baustelle: Phase 1 (Instrument)** — AP-16 (Skill-Harness-Gerüst), AP-27 (Ground-Truth-Redesign mit S0-Negativen, **Hoheit Projekteigner**), AP-28 (Skill-Metrik + No-Skill-Baseline). Detail: Masterplan §3 + §4.C/§4.D.
+**Phase 1 (Instrument) — Fortschritt:**
+- ✅ `9d7be21` **AP-16** Skill-Messharness `ALGO-SKILL-01` (`validation/skill_metrics.py`): Detektionsrate/Domain-Match/Skill-Score aus Replay-Reviews → `skill_metrics.json` + GUI-Skill-Score-KPI; Regressionstest. Anker SwR-039 (kein Count-Sync). Fehlalarm/Vorlauf/Brier → AP-28.
+- ✅ `791a389` **AP-27** Ground-Truth-Redesign (Mechanik): `ValidationCase`-Schema (onset/trajectory/split/polarity, backward-kompatibel) + `validate_reference_case_library` (Onset-im-Fenster, Split/Polarity, Anti-Zirkularität) + **1 exemplarischer S0-Fall** `VAL-CHE-2024-NEGATIVE-001` (Vorlage). #8-Verankerung SwR-088..090/StR-682..684 + Count-Sync (StR→684, SwR→90, TC→140, alle Invarianten 0). **Echte Label-Kuratierung (welche S0-Negative, Onset-Daten) bleibt Owner-Hoheit.**
+
+**Letzte offene Phase-1-Baustelle: AP-28** (Skill-Metrik `ALGO-SKILL-02`) — erweitert ALGO-SKILL-01 um **Fehlalarmrate** (auf den S0-Negativen aus AP-27), **No-Skill-Baseline** („immer S3"), **Vorlaufzeit** (aus AP-26-Zeitreihe + Onset) und **Brier-Score**. Entsperrt (braucht AP-16 ✅, AP-26 ✅, AP-27 ✅). Trace: SwR-091..094 / StR-685..688 / ALGO-SKILL-02 (#8-Verankerung wie AP-26/27). Detail: Masterplan §4.D.
 
 ---
 
@@ -97,4 +101,4 @@ Detail: `docs/plans/siasa-master-plan.md` (§3 Backlog, §4.C/§4.D) · `docs/pl
 ---
 
 ## 6. Empfohlener nächster Schritt
-Phase 0 ist abgeschlossen (s. §0). Nächste Baustelle ist **Phase 1 (Instrument)**: zuerst **AP-16** (Skill-Messharness-Gerüst), dann **AP-27** (Ground-Truth-Redesign mit S0-Negativen — **Hoheit Projekteigner**, braucht Label-Kuratierung) und **AP-28** (Skill-Metrik + No-Skill-Baseline). Alternativ die offenen Audit-Restpunkte aus §4 (3 Verifikations-Routen SyR-051/052/053; Cluster-B `release_failure_drill`-Lokalgate). Mit dem Nutzer abstimmen — AP-27 erfordert fachliche Owner-Festlegungen.
+Phase 0 + AP-16 + AP-27 sind abgeschlossen (s. §0). Letzte offene Phase-1-Baustelle ist **AP-28** (Skill-Metrik `ALGO-SKILL-02`): erweitert die AP-16-Skill-Metrik um Fehlalarmrate (auf den AP-27-S0-Negativen), No-Skill-Baseline („immer S3"), Vorlaufzeit (AP-26-Zeitreihe + Onset) und Brier-Score; mit #8-Verankerung (SwR-091..094/StR-685..688/ALGO-SKILL-02 + Count-Sync, gleiche Mechanik wie AP-26/27). Danach Phase 2 (AP-29→30→31→32, echte Daten — größter Block AP-30). Alternativ offene Audit-Restpunkte aus §4 (3 Verifikations-Routen SyR-051/052/053; Cluster-B-Lokalgate). Hinweis: bevor AP-28 echte Fehlalarm-/Vorlauf-Zahlen liefert, sollte der Owner den echten S0-Negativ-/Onset-Labelsatz kuratieren (AP-27 lieferte nur die Mechanik + 1 Beispiel).
