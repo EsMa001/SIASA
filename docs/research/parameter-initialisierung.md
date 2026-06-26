@@ -151,17 +151,31 @@ Aktuell: Amplifikation bei Wert `>1.5×` der Erstbeobachtung.
 | R₀-Notes (Berkeley), Informations-Diffusion (Nature) | Amplifikations-/Epidemie-Schwellen (gefetcht) ✓ |
 
 ## Ehrliche Einordnung des Recherche-Stands
-**Familie 2 + die übergreifende Methodik** sind quellenstark belegt (INFORM/OECD-JRC, 3-0). Die Quellen für
-**Familien 1, 4, 5, 6, 7, 8** wurden gefetcht (als Primärquellen gelistet), ihre Einzel-Claims aber wegen des
-Rate-Limits **nicht mehr 3-0-verifiziert** — die dortigen Empfehlungen stützen sich auf diese Quellen +
-etablierte Konvention, nicht auf frische adversariale Verifikation. Eine erneute, gezielte Verifikation der
-offenen Familien ist möglich (nach Limit-Reset).
+**Familie 2 + die übergreifende Methodik** sind quellenstark belegt (INFORM/OECD-JRC, 3-0). Die zunächst am
+Rate-Limit abgebrochenen **Familien 1, 4, 5, 6, 7, 8** wurden in einer **2. Verifikationsrunde** gezielt
+nachgeprüft (siehe Nachtrag): **5 von 6 sind jetzt quellenbelegt bestätigt**, nur Familie 8 (R₀) bleibt „uncertain".
+
+## Verifikations-Nachtrag (2. Runde)
+Gezielte adversariale Verifikation der ursprünglich offenen Familien:
+
+| Familie | Verdikt | Kern-Empfehlung | Quelle |
+|---|---|---|---|
+| 1 · SPC-Schwellen | **confirmed** ✓✓ | k=3 (3σ) Action-Limit + WECO-Run-Rules (2-von-3 >2σ, 4-von-5 >1σ, 8 einseitig); σ aus ~20–25 Subgruppen; ~0,27 % Fehlalarm/Punkt | NIST/SEMATECH e-Handbook (pmc32) |
+| 4 · Bayes-Elicitation | **confirmed** ✓✓ | Zentren = Mittelpunkte der D-Status-Bänder; σ **nicht** hartcodieren, via SHELF/Cooke elicitieren bzw. kalibrieren (σ=0.2 über-überlappt) | SHELF (Sheffield) |
+| 5 · Fusion-Reliabilität | **confirmed** ✓✓ | NATO-Admiralty 6-Stufen (A–F × 1–6); Suffizienz-Tiers darauf mappen; Dempster-Shafer-Konfliktmasse für Kontradiktion | NATO-Admiralty (AJP-2.1) |
+| 6 · Unsicherheit (GUM) | **confirmed** ✓✓ | RSS-Quadratur beibehalten; k=1.645 (90 %) / 1.96 (95 %); Stufen-Rauschen als Type-B | NIST TN 1297 §5 |
+| 7 · Skill/Verification | **confirmed** ✓✓ | Standardmetriken separat: Brier, **BSS = 1 − BS/BS_ref** vs. No-Skill-Baseline (BSS=0 kein Skill), POD/FAR/AUC/Lead-Time; Regressions-Schwellen ans Skill-CI koppeln | CAWCR Forecast Verification |
+| 8 · Info-Epidemiologie (R₀) | *uncertain* ○ | R₀=1 als kritische Schwelle (R₀>1 Wachstum); Quelle stützt R₀-Definition + Verdopplungszeit, aber nicht eindeutig die 1.5×-Zuordnung | PMC11407535 |
+
+Damit sind die Empfehlungen für Familien 1/4/5/6/7 von **gefetcht/Konvention (✓/○)** auf **quellenbelegt bestätigt (✓✓)** hochgestuft; Familie 8 bleibt offen (R₀-Richtung bestätigt, exakte Schwelle nicht).
 
 ## Operationalisierung
 - **Governte Single-Source-of-Truth:** `vmodel/project/scoring_thresholds.yaml` — jede Schwelle mit `current`,
   `recommended_initial`, `rationale`, `reference`, `governance: owner_authority` und `wired_to_config`-Flag.
-- **Live verdrahtet (AP-24-Slice):** Anomalie-Bound/-Mindestpunkte (`scoring/anomaly.py`) und D-Status-Cutpoints
-  (`scoring/domain_status.py`) lesen ihre Werte aus der Config (behavior-preserving, Fallback = aktuelle Werte).
+- **Live verdrahtet:** Alle 7 wirksamen Familien (Anomalie/D-Status, Daten-Suffizienz, Bayes-Status,
+  Cross-Domain-Fusion, Unsicherheits-Propagation, Skill-/Validierungs-Metriken, Info-Epidemiologie) lesen ihre
+  Werte über `scoring/scoring_thresholds.py` aus der Config (behavior-preserving, Fallback = aktuelle Werte). Nur
+  die Multi-Domain-S0–S6-Aggregation bleibt vorerst dokumentiert (`wired_to_config: false`).
 - **Sensitivitätsanalyse:** `scripts/threshold_sensitivity.py` perturbiert jede governte Schwelle und misst den
   Einfluss auf die Status-/Skill-Ergebnisse über die Referenzfälle (operationalisiert die OECD/JRC-Empfehlung,
   „welche Parameter zählen wirklich").
