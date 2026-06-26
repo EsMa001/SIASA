@@ -527,7 +527,7 @@ Die vier Adapter sind heute **live-only** (kein historisches Datumsfenster) — 
 
 | TAP | Inhalt | Status | Trace / Hinweis |
 | --- | --- | --- | --- |
-| AP-30.1 | Adapter um historisches Datumsfenster erweitern (GDELT DOC `startdatetime/enddatetime`, GDELT Events datierte Exports, GDACS Archiv, World Bank `date`-Range); **Live-Pfad unverändert** | Offen | SwR-095..098 |
+| AP-30.1 | Adapter um historisches Datumsfenster erweitern (GDELT DOC `startdatetime/enddatetime`, GDELT Events datierte Exports, GDACS Archiv, World Bank `date`-Range); **Live-Pfad unverändert** | **Erledigt** (`11ce56b`; alle 4 Adapter, `date_window`-Feld, Live-Pfad byte-genau, SwR-095..098 + neuer Slice + Count-Sync) | SwR-095..098 |
 | AP-30.2 | Orchestrator `scripts/build_historical_backfill.py`: ziehen→`normalize_records`→`ArchiveWriter`→`DailyAligner` (ALGO-BACKFILL-01); **≥100 Records/Fall** | Offen | SwR-099 / ALGO-BACKFILL-01 |
 | AP-30.3 | PIT-Replay ohne Look-ahead (verschobener Stichtag; nicht-NaN-Feldzahl steigt monoton mit `query_date`) | Offen | SwR-100 |
 | AP-30.4 | Reale Bundles + Manifest-Governance für ≥1 Positiv- + ≥1 Kontrollfall (`_validate_archival_replay_bundle` grün, ≥100 Records) | Offen | SwR-101 / StR-693..696 |

@@ -115,7 +115,7 @@ Arbeitsweise je Tranche: V-Model-Anker → RED/GREEN → targeted Tests → Full
 **✅ Erledigt:** Phase 0 (AP-17/18/25/26) · Phase 1 (AP-16/27/28) · **AP-29** (Event-Set + Kuratierung v2, 8 research-verifizierte Paare) · **AP-24** (Schwellen-Governance, vorgezogen; bis auf Owner-Policy-Werte).
 
 **▶ Jetzt — datenunabhängiger Track (kein Owner-Input nötig):**
-1. **AP-30.1** Adapter-Datumsfenster-Mechanik (GDELT/GDACS/WB historisches Fenster, Live-Pfad unverändert) — analog AP-29 Mechanik-vor-Daten.
+1. ✅ **AP-30.1 erledigt** (`11ce56b`): alle 4 Adapter (GDELT-DOC/-Events, GDACS, World Bank) um optionales `date_window` erweitert, Live-Pfad byte-genau unverändert; SwR-095..098 + neuer Slice `ap-30-historischer-backfill` + Count-Sync (94→98, slice_count 12→13). Nächste datenunabhängige Schritte:
 2. **Audit-Restpunkte** (§4): 3 Verifikations-Routen SyR-051/052/053 + Cluster-B-Lokalgate.
 3. **AP-24-Owner-Policy** (leichtgewichtig, je 1 Owner-Ja): CI 90/95 · S0–S6 geometrisches Mittel · NATO-Fusion-Mapping.
 
