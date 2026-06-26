@@ -11,7 +11,8 @@ from __future__ import annotations
 
 import pyarrow as pa
 import pytest
-import torch
+
+torch = pytest.importorskip("torch")  # AP-13 ML extra is optional; skip cleanly when absent
 
 from siasa.ml.datasets import SIASATimeSeriesDataset, siasa_collate_fn
 

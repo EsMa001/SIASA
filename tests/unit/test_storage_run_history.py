@@ -131,8 +131,8 @@ def test_persist_operational_latest_run_upserts_existing_run(tmp_path: Path) -> 
     assert len(runs) == 1
     assert runs[0].run_status == "success"
     assert runs[0].pilot_set == "extended-focus-complete"
-    assert runs[0].artifacts_dir.endswith("artifacts/latest_v2")
-    assert runs[0].gui_index.endswith("gui/latest_v2/index.html")
+    assert runs[0].artifacts_dir.replace("\\", "/").endswith("artifacts/latest_v2")
+    assert runs[0].gui_index.replace("\\", "/").endswith("gui/latest_v2/index.html")
     assert runs[0].failed_sources == []
     assert runs[0].country_set_id == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
     assert runs[0].countries_total == 11

@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
 import yaml
 
 
@@ -25,8 +26,25 @@ def _load_validation_backtest() -> dict[str, object]:
     return json.loads((_resolve_probe_root() / "validation_backtest.json").read_text(encoding="utf-8"))
 
 
+def _load_dedicated_depth_probe_backtest() -> dict[str, object]:
+    """Load the dedicated depth-probe backtest, or skip when its bundle is absent.
+
+    The generic ``latest`` run is a different bundle (not the 4-case depth probe),
+    so the depth-probe-shape assertions only hold against the dedicated probe
+    artifact; skip cleanly rather than reading an unrelated run.
+    """
+    for candidate in _PROBE_CANDIDATES[:2]:
+        path = candidate / "validation_backtest.json"
+        if path.exists():
+            return json.loads(path.read_text(encoding="utf-8"))
+    pytest.skip(
+        "dedicated validation-replay depth-probe bundle not generated under build/run_artifacts; "
+        "run the probe to enable depth-shape assertions"
+    )
+
+
 def test_validation_replay_depth_probe_has_multi_case_portfolio_summary() -> None:
-    backtest = _load_validation_backtest()
+    backtest = _load_dedicated_depth_probe_backtest()
 
     portfolio_summary = backtest.get("portfolio_summary")
     assert isinstance(portfolio_summary, dict)

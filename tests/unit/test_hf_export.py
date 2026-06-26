@@ -16,6 +16,8 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 
+pytest.importorskip("datasets")  # AP-13 HuggingFace export is an optional ml extra; skip cleanly when absent
+
 from siasa.ml.hf_export import HFExporter, DatasetCardInfo
 
 

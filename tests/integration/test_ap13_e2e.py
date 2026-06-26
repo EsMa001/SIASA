@@ -24,7 +24,9 @@ from pathlib import Path
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
-import torch
+
+torch = pytest.importorskip("torch")  # AP-13 ML extra is optional; skip cleanly when absent
+pytest.importorskip("datasets")
 
 from siasa.data.archive import ArchiveWriter, ARCHIVE_SCHEMA
 from siasa.data.normalized_models import NormalizedRecord
