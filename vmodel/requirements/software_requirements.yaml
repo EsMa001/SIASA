@@ -5,7 +5,7 @@ metadata:
   - vmodel/architecture/system_architecture.md
   created_at_utc: '2026-05-11T14:25:30.979384+00:00'
   status: draft_baseline_derived
-  software_requirement_count: 100
+  software_requirement_count: 101
 software_requirements:
 - id: SwR-001
   title: Source catalog record schema
@@ -949,6 +949,14 @@ software_requirements:
   status: accepted
   derives_from:
   - SyR-006
+  - SyR-034
+  verification_method: unit_test
+  allocated_to: DDS-002
+- id: SwR-101
+  title: PIT-Replay monotonicity validation
+  statement: The software shall validate that point-in-time feature assembly produces monotonically non-decreasing non-NaN feature counts as query_date advances, proving no look-ahead bias.
+  status: accepted
+  derives_from:
   - SyR-034
   verification_method: unit_test
   allocated_to: DDS-002

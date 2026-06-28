@@ -1489,3 +1489,10 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_historical_backfill.py
   status: accepted
+- id: TC-SwR-101-001
+  title: Verify PIT-Replay monotonicity (no look-ahead bias)
+  requirement_ids:
+  - SwR-101
+  method: unit_test
+  test_file: tests/unit/test_pit_monotonicity.py
+  status: accepted

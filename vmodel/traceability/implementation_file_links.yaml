@@ -953,6 +953,19 @@ implementation_slices:
       - tests/unit/test_gdelt_events_adapter.py
       - tests/unit/test_gdacs_adapter.py
       - tests/unit/test_world_bank_adapter.py
+  backfill-pit-monotonicity:
+    requirement_ids:
+      - SwR-101
+    implementation_map:
+      SwR-101:
+        code_paths:
+          - src/siasa/validation/pit_monotonicity.py
+        test_paths:
+          - tests/unit/test_pit_monotonicity.py
+    known_code_paths:
+      - src/siasa/validation/pit_monotonicity.py
+    known_test_paths:
+      - tests/unit/test_pit_monotonicity.py
   historical-backfill-orchestrator:
     requirement_ids:
       - SwR-100
