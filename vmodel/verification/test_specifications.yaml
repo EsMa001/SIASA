@@ -1482,3 +1482,10 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_provenance_graph.py
   status: accepted
+- id: TC-SwR-100-001
+  title: Verify historical backfill orchestrator (ALGO-BACKFILL-01)
+  requirement_ids:
+  - SwR-100
+  method: unit_test
+  test_file: tests/unit/test_historical_backfill.py
+  status: accepted

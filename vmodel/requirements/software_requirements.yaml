@@ -5,7 +5,7 @@ metadata:
   - vmodel/architecture/system_architecture.md
   created_at_utc: '2026-05-11T14:25:30.979384+00:00'
   status: draft_baseline_derived
-  software_requirement_count: 99
+  software_requirement_count: 100
 software_requirements:
 - id: SwR-001
   title: Source catalog record schema
@@ -940,6 +940,15 @@ software_requirements:
   statement: The software shall extend the provenance graph (ProvenanceEdge) with transform_version and algorithm_id metadata and detect in-chain drift (changed mapping or algorithm version on identical source graphs) via compare_provenance_runs (ALGO-PROV-02), setting lineage_changed=True when any edge-level version changes.
   status: accepted
   derives_from:
+  - SyR-034
+  verification_method: unit_test
+  allocated_to: DDS-002
+- id: SwR-100
+  title: Historical backfill orchestrator
+  statement: The software shall provide a historical backfill orchestrator (ALGO-BACKFILL-01) that fetches adapter data with date_window, normalizes records, and produces a governed manifest per validation case.
+  status: accepted
+  derives_from:
+  - SyR-006
   - SyR-034
   verification_method: unit_test
   allocated_to: DDS-002

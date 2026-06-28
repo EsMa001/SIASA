@@ -451,8 +451,9 @@ Drei neue Befunde ergänzen F1–F13: **F14** (synthetische Eventdaten), **F15**
 
 > **Trace-Allokation (disjunkt, fortlaufend ab Bestand SwR-083 / StR-677 / TC-SwR-NNN-NNN):**
 > AP-26 = SwR-084..087, StR-678..681, ALGO-REPLAY-TS-01 · AP-27 = SwR-088..090, StR-682..684 ·
-> AP-28 = SwR-091..094, StR-685..688, ALGO-SKILL-02 · AP-29 = StR-689..692 · AP-30 = SwR-095..101,
-> StR-693..696, ALGO-BACKFILL-01 · AP-31 = SwR-102, StR-697 · AP-32 = SwR-103..106, StR-698..701.
+> AP-28 = SwR-091..094, StR-685..688, ALGO-SKILL-02 · AP-29 = StR-689..692 · AP-23 = SwR-099 ·
+> AP-30 = SwR-095..098 (done) + SwR-100..102,
+> StR-693..696, ALGO-BACKFILL-01 · AP-31 = SwR-103, StR-697 · AP-32 = SwR-104..107, StR-698..701.
 > Jede ID wird nur **einmal** über alle APs vergeben; pinning auf einzelne TAPs bei Implementierung.
 
 > **Verankerungs-Stand (2026-06-25):** Die **AP-26**-Anforderungen sind in `vmodel/` verankert (Planning-Commit,
@@ -520,7 +521,7 @@ verlinkt auf bestehende `case_id`.
 | AP-29.4 | Trace (StR-689..692) + Doku (Masterplan/Matrix) | Offen | StR-692 |
 
 #### AP-30 — Historischer Backfill GDELT/GDACS/World Bank + PIT · Status: Offen · Klasse: Daten
-Phase 2b · Schließt: **F14** · Abhängig von: AP-29, **AP-13** (DailyAligner/PIT/ArchiveWriter) · Aufwand: **XL** · Risiko: **hoch** · Trace: SwR-095..101 / StR-693..696 / ALGO-BACKFILL-01.
+Phase 2b · Schließt: **F14** · Abhängig von: AP-29, **AP-13** (DailyAligner/PIT/ArchiveWriter) · Aufwand: **XL** · Risiko: **hoch** · Trace: SwR-095..098, SwR-100..102 / StR-693..696 / ALGO-BACKFILL-01.
 **Hoheit Projekteigner:** Fallauswahl (aus AP-29), Daten-Lizenz/Quellzitierung, API-Zugänge.
 Ziel: die 8-Record-Fixtures durch real erfasste, look-ahead-freie, auf Tagesauflösung alignierte Daten ersetzen.
 Die vier Adapter sind heute **live-only** (kein historisches Datumsfenster) — das ist die Kernlücke.
@@ -528,36 +529,36 @@ Die vier Adapter sind heute **live-only** (kein historisches Datumsfenster) — 
 | TAP | Inhalt | Status | Trace / Hinweis |
 | --- | --- | --- | --- |
 | AP-30.1 | Adapter um historisches Datumsfenster erweitern (GDELT DOC `startdatetime/enddatetime`, GDELT Events datierte Exports, GDACS Archiv, World Bank `date`-Range); **Live-Pfad unverändert** | **Erledigt** (`11ce56b`; alle 4 Adapter, `date_window`-Feld, Live-Pfad byte-genau, SwR-095..098 + neuer Slice + Count-Sync) | SwR-095..098 |
-| AP-30.2 | Orchestrator `scripts/build_historical_backfill.py`: ziehen→`normalize_records`→`ArchiveWriter`→`DailyAligner` (ALGO-BACKFILL-01); **≥100 Records/Fall** | Offen | SwR-099 / ALGO-BACKFILL-01 |
-| AP-30.3 | PIT-Replay ohne Look-ahead (verschobener Stichtag; nicht-NaN-Feldzahl steigt monoton mit `query_date`) | Offen | SwR-100 |
-| AP-30.4 | Reale Bundles + Manifest-Governance für ≥1 Positiv- + ≥1 Kontrollfall (`_validate_archival_replay_bundle` grün, ≥100 Records) | Offen | SwR-101 / StR-693..696 |
+| AP-30.2 | Orchestrator `scripts/build_historical_backfill.py`: ziehen→`normalize_records`→`ArchiveWriter`→`DailyAligner` (ALGO-BACKFILL-01); **≥100 Records/Fall** | **Erledigt** (Mechanik; reale Pulls owner-gated) | SwR-100 / ALGO-BACKFILL-01 |
+| AP-30.3 | PIT-Replay ohne Look-ahead (verschobener Stichtag; nicht-NaN-Feldzahl steigt monoton mit `query_date`) | Offen | SwR-101 |
+| AP-30.4 | Reale Bundles + Manifest-Governance für ≥1 Positiv- + ≥1 Kontrollfall (`_validate_archival_replay_bundle` grün, ≥100 Records) | Offen | SwR-102 / StR-693..696 |
 
 #### AP-31 — Provenance: real-captured vs fixture · Status: Offen · Klasse: Daten/Governance
-Phase 2c · Schließt: **F14** · Abhängig von: AP-30 · Aufwand: M · Risiko: niedrig · Trace: SwR-102 / StR-697.
+Phase 2c · Schließt: **F14** · Abhängig von: AP-30 · Aufwand: M · Risiko: niedrig · Trace: SwR-103 / StR-697.
 Ziel: die heute pauschal falsche „Provider-derived"-Behauptung in allen 35 Manifest-Einträgen korrigieren und
 ein validiertes Flag `data_origin` (`real-captured`|`fixture`) durch die Pipeline bis GUI/Report durchreichen.
 **Merge-Hotspot:** ändert dieselben Funktionen additiv wie AP-26.
 
 | TAP | Inhalt | Status | Trace / Hinweis |
 | --- | --- | --- | --- |
-| AP-31.1 | Manifest-Flag `data_origin` einführen, Loader **fail-loud** bei fehlend/ungültig | Offen | SwR-102 / TC-SwR-102-001 |
-| AP-31.2 | `provenance_notes` der Fixtures korrigieren (keine „provider-derived"-Behauptung mehr) | Offen | TC-SwR-102-002 |
-| AP-31.3 | `data_origin` durch Pipeline → Read-Model + `data_origin_counts` (Origin-Mix) | Offen | TC-SwR-102-003 |
-| AP-31.4 | GUI: Origin-Spalte + Origin-Mix (HTML-Assert: Header „Origin", colspan 12) | Offen | TC-SwR-102-004 |
-| AP-31.5 | Trace (SwR-102, StR-697) + Doku (Masterplan/Matrix) | Offen | StR-697 |
+| AP-31.1 | Manifest-Flag `data_origin` einführen, Loader **fail-loud** bei fehlend/ungültig | Offen | SwR-103 / TC-SwR-103-001 |
+| AP-31.2 | `provenance_notes` der Fixtures korrigieren (keine „provider-derived"-Behauptung mehr) | Offen | TC-SwR-103-002 |
+| AP-31.3 | `data_origin` durch Pipeline → Read-Model + `data_origin_counts` (Origin-Mix) | Offen | TC-SwR-103-003 |
+| AP-31.4 | GUI: Origin-Spalte + Origin-Mix (HTML-Assert: Header „Origin", colspan 12) | Offen | TC-SwR-103-004 |
+| AP-31.5 | Trace (SwR-103, StR-697) + Doku (Masterplan/Matrix) | Offen | StR-697 |
 
 #### AP-32 — End-to-End-Validierung + Skill-Report · Status: Offen · Klasse: Validierung
-Phase 3 · Schließt: **F7/F8 (real)** · Abhängig von: AP-26, AP-28, AP-30, AP-31 (AP-16/AP-27 transitiv) · Aufwand: M · Risiko: niedrig · Trace: SwR-103..106 / StR-698..701.
+Phase 3 · Schließt: **F7/F8 (real)** · Abhängig von: AP-26, AP-28, AP-30, AP-31 (AP-16/AP-27 transitiv) · Aufwand: M · Risiko: niedrig · Trace: SwR-104..107 / StR-698..701.
 Ziel: das korrigierte Modell über die realen Fenster mit PIT-Features laufen lassen und die Güte ehrlich
 beziffern — Skill-Metriken vs. No-Skill-Baseline, Fehlalarmrate auf Kontrollen, Grenzen + Origin-Mix explizit.
 Konsument/Aggregator, **erfindet keine neue Modellmechanik**.
 
 | TAP | Inhalt | Status | Trace / Hinweis |
 | --- | --- | --- | --- |
-| AP-32.1 | E2E-Lauf `src/siasa/validation/e2e_validation_run.py`: Modell über reale Fenster, Status-Zeitreihe + Positiv/Kontroll-Trennung | Offen | SwR-103 |
-| AP-32.2 | Report-Aggregation `validation_report.py`: Skill-Metriken (ALGO-SKILL-02) vs No-Skill-Baseline, `beats_baseline` | Offen | SwR-104 |
-| AP-32.3 | Ehrlicher Grenzen-/Origin-Mix-Block (kleine Fallzahl, Coverage, real vs fixture); Warnung bei reinem Fixture-Set | Offen | SwR-105 |
-| AP-32.4 | Artefakt `readmodels/validation_report.json` (deterministisch) + GUI-Sichtbarkeit | Offen | SwR-106 / StR-698..701 |
+| AP-32.1 | E2E-Lauf `src/siasa/validation/e2e_validation_run.py`: Modell über reale Fenster, Status-Zeitreihe + Positiv/Kontroll-Trennung | Offen | SwR-104 |
+| AP-32.2 | Report-Aggregation `validation_report.py`: Skill-Metriken (ALGO-SKILL-02) vs No-Skill-Baseline, `beats_baseline` | Offen | SwR-105 |
+| AP-32.3 | Ehrlicher Grenzen-/Origin-Mix-Block (kleine Fallzahl, Coverage, real vs fixture); Warnung bei reinem Fixture-Set | Offen | SwR-106 |
+| AP-32.4 | Artefakt `readmodels/validation_report.json` (deterministisch) + GUI-Sichtbarkeit | Offen | SwR-107 / StR-698..701 |
 
 **Kritischer Pfad (AP-26…32):** `AP-18 → AP-26`; parallel `AP-27 → AP-29 → AP-30 → AP-31`;
 `(AP-16, AP-26, AP-27) → AP-28`; `(AP-26, AP-28, AP-30, AP-31) → AP-32`. Längster Pfad =

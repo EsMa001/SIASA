@@ -458,9 +458,9 @@ def test_build_repo_closure_report_aggregates_all_governed_slices() -> None:
     report = build_repo_closure_report(repo_root=repo_root)
 
     assert report["summary"] == {
-        "slice_count": 14,
-        "requirement_count": 99,
-        "closed": 99,
+        "slice_count": 15,
+        "requirement_count": 100,
+        "closed": 100,
         "at_risk": 0,
     }
     assert report["slice_ids"] == [
@@ -472,6 +472,7 @@ def test_build_repo_closure_report_aggregates_all_governed_slices() -> None:
         "feature-computation-foundation",
         "governance-and-run-controls",
         "gui-readmodels-and-annotations",
+        "historical-backfill-orchestrator",
         "ml-training-data-lake",
         "normalization-and-mapping",
         "provenance-in-chain-drift",
@@ -485,12 +486,14 @@ def test_build_repo_closure_report_aggregates_all_governed_slices() -> None:
     assert report["slices"][2]["summary"] == {"closed": 4, "at_risk": 0}
     assert report["slices"][3]["slice_id"] == "baseline-and-status-engines"
     assert report["slices"][3]["summary"] == {"closed": 8, "at_risk": 0}
-    assert report["slices"][10]["slice_id"] == "provenance-in-chain-drift"
-    assert report["slices"][10]["summary"] == {"closed": 1, "at_risk": 0}
-    assert report["slices"][12]["slice_id"] == "snapshot-and-lineage"
-    assert report["slices"][12]["summary"] == {"closed": 3, "at_risk": 0}
-    assert report["slices"][13]["slice_id"] == "validation-and-backtest"
-    assert report["slices"][13]["summary"] == {"closed": 13, "at_risk": 0}
+    assert report["slices"][8]["slice_id"] == "historical-backfill-orchestrator"
+    assert report["slices"][8]["summary"] == {"closed": 1, "at_risk": 0}
+    assert report["slices"][11]["slice_id"] == "provenance-in-chain-drift"
+    assert report["slices"][11]["summary"] == {"closed": 1, "at_risk": 0}
+    assert report["slices"][13]["slice_id"] == "snapshot-and-lineage"
+    assert report["slices"][13]["summary"] == {"closed": 3, "at_risk": 0}
+    assert report["slices"][14]["slice_id"] == "validation-and-backtest"
+    assert report["slices"][14]["summary"] == {"closed": 13, "at_risk": 0}
 
 
 def test_build_traceability_integrity_report_is_globally_clean() -> None:
@@ -499,11 +502,11 @@ def test_build_traceability_integrity_report_is_globally_clean() -> None:
     report = build_traceability_integrity_report(repo_root=repo_root)
 
     assert report["summary"] == {
-        "requirement_count": 99,
-        "mapped_requirement_count": 99,
+        "requirement_count": 100,
+        "mapped_requirement_count": 100,
         "missing_requirement_mapping_count": 0,
         "orphan_mapped_requirement_count": 0,
-        "slice_count": 14,
+        "slice_count": 15,
         "unhealthy_slice_count": 0,
         "closure_at_risk": 0,
     }
@@ -511,9 +514,9 @@ def test_build_traceability_integrity_report_is_globally_clean() -> None:
     assert report["orphan_mapped_requirements"] == []
     assert report["unhealthy_slices"] == []
     assert report["repo_closure"]["summary"] == {
-        "slice_count": 14,
-        "requirement_count": 99,
-        "closed": 99,
+        "slice_count": 15,
+        "requirement_count": 100,
+        "closed": 100,
         "at_risk": 0,
     }
 
