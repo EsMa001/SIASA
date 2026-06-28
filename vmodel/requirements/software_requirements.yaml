@@ -5,7 +5,7 @@ metadata:
   - vmodel/architecture/system_architecture.md
   created_at_utc: '2026-05-11T14:25:30.979384+00:00'
   status: draft_baseline_derived
-  software_requirement_count: 98
+  software_requirement_count: 99
 software_requirements:
 - id: SwR-001
   title: Source catalog record schema
@@ -935,3 +935,11 @@ software_requirements:
   - SyR-007
   verification_method: unit_test
   allocated_to: DDS-001
+- id: SwR-099
+  title: Provenance in-chain drift detection
+  statement: The software shall extend the provenance graph (ProvenanceEdge) with transform_version and algorithm_id metadata and detect in-chain drift (changed mapping or algorithm version on identical source graphs) via compare_provenance_runs (ALGO-PROV-02), setting lineage_changed=True when any edge-level version changes.
+  status: accepted
+  derives_from:
+  - SyR-034
+  verification_method: unit_test
+  allocated_to: DDS-002

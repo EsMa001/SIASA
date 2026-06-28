@@ -953,3 +953,16 @@ implementation_slices:
       - tests/unit/test_gdelt_events_adapter.py
       - tests/unit/test_gdacs_adapter.py
       - tests/unit/test_world_bank_adapter.py
+  provenance-in-chain-drift:
+    requirement_ids:
+      - SwR-099
+    implementation_map:
+      SwR-099:
+        code_paths:
+          - src/siasa/analysis/provenance_graph.py
+        test_paths:
+          - tests/unit/test_provenance_graph.py
+    known_code_paths:
+      - src/siasa/analysis/provenance_graph.py
+    known_test_paths:
+      - tests/unit/test_provenance_graph.py

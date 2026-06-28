@@ -7,7 +7,7 @@
 > **Evidenz-/Nachweis-Begleiter:** `docs/plans/siasa-capability-fulfillment-matrix.md`
 > (detailliertes Status-/Test-/Probe-Ledger; wird von Produktionscode gelesen und bleibt aktiv).
 
-Stand: 2026-06-25
+Stand: 2026-06-28
 Status: Aktiv – einzige Planungsquelle für die Vorwärtssteuerung
 
 > **Namespace-Hinweis (AP-IDs):** Maßgeblich für `AP-NN` ist allein dieses L0-Dokument. Der
@@ -112,7 +112,7 @@ Regeln:
 | AP-20 | Echte Abhängigkeitsdetektion + Zentralität | Offen | P4 | Analytik-Kern | F4 — Phase 4 |
 | AP-21 | Info-Epidemiologie mit echten Zeitstempeln | Offen | P4 | Analytik-Kern | F5 — Phase 4 |
 | AP-22 | Fusion in Entscheidung zurückführen + D5 | Offen | P4 | Analytik-Kern | F2/F12 — Phase 4 |
-| AP-23 | Provenance-Tiefe & In-Chain-Drift | Offen | P3 | Governance | F6: Provenance ist festes Template |
+| AP-23 | Provenance-Tiefe & In-Chain-Drift | Erledigt | – | Governance | F6: ALGO-PROV-02 — In-Chain-Drift (transform_version + algorithm_id auf ProvenanceEdge), compare_provenance_runs erkennt Version-/Algorithmus-Wechsel; SwR-099, 11 Tests |
 | AP-24 | Schwellen-Governance (Magic Numbers) | Weitgehend erledigt (vorgezogen) | P2 | Governance | F11: governte `scoring_thresholds.yaml` + 7/8 Familien verdrahtet + 1. Wert (Bayes-D3→Band-Mittelpunkt) + Sensitivitäts-Tool; Rest = Owner-Policy-Werte (CI, S0–S6-Aggregation, NATO-Fusion) |
 | AP-25 | Fail-Loud-Policy für Analytikstufen | Erledigt | – | Governance | F10 geschlossen: ALGO-RUNGATE-01 (7 Analytikstufen → explizite Degradationseinträge in artifact_status/Readiness), `runs/run_gate.py`, 5+1 Tests |
 | AP-26 | Status-Zeitreihe im Fenster-Replay | Erledigt | – | Validierung (Phase 0) | F16 geschlossen: tägliche PIT-Status-Zeitreihe (ALGO-REPLAY-TS-01, data-driven via ALGO-ANOM-01), deterministisches Artefakt; Legacy-Punktstatus bleibt Konstante bis AP-30 |
@@ -172,7 +172,7 @@ Die verbleibende blockierte Arbeit ist externe Quellen-Aktivierung (AP-06) und �
 | **P1** | 2b | AP-30 | Historischer Backfill GDELT/GDACS/WB + PIT | Offen | Daten | **bindender Engpass.** 30.1 Adapter-Datumsfenster = **datenunabhängig, JETZT** · 30.2+ realer Pull = **owner-gated** (Fallauswahl aus den 8 Paaren, Lizenz/Quellzitierung, API); braucht AP-13 |
 | **P2** | 2c | AP-31 | Provenance: real-captured vs fixture | Offen | Daten/Governance | F14: ehrliche Kennzeichnung; braucht AP-30 |
 | **P3** | 3 | AP-32 | End-to-End-Validierung + Skill-Report | Offen | Validierung | F7/F8 real; braucht AP-26, AP-28, AP-30, AP-31 |
-| **P3** | – | AP-23 | Provenance-Tiefe & In-Chain-Drift | Offen | Governance | F6: läuft unabhängig nebenher |
+| ~~P3~~ | – | AP-23 | Provenance-Tiefe & In-Chain-Drift | **Erledigt** | Governance | F6: ALGO-PROV-02 In-Chain-Drift; SwR-099 |
 | **P4** | 4 | AP-19 | Unsicherheit aus echten Quellen | Offen | Analytik-Kern | F3: erst nach Skill-Score bisektierbar |
 | **P4** | 4 | AP-20 | Echte Abhängigkeitsdetektion + Zentralität | Offen | Analytik-Kern | F4: Phase 4 |
 | **P4** | 4 | AP-21 | Info-Epidemiologie mit echten Zeitstempeln | Offen | Analytik-Kern | F5: Phase 4 |
@@ -437,7 +437,7 @@ Governance: Schwellenwert-Festlegungen bleiben beim Projekteigner.
 | AP-20 | Echte Abhängigkeitsdetektion + Zentralität | 2 | F4 | Phase 4 | Offen |
 | AP-21 | Info-Epidemiologie mit echten Zeitstempeln | 2 | F5 | Phase 4 | Offen |
 | AP-22 | Fusion in Entscheidung zurückführen + D5 | 2 | F2/F12 | Phase 4 | Offen |
-| AP-23 | Provenance-Tiefe & In-Chain-Drift | 3 | F6 | unabhängig | Offen |
+| AP-23 | Provenance-Tiefe & In-Chain-Drift | 3 | F6 | unabhängig | **Erledigt** |
 | AP-24 | Schwellen-Governance (Magic Numbers) | 3 | F11 | Phase 4 | Offen |
 | AP-25 | Fail-Loud-Policy für Analytikstufen | 3 | F10 | Phase 0 (Gate) | **Erledigt** |
 

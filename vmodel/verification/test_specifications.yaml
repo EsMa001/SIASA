@@ -1475,3 +1475,10 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_world_bank_adapter.py
   status: accepted
+- id: TC-SwR-099-001
+  title: Verify provenance in-chain drift detection (ALGO-PROV-02)
+  requirement_ids:
+  - SwR-099
+  method: unit_test
+  test_file: tests/unit/test_provenance_graph.py
+  status: accepted
