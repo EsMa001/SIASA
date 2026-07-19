@@ -2501,4 +2501,28 @@ traceability:
     relation: verifies
     target_ids:
     - SwR-108
+  - source_id: SwR-109
+    relation: derives_from
+    target_ids:
+    - SyR-015
+  - source_id: SwR-109
+    relation: allocated_to
+    target_ids:
+    - DDS-006
+  - source_id: TC-SwR-109-001
+    relation: verifies
+    target_ids:
+    - SwR-109
+  - source_id: SwR-110
+    relation: derives_from
+    target_ids:
+    - SyR-015
+  - source_id: SwR-110
+    relation: allocated_to
+    target_ids:
+    - DDS-006
+  - source_id: TC-SwR-110-001
+    relation: verifies
+    target_ids:
+    - SwR-110
   waivers: []

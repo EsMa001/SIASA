@@ -37,11 +37,8 @@ _CONTRADICTION_PAIRS = [
 # Status levels ordered from calm to critical
 _STATUS_SEVERITY = {"D0": -1, "D1": 0, "D2": 1, "D3": 2, "D4": 3, "D5": 4}
 
-# Governed via vmodel/project/scoring_thresholds.yaml (AP-24); fallback = shipped values.
-_RELIABILITY_SUFFICIENT, _RELIABILITY_PARTIAL, _RELIABILITY_INSUFFICIENT = cross_domain_reliability_weights()
-_CONTRADICTION_GAP = cross_domain_contradiction_gap()
-_CONFIDENCE_FLOOR = cross_domain_confidence_floor()
-_CONFIDENCE_DISCOUNT_PER_GAP = cross_domain_confidence_discount_per_gap()
+# Governed via vmodel/project/scoring_thresholds.yaml (AP-24); resolved PER CALL
+# (SwR-109) so overrides and sensitivity sweeps reach this module.
 
 
 @dataclass(frozen=True)
@@ -83,6 +80,7 @@ def detect_cross_domain_contradictions(
     A contradiction exists when two related domains show significantly
     divergent status levels (severity gap >= 2).
     """
+    contradiction_gap = cross_domain_contradiction_gap()
     result_by_domain = {r.domain: r for r in domain_results}
     contradictions: list[ContradictionResult] = []
 
@@ -100,7 +98,7 @@ def detect_cross_domain_contradictions(
             continue
 
         gap = abs(sev_a - sev_b)
-        if gap >= _CONTRADICTION_GAP:
+        if gap >= contradiction_gap:
             higher = dom_a if sev_a > sev_b else dom_b
             lower = dom_b if sev_a > sev_b else dom_a
             contradictions.append(ContradictionResult(
@@ -128,15 +126,18 @@ def compute_evidence_weights(
     Domains with sufficient data get weight 1.0, partial gets 0.6,
     insufficient gets 0.2. Weights are normalized to sum to 1.0.
     """
+    reliability_sufficient, reliability_partial, reliability_insufficient = (
+        cross_domain_reliability_weights()
+    )
     raw_weights: list[tuple[str, float, str]] = []
 
     for result in domain_results:
         if result.sufficiency.is_sufficient:
-            raw_weights.append((result.domain, _RELIABILITY_SUFFICIENT, "sufficient"))
+            raw_weights.append((result.domain, reliability_sufficient, "sufficient"))
         elif result.status == "D0":
-            raw_weights.append((result.domain, _RELIABILITY_INSUFFICIENT, "insufficient"))
+            raw_weights.append((result.domain, reliability_insufficient, "insufficient"))
         else:
-            raw_weights.append((result.domain, _RELIABILITY_PARTIAL, "partial"))
+            raw_weights.append((result.domain, reliability_partial, "partial"))
 
     total = sum(w for _, w, _ in raw_weights)
     if total <= 0:
@@ -190,8 +191,10 @@ def fuse_domain_evidence(
     confidence = round(sufficient_count / max(len(weights), 1), 4)
     if contradictions:
         # Reduce confidence when contradictions exist
+        confidence_floor = cross_domain_confidence_floor()
+        discount_per_gap = cross_domain_confidence_discount_per_gap()
         max_gap = max(c.severity_gap for c in contradictions)
-        confidence = round(confidence * max(_CONFIDENCE_FLOOR, 1.0 - _CONFIDENCE_DISCOUNT_PER_GAP * max_gap), 4)
+        confidence = round(confidence * max(confidence_floor, 1.0 - discount_per_gap * max_gap), 4)
 
     return FusionResult(
         fused_score=fused_score,

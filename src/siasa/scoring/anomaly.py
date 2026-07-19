@@ -5,7 +5,8 @@ the domain anomaly is derived from data, not from a lookup table: for each
 ``signal_key`` in the domain's within-window record series the latest value is
 z-scored against the window mean/std via :func:`compute_zscore`
 (ALGO-ZSCORE-01, AP-17). The per-signal absolute z-scores are aggregated as a
-coverage-weighted mean and capped at :data:`ANOMALY_UPPER_BOUND`.
+coverage-weighted mean and capped at the governed ``anomaly.upper_bound``
+threshold (resolved per call via :func:`anomaly_upper_bound`, SwR-109).
 
 V1 limitation (recorded gap per AGENTS.md rule 7): the z-score uses the current
 bundle's within-window series. A single-snapshot bundle has one observation per
@@ -22,13 +23,10 @@ from siasa.data.normalized_models import NormalizedRecord
 from siasa.features.multi_resolution import compute_zscore
 from siasa.scoring.scoring_thresholds import anomaly_min_series_points, anomaly_upper_bound
 
-# Owner-governed thresholds, sourced from vmodel/project/scoring_thresholds.yaml (AP-24);
-# the loader falls back to these same values if the config is absent (behaviour-preserving).
-ANOMALY_UPPER_BOUND = anomaly_upper_bound()
-"""Upper bound on the aggregate anomaly; keeps D4 (>=1.0) reachable but bounded."""
-
-_MIN_SERIES_POINTS = anomaly_min_series_points()
-"""Minimum within-window observations before a signal's z-score is trusted."""
+# Owner-governed thresholds, sourced from vmodel/project/scoring_thresholds.yaml (AP-24).
+# Resolved PER CALL (SwR-109): binding them to module constants at import time made
+# override_thresholds — and with it every sensitivity sweep and test — silently
+# ineffective for this family (audit finding A-02).
 
 
 def _window_mean_std(values: list[float]) -> tuple[float, float]:
@@ -55,6 +53,9 @@ def compute_feature_driven_anomaly(domain: str, records: list[NormalizedRecord])
     The value is deterministic and rounded; it depends only on the supplied
     records, so two identical inputs yield bit-identical results.
     """
+    upper_bound = anomaly_upper_bound()
+    min_series_points = anomaly_min_series_points()
+
     domain_records = [record for record in records if record.domain == domain]
     if not domain_records:
         return 0.0
@@ -68,7 +69,7 @@ def compute_feature_driven_anomaly(domain: str, records: list[NormalizedRecord])
     for signal_key in sorted(by_signal):
         signal_records = sorted(by_signal[signal_key], key=lambda record: (str(record.timestamp), record.normalized_id))
         values = [float(record.value) for record in signal_records]
-        if len(values) < _MIN_SERIES_POINTS:
+        if len(values) < min_series_points:
             continue
         mean, std = _window_mean_std(values)
         zscore = compute_zscore(values[-1], mean, std)
@@ -82,4 +83,4 @@ def compute_feature_driven_anomaly(domain: str, records: list[NormalizedRecord])
 
     if weight_total <= 0:
         return 0.0
-    return round(min(weighted_sum / weight_total, ANOMALY_UPPER_BOUND), 4)
+    return round(min(weighted_sum / weight_total, upper_bound), 4)

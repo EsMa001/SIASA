@@ -30,8 +30,8 @@ from typing import Any
 
 from siasa.scoring.scoring_thresholds import skill_score_weights
 
-# Governed via vmodel/project/scoring_thresholds.yaml (AP-24); fallback = shipped values.
-_DETECTION_WEIGHT, _DOMAIN_MATCH_WEIGHT = skill_score_weights()
+# Governed via vmodel/project/scoring_thresholds.yaml (AP-24); resolved PER CALL
+# (SwR-109) so overrides and sensitivity sweeps reach this module.
 
 _STATUS_ORDINAL = {"S0": 0, "S1": 1, "S2": 2, "S3": 3, "S4": 4, "S5": 5, "S6": 6}
 _BASELINE_STATUS = "S3"  # no-skill baseline: always predict S3
@@ -138,8 +138,9 @@ def compute_skill_metrics(reviews: list[dict[str, Any]]) -> dict[str, Any]:
         round(sum(domain_match_ratios) / len(domain_match_ratios), 4) if domain_match_ratios else 0.0
     )
 
+    detection_weight, domain_match_weight = skill_score_weights()
     skill_score = round(
-        _DETECTION_WEIGHT * detection_rate + _DOMAIN_MATCH_WEIGHT * mean_domain_match_ratio,
+        detection_weight * detection_rate + domain_match_weight * mean_domain_match_ratio,
         4,
     )
 

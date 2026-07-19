@@ -6968,6 +6968,9 @@ def _render_analytics(
             f"<td style='padding:6px 10px;font-size:11px;color:#8899bb;'>{html.escape(contra_text)}</td></tr>"
         )
     fusion_section = _section('Cross-Domain Fusion', (
+        f"<p style='color:#c9a227;font-size:11px;margin:0 0 8px 0;'>Diagnostic layer: computed per run, "
+        f"but NOT status-driving — the S0–S6 headline status derives solely from the domain-count rule "
+        f"(multi_domain_status.py); see audit A-15/A-27.</p>"
         f"<table style='width:100%;border-collapse:collapse;font-size:12px;'>"
         f"<thead><tr style='color:#6b7d99;border-bottom:1px solid #263050;'>"
         f"<th style='padding:4px 10px;text-align:left;'>Country</th>"
@@ -6998,6 +7001,9 @@ def _render_analytics(
                 f"<td style='padding:5px 10px;font-size:11px;color:#8899bb;'>{html.escape(ci_str)}</td></tr>"
             )
     bayes_section = _section('Bayesian Status Estimates', (
+        f"<p style='color:#c9a227;font-size:11px;margin:0 0 8px 0;'>Diagnostic layer: computed per run with "
+        f"a flat per-call prior (no sequential updating), NOT status-driving — the MAP status does not feed "
+        f"the S0–S6 headline; see audit A-15.</p>"
         f"<table style='width:100%;border-collapse:collapse;font-size:12px;'>"
         f"<thead><tr style='color:#6b7d99;border-bottom:1px solid #263050;'>"
         f"<th style='padding:4px 10px;text-align:left;'>Country</th>"
@@ -8238,7 +8244,7 @@ Step 10: GUI Rendering       → Static HTML with interactive visualizations
   <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;width:120px;vertical-align:top;">Input</td>
       <td style="color:#e8edf5;">Historical feature values from SQLite storage (<code style="color:#4edea3;">historical_records</code> table)</td></tr>
   <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Method</td>
-      <td style="color:#e8edf5;"><code style="color:#4edea3;">compute_combined_baseline()</code> calculates weighted average across multiple time windows (30, 90, 365 days). Short windows react faster; long windows provide stability. Combined baseline = weighted mean of available windows.</td></tr>
+      <td style="color:#e8edf5;"><code style="color:#4edea3;">compute_combined_baseline()</code> calculates weighted average across multiple time windows (30, 90, 365 days). Short windows react faster; long windows provide stability. Combined baseline = weighted mean of available windows. <em style="color:#c9a227;">Not wired into the production status path yet (audit A-17): the live anomaly uses the within-window z-score of ALGO-ANOM-01 instead.</em></td></tr>
   <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Output</td>
       <td style="color:#e8edf5;">Baseline value (float) per domain per country</td></tr>
 </table>
@@ -8251,7 +8257,7 @@ Step 10: GUI Rendering       → Static HTML with interactive visualizations
   <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;width:120px;vertical-align:top;">Input</td>
       <td style="color:#e8edf5;">Current feature value + baseline value</td></tr>
   <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Method</td>
-      <td style="color:#e8edf5;"><code style="color:#4edea3;">compute_relative_anomaly(current, baseline)</code> = <code>|current - baseline| / max(|baseline|, ε)</code>. Produces a non-negative anomaly score where 0 = no deviation, &gt;1 = strong anomaly. Optional: Bayesian status computation (<code style="color:#4edea3;">compute_bayesian_status()</code>) using Gaussian likelihood over D0–D4 centers.</td></tr>
+      <td style="color:#e8edf5;"><code style="color:#4edea3;">compute_relative_anomaly(current, baseline)</code> = <code>|current - baseline| / max(|baseline|, ε)</code>. Produces a non-negative anomaly score where 0 = no deviation, &gt;1 = strong anomaly. <em style="color:#c9a227;">Not wired into the production status path yet (audit A-17); the live path uses ALGO-ANOM-01.</em> Optional diagnostic: Bayesian status computation (<code style="color:#4edea3;">compute_bayesian_status()</code>) using Gaussian likelihood over D0–D4 centers — computed, not status-driving (audit A-15).</td></tr>
   <tr><td style="color:#6b7d99;padding:4px 12px 4px 0;vertical-align:top;">Output</td>
       <td style="color:#e8edf5;">Anomaly score (float ≥ 0)</td></tr>
 </table>
@@ -8355,8 +8361,10 @@ Step 10: GUI Rendering       → Static HTML with interactive visualizations
 </p>
 <p style="color:#b0c4de;font-size:13px;line-height:1.6;">
   <strong style="color:#e8edf5;">Cross-Domain Fusion:</strong> Evidence weights (<code style="color:#4edea3;">cross_domain_fusion.py</code>)
-  determine how much each domain contributes to the overall country status. Domains with D0 (insufficient data)
-  are down-weighted; domains with higher severity receive proportionally higher weight.
+  weight each domain's evidence by data sufficiency (sufficient 1.0, partial 0.6, insufficient/D0 0.2 — severity
+  plays no role in the weights). The fused score is a diagnostic output: it does <em>not</em> drive the S0–S6
+  headline status, which derives solely from the domain-count rule in <code style="color:#4edea3;">multi_domain_status.py</code>
+  (audit A-15/A-27).
 </p>
 </div>
 

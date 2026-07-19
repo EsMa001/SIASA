@@ -70,11 +70,19 @@ def test_override_thresholds_restores_previous_config():
     assert anomaly_upper_bound() == 1.5
 
 
-def test_anomaly_module_constants_are_wired_to_governed_thresholds():
+def test_anomaly_module_has_no_import_time_threshold_constants():
+    """SwR-109: thresholds are resolved per call, never frozen at import.
+
+    The former module constants (ANOMALY_UPPER_BOUND, _MIN_SERIES_POINTS) made
+    override_thresholds silently ineffective for this family (audit A-02).
+    """
     from siasa.scoring import anomaly
 
-    assert anomaly.ANOMALY_UPPER_BOUND == anomaly_upper_bound()
-    assert anomaly._MIN_SERIES_POINTS == anomaly_min_series_points()
+    assert not hasattr(anomaly, "ANOMALY_UPPER_BOUND")
+    assert not hasattr(anomaly, "_MIN_SERIES_POINTS")
+    # The getters remain the single source of truth.
+    assert anomaly_upper_bound() == 1.5
+    assert anomaly_min_series_points() == 4
 
 
 def test_domain_status_uses_governed_cutpoints():
@@ -132,21 +140,51 @@ def test_new_family_getters_read_overrides(tmp_path):
     assert data_sufficiency_minimum_feature_count(cfg) == 2
 
 
-def test_consumer_modules_are_wired_to_governed_thresholds():
+def test_consumer_modules_hold_no_import_time_threshold_constants():
+    """SwR-109: no consumer module may freeze governed thresholds at import.
+
+    The former module constants made override_thresholds — and with it every
+    sensitivity sweep and test — silently ineffective for 8 of 10 consumer
+    families (audit A-02). Behavioural per-call proof lives in
+    tests/unit/test_threshold_wiring.py; this guard keeps the constants from
+    creeping back in.
+    """
     clear_threshold_cache()
     from siasa.analysis import info_epidemiology
     from siasa.scoring import cross_domain_fusion, probabilistic
     from siasa.validation import backtesting, historical_replay, skill_metrics
 
-    assert probabilistic._STATUS_SIGMA == bayesian_status_sigma()
-    assert probabilistic._STATUS_ANOMALY_CENTERS == bayesian_status_centers()
-    assert cross_domain_fusion._CONTRADICTION_GAP == cross_domain_contradiction_gap()
-    assert cross_domain_fusion._RELIABILITY_SUFFICIENT == cross_domain_reliability_weights()[0]
-    assert (skill_metrics._DETECTION_WEIGHT, skill_metrics._DOMAIN_MATCH_WEIGHT) == skill_score_weights()
-    assert historical_replay._TIER_VERIFIED == replay_evidence_tiers()[0]
-    assert (
-        backtesting._SCORE_REGRESSION_THRESHOLD,
-        backtesting._REGRESSION_RATE_WARNING,
-        backtesting._REGRESSION_RATE_FAIL,
-    ) == regression_thresholds()
-    assert info_epidemiology._AMPLIFICATION_RATIO == amplification_ratio()
+    banned = {
+        probabilistic: ("_STATUS_SIGMA", "_STATUS_ANOMALY_CENTERS", "_CREDIBLE_INTERVAL_TAIL"),
+        cross_domain_fusion: (
+            "_CONTRADICTION_GAP",
+            "_RELIABILITY_SUFFICIENT",
+            "_RELIABILITY_PARTIAL",
+            "_RELIABILITY_INSUFFICIENT",
+            "_CONFIDENCE_FLOOR",
+            "_CONFIDENCE_DISCOUNT_PER_GAP",
+        ),
+        skill_metrics: ("_DETECTION_WEIGHT", "_DOMAIN_MATCH_WEIGHT"),
+        historical_replay: (
+            "_TIER_VERIFIED",
+            "_TIER_STRONG",
+            "_TIER_PARTIAL",
+            "_EVIDENCE_W_STATUS",
+            "_EVIDENCE_W_DOMAIN",
+            "_EVIDENCE_W_COVERAGE",
+            "_EVIDENCE_W_PROVENANCE",
+        ),
+        backtesting: (
+            "_SCORE_REGRESSION_THRESHOLD",
+            "_REGRESSION_RATE_WARNING",
+            "_REGRESSION_RATE_FAIL",
+        ),
+        info_epidemiology: ("_AMPLIFICATION_RATIO",),
+    }
+    offenders = [
+        f"{module.__name__}.{name}"
+        for module, names in banned.items()
+        for name in names
+        if hasattr(module, name)
+    ]
+    assert offenders == [], f"import-time threshold constants reintroduced: {offenders}"

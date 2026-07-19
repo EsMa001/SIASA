@@ -225,7 +225,7 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert readiness["demo_verdict"] == "blocked"
     assert readiness["release_verdict"] == "blocked_by_known_gaps"
     assert readiness["known_gaps"] == ["validation_backtest_absent:not_configured"]
-    assert traceability_integrity["summary"]["requirement_count"] == 102
+    assert traceability_integrity["summary"]["requirement_count"] == 104
     assert stakeholder_functional_closure["focus_gap_cluster"] == {
         "stakeholder_ids": [
             "StR-001", "StR-002", "StR-004", "StR-007", "StR-024", "StR-025",
@@ -252,7 +252,7 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
     assert event_report["payload"]["source_state"] == {"SRC-B": "success"}
     assert "REP-COVERAGE-RUN-200" in traceability["lineage_records"][0]["report_ids"]
     assert "REP-COUNTRY-UKR" in traceability["lineage_records"][0]["report_ids"]
-    assert repo_closure["summary"] == {"slice_count": 17, "requirement_count": 102, "closed": 102, "at_risk": 0}
+    assert repo_closure["summary"] == {"slice_count": 18, "requirement_count": 104, "closed": 104, "at_risk": 0}
     assert repo_closure["slice_ids"] == [
         "ap-14-kostenfreie-api-quellen",
         "ap-15-erweiterte-api-integration",
@@ -264,6 +264,7 @@ def test_daily_run_orchestrator_writes_gui_artifact_bundle_after_successful_run(
         "governance-and-run-controls",
         "gui-readmodels-and-annotations",
         "historical-backfill-orchestrator",
+        "messketten-integritaet",
         "ml-training-data-lake",
         "normalization-and-mapping",
         "provenance-in-chain-drift",

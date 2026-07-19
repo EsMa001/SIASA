@@ -2636,7 +2636,7 @@ def test_load_site_payload_from_artifacts_falls_back_for_missing_readiness_suppo
 
     assert payload["validation_view_model"] is None
     assert payload["annotations_view_model"] == {"annotations": [], "by_scope": {}, "by_linked_item": {}}
-    assert payload["repo_closure_view_model"]["summary"] == {"slice_count": 17, "requirement_count": 102, "closed": 102, "at_risk": 0}
+    assert payload["repo_closure_view_model"]["summary"] == {"slice_count": 18, "requirement_count": 104, "closed": 104, "at_risk": 0}
     assert payload["system_status_read_model"]["operational_evidence_lane"]["latest_summary"]["country_set_id"] == "MVP-COUNTRIES-LIVE-extended-focus-complete-v1"
 
     pages = build_local_mvp_site(output_dir=tmp_path / "site", **payload)

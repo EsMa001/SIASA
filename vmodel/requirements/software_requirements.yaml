@@ -5,7 +5,7 @@ metadata:
   - vmodel/architecture/system_architecture.md
   created_at_utc: '2026-05-11T14:25:30.979384+00:00'
   status: draft_baseline_derived
-  software_requirement_count: 102
+  software_requirement_count: 104
 software_requirements:
 - id: SwR-001
   title: Source catalog record schema
@@ -969,3 +969,19 @@ software_requirements:
   - SyR-007
   verification_method: unit_test
   allocated_to: DDS-001
+- id: SwR-109
+  title: Per-call resolution of governed scoring thresholds
+  statement: The software shall resolve every governed scoring threshold at call time from the governed configuration (vmodel/project/scoring_thresholds.yaml) in all consuming modules, so that configuration overrides, sensitivity sweeps, and tests observe the same values as the production code paths; binding governed thresholds to module constants at import time is prohibited (audit finding A-02).
+  status: accepted
+  derives_from:
+  - SyR-015
+  verification_method: unit_test
+  allocated_to: DDS-006
+- id: SwR-110
+  title: Full-coverage, honestly labeled threshold sensitivity analysis
+  statement: The software shall provide a one-at-a-time threshold sensitivity analysis (ALGO-SENS-01) whose probe grid is derived automatically from the complete governed threshold configuration, shall report every governed parameter it cannot sweep explicitly with a reason instead of omitting it, and shall label every report as fixture-bound and not model-informative for as long as the replay status derives from constant fixture scores (audit findings A-01, A-02).
+  status: accepted
+  derives_from:
+  - SyR-015
+  verification_method: unit_test
+  allocated_to: DDS-006

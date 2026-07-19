@@ -20,8 +20,8 @@ from siasa.scoring.scoring_thresholds import replay_evidence_tiers, replay_evide
 from siasa.validation.cases import ValidationCase, compare_expected_vs_observed
 
 # Governed via vmodel/project/scoring_thresholds.yaml (AP-24); fallback = shipped values.
-_EVIDENCE_W_STATUS, _EVIDENCE_W_DOMAIN, _EVIDENCE_W_COVERAGE, _EVIDENCE_W_PROVENANCE = replay_evidence_weights()
-_TIER_VERIFIED, _TIER_STRONG, _TIER_PARTIAL = replay_evidence_tiers()
+# Evidence weights/tiers are governed via scoring_thresholds.yaml (AP-24) and
+# resolved PER CALL (SwR-109) so overrides and sensitivity sweeps reach this module.
 
 
 @dataclass(frozen=True)
@@ -86,21 +86,23 @@ def _replay_evidence_score(
     replay_source_coverage_ratio: float,
     replay_provenance_completeness_ratio: float,
 ) -> float:
+    w_status, w_domain, w_coverage, w_provenance = replay_evidence_weights()
     score = (
-        (_EVIDENCE_W_STATUS if status_match else 0.0)
-        + (_EVIDENCE_W_DOMAIN * domain_match_ratio)
-        + (_EVIDENCE_W_COVERAGE * replay_source_coverage_ratio)
-        + (_EVIDENCE_W_PROVENANCE * replay_provenance_completeness_ratio)
+        (w_status if status_match else 0.0)
+        + (w_domain * domain_match_ratio)
+        + (w_coverage * replay_source_coverage_ratio)
+        + (w_provenance * replay_provenance_completeness_ratio)
     )
     return round(score, 2)
 
 
 def _replay_evidence_tier(replay_evidence_score: float) -> str:
-    if replay_evidence_score >= _TIER_VERIFIED:
+    tier_verified, tier_strong, tier_partial = replay_evidence_tiers()
+    if replay_evidence_score >= tier_verified:
         return "verified_replay_evidence"
-    if replay_evidence_score >= _TIER_STRONG:
+    if replay_evidence_score >= tier_strong:
         return "strong_replay_evidence"
-    if replay_evidence_score >= _TIER_PARTIAL:
+    if replay_evidence_score >= tier_partial:
         return "partial_replay_evidence"
     return "weak_replay_evidence"
 

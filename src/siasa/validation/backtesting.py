@@ -68,8 +68,8 @@ class BacktestResult:
     verdict: str  # "pass", "warning", "fail"
 
 
-# Thresholds for regression detection, governed via scoring_thresholds.yaml (AP-24).
-_SCORE_REGRESSION_THRESHOLD, _REGRESSION_RATE_WARNING, _REGRESSION_RATE_FAIL = regression_thresholds()
+# Thresholds for regression detection, governed via scoring_thresholds.yaml (AP-24);
+# resolved PER CALL (SwR-109) so overrides and sensitivity sweeps reach this module.
 
 
 def run_backtest(
@@ -128,15 +128,18 @@ def run_backtest(
         return _empty_result(now, "insufficient_history")
 
     # Compute summary
+    score_regression_threshold, regression_rate_warning, regression_rate_fail = (
+        regression_thresholds()
+    )
     regressions = sum(1 for c in comparisons if c.regression_detected)
-    improvements = sum(1 for c in comparisons if c.score_delta > _SCORE_REGRESSION_THRESHOLD)
-    unchanged = sum(1 for c in comparisons if abs(c.score_delta) <= _SCORE_REGRESSION_THRESHOLD and not c.status_changed)
+    improvements = sum(1 for c in comparisons if c.score_delta > score_regression_threshold)
+    unchanged = sum(1 for c in comparisons if abs(c.score_delta) <= score_regression_threshold and not c.status_changed)
     status_changes = sum(1 for c in comparisons if c.status_changed)
     regression_rate = regressions / len(comparisons) if comparisons else 0.0
 
-    if regression_rate >= _REGRESSION_RATE_FAIL:
+    if regression_rate >= regression_rate_fail:
         verdict = "fail"
-    elif regression_rate >= _REGRESSION_RATE_WARNING or regressions > 0:
+    elif regression_rate >= regression_rate_warning or regressions > 0:
         verdict = "warning"
     else:
         verdict = "pass"
@@ -232,7 +235,8 @@ def _compare_scores(
     score_delta = current.score - baseline.score
     status_changed = current.status != baseline.status
     # Regression = significant score drop
-    regression_detected = score_delta < -_SCORE_REGRESSION_THRESHOLD
+    score_regression_threshold, _, _ = regression_thresholds()
+    regression_detected = score_delta < -score_regression_threshold
 
     return BacktestComparison(
         country_id=country_id,

@@ -1503,3 +1503,17 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_adapter_ucdp.py
   status: accepted
+- id: TC-SwR-109-001
+  title: Verify per-call threshold resolution reaches every governed family
+  requirement_ids:
+  - SwR-109
+  method: unit_test
+  test_file: tests/unit/test_threshold_wiring.py
+  status: accepted
+- id: TC-SwR-110-001
+  title: Verify sensitivity probe grid derives from the full governed config with honest labeling
+  requirement_ids:
+  - SwR-110
+  method: unit_test
+  test_file: tests/unit/test_threshold_sensitivity.py
+  status: accepted

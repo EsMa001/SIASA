@@ -966,6 +966,41 @@ implementation_slices:
       - src/siasa/validation/pit_monotonicity.py
     known_test_paths:
       - tests/unit/test_pit_monotonicity.py
+  messketten-integritaet:
+    requirement_ids:
+      - SwR-109
+      - SwR-110
+    implementation_map:
+      SwR-109:
+        code_paths:
+          - src/siasa/scoring/anomaly.py
+          - src/siasa/scoring/probabilistic.py
+          - src/siasa/scoring/cross_domain_fusion.py
+          - src/siasa/analysis/info_epidemiology.py
+          - src/siasa/validation/backtesting.py
+          - src/siasa/validation/historical_replay.py
+          - src/siasa/validation/skill_metrics.py
+        test_paths:
+          - tests/unit/test_threshold_wiring.py
+      SwR-110:
+        code_paths:
+          - scripts/threshold_sensitivity.py
+        test_paths:
+          - tests/unit/test_threshold_sensitivity.py
+          - tests/integration/test_threshold_sensitivity.py
+    known_code_paths:
+      - src/siasa/scoring/anomaly.py
+      - src/siasa/scoring/probabilistic.py
+      - src/siasa/scoring/cross_domain_fusion.py
+      - src/siasa/analysis/info_epidemiology.py
+      - src/siasa/validation/backtesting.py
+      - src/siasa/validation/historical_replay.py
+      - src/siasa/validation/skill_metrics.py
+      - scripts/threshold_sensitivity.py
+    known_test_paths:
+      - tests/unit/test_threshold_wiring.py
+      - tests/unit/test_threshold_sensitivity.py
+      - tests/integration/test_threshold_sensitivity.py
   ucdp-server-side-query:
     requirement_ids:
       - SwR-108

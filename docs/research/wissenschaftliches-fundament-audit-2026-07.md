@@ -1,6 +1,6 @@
 # Wissenschaftliches Fundament-Audit — SIASA (Juli 2026)
 
-Stand: 2026-07-19 · Bezug: Commit `bc54f8f` · Status: **Befund dokumentiert, Maßnahmen vorgeschlagen, Owner-Entscheid offen**
+Stand: 2026-07-19 · Bezug: Commit `bc54f8f` · Status: **Phase I in Umsetzung als AP-34** — 34.1 (Hygiene), 34.2 (V-1) und 34.3 (V-2) erledigt, siehe §7-Nachtrag; 34.4–34.8 offen
 
 ---
 
@@ -453,3 +453,24 @@ gestapelte mechanische Ursachen und ist **keine Aussage über das Modell**:
 
 Erst nach V-1 (Verdrahtung), V-2 (Vollabdeckung) und V-8 (echte Anomalie im Replay) misst
 die Sensitivitätsanalyse das, was ihr Name verspricht.
+
+### Nachtrag 2026-07-19 — Re-Run nach Umsetzung von V-1 und V-2 (AP-34.2/34.3)
+
+V-1 (Per-Call-Auflösung, SwR-109) und V-2 (voll abgeleitetes Probe-Grid + validity_caveat,
+SwR-110/ALGO-SENS-01) sind umgesetzt. Der Re-Run über **38 statt 5** Sonden ergibt:
+
+| Parameter | Einfluss | vorher |
+| --- | --- | --- |
+| `data_sufficiency.minimum_coverage` | **0.4286** | nie gesweept |
+| `skill_validation_metrics.detection_weight` | **0.4286** | importgebunden + nie gesweept |
+| `domain_status.d1_max` | 0.3600 | 0.4286 (einziger Treffer) |
+| `skill_validation_metrics.domain_match_weight` | 0.3315 | importgebunden + nie gesweept |
+| übrige 34 Parameter | 0.0000 | überwiegend mechanisch erzwungen |
+
+Interpretation: Das alte Bild „nur d1_max wirkt" ist **widerlegt** — es war ein Abdeckungs- und
+Verdrahtungsartefakt (A-02). Die verbleibenden Nullen sind jetzt *ehrliche* Nullen: sie bestätigen
+empirisch, dass Bayes-, Fusions-, Unsicherheits- und Anomalie-Familien auf diesen Fixtures nicht
+outcome-wirksam sind (konsistent mit A-01, A-03, A-15, A-27). Zwei der vier wirksamen Parameter
+sind Gewichte der Metrik selbst (Meta-Sensitivität) — auch das ein ehrlicher Befund über die
+Messkette. Alle Werte bleiben per `validity_caveat` als **fixture-bound** markiert, bis V-8/AP-30
+echte Zeitreihen in den Replay-Pfad bringen.

@@ -26,7 +26,7 @@ data_sufficiency:
   maximum_freshness_hours: 168.0  # fallback horizon (per-source/-domain governed in freshness_config.yaml)
   minimum_feature_count: 2        # min features before a domain is scorable
 bayesian_status:
-  centers: {D0: 0.0, D1: 0.1, D2: 0.35, D3: 0.75, D4: 1.0}  # likelihood centers = D-band midpoints (D3 0.65->0.75 applied per SHELF); D4 at the 1.0 threshold anchor
+  centers: {D0: 0.0, D1: 0.1, D2: 0.35, D3: 0.75, D4: 1.0}  # likelihood centers = D-band midpoints (interim convention, SHELF elicitation outstanding); D4 at the 1.0 threshold anchor
   sigma: 0.2                  # likelihood std-dev (NB ~0.25 spacing -> overlap; elicit/calibrate via SHELF/Cooke)
   credible_interval_tail: 0.1 # tail mass per side -> 80% credible interval
 cross_domain_fusion:
@@ -82,7 +82,7 @@ governance_record:
     wired_to_config: true
     current: {centers: [0.0, 0.1, 0.35, 0.75, 1.0], sigma: 0.2, credible_interval: 0.8}
     recommended_initial: {centers: "midpoints of the D-status anomaly ranges", sigma: "elicited or calibrated (0.2 over-overlaps)"}
-    applied: "D3 center set 0.65 -> 0.75 = midpoint of the D3 band [0.5, 1.0) per SHELF; D0-D2 already at midpoints; D4 kept at the 1.0 threshold anchor (upper bound is arbitrary); sigma left at 0.2 pending elicitation/calibration."
+    applied: "D3 center set 0.65 -> 0.75 = interim band-midpoint convention (NOT a SHELF elicitation — audit A-24; a structured elicitation remains outstanding); D0-D2 already at midpoints; D4 kept at the 1.0 threshold anchor (upper bound is arbitrary); sigma left at 0.2 pending elicitation/calibration."
     rationale: "Likelihood centers should be consistent with the D-status cutpoints; sigma=0.2 at ~0.25 spacing over-overlaps -> under-discrimination. Elicit (SHELF/Cooke) or calibrate."
     reference: "SHELF (O'Hagan 2006; Gosling 2018); Cooke's Classical Method"
   - family: cross_domain_fusion
