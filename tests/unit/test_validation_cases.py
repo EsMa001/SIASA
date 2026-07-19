@@ -139,7 +139,8 @@ def test_reference_library_loads_exemplary_s0_negative_and_keeps_legacy_defaults
     che = by_id["VAL-CHE-2024-NEGATIVE-001"]
     assert che.expected_status == "S0"
     assert che.case_polarity == "negative"
-    assert che.dataset_split == "holdout"
+    # v3 re-split (SwR-112): pair PAIR-UKR-CHE travels together into tuning.
+    assert che.dataset_split == "tuning"
     assert che.expected_trajectory == ["S0", "S0", "S0"]
     # still-legacy cases load with backward-compatible defaults (UKR-2022 is now curated, AP-29 v1)
     assert by_id["VAL-RUS-2024-001"].case_polarity == "positive"
@@ -203,5 +204,77 @@ def test_validator_anti_circularity_flags_positive_but_exempts_negative() -> Non
     ]
     report = validate_reference_case_library(cases)
     assert report["circular_label_case_ids"] == ["VAL-CIRC"]
-    # circular labels are a quality signal, not a structural failure
+    # legacy fixture cases (no onset_date) stay a quality signal, not a failure
+    assert report["unverified_circular_label_case_ids"] == []
     assert report["is_valid"] is True
+
+
+def test_validator_blocks_onset_dated_circular_label_without_observation_basis() -> None:
+    """SwR-111 (audit A-08): redesigned ground truth may not copy labels silently."""
+    import dataclasses
+
+    undocumented = _gt_case(
+        "VAL-UNDOC", "S3", historical="S3", onset="2024-02-01",
+        time_start="2024-01-01", time_end="2024-03-31",
+    )
+    documented = dataclasses.replace(
+        undocumented,
+        case_id="VAL-DOC",
+        observation_basis="onset documented in contemporaneous primary reporting",
+    )
+
+    blocked = validate_reference_case_library([undocumented])
+    assert blocked["unverified_circular_label_case_ids"] == ["VAL-UNDOC"]
+    assert blocked["is_valid"] is False
+
+    passed = validate_reference_case_library([documented])
+    assert passed["unverified_circular_label_case_ids"] == []
+    assert passed["circular_label_case_ids"] == ["VAL-DOC"]  # equality itself stays visible
+    assert passed["is_valid"] is True
+
+
+def test_validator_counts_ratification_status() -> None:
+    """SwR-111: ratification_status is read by code, no longer dead governance (A-20)."""
+    import dataclasses
+
+    ratified = dataclasses.replace(_gt_case("VAL-R", "S3"), ratification_status="research_verified")
+    unratified = _gt_case("VAL-U", "S3")
+    report = validate_reference_case_library([ratified, unratified])
+    assert report["ratification_status_counts"] == {"missing": 1, "research_verified": 1}
+
+
+def test_committed_library_passes_the_sharpened_anti_circularity_gate() -> None:
+    """Every onset-dated positive in the repo must carry an observation_basis."""
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parents[2]
+    library = load_validation_case_library(
+        repo_root / "vmodel" / "verification" / "validation_reference_cases.yaml"
+    )
+    report = validate_reference_case_library(library)
+    assert report["unverified_circular_label_case_ids"] == []
+    assert report["is_valid"] is True
+    onset_dated_positives = [
+        case for case in library if case.case_polarity == "positive" and case.onset_date
+    ]
+    assert len(onset_dated_positives) == 8
+    assert all(case.observation_basis for case in onset_dated_positives)
+
+
+def test_committed_library_split_is_stratified_at_pair_level() -> None:
+    """SwR-112: both splits must contain both classes (v3 re-split)."""
+    from collections import Counter
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parents[2]
+    library = load_validation_case_library(
+        repo_root / "vmodel" / "verification" / "validation_reference_cases.yaml"
+    )
+    assigned = [case for case in library if case.dataset_split in {"tuning", "holdout"}]
+    combos = Counter((case.dataset_split, case.case_polarity) for case in assigned)
+    assert combos == {
+        ("tuning", "positive"): 4,
+        ("tuning", "negative"): 4,
+        ("holdout", "positive"): 4,
+        ("holdout", "negative"): 4,
+    }

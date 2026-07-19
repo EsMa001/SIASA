@@ -510,4 +510,33 @@ def build_validation_backtest_read_model(
             historical_replay_summary or build_historical_replay_summary(historical_replay_reviews)
         )
         read_model["skill_metrics"] = compute_skill_metrics(historical_replay_reviews)
+        # SwR-112 (audit A-19): report skill per dataset split, with holdout as the
+        # designated evaluation split. A split section is only a VALID evaluation
+        # when it contains both classes; today the holdout split holds one
+        # replay-backed positive (ISR-2023) and zero negatives-with-inputs
+        # (audit A-07, AP-34.7), so its section is explicitly marked invalid
+        # instead of a 1-positive recall=1.0 masquerading as an evaluation.
+        by_split: dict[str, list[dict]] = {}
+        for review in historical_replay_reviews:
+            if isinstance(review, dict):
+                by_split.setdefault(str(review.get("dataset_split", "unassigned")), []).append(review)
+        skill_by_split: dict[str, dict] = {}
+        for split, split_reviews in sorted(by_split.items()):
+            split_metrics = compute_skill_metrics(split_reviews)
+            has_both_classes = (
+                split_metrics["positive_case_count"] >= 1
+                and split_metrics["negative_case_count"] >= 1
+            )
+            split_metrics["evaluation_valid"] = has_both_classes
+            split_metrics["evaluation_invalid_reason"] = (
+                None
+                if has_both_classes
+                else (
+                    "degenerate split: needs at least one positive AND one negative "
+                    "review (missing replay inputs — audit A-07, AP-34.7)"
+                )
+            )
+            skill_by_split[split] = split_metrics
+        read_model["skill_metrics_by_split"] = skill_by_split
+        read_model["skill_evaluation_split"] = "holdout"
     return read_model

@@ -44,6 +44,7 @@ uncertainty_propagation:
 skill_validation_metrics:
   detection_weight: 0.6
   domain_match_weight: 0.4
+  alarm_minimum_status: "S1"  # alarm = replayed status >= this ordinal (SwR-113); S1 preserves the former "!= S0" rule
   evidence_status_match_weight: 0.4
   evidence_domain_match_weight: 0.3
   evidence_source_coverage_weight: 0.2
@@ -99,9 +100,9 @@ governance_record:
     reference: "GUM JCGM 100; Type-A/Type-B uncertainty budget"
   - family: skill_validation_metrics
     wired_to_config: true
-    current: {skill_weights: [0.6, 0.4], evidence_weights: [0.4, 0.3, 0.2, 0.1], tiers: [0.95, 0.75, 0.5], regression: {flag: 0.1, warn: 0.1, fail: 0.3}}
-    recommended_initial: {report: "standard verification metrics separately (Brier, BSS vs no-skill baseline, POD, FAR, AUC, lead time) instead of one weighted blend"}
-    rationale: "Forecast-verification science: skill is defined relative to a reference. Replace the ad-hoc 0.6/0.4 blend with separately-reported standard metrics (ViEWS/WMO). Couple regression thresholds to the skill-score confidence interval."
+    current: {skill_weights: [0.6, 0.4], evidence_weights: [0.4, 0.3, 0.2, 0.1], tiers: [0.95, 0.75, 0.5], regression: {flag: 0.1, warn: 0.1, fail: 0.3}, alarm_minimum_status: "S1"}
+    recommended_initial: {report: "standard verification metrics separately (Brier, BSS vs no-skill baseline, POD, FAR, AUC, lead time) instead of one weighted blend", alarm_minimum_status: "S2"}
+    rationale: "Forecast-verification science: skill is defined relative to a reference. Replace the ad-hoc 0.6/0.4 blend with separately-reported standard metrics (ViEWS/WMO). Couple regression thresholds to the skill-score confidence interval. alarm_minimum_status governs what counts as an alarm (SwR-113, audit A-16): S1 preserves the former implicit '!= S0' rule; S2 is the recommended operating point so a mild S1 on a control is not scored as a full false alarm — owner decision pending."
     reference: "WMO/CAWCR forecast verification; ViEWS; ICEWS; Brier/ROC/skill scores"
   - family: information_epidemiology
     wired_to_config: true

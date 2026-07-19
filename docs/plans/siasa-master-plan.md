@@ -169,7 +169,7 @@ Die verbleibende blockierte Arbeit ist externe Quellen-Aktivierung (AP-06) und �
 | ~~P1~~ | 1b | AP-16 | Skill-Messharness (Ground-Truth-Backtest) | **Erledigt** | Analytik-Kern | F7/F8/F9: ALGO-SKILL-01 (`validation/skill_metrics.py`) + GUI-KPI; Regressionstest grün |
 | ~~P1~~ | 1b | AP-28 | Skill-Metrik: Fehlalarmrate + No-Skill-Baseline | **Erledigt** | Validierung | F9: ALGO-SKILL-02 (Fehlalarm/Vorlauf/Brier/Baseline); Zahlen erst mit AP-30 aussagekräftig |
 | ~~P2~~ | 2a | AP-29 | Event-Set-Definition (klein, ausgewogen) | **Erledigt** | Validierung | F14: Mechanik + Kuratierung v2 (8 research-verifizierte Paare); finale Ratifizierung Owner-Hoheit |
-| **P1** | 1c | AP-34 | Messketten-Integrität (Fundament-Audit Phase I) | In Arbeit (34.1–34.3 erledigt) | Validierung/Governance | Audit 2026-07-19 (D1): Skill-/Sensitivitätszahlen waren nicht modellaussagekräftig. **Vor** AP-30.4/31/32 abschließen, sonst validieren die realen Daten gegen eine kaputte Metrik. Datenunabhängig. |
+| **P1** | 1c | AP-34 | Messketten-Integrität (Fundament-Audit Phase I) | In Arbeit (34.1–34.6 erledigt; offen 34.7/34.8) | Validierung/Governance | Audit 2026-07-19 (D1): Skill-/Sensitivitätszahlen waren nicht modellaussagekräftig. **Vor** AP-30.4/31/32 abschließen, sonst validieren die realen Daten gegen eine kaputte Metrik. Datenunabhängig. |
 | **P1** | 2b | AP-30 | Historischer Backfill GDELT/GDACS/WB + PIT | Offen | Daten | **bindender Engpass.** 30.1 Adapter-Datumsfenster = **datenunabhängig, JETZT** · 30.2+ realer Pull = **owner-gated** (Fallauswahl aus den 8 Paaren, Lizenz/Quellzitierung, API); braucht AP-13 |
 | **P2** | 2c | AP-31 | Provenance: real-captured vs fixture | Offen | Daten/Governance | F14: ehrliche Kennzeichnung; braucht AP-30 |
 | **P3** | 3 | AP-32 | End-to-End-Validierung + Skill-Report | Offen | Validierung | F7/F8 real; braucht AP-26, AP-28, AP-30, AP-31 |
@@ -593,7 +593,7 @@ Konsument/Aggregator, **erfindet keine neue Modellmechanik**.
 verstecktes Bottleneck für AP-28/AP-32 — vorab schließen. **Ergänzung 2026-07-19:** AP-34
 (Messketten-Integrität) schiebt sich vor AP-30.4/31/32 — siehe unten.
 
-#### AP-34 — Messketten-Integrität (Fundament-Audit Phase I) · Status: In Arbeit · Rang: P1 · Klasse: Validierung/Governance
+#### AP-34 — Messketten-Integrität (Fundament-Audit Phase I) · Status: In Arbeit (34.1–34.6 erledigt) · Rang: P1 · Klasse: Validierung/Governance
 Herkunft: **Fundament-Audit 2026-07-19** (`docs/research/wissenschaftliches-fundament-audit-2026-07.md`),
 Systemdiagnose D1: die publizierten Skill-/Sensitivitätszahlen hingen an einer Konstantentabelle,
 importgebundenen Parametern, fehlenden Negativfällen und zirkulären Labels — sie waren über die
@@ -606,9 +606,9 @@ Trace: SwR-109..115 / ALGO-SENS-01.
 | AP-34.1 | Sofort-Hygiene: SHELF-Etikett ehrlich, Freshness-Kommentar-Labels an domains.yaml angeglichen, GUI kennzeichnet Bayes/Fusion/Baselines als „berechnet, nicht statusbildend" (A-24/A-28/A-27) | **Erledigt** | Doku/GUI |
 | AP-34.2 | V-1 Per-Call-Auflösung aller governed Parameter; Verbots-Wächter gegen Import-Bindung (A-02) | **Erledigt** | SwR-109 / TC-SwR-109-001 |
 | AP-34.3 | V-2 Sensitivität: Probe-Grid aus voller Config abgeleitet (38 statt 5 Parameter), `not_swept` explizit, hartes `validity_caveat` fixture-bound (A-01/A-02) | **Erledigt** | SwR-110 / TC-SwR-110-001 / ALGO-SENS-01 |
-| AP-34.4 | V-4 Zirkuläre Labels blockierend; Beobachtungsstatus quellengetrennt vom Soll-Label (A-08) | Offen | SwR-111 |
-| AP-34.5 | V-6 `dataset_split` durchsetzen: Tuning nur auf tuning-Split, Skill-Report nur holdout (A-19) | Offen | SwR-112 |
-| AP-34.6 | V-7 Lead-Time: nur Alarme vor Onset, Zensierung ausweisen, Alarm-Schwelle governen, Nowcast/Forecast trennen (A-16) | Offen | SwR-113 |
+| AP-34.4 | V-4 Zirkularität blockierend: onset-datierte Positive mit identischen Labels brauchen dokumentierte `observation_basis`, sonst `is_valid: false`; `ratification_status` wird erstmals maschinell gezählt (A-08, A-20) | **Erledigt** | SwR-111 / TC-SwR-111-001 |
+| AP-34.5 | V-6 Split durchgesetzt: Holdout aus jeder Kalibrierung ausgeschlossen (Sensitivität deklariert Zusammensetzung), Skill je Split im Read-Model (Holdout = Evaluations-Split), **Kuration v3**: stratifizierter Paar-Split — v2 hatte alle Positiven im Tuning, alle Kontrollen im Holdout (A-19) | **Erledigt** | SwR-112 / TC-SwR-112-001 |
+| AP-34.6 | V-7 Lead-Time: governte Alarm-Schwelle (`alarm_minimum_status`, Default S1 verhaltensgleich, Empfehlung S2), Lead nur für Alarme vor Onset, Nowcast/Miss/undatierbar getrennt gezählt (A-16) | **Erledigt** | SwR-113 / TC-SwR-113-001 |
 | AP-34.7 | V-3 Replay-Inputs für die 8 S0-Negativkontrollen + Guard gegen `negative_total == 0` (A-07) | Offen | SwR-114 |
 | AP-34.8 | V-5 Klimatologie-Baseline + BSS als `beats_baseline`-Kriterium + Wilson-Intervalle (A-09/A-10/A-23) | Offen | SwR-115 |
 

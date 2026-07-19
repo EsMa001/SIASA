@@ -1517,3 +1517,24 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_threshold_sensitivity.py
   status: accepted
+- id: TC-SwR-111-001
+  title: Verify blocking anti-circularity gate and ratification-status counting
+  requirement_ids:
+  - SwR-111
+  method: unit_test
+  test_file: tests/unit/test_validation_cases.py
+  status: accepted
+- id: TC-SwR-112-001
+  title: Verify holdout exclusion from calibration and per-split skill reporting
+  requirement_ids:
+  - SwR-112
+  method: unit_test
+  test_file: tests/unit/test_validation_cases.py
+  status: accepted
+- id: TC-SwR-113-001
+  title: Verify governed alarm threshold and pre-onset lead-time accounting
+  requirement_ids:
+  - SwR-113
+  method: unit_test
+  test_file: tests/unit/test_skill_metrics.py
+  status: accepted

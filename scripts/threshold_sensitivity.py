@@ -117,11 +117,23 @@ def build_probe_grid(
     return probes, not_swept
 
 
-def _skill_metrics(repo_root: Path) -> dict[str, Any]:
+def _calibration_reviews(repo_root: Path) -> list[dict[str, Any]]:
+    """Replay reviews with the HOLDOUT split excluded (SwR-112, audit A-19).
+
+    Threshold calibration must never see the holdout split — that would leak the
+    evaluation set into calibration. Tuning-split cases and legacy ``unassigned``
+    fixture cases remain calibration-eligible (strictly tuning-only would leave a
+    single review until AP-34.7 supplies replay inputs for most curated cases);
+    the report states the composition instead of hiding it.
+    """
     cases = load_validation_case_library(repo_root / _CASE_LIBRARY)
     inputs = load_historical_replay_inputs(repo_root / _REPLAY_INPUTS)
     reviews = build_historical_replay_reviews(cases, inputs)
-    return compute_skill_metrics(reviews)
+    return [r for r in reviews if str(r.get("dataset_split")) != "holdout"]
+
+
+def _skill_metrics(repo_root: Path) -> dict[str, Any]:
+    return compute_skill_metrics(_calibration_reviews(repo_root))
 
 
 def run_sensitivity(
@@ -157,6 +169,7 @@ def run_sensitivity(
     ranked.sort(key=lambda row: (-row["influence"], row["threshold"]))
     return {
         "validity_caveat": VALIDITY_CAVEAT,
+        "dataset_split_used": "tuning+unassigned (holdout excluded, SwR-112)",
         "baseline_skill_score": round(base_score, 4),
         "baseline_status_match_count": baseline["status_match_count"],
         "case_count": baseline["case_count"],

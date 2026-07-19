@@ -342,6 +342,7 @@ def build_historical_replay_reviews(
                 "status_match": status_match,
                 "case_polarity": validation_case.case_polarity,
                 "onset_date": validation_case.onset_date,
+                "dataset_split": validation_case.dataset_split,
                 "expected_trajectory": list(validation_case.expected_trajectory)
                 if validation_case.expected_trajectory
                 else None,

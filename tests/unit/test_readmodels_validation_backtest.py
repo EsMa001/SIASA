@@ -785,3 +785,91 @@ def test_historical_replay_summary_scores_fixture_backed_true_replay_cases() -> 
             },
         ],
     }
+
+
+def _minimal_case() -> ValidationCase:
+    return ValidationCase(
+        case_id="VAL-SPLIT-TEST",
+        country_id="UKR",
+        case_name="split test",
+        case_type="t",
+        time_start="2024-01-01",
+        time_end="2024-03-31",
+        expected_domains=["A"],
+        expected_status="S0",
+        expected_signal_pattern="",
+        reference_sources=[],
+        validation_goal="",
+        known_limitations=[],
+        validation_metrics=[],
+    )
+
+
+def _minimal_comparison() -> dict:
+    return compare_expected_vs_observed(
+        validation_case=_minimal_case(),
+        observed_domains=["A"],
+        observed_status="S0",
+        expected_status="S0",
+    )
+
+
+def test_skill_metrics_by_split_marks_degenerate_sections_invalid():
+    """SwR-112: a split without both classes must not pose as an evaluation."""
+    from siasa.readmodels.validation_backtest import build_validation_backtest_read_model
+
+    reviews = [
+        {"case_polarity": "positive", "replayed_status": "S3", "status_match": True,
+         "domain_match_ratio": 1.0, "dataset_split": "holdout", "onset_date": None,
+         "status_timeseries": []},
+        {"case_polarity": "positive", "replayed_status": "S3", "status_match": True,
+         "domain_match_ratio": 1.0, "dataset_split": "tuning", "onset_date": None,
+         "status_timeseries": []},
+        {"case_polarity": "negative", "replayed_status": "S0", "status_match": True,
+         "domain_match_ratio": 1.0, "dataset_split": "tuning", "onset_date": None,
+         "status_timeseries": []},
+    ]
+    read_model = build_validation_backtest_read_model(
+        validation_case=_minimal_case(),
+        comparison=_minimal_comparison(),
+        historical_replay_reviews=reviews,
+    )
+
+    by_split = read_model["skill_metrics_by_split"]
+    assert read_model["skill_evaluation_split"] == "holdout"
+    # holdout: one positive, zero negatives -> degenerate, must be flagged.
+    assert by_split["holdout"]["evaluation_valid"] is False
+    assert "degenerate" in by_split["holdout"]["evaluation_invalid_reason"]
+    # tuning: both classes present -> a valid section.
+    assert by_split["tuning"]["evaluation_valid"] is True
+    assert by_split["tuning"]["evaluation_invalid_reason"] is None
+
+
+def test_committed_holdout_split_is_currently_marked_invalid():
+    """Until AP-34.7 supplies negative replay inputs, holdout must be flagged."""
+    from pathlib import Path
+
+    from siasa.readmodels.validation_backtest import build_validation_backtest_read_model
+    from siasa.validation.cases import load_validation_case_library
+    from siasa.validation.historical_replay import (
+        build_historical_replay_reviews,
+        load_historical_replay_inputs,
+    )
+
+    repo_root = Path(__file__).resolve().parents[2]
+    cases = load_validation_case_library(
+        repo_root / "vmodel" / "verification" / "validation_reference_cases.yaml"
+    )
+    inputs = load_historical_replay_inputs(
+        repo_root / "vmodel" / "verification" / "validation_replay_inputs.yaml"
+    )
+    reviews = build_historical_replay_reviews(cases, inputs)
+    read_model = build_validation_backtest_read_model(
+        validation_case=_minimal_case(),
+        comparison=_minimal_comparison(),
+        historical_replay_reviews=reviews,
+    )
+
+    holdout = read_model["skill_metrics_by_split"].get("holdout")
+    assert holdout is not None  # ISR-2023 is replay-backed and holdout after v3
+    assert holdout["evaluation_valid"] is False  # 1 positive, 0 negatives

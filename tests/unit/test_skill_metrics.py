@@ -173,3 +173,66 @@ def test_extended_metrics_are_deterministic_and_json_serializable():
         assert key in metrics
     json.dumps(metrics, sort_keys=True)
 
+
+
+# --- SwR-113 (AP-34.6, audit A-16): governed alarm threshold + honest lead time ---
+
+def test_alarm_threshold_is_governed_and_resolved_per_call():
+    """An S1 replay only counts as an alarm while the governed minimum allows it."""
+    from siasa.scoring.scoring_thresholds import override_thresholds
+
+    reviews = [_case("negative", "S1")]
+    assert compute_skill_metrics(reviews)["false_alarm_rate"] == 1.0  # default S1
+    with override_thresholds({("skill_validation_metrics", "alarm_minimum_status"): "S2"}):
+        raised = compute_skill_metrics(reviews)
+    assert raised["false_alarm_rate"] == 0.0
+    assert raised["alarm_minimum_status"] == "S2"
+
+
+def test_alarm_threshold_applies_to_the_lead_time_timeseries():
+    """First-alarm day moves when sub-threshold days no longer count as alarms."""
+    from siasa.scoring.scoring_thresholds import override_thresholds
+
+    timeseries = [
+        {"date": "2024-01-10", "status": "S1", "confidence": 0.9},
+        {"date": "2024-01-15", "status": "S3", "confidence": 0.9},
+    ]
+    review = [_case("positive", "S3", onset_date="2024-01-20", timeseries=timeseries)]
+    assert compute_skill_metrics(review)["mean_lead_time_days"] == 10.0  # S1 day alarms
+    with override_thresholds({("skill_validation_metrics", "alarm_minimum_status"): "S2"}):
+        assert compute_skill_metrics(review)["mean_lead_time_days"] == 5.0  # S3 day only
+
+
+def test_post_onset_alarm_is_a_nowcast_not_a_warning():
+    """An alarm first raised AFTER onset must not enter the lead-time mean."""
+    late_timeseries = [{"date": "2024-01-25", "status": "S3", "confidence": 0.9}]
+    metrics = compute_skill_metrics(
+        [_case("positive", "S3", onset_date="2024-01-20", timeseries=late_timeseries)]
+    )
+    assert metrics["mean_lead_time_days"] is None  # no pre-onset warning happened
+    assert metrics["pre_onset_alarm_count"] == 0
+    assert metrics["post_onset_detection_count"] == 1
+    assert metrics["missed_positive_count"] == 0
+
+
+def test_missed_positive_is_counted_not_silently_dropped():
+    metrics = compute_skill_metrics(
+        [_case("positive", "S0", status_match=False, onset_date="2024-01-20")]
+    )
+    assert metrics["missed_positive_count"] == 1
+    assert metrics["pre_onset_alarm_count"] == 0
+    assert metrics["post_onset_detection_count"] == 0
+
+
+def test_mean_lead_time_is_never_negative_under_the_new_definition():
+    """Pre-onset-only accounting makes negative 'lead times' impossible."""
+    mixed = [
+        _case("positive", "S3", onset_date="2024-01-20",
+              timeseries=[{"date": "2024-01-18", "status": "S3", "confidence": 0.9}]),
+        _case("positive", "S3", onset_date="2024-01-20",
+              timeseries=[{"date": "2024-01-25", "status": "S3", "confidence": 0.9}]),
+    ]
+    metrics = compute_skill_metrics(mixed)
+    assert metrics["mean_lead_time_days"] == 2.0  # only the pre-onset case counts
+    assert metrics["pre_onset_alarm_count"] == 1
+    assert metrics["post_onset_detection_count"] == 1

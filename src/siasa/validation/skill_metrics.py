@@ -28,7 +28,7 @@ from __future__ import annotations
 from datetime import date
 from typing import Any
 
-from siasa.scoring.scoring_thresholds import skill_score_weights
+from siasa.scoring.scoring_thresholds import skill_alarm_minimum_status, skill_score_weights
 
 # Governed via vmodel/project/scoring_thresholds.yaml (AP-24); resolved PER CALL
 # (SwR-109) so overrides and sensitivity sweeps reach this module.
@@ -43,6 +43,11 @@ def _event_probability(status: str) -> float:
     return _STATUS_ORDINAL.get(status, 0) / _MAX_STATUS
 
 
+def _is_alarm(status: str, alarm_minimum: str) -> bool:
+    """SwR-113: an alarm is a status at or above the governed minimum, not merely != S0."""
+    return _STATUS_ORDINAL.get(status, 0) >= _STATUS_ORDINAL.get(alarm_minimum, 1)
+
+
 def _parse_date(value: Any) -> date | None:
     if not isinstance(value, str) or len(value) < 10:
         return None
@@ -52,23 +57,34 @@ def _parse_date(value: Any) -> date | None:
         return None
 
 
-def _first_alarm_date(timeseries: Any) -> Any:
-    """Return the date of the first non-S0 (alarm) day in the per-day timeseries."""
+def _first_alarm_date(timeseries: Any, alarm_minimum: str) -> Any:
+    """Return the date of the first at-or-above-threshold day in the per-day timeseries."""
     if not isinstance(timeseries, list):
         return None
     for entry in timeseries:
-        if isinstance(entry, dict) and str(entry.get("status", "S0")) != "S0":
+        if isinstance(entry, dict) and _is_alarm(str(entry.get("status", "S0")), alarm_minimum):
             return entry.get("date")
     return None
 
 
 def _skill_bundle(cases: list[dict[str, Any]], *, baseline: bool) -> dict[str, Any]:
-    """Hit/false-alarm/lead/Brier bundle for the real model or the always-S3 baseline."""
+    """Hit/false-alarm/lead/Brier bundle for the real model or the always-S3 baseline.
+
+    SwR-113 (audit A-16): the alarm threshold is governed (``alarm_minimum_status``)
+    instead of the implicit "!= S0"; lead time counts ONLY alarms raised at or
+    before onset (a warning), while alarms first raised after onset are reported
+    separately as nowcast detections, and positives never alarmed are reported as
+    missed — nothing is silently dropped from the denominator.
+    """
+    alarm_minimum = skill_alarm_minimum_status()
     positive_total = 0
     positive_hits = 0
     negative_total = 0
     negative_false_alarms = 0
     lead_times: list[int] = []
+    post_onset_detections = 0
+    missed_positives = 0
+    undatable_alarms = 0
     brier_terms: list[float] = []
 
     for review in cases:
@@ -77,7 +93,7 @@ def _skill_bundle(cases: list[dict[str, Any]], *, baseline: bool) -> dict[str, A
 
         if baseline:
             predicted_status = _BASELINE_STATUS
-            alarm = True  # S3 != S0: the baseline alarms unconditionally
+            alarm = _is_alarm(predicted_status, alarm_minimum)  # S3: alarms unconditionally
             alarm_date = (
                 timeseries[0].get("date")
                 if isinstance(timeseries, list) and timeseries and isinstance(timeseries[0], dict)
@@ -85,8 +101,8 @@ def _skill_bundle(cases: list[dict[str, Any]], *, baseline: bool) -> dict[str, A
             )
         else:
             predicted_status = str(review.get("replayed_status", "S0"))
-            alarm = predicted_status != "S0"
-            alarm_date = _first_alarm_date(timeseries)
+            alarm = _is_alarm(predicted_status, alarm_minimum)
+            alarm_date = _first_alarm_date(timeseries, alarm_minimum)
 
         outcome = 1.0 if is_positive else 0.0
         brier_terms.append((_event_probability(predicted_status) - outcome) ** 2)
@@ -95,10 +111,16 @@ def _skill_bundle(cases: list[dict[str, Any]], *, baseline: bool) -> dict[str, A
             positive_total += 1
             if alarm:
                 positive_hits += 1
-            onset = _parse_date(review.get("onset_date"))
-            first = _parse_date(alarm_date)
-            if alarm and onset is not None and first is not None:
-                lead_times.append((onset - first).days)
+                onset = _parse_date(review.get("onset_date"))
+                first = _parse_date(alarm_date)
+                if onset is None or first is None:
+                    undatable_alarms += 1
+                elif first <= onset:
+                    lead_times.append((onset - first).days)  # warning: >= 0 by construction
+                else:
+                    post_onset_detections += 1  # nowcast, not a warning
+            else:
+                missed_positives += 1
         else:
             negative_total += 1
             if alarm:
@@ -111,6 +133,11 @@ def _skill_bundle(cases: list[dict[str, Any]], *, baseline: bool) -> dict[str, A
         "negative_case_count": negative_total,
         "mean_lead_time_days": round(sum(lead_times) / len(lead_times), 4) if lead_times else None,
         "lead_time_case_count": len(lead_times),
+        "pre_onset_alarm_count": len(lead_times),
+        "post_onset_detection_count": post_onset_detections,
+        "missed_positive_count": missed_positives,
+        "undatable_alarm_count": undatable_alarms,
+        "alarm_minimum_status": alarm_minimum,
         "brier_score": round(sum(brier_terms) / len(brier_terms), 4) if brier_terms else 0.0,
     }
 
@@ -171,6 +198,12 @@ def compute_skill_metrics(reviews: list[dict[str, Any]]) -> dict[str, Any]:
         "negative_case_count": model["negative_case_count"],
         "mean_lead_time_days": model["mean_lead_time_days"],
         "lead_time_case_count": model["lead_time_case_count"],
+        # SwR-113: warning vs nowcast vs miss, nothing silently dropped.
+        "pre_onset_alarm_count": model["pre_onset_alarm_count"],
+        "post_onset_detection_count": model["post_onset_detection_count"],
+        "missed_positive_count": model["missed_positive_count"],
+        "undatable_alarm_count": model["undatable_alarm_count"],
+        "alarm_minimum_status": model["alarm_minimum_status"],
         "brier_score": model["brier_score"],
         "baseline_false_alarm_rate": baseline["false_alarm_rate"],
         "baseline_brier_score": baseline["brier_score"],

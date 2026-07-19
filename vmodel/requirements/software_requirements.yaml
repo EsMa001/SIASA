@@ -5,7 +5,7 @@ metadata:
   - vmodel/architecture/system_architecture.md
   created_at_utc: '2026-05-11T14:25:30.979384+00:00'
   status: draft_baseline_derived
-  software_requirement_count: 104
+  software_requirement_count: 107
 software_requirements:
 - id: SwR-001
   title: Source catalog record schema
@@ -985,3 +985,27 @@ software_requirements:
   - SyR-015
   verification_method: unit_test
   allocated_to: DDS-006
+- id: SwR-111
+  title: Blocking anti-circularity gate with documented observation basis
+  statement: The software shall treat a positive ground-truth case that carries an onset_date and whose historical_observed_status equals its expected_status as structurally invalid unless the case documents an independent observation_basis describing how the observed status was determined; label equality without such a basis is indistinguishable from label copying (audit finding A-08). The validator shall additionally report ratification_status counts so the ratification field is machine-read (audit finding A-20).
+  status: accepted
+  derives_from:
+  - SyR-026
+  verification_method: unit_test
+  allocated_to: DDS-010
+- id: SwR-112
+  title: Dataset-split enforcement between calibration and evaluation
+  statement: The software shall exclude the holdout dataset split from every threshold-calibration computation (the sensitivity sweep runs on tuning and unassigned cases only and states that composition in its report), shall report skill metrics per dataset split in the validation read model with holdout declared as the designated evaluation split, and the curated event set shall assign matched pairs to splits jointly so that both splits contain both case polarities (audit finding A-19).
+  status: accepted
+  derives_from:
+  - SyR-026
+  verification_method: unit_test
+  allocated_to: DDS-010
+- id: SwR-113
+  title: Governed alarm threshold and pre-onset lead-time accounting
+  statement: The software shall determine alarms from a governed minimum status (skill_validation_metrics.alarm_minimum_status) instead of the implicit any-non-S0 rule, shall count lead time only for alarms first raised at or before onset, and shall report post-onset detections, missed positives, and undatable alarms as separate counts so that no positive case is silently dropped from the accounting (audit finding A-16).
+  status: accepted
+  derives_from:
+  - SyR-026
+  verification_method: unit_test
+  allocated_to: DDS-010

@@ -102,3 +102,30 @@ class TestReportHonesty:
         }
         report = run_sensitivity(_REPO_ROOT, probes=probes)
         assert report["ranked_by_influence"][0]["influence"] > 0
+
+
+class TestDatasetSplitEnforcement:
+    """SwR-112 (audit A-19): calibration must never see the holdout split."""
+
+    def test_holdout_reviews_are_excluded_from_calibration(self):
+        from threshold_sensitivity import _CASE_LIBRARY, _REPLAY_INPUTS, _calibration_reviews
+        from siasa.validation.cases import load_validation_case_library
+        from siasa.validation.historical_replay import (
+            build_historical_replay_reviews,
+            load_historical_replay_inputs,
+        )
+
+        cases = load_validation_case_library(_REPO_ROOT / _CASE_LIBRARY)
+        inputs = load_historical_replay_inputs(_REPO_ROOT / _REPLAY_INPUTS)
+        all_reviews = build_historical_replay_reviews(cases, inputs)
+        calibration = _calibration_reviews(_REPO_ROOT)
+
+        assert all(str(r.get("dataset_split")) != "holdout" for r in calibration)
+        # The exclusion must actually bite: the committed library holds at least
+        # one replay-backed holdout case (ISR-2023 after the v3 re-split).
+        assert len(calibration) < len(all_reviews)
+
+    def test_report_declares_the_split_composition(self):
+        probes = {"domain_status.d1_max": (("domain_status", "d1_max"), [1.0])}
+        report = run_sensitivity(_REPO_ROOT, probes=probes)
+        assert "holdout excluded" in report["dataset_split_used"]
