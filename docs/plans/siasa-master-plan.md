@@ -201,8 +201,11 @@ keine Übertreibung.
 
 - **AP-13 zuerst (P1):** Alle operativen Daten gehen nach 168h verloren. Ohne permanentes Archiv ist
   kein ML-Training möglich. Jeder Tag ohne Archivierung ist unwiederbringlicher Datenverlust.
-- **AP-06 (P2, bedingt):** Repo-seitig fertig; der einzige offene Hebel ist extern (Credentials). Sobald
-  Credentials da sind, ist dies das wertvollste gebündelte Paket.
+- **AP-06 (P2, bedingt):** ~~Repo-seitig fertig; der einzige offene Hebel ist extern (Credentials).~~
+  **Widerlegt am 2026-07-19** (siehe Korrektur unter AP-06): Mit gesetztem UCDP-Token lieferte der erste
+  echte Abruf null Events wegen eines Adapter-Defekts, nicht wegen fehlender Credentials. Repo-seitige
+  Fertigkeit einer credential-gated Quelle lässt sich ohne echten Abruf **nicht** behaupten — Mock-Tests
+  belegen sie nicht. Für ReliefWeb (AP-06.1) gilt derselbe Vorbehalt bis zum Gegenbeweis.
 - **AP-09 (P3, zurückgestellt):** Großer Architektursprung; nur bei explizitem Bedarf am Ziel-Betriebsmodell.
 
 ---
@@ -281,18 +284,35 @@ ein reales Probe-Bundle; Master-Plan + Capability-Matrix aktualisiert; Commit/Pu
 
 #### AP-06 — Externe credential-gated Quellen-Aktivierung · Status: Blockiert (extern) · Rang: P2 · Klasse: MVP-Should
 Herkunft: `G2`, `P0-WP-001` (Source-Access-Assessment, archiviert unter `outdated/`), `P0-WP-002c`.
-Repo-seitig geschlossen: Adapter + graceful Degradation + Aktivierungs-/Evidenz-Wahrheit
+Repo-seitig geschlossen: graceful Degradation + Aktivierungs-/Evidenz-Wahrheit
 (`activated_with_live_evidence`, `configured_but_not_evidenced`, `credentialed_but_live_fetch_failed`,
-`external_blocker_present`). Offener Hebel ist rein extern (Credentials/Registrierung).
+`external_blocker_present`).
+
+**Korrektur (2026-07-19):** Die frühere Aussage „offener Hebel ist rein extern (Credentials)" war für UCDP
+falsch. Mit gesetztem `UCDP_API_TOKEN` lieferte der erste echte Abruf `is_success=True` bei **null Events**.
+Ursache war kein Credential-Problem, sondern ein Adapter-Defekt: Der UCDP-Adapter sendete **keinerlei**
+Server-Filter und siebte den globalen, ab 1989 chronologisch sortierten Datensatz klient-seitig — die
+Zielländer lagen hunderttausende Zeilen jenseits des Abruffensters. Der Adapter war zudem im V-Modell
+**vollständig unverankert** (keine SwR, keine TC, keine Slice), weshalb keine Verifikation den Defekt
+fangen konnte. Lehre: „Adapter existiert" ≠ „Adapter ruft ab"; credential-gated Quellen brauchen einen
+echten Abruf als Nachweis, kein bestandenes Mock-Testset.
 
 | TAP | Inhalt | Status | Bedingung |
 | --- | --- | --- | --- |
 | AP-06.1 | ReliefWeb live aktivieren (Domain-C-Breite) | Blockiert | benötigt `RELIEFWEB_APPNAME` (approved appname) |
-| AP-06.2 | UCDP-GED live aktivieren | Blockiert | benötigt `UCDP_API_TOKEN` im Operator-Lane |
+| AP-06.2 | UCDP-GED live aktivieren | In Arbeit | Token gesetzt und verifiziert; Datenankunft nach AP-06.4 erneut zu prüfen |
 | AP-06.3 | Entscheidung über weitere fehlende Quellklassen (implementieren vs. bewusst aufschieben) | Offen | PL-Entscheid |
+| AP-06.4 | UCDP-Adapter serverseitige Land-/Zeitfilterung (SwR-108, ALGO-UCDP-01) | **Erledigt** | — |
+| AP-06.5 | UCDP GED Candidate als eigene Quelle (Live-Signal) | Offen | braucht laufende Candidate-Version + Drift-/PIT-Semantik für revidierbare Daten |
 
 Auslöser-Regel: Sobald gültige Credentials vorliegen → AP-06 auf P1 ziehen, einen governed Aktivierungslauf
 fahren und explizite Source-Success-Evidenz erfassen.
+
+Datenlinien-Entscheid (PL, 2026-07-19): **beide Linien getrennt** — Jahres-GED (`26.1`) für Backfill und
+PIT-Replay (stabil, revisionsfrei), GED Candidate für den Live-Lauf (tagesaktuell, aber revidierbar).
+Getrennte Quell-IDs, damit Revisionsdrift zwischen den Linien sichtbar bleibt statt sich in einer Kette
+zu vermischen. Randbedingung: Jahresreleases decken nur bis 31.12. des Vorjahres ab — ein Live-Fenster
+kürzer als der Release-Verzug (~16 Monate) liefert auf der Jahreslinie strukturell null Events.
 
 #### AP-07 — Quellen-Robustheit & Degradations-Wahrheit · Status: Erledigt · Klasse: MVP-Should
 Herkunft: `G1`-Rest (das einzige verbliebene Delta der Runtime-Breite). Es geht **nicht** um fehlende
@@ -453,8 +473,12 @@ Drei neue Befunde ergänzen F1–F13: **F14** (synthetische Eventdaten), **F15**
 > AP-26 = SwR-084..087, StR-678..681, ALGO-REPLAY-TS-01 · AP-27 = SwR-088..090, StR-682..684 ·
 > AP-28 = SwR-091..094, StR-685..688, ALGO-SKILL-02 · AP-29 = StR-689..692 · AP-23 = SwR-099 ·
 > AP-30 = SwR-095..098 (done) + SwR-100..102,
-> StR-693..696, ALGO-BACKFILL-01 · AP-31 = SwR-103, StR-697 · AP-32 = SwR-104..107, StR-698..701.
+> StR-693..696, ALGO-BACKFILL-01 · AP-31 = SwR-103, StR-697 · AP-32 = SwR-104..107, StR-698..701 ·
+> AP-06.4 = SwR-108, ALGO-UCDP-01.
 > Jede ID wird nur **einmal** über alle APs vergeben; pinning auf einzelne TAPs bei Implementierung.
+> **Achtung:** Dieses Verzeichnis reserviert IDs *vorwärts* für noch nicht implementierte APs. Die nächste
+> freie SwR-ID ist deshalb **nicht** „höchste vergebene + 1" — sie muss hier gegengeprüft werden.
+> (SwR-102 war bereits an AP-30.4 vergeben, als der Bestand erst bis SwR-101 reichte.)
 
 > **Verankerungs-Stand (2026-06-25):** Die **AP-26**-Anforderungen sind in `vmodel/` verankert (Planning-Commit,
 > "#8" auf AP-26 begrenzt): StR-678..681 (covered by SyR-026), SwR-084..087 (derive SyR-026, allocated DDS-010),

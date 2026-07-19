@@ -966,6 +966,19 @@ implementation_slices:
       - src/siasa/validation/pit_monotonicity.py
     known_test_paths:
       - tests/unit/test_pit_monotonicity.py
+  ucdp-server-side-query:
+    requirement_ids:
+      - SwR-108
+    implementation_map:
+      SwR-108:
+        code_paths:
+          - src/siasa/adapters/ucdp.py
+        test_paths:
+          - tests/unit/test_adapter_ucdp.py
+    known_code_paths:
+      - src/siasa/adapters/ucdp.py
+    known_test_paths:
+      - tests/unit/test_adapter_ucdp.py
   historical-backfill-orchestrator:
     requirement_ids:
       - SwR-100

@@ -1496,3 +1496,10 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_pit_monotonicity.py
   status: accepted
+- id: TC-SwR-108-001
+  title: Verify UCDP server-side country/date filtering and ignored-filter detection
+  requirement_ids:
+  - SwR-108
+  method: unit_test
+  test_file: tests/unit/test_adapter_ucdp.py
+  status: accepted

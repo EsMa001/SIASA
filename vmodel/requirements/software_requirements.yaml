@@ -5,7 +5,7 @@ metadata:
   - vmodel/architecture/system_architecture.md
   created_at_utc: '2026-05-11T14:25:30.979384+00:00'
   status: draft_baseline_derived
-  software_requirement_count: 101
+  software_requirement_count: 102
 software_requirements:
 - id: SwR-001
   title: Source catalog record schema
@@ -960,3 +960,12 @@ software_requirements:
   - SyR-034
   verification_method: unit_test
   allocated_to: DDS-002
+- id: SwR-108
+  title: UCDP adapter server-side country and date filtering
+  statement: The software shall request UCDP GED events with server-side Country (Gleditsch-Ward numeric ids) and StartDate/EndDate filters instead of scanning the unfiltered global dataset, shall detect an ignored filter by rejecting any response containing an unrequested country (ALGO-UCDP-01), shall treat HTTP 401 and 403 as terminal without retry because UCDP counts errors against the daily request quota, and shall report rows returned by the API separately from events retained after filtering.
+  status: accepted
+  derives_from:
+  - SyR-006
+  - SyR-007
+  verification_method: unit_test
+  allocated_to: DDS-001
