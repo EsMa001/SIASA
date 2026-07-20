@@ -14,11 +14,9 @@ from siasa.scoring.scoring_thresholds import (
     bayesian_status_sigma,
 )
 
-# Governed via vmodel/project/scoring_thresholds.yaml (AP-24); fallback = shipped values.
+# Governed via vmodel/project/scoring_thresholds.yaml (AP-24); centers/sigma/tail are
+# resolved PER CALL (SwR-109) so overrides and sensitivity sweeps reach this module.
 _STATUS_LABELS = ["D0", "D1", "D2", "D3", "D4"]
-_STATUS_ANOMALY_CENTERS = bayesian_status_centers()
-_STATUS_SIGMA = bayesian_status_sigma()
-_CREDIBLE_INTERVAL_TAIL = bayesian_status_credible_interval_tail()
 
 @dataclass(frozen=True)
 class BayesianStatusEstimate:
@@ -34,11 +32,14 @@ def compute_bayesian_status(
     anomaly_score: float,
     prior: dict[str, float] | None = None,
 ) -> BayesianStatusEstimate:
+    centers = bayesian_status_centers()
+    sigma = bayesian_status_sigma()
+    credible_interval_tail = bayesian_status_credible_interval_tail()
     if prior is None:
         prior = {s: 1.0 / len(_STATUS_LABELS) for s in _STATUS_LABELS}
     unnormalized = {}
     for status in _STATUS_LABELS:
-        likelihood = _gaussian_likelihood(anomaly_score, _STATUS_ANOMALY_CENTERS[status], _STATUS_SIGMA)
+        likelihood = _gaussian_likelihood(anomaly_score, centers[status], sigma)
         unnormalized[status] = prior.get(status, 0.0) * likelihood
     total = sum(unnormalized.values())
     if total <= 0:
@@ -53,13 +54,13 @@ def compute_bayesian_status(
     high = _STATUS_LABELS[-1]
     for s in _STATUS_LABELS:
         cumulative += posterior[s]
-        if cumulative >= _CREDIBLE_INTERVAL_TAIL:
+        if cumulative >= credible_interval_tail:
             low = s
             break
     cumulative = 0.0
     for s in reversed(_STATUS_LABELS):
         cumulative += posterior[s]
-        if cumulative >= _CREDIBLE_INTERVAL_TAIL:
+        if cumulative >= credible_interval_tail:
             high = s
             break
     return BayesianStatusEstimate(posterior=posterior, map_status=map_status, confidence=round(confidence, 4), confidence_interval=(low, high))

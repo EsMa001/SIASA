@@ -86,9 +86,9 @@ def test_build_historical_replay_reviews_executes_replay_against_fixture_backed_
 
     reviews = build_historical_replay_reviews(cases, replay_inputs)
 
-    # AP-26 (status_timeseries) and AP-28 (case_polarity/onset_date/expected_trajectory)
-    # add review keys additively; this legacy assertion pins the pre-existing fields,
-    # so strip the additive keys before comparing.
+    # AP-26 (status_timeseries), AP-28 (case_polarity/onset_date/expected_trajectory)
+    # and AP-34.5 (dataset_split, SwR-112) add review keys additively; this legacy
+    # assertion pins the pre-existing fields, so strip the additive keys before comparing.
     reviews = [
         {
             key: value
@@ -100,6 +100,7 @@ def test_build_historical_replay_reviews_executes_replay_against_fixture_backed_
                 "case_polarity",
                 "onset_date",
                 "expected_trajectory",
+                "dataset_split",
             }
         }
         for review in reviews

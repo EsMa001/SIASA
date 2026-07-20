@@ -16,9 +16,18 @@ metadata:
   governance: owner_authority
   target_size: "balanced matched escalation/control pairs (expandable)"
   references: vmodel/verification/validation_reference_cases.yaml
-  curation_version: v2
+  curation_version: v3
   curated_pairs: 8
   ratification_status: research_verified
+  split_design: >-
+    Stratified pair-level split (AP-34.5, SwR-112): tuning = PAIR-UKR-CHE, PAIR-SDN-GHA,
+    PAIR-MMR-CRI, PAIR-SYR-JPN; holdout = PAIR-ISR-OMN, PAIR-AZE-NOR, PAIR-NER-BWA,
+    PAIR-AFG-URY. Pairs travel together; both splits contain both classes plus regional
+    and case-type diversity. Replaces the v2 assignment (all positives tuning / all
+    negatives holdout), under which a holdout evaluation would have had zero positives
+    and calibration zero controls. v3 also adds observation_basis to every onset-dated
+    positive (AP-34.4, SwR-111): the documented, label-independent path by which
+    historical_observed_status was determined.
 event_pairs:
   - pair_id: PAIR-UKR-CHE-001
     rationale: "E.Europe interstate invasion (onset 2022-02-24) matched with a stable European quiet quarter."

@@ -47,6 +47,7 @@ _DEFAULTS: dict[str, dict[str, Any]] = {
     "skill_validation_metrics": {
         "detection_weight": 0.6,
         "domain_match_weight": 0.4,
+        "alarm_minimum_status": "S1",
         "evidence_status_match_weight": 0.4,
         "evidence_domain_match_weight": 0.3,
         "evidence_source_coverage_weight": 0.2,
@@ -196,6 +197,12 @@ def skill_score_weights(config_path: Optional[Path] = None) -> tuple[float, floa
     """Return (detection, domain_match) composite skill weights."""
     skill = _load(config_path)["skill_validation_metrics"]
     return (float(skill["detection_weight"]), float(skill["domain_match_weight"]))
+
+
+def skill_alarm_minimum_status(config_path: Optional[Path] = None) -> str:
+    """Return the minimum S-status that counts as an alarm (SwR-113)."""
+    skill = _load(config_path)["skill_validation_metrics"]
+    return str(skill["alarm_minimum_status"])
 
 
 def replay_evidence_weights(config_path: Optional[Path] = None) -> tuple[float, float, float, float]:

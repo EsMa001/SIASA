@@ -966,6 +966,95 @@ implementation_slices:
       - src/siasa/validation/pit_monotonicity.py
     known_test_paths:
       - tests/unit/test_pit_monotonicity.py
+  messketten-integritaet:
+    requirement_ids:
+      - SwR-109
+      - SwR-110
+      - SwR-111
+      - SwR-112
+      - SwR-113
+      - SwR-114
+      - SwR-115
+    implementation_map:
+      SwR-109:
+        code_paths:
+          - src/siasa/scoring/anomaly.py
+          - src/siasa/scoring/probabilistic.py
+          - src/siasa/scoring/cross_domain_fusion.py
+          - src/siasa/analysis/info_epidemiology.py
+          - src/siasa/validation/backtesting.py
+          - src/siasa/validation/historical_replay.py
+          - src/siasa/validation/skill_metrics.py
+        test_paths:
+          - tests/unit/test_threshold_wiring.py
+      SwR-110:
+        code_paths:
+          - scripts/threshold_sensitivity.py
+        test_paths:
+          - tests/unit/test_threshold_sensitivity.py
+          - tests/integration/test_threshold_sensitivity.py
+      SwR-111:
+        code_paths:
+          - src/siasa/validation/cases.py
+        test_paths:
+          - tests/unit/test_validation_cases.py
+      SwR-112:
+        code_paths:
+          - scripts/threshold_sensitivity.py
+          - src/siasa/readmodels/validation_backtest.py
+          - src/siasa/validation/historical_replay.py
+        test_paths:
+          - tests/unit/test_validation_cases.py
+          - tests/unit/test_threshold_sensitivity.py
+      SwR-113:
+        code_paths:
+          - src/siasa/validation/skill_metrics.py
+          - src/siasa/scoring/scoring_thresholds.py
+        test_paths:
+          - tests/unit/test_skill_metrics.py
+      SwR-114:
+        code_paths:
+          - src/siasa/validation/skill_metrics.py
+          - src/siasa/gui/local_app.py
+        test_paths:
+          - tests/unit/test_skill_metrics.py
+      SwR-115:
+        code_paths:
+          - src/siasa/validation/skill_metrics.py
+        test_paths:
+          - tests/unit/test_skill_metrics.py
+    known_code_paths:
+      - src/siasa/scoring/anomaly.py
+      - src/siasa/scoring/probabilistic.py
+      - src/siasa/scoring/cross_domain_fusion.py
+      - src/siasa/analysis/info_epidemiology.py
+      - src/siasa/validation/backtesting.py
+      - src/siasa/validation/historical_replay.py
+      - src/siasa/validation/skill_metrics.py
+      - src/siasa/validation/cases.py
+      - src/siasa/readmodels/validation_backtest.py
+      - src/siasa/scoring/scoring_thresholds.py
+      - src/siasa/gui/local_app.py
+      - scripts/threshold_sensitivity.py
+    known_test_paths:
+      - tests/unit/test_threshold_wiring.py
+      - tests/unit/test_threshold_sensitivity.py
+      - tests/integration/test_threshold_sensitivity.py
+      - tests/unit/test_validation_cases.py
+      - tests/unit/test_skill_metrics.py
+  ucdp-server-side-query:
+    requirement_ids:
+      - SwR-108
+    implementation_map:
+      SwR-108:
+        code_paths:
+          - src/siasa/adapters/ucdp.py
+        test_paths:
+          - tests/unit/test_adapter_ucdp.py
+    known_code_paths:
+      - src/siasa/adapters/ucdp.py
+    known_test_paths:
+      - tests/unit/test_adapter_ucdp.py
   historical-backfill-orchestrator:
     requirement_ids:
       - SwR-100

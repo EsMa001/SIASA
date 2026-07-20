@@ -169,6 +169,7 @@ Die verbleibende blockierte Arbeit ist externe Quellen-Aktivierung (AP-06) und �
 | ~~P1~~ | 1b | AP-16 | Skill-Messharness (Ground-Truth-Backtest) | **Erledigt** | Analytik-Kern | F7/F8/F9: ALGO-SKILL-01 (`validation/skill_metrics.py`) + GUI-KPI; Regressionstest grün |
 | ~~P1~~ | 1b | AP-28 | Skill-Metrik: Fehlalarmrate + No-Skill-Baseline | **Erledigt** | Validierung | F9: ALGO-SKILL-02 (Fehlalarm/Vorlauf/Brier/Baseline); Zahlen erst mit AP-30 aussagekräftig |
 | ~~P2~~ | 2a | AP-29 | Event-Set-Definition (klein, ausgewogen) | **Erledigt** | Validierung | F14: Mechanik + Kuratierung v2 (8 research-verifizierte Paare); finale Ratifizierung Owner-Hoheit |
+| **P1** | 1c | AP-34 | Messketten-Integrität (Fundament-Audit Phase I) | **Erledigt** (34.7 → AP-30.4 verschoben) | Validierung/Governance | Audit 2026-07-19 (D1): Skill-/Sensitivitätszahlen waren nicht modellaussagekräftig. **Vor** AP-30.4/31/32 abschließen, sonst validieren die realen Daten gegen eine kaputte Metrik. Datenunabhängig. |
 | **P1** | 2b | AP-30 | Historischer Backfill GDELT/GDACS/WB + PIT | Offen | Daten | **bindender Engpass.** 30.1 Adapter-Datumsfenster = **datenunabhängig, JETZT** · 30.2+ realer Pull = **owner-gated** (Fallauswahl aus den 8 Paaren, Lizenz/Quellzitierung, API); braucht AP-13 |
 | **P2** | 2c | AP-31 | Provenance: real-captured vs fixture | Offen | Daten/Governance | F14: ehrliche Kennzeichnung; braucht AP-30 |
 | **P3** | 3 | AP-32 | End-to-End-Validierung + Skill-Report | Offen | Validierung | F7/F8 real; braucht AP-26, AP-28, AP-30, AP-31 |
@@ -201,8 +202,11 @@ keine Übertreibung.
 
 - **AP-13 zuerst (P1):** Alle operativen Daten gehen nach 168h verloren. Ohne permanentes Archiv ist
   kein ML-Training möglich. Jeder Tag ohne Archivierung ist unwiederbringlicher Datenverlust.
-- **AP-06 (P2, bedingt):** Repo-seitig fertig; der einzige offene Hebel ist extern (Credentials). Sobald
-  Credentials da sind, ist dies das wertvollste gebündelte Paket.
+- **AP-06 (P2, bedingt):** ~~Repo-seitig fertig; der einzige offene Hebel ist extern (Credentials).~~
+  **Widerlegt am 2026-07-19** (siehe Korrektur unter AP-06): Mit gesetztem UCDP-Token lieferte der erste
+  echte Abruf null Events wegen eines Adapter-Defekts, nicht wegen fehlender Credentials. Repo-seitige
+  Fertigkeit einer credential-gated Quelle lässt sich ohne echten Abruf **nicht** behaupten — Mock-Tests
+  belegen sie nicht. Für ReliefWeb (AP-06.1) gilt derselbe Vorbehalt bis zum Gegenbeweis.
 - **AP-09 (P3, zurückgestellt):** Großer Architektursprung; nur bei explizitem Bedarf am Ziel-Betriebsmodell.
 
 ---
@@ -281,18 +285,35 @@ ein reales Probe-Bundle; Master-Plan + Capability-Matrix aktualisiert; Commit/Pu
 
 #### AP-06 — Externe credential-gated Quellen-Aktivierung · Status: Blockiert (extern) · Rang: P2 · Klasse: MVP-Should
 Herkunft: `G2`, `P0-WP-001` (Source-Access-Assessment, archiviert unter `outdated/`), `P0-WP-002c`.
-Repo-seitig geschlossen: Adapter + graceful Degradation + Aktivierungs-/Evidenz-Wahrheit
+Repo-seitig geschlossen: graceful Degradation + Aktivierungs-/Evidenz-Wahrheit
 (`activated_with_live_evidence`, `configured_but_not_evidenced`, `credentialed_but_live_fetch_failed`,
-`external_blocker_present`). Offener Hebel ist rein extern (Credentials/Registrierung).
+`external_blocker_present`).
+
+**Korrektur (2026-07-19):** Die frühere Aussage „offener Hebel ist rein extern (Credentials)" war für UCDP
+falsch. Mit gesetztem `UCDP_API_TOKEN` lieferte der erste echte Abruf `is_success=True` bei **null Events**.
+Ursache war kein Credential-Problem, sondern ein Adapter-Defekt: Der UCDP-Adapter sendete **keinerlei**
+Server-Filter und siebte den globalen, ab 1989 chronologisch sortierten Datensatz klient-seitig — die
+Zielländer lagen hunderttausende Zeilen jenseits des Abruffensters. Der Adapter war zudem im V-Modell
+**vollständig unverankert** (keine SwR, keine TC, keine Slice), weshalb keine Verifikation den Defekt
+fangen konnte. Lehre: „Adapter existiert" ≠ „Adapter ruft ab"; credential-gated Quellen brauchen einen
+echten Abruf als Nachweis, kein bestandenes Mock-Testset.
 
 | TAP | Inhalt | Status | Bedingung |
 | --- | --- | --- | --- |
 | AP-06.1 | ReliefWeb live aktivieren (Domain-C-Breite) | Blockiert | benötigt `RELIEFWEB_APPNAME` (approved appname) |
-| AP-06.2 | UCDP-GED live aktivieren | Blockiert | benötigt `UCDP_API_TOKEN` im Operator-Lane |
+| AP-06.2 | UCDP-GED live aktivieren | In Arbeit | Token gesetzt und verifiziert; Datenankunft nach AP-06.4 erneut zu prüfen |
 | AP-06.3 | Entscheidung über weitere fehlende Quellklassen (implementieren vs. bewusst aufschieben) | Offen | PL-Entscheid |
+| AP-06.4 | UCDP-Adapter serverseitige Land-/Zeitfilterung (SwR-108, ALGO-UCDP-01) | **Erledigt** | — |
+| AP-06.5 | UCDP GED Candidate als eigene Quelle (Live-Signal) | Offen | braucht laufende Candidate-Version + Drift-/PIT-Semantik für revidierbare Daten |
 
 Auslöser-Regel: Sobald gültige Credentials vorliegen → AP-06 auf P1 ziehen, einen governed Aktivierungslauf
 fahren und explizite Source-Success-Evidenz erfassen.
+
+Datenlinien-Entscheid (PL, 2026-07-19): **beide Linien getrennt** — Jahres-GED (`26.1`) für Backfill und
+PIT-Replay (stabil, revisionsfrei), GED Candidate für den Live-Lauf (tagesaktuell, aber revidierbar).
+Getrennte Quell-IDs, damit Revisionsdrift zwischen den Linien sichtbar bleibt statt sich in einer Kette
+zu vermischen. Randbedingung: Jahresreleases decken nur bis 31.12. des Vorjahres ab — ein Live-Fenster
+kürzer als der Release-Verzug (~16 Monate) liefert auf der Jahreslinie strukturell null Events.
 
 #### AP-07 — Quellen-Robustheit & Degradations-Wahrheit · Status: Erledigt · Klasse: MVP-Should
 Herkunft: `G1`-Rest (das einzige verbliebene Delta der Runtime-Breite). Es geht **nicht** um fehlende
@@ -453,8 +474,15 @@ Drei neue Befunde ergänzen F1–F13: **F14** (synthetische Eventdaten), **F15**
 > AP-26 = SwR-084..087, StR-678..681, ALGO-REPLAY-TS-01 · AP-27 = SwR-088..090, StR-682..684 ·
 > AP-28 = SwR-091..094, StR-685..688, ALGO-SKILL-02 · AP-29 = StR-689..692 · AP-23 = SwR-099 ·
 > AP-30 = SwR-095..098 (done) + SwR-100..102,
-> StR-693..696, ALGO-BACKFILL-01 · AP-31 = SwR-103, StR-697 · AP-32 = SwR-104..107, StR-698..701.
+> StR-693..696, ALGO-BACKFILL-01 · AP-31 = SwR-103, StR-697 · AP-32 = SwR-104..107, StR-698..701 ·
+> AP-06.4 = SwR-108, ALGO-UCDP-01 · AP-34 = SwR-109..114, ALGO-SENS-01 (109 Per-Call-Threshold-
+> Aufloesung, 110 Sensitivitaets-Vollabdeckung, 111 Anti-Zirkularitaet, 112 Split-Durchsetzung,
+> 113 Alarm-Schwelle/Vorlauf, 114 Klimatologie-BSS + Wilson, 115 S5/S6-Enthaltungen). Die verschobene
+> Kontroll-Input-Anforderung (ex AP-34.7) laeuft unter AP-30.4/SwR-102.
 > Jede ID wird nur **einmal** über alle APs vergeben; pinning auf einzelne TAPs bei Implementierung.
+> **Achtung:** Dieses Verzeichnis reserviert IDs *vorwärts* für noch nicht implementierte APs. Die nächste
+> freie SwR-ID ist deshalb **nicht** „höchste vergebene + 1" — sie muss hier gegengeprüft werden.
+> (SwR-102 war bereits an AP-30.4 vergeben, als der Bestand erst bis SwR-101 reichte.)
 
 > **Verankerungs-Stand (2026-06-25):** Die **AP-26**-Anforderungen sind in `vmodel/` verankert (Planning-Commit,
 > "#8" auf AP-26 begrenzt): StR-678..681 (covered by SyR-026), SwR-084..087 (derive SyR-026, allocated DDS-010),
@@ -531,7 +559,7 @@ Die vier Adapter sind heute **live-only** (kein historisches Datumsfenster) — 
 | AP-30.1 | Adapter um historisches Datumsfenster erweitern (GDELT DOC `startdatetime/enddatetime`, GDELT Events datierte Exports, GDACS Archiv, World Bank `date`-Range); **Live-Pfad unverändert** | **Erledigt** (`11ce56b`; alle 4 Adapter, `date_window`-Feld, Live-Pfad byte-genau, SwR-095..098 + neuer Slice + Count-Sync) | SwR-095..098 |
 | AP-30.2 | Orchestrator `scripts/build_historical_backfill.py`: ziehen→`normalize_records`→`ArchiveWriter`→`DailyAligner` (ALGO-BACKFILL-01); **≥100 Records/Fall** | **Erledigt** (Mechanik; reale Pulls owner-gated) | SwR-100 / ALGO-BACKFILL-01 |
 | AP-30.3 | PIT-Replay ohne Look-ahead (verschobener Stichtag; nicht-NaN-Feldzahl steigt monoton mit `query_date`) | **Erledigt** | SwR-101 |
-| AP-30.4 | Reale Bundles + Manifest-Governance für ≥1 Positiv- + ≥1 Kontrollfall (`_validate_archival_replay_bundle` grün, ≥100 Records) | Offen | SwR-102 / StR-693..696 |
+| AP-30.4 | Reale Bundles + Manifest-Governance für ≥1 Positiv- + ≥1 Kontrollfall (`_validate_archival_replay_bundle` grün, ≥100 Records); **erweitert (2026-07-19, ex AP-34.7):** Bundles für **alle 8 S0-Kontrollen**, damit die Fehlalarmrate einen realen Nenner bekommt und `skill_metrics_by_split["holdout"].evaluation_valid` von false auf true wechselt (A-07) | Offen | SwR-102 / StR-693..696 |
 
 #### AP-31 — Provenance: real-captured vs fixture · Status: Offen · Klasse: Daten/Governance
 Phase 2c · Schließt: **F14** · Abhängig von: AP-30 · Aufwand: M · Risiko: niedrig · Trace: SwR-103 / StR-697.
@@ -563,7 +591,42 @@ Konsument/Aggregator, **erfindet keine neue Modellmechanik**.
 **Kritischer Pfad (AP-26…32):** `AP-18 → AP-26`; parallel `AP-27 → AP-29 → AP-30 → AP-31`;
 `(AP-16, AP-26, AP-27) → AP-28`; `(AP-26, AP-28, AP-30, AP-31) → AP-32`. Längster Pfad =
 `AP-27 → AP-29 → AP-30 → AP-31 → AP-32` (enthält das XL/hoch-Risiko-Paket AP-30). AP-16 ist
-verstecktes Bottleneck für AP-28/AP-32 — vorab schließen.
+verstecktes Bottleneck für AP-28/AP-32 — vorab schließen. **Ergänzung 2026-07-19:** AP-34
+(Messketten-Integrität) schiebt sich vor AP-30.4/31/32 — siehe unten.
+
+#### AP-34 — Messketten-Integrität (Fundament-Audit Phase I) · Status: Erledigt (34.7 → AP-30.4) · Rang: P1 · Klasse: Validierung/Governance
+Herkunft: **Fundament-Audit 2026-07-19** (`docs/research/wissenschaftliches-fundament-audit-2026-07.md`),
+Systemdiagnose D1: die publizierten Skill-/Sensitivitätszahlen hingen an einer Konstantentabelle,
+importgebundenen Parametern, fehlenden Negativfällen und zirkulären Labels — sie waren über die
+Modellgüte nicht aussagekräftig. AP-34 repariert die **Messkette selbst**, bevor AP-30.4/31/32 reale
+Daten durch sie validieren. Alle TAPs sind **datenunabhängig**.
+Trace: SwR-109..115 / ALGO-SENS-01.
+
+| TAP | Inhalt (Audit-Maßnahme) | Status | Trace |
+| --- | --- | --- | --- |
+| AP-34.1 | Sofort-Hygiene: SHELF-Etikett ehrlich, Freshness-Kommentar-Labels an domains.yaml angeglichen, GUI kennzeichnet Bayes/Fusion/Baselines als „berechnet, nicht statusbildend" (A-24/A-28/A-27) | **Erledigt** | Doku/GUI |
+| AP-34.2 | V-1 Per-Call-Auflösung aller governed Parameter; Verbots-Wächter gegen Import-Bindung (A-02) | **Erledigt** | SwR-109 / TC-SwR-109-001 |
+| AP-34.3 | V-2 Sensitivität: Probe-Grid aus voller Config abgeleitet (38 statt 5 Parameter), `not_swept` explizit, hartes `validity_caveat` fixture-bound (A-01/A-02) | **Erledigt** | SwR-110 / TC-SwR-110-001 / ALGO-SENS-01 |
+| AP-34.4 | V-4 Zirkularität blockierend: onset-datierte Positive mit identischen Labels brauchen dokumentierte `observation_basis`, sonst `is_valid: false`; `ratification_status` wird erstmals maschinell gezählt (A-08, A-20) | **Erledigt** | SwR-111 / TC-SwR-111-001 |
+| AP-34.5 | V-6 Split durchgesetzt: Holdout aus jeder Kalibrierung ausgeschlossen (Sensitivität deklariert Zusammensetzung), Skill je Split im Read-Model (Holdout = Evaluations-Split), **Kuration v3**: stratifizierter Paar-Split — v2 hatte alle Positiven im Tuning, alle Kontrollen im Holdout (A-19) | **Erledigt** | SwR-112 / TC-SwR-112-001 |
+| AP-34.6 | V-7 Lead-Time: governte Alarm-Schwelle (`alarm_minimum_status`, Default S1 verhaltensgleich, Empfehlung S2), Lead nur für Alarme vor Onset, Nowcast/Miss/undatierbar getrennt gezählt (A-16) | **Erledigt** | SwR-113 / TC-SwR-113-001 |
+| AP-34.7 | V-3 Replay-Inputs für die 8 S0-Negativkontrollen (A-07) | **Verschoben → AP-30.4** | siehe Begründung unten |
+| AP-34.8 | V-5 Klimatologie-Referenz + BSS als `beats_baseline`-Kriterium + Wilson-Intervalle (A-09/A-10) | **Erledigt** | SwR-114 / TC-SwR-114-001 |
+| AP-34.9 | **Nachtrag:** S5/S6 sind Enthaltungen, keine Schweregrade (A-05b, vom Audit uebersehen). Vorher wurde ein Datenausfall auf einem Positivfall als perfekte Fruehwarnung gewertet (recall 1.0, lead 10d, brier 0.0). | **Erledigt** | SwR-115 / TC-SwR-115-001 |
+
+**AP-34.7 verschoben nach AP-30.4 (Entscheid 2026-07-19).** Die 8 S0-Kontrollen brauchen Replay-Inputs,
+damit die Fehlalarmrate überhaupt einen Nenner bekommt. Diese Inputs *synthetisch* zu bauen, würde eine
+Fehlalarmrate erzeugen, die genauso wenig über das Modell aussagt wie die heutige strukturelle Null —
+nur schlechter erkennbar, weil sie dann plausibel aussieht. AP-30.4 zieht ohnehin reale Bundles; die
+Kontrollen werden dort mitgezogen. Bis dahin ist der Zustand **explizit markiert** statt kaschiert:
+`skill_metrics_by_split["holdout"].evaluation_valid = false` mit Begründung (SwR-112). Damit wird
+AP-30.4 um eine Anforderung erweitert: reale Bundles auch für die 8 Kontrollfälle.
+
+Re-Run-Befund nach 34.2/34.3 (vorher: „nur d1_max wirkt, 0.4286"): mit reparierter Verdrahtung und
+38 Sonden zeigen **vier** Parameter Einfluss — `data_sufficiency.minimum_coverage` (0.4286, nie zuvor
+gesweept), `skill_validation_metrics.detection_weight` (0.4286, vorher importgebunden),
+`domain_status.d1_max` (0.36), `domain_match_weight` (0.33). Die übrigen 34 Nullen sind jetzt ehrliche
+Nullen mit Begründung (nicht statusbildende Familien). Alle Werte bleiben **fixture-bound** bis V-8/AP-30.
 
 ---
 

@@ -17,7 +17,7 @@ def test_stakeholder_verification_coverage_report_covers_all_active_stakeholders
     assert report["summary"]["system_requirement_count"] == 53
     assert report["summary"]["software_route_system_requirement_count"] == 30
     assert report["summary"]["governance_system_route_requirement_count"] == 20
-    assert report["summary"]["accepted_software_requirement_count"] == 101
+    assert report["summary"]["accepted_software_requirement_count"] == 109
     assert report["summary"]["software_requirements_without_tc_count"] == 0
     assert report["summary"]["software_route_syrs_without_swr_count"] == 0
 

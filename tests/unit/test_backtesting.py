@@ -20,8 +20,11 @@ from siasa.validation.backtesting import (
     run_backtest,
     generate_backtest_report,
     _compare_scores,
-    _SCORE_REGRESSION_THRESHOLD,
 )
+from siasa.scoring.scoring_thresholds import regression_thresholds
+
+# Resolved via the governed getter (SwR-109) — the former module constant is gone.
+_SCORE_REGRESSION_THRESHOLD, _, _ = regression_thresholds()
 
 
 def _setup_db_with_scores(

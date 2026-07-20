@@ -8,7 +8,11 @@ from a fixed per-domain constant.
 from __future__ import annotations
 
 from siasa.data.normalized_models import NormalizedRecord
-from siasa.scoring.anomaly import ANOMALY_UPPER_BOUND, compute_feature_driven_anomaly
+from siasa.scoring.anomaly import compute_feature_driven_anomaly
+from siasa.scoring.scoring_thresholds import anomaly_upper_bound
+
+# Resolved via the governed getter (SwR-109) — the former module constant is gone.
+ANOMALY_UPPER_BOUND = anomaly_upper_bound()
 
 
 def _rec(

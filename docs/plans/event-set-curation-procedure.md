@@ -100,3 +100,29 @@ AP-30-Realdaten durch Vor-Onset-Fenster desselben Landes ersetzbar.
 
 **Owner-Ratifizierung offen:** Auswahl + Onsets + Ruhe-Aussagen gegen Primärquellen **final** ratifizieren;
 ggf. Kontrollen durch dieselben Länder in nachweislich ruhigen Fenstern ersetzen, sobald AP-30 echte Daten liefert.
+
+## 8. Kuration v3 (2026-07-19, AP-34.4/34.5 — SwR-111/112)
+
+**Anlass:** Fundament-Audit 2026-07 (Befunde A-08 Zirkularität, A-19 dekorativer Split) und die
+dabei entdeckte v2-Split-Schieflage: *alle* Positiven lagen im Tuning-, *alle* Kontrollen im
+Holdout-Split — eine Holdout-Evaluation hätte null Positive (Recall undefiniert), die Kalibrierung
+null Kontrollen (Fehlalarmrate undefiniert) gehabt.
+
+**Änderung 1 — stratifizierter Paar-Split (SwR-112):** Paare wandern geschlossen.
+Tuning: Paare 1 (UKR–CHE), 3 (SDN–GHA), 7 (MMR–CRI), 8 (SYR–JPN) ·
+Holdout: Paare 2 (ISR–OMN), 4 (AZE–NOR), 5 (NER–BWA), 6 (AFG–URY).
+Beide Splits enthalten damit beide Klassen sowie Regionen- und Typ-Diversität (je ein Putsch,
+je ein Staatskollaps). Durchsetzung: die Sensitivitäts-/Kalibrier-Kette schließt den
+Holdout-Split aus (`scripts/threshold_sensitivity.py`); das Validierungs-Read-Model berichtet
+Skill **je Split** und deklariert Holdout als Evaluations-Split.
+
+**Änderung 2 — `observation_basis` je onset-datiertem Positivfall (SwR-111):** dokumentiert den
+label-unabhängigen Beobachtungspfad, über den `historical_observed_status` bestimmt wurde.
+Der Validator blockiert (`is_valid: false`) jeden onset-datierten Positivfall, dessen
+Beobachtungs- und Soll-Label identisch sind, **ohne** dass eine solche Basis dokumentiert ist —
+Gleichheit ist bei gut kuratierten Fällen legitim, stilles Label-Kopieren nicht mehr.
+Zusätzlich zählt der Validator jetzt `ratification_status` aus (Feld war zuvor von keinem Code
+gelesen, Audit A-20).
+
+**Owner-Ratifizierung weiterhin offen** (unverändert aus v2); die v3-Änderungen sind
+mechanik-/governance-seitig und ändern keine Fall-Labels.

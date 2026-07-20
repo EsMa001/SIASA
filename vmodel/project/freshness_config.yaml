@@ -9,12 +9,13 @@
 
 global_default_hours: 168.0
 
+# Domain letters follow vmodel/architecture/domains.yaml (audit A-28 fixed the drifted labels).
 domain_defaults:
-  A: 168.0    # Political/Security — 7 days
-  B: 168.0    # Economic — 7 days
-  C: 336.0    # Social/Physical — 14 days (events less frequent)
-  D: 168.0    # Media/Information — 7 days
-  E: 168.0    # Cyber/Tech — 7 days
+  A: 168.0    # Informationsraum/Narrative — 7 days
+  B: 168.0    # Ereignisdaten (Konflikt/Protest/Katastrophen) — 7 days
+  C: 336.0    # Physische Aktivität/Satellit — 14 days (events less frequent)
+  D: 168.0    # Wirtschafts-/Strukturdaten — 7 days
+  E: 168.0    # Cyber/Tech/InfoOps — 7 days
 
 source_overrides:
   # Override for specific sources that have different update frequencies

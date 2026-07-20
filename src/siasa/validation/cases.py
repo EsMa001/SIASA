@@ -29,6 +29,11 @@ class ValidationCase:
     expected_trajectory: list[str] | None = None
     dataset_split: str = "unassigned"
     case_polarity: str = "positive"
+    # AP-34.4 anti-circularity (SwR-111): documents HOW historical_observed_status
+    # was determined, independently of the expected label. Equality of the two
+    # labels is legitimate for a well-curated case ONLY when this basis exists.
+    observation_basis: str | None = None
+    ratification_status: str | None = None
 
     def __post_init__(self) -> None:
         if not self.case_id or not self.country_id:
@@ -96,6 +101,12 @@ def load_validation_case_library(path: Path) -> list[ValidationCase]:
             ),
             dataset_split=str(record.get("dataset_split", "unassigned")),
             case_polarity=str(record.get("case_polarity", "positive")),
+            observation_basis=(
+                str(record["observation_basis"]) if record.get("observation_basis") else None
+            ),
+            ratification_status=(
+                str(record["ratification_status"]) if record.get("ratification_status") else None
+            ),
         )
         for record in case_records
         if isinstance(record, dict)
@@ -119,13 +130,23 @@ def validate_reference_case_library(cases: list[ValidationCase]) -> dict[str, ob
 
     Structural problems (onset/split/polarity) drive ``is_valid``; circular labels
     and the negative/S0 counts are reported as quality signals for owner curation.
-    Deterministic.
+
+    SwR-111 (audit A-08) sharpens the anti-circularity gate: for the redesigned
+    ground-truth cases (those carrying an ``onset_date``), a positive case whose
+    ``historical_observed_status`` equals its ``expected_status`` MUST document an
+    independent ``observation_basis`` — otherwise the equality is indistinguishable
+    from label copying and the library is structurally invalid. Legacy fixture
+    cases without ``onset_date`` keep the informational-only flag. Deterministic.
     """
     onset_out_of_window: list[str] = []
     invalid_split: list[str] = []
     invalid_polarity: list[str] = []
     circular_label_case_ids: list[str] = []
+    unverified_circular_label_case_ids: list[str] = []
+    ratification_status_counts: dict[str, int] = {}
     for case in cases:
+        status_key = case.ratification_status or "missing"
+        ratification_status_counts[status_key] = ratification_status_counts.get(status_key, 0) + 1
         if case.onset_date is not None and not (case.time_start <= case.onset_date <= case.time_end):
             onset_out_of_window.append(case.case_id)
         if case.dataset_split not in _VALID_DATASET_SPLITS:
@@ -138,6 +159,8 @@ def validate_reference_case_library(cases: list[ValidationCase]) -> dict[str, ob
             and case.historical_observed_status == case.expected_status
         ):
             circular_label_case_ids.append(case.case_id)
+            if case.onset_date is not None and not case.observation_basis:
+                unverified_circular_label_case_ids.append(case.case_id)
     return {
         "case_count": len(cases),
         "negative_case_count": sum(1 for case in cases if case.case_polarity == "negative"),
@@ -145,11 +168,18 @@ def validate_reference_case_library(cases: list[ValidationCase]) -> dict[str, ob
             1 for case in cases if case.case_polarity == "negative" and case.expected_status == "S0"
         ),
         "dataset_splits_present": sorted({case.dataset_split for case in cases}),
+        "ratification_status_counts": dict(sorted(ratification_status_counts.items())),
         "onset_out_of_window": sorted(onset_out_of_window),
         "invalid_split": sorted(invalid_split),
         "invalid_polarity": sorted(invalid_polarity),
         "circular_label_case_ids": sorted(circular_label_case_ids),
-        "is_valid": not (onset_out_of_window or invalid_split or invalid_polarity),
+        "unverified_circular_label_case_ids": sorted(unverified_circular_label_case_ids),
+        "is_valid": not (
+            onset_out_of_window
+            or invalid_split
+            or invalid_polarity
+            or unverified_circular_label_case_ids
+        ),
     }
 
 

@@ -26,7 +26,8 @@ def test_sensitivity_run_produces_ranked_report():
     module = _load_sensitivity_module()
     clear_threshold_cache()
 
-    # Minimal probe keeps the smoke fast; full grid lives in the script's _PROBES.
+    # Minimal probe keeps the smoke fast; the full grid is derived from the
+    # governed config via build_probe_grid() (SwR-110).
     probes = {"domain_status.d3_max": (("domain_status", "d3_max"), [1.0, 3.0])}
     report = module.run_sensitivity(_REPO_ROOT, probes)
 
@@ -44,12 +45,17 @@ def test_sensitivity_run_produces_ranked_report():
     assert domain_status_cutpoints() == (0.2, 0.5, 1.0)
 
 
-def test_format_report_renders_ranking():
+def test_format_report_renders_ranking_with_validity_caveat():
     module = _load_sensitivity_module()
     report = {
+        "validity_caveat": module.VALIDITY_CAVEAT,
         "baseline_skill_score": 0.5,
         "baseline_status_match_count": 20,
         "case_count": 36,
+        "probe_coverage": {
+            "swept_parameter_count": 2,
+            "not_swept": [{"parameter": "family.label", "reason": "unsupported type str"}],
+        },
         "ranked_by_influence": [
             {"threshold": "domain_status.d3_max", "influence": 0.12, "sweep": []},
             {"threshold": "anomaly.upper_bound", "influence": 0.0, "sweep": []},
@@ -60,3 +66,6 @@ def test_format_report_renders_ranking():
     assert "domain_status.d3_max" in text
     assert "moves the outcome" in text
     assert "no effect on these fixtures" in text
+    # SwR-110: the fixture-bound validity caveat and coverage report are mandatory.
+    assert "fixture-bound" in text
+    assert "not swept: family.label" in text

@@ -123,7 +123,9 @@ def test_lead_time_before_onset_from_timeseries():
 
 def test_brier_score_uses_status_event_probability():
     # SwR-092: perfect calibration -> Brier 0; fully wrong -> Brier 1.
-    assert compute_skill_metrics([_case("positive", "S6"), _case("negative", "S0")])["brier_score"] == 0.0
+    # SwR-115: S4 is the top of the ordinal scale (p=1.0); the former S6 here
+    # would now be an abstention and would make this assertion vacuous.
+    assert compute_skill_metrics([_case("positive", "S4"), _case("negative", "S0")])["brier_score"] == 0.0
     assert compute_skill_metrics([_case("positive", "S0")])["brier_score"] == 1.0
 
 
@@ -173,3 +175,298 @@ def test_extended_metrics_are_deterministic_and_json_serializable():
         assert key in metrics
     json.dumps(metrics, sort_keys=True)
 
+
+
+# --- SwR-113 (AP-34.6, audit A-16): governed alarm threshold + honest lead time ---
+
+def test_alarm_threshold_is_governed_and_resolved_per_call():
+    """An S1 replay only counts as an alarm while the governed minimum allows it."""
+    from siasa.scoring.scoring_thresholds import override_thresholds
+
+    reviews = [_case("negative", "S1")]
+    assert compute_skill_metrics(reviews)["false_alarm_rate"] == 1.0  # default S1
+    with override_thresholds({("skill_validation_metrics", "alarm_minimum_status"): "S2"}):
+        raised = compute_skill_metrics(reviews)
+    assert raised["false_alarm_rate"] == 0.0
+    assert raised["alarm_minimum_status"] == "S2"
+
+
+def test_alarm_threshold_applies_to_the_lead_time_timeseries():
+    """First-alarm day moves when sub-threshold days no longer count as alarms."""
+    from siasa.scoring.scoring_thresholds import override_thresholds
+
+    timeseries = [
+        {"date": "2024-01-10", "status": "S1", "confidence": 0.9},
+        {"date": "2024-01-15", "status": "S3", "confidence": 0.9},
+    ]
+    review = [_case("positive", "S3", onset_date="2024-01-20", timeseries=timeseries)]
+    assert compute_skill_metrics(review)["mean_lead_time_days"] == 10.0  # S1 day alarms
+    with override_thresholds({("skill_validation_metrics", "alarm_minimum_status"): "S2"}):
+        assert compute_skill_metrics(review)["mean_lead_time_days"] == 5.0  # S3 day only
+
+
+def test_post_onset_alarm_is_a_nowcast_not_a_warning():
+    """An alarm first raised AFTER onset must not enter the lead-time mean."""
+    late_timeseries = [{"date": "2024-01-25", "status": "S3", "confidence": 0.9}]
+    metrics = compute_skill_metrics(
+        [_case("positive", "S3", onset_date="2024-01-20", timeseries=late_timeseries)]
+    )
+    assert metrics["mean_lead_time_days"] is None  # no pre-onset warning happened
+    assert metrics["pre_onset_alarm_count"] == 0
+    assert metrics["post_onset_detection_count"] == 1
+    assert metrics["missed_positive_count"] == 0
+
+
+def test_missed_positive_is_counted_not_silently_dropped():
+    metrics = compute_skill_metrics(
+        [_case("positive", "S0", status_match=False, onset_date="2024-01-20")]
+    )
+    assert metrics["missed_positive_count"] == 1
+    assert metrics["pre_onset_alarm_count"] == 0
+    assert metrics["post_onset_detection_count"] == 0
+
+
+def test_mean_lead_time_is_never_negative_under_the_new_definition():
+    """Pre-onset-only accounting makes negative 'lead times' impossible."""
+    mixed = [
+        _case("positive", "S3", onset_date="2024-01-20",
+              timeseries=[{"date": "2024-01-18", "status": "S3", "confidence": 0.9}]),
+        _case("positive", "S3", onset_date="2024-01-20",
+              timeseries=[{"date": "2024-01-25", "status": "S3", "confidence": 0.9}]),
+    ]
+    metrics = compute_skill_metrics(mixed)
+    assert metrics["mean_lead_time_days"] == 2.0  # only the pre-onset case counts
+    assert metrics["pre_onset_alarm_count"] == 1
+    assert metrics["post_onset_detection_count"] == 1
+
+
+# --- SwR-114 (AP-34.8, audit A-09/A-10): climatology reference + uncertainty ---
+
+def test_brier_skill_score_is_measured_against_climatology_not_always_s3():
+    """BSS = 1 - B_model/B_climatology; climatology Brier reduces to p(1-p)."""
+    reviews = [
+        _case("positive", "S4"),
+        _case("positive", "S4"),
+        _case("negative", "S0"),
+        _case("negative", "S0"),
+    ]
+    metrics = compute_skill_metrics(reviews)
+    assert metrics["climatology_base_rate"] == 0.5
+    assert metrics["climatology_brier_score"] == 0.25  # 0.5 * 0.5
+    assert metrics["brier_score"] == 0.0  # perfectly calibrated on this set
+    assert metrics["brier_skill_score"] == 1.0
+
+
+def test_model_no_better_than_the_base_rate_has_non_positive_skill():
+    """A model that always predicts the middle carries no information."""
+    reviews = [_case("positive", "S2"), _case("negative", "S2")]
+    metrics = compute_skill_metrics(reviews)
+    # SwR-115: the ordinal part of the scale is S0..S4, so S2 -> p = 0.5,
+    # which is exactly the climatology forecast at a 50% base rate.
+    assert metrics["brier_skill_score"] == 0.0
+    assert metrics["beats_baseline"] is False
+
+
+def test_beats_baseline_requires_probabilistic_skill_not_only_selectivity():
+    """Selectivity alone must no longer buy a 'beats baseline' verdict (A-09)."""
+    # Quiet everywhere: zero false alarms (beats always-S3 on selectivity), but
+    # it misses the positive entirely, so its Brier is worse than climatology.
+    reviews = [
+        _case("positive", "S0", status_match=False, onset_date="2024-01-20",
+              timeseries=[{"date": "2024-01-05", "status": "S0", "confidence": 0.1}]),
+        _case("negative", "S0"),
+    ]
+    metrics = compute_skill_metrics(reviews)
+    assert metrics["false_alarm_rate"] < metrics["baseline_false_alarm_rate"]  # selective
+    assert metrics["brier_skill_score"] < 0  # but worse than the base rate
+    assert metrics["beats_baseline"] is False
+
+
+def test_wilson_intervals_accompany_every_rate():
+    """SwR-114 (A-10): n=8 with 0 false alarms may not be reported as a bare 0.0.
+
+    The bound is pinned exactly: a loose band would let the estimator silently
+    drift to Clopper-Pearson (0.3694) or the rule of three (0.375) without any
+    test signalling it — which is how the docstring came to quote 0.37.
+    """
+    reviews = [_case("negative", "S0") for _ in range(8)]
+    metrics = compute_skill_metrics(reviews)
+    assert metrics["false_alarm_rate"] == 0.0
+    # The sample cannot exclude a ~32% false-alarm rate (Wilson, not Clopper-Pearson).
+    assert metrics["false_alarm_rate_ci_95"] == (0.0, 0.3244)
+
+
+def test_interval_is_none_exactly_when_the_rate_is_undefined():
+    """A rate over zero cases is undefined, and the interval says so."""
+    only_positives = compute_skill_metrics([_case("positive", "S3")])
+    assert only_positives["negative_case_count"] == 0
+    assert only_positives["false_alarm_rate_ci_95"] is None
+    assert only_positives["recall_ci_95"] is not None
+
+
+def test_interval_narrows_as_the_sample_grows():
+    small = compute_skill_metrics([_case("negative", "S0") for _ in range(4)])
+    large = compute_skill_metrics([_case("negative", "S0") for _ in range(100)])
+    assert small["false_alarm_rate_ci_95"][1] > large["false_alarm_rate_ci_95"][1]
+
+
+def test_climatology_fields_are_none_for_an_empty_review_set():
+    metrics = compute_skill_metrics([])
+    assert metrics["climatology_base_rate"] is None
+    assert metrics["climatology_brier_score"] is None
+    assert metrics["brier_skill_score"] is None
+    assert metrics["beats_baseline"] is False
+
+
+# --- SwR-115 (AP-34.9): S5/S6 are abstentions, not severity levels ---
+
+def test_data_outage_on_a_positive_is_no_longer_scored_as_a_perfect_warning():
+    """The regression this requirement exists for.
+
+    Before SwR-115 the ordinal map ran S0..S6, so S6 ("data insufficient", per
+    vmodel/project/glossary.yaml) produced event probability 1.0: a country the
+    system could not assess at all scored recall 1.0, a 10-day lead time and a
+    perfect Brier score. Blindness was rewarded as early warning.
+    """
+    blind = [
+        _case("positive", "S6", status_match=False, onset_date="2024-01-20",
+              timeseries=[{"date": "2024-01-10", "status": "S6", "confidence": 0.0}]),
+    ]
+    metrics = compute_skill_metrics(blind)
+
+    assert metrics["recall"] == 0.0
+    assert metrics["mean_lead_time_days"] is None
+    assert metrics["recall_ci_95"] is None  # no scored positive -> rate undefined
+    # The case is still visible as present, only not scored.
+    assert metrics["positive_case_count"] == 1
+    assert metrics["scored_positive_count"] == 0
+    assert metrics["abstained_case_count"] == 1
+    assert metrics["abstained_data_insufficient_count"] == 1
+
+
+def test_data_outage_on_a_control_is_not_a_false_alarm():
+    """'I cannot assess this' must not be read as 'I am warning about this'."""
+    metrics = compute_skill_metrics([_case("negative", "S6")])
+    assert metrics["false_alarm_rate"] == 0.0
+    assert metrics["false_alarm_rate_ci_95"] is None
+    assert metrics["negative_case_count"] == 1
+    assert metrics["scored_negative_count"] == 0
+    assert metrics["abstained_data_insufficient_count"] == 1
+
+
+def test_contradictory_status_abstains_separately_from_data_insufficiency():
+    metrics = compute_skill_metrics([_case("positive", "S5"), _case("negative", "S6")])
+    assert metrics["abstained_case_count"] == 2
+    assert metrics["abstained_contradictory_count"] == 1
+    assert metrics["abstained_data_insufficient_count"] == 1
+
+
+def test_severity_ordinal_tops_out_at_s4_not_s6():
+    """S4 is the most severe assessable state and must carry probability 1.0."""
+    from siasa.validation.skill_metrics import _event_probability
+
+    assert _event_probability("S0") == 0.0
+    assert _event_probability("S2") == 0.5
+    assert _event_probability("S4") == 1.0
+
+
+def test_abstentions_do_not_dilute_the_rates_of_assessed_cases():
+    """A mixed set scores only what was assessed, and says how many it skipped."""
+    reviews = [
+        _case("positive", "S4", onset_date="2024-01-20",
+              timeseries=[{"date": "2024-01-10", "status": "S4", "confidence": 0.9}]),
+        _case("positive", "S6"),  # abstention
+        _case("negative", "S0"),
+        _case("negative", "S5"),  # abstention
+    ]
+    metrics = compute_skill_metrics(reviews)
+
+    assert metrics["positive_case_count"] == 2 and metrics["scored_positive_count"] == 1
+    assert metrics["negative_case_count"] == 2 and metrics["scored_negative_count"] == 1
+    assert metrics["recall"] == 1.0  # over the one assessed positive
+    assert metrics["false_alarm_rate"] == 0.0  # over the one assessed negative
+    assert metrics["abstained_case_count"] == 2
+
+
+def test_climatology_reference_uses_the_same_population_as_the_model_brier():
+    """SwR-115: BSS must compare like with like when the model abstained.
+
+    The two abstained positives are outside the model's Brier, so they must be
+    outside the climatology reference too — otherwise the base rate would be
+    computed over 4 cases while the model was scored over 2.
+    """
+    reviews = [
+        _case("positive", "S4"),
+        _case("negative", "S0"),
+        _case("positive", "S6"),  # abstention
+        _case("positive", "S6"),  # abstention
+    ]
+    metrics = compute_skill_metrics(reviews)
+    # Scored subset is 1 positive + 1 negative -> base rate 0.5, not 3/4.
+    assert metrics["climatology_base_rate"] == 0.5
+    assert metrics["climatology_brier_score"] == 0.25
+    assert metrics["abstained_case_count"] == 2
+
+
+# --- SwR-114 follow-up (deferred review findings 1..6) ---
+
+def test_detection_rate_carries_its_own_interval():
+    """SwR-114 demands an interval next to every binomial rate, not only recall."""
+    reviews = [_review(True), _review(True), _review(False), _review(True)]
+    metrics = compute_skill_metrics(reviews)
+    assert metrics["detection_rate"] == 0.75
+    low, high = metrics["detection_rate_ci_95"]
+    assert low < 0.75 < high
+    assert metrics["detection_rate_ci_95"] == (0.3006, 0.9544)
+
+
+def test_mean_domain_match_ratio_gets_no_fabricated_interval():
+    """It is a mean of continuous ratios, so a Wilson interval would be wrong."""
+    metrics = compute_skill_metrics([_review(True, 0.5)])
+    assert "mean_domain_match_ratio" in metrics
+    assert "mean_domain_match_ratio_ci_95" not in metrics
+
+
+def test_baseline_false_alarm_rate_also_carries_an_interval():
+    reviews = [_case("positive", "S3"), _case("negative", "S0")]
+    metrics = compute_skill_metrics(reviews)
+    assert metrics["baseline_false_alarm_rate"] == 1.0
+    assert metrics["baseline_false_alarm_rate_ci_95"] is not None
+
+
+def test_gui_marks_an_undefined_false_alarm_rate_instead_of_showing_zero():
+    """The live state has zero scored controls; a bare 0.0 would read as perfect."""
+    from siasa.gui.local_app import _render_validation_kpi_grid
+
+    metrics = compute_skill_metrics([_case("positive", "S3") for _ in range(35)])
+    assert metrics["false_alarm_rate"] == 0.0  # the metric layer keeps the legacy value
+    assert metrics["false_alarm_rate_ci_95"] is None
+
+    html_out = _render_validation_kpi_grid({}, {}, {}, "replay_match", metrics)
+    assert "undefiniert" in html_out
+    assert "keine bewertbaren Kontrollf" in html_out
+
+
+def test_gui_renders_the_interval_when_the_rate_is_defined():
+    from siasa.gui.local_app import _render_validation_kpi_grid
+
+    metrics = compute_skill_metrics(
+        [_case("positive", "S3", onset_date="2024-01-10",
+               timeseries=[{"date": "2024-01-05", "status": "S2"}])]
+        + [_case("negative", "S0") for _ in range(8)]
+    )
+    html_out = _render_validation_kpi_grid({}, {}, {}, "replay_match", metrics)
+    assert "95%-KI" in html_out
+    assert "n=8" in html_out
+    assert "BSS vs Klimatologie" in html_out
+
+
+def test_gui_leaves_legacy_payloads_without_ci_keys_untouched():
+    """A pre-SwR-114 dict must not be mislabelled as undefined."""
+    from siasa.gui.local_app import _render_validation_kpi_grid
+
+    html_out = _render_validation_kpi_grid(
+        {}, {}, {}, "replay_match", {"skill_score": 0.83, "false_alarm_rate": 0.5}
+    )
+    assert "0.5" in html_out
+    assert "undefiniert" not in html_out

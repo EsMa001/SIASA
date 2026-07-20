@@ -9,6 +9,7 @@ validation_cases:
     expected_status: S3
     historical_observed_domains: [A, B, D]
     historical_observed_status: S3
+    observation_basis: "Full-scale invasion onset 2022-02-24 documented in contemporaneous primary reporting and UN records (UN GA Res ES-11/1 context); observation recorded independently of the expected-label curation."
     evidence_tier: verified_multi_source
     expected_signal_pattern: Aligned information, event, and economic stress escalation.
     reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
@@ -342,6 +343,7 @@ validation_cases:
     expected_status: S3
     historical_observed_domains: [A, B, D]
     historical_observed_status: S3
+    observation_basis: "Attack onset 2023-10-07 documented in contemporaneous primary reporting and UN OCHA situation reports; observation recorded independently of the expected-label curation."
     evidence_tier: verified_multi_source
     expected_signal_pattern: Regional conflict escalation should align information pressure, event intensity, and macro stress context.
     reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
@@ -352,7 +354,7 @@ validation_cases:
       - curated_proposal_v1_owner_to_ratify_against_primary_sources
     validation_metrics: [Domain Match, Status Match]
     case_polarity: positive
-    dataset_split: tuning
+    dataset_split: holdout
     onset_date: "2023-10-07"  # Hamas-led attack; en.wikipedia.org/wiki/October_7_Hamas-led_attack_on_Israel
     expected_trajectory: [S0, S2, S3]
     ratification_status: research_verified
@@ -673,7 +675,7 @@ validation_cases:
     expected_domains: [A, B, D]
     expected_status: S0
     case_polarity: negative
-    dataset_split: holdout
+    dataset_split: tuning
     expected_trajectory: [S0, S0, S0]
     historical_observed_domains: [A, B, D]
     historical_observed_status: S0
@@ -697,6 +699,7 @@ validation_cases:
     expected_status: S3
     historical_observed_domains: [A, B, C]
     historical_observed_status: S3
+    observation_basis: "Armed-conflict onset 2023-04-15 (SAF vs RSF) documented by HRW breaking-news reporting and UN OCHA; observation recorded independently of the expected-label curation."
     evidence_tier: verified_multi_source
     expected_signal_pattern: SAF-RSF power struggle erupts into armed conflict with mass displacement.
     validation_goal: Real multi-domain armed-conflict onset (conflict + humanitarian + political) for lead-time and detection evaluation.
@@ -744,7 +747,7 @@ validation_cases:
     expected_domains: [A, B, D]
     expected_status: S0
     case_polarity: negative
-    dataset_split: holdout
+    dataset_split: tuning
     expected_trajectory: [S0, S0, S0]
     historical_observed_domains: [A, B, D]
     historical_observed_status: S0
@@ -769,6 +772,7 @@ validation_cases:
     expected_status: S3
     historical_observed_domains: [A, B, C]
     historical_observed_status: S3
+    observation_basis: "Military offensive onset 2023-09-19 (Nagorno-Karabakh) documented in contemporaneous international reporting and ICG tracking; observation recorded independently of the expected-label curation."
     evidence_tier: verified_multi_source
     expected_signal_pattern: One-day military offensive forcing capitulation and mass Armenian exodus.
     validation_goal: Real Caucasus territorial-military escalation (conflict + humanitarian + political) for detection and lead-time evaluation.
@@ -778,7 +782,7 @@ validation_cases:
     validation_metrics: [Domain Match, Status Match]
     reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
     case_polarity: positive
-    dataset_split: tuning
+    dataset_split: holdout
     onset_date: "2023-09-19"  # Azerbaijani offensive; en.wikipedia.org/wiki/2023_Azerbaijani_offensive_in_Nagorno-Karabakh
     expected_trajectory: [S0, S2, S3]
     ratification_status: research_verified
@@ -793,6 +797,7 @@ validation_cases:
     expected_status: S3
     historical_observed_domains: [A, B, D]
     historical_observed_status: S3
+    observation_basis: "Coup onset 2023-07-26 documented in contemporaneous reporting and ECOWAS communiques; observation recorded independently of the expected-label curation."
     evidence_tier: verified_multi_source
     expected_signal_pattern: Presidential guard detains the president; junta takes power; ECOWAS sanctions follow.
     validation_goal: Real Sahel coup (political + conflict + economic sanctions) for detection and lead-time evaluation.
@@ -802,7 +807,7 @@ validation_cases:
     validation_metrics: [Domain Match, Status Match]
     reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
     case_polarity: positive
-    dataset_split: tuning
+    dataset_split: holdout
     onset_date: "2023-07-26"  # Presidential Guard detains Bazoum; en.wikipedia.org/wiki/2023_Nigerien_coup_d'etat
     expected_trajectory: [S0, S2, S3]
     ratification_status: research_verified
@@ -817,6 +822,7 @@ validation_cases:
     expected_status: S3
     historical_observed_domains: [A, B, C]
     historical_observed_status: S3
+    observation_basis: "Fall of Kabul 2021-08-15 documented in contemporaneous primary reporting and UNAMA records; observation recorded independently of the expected-label curation."
     evidence_tier: verified_multi_source
     expected_signal_pattern: Insurgent offensive captures the capital; government collapses; mass evacuation crisis.
     validation_goal: Real state-collapse escalation (political + conflict + humanitarian) for detection and lead-time evaluation.
@@ -826,7 +832,7 @@ validation_cases:
     validation_metrics: [Domain Match, Status Match]
     reference_sources: [SRC-GDELT-DOC, SRC-GDELT-EVENTS, SRC-GDACS, WB-INDICATORS]
     case_polarity: positive
-    dataset_split: tuning
+    dataset_split: holdout
     onset_date: "2021-08-15"  # Taliban capture Kabul; en.wikipedia.org/wiki/Fall_of_Kabul_(2021)
     expected_trajectory: [S0, S2, S3]
     ratification_status: research_verified
@@ -841,6 +847,7 @@ validation_cases:
     expected_status: S3
     historical_observed_domains: [A, B, D]
     historical_observed_status: S3
+    observation_basis: "Military coup 2021-02-01 documented in contemporaneous primary reporting and UN records; observation recorded independently of the expected-label curation."
     evidence_tier: verified_multi_source
     expected_signal_pattern: Military deposes the elected government; protests and crackdown; markets and FDI collapse.
     validation_goal: Real coup escalation (political + conflict + economic) for detection and lead-time evaluation.
@@ -865,6 +872,7 @@ validation_cases:
     expected_status: S3
     historical_observed_domains: [A, B, C]
     historical_observed_status: S3
+    observation_basis: "Escalation/regime-collapse window Nov-Dec 2024 documented in contemporaneous primary reporting and UN OCHA; observation recorded independently of the expected-label curation."
     evidence_tier: verified_multi_source
     expected_signal_pattern: Rapid opposition offensive captures major cities; 53-year regime collapses.
     validation_goal: Real regime-collapse escalation (political + conflict + humanitarian) for detection and lead-time evaluation.
@@ -960,7 +968,7 @@ validation_cases:
     expected_domains: [A, B, D]
     expected_status: S0
     case_polarity: negative
-    dataset_split: holdout
+    dataset_split: tuning
     expected_trajectory: [S0, S0, S0]
     historical_observed_domains: [A, B, D]
     historical_observed_status: S0
@@ -984,7 +992,7 @@ validation_cases:
     expected_domains: [A, B, D]
     expected_status: S0
     case_polarity: negative
-    dataset_split: holdout
+    dataset_split: tuning
     expected_trajectory: [S0, S0, S0]
     historical_observed_domains: [A, B, D]
     historical_observed_status: S0

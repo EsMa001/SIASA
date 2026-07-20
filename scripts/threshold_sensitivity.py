@@ -1,16 +1,25 @@
 #!/usr/bin/env python3
-"""AP-24 threshold sensitivity analysis (OECD/JRC robustness step, finding F11).
+"""AP-24/AP-34 threshold sensitivity analysis (OECD/JRC robustness step, ALGO-SENS-01).
 
 One-at-a-time (OAT) sweep: perturb each governed scoring threshold, recompute the
 validation skill metrics over the committed reference fixtures, and rank the
-thresholds by how much they move the outcome. This operationalises the OECD/JRC
-recommendation to use sensitivity analysis to find which parameters actually
-matter -- an INFORM Severity re-audit found only 11 of 35 indicators carried real
-numerical signal (docs/research/parameter-initialisierung.md).
+thresholds by how much they move the outcome.
 
-It runs offline on the committed fixtures today and gains real discriminating
-power once AP-30 supplies genuine historical depth; until then a threshold that
-shows zero influence here is "no effect *on these fixtures*", not "irrelevant".
+SwR-110 hardening (audit findings A-01/A-02, docs/research/
+wissenschaftliches-fundament-audit-2026-07.md):
+
+* The probe grid is DERIVED from the complete governed configuration
+  (``get_all_scoring_thresholds``) instead of a hand-maintained subset — a
+  parameter family added to the YAML is swept automatically, and anything the
+  generator cannot sweep is reported explicitly under ``not_swept`` with a
+  reason. No silent coverage gaps.
+* Every report carries a hard ``validity_caveat``: as long as the replay status
+  derives from the constant fixture table (``_DOMAIN_ANOMALY_SCORES``,
+  audit A-01), influence values describe the measurement harness, NOT the
+  model. The caveat disappears only when that wiring is replaced (roadmap V-8).
+* Requires the per-call threshold resolution of SwR-109 — with the former
+  import-time constant binding, most families were mechanically incapable of
+  showing any influence.
 
 Usage:
     python scripts/threshold_sensitivity.py            # human-readable ranking
@@ -24,7 +33,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from siasa.scoring.scoring_thresholds import override_thresholds
+from siasa.scoring.scoring_thresholds import get_all_scoring_thresholds, override_thresholds
 from siasa.validation.cases import load_validation_case_library
 from siasa.validation.historical_replay import (
     build_historical_replay_reviews,
@@ -35,30 +44,107 @@ from siasa.validation.skill_metrics import compute_skill_metrics
 _CASE_LIBRARY = Path("vmodel/verification/validation_reference_cases.yaml")
 _REPLAY_INPUTS = Path("vmodel/verification/validation_replay_inputs.yaml")
 
-# OAT probe grid per governed threshold: name -> ((section, key), candidate values).
-# Each grid spans current value -> science-anchored recommendation (governance record).
-_PROBES: dict[str, tuple[tuple[str, str], list[float]]] = {
-    "domain_status.d1_max": (("domain_status", "d1_max"), [0.1, 0.2, 0.5, 1.0]),
-    "domain_status.d2_max": (("domain_status", "d2_max"), [0.35, 0.5, 1.0, 2.0]),
-    "domain_status.d3_max": (("domain_status", "d3_max"), [0.65, 1.0, 2.0, 3.0]),
-    "anomaly.upper_bound": (("anomaly", "upper_bound"), [1.0, 1.5, 2.0, 3.0]),
-    "anomaly.min_series_points": (("anomaly", "min_series_points"), [2, 4, 8, 20]),
-}
+# Multiplicative OAT grid around the current value (OECD/JRC: perturb, observe).
+_SCALE_FACTORS = (0.5, 0.75, 1.5, 2.0)
+
+VALIDITY_CAVEAT = (
+    "fixture-bound: the outcome metric runs over committed synthetic fixtures and a "
+    "replay status derived from the constant table _DOMAIN_ANOMALY_SCORES "
+    "(audit A-01). Influence values describe the measurement harness, NOT the model. "
+    "They become model-informative only once the replay path uses the data-driven "
+    "anomaly on real historical windows (roadmap V-8, AP-26/AP-30)."
+)
 
 
-def _skill_metrics(repo_root: Path) -> dict[str, Any]:
+def _scaled_candidates(value: float, *, integer: bool) -> list[float | int]:
+    """Multiplicative probe values around ``value``, deduplicated, current value excluded."""
+    candidates: list[float | int] = []
+    for factor in _SCALE_FACTORS:
+        candidate: float | int = value * factor
+        if integer:
+            candidate = max(1, int(round(candidate)))
+        else:
+            candidate = round(candidate, 6)
+        if candidate != value and candidate not in candidates:
+            candidates.append(candidate)
+    return candidates
+
+
+def build_probe_grid(
+    config: dict[str, dict[str, Any]] | None = None,
+) -> tuple[dict[str, tuple[tuple[str, str], list[Any]]], list[dict[str, str]]]:
+    """Derive the OAT probe grid from the full governed configuration.
+
+    Returns ``(probes, not_swept)``. ``probes`` maps a display name to
+    ``((section, key), candidate_values)``; for dict-valued parameters each
+    sub-key becomes its own probe whose candidates are full replacement dicts.
+    ``not_swept`` lists every governed parameter the generator cannot sweep,
+    with a reason — coverage gaps are reported, never silent.
+    """
+    config = config if config is not None else get_all_scoring_thresholds()
+    probes: dict[str, tuple[tuple[str, str], list[Any]]] = {}
+    not_swept: list[dict[str, str]] = []
+
+    for section in sorted(config):
+        for key in sorted(config[section]):
+            value = config[section][key]
+            name = f"{section}.{key}"
+            if isinstance(value, bool):
+                not_swept.append({"parameter": name, "reason": "boolean — no OAT scale"})
+            elif isinstance(value, int) and not isinstance(value, bool):
+                probes[name] = ((section, key), _scaled_candidates(value, integer=True))
+            elif isinstance(value, float):
+                if value == 0.0:
+                    not_swept.append({"parameter": name, "reason": "zero-valued — multiplicative grid degenerate"})
+                else:
+                    probes[name] = ((section, key), _scaled_candidates(value, integer=False))
+            elif isinstance(value, dict) and value and all(
+                isinstance(v, (int, float)) and not isinstance(v, bool) for v in value.values()
+            ):
+                for sub_key in sorted(value):
+                    sub_value = float(value[sub_key])
+                    variants: list[Any] = []
+                    for candidate in _scaled_candidates(sub_value, integer=False) or [round(sub_value + 0.1, 6)]:
+                        replacement = dict(value)
+                        replacement[sub_key] = candidate
+                        variants.append(replacement)
+                    probes[f"{name}.{sub_key}"] = ((section, key), variants)
+            else:
+                not_swept.append(
+                    {"parameter": name, "reason": f"unsupported type {type(value).__name__} — needs a bespoke probe"}
+                )
+
+    return probes, not_swept
+
+
+def _calibration_reviews(repo_root: Path) -> list[dict[str, Any]]:
+    """Replay reviews with the HOLDOUT split excluded (SwR-112, audit A-19).
+
+    Threshold calibration must never see the holdout split — that would leak the
+    evaluation set into calibration. Tuning-split cases and legacy ``unassigned``
+    fixture cases remain calibration-eligible (strictly tuning-only would leave a
+    single review until AP-34.7 supplies replay inputs for most curated cases);
+    the report states the composition instead of hiding it.
+    """
     cases = load_validation_case_library(repo_root / _CASE_LIBRARY)
     inputs = load_historical_replay_inputs(repo_root / _REPLAY_INPUTS)
     reviews = build_historical_replay_reviews(cases, inputs)
-    return compute_skill_metrics(reviews)
+    return [r for r in reviews if str(r.get("dataset_split")) != "holdout"]
+
+
+def _skill_metrics(repo_root: Path) -> dict[str, Any]:
+    return compute_skill_metrics(_calibration_reviews(repo_root))
 
 
 def run_sensitivity(
     repo_root: Path,
-    probes: dict[str, tuple[tuple[str, str], list[float]]] | None = None,
+    probes: dict[str, tuple[tuple[str, str], list[Any]]] | None = None,
 ) -> dict[str, Any]:
     """Run the OAT sweep and return a ranked sensitivity report."""
-    probes = probes if probes is not None else _PROBES
+    if probes is None:
+        probes, not_swept = build_probe_grid()
+    else:
+        not_swept = []
     baseline = _skill_metrics(repo_root)
     base_score = float(baseline["skill_score"])
 
@@ -80,22 +166,33 @@ def run_sensitivity(
         influence = round(max(abs(point["delta"]) for point in sweep), 4)
         ranked.append({"threshold": name, "influence": influence, "sweep": sweep})
 
-    ranked.sort(key=lambda row: row["influence"], reverse=True)
+    ranked.sort(key=lambda row: (-row["influence"], row["threshold"]))
     return {
+        "validity_caveat": VALIDITY_CAVEAT,
+        "dataset_split_used": "tuning+unassigned (holdout excluded, SwR-112)",
         "baseline_skill_score": round(base_score, 4),
         "baseline_status_match_count": baseline["status_match_count"],
         "case_count": baseline["case_count"],
+        "probe_coverage": {
+            "swept_parameter_count": len(probes),
+            "not_swept": not_swept,
+        },
         "ranked_by_influence": ranked,
     }
 
 
 def format_report(report: dict[str, Any]) -> str:
     lines = [
-        "AP-24 threshold sensitivity (OAT over reference fixtures)",
+        "AP-24/AP-34 threshold sensitivity (OAT over reference fixtures, ALGO-SENS-01)",
+        f"  !! VALIDITY: {report['validity_caveat']}",
         f"  baseline skill_score = {report['baseline_skill_score']} "
         f"(status_match {report['baseline_status_match_count']}/{report['case_count']})",
-        "  thresholds ranked by influence on skill_score:",
+        f"  probes swept: {report['probe_coverage']['swept_parameter_count']}"
+        f" | not swept: {len(report['probe_coverage']['not_swept'])}",
     ]
+    for entry in report["probe_coverage"]["not_swept"]:
+        lines.append(f"    not swept: {entry['parameter']} ({entry['reason']})")
+    lines.append("  thresholds ranked by influence on skill_score:")
     for row in report["ranked_by_influence"]:
         flag = "  <- moves the outcome" if row["influence"] > 0 else "  (no effect on these fixtures)"
         lines.append(f"    {row['influence']:>7.4f}  {row['threshold']}{flag}")
@@ -103,7 +200,7 @@ def format_report(report: dict[str, Any]) -> str:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="AP-24 threshold sensitivity analysis")
+    parser = argparse.ArgumentParser(description="AP-24/AP-34 threshold sensitivity analysis")
     parser.add_argument("--repo-root", default=".", help="repository root (default: current dir)")
     parser.add_argument("--json", action="store_true", help="emit the full JSON report")
     args = parser.parse_args()
