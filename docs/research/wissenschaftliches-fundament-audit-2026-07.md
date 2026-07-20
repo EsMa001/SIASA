@@ -1,6 +1,6 @@
 # Wissenschaftliches Fundament-Audit — SIASA (Juli 2026)
 
-Stand: 2026-07-19 · Bezug: Commit `bc54f8f` · Status: **Phase I in Umsetzung als AP-34** — 34.1 (Hygiene), 34.2 (V-1) und 34.3 (V-2) erledigt, siehe §7-Nachtrag; 34.4–34.8 offen
+Stand: 2026-07-19 · Bezug: Commit `bc54f8f` · Status: **Phase I abgeschlossen als AP-34** — V-1, V-2, V-4, V-5, V-6, V-7 und die Sofort-Hygiene umgesetzt (SwR-109..114); V-3 (Kontroll-Replay-Inputs) bewusst nach AP-30.4 verschoben, siehe §8. Phase II (V-8..V-11) und Phase III (V-12..V-18) offen.
 
 ---
 
@@ -474,3 +474,51 @@ outcome-wirksam sind (konsistent mit A-01, A-03, A-15, A-27). Zwei der vier wirk
 sind Gewichte der Metrik selbst (Meta-Sensitivität) — auch das ein ehrlicher Befund über die
 Messkette. Alle Werte bleiben per `validity_caveat` als **fixture-bound** markiert, bis V-8/AP-30
 echte Zeitreihen in den Replay-Pfad bringen.
+
+---
+
+## 8. Abschluss Phase I (2026-07-19) — was sich faktisch geändert hat
+
+Phase I ist als **AP-34** umgesetzt (Commits `dbb1652`, `d36ae90`, Folge-Commit für V-5).
+Sieben der acht Maßnahmen sind erledigt; eine ist bewusst verschoben.
+
+| Maßnahme | Umsetzung | SwR |
+| --- | --- | --- |
+| Sofort-Hygiene | SHELF-Etikett ehrlich, Domänen-Labels an `domains.yaml` angeglichen, GUI kennzeichnet Bayes/Fusion/Baselines als „berechnet, nicht statusbildend"; die faktisch falsche Fusions-Beschreibung (Gewichte folgen Suffizienz, nicht Severity) korrigiert | — |
+| **V-1** Verdrahtung | 7 Module auf Per-Call-Auflösung; Verbots-Wächter gegen Rückfall; 13 Tests beweisen Wirksamkeit je Familie | SwR-109 |
+| **V-2** Sensitivität | Grid aus voller Config (38 statt 5), `not_swept` mit Grund, hartes `validity_caveat` | SwR-110 |
+| **V-4** Zirkularität | onset-datierte Positive mit identischen Labels ohne `observation_basis` ⇒ `is_valid: false`; `ratification_status` erstmals maschinell gezählt | SwR-111 |
+| **V-6** Split | Holdout aus jeder Kalibrierung ausgeschlossen; Skill je Split; `evaluation_valid` je Sektion; **Kuration v3** (stratifizierter Paar-Split) | SwR-112 |
+| **V-7** Lead-Time | governte Alarm-Schwelle; Vorlauf nur für Vor-Onset-Alarme; Nowcast/Miss/undatierbar getrennt gezählt | SwR-113 |
+| **V-5** Baseline | Klimatologie-Referenz (Brier = p(1−p)) statt Strohmann; **BSS** als Kriterium in `beats_baseline`; Wilson-95%-Intervalle neben jeder Rate, `None` genau dann, wenn die Rate undefiniert ist | SwR-114 |
+| **V-3** Kontroll-Inputs | **verschoben → AP-30.4** (Begründung unten) | — |
+
+### Was Phase I *nicht* geleistet hat — und nicht leisten sollte
+
+Die Messkette lügt nicht mehr; sie ist deswegen aber nicht aussagekräftiger geworden. Der
+`validity_caveat` bleibt auf jedem Sensitivitätsreport, die Holdout-Sektion bleibt
+`evaluation_valid: false`, und der Skill-Score misst weiterhin die Konstantentabelle (A-01).
+**Das ist der beabsichtigte Zustand:** Phase I macht die Unwissenheit sichtbar, Phase II und
+AP-30 beseitigen sie. Wer nach Phase I bessere Zahlen erwartet hat, hat den Zweck missverstanden —
+mehrere Kennzahlen sind jetzt *schlechter* oder *undefiniert*, weil sie vorher unbegründet gut aussahen.
+
+### Zwei bewusste Nicht-Änderungen
+
+1. **V-3 nicht mit Fixtures geschlossen.** Die 8 Kontrollen brauchen Replay-Inputs, damit die
+   Fehlalarmrate einen Nenner bekommt. Synthetische Inputs hätten eine Rate erzeugt, die genauso
+   wenig über das Modell aussagt wie die heutige strukturelle Null — nur schwerer als Artefakt
+   erkennbar, weil sie plausibel aussieht. Stattdessen: Zustand explizit markiert
+   (`evaluation_valid: false`) und die Anforderung an **AP-30.4** gehängt, das reale Bundles
+   ohnehin zieht.
+2. **`alarm_minimum_status` bei S1 belassen.** Der `governance_record` empfiehlt S2, und das ist
+   fachlich gut begründet (ein mildes S1 auf einer Kontrolle ist kein voller Fehlalarm). Aber die
+   Umstellung **senkt die eigene Fehlalarmrate**. Eine solche Änderung unmittelbar nach dem Bau der
+   Messmechanik ohne Owner-Freigabe zu setzen, wäre genau das Muster, das dieses Audit rügt.
+   Owner-Entscheid ausstehend; der Mechanismus ist gebaut und getestet, nur der Wert ist konservativ.
+
+### Nächster wissenschaftlicher Hebel
+
+Unverändert **Phase II (V-8..V-11)**, getragen von AP-13/26/30: SPC-konforme Anomalie
+(Baseline ohne Prüfpunkt, Stichproben-σ, ≥20 Punkte), EWMA/CUSUM gegen schleichende Eskalation,
+Persistenz/Hysterese, und die Trennung von Datenlage und Bedrohungslage (S0/S6-Problem, A-03/A-05).
+Erst danach lohnt Phase III (UCDP konsumieren, Normalisierung, INFORM-Aggregation).

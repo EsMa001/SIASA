@@ -1538,3 +1538,10 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_skill_metrics.py
   status: accepted
+- id: TC-SwR-114-001
+  title: Verify climatology-referenced Brier Skill Score and Wilson intervals
+  requirement_ids:
+  - SwR-114
+  method: unit_test
+  test_file: tests/unit/test_skill_metrics.py
+  status: accepted

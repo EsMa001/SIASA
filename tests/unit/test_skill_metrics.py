@@ -236,3 +236,76 @@ def test_mean_lead_time_is_never_negative_under_the_new_definition():
     assert metrics["mean_lead_time_days"] == 2.0  # only the pre-onset case counts
     assert metrics["pre_onset_alarm_count"] == 1
     assert metrics["post_onset_detection_count"] == 1
+
+
+# --- SwR-114 (AP-34.8, audit A-09/A-10): climatology reference + uncertainty ---
+
+def test_brier_skill_score_is_measured_against_climatology_not_always_s3():
+    """BSS = 1 - B_model/B_climatology; climatology Brier reduces to p(1-p)."""
+    reviews = [
+        _case("positive", "S6"),
+        _case("positive", "S6"),
+        _case("negative", "S0"),
+        _case("negative", "S0"),
+    ]
+    metrics = compute_skill_metrics(reviews)
+    assert metrics["climatology_base_rate"] == 0.5
+    assert metrics["climatology_brier_score"] == 0.25  # 0.5 * 0.5
+    assert metrics["brier_score"] == 0.0  # perfectly calibrated on this set
+    assert metrics["brier_skill_score"] == 1.0
+
+
+def test_model_no_better_than_the_base_rate_has_non_positive_skill():
+    """A model that always predicts the middle carries no information."""
+    reviews = [_case("positive", "S3"), _case("negative", "S3")]
+    metrics = compute_skill_metrics(reviews)
+    # S3 -> p = 0.5 for every case: exactly the climatology forecast.
+    assert metrics["brier_skill_score"] == 0.0
+    assert metrics["beats_baseline"] is False
+
+
+def test_beats_baseline_requires_probabilistic_skill_not_only_selectivity():
+    """Selectivity alone must no longer buy a 'beats baseline' verdict (A-09)."""
+    # Quiet everywhere: zero false alarms (beats always-S3 on selectivity), but
+    # it misses the positive entirely, so its Brier is worse than climatology.
+    reviews = [
+        _case("positive", "S0", status_match=False, onset_date="2024-01-20",
+              timeseries=[{"date": "2024-01-05", "status": "S0", "confidence": 0.1}]),
+        _case("negative", "S0"),
+    ]
+    metrics = compute_skill_metrics(reviews)
+    assert metrics["false_alarm_rate"] < metrics["baseline_false_alarm_rate"]  # selective
+    assert metrics["brier_skill_score"] < 0  # but worse than the base rate
+    assert metrics["beats_baseline"] is False
+
+
+def test_wilson_intervals_accompany_every_rate():
+    """SwR-114 (A-10): n=8 with 0 false alarms may not be reported as a bare 0.0."""
+    reviews = [_case("negative", "S0") for _ in range(8)]
+    metrics = compute_skill_metrics(reviews)
+    assert metrics["false_alarm_rate"] == 0.0
+    low, high = metrics["false_alarm_rate_ci_95"]
+    assert low == 0.0
+    assert 0.3 < high < 0.4  # the sample cannot exclude a ~37% false-alarm rate
+
+
+def test_interval_is_none_exactly_when_the_rate_is_undefined():
+    """A rate over zero cases is undefined, and the interval says so."""
+    only_positives = compute_skill_metrics([_case("positive", "S3")])
+    assert only_positives["negative_case_count"] == 0
+    assert only_positives["false_alarm_rate_ci_95"] is None
+    assert only_positives["recall_ci_95"] is not None
+
+
+def test_interval_narrows_as_the_sample_grows():
+    small = compute_skill_metrics([_case("negative", "S0") for _ in range(4)])
+    large = compute_skill_metrics([_case("negative", "S0") for _ in range(100)])
+    assert small["false_alarm_rate_ci_95"][1] > large["false_alarm_rate_ci_95"][1]
+
+
+def test_climatology_fields_are_none_for_an_empty_review_set():
+    metrics = compute_skill_metrics([])
+    assert metrics["climatology_base_rate"] is None
+    assert metrics["climatology_brier_score"] is None
+    assert metrics["brier_skill_score"] is None
+    assert metrics["beats_baseline"] is False
