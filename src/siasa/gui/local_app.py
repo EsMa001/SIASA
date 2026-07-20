@@ -4900,6 +4900,26 @@ def _render_validation_kpi_grid(
     skill_score = (skill_metrics or {}).get('skill_score', 'n/a')
     false_alarm_rate = (skill_metrics or {}).get('false_alarm_rate', 'n/a')
     beats_baseline = (skill_metrics or {}).get('beats_baseline', 'n/a')
+    # SwR-114 (audit A-10): a rate without its interval overstates precision, and
+    # a rate over an empty class is not 0.0 but undefined. The metric layer marks
+    # the latter with a None interval; render that instead of a fabricated zero.
+    # A missing key means a legacy payload that predates SwR-114 — leave its rate
+    # alone. Only an explicitly present ``None`` means "undefined, empty class".
+    _absent = object()
+    far_ci = (skill_metrics or {}).get('false_alarm_rate_ci_95', _absent)
+    far_scored_n = (skill_metrics or {}).get('scored_negative_count')
+    if far_ci is None:
+        false_alarm_rate = 'undefiniert'
+        far_note = 'keine bewertbaren Kontrollfälle (AP-30.4 offen)'
+    elif far_ci is _absent:
+        far_note = 'ALGO-SKILL-02'
+    else:
+        far_note = f"95%-KI {far_ci[0]:.2f}–{far_ci[1]:.2f} bei n={far_scored_n}"
+    brier_skill = (skill_metrics or {}).get('brier_skill_score')
+    bss_note = (
+        f"BSS vs Klimatologie: {brier_skill}" if brier_skill is not None
+        else 'BSS nicht bestimmbar'
+    )
     case_count = portfolio_summary.get('case_count', 0)
     countries = portfolio_summary.get('countries_covered', [])
     portfolio_gap_case_count = len([case for case in portfolio_summary.get('cases_with_gaps', []) if isinstance(case, dict)])
@@ -4929,7 +4949,8 @@ def _render_validation_kpi_grid(
         f"<div class='kpi-sub'>ALGO-SKILL-01 detection vs labels</div></div>"
         f"<div class='kpi-card'><span class='kpi-label'>False-Alarm Rate</span>"
         f"<div class='kpi-value'>{html.escape(str(false_alarm_rate))}</div>"
-        f"<div class='kpi-sub'>ALGO-SKILL-02 &middot; beats baseline: {html.escape(str(beats_baseline))}</div></div>"
+        f"<div class='kpi-sub'>{html.escape(far_note)} &middot; beats baseline: "
+        f"{html.escape(str(beats_baseline))} &middot; {html.escape(bss_note)}</div></div>"
         f"<div class='kpi-card'><span class='kpi-label'>Cases</span>"
         f"<div class='kpi-value'>{html.escape(str(case_count))}</div>"
         f"<div class='kpi-sub'>{html.escape(', '.join(str(c) for c in countries))}</div></div>"

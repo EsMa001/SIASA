@@ -5,7 +5,7 @@ metadata:
   - vmodel/architecture/system_architecture.md
   created_at_utc: '2026-05-11T14:25:30.979384+00:00'
   status: draft_baseline_derived
-  software_requirement_count: 108
+  software_requirement_count: 109
 software_requirements:
 - id: SwR-001
   title: Source catalog record schema
@@ -1011,7 +1011,15 @@ software_requirements:
   allocated_to: DDS-010
 - id: SwR-114
   title: Climatology-referenced skill score with uncertainty intervals
-  statement: The software shall derive a climatology reference forecast (the observed base rate, Brier score p(1-p)) from the evaluated case set and report the Brier Skill Score relative to it, shall require positive probabilistic skill against that reference in addition to selectivity and a pre-onset warning before declaring that a model beats the baseline, and shall report a 95 percent Wilson score interval next to every reported rate, with the interval absent exactly when the rate is undefined because its case class is empty (audit findings A-09, A-10).
+  statement: The software shall derive a climatology reference forecast (the observed base rate, Brier score p(1-p)) from the evaluated case set and report the Brier Skill Score relative to it, shall require positive probabilistic skill against that reference in addition to selectivity and a pre-onset warning before declaring that a model beats the baseline, and shall report a 95 percent Wilson score interval next to every reported binomial rate (recall, false-alarm rate, detection rate and the baseline false-alarm rate; the mean domain-match ratio is a mean of continuous ratios and deliberately receives no binomial interval), shall omit the interval exactly when the rate is undefined because its case class is empty, and shall surface that undefined state in the user-facing validation view rather than displaying the placeholder zero (audit findings A-09, A-10).
+  status: accepted
+  derives_from:
+  - SyR-026
+  verification_method: unit_test
+  allocated_to: DDS-010
+- id: SwR-115
+  title: Non-ordinal handling of contradictory and data-insufficient statuses
+  statement: The software shall treat the multi-domain statuses S5 (contradictory) and S6 (data insufficient) as abstentions rather than as severity levels above S4, because the governed glossary defines them as qualitative categories and not as degrees of threat; abstained cases shall be excluded from recall, false-alarm rate, lead time and Brier scoring, shall never count as an alarm, shall be reported as separate abstention counts alongside the unchanged case-presence counts, and the climatology reference shall be computed over the same scored population as the model Brier score.
   status: accepted
   derives_from:
   - SyR-026

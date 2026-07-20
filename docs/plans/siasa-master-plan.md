@@ -477,7 +477,7 @@ Drei neue Befunde ergänzen F1–F13: **F14** (synthetische Eventdaten), **F15**
 > StR-693..696, ALGO-BACKFILL-01 · AP-31 = SwR-103, StR-697 · AP-32 = SwR-104..107, StR-698..701 ·
 > AP-06.4 = SwR-108, ALGO-UCDP-01 · AP-34 = SwR-109..114, ALGO-SENS-01 (109 Per-Call-Threshold-
 > Aufloesung, 110 Sensitivitaets-Vollabdeckung, 111 Anti-Zirkularitaet, 112 Split-Durchsetzung,
-> 113 Alarm-Schwelle/Vorlauf, 114 Klimatologie-BSS + Wilson). SwR-115 bleibt frei; die verschobene
+> 113 Alarm-Schwelle/Vorlauf, 114 Klimatologie-BSS + Wilson, 115 S5/S6-Enthaltungen). Die verschobene
 > Kontroll-Input-Anforderung (ex AP-34.7) laeuft unter AP-30.4/SwR-102.
 > Jede ID wird nur **einmal** über alle APs vergeben; pinning auf einzelne TAPs bei Implementierung.
 > **Achtung:** Dieses Verzeichnis reserviert IDs *vorwärts* für noch nicht implementierte APs. Die nächste
@@ -612,6 +612,7 @@ Trace: SwR-109..115 / ALGO-SENS-01.
 | AP-34.6 | V-7 Lead-Time: governte Alarm-Schwelle (`alarm_minimum_status`, Default S1 verhaltensgleich, Empfehlung S2), Lead nur für Alarme vor Onset, Nowcast/Miss/undatierbar getrennt gezählt (A-16) | **Erledigt** | SwR-113 / TC-SwR-113-001 |
 | AP-34.7 | V-3 Replay-Inputs für die 8 S0-Negativkontrollen (A-07) | **Verschoben → AP-30.4** | siehe Begründung unten |
 | AP-34.8 | V-5 Klimatologie-Referenz + BSS als `beats_baseline`-Kriterium + Wilson-Intervalle (A-09/A-10) | **Erledigt** | SwR-114 / TC-SwR-114-001 |
+| AP-34.9 | **Nachtrag:** S5/S6 sind Enthaltungen, keine Schweregrade (A-05b, vom Audit uebersehen). Vorher wurde ein Datenausfall auf einem Positivfall als perfekte Fruehwarnung gewertet (recall 1.0, lead 10d, brier 0.0). | **Erledigt** | SwR-115 / TC-SwR-115-001 |
 
 **AP-34.7 verschoben nach AP-30.4 (Entscheid 2026-07-19).** Die 8 S0-Kontrollen brauchen Replay-Inputs,
 damit die Fehlalarmrate überhaupt einen Nenner bekommt. Diese Inputs *synthetisch* zu bauen, würde eine

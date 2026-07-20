@@ -974,6 +974,7 @@ implementation_slices:
       - SwR-112
       - SwR-113
       - SwR-114
+      - SwR-115
     implementation_map:
       SwR-109:
         code_paths:
@@ -1014,6 +1015,12 @@ implementation_slices:
       SwR-114:
         code_paths:
           - src/siasa/validation/skill_metrics.py
+          - src/siasa/gui/local_app.py
+        test_paths:
+          - tests/unit/test_skill_metrics.py
+      SwR-115:
+        code_paths:
+          - src/siasa/validation/skill_metrics.py
         test_paths:
           - tests/unit/test_skill_metrics.py
     known_code_paths:
@@ -1027,6 +1034,7 @@ implementation_slices:
       - src/siasa/validation/cases.py
       - src/siasa/readmodels/validation_backtest.py
       - src/siasa/scoring/scoring_thresholds.py
+      - src/siasa/gui/local_app.py
       - scripts/threshold_sensitivity.py
     known_test_paths:
       - tests/unit/test_threshold_wiring.py

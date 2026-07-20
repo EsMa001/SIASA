@@ -1545,3 +1545,10 @@ test_specifications:
   method: unit_test
   test_file: tests/unit/test_skill_metrics.py
   status: accepted
+- id: TC-SwR-115-001
+  title: Verify S5/S6 are treated as abstentions, not severity levels
+  requirement_ids:
+  - SwR-115
+  method: unit_test
+  test_file: tests/unit/test_skill_metrics.py
+  status: accepted

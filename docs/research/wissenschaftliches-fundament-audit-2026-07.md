@@ -122,13 +122,40 @@ Quellen-/Domänenverfügbarkeit getrieben, nicht von Instabilität — genau die
 das OECD/JRC-Handbuch und die INFORM-Methodik durch Normierung ausschließen. Dieser Punkt
 fehlt im governance_record vollständig.
 
-**A-05 [E] S6 (höchste Stufe) wird durch Datenausfall ausgelöst, nicht durch Instabilität.**
-`multi_domain_status.py:29-31`: sind ≥2 Kern-Domänen (A/B/D) auf D0 (= unzureichende Daten),
-wird sofort S6 zurückgegeben. Zusammen mit A-03 gilt: **beide Extreme der Skala messen
-Datenlogistik** — S0 = „Daten da, keine Historie", S6 = „Daten weg". Ein routinemäßiger
-Doppel-Adapterausfall erzeugte die höchste Alarmstufe. *Konsequenz:* Die Skala vermengt
-zwei orthogonale Größen (Bedrohungslage, Datenlage); ein „data blackout"-Zustand gehört
-getrennt ausgewiesen, mit Eskalation nur bei zuvor erhöhter Baseline.
+**A-05 [E] ~~S6 (höchste Stufe) wird durch Datenausfall ausgelöst, nicht durch Instabilität.~~**
+**TEILWEISE WIDERLEGT und ersetzt durch A-05b (Korrektur 2026-07-19).**
+Die ursprüngliche Formulierung unterstellte, die S-Skala sei durchgängig ordinal nach
+Schweregrad, S6 also die „höchste Stufe". Das ist **falsch**: `vmodel/project/glossary.yaml`
+definiert **S5 = „Contradictory / ambiguous pattern"** und **S6 = „Data insufficient"** —
+beides *qualitative Kategorien*, keine Steigerung über S4. Ordinal ist die Skala nur bis S4.
+Damit ist `multi_domain_status.py:29-31` (S6 bei ≥2 Kern-Domänen auf D0) **korrekt** und
+entspricht exakt der governten Definition. Der Befund war insoweit ein Lesefehler des Auditors.
+
+**A-05b [E, experimentell bewiesen] Die Skill-Metrik behandelt die qualitativen Kategorien
+S5/S6 als Höchstwerte einer Schweregrad-Ordinalskala.**
+`skill_metrics.py` bildete mit `_STATUS_ORDINAL = {S0:0 … S6:6}` und `_MAX_STATUS = 6` ab, und
+`_event_probability = Ordinal/6` ergab damit **S6 → 1.0** — „Datenlage unzureichend" wurde als
+die *sicherste Konfliktvorhersage* eingespeist, die das System abgeben kann; S5 → 0.833. Ebenso
+galten S5/S6 über `_is_alarm` als Alarm. Experiment (2026-07-19) auf dem unveränderten Stand:
+
+| Fall | Ergebnis vor der Korrektur |
+| --- | --- |
+| Positivfall mit Datenausfall (S6) | `recall = 1.0`, `mean_lead_time_days = 10.0`, `brier = 0.0` |
+| Kontrollfall mit Datenausfall (S6) | `false_alarm_rate = 1.0`, `brier = 1.0` |
+
+*Konsequenz:* **Blindheit wurde als perfekte Frühwarnung belohnt.** Ein Land, über das gar keine
+belastbaren Daten vorlagen, ging mit Bestnoten in Recall, Vorlaufzeit und Brier ein; derselbe
+Ausfall auf einer Kontrolle wurde zum vollen Fehlalarm. Das ist der schwerste Einzelbefund der
+Messketten-Familie und wurde vom ursprünglichen Audit übersehen. Behoben mit **SwR-115**
+(AP-34.9): S5/S6 sind Enthaltungen — nie Alarm, aus allen Raten und aus dem Brier-Score
+ausgeschlossen, separat ausgewiesen; die Fall-Präsenzzähler bleiben unverändert, damit „8
+Positive, alle nicht bewertbar" von „keine Positiven" unterscheidbar bleibt; die
+Klimatologie-Referenz wird über dieselbe bewertete Teilmenge gebildet wie das Modell-Brier.
+
+*Der ursprüngliche Verbesserungsvorschlag bleibt gültig, aber aus anderem Grund:* Ein
+`data_blackout`-Zustand gehört weiterhin getrennt ausgewiesen — nicht weil die Statuslogik
+falsch wäre, sondern weil nachgelagerte Konsumenten (GUI, Read-Models) die S-Skala leicht als
+durchgängig ordinal missverstehen. Siehe Aufgabe „Datenlage von Bedrohungslage trennen".
 
 **A-06 [E] Die einzige kuratierte Konfliktquelle (UCDP) wird geladen, aber nie konsumiert —
 Domäne B misst Medienaufmerksamkeit.**
